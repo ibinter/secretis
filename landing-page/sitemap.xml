@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- ============================================================ -->
+  <!-- PAGE PRINCIPALE                                              -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://secretis.ibigsoft.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://secretis.ibigsoft.com/en/"/>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- PAGES PRODUIT                                                -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/agenda</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/courrier</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/reunions</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/taches</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/communication</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/accueil-visiteurs</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/ressources</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/rh</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/rapports</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/fonctionnalites/sara-ia</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- TARIFS ET PLANS                                              -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/tarifs</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- À PROPOS ET ENTREPRISE                                       -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/a-propos</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/securite</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/partenaires</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- CONTACT ET SUPPORT                                           -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/contact</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/support</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/demo</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- BLOG ET RESSOURCES                                           -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/blog</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/blog/digitalisation-secretariat-africain</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/blog/ged-courrier-numerique</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/blog/pv-reunion-automatique-ia</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- ============================================================ -->
+  <!-- PAGES LÉGALES                                                -->
+  <!-- ============================================================ -->
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/mentions-legales</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/politique-confidentialite</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/conditions-utilisation</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/cgv</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://secretis.ibigsoft.com/cookies</loc>
+    <lastmod>2026-07-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+</urlset>

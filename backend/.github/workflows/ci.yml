@@ -1,0 +1,283 @@
+name: CI — SECRETIS ERP
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP_VERSION: "8.2"
+  NODE_VERSION: "20"
+
+# =============================================================================
+# Jobs
+# =============================================================================
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # TESTS — PHP 8.2 + PostgreSQL 15 + Redis + Pest
+  # ---------------------------------------------------------------------------
+
+  tests:
+    name: "Tests Pest (PHP ${{ env.PHP_VERSION }})"
+    runs-on: ubuntu-22.04
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: secretis_test
+          POSTGRES_USER: secretis
+          POSTGRES_PASSWORD: ${{ secrets.DB_TEST_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation PHP ${{ env.PHP_VERSION }} avec extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: >-
+            pgsql,
+            pdo_pgsql,
+            redis,
+            bcmath,
+            gd,
+            intl,
+            mbstring,
+            zip,
+            exif
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Installation des dépendances Composer
+        working-directory: backend
+        run: composer install --prefer-dist --no-interaction --no-progress --ansi
+
+      - name: Copie du fichier .env de test
+        working-directory: backend
+        run: cp .env.testing.example .env.testing
+
+      - name: Configuration de l'environnement de test
+        working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: secretis_test
+          DB_USERNAME: secretis
+          DB_PASSWORD: ${{ secrets.DB_TEST_PASSWORD }}
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          APP_KEY: ${{ secrets.APP_KEY_TEST }}
+          CINETPAY_SECRET_KEY: ${{ secrets.CINETPAY_SECRET_KEY_TEST }}
+          CINETPAY_SITE_ID: ${{ secrets.CINETPAY_SITE_ID_TEST }}
+        run: |
+          php artisan key:generate --env=testing
+          php artisan config:clear
+
+      - name: Exécution des migrations (base de test)
+        working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: secretis_test
+          DB_USERNAME: secretis
+          DB_PASSWORD: ${{ secrets.DB_TEST_PASSWORD }}
+        run: php artisan migrate --env=testing --force --ansi
+
+      - name: Lancement de la suite Pest
+        working-directory: backend
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: secretis_test
+          DB_USERNAME: secretis
+          DB_PASSWORD: ${{ secrets.DB_TEST_PASSWORD }}
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          APP_KEY: ${{ secrets.APP_KEY_TEST }}
+          CINETPAY_SECRET_KEY: ${{ secrets.CINETPAY_SECRET_KEY_TEST }}
+          CINETPAY_SITE_ID: ${{ secrets.CINETPAY_SITE_ID_TEST }}
+        run: |
+          ./vendor/bin/pest \
+            --parallel \
+            --coverage \
+            --min=80 \
+            --coverage-clover=coverage.xml \
+            --log-junit=junit.xml \
+            --colors=always
+
+      - name: Publication du rapport de couverture
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/coverage.xml
+          retention-days: 7
+
+      - name: Publication du rapport JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: backend/junit.xml
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # SECURITY — Audit Composer + Vérification des failles connues
+  # ---------------------------------------------------------------------------
+
+  security:
+    name: "Audit de sécurité"
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Installation des dépendances
+        working-directory: backend
+        run: composer install --prefer-dist --no-interaction --no-progress --ansi
+
+      - name: Audit de sécurité Composer (CVE connues)
+        working-directory: backend
+        run: composer audit --format=plain --no-interaction
+
+      - name: Vérification des failles avec Enlightn (si disponible)
+        working-directory: backend
+        continue-on-error: true
+        run: |
+          if php artisan list | grep -q "enlightn"; then
+            php artisan enlightn --ci --report
+          else
+            echo "Enlightn non installé, étape ignorée"
+          fi
+
+      - name: Recherche de secrets dans le code (patterns dangereux)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  # ---------------------------------------------------------------------------
+  # LINT — Laravel Pint (code style PSR-12)
+  # ---------------------------------------------------------------------------
+
+  lint:
+    name: "Code Style (Laravel Pint)"
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Installation des dépendances
+        working-directory: backend
+        run: composer install --prefer-dist --no-interaction --no-progress --ansi
+
+      - name: Vérification du code style avec Pint (mode dry-run)
+        working-directory: backend
+        run: ./vendor/bin/pint --test --ansi
+
+      - name: Vérification PHPStan (analyse statique niveau 6)
+        working-directory: backend
+        continue-on-error: false
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            ./vendor/bin/phpstan analyse \
+              --level=6 \
+              --error-format=github \
+              --no-progress
+          else
+            echo "PHPStan non configuré"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # STATUS CHECK — Agrège les résultats pour la protection de branche
+  # ---------------------------------------------------------------------------
+
+  ci-success:
+    name: "CI réussie"
+    runs-on: ubuntu-22.04
+    needs: [tests, security, lint]
+    if: always()
+
+    steps:
+      - name: Vérification des résultats
+        run: |
+          if [[ "${{ needs.tests.result }}" != "success" ]]; then
+            echo "❌ Les tests ont échoué"
+            exit 1
+          fi
+          if [[ "${{ needs.security.result }}" != "success" ]]; then
+            echo "❌ L'audit de sécurité a échoué"
+            exit 1
+          fi
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ Le lint a échoué"
+            exit 1
+          fi
+          echo "✅ Tous les checks CI sont passés"

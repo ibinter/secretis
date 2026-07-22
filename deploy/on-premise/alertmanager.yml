@@ -1,0 +1,218 @@
+# =============================================================================
+# SECRETIS ERP — Alertmanager Configuration
+# =============================================================================
+global:
+  resolve_timeout: 5m
+  smtp_smarthost:   'smtp.monentreprise.com:587'
+  smtp_from:        'alertes-secretis@monentreprise.com'
+  smtp_auth_username: 'alertes-secretis@monentreprise.com'
+  smtp_auth_password: 'CHANGE_ME'
+  smtp_require_tls: true
+
+# ---- Routage des alertes ----
+route:
+  group_by:         [alertname, service]
+  group_wait:       30s
+  group_interval:   5m
+  repeat_interval:  4h
+  receiver:         admin-email
+
+  routes:
+    # Alertes critiques : notification immédiate + webhook
+    - match:
+        severity: critical
+      receiver: admin-critical
+      group_wait: 10s
+      repeat_interval: 1h
+
+    # Alertes warning
+    - match:
+        severity: warning
+      receiver: admin-email
+      repeat_interval: 4h
+
+# ---- Récepteurs ----
+receivers:
+  - name: admin-email
+    email_configs:
+      - to: 'admin@monentreprise.com'
+        subject: '[SECRETIS] {{ .GroupLabels.alertname }} — {{ .Status | toUpper }}'
+        html: |
+          <h2>Alerte SECRETIS ERP</h2>
+          <p><strong>État :</strong> {{ .Status | toUpper }}</p>
+          {{ range .Alerts }}
+          <hr>
+          <p><strong>Alerte :</strong> {{ .Labels.alertname }}</p>
+          <p><strong>Service :</strong> {{ .Labels.service }}</p>
+          <p><strong>Sévérité :</strong> {{ .Labels.severity }}</p>
+          <p><strong>Description :</strong> {{ .Annotations.description }}</p>
+          <p><strong>Début :</strong> {{ .StartsAt.Format "02/01/2006 15:04:05" }}</p>
+          {{ if .EndsAt }}<p><strong>Fin :</strong> {{ .EndsAt.Format "02/01/2006 15:04:05" }}</p>{{ end }}
+          {{ end }}
+          <p><a href="http://grafana:3000">Ouvrir Grafana</a></p>
+        send_resolved: true
+
+  - name: admin-critical
+    email_configs:
+      - to: 'admin@monentreprise.com'
+        subject: '[SECRETIS CRITIQUE] {{ .GroupLabels.alertname }}'
+        send_resolved: true
+    webhook_configs:
+      - url: '${ALERT_WEBHOOK_URL}'
+        send_resolved: true
+        http_config:
+          bearer_token: '${ALERT_WEBHOOK_TOKEN}'
+
+# ---- Silences (pas de notifications répétées pour les mêmes alertes) ----
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: [alertname, service]
+
+---
+# =============================================================================
+# Règles d'alerte Prometheus (fichier séparé : alerting_rules.yml)
+# À placer dans le même répertoire que prometheus.yml
+# =============================================================================
+# groups:
+groups:
+  - name: secretis.app
+    rules:
+      # Service DOWN depuis 5 minutes
+      - alert: SecretisAppDown
+        expr: up{job="secretis-app"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service:  app
+        annotations:
+          summary:     "Application SECRETIS hors ligne"
+          description: "Le service app ne répond plus depuis plus de 5 minutes. URL : {{ $labels.instance }}"
+
+      # Nginx DOWN
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          service:  nginx
+        annotations:
+          summary:     "Nginx hors ligne"
+          description: "Le reverse proxy Nginx ne répond plus."
+
+      # PostgreSQL DOWN
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service:  postgres
+        annotations:
+          summary:     "Base de données PostgreSQL hors ligne"
+          description: "PostgreSQL ne répond plus. Perte de service totale imminente."
+
+      # Redis DOWN
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service:  redis
+        annotations:
+          summary:     "Redis hors ligne"
+          description: "Le cache Redis est inaccessible. Sessions et queues impactées."
+
+  - name: secretis.resources
+    rules:
+      # Disque plein à 80%
+      - alert: DiskSpaceWarning
+        expr: 100 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service:  host
+        annotations:
+          summary:     "Espace disque faible"
+          description: "Utilisation disque à {{ printf \"%.1f\" $value }}%. Libérez de l'espace ou agrandissez le volume."
+
+      # Disque plein à 90%
+      - alert: DiskSpaceCritical
+        expr: 100 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100) > 90
+        for: 2m
+        labels:
+          severity: critical
+          service:  host
+        annotations:
+          summary:     "Espace disque critique !"
+          description: "Utilisation disque à {{ printf \"%.1f\" $value }}%. Le service va s'arrêter si le disque est plein."
+
+      # RAM élevée
+      - alert: MemoryHighUsage
+        expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 85
+        for: 10m
+        labels:
+          severity: warning
+          service:  host
+        annotations:
+          summary:     "Utilisation mémoire élevée"
+          description: "RAM à {{ printf \"%.1f\" $value }}%. Risque de swap ou OOM."
+
+      # CPU élevé
+      - alert: CpuHighUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 15m
+        labels:
+          severity: warning
+          service:  host
+        annotations:
+          summary:     "Charge CPU élevée"
+          description: "CPU à {{ printf \"%.1f\" $value }}% depuis 15 minutes."
+
+  - name: secretis.queues
+    rules:
+      # Queue en retard
+      - alert: QueueBacklogWarning
+        expr: laravel_queue_size{queue="default"} > 100
+        for: 5m
+        labels:
+          severity: warning
+          service:  queue
+        annotations:
+          summary:     "Queue en retard"
+          description: "{{ $value }} jobs en attente dans la queue depuis 5 minutes."
+
+      - alert: QueueBacklogCritical
+        expr: laravel_queue_size{queue="default"} > 500
+        for: 5m
+        labels:
+          severity: critical
+          service:  queue
+        annotations:
+          summary:     "Queue critique — travaux bloqués"
+          description: "{{ $value }} jobs bloqués. Vérifiez les workers et les logs."
+
+  - name: secretis.database
+    rules:
+      # Connexions PostgreSQL proches du maximum
+      - alert: PostgresConnectionsHigh
+        expr: pg_stat_activity_count > (pg_settings_max_connections * 0.8)
+        for: 5m
+        labels:
+          severity: warning
+          service:  postgres
+        annotations:
+          summary:     "Connexions PostgreSQL élevées"
+          description: "{{ $value }} connexions actives (80% du maximum)."
+
+      # Temps de requête long
+      - alert: PostgresSlowQueries
+        expr: pg_stat_activity_max_tx_duration > 300
+        for: 5m
+        labels:
+          severity: warning
+          service:  postgres
+        annotations:
+          summary:     "Requêtes PostgreSQL lentes"
+          description: "Des transactions durent plus de 5 minutes."

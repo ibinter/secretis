@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBIG SECRETIS — API Reference</title>
+  <meta name="description" content="Documentation interactive de l'API REST IBIG SECRETIS ERP" />
+
+  <!-- Swagger UI CSS -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+
+  <style>
+    /* =========================================================================
+       VARIABLES & RESET
+    ========================================================================= */
+    :root {
+      --secretis-navy:    #1A3A5C;
+      --secretis-blue:    #2E86C1;
+      --secretis-light:   #5DADE2;
+      --secretis-accent:  #F39C12;
+      --secretis-bg:      #F4F6F8;
+      --secretis-text:    #2C3E50;
+      --secretis-border:  #D5D8DC;
+      --header-h:         72px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--secretis-bg);
+      color: var(--secretis-text);
+      min-height: 100vh;
+    }
+
+    /* =========================================================================
+       HEADER
+    ========================================================================= */
+    #secretis-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: var(--header-h);
+      background: var(--secretis-navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      background: var(--secretis-blue);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .header-title {
+      color: #fff;
+    }
+
+    .header-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .header-title span {
+      font-size: .72rem;
+      color: var(--secretis-light);
+      font-weight: 400;
+      display: block;
+      margin-top: 1px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* ---- API Key input ---- */
+    .api-key-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .api-key-group label {
+      color: var(--secretis-light);
+      font-size: .78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    #apiKeyInput {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      font-size: .82rem;
+      width: 240px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    #apiKeyInput::placeholder { color: rgba(255,255,255,.4); }
+    #apiKeyInput:focus { border-color: var(--secretis-light); background: rgba(255,255,255,.15); }
+
+    #applyKeyBtn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      background: var(--secretis-blue);
+      color: #fff;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+
+    #applyKeyBtn:hover { background: var(--secretis-light); }
+
+    .header-badge {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: .75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ---- Notification ---- */
+    #keyNotif {
+      position: fixed;
+      top: calc(var(--header-h) + 12px);
+      right: 20px;
+      background: #27AE60;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    #keyNotif.show { opacity: 1; }
+
+    /* =========================================================================
+       BANNER
+    ========================================================================= */
+    #secretis-banner {
+      background: linear-gradient(135deg, var(--secretis-navy) 0%, var(--secretis-blue) 100%);
+      color: #fff;
+      padding: 40px 32px 36px;
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .banner-text { flex: 1; min-width: 260px; }
+    .banner-text h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+    .banner-text p  { font-size: .92rem; line-height: 1.7; color: rgba(255,255,255,.85); max-width: 560px; }
+
+    .banner-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .stat-card .val { font-size: 1.5rem; font-weight: 800; }
+    .stat-card .lbl { font-size: .72rem; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+    /* =========================================================================
+       SWAGGER UI CUSTOMIZATIONS
+    ========================================================================= */
+    .swagger-ui-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 0 60px;
+    }
+
+    /* Topbar caché (on a notre propre header) */
+    .swagger-ui .topbar { display: none !important; }
+
+    /* Info section */
+    .swagger-ui .info { padding: 24px 28px 12px; }
+    .swagger-ui .info .title {
+      font-size: 1.6rem !important;
+      color: var(--secretis-navy) !important;
+      font-weight: 800 !important;
+    }
+
+    /* Bouton "Authorize" */
+    .swagger-ui .auth-wrapper .btn-done,
+    .swagger-ui .authorization__btn {
+      background: var(--secretis-blue) !important;
+      border-color: var(--secretis-blue) !important;
+      color: #fff !important;
+    }
+
+    /* Tags */
+    .swagger-ui .opblock-tag {
+      border-bottom: 2px solid var(--secretis-border);
+      color: var(--secretis-navy) !important;
+      font-weight: 700 !important;
+    }
+
+    .swagger-ui .opblock-tag:hover { background: rgba(46,134,193,.06) !important; }
+
+    /* Méthodes HTTP — couleurs SECRETIS */
+    .swagger-ui .opblock.opblock-post   { border-color: #27AE60; background: rgba(39,174,96,.06); }
+    .swagger-ui .opblock.opblock-get    { border-color: var(--secretis-blue); background: rgba(46,134,193,.05); }
+    .swagger-ui .opblock.opblock-put    { border-color: var(--secretis-accent); background: rgba(243,156,18,.06); }
+    .swagger-ui .opblock.opblock-patch  { border-color: #8E44AD; background: rgba(142,68,173,.06); }
+    .swagger-ui .opblock.opblock-delete { border-color: #E74C3C; background: rgba(231,76,60,.06); }
+
+    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #27AE60 !important; }
+    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: var(--secretis-blue) !important; }
+    .swagger-ui .opblock.opblock-put    .opblock-summary-method { background: var(--secretis-accent) !important; }
+    .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: #8E44AD !important; }
+    .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #E74C3C !important; }
+
+    /* Bouton "Try it out" */
+    .swagger-ui .try-out__btn {
+      border-color: var(--secretis-blue) !important;
+      color: var(--secretis-blue) !important;
+    }
+    .swagger-ui .try-out__btn:hover {
+      background: var(--secretis-blue) !important;
+      color: #fff !important;
+    }
+
+    /* Bouton "Execute" */
+    .swagger-ui .btn.execute {
+      background: var(--secretis-navy) !important;
+      border-color: var(--secretis-navy) !important;
+      color: #fff !important;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: var(--secretis-border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--secretis-blue); }
+
+    /* =========================================================================
+       FOOTER
+    ========================================================================= */
+    #secretis-footer {
+      background: var(--secretis-navy);
+      color: rgba(255,255,255,.6);
+      text-align: center;
+      padding: 20px;
+      font-size: .78rem;
+    }
+
+    #secretis-footer a { color: var(--secretis-light); text-decoration: none; }
+    #secretis-footer a:hover { text-decoration: underline; }
+
+    /* =========================================================================
+       RESPONSIVE
+    ========================================================================= */
+    @media (max-width: 768px) {
+      #secretis-header { height: auto; padding: 12px 16px; flex-direction: column; gap: 12px; }
+      .api-key-group { flex-wrap: wrap; }
+      #apiKeyInput { width: 100%; }
+      #secretis-banner { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===================================================================== -->
+  <!-- HEADER                                                                 -->
+  <!-- ===================================================================== -->
+  <header id="secretis-header">
+    <a class="header-brand" href="https://secretis.ibigsoft.com" target="_blank" rel="noopener">
+      <div class="header-logo">IS</div>
+      <div class="header-title">
+        <h1>IBIG SECRETIS</h1>
+        <span>API Reference — v1.0.0</span>
+      </div>
+    </a>
+
+    <div class="header-right">
+      <div class="api-key-group">
+        <label for="apiKeyInput">🔑 Bearer Token</label>
+        <input
+          id="apiKeyInput"
+          type="password"
+          placeholder="1|votre-token-sanctum..."
+          autocomplete="off"
+        />
+        <button id="applyKeyBtn" onclick="applyApiKey()">Appliquer</button>
+      </div>
+      <span class="header-badge">OpenAPI 3.1</span>
+    </div>
+  </header>
+
+  <!-- Notification succès -->
+  <div id="keyNotif">✅ Token appliqué — Try it out activé !</div>
+
+  <!-- ===================================================================== -->
+  <!-- BANNER                                                                 -->
+  <!-- ===================================================================== -->
+  <div id="secretis-banner">
+    <div class="banner-text">
+      <h2>Documentation Interactive</h2>
+      <p>
+        Explorez et testez tous les endpoints de l'API IBIG SECRETIS ERP directement depuis ce portail.
+        Collez votre Bearer token Sanctum dans le champ ci-dessus, puis utilisez
+        <strong>Try it out</strong> sur n'importe quel endpoint.
+      </p>
+    </div>
+    <div class="banner-stats">
+      <div class="stat-card"><div class="val">50+</div><div class="lbl">Endpoints</div></div>
+      <div class="stat-card"><div class="val">11</div><div class="lbl">Modules</div></div>
+      <div class="stat-card"><div class="val">1 000</div><div class="lbl">Req/heure</div></div>
+      <div class="stat-card"><div class="val">JWT</div><div class="lbl">Sanctum</div></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SWAGGER UI                                                             -->
+  <!-- ===================================================================== -->
+  <div class="swagger-ui-wrapper">
+    <div id="swagger-ui"></div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- FOOTER                                                                 -->
+  <!-- ===================================================================== -->
+  <footer id="secretis-footer">
+    &copy; 2026 <a href="https://ibigsoft.com" target="_blank">IBIG Soft</a> —
+    <a href="https://secretis.ibigsoft.com/legal/api-terms" target="_blank">Conditions d'utilisation API</a> —
+    <a href="mailto:support@ibigsoft.com">support@ibigsoft.com</a>
+  </footer>
+
+  <!-- Swagger UI JS -->
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js"></script>
+
+  <script>
+    // =========================================================================
+    // Swagger UI — Initialisation
+    // =========================================================================
+
+    // Chemin vers la spec OpenAPI (relatif à ce fichier HTML)
+    const SPEC_URL = '../../backend/openapi.yaml';
+
+    let swaggerUI;
+
+    window.onload = function () {
+      swaggerUI = SwaggerUIBundle({
+        url: SPEC_URL,
+
+        dom_id: '#swagger-ui',
+
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset,
+        ],
+
+        plugins: [SwaggerUIBundle.plugins.DownloadUrl],
+
+        layout: 'StandaloneLayout',
+
+        // Affichage
+        defaultModelsExpandDepth: 1,
+        defaultModelExpandDepth: 2,
+        docExpansion: 'list',          // 'none' | 'list' | 'full'
+        filter: true,                  // Barre de recherche
+        showExtensions: true,
+        showCommonExtensions: true,
+        tryItOutEnabled: false,        // Désactivé par défaut (activer avec token)
+        persistAuthorization: true,
+
+        // Intercepteur pour ajouter le token Bearer
+        requestInterceptor: (req) => {
+          const token = document.getElementById('apiKeyInput').value.trim();
+          if (token) {
+            req.headers['Authorization'] = `Bearer ${token}`;
+          }
+          return req;
+        },
+
+        // Callback après chargement de la spec
+        onComplete: () => {
+          console.log('[SECRETIS API] Swagger UI prêt.');
+
+          // Restaurer le token depuis sessionStorage
+          const saved = sessionStorage.getItem('secretis_api_token');
+          if (saved) {
+            document.getElementById('apiKeyInput').value = saved;
+            authorizeSwagger(saved);
+          }
+        },
+      });
+    };
+
+    // =========================================================================
+    // Gestion du token
+    // =========================================================================
+
+    function applyApiKey() {
+      const token = document.getElementById('apiKeyInput').value.trim();
+
+      if (!token) {
+        alert('Veuillez entrer votre Bearer token Sanctum.');
+        return;
+      }
+
+      // Persister en session
+      sessionStorage.setItem('secretis_api_token', token);
+
+      // Appliquer dans Swagger UI
+      authorizeSwagger(token);
+
+      // Activer "Try it out" globalement
+      document.querySelectorAll('.try-out__btn:not(.cancel)').forEach(btn => btn.click());
+
+      // Notification
+      const notif = document.getElementById('keyNotif');
+      notif.classList.add('show');
+      setTimeout(() => notif.classList.remove('show'), 3000);
+    }
+
+    function authorizeSwagger(token) {
+      if (!swaggerUI) return;
+      swaggerUI.preauthorizeApiKey('BearerAuth', token);
+    }
+
+    // Appliquer avec Entrée
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('apiKeyInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') applyApiKey();
+      });
+    });
+  </script>
+</body>
+</html>

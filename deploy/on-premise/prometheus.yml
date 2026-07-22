@@ -1,0 +1,119 @@
+# =============================================================================
+# SECRETIS ERP — Configuration Prometheus On-Premise
+# =============================================================================
+global:
+  scrape_interval:     30s
+  evaluation_interval: 30s
+  scrape_timeout:      10s
+  external_labels:
+    deployment: on-premise
+    app:        secretis
+
+# Règles d'alerte
+rule_files:
+  - "alerting_rules.yml"
+
+# Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# =============================================================================
+# Jobs de scraping
+# =============================================================================
+scrape_configs:
+
+  # ---------------------------------------------------------------------------
+  # Application SECRETIS — métriques Laravel
+  # Utilise le package spatie/laravel-prometheus ou treblle/laravel-metrics
+  # Endpoint : GET /metrics (protégé par bearer token)
+  # ---------------------------------------------------------------------------
+  - job_name: secretis-app
+    scheme: http
+    metrics_path: /metrics
+    bearer_token: "${PROMETHEUS_TOKEN}"
+    static_configs:
+      - targets:
+          - app:9000
+        labels:
+          service: app
+          component: php-fpm
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: secretis-app
+
+  # ---------------------------------------------------------------------------
+  # Nginx — métriques via stub_status ou nginx-prometheus-exporter
+  # ---------------------------------------------------------------------------
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - nginx:9113
+        labels:
+          service: nginx
+    metrics_path: /metrics
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Exporter
+  # Image : quay.io/prometheuscommunity/postgres-exporter
+  # ---------------------------------------------------------------------------
+  - job_name: postgres
+    static_configs:
+      - targets:
+          - postgres-exporter:9187
+        labels:
+          service: postgres
+          db: secretis
+    metrics_path: /metrics
+    scrape_interval: 60s
+
+  # ---------------------------------------------------------------------------
+  # Redis Exporter
+  # Image : oliver006/redis_exporter
+  # ---------------------------------------------------------------------------
+  - job_name: redis
+    static_configs:
+      - targets:
+          - redis-exporter:9121
+        labels:
+          service: redis
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # ---------------------------------------------------------------------------
+  # MinIO Exporter (métriques natives MinIO)
+  # ---------------------------------------------------------------------------
+  - job_name: minio
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+      - targets:
+          - minio:9000
+        labels:
+          service: minio
+
+  # ---------------------------------------------------------------------------
+  # Node Exporter — métriques système du serveur hôte
+  # ---------------------------------------------------------------------------
+  - job_name: node
+    static_configs:
+      - targets:
+          - node-exporter:9100
+        labels:
+          service: host
+    scrape_interval: 60s
+
+  # ---------------------------------------------------------------------------
+  # cAdvisor — métriques des conteneurs Docker
+  # ---------------------------------------------------------------------------
+  - job_name: cadvisor
+    static_configs:
+      - targets:
+          - cadvisor:8080
+        labels:
+          service: docker
+    scrape_interval: 60s
+    metrics_path: /metrics

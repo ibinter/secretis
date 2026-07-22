@@ -1,0 +1,89 @@
+version: "3.9"
+
+# =============================================================================
+# SECRETIS ERP — Docker Compose Override (Développement Local)
+# Ce fichier est automatiquement fusionné avec docker-compose.yml en dev.
+# NE PAS utiliser en production.
+# =============================================================================
+
+services:
+
+  app:
+    image: ibigsoft/secretis:dev
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      # Hot-reload : mount du code source
+      - ../../backend:/var/www/html
+      - /var/www/html/vendor      # exclude vendor (rebuild dans le conteneur)
+      - /var/www/html/node_modules
+    environment:
+      PHP_IDE_CONFIG: "serverName=secretis-local"
+      XDEBUG_MODE: "debug,coverage"
+      XDEBUG_CONFIG: >
+        client_host=host-gateway
+        client_port=9003
+        start_with_request=yes
+        idekey=PHPSTORM
+      APP_ENV: local
+      APP_DEBUG: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "9000:9000"    # PHP-FPM (accès direct pour debug)
+
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+
+  # ---------------------------------------------------------------------------
+  # MailHog — Capture des emails en développement
+  # ---------------------------------------------------------------------------
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Interface web
+    networks:
+      - backend
+    logging:
+      driver: "none"
+
+  # ---------------------------------------------------------------------------
+  # Adminer — Interface web pour PostgreSQL
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+    networks:
+      - backend
+    depends_on:
+      - postgres
+
+  # ---------------------------------------------------------------------------
+  # Redis Commander — Interface web pour Redis
+  # ---------------------------------------------------------------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379:0:${REDIS_PASSWORD}"
+    networks:
+      - backend
+    depends_on:
+      - redis
+
+  # Mode développement : pas de scheduler tournant en boucle
+  scheduler:
+    command: php artisan schedule:work

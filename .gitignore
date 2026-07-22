@@ -1,0 +1,74 @@
+# LibreOffice/Word temp files
+.~lock.*
+*.tmp
+*.temp
+
+# CDC images (pages scannées, ne pas versionner)
+page-*.jpg
+page-*.png
+
+# Fichiers Word/PDF sources CDC (doc de référence, pas du code)
+*.docx
+*.pdf
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+!backend/.env.production.example
+
+# Laravel
+backend/vendor/
+backend/node_modules/
+backend/storage/logs/*.log
+backend/storage/app/public/
+backend/bootstrap/cache/*.php
+backend/.env
+backend/.env.local
+
+# Frontend
+frontend/node_modules/
+frontend/public/build/
+frontend/public/hot
+frontend/.env
+frontend/.env.local
+
+# Mobile
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+backend/coverage/
+frontend/coverage/
+
+# Docker
+deploy/docker/data/
+deploy/docker/logs/
+
+# Load tests reports (générés, pas sourcés)
+load-tests/reports/*.html
+load-tests/results/
+
+# Composer
+backend/composer.lock
+
+# NPM
+frontend/package-lock.json
+frontend/yarn.lock
+mobile/package-lock.json

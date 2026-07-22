@@ -1,0 +1,164 @@
+{
+  "_meta": {
+    "locale": "sw",
+    "dir": "ltr",
+    "version": "1.0.0",
+    "description": "Kiswahili — Lugha ya kazi (Tanzania, Kenya, DRC). Maneno muhimu ya kiorodha (~150 keys)."
+  },
+
+  "nav": {
+    "dashboard":      "Dashibodi",
+    "agenda":         "Kalenda",
+    "courrier":       "Barua Pepe",
+    "reunion":        "Mikutano",
+    "taches":         "Kazi",
+    "visiteur":       "Wageni",
+    "ressources":     "Rasilimali",
+    "rh":             "Rasilimali Watu",
+    "rapports":       "Ripoti",
+    "documents":      "Nyaraka",
+    "parametres":     "Mipangilio",
+    "help":           "Msaada",
+    "notifications":  "Arifa",
+    "profile":        "Wasifu Wangu",
+    "logout":         "Toka",
+    "comptabilite":   "Uhasibu",
+    "projets":        "Miradi"
+  },
+
+  "buttons": {
+    "save":           "Hifadhi",
+    "cancel":         "Ghairi",
+    "delete":         "Futa",
+    "edit":           "Hariri",
+    "view":           "Angalia",
+    "create":         "Unda",
+    "add":            "Ongeza",
+    "confirm":        "Thibitisha",
+    "send":           "Tuma",
+    "submit":         "Wasilisha",
+    "search":         "Tafuta",
+    "filter":         "Chuja",
+    "reset":          "Weka upya",
+    "export":         "Hamisha",
+    "import":         "Ingiza",
+    "download":       "Pakua",
+    "upload":         "Pakia",
+    "close":          "Funga",
+    "back":           "Rudi",
+    "next":           "Ifuatayo",
+    "previous":       "Iliyotangulia",
+    "continue":       "Endelea",
+    "apply":          "Tumia",
+    "clear":          "Futa",
+    "refresh":        "Onyesha upya",
+    "print":          "Chapa",
+    "approve":        "Idhinisha",
+    "reject":         "Kataa",
+    "assign":         "Gawia",
+    "loading":        "Inapakia…",
+    "saving":         "Inahifadhi…",
+    "see_all":        "Angalia Yote"
+  },
+
+  "labels": {
+    "name":           "Jina",
+    "first_name":     "Jina la Kwanza",
+    "last_name":      "Jina la Familia",
+    "full_name":      "Jina Kamili",
+    "email":          "Barua Pepe",
+    "phone":          "Simu",
+    "mobile":         "Simu ya Mkononi",
+    "address":        "Anwani",
+    "city":           "Mji",
+    "country":        "Nchi",
+    "company":        "Kampuni",
+    "department":     "Idara",
+    "position":       "Nafasi ya Kazi",
+    "description":    "Maelezo",
+    "notes":          "Maelezo ya Ziada",
+    "title":          "Kichwa",
+    "subject":        "Mada",
+    "category":       "Aina",
+    "priority":       "Kipaumbele",
+    "status":         "Hali",
+    "date":           "Tarehe",
+    "start_date":     "Tarehe ya Kuanza",
+    "end_date":       "Tarehe ya Kumaliza",
+    "amount":         "Kiasi",
+    "total":          "Jumla",
+    "yes":            "Ndiyo",
+    "no":             "Hapana",
+    "all":            "Yote",
+    "none":           "Hakuna",
+    "password":       "Nenosiri",
+    "language":       "Lugha",
+    "organization":   "Shirika"
+  },
+
+  "placeholders": {
+    "search":         "Tafuta…",
+    "select":         "Chagua…",
+    "description":    "Ongeza maelezo…",
+    "write_here":     "Andika hapa…"
+  },
+
+  "empty_states": {
+    "no_results":     "Hakuna matokeo.",
+    "no_tasks":       "Hakuna kazi kwa sasa.",
+    "no_events":      "Hakuna matukio yaliyopangwa.",
+    "no_meetings":    "Hakuna mikutano iliyopangwa.",
+    "no_data":        "Hakuna data inayopatikana.",
+    "no_notifications": "Hakuna arifa."
+  },
+
+  "feedback": {
+    "saved":          "Mabadiliko yamehifadhiwa.",
+    "created":        "Kipengele kimeundwa kwa mafanikio.",
+    "updated":        "Kipengele kimesasishwa.",
+    "deleted":        "Kipengele kimefutwa.",
+    "sent":           "Ujumbe umetumwa.",
+    "error_generic":  "Hitilafu imetokea. Tafadhali jaribu tena.",
+    "error_network":  "Hitilafu ya mtandao. Angalia muunganisho wako."
+  },
+
+  "statuses": {
+    "pending":        "Inasubiri",
+    "active":         "Inafanya kazi",
+    "in_progress":    "Inaendelea",
+    "done":           "Imekamilika",
+    "cancelled":      "Imefutwa",
+    "approved":       "Imeidhinishwa",
+    "rejected":       "Imekataliwa",
+    "draft":          "Rasimu"
+  },
+
+  "priorities": {
+    "low":            "Chini",
+    "medium":         "Wastani",
+    "high":           "Juu",
+    "critical":       "Muhimu Sana",
+    "urgent":         "Haraka"
+  },
+
+  "dates": {
+    "today":          "Leo",
+    "yesterday":      "Jana",
+    "tomorrow":       "Kesho",
+    "this_week":      "Wiki Hii",
+    "this_month":     "Mwezi Huu",
+    "format_date":    "DD/MM/YYYY",
+    "format_time":    "HH:mm",
+    "days_short":     ["Jpi", "Jtt", "Jnn", "Jtn", "Alh", "Iju", "Jmo"],
+    "days_long":      ["Jumapili", "Jumatatu", "Jumanne", "Jumatano", "Alhamisi", "Ijumaa", "Jumamosi"],
+    "months_long":    ["Januari", "Februari", "Machi", "Aprili", "Mei", "Juni", "Julai", "Agosti", "Septemba", "Oktoba", "Novemba", "Desemba"],
+    "just_now":       "Sasa hivi",
+    "ago":            "zamani :time"
+  },
+
+  "misc": {
+    "loading":        "Inapakia…",
+    "copyright":      "© :year IBIG SECRETIS. Haki zote zimehifadhiwa.",
+    "version":        "Toleo :v"
+  }
+}

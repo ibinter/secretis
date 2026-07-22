@@ -1,0 +1,238 @@
+/* ============================================================
+   app.css — Styles globaux IBIG SECRETIS
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables ──────────────────────────────────────────────────────────── */
+:root {
+  /* Palette IBIG */
+  --color-primary:   #1A3A5C;
+  --color-secondary: #2E86C1;
+  --color-accent:    #F39C12;
+  --color-success:   #1E8449;
+  --color-danger:    #C0392B;
+
+  /* Surface */
+  --color-bg:        #F9FAFB;
+  --color-surface:   #FFFFFF;
+  --color-border:    #E5E7EB;
+  --color-text:      #111827;
+  --color-muted:     #6B7280;
+
+  /* Sidebar */
+  --sidebar-width:       256px;
+  --sidebar-width-sm:    64px;
+  --header-height:       56px;
+
+  /* Radius */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  18px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-dropdown: 0 10px 30px rgba(0,0,0,.12);
+}
+
+/* ─── Dark mode ──────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:      #0F1923;
+    --color-surface: #162032;
+    --color-border:  #1E3048;
+    --color-text:    #F3F4F6;
+    --color-muted:   #9CA3AF;
+  }
+}
+
+[data-theme="dark"] {
+  --color-bg:      #0F1923;
+  --color-surface: #162032;
+  --color-border:  #1E3048;
+  --color-text:    #F3F4F6;
+  --color-muted:   #9CA3AF;
+}
+
+[data-theme="light"] {
+  --color-bg:      #F9FAFB;
+  --color-surface: #FFFFFF;
+  --color-border:  #E5E7EB;
+  --color-text:    #111827;
+  --color-muted:   #6B7280;
+}
+
+/* ─── RTL ────────────────────────────────────────────────────────────────────── */
+[dir="rtl"] {
+  --sidebar-start: auto;
+  --sidebar-end:   0;
+}
+[dir="rtl"] .sidebar { right: 0; left: auto; border-right: none; border-left: 1px solid var(--color-border); }
+[dir="rtl"] .sidebar-content { direction: rtl; }
+
+/* ─── Base ───────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar thin ─────────────────────────────────────────────────────────── */
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+.scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+/* ─── Utility classes SECRETIS ───────────────────────────────────────────────── */
+@layer components {
+  .secretis-card {
+    @apply bg-white dark:bg-[#162032] rounded-xl border border-gray-200 dark:border-[#1E3048] shadow-sm;
+  }
+
+  .secretis-header {
+    @apply bg-white dark:bg-[#162032] border-b border-gray-200 dark:border-[#1E3048] h-14 flex items-center gap-3 px-4;
+  }
+
+  /* Badges de statut */
+  .secretis-badge       { @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full; }
+  .secretis-badge-success { @apply secretis-badge bg-[#1E8449]/15 text-[#1E8449]; }
+  .secretis-badge-warning { @apply secretis-badge bg-[#F39C12]/15 text-[#d68910]; }
+  .secretis-badge-danger  { @apply secretis-badge bg-[#C0392B]/15 text-[#C0392B]; }
+  .secretis-badge-info    { @apply secretis-badge bg-[#2E86C1]/15 text-[#2E86C1]; }
+  .secretis-badge-gray    { @apply secretis-badge bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300; }
+  .secretis-badge-primary { @apply secretis-badge bg-[#1A3A5C]/15 text-[#1A3A5C] dark:bg-[#1A3A5C]/30 dark:text-blue-300; }
+
+  /* Page heading */
+  .secretis-page-title {
+    @apply text-xl font-bold text-gray-900 dark:text-white tracking-tight;
+  }
+
+  /* Form label */
+  .secretis-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+
+  /* Divider */
+  .secretis-divider {
+    @apply border-t border-gray-100 dark:border-[#1E3048] my-4;
+  }
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes pulseAlert {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(192, 57, 43, 0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.animate-fade-in    { animation: fadeIn    0.2s ease-out both; }
+.animate-slide-in   { animation: slideIn   0.3s ease-out both; }
+.animate-slide-in-r { animation: slideInRight 0.3s ease-out both; }
+.animate-pulse-alert{ animation: pulseAlert 1.5s infinite; }
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e3048 25%, #243854 50%, #1e3048 75%);
+  background-size: 200% 100%;
+}
+
+/* ─── TipTap Editor ─────────────────────────────────────────────────────────── */
+.tiptap-editor {
+  @apply min-h-[200px] border border-gray-300 dark:border-gray-600 rounded-xl;
+}
+.tiptap-editor .ProseMirror {
+  @apply p-4 outline-none text-sm text-gray-900 dark:text-white leading-relaxed;
+}
+.tiptap-editor .ProseMirror h1 { @apply text-2xl font-bold mb-3; }
+.tiptap-editor .ProseMirror h2 { @apply text-xl font-semibold mb-2; }
+.tiptap-editor .ProseMirror h3 { @apply text-lg font-medium mb-2; }
+.tiptap-editor .ProseMirror p  { @apply mb-2; }
+.tiptap-editor .ProseMirror ul { @apply list-disc ml-5 mb-2; }
+.tiptap-editor .ProseMirror ol { @apply list-decimal ml-5 mb-2; }
+.tiptap-editor .ProseMirror blockquote {
+  @apply border-l-4 border-[#2E86C1] pl-4 italic text-gray-500 my-3;
+}
+.tiptap-editor .ProseMirror code {
+  @apply bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+.tiptap-editor .ProseMirror pre {
+  @apply bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono my-3;
+}
+.tiptap-editor .ProseMirror a { @apply text-[#2E86C1] underline; }
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9CA3AF;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ─── Print ──────────────────────────────────────────────────────────────────── */
+@media print {
+  aside,
+  header,
+  [data-print="hide"],
+  .fixed,
+  button:not([data-print="show"]) {
+    display: none !important;
+  }
+  body { background: white; color: black; font-size: 12pt; }
+  main { padding: 0 !important; }
+
+  /* Logo uniquement en impression */
+  .print-logo::before {
+    content: "IBIG SECRETIS";
+    display: block;
+    font-size: 18pt;
+    font-weight: 900;
+    color: #1A3A5C;
+    margin-bottom: 16pt;
+  }
+
+  .secretis-card {
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+  table { page-break-inside: auto; }
+  tr    { page-break-inside: avoid; page-break-after: auto; }
+}
+
+/* ─── Focus visible ──────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────────────────── */
+::selection { background: rgba(46, 134, 193, 0.2); }

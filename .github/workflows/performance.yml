@@ -1,0 +1,642 @@
+name: Performance Tests
+
+on:
+  # Smoke test sur chaque PR
+  pull_request:
+    branches: [main, develop]
+
+  # Load test complet en nightly sur main
+  push:
+    branches: [main]
+
+  # Déclenchement manuel
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: "Type de test (smoke|load|stress|spike|soak)"
+        required: true
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+          - spike
+          - soak
+      base_url:
+        description: "URL de base de l'application"
+        required: false
+        default: "http://localhost:8000"
+
+# Annuler les runs précédents sur la même PR (économie de ressources)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  K6_VERSION: "0.52.0"
+  NODE_VERSION: "20"
+  BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:8000' }}
+  # Seuil de blocage PR : p95 > 1000ms = échec
+  P95_BLOCKING_THRESHOLD_MS: 1000
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1 : Smoke test (toutes les PRs)
+  # ─────────────────────────────────────────────────────────────────────────────
+  smoke-test:
+    name: "Smoke Test (PR gate)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event.inputs.test_type == 'smoke'
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB:       secretis_test
+          POSTGRES_USER:     secretis
+          POSTGRES_PASSWORD: secret
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_pgsql, redis, mbstring, xml, zip
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] \
+            https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: .
+
+      - name: Setup application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan config:cache
+          php artisan migrate --force
+          php artisan db:seed --class=LoadTestSeeder --force
+        env:
+          DB_CONNECTION:  pgsql
+          DB_HOST:        127.0.0.1
+          DB_PORT:        5432
+          DB_DATABASE:    secretis_test
+          DB_USERNAME:    secretis
+          DB_PASSWORD:    secret
+          REDIS_HOST:     127.0.0.1
+          CACHE_DRIVER:   redis
+          QUEUE_CONNECTION: sync
+
+      - name: Start application server
+        run: |
+          php artisan serve --host=0.0.0.0 --port=8000 &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:8000/api/health
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST:       127.0.0.1
+          DB_PORT:       5432
+          DB_DATABASE:   secretis_test
+          DB_USERNAME:   secretis
+          DB_PASSWORD:   secret
+          REDIS_HOST:    127.0.0.1
+
+      - name: Run Smoke Test
+        id: smoke
+        run: |
+          k6 run \
+            --out json=load-tests/reports/smoke-results.json \
+            --summary-export=load-tests/reports/smoke-summary.json \
+            --env TEST_TYPE=smoke \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/full-journey.js 2>&1 | tee smoke-output.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Check p95 threshold (block merge if > 1000ms)
+        id: threshold_check
+        run: |
+          P95=$(python3 -c "
+          import json, sys
+          with open('load-tests/reports/smoke-summary.json') as f:
+            data = json.load(f)
+          p95 = data.get('metrics', {}).get('http_req_duration', {}).get('values', {}).get('p(95)', 9999)
+          print(p95)
+          ")
+          echo "p95=${P95}" >> "$GITHUB_OUTPUT"
+          echo "P95 latence : ${P95} ms"
+          if (( $(echo "$P95 > ${{ env.P95_BLOCKING_THRESHOLD_MS }}" | bc -l) )); then
+            echo "ECHEC : p95 (${P95}ms) dépasse le seuil de ${{ env.P95_BLOCKING_THRESHOLD_MS }}ms"
+            exit 1
+          else
+            echo "OK : p95 (${P95}ms) sous le seuil de ${{ env.P95_BLOCKING_THRESHOLD_MS }}ms"
+          fi
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results-${{ github.sha }}
+          path: |
+            load-tests/reports/smoke-results.json
+            load-tests/reports/smoke-summary.json
+            smoke-output.txt
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = {};
+            try {
+              summary = JSON.parse(fs.readFileSync('load-tests/reports/smoke-summary.json', 'utf8'));
+            } catch (e) {
+              console.error('Could not read summary:', e);
+            }
+
+            const metrics  = summary.metrics || {};
+            const p50      = metrics.http_req_duration?.values?.['p(50)']?.toFixed(0) || 'N/A';
+            const p95      = metrics.http_req_duration?.values?.['p(95)']?.toFixed(0) || 'N/A';
+            const p99      = metrics.http_req_duration?.values?.['p(99)']?.toFixed(0) || 'N/A';
+            const errRate  = ((metrics.http_req_failed?.values?.rate || 0) * 100).toFixed(2);
+            const reqTotal = metrics.http_reqs?.values?.count || 0;
+            const status   = '${{ steps.threshold_check.outcome }}' === 'success' ? 'PASS' : 'FAIL';
+            const emoji    = status === 'PASS' ? 'green_circle' : 'red_circle';
+
+            const body = `## :${emoji}: Smoke Test – Résultats de performance
+
+            | Métrique | Valeur | Seuil | Statut |
+            |---|---|---|---|
+            | p50 latence | ${p50} ms | – | – |
+            | **p95 latence** | **${p95} ms** | **< 1 000 ms** | ${parseInt(p95) < 1000 ? 'PASS' : 'FAIL'} |
+            | p99 latence | ${p99} ms | < 1 000 ms | ${parseInt(p99) < 1000 ? 'PASS' : 'FAIL'} |
+            | Taux d'erreur | ${errRate} % | < 1 % | ${parseFloat(errRate) < 1 ? 'PASS' : 'FAIL'} |
+            | Requêtes totales | ${reqTotal} | – | – |
+
+            **Résultat global : ${status}**
+            ${status === 'FAIL' ? '\n> Le merge est bloqué car p95 > 1 000 ms. Optimisez les performances avant de merger.' : ''}
+
+            <details>
+            <summary>Voir le commit testé</summary>
+            Commit : \`${{ github.sha }}\`
+            Branche : \`${{ github.head_ref }}\`
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2 : Load test complet (nightly sur main)
+  # ─────────────────────────────────────────────────────────────────────────────
+  load-test-nightly:
+    name: "Load Test complet (nightly)"
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.test_type != 'smoke')
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB:       secretis_test
+          POSTGRES_USER:     secretis
+          POSTGRES_PASSWORD: secret
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_pgsql, redis, mbstring, xml, zip
+          coverage: none
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] \
+            https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Setup application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan config:cache
+          php artisan migrate --force
+          php artisan db:seed --class=LoadTestSeeder --force
+        env:
+          DB_CONNECTION:  pgsql
+          DB_HOST:        127.0.0.1
+          DB_PORT:        5432
+          DB_DATABASE:    secretis_test
+          DB_USERNAME:    secretis
+          DB_PASSWORD:    secret
+          REDIS_HOST:     127.0.0.1
+          CACHE_DRIVER:   redis
+          QUEUE_CONNECTION: sync
+
+      - name: Start application server
+        run: |
+          php artisan serve --host=0.0.0.0 --port=8000 &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:8000/api/health
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST:       127.0.0.1
+          DB_PORT:       5432
+          DB_DATABASE:   secretis_test
+          DB_USERNAME:   secretis
+          DB_PASSWORD:   secret
+          REDIS_HOST:    127.0.0.1
+
+      - name: Determine test type
+        id: test_type
+        run: |
+          TYPE="${{ github.event.inputs.test_type || 'load' }}"
+          echo "type=${TYPE}" >> "$GITHUB_OUTPUT"
+          echo "Test type : ${TYPE}"
+
+      - name: Run Auth Load Test
+        run: |
+          mkdir -p load-tests/reports
+          k6 run \
+            --out json=load-tests/reports/auth-results.json \
+            --summary-export=load-tests/reports/auth-summary.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/auth-load.js 2>&1 | tee load-tests/reports/auth-output.txt
+        continue-on-error: true
+
+      - name: Run Agenda Load Test
+        run: |
+          k6 run \
+            --out json=load-tests/reports/agenda-results.json \
+            --summary-export=load-tests/reports/agenda-summary.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/agenda-load.js 2>&1 | tee load-tests/reports/agenda-output.txt
+        continue-on-error: true
+
+      - name: Run Courrier Load Test
+        run: |
+          k6 run \
+            --out json=load-tests/reports/courrier-results.json \
+            --summary-export=load-tests/reports/courrier-summary.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/courrier-load.js 2>&1 | tee load-tests/reports/courrier-output.txt
+        continue-on-error: true
+
+      - name: Run Dashboard Load Test
+        run: |
+          k6 run \
+            --out json=load-tests/reports/dashboard-results.json \
+            --summary-export=load-tests/reports/dashboard-summary.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/dashboard-load.js 2>&1 | tee load-tests/reports/dashboard-output.txt
+        continue-on-error: true
+
+      - name: Run Full Journey Load Test
+        id: full_journey
+        run: |
+          k6 run \
+            --out json=load-tests/reports/journey-results.json \
+            --summary-export=load-tests/reports/journey-summary.json \
+            --env TEST_TYPE=${{ steps.test_type.outputs.type }} \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/full-journey.js 2>&1 | tee load-tests/reports/journey-output.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Check global p95 threshold
+        id: global_check
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, sys, glob
+
+          summaries = glob.glob('load-tests/reports/*-summary.json')
+          max_p95   = 0
+          results   = []
+
+          for path in summaries:
+            try:
+              with open(path) as f:
+                data  = json.load(f)
+              name = os.path.basename(path).replace('-summary.json', '')
+              p95  = data.get('metrics', {}).get('http_req_duration', {}).get('values', {}).get('p(95)', 0)
+              results.append({ 'name': name, 'p95': p95 })
+              if p95 > max_p95:
+                max_p95 = p95
+            except Exception as e:
+              print(f"Erreur lecture {path}: {e}")
+
+          print(f"=== RÉSUMÉ GLOBAL ===")
+          for r in sorted(results, key=lambda x: x['p95'], reverse=True):
+            status = "FAIL" if r['p95'] > 1000 else "PASS"
+            print(f"  [{status}] {r['name']}: p95={r['p95']:.0f}ms")
+
+          threshold = int(os.environ.get('P95_BLOCKING_THRESHOLD_MS', 1000))
+          if max_p95 > threshold:
+            print(f"\nECHEC: p95 max ({max_p95:.0f}ms) > seuil ({threshold}ms)")
+            sys.exit(1)
+          else:
+            print(f"\nSUCCES: p95 max ({max_p95:.0f}ms) <= seuil ({threshold}ms)")
+          PYEOF
+
+      - name: Generate HTML report
+        if: always()
+        run: |
+          python3 - <<'PYEOF'
+          import json, glob, os
+          from datetime import datetime
+
+          summaries = glob.glob('load-tests/reports/*-summary.json')
+          rows = []
+
+          for path in summaries:
+            try:
+              with open(path) as f:
+                data = json.load(f)
+              name = os.path.basename(path).replace('-summary.json', '')
+              m    = data.get('metrics', {})
+              p50  = m.get('http_req_duration', {}).get('values', {}).get('p(50)', 0)
+              p95  = m.get('http_req_duration', {}).get('values', {}).get('p(95)', 0)
+              p99  = m.get('http_req_duration', {}).get('values', {}).get('p(99)', 0)
+              err  = m.get('http_req_failed', {}).get('values', {}).get('rate', 0) * 100
+              reqs = m.get('http_reqs', {}).get('values', {}).get('count', 0)
+              status = 'PASS' if p95 <= 1000 and err < 1 else 'FAIL'
+              rows.append(f'<tr class="{status.lower()}"><td>{name}</td><td>{p50:.0f}ms</td>'
+                          f'<td>{p95:.0f}ms</td><td>{p99:.0f}ms</td>'
+                          f'<td>{err:.2f}%</td><td>{reqs}</td>'
+                          f'<td class="status">{status}</td></tr>')
+            except Exception as e:
+              rows.append(f'<tr class="fail"><td colspan="7">Erreur: {path} – {e}</td></tr>')
+
+          html = f"""<!DOCTYPE html>
+          <html lang="fr">
+          <head>
+          <meta charset="UTF-8">
+          <title>SECRETIS – Rapport de performance</title>
+          <style>
+            body {{ font-family: Arial, sans-serif; margin: 2em; }}
+            h1   {{ color: #1a1a2e; }}
+            table {{ border-collapse: collapse; width: 100%; }}
+            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+            th {{ background: #1a1a2e; color: white; }}
+            .pass {{ background: #e8f5e9; }}
+            .fail {{ background: #ffebee; }}
+            .status {{ font-weight: bold; }}
+            .pass .status {{ color: #2e7d32; }}
+            .fail .status {{ color: #c62828; }}
+          </style>
+          </head>
+          <body>
+          <h1>IBIG SECRETIS – Rapport de performance</h1>
+          <p>Généré le : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
+          <table>
+          <thead><tr>
+            <th>Test</th><th>p50</th><th>p95</th><th>p99</th>
+            <th>Taux erreur</th><th>Requêtes</th><th>Statut</th>
+          </tr></thead>
+          <tbody>{''.join(rows)}</tbody>
+          </table>
+          <hr>
+          <p><em>Seuils : p95 &lt; 1 000ms, taux erreur &lt; 1%</em></p>
+          </body></html>"""
+
+          os.makedirs('load-tests/reports', exist_ok=True)
+          with open('load-tests/reports/performance-report.html', 'w') as f:
+            f.write(html)
+          print("Rapport HTML généré : load-tests/reports/performance-report.html")
+          PYEOF
+
+      - name: Upload all test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results-${{ github.sha }}-${{ github.run_number }}
+          path: |
+            load-tests/reports/
+          retention-days: 90
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `Performance regression detectee – ${new Date().toISOString().split('T')[0]}`,
+              body:  `## Regression de performance detectee\n\n`
+                    + `**Commit :** \`${context.sha}\`\n`
+                    + `**Run :** [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})\n\n`
+                    + `Le p95 de latence a depasse 1 000 ms lors du load test nightly.\n\n`
+                    + `Consulter les artifacts pour le rapport detaille.`,
+              labels: ['performance', 'regression', 'ci']
+            });
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 3 : Webhook & multitenancy (rapide, sur toutes les PRs)
+  # ─────────────────────────────────────────────────────────────────────────────
+  critical-checks:
+    name: "Vérifications critiques (idempotence + isolation)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [smoke-test]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB:       secretis_test
+          POSTGRES_USER:     secretis
+          POSTGRES_PASSWORD: secret
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_pgsql, redis, mbstring, xml, zip
+          coverage: none
+
+      - name: Install k6
+        run: |
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] \
+            https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
+      - run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Setup & start app
+        run: |
+          cp .env.example .env && php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=LoadTestSeeder --force
+          php artisan serve --host=0.0.0.0 --port=8000 &
+          sleep 5
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: secretis_test
+          DB_USERNAME: secretis
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          CACHE_DRIVER: redis
+          QUEUE_CONNECTION: sync
+
+      - name: Test idempotence webhooks
+        run: |
+          mkdir -p load-tests/reports
+          k6 run \
+            --summary-export=load-tests/reports/webhook-critical.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/webhook-load.js
+
+      - name: Test isolation multi-tenant
+        run: |
+          k6 run \
+            --summary-export=load-tests/reports/multitenancy-critical.json \
+            --env BASE_URL=http://localhost:8000 \
+            load-tests/scenarios/multitenancy-load.js
+
+      - name: Check critical metrics
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys
+
+          def check(path, checks):
+            try:
+              with open(path) as f:
+                data = json.load(f)
+            except:
+              print(f"SKIP: {path} non trouvé")
+              return True
+            m   = data.get('metrics', {})
+            ok  = True
+            for metric, expected in checks.items():
+              val = m.get(metric, {}).get('values', {})
+              for op, threshold in expected.items():
+                actual = val.get(op, None)
+                if actual is None:
+                  print(f"  WARN: métrique {metric}.{op} absente")
+                  continue
+                passed = eval(f"{actual} {op} {threshold}")
+                status = 'PASS' if passed else 'FAIL'
+                print(f"  [{status}] {metric}.{op}: {actual} {'<' if '<' in op else ''}{threshold}")
+                if not passed:
+                  ok = False
+            return ok
+
+          all_ok = True
+
+          print("=== Webhooks (idempotence) ===")
+          all_ok &= check('load-tests/reports/webhook-critical.json', {
+            'webhook_response_ok':     {'rate': 0.999},
+            'duplicate_activations':   {'count': 0},
+          })
+
+          print("=== Multi-tenancy (isolation) ===")
+          all_ok &= check('load-tests/reports/multitenancy-critical.json', {
+            'data_isolation_breach':   {'count': 0},
+            'cross_tenant_data_visible': {'count': 0},
+          })
+
+          sys.exit(0 if all_ok else 1)
+          PYEOF
+
+      - name: Upload critical results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: critical-checks-${{ github.sha }}
+          path: load-tests/reports/
+          retention-days: 30

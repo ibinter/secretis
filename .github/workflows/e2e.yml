@@ -1,0 +1,291 @@
+name: E2E Tests — SECRETIS ERP
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+# Annuler les runs précédents sur la même branche/PR
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      APP_ENV: testing
+      APP_DEBUG: false
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: log
+      CINETPAY_WEBHOOK_SECRET: ${{ secrets.CINETPAY_WEBHOOK_SECRET_TEST }}
+      BASE_URL: http://localhost:8000
+      TEST_SECRET: ${{ secrets.E2E_TEST_SECRET }}
+      TEST_ADMIN_EMAIL: admin@test-secretis.ci
+      TEST_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      TEST_SECRETARY_EMAIL: secretaire@test-secretis.ci
+      TEST_SECRETARY_PASSWORD: ${{ secrets.E2E_SECRETARY_PASSWORD }}
+
+    steps:
+      # ----------------------------------------------------------------
+      # 1. Checkout du code
+      # ----------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------
+      # 2. Configuration PHP + Composer
+      # ----------------------------------------------------------------
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_sqlite, sqlite3, mbstring, bcmath, json, openssl
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      # ----------------------------------------------------------------
+      # 3. Configuration Laravel
+      # ----------------------------------------------------------------
+      - name: Préparer le fichier .env
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=testing" >> .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=:memory:" >> .env
+          echo "CACHE_DRIVER=array" >> .env
+          echo "SESSION_DRIVER=array" >> .env
+          echo "QUEUE_CONNECTION=sync" >> .env
+          echo "MAIL_MAILER=log" >> .env
+          echo "E2E_TEST_SECRET=${{ secrets.E2E_TEST_SECRET }}" >> .env
+
+      - name: Générer la clé d'application
+        working-directory: backend
+        run: php artisan key:generate
+
+      - name: Exécuter les migrations et seeders de test
+        working-directory: backend
+        run: |
+          php artisan migrate --seed --seeder=DatabaseSeeder --force
+          php artisan db:seed --class=E2ETestSeeder --force
+
+      # ----------------------------------------------------------------
+      # 4. Build des assets frontend (Vite)
+      # ----------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installer les dépendances frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build des assets
+        working-directory: frontend
+        run: npm run build
+
+      # ----------------------------------------------------------------
+      # 5. Démarrer le serveur Laravel en arrière-plan
+      # ----------------------------------------------------------------
+      - name: Démarrer le serveur Laravel
+        working-directory: backend
+        run: |
+          php artisan serve --host=0.0.0.0 --port=8000 &
+          echo "Laravel PID: $!" > /tmp/laravel.pid
+          # Attendre que le serveur soit prêt
+          for i in {1..30}; do
+            if curl -s http://localhost:8000/api/health > /dev/null; then
+              echo "Serveur Laravel prêt!"
+              break
+            fi
+            echo "Attente du serveur... ($i/30)"
+            sleep 2
+          done
+
+      # ----------------------------------------------------------------
+      # 6. Installation des dépendances Playwright
+      # ----------------------------------------------------------------
+      - name: Installer les dépendances E2E
+        working-directory: e2e
+        run: npm ci
+
+      - name: Installer les navigateurs Playwright
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium firefox
+
+      # ----------------------------------------------------------------
+      # 7. Créer les états d'authentification (setup project)
+      # ----------------------------------------------------------------
+      - name: Setup — Créer les états d'auth
+        working-directory: e2e
+        run: npx playwright test --project=setup
+        env:
+          CI: true
+          BASE_URL: http://localhost:8000
+
+      # ----------------------------------------------------------------
+      # 8. Exécuter les tests E2E
+      # ----------------------------------------------------------------
+      - name: Exécuter les tests Playwright
+        working-directory: e2e
+        run: npx playwright test --project=chromium --project=firefox
+        env:
+          CI: true
+          BASE_URL: http://localhost:8000
+          TEST_SECRET: ${{ secrets.E2E_TEST_SECRET }}
+          TEST_ADMIN_EMAIL: admin@test-secretis.ci
+          TEST_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          TEST_SECRETARY_EMAIL: secretaire@test-secretis.ci
+          TEST_SECRETARY_PASSWORD: ${{ secrets.E2E_SECRETARY_PASSWORD }}
+          CINETPAY_WEBHOOK_SECRET: ${{ secrets.CINETPAY_WEBHOOK_SECRET_TEST }}
+
+      # ----------------------------------------------------------------
+      # 9. Upload des artifacts (rapport + vidéos)
+      # ----------------------------------------------------------------
+      - name: Upload rapport HTML Playwright
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload artifacts d'échec (screenshots + vidéos)
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failures-${{ github.run_id }}
+          path: test-results/artifacts/
+          retention-days: 14
+
+      - name: Upload rapport JUnit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-report-${{ github.run_id }}
+          path: test-results/junit.xml
+          retention-days: 30
+
+      # ----------------------------------------------------------------
+      # 10. Publier les résultats JUnit dans la PR (optionnel)
+      # ----------------------------------------------------------------
+      - name: Publier les résultats de tests
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && github.event_name == 'pull_request'
+        with:
+          files: test-results/junit.xml
+          comment_mode: always
+          check_name: "Résultats E2E Playwright"
+
+  # ----------------------------------------------------------------
+  # Job séparé : tests mobiles (optionnel, uniquement sur main)
+  # ----------------------------------------------------------------
+  e2e-mobile:
+    name: E2E Mobile Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.ref == 'refs/heads/main'
+    needs: e2e
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo, pdo_sqlite, sqlite3, mbstring, bcmath
+
+      - name: Install Composer dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --no-dev
+
+      - name: Setup Laravel
+        working-directory: backend
+        run: |
+          cp .env.example .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=:memory:" >> .env
+          php artisan key:generate
+          php artisan migrate --seed --force
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Démarrer Laravel
+        working-directory: backend
+        run: php artisan serve --port=8000 &
+
+      - name: Attendre Laravel
+        run: |
+          for i in {1..20}; do
+            curl -s http://localhost:8000/api/health && break
+            sleep 3
+          done
+
+      - name: Installer Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps webkit chromium
+
+      - name: Setup Auth
+        working-directory: e2e
+        run: npx playwright test --project=setup
+        env:
+          CI: true
+          BASE_URL: http://localhost:8000
+
+      - name: Exécuter tests mobiles
+        working-directory: e2e
+        run: npx playwright test --project=mobile-chrome --project=mobile-safari
+        env:
+          CI: true
+          BASE_URL: http://localhost:8000
+          TEST_SECRET: ${{ secrets.E2E_TEST_SECRET }}
+          TEST_ADMIN_EMAIL: admin@test-secretis.ci
+          TEST_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      - name: Upload rapport mobile
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-mobile-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14

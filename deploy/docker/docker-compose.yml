@@ -1,0 +1,297 @@
+# =============================================================================
+# SECRETIS ERP - Docker Compose Production
+# Usage   : docker compose --env-file .env.docker up -d
+# Auteur  : IBIG SOFT
+# Version : 1.0.0
+# =============================================================================
+
+name: secretis-erp
+
+# ─── Services ─────────────────────────────────────────────────────────────────
+services:
+
+  # ── Application PHP-FPM ────────────────────────────────────────────────────
+  app:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      target: production
+      args:
+        APP_ENV: production
+    image: secretis-erp:latest
+    container_name: secretis_app
+    restart: unless-stopped
+    env_file:
+      - ../../.env.docker
+    volumes:
+      - storage_data:/var/www/secretis/backend/storage
+      - public_data:/var/www/secretis/backend/public/storage
+    networks:
+      - secretis_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── Nginx (reverse proxy + assets) ─────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: secretis_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/secretis.conf:/etc/nginx/conf.d/secretis.conf:ro
+      - ../nginx/subdomain-wildcard.conf:/etc/nginx/conf.d/subdomain-wildcard.conf:ro
+      - public_data:/var/www/secretis/backend/public/storage:ro
+      - storage_data:/var/www/secretis/backend/storage:ro
+      - letsencrypt_data:/etc/letsencrypt:ro
+      - certbot_data:/var/www/certbot:ro
+      # Socket PHP-FPM partagée
+      - fpm_socket:/var/run/php
+    networks:
+      - secretis_network
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t && curl -f http://localhost/fpm-ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── PostgreSQL 15 ───────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: secretis_postgres
+    restart: unless-stopped
+    env_file:
+      - ../../.env.docker
+    environment:
+      POSTGRES_DB:       ${DB_DATABASE:-secretis_production}
+      POSTGRES_USER:     ${DB_USERNAME:-secretis_db}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=fr_FR.UTF-8"
+      TZ: Africa/Abidjan
+      PGTZ: Africa/Abidjan
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    networks:
+      - secretis_network
+    # PAS exposé en dehors du réseau interne (sécurité)
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-secretis_db} -d ${DB_DATABASE:-secretis_production}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── Redis 7 ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: secretis_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+        --requirepass ${REDIS_PASSWORD}
+        --appendonly yes
+        --appendfsync everysec
+        --maxmemory 2gb
+        --maxmemory-policy allkeys-lru
+        --bind 0.0.0.0
+        --save 900 1
+        --save 300 10
+        --save 60 10000
+    env_file:
+      - ../../.env.docker
+    volumes:
+      - redis_data:/data
+    networks:
+      - secretis_network
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Queue Worker (Laravel Horizon ou queue:work) ──────────────────────────
+  queue-worker:
+    image: secretis-erp:latest
+    container_name: secretis_queue
+    restart: unless-stopped
+    command: >
+      php artisan queue:work pgsql
+        --queue=default,emails,broadcasts,exports
+        --sleep=3
+        --tries=3
+        --max-time=3600
+        --memory=256
+        --timeout=300
+    env_file:
+      - ../../.env.docker
+    volumes:
+      - storage_data:/var/www/secretis/backend/storage
+    networks:
+      - secretis_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+    deploy:
+      replicas: 3   # 3 workers parallèles
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  # ── Worker dédié exports (jobs longs) ────────────────────────────────────
+  queue-exports:
+    image: secretis-erp:latest
+    container_name: secretis_queue_exports
+    restart: unless-stopped
+    command: >
+      php artisan queue:work pgsql
+        --queue=exports
+        --sleep=5
+        --tries=2
+        --max-time=7200
+        --memory=512
+        --timeout=600
+    env_file:
+      - ../../.env.docker
+    volumes:
+      - storage_data:/var/www/secretis/backend/storage
+    networks:
+      - secretis_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Reverb WebSocket Server ────────────────────────────────────────────────
+  reverb:
+    image: secretis-erp:latest
+    container_name: secretis_reverb
+    restart: unless-stopped
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    env_file:
+      - ../../.env.docker
+    environment:
+      REVERB_HOST: "0.0.0.0"
+      REVERB_PORT: "8080"
+      REVERB_SCHEME: "http"
+    volumes:
+      - storage_data:/var/www/secretis/backend/storage
+    networks:
+      - secretis_network
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Certbot (renouvellement SSL automatique) ──────────────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: secretis_certbot
+    restart: "no"
+    volumes:
+      - letsencrypt_data:/etc/letsencrypt
+      - certbot_data:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c 'trap exit TERM;
+        while :; do
+          certbot renew --webroot -w /var/www/certbot --quiet;
+          sleep 12h & wait $${!};
+        done'
+    profiles:
+      - production   # Activé uniquement en production
+
+  # ── MeiliSearch (optionnel, profil dédié) ────────────────────────────────
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: secretis_meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-changeme-in-production}
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - secretis_network
+    expose:
+      - "7700"
+    profiles:
+      - search   # docker compose --profile search up -d
+
+# ─── Volumes persistants ───────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+    name: secretis_postgres_data
+
+  redis_data:
+    driver: local
+    name: secretis_redis_data
+
+  storage_data:
+    driver: local
+    name: secretis_storage
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/www/secretis/backend/storage
+
+  public_data:
+    driver: local
+    name: secretis_public
+
+  letsencrypt_data:
+    driver: local
+    name: secretis_letsencrypt
+    driver_opts:
+      type: none
+      o: bind
+      device: /etc/letsencrypt
+
+  certbot_data:
+    driver: local
+    name: secretis_certbot
+
+  fpm_socket:
+    driver: local
+    name: secretis_fpm_socket
+
+  meilisearch_data:
+    driver: local
+    name: secretis_meilisearch
+
+# ─── Réseau interne ───────────────────────────────────────────────────────────
+networks:
+  secretis_network:
+    driver: bridge
+    name: secretis_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

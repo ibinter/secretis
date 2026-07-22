@@ -1,0 +1,375 @@
+/**
+ * IBIG SECRETIS — animations.css
+ * Animations système : fade-in, slide-up, scale-in, shimmer (skeleton)
+ * Toutes respectent prefers-reduced-motion: reduce
+ *
+ * Variables de durée :
+ *   --duration-fast:   150ms
+ *   --duration-normal: 300ms
+ *   --duration-slow:   500ms
+ */
+
+/* ─────────────────────────────────────────────────────────────
+   Variables de durée (partagées avec dark-mode.css)
+   ──────────────────────────────────────────────────────────── */
+:root {
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce:  cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Keyframes
+   ──────────────────────────────────────────────────────────── */
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Fade out */
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Slide up + fade */
+@keyframes slideUp {
+  from {
+    opacity:   0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down + fade */
+@keyframes slideDown {
+  from {
+    opacity:   0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from {
+    opacity:   0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity:   1;
+    transform: translateX(0);
+  }
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    opacity:   0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity:   1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale in (modal, popover) */
+@keyframes scaleIn {
+  from {
+    opacity:   0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity:   1;
+    transform: scale(1);
+  }
+}
+
+/* Scale out */
+@keyframes scaleOut {
+  from {
+    opacity:   1;
+    transform: scale(1);
+  }
+  to {
+    opacity:   0;
+    transform: scale(0.95);
+  }
+}
+
+/* Scale in with spring (boutons, badges) */
+@keyframes scaleInSpring {
+  from {
+    opacity:   0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity:   1;
+    transform: scale(1);
+  }
+}
+
+/* Shimmer — skeleton loading */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Pulse (alternative shimmer) */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Spin (chargement) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Bounce (notification, badge) */
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { opacity: 1; transform: scale(1.05); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Shake (erreur) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80%      { transform: translateX(4px); }
+}
+
+/* Ripple (boutons Material) */
+@keyframes ripple {
+  from {
+    transform: scale(0);
+    opacity:   0.4;
+  }
+  to {
+    transform: scale(4);
+    opacity:   0;
+  }
+}
+
+/* Toast slide-in from bottom */
+@keyframes toastIn {
+  from {
+    opacity:   0;
+    transform: translateY(100%) scale(0.9);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Toast slide-out */
+@keyframes toastOut {
+  from {
+    opacity:   1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity:   0;
+    transform: translateY(-20px) scale(0.95);
+  }
+}
+
+/* Drawer slide from left */
+@keyframes drawerInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Drawer slide from right */
+@keyframes drawerInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Progress bar */
+@keyframes progressBar {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Heartbeat */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.3); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.3); }
+  70%       { transform: scale(1); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Classes d'animation — usage : class="anim-fade-in"
+   ──────────────────────────────────────────────────────────── */
+
+.anim-fade-in       { animation: fadeIn       var(--duration-normal) var(--ease-out)    both; }
+.anim-fade-out      { animation: fadeOut      var(--duration-fast)   var(--ease-in)     both; }
+.anim-slide-up      { animation: slideUp      var(--duration-normal) var(--ease-out)    both; }
+.anim-slide-down    { animation: slideDown    var(--duration-normal) var(--ease-out)    both; }
+.anim-slide-in-left { animation: slideInLeft  var(--duration-normal) var(--ease-out)    both; }
+.anim-slide-in-right{ animation: slideInRight var(--duration-normal) var(--ease-out)    both; }
+.anim-scale-in      { animation: scaleIn      var(--duration-normal) var(--ease-spring) both; }
+.anim-scale-out     { animation: scaleOut     var(--duration-fast)   var(--ease-in)     both; }
+.anim-bounce-in     { animation: bounceIn     var(--duration-slow)   var(--ease-bounce) both; }
+.anim-shake         { animation: shake        0.5s var(--ease-in-out) both; }
+.anim-spin          { animation: spin         1s linear infinite; }
+.anim-pulse         { animation: pulse        2s var(--ease-in-out) infinite; }
+.anim-heartbeat     { animation: heartbeat    1.5s var(--ease-in-out) infinite; }
+
+/* Durées alternatives */
+.anim-fast          { animation-duration: var(--duration-fast) !important; }
+.anim-slow          { animation-duration: var(--duration-slow) !important; }
+
+/* Délais */
+.anim-delay-75      { animation-delay: 75ms; }
+.anim-delay-150     { animation-delay: 150ms; }
+.anim-delay-300     { animation-delay: 300ms; }
+.anim-delay-500     { animation-delay: 500ms; }
+
+/* ─────────────────────────────────────────────────────────────
+   Skeleton shimmer
+   ──────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary, #F5F7FA) 25%,
+    var(--color-bg-tertiary,  #EEF1F5) 50%,
+    var(--color-bg-secondary, #F5F7FA) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s var(--ease-in-out) infinite;
+  border-radius: var(--radius-sm, 4px);
+}
+
+[data-theme="dark"] .skeleton,
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    #1A2A3A 25%,
+    #243447 50%,
+    #1A2A3A 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Variantes de skeleton */
+.skeleton-text {
+  composes: skeleton;
+  height: 1em;
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  composes: skeleton;
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  composes: skeleton;
+  border-radius: var(--radius-lg, 12px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Toast / Notifications
+   ──────────────────────────────────────────────────────────── */
+.toast-enter   { animation: toastIn  var(--duration-normal) var(--ease-spring) both; }
+.toast-exit    { animation: toastOut var(--duration-fast)   var(--ease-in)     both; }
+
+/* ─────────────────────────────────────────────────────────────
+   Modal / Dialog
+   ──────────────────────────────────────────────────────────── */
+.modal-enter   { animation: scaleIn var(--duration-normal) var(--ease-spring) both; }
+.modal-exit    { animation: scaleOut var(--duration-fast)  var(--ease-in)     both; }
+.overlay-enter { animation: fadeIn  var(--duration-normal) var(--ease-out)    both; }
+.overlay-exit  { animation: fadeOut var(--duration-fast)   var(--ease-in)     both; }
+
+/* ─────────────────────────────────────────────────────────────
+   Sidebar / Drawer
+   ──────────────────────────────────────────────────────────── */
+.drawer-left-enter  { animation: drawerInLeft  var(--duration-normal) var(--ease-out) both; }
+.drawer-right-enter { animation: drawerInRight var(--duration-normal) var(--ease-out) both; }
+
+/* ─────────────────────────────────────────────────────────────
+   Stagger — animation en cascade pour les listes
+   ──────────────────────────────────────────────────────────── */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms;    }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms;   }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms;  }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms;  }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms;  }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms;  }
+.stagger-children > *:nth-child(n+7) { animation-delay: 300ms; }
+
+/* ─────────────────────────────────────────────────────────────
+   Transitions globales Tailwind (utilitaires)
+   ──────────────────────────────────────────────────────────── */
+.transition-colors-fast {
+  transition: color var(--duration-fast) var(--ease-in-out),
+              background-color var(--duration-fast) var(--ease-in-out),
+              border-color var(--duration-fast) var(--ease-in-out),
+              fill var(--duration-fast) var(--ease-in-out),
+              stroke var(--duration-fast) var(--ease-in-out);
+}
+
+.transition-all-normal {
+  transition: all var(--duration-normal) var(--ease-in-out);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   prefers-reduced-motion — DÉSACTIVER toutes les animations
+   WCAG 2.1 critère 2.3.3 (Animation from Interactions) — niveau AAA
+   ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
+
+  /* Exceptions : les animations de chargement restent (mais sans mouvement) */
+  .anim-spin {
+    animation: none !important;
+    /* Spinner statique pour indiquer le chargement */
+    opacity: 0.6;
+  }
+
+  .skeleton,
+  .skeleton-text,
+  .skeleton-circle,
+  .skeleton-card {
+    animation: pulse 2s ease-in-out infinite !important;
+    background: var(--color-bg-tertiary, #EEF1F5) !important;
+  }
+
+  [data-theme="dark"] .skeleton,
+  .dark .skeleton,
+  [data-theme="dark"] .skeleton-text,
+  .dark .skeleton-text {
+    background: #243447 !important;
+  }
+}

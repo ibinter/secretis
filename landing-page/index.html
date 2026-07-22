@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="IBIG SECRETIS — ERP Secrétariat & Bureautique conçu pour l'Afrique. Gérez courrier, agenda, réunions, tâches et ressources humaines depuis une seule plateforme sécurisée.">
+<meta name="keywords" content="ERP Afrique, secrétariat numérique, logiciel bureautique, OHADA, gestion administrative, SARA IA">
+<meta name="author" content="IBIG Soft">
+<meta property="og:title" content="IBIG SECRETIS — ERP Secrétariat & Bureautique pour l'Afrique">
+<meta property="og:description" content="Gérez votre secrétariat comme les entreprises de classe mondiale. Solution tout-en-un, conçue pour l'Afrique francophone.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://ibig-secretis.com/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>IBIG SECRETIS — ERP Secrétariat & Bureautique pour l'Afrique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* =============================================
+   CSS RESET & VARIABLES
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { font-family: 'Inter', -apple-system, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; overflow-x: hidden; }
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* =============================================
+   DESIGN TOKENS
+   ============================================= */
+:root {
+  --primary: #1A3A5C;
+  --primary-dark: #122840;
+  --primary-light: #234d78;
+  --secondary: #2E86C1;
+  --accent: #F39C12;
+  --accent-dark: #d4890e;
+  --success: #1E8449;
+  --danger: #C0392B;
+  --text: #1C1C1C;
+  --text-muted: #5a6a7a;
+  --text-light: #8fa0b0;
+  --bg: #F5F7FA;
+  --bg-white: #ffffff;
+  --bg-dark: #0e2035;
+  --border: #dde3ea;
+  --border-light: #eef1f5;
+  --shadow-sm: 0 1px 3px rgba(26,58,92,0.08), 0 1px 2px rgba(26,58,92,0.04);
+  --shadow-md: 0 4px 16px rgba(26,58,92,0.10), 0 2px 6px rgba(26,58,92,0.06);
+  --shadow-lg: 0 12px 40px rgba(26,58,92,0.14), 0 4px 12px rgba(26,58,92,0.08);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+  --max-w: 1240px;
+}
+
+[data-theme="dark"] {
+  --text: #e8edf2;
+  --text-muted: #8fa0b0;
+  --text-light: #5a6a7a;
+  --bg: #0e1e2e;
+  --bg-white: #142333;
+  --bg-dark: #07111b;
+  --border: #1e3348;
+  --border-light: #192d40;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+/* =============================================
+   TYPOGRAPHY SCALE
+   ============================================= */
+.t-display { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; text-wrap: balance; }
+.t-h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; }
+.t-h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 600; line-height: 1.3; }
+.t-body { font-size: 1rem; font-weight: 400; line-height: 1.7; }
+.t-small { font-size: 0.875rem; line-height: 1.5; }
+.t-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* =============================================
+   LAYOUT UTILITIES
+   ============================================= */
+.container { width: 100%; max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+.section { padding: 80px 0; }
+.section-sm { padding: 48px 0; }
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-eyebrow { color: var(--secondary); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+.section-title { color: var(--text); margin-bottom: 16px; }
+.section-subtitle { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; transition: var(--transition); white-space: nowrap; }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,58,92,0.3); }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,58,92,0.35); }
+.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+.btn-outline:hover { background: var(--primary); color: #fff; }
+.btn-outline-white { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+.btn-outline-white:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+.btn-accent { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(243,156,18,0.35); }
+.btn-accent:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.btn-lg { padding: 16px 32px; font-size: 1.05rem; border-radius: var(--radius-md); }
+
+/* =============================================
+   ZONE 1 — TOP BAR
+   ============================================= */
+#topbar {
+  background: var(--primary);
+  color: #fff;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  position: relative;
+  z-index: 200;
+}
+#topbar .tb-inner {
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+#topbar .tb-left { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+#topbar .tb-left .gift-icon { color: var(--accent); }
+#topbar .tb-center { display: flex; align-items: center; gap: 20px; opacity: 0.85; }
+#topbar .tb-center a { display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+#topbar .tb-center a:hover { opacity: 1; }
+#topbar .tb-right { display: flex; gap: 4px; }
+#topbar .lang-btn { padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; transition: background 0.2s; color: rgba(255,255,255,0.7); }
+#topbar .lang-btn.active, #topbar .lang-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+@media (max-width: 767px) {
+  #topbar .tb-center { display: none; }
+  #topbar .tb-left { font-size: 0.72rem; }
+}
+
+/* =============================================
+   ZONE 2 — HEADER STICKY
+   ============================================= */
+#header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-white);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+#header.scrolled { border-color: var(--border); box-shadow: 0 2px 16px rgba(26,58,92,0.09); }
+#header .hd-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.logo-mark { width: 38px; height: 38px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.02em; flex-shrink: 0; }
+.logo-text { font-weight: 700; font-size: 1.05rem; color: var(--primary); line-height: 1; }
+.logo-text span { display: block; font-size: 0.65rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0.05em; margin-top: 2px; }
+nav { flex: 1; display: flex; align-items: center; gap: 4px; }
+nav a { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.2s, background 0.2s; white-space: nowrap; }
+nav a:hover { color: var(--primary); background: var(--bg); }
+nav a.partners { color: var(--secondary); font-weight: 600; }
+.hd-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.hamburger { display: none; flex-direction: column; gap: 5px; width: 28px; cursor: pointer; padding: 4px; }
+.hamburger span { display: block; height: 2px; background: var(--primary); border-radius: 2px; transition: var(--transition); }
+@media (max-width: 1024px) { nav a { padding: 8px 10px; font-size: 0.85rem; } }
+@media (max-width: 860px) {
+  nav { display: none; position: fixed; top: 108px; left: 0; right: 0; background: var(--bg-white); flex-direction: column; align-items: flex-start; padding: 16px 24px 24px; border-bottom: 1px solid var(--border); box-shadow: var(--shadow-lg); gap: 2px; }
+  nav.open { display: flex; }
+  nav a { width: 100%; padding: 12px 16px; font-size: 1rem; border-radius: var(--radius-sm); }
+  .hd-actions .btn-outline { display: none; }
+  .hamburger { display: flex; }
+}
+
+/* =============================================
+   ZONE 3 — HERO
+   ============================================= */
+#hero {
+  background: var(--bg-white);
+  padding: 80px 0 0;
+  overflow: hidden;
+}
+.hero-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(243,156,18,0.1); color: var(--accent-dark); border: 1px solid rgba(243,156,18,0.3); padding: 6px 14px; border-radius: 100px; font-size: 0.8rem; font-weight: 600; margin-bottom: 24px; }
+.hero-h1 { margin-bottom: 20px; color: var(--primary); }
+.hero-h1 em { font-style: normal; color: var(--secondary); }
+.hero-sub { color: var(--text-muted); font-size: 1.1rem; line-height: 1.7; margin-bottom: 36px; max-width: 520px; }
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+.hero-trust { display: flex; gap: 20px; flex-wrap: wrap; }
+.hero-trust-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; font-weight: 500; color: var(--text-muted); }
+.hero-trust-item i { color: var(--success); font-size: 0.75rem; }
+
+/* Dashboard mockup */
+.hero-visual { position: relative; padding-bottom: 40px; }
+.dashboard-mockup {
+  background: linear-gradient(145deg, #1A3A5C 0%, #2E86C1 60%, #1e6fa8 100%);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.08);
+  position: relative;
+  overflow: hidden;
+}
+.dashboard-mockup::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(243,156,18,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.dm-topbar { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.dm-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dm-dot:nth-child(1) { background: #ff5f57; }
+.dm-dot:nth-child(2) { background: #ffbd2e; }
+.dm-dot:nth-child(3) { background: #28ca41; }
+.dm-title { margin-left: 10px; color: rgba(255,255,255,0.6); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.05em; }
+.dm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.dm-card { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; }
+.dm-card-label { color: rgba(255,255,255,0.55); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+.dm-card-value { color: #fff; font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dm-card-sub { color: rgba(255,255,255,0.5); font-size: 0.65rem; margin-top: 3px; }
+.dm-chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.dm-chart { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; }
+.dm-chart-label { color: rgba(255,255,255,0.55); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 10px; }
+.dm-bars { display: flex; align-items: flex-end; gap: 5px; height: 50px; }
+.dm-bar { flex: 1; border-radius: 3px 3px 0 0; background: rgba(255,255,255,0.25); }
+.dm-bar:nth-child(4) { background: var(--accent); }
+.dm-list { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; }
+.dm-list-item { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.dm-list-item:last-child { margin-bottom: 0; }
+.dm-avatar { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
+.dm-list-text { color: rgba(255,255,255,0.7); font-size: 0.65rem; }
+.dm-badge-row { display: flex; gap: 8px; margin-top: 10px; }
+.dm-badge { background: rgba(30,132,73,0.3); border: 1px solid rgba(30,132,73,0.5); color: #5dde8a; font-size: 0.6rem; font-weight: 600; padding: 3px 8px; border-radius: 100px; }
+.dm-badge.amber { background: rgba(243,156,18,0.25); border-color: rgba(243,156,18,0.4); color: var(--accent); }
+
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+  #hero { padding: 56px 0 0; }
+}
+@media (max-width: 480px) {
+  .hero-ctas { flex-direction: column; }
+  .hero-ctas .btn { justify-content: center; }
+  .dm-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* =============================================
+   ZONE 4 — TRUST BAND
+   ============================================= */
+#trust-band {
+  background: var(--bg-white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+}
+.trust-inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 20px;
+  border-right: 1px solid var(--border);
+}
+.trust-item:last-child { border-right: none; }
+.trust-icon { font-size: 1.5rem; flex-shrink: 0; }
+.trust-item-label { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.trust-item-sub { font-size: 0.72rem; color: var(--text-muted); }
+@media (max-width: 760px) {
+  .trust-inner { grid-template-columns: 1fr 1fr; }
+  .trust-item:nth-child(2) { border-right: none; }
+  .trust-item { border-bottom: 1px solid var(--border); }
+  .trust-item:nth-child(3), .trust-item:nth-child(4) { border-bottom: none; }
+}
+@media (max-width: 480px) {
+  .trust-inner { grid-template-columns: 1fr; }
+  .trust-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .trust-item:last-child { border-bottom: none; }
+}
+
+/* =============================================
+   ZONE 5 — PROBLÈMES RÉSOLUS
+   ============================================= */
+#problems { background: var(--bg); }
+.problems-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.problems-col { border-radius: var(--radius-lg); padding: 32px; }
+.problems-col.before { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.15); }
+.problems-col.after { background: rgba(30,132,73,0.06); border: 1px solid rgba(30,132,73,0.15); }
+.problems-col-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+.problems-col-title { font-size: 1rem; font-weight: 700; }
+.problems-col.before .problems-col-title { color: var(--danger); }
+.problems-col.after .problems-col-title { color: var(--success); }
+.prob-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; font-size: 0.9rem; color: var(--text); }
+.prob-icon { flex-shrink: 0; margin-top: 2px; font-size: 0.85rem; }
+.problems-col.before .prob-icon { color: var(--danger); }
+.problems-col.after .prob-icon { color: var(--success); }
+@media (max-width: 640px) { .problems-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 6 — 12 BÉNÉFICES
+   ============================================= */
+#benefits { background: var(--bg-white); }
+.benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.benefit-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 20px; transition: var(--transition); }
+.benefit-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(46,134,193,0.3); }
+.benefit-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; }
+.benefit-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.benefit-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; }
+@media (max-width: 1024px) { .benefits-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 640px) { .benefits-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 380px) { .benefits-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 7 — 10 MODULES
+   ============================================= */
+#modules { background: var(--bg); }
+.modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.module-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; display: flex; gap: 18px; transition: var(--transition); }
+.module-card:hover { box-shadow: var(--shadow-md); border-color: rgba(46,134,193,0.3); }
+.module-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.module-content { flex: 1; }
+.module-name { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.module-features { display: flex; flex-direction: column; gap: 5px; }
+.module-feature { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.module-feature::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--secondary); flex-shrink: 0; }
+@media (max-width: 640px) { .modules-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 8 — COMMENT ÇA MARCHE
+   ============================================= */
+#how-it-works { background: var(--bg-white); }
+.steps-row { display: flex; align-items: flex-start; gap: 0; position: relative; }
+.steps-row::before { content: ''; position: absolute; top: 28px; left: calc(10% + 28px); right: calc(10% + 28px); height: 2px; background: linear-gradient(90deg, var(--secondary), var(--accent)); z-index: 0; }
+.step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 12px; position: relative; z-index: 1; }
+.step-num { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 3px solid var(--bg-white); box-shadow: 0 0 0 3px var(--primary); flex-shrink: 0; }
+.step-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.step-desc { font-size: 0.75rem; color: var(--text-muted); }
+@media (max-width: 640px) {
+  .steps-row { flex-direction: column; gap: 24px; align-items: flex-start; }
+  .steps-row::before { display: none; }
+  .step { flex-direction: row; text-align: left; gap: 16px; align-items: flex-start; padding: 0; }
+  .step-num { margin-bottom: 0; flex-shrink: 0; }
+}
+
+/* =============================================
+   ZONE 9 — SARA IA
+   ============================================= */
+#sara {
+  background: linear-gradient(135deg, var(--primary) 0%, #1e5a8a 50%, var(--secondary) 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+#sara::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(243,156,18,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.sara-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.sara-eyebrow { color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.sara-title { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.2; text-wrap: balance; }
+.sara-desc { color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.7; margin-bottom: 28px; }
+.sara-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.sara-feature { display: flex; align-items: flex-start; gap: 10px; color: rgba(255,255,255,0.85); font-size: 0.9rem; }
+.sara-feature i { color: var(--accent); margin-top: 3px; flex-shrink: 0; font-size: 0.8rem; }
+
+/* Chat mockup */
+.chat-mockup { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-xl); padding: 20px; backdrop-filter: blur(10px); }
+.chat-header { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+.chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, #e67e22 100%); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.chat-name { font-size: 0.85rem; font-weight: 700; color: #fff; }
+.chat-status { font-size: 0.7rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; }
+.chat-status::before { content: ''; width: 6px; height: 6px; background: #28ca41; border-radius: 50%; display: inline-block; }
+.chat-messages { display: flex; flex-direction: column; gap: 14px; }
+.chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.82rem; line-height: 1.5; }
+.chat-bubble.user { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-bubble.sara { background: rgba(243,156,18,0.15); border: 1px solid rgba(243,156,18,0.25); color: rgba(255,255,255,0.9); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-bubble.sara strong { color: var(--accent); }
+.chat-time { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px; text-align: right; }
+.chat-input-row { margin-top: 16px; display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+.chat-input-fake { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 8px 16px; font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+.chat-send { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; flex-shrink: 0; }
+
+@media (max-width: 860px) { .sara-inner { grid-template-columns: 1fr; gap: 40px; } }
+
+/* =============================================
+   ZONE 10 — PWA
+   ============================================= */
+#pwa { background: var(--bg); }
+.pwa-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.pwa-devices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.pwa-device { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); transition: var(--transition); }
+.pwa-device:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.pwa-device i { font-size: 2rem; }
+.pwa-device-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.pwa-device-badge { font-size: 0.65rem; font-weight: 600; color: var(--success); background: rgba(30,132,73,0.1); padding: 2px 7px; border-radius: 100px; }
+.pwa-steps { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+.pwa-step { display: flex; align-items: center; gap: 14px; font-size: 0.88rem; color: var(--text-muted); }
+.pwa-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--secondary); color: #fff; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+@media (max-width: 860px) { .pwa-inner { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .pwa-devices { grid-template-columns: repeat(2, 1fr); } }
+
+/* =============================================
+   ZONE 11 — SÉCURITÉ
+   ============================================= */
+#security { background: var(--bg-white); }
+.security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.security-badge { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 28px 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; transition: var(--transition); }
+.security-badge:hover { border-color: rgba(46,134,193,0.3); box-shadow: var(--shadow-sm); }
+.security-badge-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(26,58,92,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary); }
+.security-badge-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.security-badge-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+@media (max-width: 640px) { .security-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 400px) { .security-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 12 — TARIFS
+   ============================================= */
+#pricing { background: var(--bg); }
+.pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 48px; }
+.toggle-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+.toggle-label.active { color: var(--primary); }
+.toggle-switch { width: 44px; height: 24px; background: var(--border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+.toggle-switch.on { background: var(--secondary); }
+.toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle-switch.on::after { transform: translateX(20px); }
+.toggle-save { background: rgba(30,132,73,0.1); color: var(--success); font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 100px; }
+.pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.pricing-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px; display: flex; flex-direction: column; position: relative; transition: var(--transition); }
+.pricing-card:hover { box-shadow: var(--shadow-md); }
+.pricing-card.recommended { border: 2px solid var(--accent); box-shadow: 0 0 0 4px rgba(243,156,18,0.08); }
+.pricing-recommended-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.04em; }
+.pricing-plan { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.pricing-price { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.pricing-price sub { font-size: 0.9rem; font-weight: 500; }
+.pricing-period { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; }
+.pricing-cta { margin-bottom: 24px; text-align: center; }
+.pricing-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
+.pricing-features { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.pricing-feature { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: var(--text-muted); }
+.pricing-feature i { color: var(--success); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
+@media (max-width: 900px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 13 — FORMULAIRE DÉMO
+   ============================================= */
+#demo-form {
+  background: var(--primary);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+#demo-form::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(46,134,193,0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+.demo-inner { display: grid; grid-template-columns: 1fr 1.5fr; gap: 64px; align-items: start; position: relative; z-index: 1; }
+.demo-left h2 { color: #fff; font-size: clamp(1.5rem, 2.5vw, 2.2rem); margin-bottom: 16px; text-wrap: balance; }
+.demo-left p { color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.7; margin-bottom: 28px; }
+.demo-perks { display: flex; flex-direction: column; gap: 10px; }
+.demo-perk { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.8); }
+.demo-perk i { color: var(--accent); width: 16px; flex-shrink: 0; }
+.demo-form-box { background: var(--bg-white); border-radius: var(--radius-xl); padding: 36px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.form-group:last-of-type { margin-bottom: 0; }
+.form-label { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.form-control { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 0.9rem; color: var(--text); background: var(--bg); transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
+.form-control:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(46,134,193,0.15); }
+.form-control::placeholder { color: var(--text-light); }
+.form-submit { width: 100%; margin-top: 20px; padding: 14px; font-size: 1rem; font-weight: 700; border-radius: var(--radius-sm); }
+@media (max-width: 860px) { .demo-inner { grid-template-columns: 1fr; gap: 36px; } }
+@media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } .demo-form-box { padding: 24px; } }
+
+/* =============================================
+   ZONE 14 — FAQ
+   ============================================= */
+#faq { background: var(--bg-white); }
+.faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 2px; }
+.faq-item { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.faq-item + .faq-item { margin-top: 6px; }
+.faq-question { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; font-size: 0.92rem; font-weight: 600; color: var(--text); background: var(--bg-white); cursor: pointer; text-align: left; transition: background 0.2s; }
+.faq-question:hover { background: var(--bg); }
+.faq-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; color: var(--text-muted); transition: transform 0.25s, background 0.2s; }
+.faq-item.open .faq-icon { transform: rotate(45deg); background: var(--primary); color: #fff; border-color: var(--primary); }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; }
+.faq-answer-inner { padding: 0 20px 18px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 14px; }
+.faq-item.open .faq-answer { max-height: 300px; }
+
+/* =============================================
+   ZONE 15 — FOOTER
+   ============================================= */
+#footer {
+  background: var(--primary-dark, #0e2035);
+  color: rgba(255,255,255,0.75);
+  padding: 64px 0 0;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand .logo-mark { background: rgba(255,255,255,0.1); margin-bottom: 16px; }
+.footer-brand .logo-text { color: #fff; }
+.footer-brand .logo-text span { color: rgba(255,255,255,0.4); }
+.footer-brand p { font-size: 0.85rem; line-height: 1.7; color: rgba(255,255,255,0.55); margin-bottom: 20px; }
+.footer-socials { display: flex; gap: 10px; }
+.social-link { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.85rem; transition: var(--transition); }
+.social-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.footer-col-title { color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 18px; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-size: 0.83rem; color: rgba(255,255,255,0.55); transition: color 0.2s; }
+.footer-links a:hover { color: #fff; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding: 20px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-copyright { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+.footer-legal { display: flex; gap: 20px; }
+.footer-legal a { font-size: 0.78rem; color: rgba(255,255,255,0.4); transition: color 0.2s; }
+.footer-legal a:hover { color: rgba(255,255,255,0.8); }
+@media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; } .footer-brand { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+
+/* =============================================
+   ZONE 16 — FLOATING BUTTONS
+   ============================================= */
+.float-btn {
+  position: fixed;
+  bottom: 28px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 999;
+  transition: var(--transition);
+  cursor: pointer;
+  border: none;
+}
+.float-btn:hover { transform: scale(1.1); }
+.float-sara { right: 28px; background: var(--primary); color: #fff; }
+.float-sara .float-tooltip { position: absolute; right: 60px; white-space: nowrap; background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.float-sara:hover .float-tooltip { opacity: 1; }
+.float-whatsapp { left: 28px; background: #25D366; color: #fff; }
+.float-badge { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; font-size: 0.6rem; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; }
+
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.fade-up { animation: fadeUp 0.6s ease both; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Focus styles */
+:focus-visible { outline: 2px solid var(--secondary); outline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     ZONE 1 — BARRE SUPÉRIEURE
+     ============================================ -->
+<div id="topbar">
+  <div class="tb-inner">
+    <div class="tb-left">
+      <span class="gift-icon">🎁</span>
+      <span>Essai gratuit 14 jours &mdash; Sans carte bancaire</span>
+    </div>
+    <div class="tb-center">
+      <a href="tel:+22500000000"><i class="fa fa-phone"></i> +225 00 00 00 00</a>
+      <a href="mailto:contact@ibig-secretis.com"><i class="fa fa-envelope"></i> contact@ibig-secretis.com</a>
+    </div>
+    <div class="tb-right">
+      <button class="lang-btn active">FR</button>
+      <button class="lang-btn">EN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     ZONE 2 — HEADER STICKY
+     ============================================ -->
+<header id="header">
+  <div class="hd-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">IS</div>
+      <div class="logo-text">IBIG SECRETIS<span>ERP Bureautique</span></div>
+    </a>
+    <nav id="nav">
+      <a href="#benefits">Fonctionnalités</a>
+      <a href="#modules">Modules</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="#faq">Support</a>
+      <a href="#" class="partners">IBIG PARTNERS</a>
+    </nav>
+    <div class="hd-actions">
+      <a href="#" class="btn btn-outline" style="padding:9px 18px;font-size:0.88rem;">Se connecter</a>
+      <a href="#demo-form" class="btn btn-primary" style="padding:9px 18px;font-size:0.88rem;">Essai gratuit <i class="fa fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================
+     ZONE 3 — HERO
+     ============================================ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-content fade-up">
+      <div class="hero-badge">⭐ Trusted by 500+ organisations en Afrique</div>
+      <h1 class="t-display hero-h1">Gérez votre secrétariat comme les <em>entreprises de classe mondiale</em></h1>
+      <p class="hero-sub">IBIG SECRETIS centralise courrier, agenda, réunions, tâches et ressources humaines dans une plateforme sécurisée, pensée pour les organisations africaines.</p>
+      <div class="hero-ctas">
+        <a href="#demo-form" class="btn btn-primary btn-lg">
+          <i class="fa fa-rocket"></i> Démarrer l'essai gratuit — 14 jours
+        </a>
+        <a href="#how-it-works" class="btn btn-outline btn-lg">
+          <i class="fa fa-play-circle"></i> Voir la démonstration
+        </a>
+      </div>
+      <div class="hero-trust">
+        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Aucune carte requise</div>
+        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Installation en 5 min</div>
+        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Support francophone</div>
+      </div>
+    </div>
+    <div class="hero-visual fade-up delay-2">
+      <div class="dashboard-mockup">
+        <div class="dm-topbar">
+          <div class="dm-dot"></div><div class="dm-dot"></div><div class="dm-dot"></div>
+          <span class="dm-title">IBIG SECRETIS — Tableau de bord</span>
+        </div>
+        <div class="dm-grid">
+          <div class="dm-card">
+            <div class="dm-card-label">Courriers</div>
+            <div class="dm-card-value">248</div>
+            <div class="dm-card-sub">+12 aujourd'hui</div>
+          </div>
+          <div class="dm-card">
+            <div class="dm-card-label">Réunions</div>
+            <div class="dm-card-value">14</div>
+            <div class="dm-card-sub">Cette semaine</div>
+          </div>
+          <div class="dm-card">
+            <div class="dm-card-label">Tâches</div>
+            <div class="dm-card-value">93%</div>
+            <div class="dm-card-sub">Taux résolution</div>
+          </div>
+        </div>
+        <div class="dm-chart-row">
+          <div class="dm-chart">
+            <div class="dm-chart-label">Activité mensuelle</div>
+            <div class="dm-bars">
+              <div class="dm-bar" style="height:40%"></div>
+              <div class="dm-bar" style="height:60%"></div>
+              <div class="dm-bar" style="height:45%"></div>
+              <div class="dm-bar" style="height:80%"></div>
+              <div class="dm-bar" style="height:65%"></div>
+              <div class="dm-bar" style="height:90%"></div>
+              <div class="dm-bar" style="height:72%"></div>
+            </div>
+          </div>
+          <div class="dm-list">
+            <div class="dm-chart-label">Équipe active</div>
+            <div class="dm-list-item"><div class="dm-avatar"></div><div class="dm-list-text">Koné A. · En ligne</div></div>
+            <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(243,156,18,0.3)"></div><div class="dm-list-text">Diallo F. · Réunion</div></div>
+            <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(30,132,73,0.3)"></div><div class="dm-list-text">Yao M. · En ligne</div></div>
+          </div>
+        </div>
+        <div class="dm-badge-row">
+          <div class="dm-badge">✓ Synchronisé</div>
+          <div class="dm-badge amber">3 alertes SARA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 4 — BANDE DE CONFIANCE
+     ============================================ -->
+<section id="trust-band">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <div class="trust-icon">🔒</div>
+      <div>
+        <div class="trust-item-label">Données chiffrées SSL</div>
+        <div class="trust-item-sub">Chiffrement bout-en-bout</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">🌍</div>
+      <div>
+        <div class="trust-item-label">Conçu pour l'Afrique OHADA</div>
+        <div class="trust-item-sub">Conformité juridique locale</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">⚡</div>
+      <div>
+        <div class="trust-item-label">Support 24/7</div>
+        <div class="trust-item-sub">Équipe francophone dédiée</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">💳</div>
+      <div>
+        <div class="trust-item-label">10 modes de paiement</div>
+        <div class="trust-item-sub">Mobile Money, virement, carte</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 5 — PROBLÈMES RÉSOLUS
+     ============================================ -->
+<section id="problems" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Transformation</div>
+      <h2 class="t-h2 section-title">Fini le chaos administratif</h2>
+      <p class="section-subtitle">SECRETIS transforme chaque douleur quotidienne en processus fluide et traçable.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problems-col before">
+        <div class="problems-col-header">
+          <span style="font-size:1.4rem;">❌</span>
+          <div class="problems-col-title">Avant SECRETIS</div>
+        </div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Courriers perdus dans des piles de papier sans traçabilité</span></div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Réunions mal organisées, comptes-rendus inexistants ou introuvables</span></div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Agenda partagé par messages WhatsApp et conflits de planning</span></div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Tâches assignées verbalement, oubliées sans suivi ni relance</span></div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Rapport mensuel préparé en urgence sur tableur non sécurisé</span></div>
+        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Visiteurs accueillis sans registre, responsables introuvables</span></div>
+      </div>
+      <div class="problems-col after">
+        <div class="problems-col-header">
+          <span style="font-size:1.4rem;">✅</span>
+          <div class="problems-col-title">Avec SECRETIS</div>
+        </div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Chaque courrier enregistré, horodaté, acheminé et signé électroniquement</span></div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Réunions planifiées, convocations envoyées, PV générés automatiquement</span></div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Agenda unifié pour toute l'équipe, visible sur tous les appareils</span></div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Tâches assignées, suivies, relancées et clôturées avec historique complet</span></div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Rapports générés en un clic depuis un tableau de bord en temps réel</span></div>
+        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Accueil visiteurs digitalisé, badge imprimé, notification automatique</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 6 — 12 BÉNÉFICES
+     ============================================ -->
+<section id="benefits" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Bénéfices</div>
+      <h2 class="t-h2 section-title">Tout ce dont votre organisation a besoin</h2>
+      <p class="section-subtitle">Des avantages concrets, mesurables, dès le premier jour d'utilisation.</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-clock"></i></div>
+        <div class="benefit-title">Gain de temps</div>
+        <div class="benefit-desc">Automatisez les tâches répétitives. Récupérez jusqu'à 3h par jour par collaborateur.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-leaf"></i></div>
+        <div class="benefit-title">Zéro papier</div>
+        <div class="benefit-desc">Dématérialisez tous vos flux : courrier, signatures, archivage — 100% numérique.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-route"></i></div>
+        <div class="benefit-title">Traçabilité totale</div>
+        <div class="benefit-desc">Journal d'audit complet. Chaque action est datée, attribuée et conservée.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-users"></i></div>
+        <div class="benefit-title">Collaboration temps réel</div>
+        <div class="benefit-desc">Travaillez ensemble depuis n'importe quel lieu. Modifications synchronisées à la seconde.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-mobile-alt"></i></div>
+        <div class="benefit-title">Mobilité totale</div>
+        <div class="benefit-desc">PWA installable sur Android, iOS, Windows et Mac. Hors connexion disponible.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-robot"></i></div>
+        <div class="benefit-title">IA intégrée (SARA)</div>
+        <div class="benefit-desc">Votre assistante IA analyse, rédige et alerte. Disponible 24h/24 dans l'interface.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-chart-bar"></i></div>
+        <div class="benefit-title">Rapports automatiques</div>
+        <div class="benefit-desc">Tableaux de bord et rapports PDF générés automatiquement selon vos périodes.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(192,57,43,0.1);color:#C0392B;"><i class="fa fa-shield-alt"></i></div>
+        <div class="benefit-title">Sécurité bancaire</div>
+        <div class="benefit-desc">Chiffrement AES-256, authentification MFA, isolation des données par tenant.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-coins"></i></div>
+        <div class="benefit-title">Multi-devises FCFA</div>
+        <div class="benefit-desc">Gérez FCFA, USD, EUR dans une interface adaptée à l'espace UEMOA et CEMAC.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-building"></i></div>
+        <div class="benefit-title">Multi-sites</div>
+        <div class="benefit-desc">Pilotez plusieurs antennes ou filiales depuis une console centrale unifiée.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-graduation-cap"></i></div>
+        <div class="benefit-title">Formation incluse</div>
+        <div class="benefit-desc">Onboarding guidé, tutoriels vidéo, webinaires mensuels et base de connaissance.</div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-headset"></i></div>
+        <div class="benefit-title">Support local</div>
+        <div class="benefit-desc">Équipe basée en Afrique, fuseau horaire commun, langue française. Chat et téléphone.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 7 — 10 MODULES
+     ============================================ -->
+<section id="modules" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Modules</div>
+      <h2 class="t-h2 section-title">10 modules pour couvrir 100% de vos besoins</h2>
+      <p class="section-subtitle">Activez uniquement ce dont vous avez besoin. Chaque module s'intègre aux autres.</p>
+    </div>
+    <div class="modules-grid">
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-calendar-alt"></i></div>
+        <div class="module-content">
+          <div class="module-name">Agenda & Planning</div>
+          <div class="module-features">
+            <div class="module-feature">Agenda partagé multi-utilisateurs</div>
+            <div class="module-feature">Rappels et notifications automatiques</div>
+            <div class="module-feature">Synchronisation calendrier externe (iCal)</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-envelope-open-text"></i></div>
+        <div class="module-content">
+          <div class="module-name">Courrier & GED</div>
+          <div class="module-features">
+            <div class="module-feature">Enregistrement et acheminement automatique</div>
+            <div class="module-feature">Signature électronique intégrée</div>
+            <div class="module-feature">Archivage sécurisé avec recherche full-text</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-chalkboard-teacher"></i></div>
+        <div class="module-content">
+          <div class="module-name">Réunions & Comptes-rendus</div>
+          <div class="module-features">
+            <div class="module-feature">Convocations et ordre du jour automatisés</div>
+            <div class="module-feature">Rédaction assistée par SARA (IA)</div>
+            <div class="module-feature">Suivi des décisions et points d'action</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-tasks"></i></div>
+        <div class="module-content">
+          <div class="module-name">Tâches & Projets</div>
+          <div class="module-features">
+            <div class="module-feature">Kanban, liste et vue Gantt intégrés</div>
+            <div class="module-feature">Assignation et relance automatique</div>
+            <div class="module-feature">Suivi du temps et reporting d'avancement</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-comments"></i></div>
+        <div class="module-content">
+          <div class="module-name">Communication interne</div>
+          <div class="module-features">
+            <div class="module-feature">Messagerie instantanée par équipe</div>
+            <div class="module-feature">Annonces et bulletins d'information</div>
+            <div class="module-feature">Notifications push sur tous les appareils</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(192,57,43,0.1);color:#C0392B;"><i class="fa fa-user-check"></i></div>
+        <div class="module-content">
+          <div class="module-name">Accueil Visiteurs</div>
+          <div class="module-features">
+            <div class="module-feature">Enregistrement et badge visiteur digital</div>
+            <div class="module-feature">Notification automatique du responsable</div>
+            <div class="module-feature">Registre consultable et exportable</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-boxes"></i></div>
+        <div class="module-content">
+          <div class="module-name">Ressources & Matériel</div>
+          <div class="module-features">
+            <div class="module-feature">Réservation salles et équipements</div>
+            <div class="module-feature">Inventaire et maintenance planifiée</div>
+            <div class="module-feature">Alertes de disponibilité en temps réel</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-id-badge"></i></div>
+        <div class="module-content">
+          <div class="module-name">RH Légère</div>
+          <div class="module-features">
+            <div class="module-feature">Gestion des congés et absences</div>
+            <div class="module-feature">Fiche collaborateur et organigramme</div>
+            <div class="module-feature">Suivi des performances et évaluations</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-chart-pie"></i></div>
+        <div class="module-content">
+          <div class="module-name">Rapports & Statistiques</div>
+          <div class="module-features">
+            <div class="module-feature">Tableaux de bord personnalisables</div>
+            <div class="module-feature">Export PDF, Excel et CSV en un clic</div>
+            <div class="module-feature">Envoi automatique par email périodique</div>
+          </div>
+        </div>
+      </div>
+      <div class="module-card">
+        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-cog"></i></div>
+        <div class="module-content">
+          <div class="module-name">Paramètres & Administration</div>
+          <div class="module-features">
+            <div class="module-feature">Gestion rôles et droits d'accès granulaires</div>
+            <div class="module-feature">Configuration multi-entités et multi-sites</div>
+            <div class="module-feature">API REST ouverte et intégrations tierces</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 8 — COMMENT ÇA MARCHE
+     ============================================ -->
+<section id="how-it-works" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Mise en route</div>
+      <h2 class="t-h2 section-title">Opérationnel en 5 étapes</h2>
+      <p class="section-subtitle">De l'inscription au tableau de bord en direct — en moins de 30 minutes.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Créer votre compte</div>
+        <div class="step-desc">Inscription gratuite en 2 minutes, sans carte bancaire</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Configurer votre organisation</div>
+        <div class="step-desc">Nom, logo, structure, fuseaux horaires et devises</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Inviter votre équipe</div>
+        <div class="step-desc">Par email ou lien d'invitation avec rôles préconfigurés</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Activer vos modules</div>
+        <div class="step-desc">Choisissez les modules adaptés à votre activité</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-title">Tableau de bord en direct</div>
+        <div class="step-desc">Vos données s'affichent en temps réel dès le premier usage</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 9 — SARA IA
+     ============================================ -->
+<section id="sara" class="section">
+  <div class="container">
+    <div class="sara-inner">
+      <div>
+        <div class="sara-eyebrow">Intelligence Artificielle</div>
+        <h2 class="sara-title">SARA, votre assistante IA intégrée</h2>
+        <p class="sara-desc">SARA (Secrétaire Artificielle à Réponse Augmentée) est l'IA native de SECRETIS. Elle analyse vos données, rédige vos documents et vous alerte proactivement — sans quitter votre plateforme.</p>
+        <div class="sara-features">
+          <div class="sara-feature"><i class="fa fa-check-circle"></i> Rédaction automatique de comptes-rendus et courriers</div>
+          <div class="sara-feature"><i class="fa fa-check-circle"></i> Résumé intelligent de documents longs</div>
+          <div class="sara-feature"><i class="fa fa-check-circle"></i> Détection d'anomalies et alertes proactives</div>
+          <div class="sara-feature"><i class="fa fa-check-circle"></i> Recherche sémantique dans tous vos documents</div>
+          <div class="sara-feature"><i class="fa fa-check-circle"></i> Suggestions de planification et optimisation d'agenda</div>
+        </div>
+        <a href="#demo-form" class="btn btn-accent btn-lg">Tester SARA gratuitement <i class="fa fa-arrow-right"></i></a>
+      </div>
+      <div>
+        <div class="chat-mockup">
+          <div class="chat-header">
+            <div class="chat-avatar">S</div>
+            <div>
+              <div class="chat-name">SARA — Assistante IA</div>
+              <div class="chat-status">En ligne et disponible</div>
+            </div>
+          </div>
+          <div class="chat-messages">
+            <div class="chat-bubble user">Rédige le compte-rendu de notre réunion de direction du 15 juillet.</div>
+            <div style="color:rgba(255,255,255,0.35);font-size:0.65rem;text-align:right;margin-top:-8px;">10h14</div>
+            <div class="chat-bubble sara"><strong>SARA :</strong> Bien sûr. J'ai analysé l'enregistrement et les points à l'ordre du jour. Voici le brouillon :<br><br>📄 <strong>CR — Réunion de direction · 15/07</strong><br>Présents : 8 participants · Durée : 1h20<br>Décisions : 5 validées · Actions : 12 assignées</div>
+            <div class="chat-bubble user">Envoie-le à tous les participants pour validation.</div>
+            <div class="chat-bubble sara"><strong>SARA :</strong> Envoi effectué à 8 destinataires. Délai de validation fixé à 48h. Je vous relancerai automatiquement le 17/07 si aucune réponse.</div>
+          </div>
+          <div class="chat-input-row">
+            <div class="chat-input-fake">Demandez quelque chose à SARA...</div>
+            <div class="chat-send"><i class="fa fa-paper-plane"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 10 — PWA
+     ============================================ -->
+<section id="pwa" class="section">
+  <div class="container">
+    <div class="pwa-inner">
+      <div>
+        <div class="section-eyebrow">Application mobile & desktop</div>
+        <h2 class="t-h2" style="margin-bottom:16px;">Installez SECRETIS sur tous vos appareils</h2>
+        <p style="color:var(--text-muted);font-size:1rem;line-height:1.7;margin-bottom:28px;">SECRETIS est une Progressive Web App (PWA). Pas de magasin d'applications, pas de configuration complexe. Une URL, une installation, tous vos appareils synchronisés.</p>
+        <div class="pwa-steps">
+          <div class="pwa-step"><div class="pwa-step-num">1</div> Ouvrez SECRETIS dans votre navigateur</div>
+          <div class="pwa-step"><div class="pwa-step-num">2</div> Cliquez sur "Installer l'application" dans la barre d'adresse</div>
+          <div class="pwa-step"><div class="pwa-step-num">3</div> L'icône apparaît sur votre écran d'accueil</div>
+          <div class="pwa-step"><div class="pwa-step-num">4</div> Utilisez-le hors-ligne avec synchronisation automatique</div>
+        </div>
+      </div>
+      <div>
+        <div class="pwa-devices">
+          <div class="pwa-device">
+            <i class="fab fa-android" style="color:#3ddc84;"></i>
+            <div class="pwa-device-name">Android</div>
+            <div class="pwa-device-badge">Disponible</div>
+          </div>
+          <div class="pwa-device">
+            <i class="fab fa-apple" style="color:#555;"></i>
+            <div class="pwa-device-name">iOS</div>
+            <div class="pwa-device-badge">Disponible</div>
+          </div>
+          <div class="pwa-device">
+            <i class="fab fa-windows" style="color:#0078d4;"></i>
+            <div class="pwa-device-name">Windows</div>
+            <div class="pwa-device-badge">Disponible</div>
+          </div>
+          <div class="pwa-device">
+            <i class="fab fa-apple" style="color:#888;"></i>
+            <div class="pwa-device-name">macOS</div>
+            <div class="pwa-device-badge">Disponible</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 11 — SÉCURITÉ
+     ============================================ -->
+<section id="security" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Sécurité & Conformité</div>
+      <h2 class="t-h2 section-title">Vos données, protégées au niveau bancaire</h2>
+      <p class="section-subtitle">SECRETIS applique les mêmes standards de sécurité que les institutions financières internationales.</p>
+    </div>
+    <div class="security-grid">
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-lock"></i></div>
+        <div class="security-badge-title">HTTPS / SSL</div>
+        <div class="security-badge-desc">Toutes les communications chiffrées en transit via TLS 1.3. Certificat SSL renouvelé automatiquement.</div>
+      </div>
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-key"></i></div>
+        <div class="security-badge-title">Authentification MFA</div>
+        <div class="security-badge-desc">Double facteur d'authentification par SMS, TOTP ou email. Obligatoire pour les comptes administrateurs.</div>
+      </div>
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-database"></i></div>
+        <div class="security-badge-title">Chiffrement des données</div>
+        <div class="security-badge-desc">Données chiffrées au repos avec AES-256. Clés de chiffrement gérées par tenant, rotation automatique.</div>
+      </div>
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-clipboard-list"></i></div>
+        <div class="security-badge-title">Journal d'audit complet</div>
+        <div class="security-badge-desc">Chaque action enregistrée avec horodatage, utilisateur et adresse IP. Export disponible pour audit externe.</div>
+      </div>
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-sitemap"></i></div>
+        <div class="security-badge-title">Isolation multi-tenant</div>
+        <div class="security-badge-desc">Chaque organisation dispose d'une base de données isolée. Aucun partage de données entre clients.</div>
+      </div>
+      <div class="security-badge">
+        <div class="security-badge-icon"><i class="fa fa-balance-scale"></i></div>
+        <div class="security-badge-title">RGPD & Droit OHADA</div>
+        <div class="security-badge-desc">Conformité RGPD européen et droit OHADA africain. Données hébergées en Afrique de l'Ouest sur demande.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 12 — TARIFS
+     ============================================ -->
+<section id="pricing" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Tarification</div>
+      <h2 class="t-h2 section-title">Des plans adaptés à chaque organisation</h2>
+      <p class="section-subtitle">Commencez gratuitement. Passez à l'échelle selon vos besoins.</p>
+    </div>
+    <div class="pricing-toggle">
+      <span class="toggle-label active" id="lbl-monthly">Mensuel</span>
+      <div class="toggle-switch" id="billing-toggle" role="switch" aria-checked="false" tabindex="0"></div>
+      <span class="toggle-label" id="lbl-annual">Annuel</span>
+      <span class="toggle-save">−20%</span>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-plan">Starter</div>
+        <div class="pricing-price">Gratuit <sub>14j</sub></div>
+        <div class="pricing-period">Puis sur devis — sans engagement</div>
+        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Commencer gratuitement</a></div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="fa fa-check"></i> Jusqu'à 5 utilisateurs</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Agenda & Courrier de base</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> 5 Go de stockage</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Support par email</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Tableau de bord simplifié</div>
+        </div>
+      </div>
+      <div class="pricing-card recommended">
+        <div class="pricing-recommended-badge">Recommandé</div>
+        <div class="pricing-plan">PME</div>
+        <div class="pricing-price">Sur devis</div>
+        <div class="pricing-period">Tarif selon effectif et modules</div>
+        <div class="pricing-cta"><a href="#demo-form" class="btn btn-primary" style="width:100%;justify-content:center;">Demander un devis</a></div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="fa fa-check"></i> Jusqu'à 50 utilisateurs</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Tous les modules actifs</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> SARA IA incluse</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> 100 Go de stockage</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Support chat + téléphone</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Formation onboarding incluse</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Rapports avancés</div>
+        </div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-plan">Entreprise</div>
+        <div class="pricing-price">Sur devis</div>
+        <div class="pricing-period">Tarif personnalisé par site</div>
+        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Nous contacter</a></div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="fa fa-check"></i> Utilisateurs illimités</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Multi-sites & multi-entités</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Hébergement dédié possible</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> API & intégrations sur mesure</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> SLA garanti 99,9%</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Account manager dédié</div>
+        </div>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-plan">Institution</div>
+        <div class="pricing-price">Sur devis</div>
+        <div class="pricing-period">Ministères, ONG, collectivités</div>
+        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Nous contacter</a></div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><i class="fa fa-check"></i> Conformité OHADA renforcée</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Hébergement souverain local</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Formation équipes sur site</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Contrat de maintenance annuel</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Audit de sécurité inclus</div>
+          <div class="pricing-feature"><i class="fa fa-check"></i> Personnalisation interface</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 13 — FORMULAIRE DÉMO
+     ============================================ -->
+<section id="demo-form" class="section">
+  <div class="container">
+    <div class="demo-inner">
+      <div class="demo-left">
+        <div class="section-eyebrow" style="color:rgba(255,255,255,0.5);">Démonstration gratuite</div>
+        <h2>Demandez votre démonstration gratuite</h2>
+        <p>Un expert SECRETIS vous contacte sous 24h pour une démonstration personnalisée de 45 minutes, adaptée à votre secteur d'activité.</p>
+        <div class="demo-perks">
+          <div class="demo-perk"><i class="fa fa-check-circle"></i> Aucun engagement, aucune carte requise</div>
+          <div class="demo-perk"><i class="fa fa-check-circle"></i> Démonstration en français sur votre cas réel</div>
+          <div class="demo-perk"><i class="fa fa-check-circle"></i> Accès immédiat à l'essai gratuit 14 jours</div>
+          <div class="demo-perk"><i class="fa fa-check-circle"></i> Devis personnalisé offert après la démo</div>
+        </div>
+      </div>
+      <div class="demo-form-box">
+        <form id="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-prenom">Prénom *</label>
+              <input class="form-control" type="text" id="f-prenom" name="prenom" placeholder="Jean" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-nom">Nom *</label>
+              <input class="form-control" type="text" id="f-nom" name="nom" placeholder="Kouassi" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-email">Email professionnel *</label>
+              <input class="form-control" type="email" id="f-email" name="email" placeholder="j.kouassi@entreprise.com" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-tel">Téléphone *</label>
+              <input class="form-control" type="tel" id="f-tel" name="tel" placeholder="+225 07 00 00 00 00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-org">Organisation *</label>
+            <input class="form-control" type="text" id="f-org" name="organisation" placeholder="Nom de votre organisation" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-type">Type de structure *</label>
+            <select class="form-control" id="f-type" name="type" required>
+              <option value="">Sélectionnez votre type de structure...</option>
+              <option>PME / Startup</option>
+              <option>Grande entreprise</option>
+              <option>Administration publique / Ministère</option>
+              <option>ONG / Association</option>
+              <option>Collectivité territoriale</option>
+              <option>Établissement scolaire / Université</option>
+              <option>Hôpital / Clinique</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-message">Message (optionnel)</label>
+            <textarea class="form-control" id="f-message" name="message" rows="3" placeholder="Décrivez brièvement vos besoins ou vos questions..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-accent form-submit">
+            <i class="fa fa-paper-plane"></i> Envoyer ma demande
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 14 — FAQ
+     ============================================ -->
+<section id="faq" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-eyebrow">Questions fréquentes</div>
+      <h2 class="t-h2 section-title">Tout ce que vous voulez savoir</h2>
+    </div>
+    <div class="faq-list" id="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question">Puis-je tester SECRETIS sans donner ma carte bancaire ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Oui, absolument. L'essai gratuit de 14 jours ne nécessite aucune information de paiement. Vous accédez à toutes les fonctionnalités du plan PME sans aucune limite, et vous pouvez décider à tout moment de souscrire ou non.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">SECRETIS fonctionne-t-il sans connexion internet ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Oui, grâce à la technologie PWA, SECRETIS dispose d'un mode hors-ligne. Les données consultées récemment sont mises en cache localement. Dès que la connexion est rétablie, tout se synchronise automatiquement.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Mes données sont-elles hébergées en Afrique ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Par défaut, les données sont hébergées dans des datacentres certifiés ISO 27001. Pour les institutions publiques et les clients Enterprise, nous proposons un hébergement souverain sur des serveurs situés en Afrique de l'Ouest (Côte d'Ivoire, Sénégal, Ghana) sur demande.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Combien d'utilisateurs puis-je ajouter ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Le plan Starter inclut 5 utilisateurs. Le plan PME monte jusqu'à 50. Les plans Entreprise et Institution offrent un nombre illimité d'utilisateurs, facturés selon des paliers définis dans votre contrat personnalisé.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Quels modes de paiement acceptez-vous ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Nous acceptons 10 modes de paiement : Mobile Money (Orange Money, MTN MoMo, Wave, Moov), cartes Visa/Mastercard, virement bancaire SEPA et UEMOA, paiement en FCFA XOF et XAF. Des facilités de paiement sont disponibles pour les institutions publiques.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Puis-je importer mes données existantes ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Oui. SECRETIS propose des outils d'import pour les fichiers Excel, CSV, et des connecteurs vers des systèmes courants. Notre équipe technique vous accompagne gratuitement lors de la migration initiale pour les plans PME, Entreprise et Institution.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Comment fonctionne l'IA SARA ? Est-elle sécurisée ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">SARA est un modèle de traitement du langage naturel déployé dans votre espace isolé. Vos données ne sont jamais partagées avec d'autres clients ni utilisées pour entraîner des modèles publics. SARA opère exclusivement sur votre tenant sécurisé.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Y a-t-il une API pour connecter SECRETIS à nos autres outils ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Oui. SECRETIS expose une API REST complète avec documentation Swagger. Des webhooks sont disponibles pour les événements clés. Des connecteurs natifs existent pour Google Workspace, Microsoft 365, Slack, et les ERP comptables courants en Afrique.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Que se passe-t-il si je dépasse la limite de stockage ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Vous recevrez une alerte automatique à 80% de votre quota. Vous pouvez augmenter votre stockage à tout moment depuis les paramètres de votre compte, sans interruption de service. La facturation est au prorata du mois en cours.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">Comment contacter le support technique ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
+        <div class="faq-answer"><div class="faq-answer-inner">Le support est disponible par chat intégré, email (support@ibig-secretis.com), WhatsApp Business et téléphone. Les plans PME et supérieurs bénéficient d'un support prioritaire avec un temps de réponse garanti inférieur à 4 heures ouvrées. Un support 24/7 est disponible pour les plans Entreprise et Institution.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     ZONE 15 — FOOTER
+     ============================================ -->
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo" style="margin-bottom:16px;">
+          <div class="logo-mark">IS</div>
+          <div class="logo-text" style="color:#fff;">IBIG SECRETIS<span style="color:rgba(255,255,255,0.4);">ERP Bureautique Africain</span></div>
+        </a>
+        <p>La plateforme de gestion administrative conçue pour les organisations africaines. Secrétariat, GED, RH légère et IA réunis dans un seul outil sécurisé.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+          <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Produit</div>
+        <div class="footer-links">
+          <a href="#benefits">Fonctionnalités</a>
+          <a href="#modules">Modules</a>
+          <a href="#sara">SARA IA</a>
+          <a href="#pwa">Application mobile</a>
+          <a href="#security">Sécurité</a>
+          <a href="#pricing">Tarifs</a>
+          <a href="#">Nouveautés</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Ressources</div>
+        <div class="footer-links">
+          <a href="#">Documentation</a>
+          <a href="#">Tutoriels vidéo</a>
+          <a href="#">Blog</a>
+          <a href="#">Webinaires</a>
+          <a href="#">API Reference</a>
+          <a href="#">Centre d'aide</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">IBIG Soft</div>
+        <div class="footer-links">
+          <a href="#">À propos</a>
+          <a href="#">Notre équipe</a>
+          <a href="#">IBIG PARTNERS</a>
+          <a href="#">Devenir revendeur</a>
+          <a href="#">Carrières</a>
+          <a href="#demo-form">Contact</a>
+          <a href="#">Presse</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copyright">&copy; 2024 IBIG Soft. Tous droits réservés. Fait avec soin en Afrique.</div>
+      <div class="footer-legal">
+        <a href="#">Mentions légales</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">CGU</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     ZONE 16 — BOUTONS FLOTTANTS
+     ============================================ -->
+<button class="float-btn float-whatsapp" aria-label="Contacter sur WhatsApp" onclick="window.open('https://wa.me/22500000000','_blank')">
+  <i class="fab fa-whatsapp"></i>
+</button>
+
+<button class="float-btn float-sara" aria-label="Parler à SARA" onclick="document.getElementById('sara').scrollIntoView({behavior:'smooth'})">
+  <div class="float-tooltip">Parler à SARA</div>
+  <div class="float-badge">IA</div>
+  <i class="fa fa-robot"></i>
+</button>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // --- Header scroll shadow ---
+  const header = document.getElementById('header');
+  const topbar = document.getElementById('topbar');
+  function onScroll() {
+    const scrolled = window.scrollY > 10;
+    header.classList.toggle('scrolled', scrolled);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // --- Hamburger menu ---
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.getElementById('nav');
+  hamburger.addEventListener('click', function() {
+    const isOpen = nav.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', isOpen);
+    const spans = hamburger.querySelectorAll('span');
+    if (isOpen) {
+      spans[0].style.transform = 'translateY(7px) rotate(45deg)';
+      spans[1].style.opacity = '0';
+      spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
+    } else {
+      spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+    }
+  });
+
+  // Close nav on link click
+  nav.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      nav.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.querySelectorAll('span').forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+    });
+  });
+
+  // --- Billing toggle ---
+  const toggle = document.getElementById('billing-toggle');
+  const lblMonthly = document.getElementById('lbl-monthly');
+  const lblAnnual = document.getElementById('lbl-annual');
+  let isAnnual = false;
+  function updateToggle() {
+    toggle.classList.toggle('on', isAnnual);
+    toggle.setAttribute('aria-checked', isAnnual);
+    lblMonthly.classList.toggle('active', !isAnnual);
+    lblAnnual.classList.toggle('active', isAnnual);
+  }
+  toggle.addEventListener('click', function() { isAnnual = !isAnnual; updateToggle(); });
+  toggle.addEventListener('keydown', function(e) {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); isAnnual = !isAnnual; updateToggle(); }
+  });
+
+  // --- FAQ Accordion ---
+  const faqItems = document.querySelectorAll('.faq-item');
+  faqItems.forEach(function(item) {
+    const btn = item.querySelector('.faq-question');
+    btn.addEventListener('click', function() {
+      const isOpen = item.classList.contains('open');
+      faqItems.forEach(function(i) { i.classList.remove('open'); });
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // --- Contact form submit (demo) ---
+  const form = document.getElementById('contact-form');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('.form-submit');
+    btn.innerHTML = '<i class="fa fa-check"></i> Demande envoyée !';
+    btn.style.background = 'var(--success)';
+    btn.disabled = true;
+    setTimeout(function() {
+      btn.innerHTML = '<i class="fa fa-paper-plane"></i> Envoyer ma demande';
+      btn.style.background = '';
+      btn.disabled = false;
+      form.reset();
+    }, 4000);
+  });
+
+  // --- Scroll-triggered fade-in for sections ---
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.benefit-card, .module-card, .security-badge, .pricing-card, .step').forEach(function(el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(18px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  }
+
+  // --- Language buttons ---
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

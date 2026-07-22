@@ -1,0 +1,126 @@
+{
+  "_meta": {
+    "locale": "ha",
+    "dir": "ltr",
+    "version": "1.0.0",
+    "description": "Hausa (Haoussa) — Harshen aiki (Nijar, Najeriya). Transliterasi Latin. ~100 keys."
+  },
+
+  "nav": {
+    "dashboard":      "Allon Sarrafa",
+    "agenda":         "Kalanda",
+    "courrier":       "Wasika",
+    "reunion":        "Taro",
+    "taches":         "Ayyuka",
+    "visiteur":       "Baƙi",
+    "ressources":     "Albarkatu",
+    "rh":             "Ma'aikata",
+    "rapports":       "Rahotanni",
+    "documents":      "Takardu",
+    "parametres":     "Saitunan",
+    "help":           "Taimako",
+    "notifications":  "Sanarwa",
+    "profile":        "Bayanin Kai",
+    "logout":         "Fita",
+    "comptabilite":   "Lissafi"
+  },
+
+  "buttons": {
+    "save":           "Ajiye",
+    "cancel":         "Soke",
+    "delete":         "Goge",
+    "edit":           "Gyara",
+    "view":           "Duba",
+    "create":         "Ƙirƙira",
+    "add":            "Ƙara",
+    "confirm":        "Tabbatar",
+    "send":           "Aika",
+    "search":         "Bincika",
+    "filter":         "Tace",
+    "export":         "Fitar",
+    "import":         "Shigar",
+    "download":       "Sauke",
+    "upload":         "Loda",
+    "close":          "Rufe",
+    "back":           "Koma",
+    "next":           "Na Gaba",
+    "approve":        "Amince",
+    "reject":         "Ƙi",
+    "loading":        "Ana lodi…"
+  },
+
+  "labels": {
+    "name":           "Suna",
+    "first_name":     "Sunan Farko",
+    "last_name":      "Sunan Iyali",
+    "full_name":      "Cikakken Suna",
+    "email":          "Imel",
+    "phone":          "Wayar Hannu",
+    "address":        "Adireshi",
+    "city":           "Gari",
+    "country":        "Ƙasa",
+    "company":        "Kamfani",
+    "department":     "Sashe",
+    "position":       "Mukamin Aiki",
+    "description":    "Bayani",
+    "status":         "Halin",
+    "date":           "Kwanan Wata",
+    "amount":         "Adadi",
+    "total":          "Jimillar",
+    "yes":            "Eh",
+    "no":             "A'a",
+    "all":            "Duka",
+    "password":       "Kalmar Sirri",
+    "organization":   "Ƙungiya"
+  },
+
+  "empty_states": {
+    "no_results":     "Babu sakamakon.",
+    "no_tasks":       "Babu ayyuka a yanzu.",
+    "no_data":        "Babu bayanai.",
+    "no_notifications": "Babu sanarwa."
+  },
+
+  "feedback": {
+    "saved":          "An ajiye canje-canje.",
+    "created":        "An ƙirƙira abin cikin nasara.",
+    "updated":        "An sabunta abin.",
+    "deleted":        "An goge abin.",
+    "error_generic":  "Kuskure ya faru. Don Allah sake gwadawa."
+  },
+
+  "statuses": {
+    "pending":        "Ana Jira",
+    "active":         "Mai Aiki",
+    "in_progress":    "Ana Ci Gaba",
+    "done":           "An Gama",
+    "cancelled":      "An Soke",
+    "approved":       "An Amince",
+    "rejected":       "An Ƙi",
+    "draft":          "Daftari"
+  },
+
+  "priorities": {
+    "low":            "Ƙanƙanta",
+    "medium":         "Matsakaici",
+    "high":           "Babba",
+    "critical":       "Mai Muhimmanci Sosai",
+    "urgent":         "Gaggawa"
+  },
+
+  "dates": {
+    "today":          "Yau",
+    "yesterday":      "Jiya",
+    "tomorrow":       "Gobe",
+    "format_date":    "DD/MM/YYYY",
+    "days_long":      ["Lahadi", "Litinin", "Talata", "Laraba", "Alhamis", "Juma'a", "Asabar"],
+    "months_long":    ["Janairu", "Fabrairu", "Maris", "Afrilu", "Mayu", "Yuni", "Yuli", "Agusta", "Satumba", "Oktoba", "Nuwamba", "Disamba"],
+    "just_now":       "Yanzu haka"
+  },
+
+  "misc": {
+    "loading":        "Ana lodi…",
+    "copyright":      "© :year IBIG SECRETIS. Duk haƙƙoƙi an kiyaye su.",
+    "version":        "Sigar :v"
+  }
+}

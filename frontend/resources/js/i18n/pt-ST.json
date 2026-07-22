@@ -1,0 +1,48 @@
+{
+  "_meta": {
+    "locale": "pt-ST",
+    "dir": "ltr",
+    "base": "pt-BR",
+    "version": "1.0.0",
+    "description": "Português — São Tomé e Príncipe (país OHADA lusófono). Overrides sobre pt-BR."
+  },
+
+  "labels": {
+    "currency":   "Dobra São-tomense",
+    "phone":      "+239 9XX XXXX",
+    "country":    "São Tomé e Príncipe",
+    "zip":        "Código Postal"
+  },
+
+  "placeholders": {
+    "phone": "+239 9XX XXXX"
+  },
+
+  "comptabilite": {
+    "currency_symbol": "Db",
+    "currency_code":   "STN",
+    "currency_name":   "Dobra São-tomense",
+    "vat":             "IVA (Imposto sobre Valor Acrescentado)",
+    "tax_number":      "NUIT (Número Único de Identificação Tributária)",
+    "trade_register":  "Registo Comercial",
+    "social_security": "INSS (Instituto Nacional de Segurança Social)"
+  },
+
+  "rh": {
+    "inss":            "INSS — Instituto Nacional de Segurança Social",
+    "congé_annuel":    "Férias Anuais",
+    "congé_maladie":   "Licença por Doença"
+  },
+
+  "administration": {
+    "ministry":        "Ministério",
+    "district":        "Distrito",
+    "regiao":          "Região Autónoma do Príncipe",
+    "camara":          "Câmara Distrital",
+    "assembleia":      "Assembleia Nacional"
+  },
+
+  "misc": {
+    "copyright": "© :year IBIG SECRETIS. Todos os direitos reservados. — São Tomé e Príncipe"
+  }
+}

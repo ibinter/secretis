@@ -1,0 +1,441 @@
+﻿name: SECRETIS ERP — Test Suite
+
+on:
+  push:
+    branches: [main, develop, "feature/**", "fix/**"]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP_VERSION: "8.3"
+  NODE_VERSION: "20"
+
+# =============================================================================
+# JOBS
+# =============================================================================
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Tests unitaires en parallèle (3 processus)
+  # ---------------------------------------------------------------------------
+  unit-tests:
+    name: "Unit Tests (process ${{ matrix.chunk }})"
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [1, 2, 3]   # 3 processus parallèles
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: secretis_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, pdo, pdo_mysql, redis, bcmath, gd, intl, zip
+          coverage: xdebug
+          tools: pest
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install PHP dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Prepare test environment
+        working-directory: backend
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+          php artisan config:clear
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          CACHE_DRIVER: redis
+          QUEUE_CONNECTION: sync
+          SESSION_DRIVER: array
+          MAIL_MAILER: array
+
+      - name: Run database migrations
+        working-directory: backend
+        run: php artisan migrate --env=testing --force
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+
+      - name: Run Unit Tests (chunk ${{ matrix.chunk }}/3)
+        working-directory: backend
+        run: |
+          vendor/bin/pest tests/Unit \
+            --parallel \
+            --processes=4 \
+            --coverage \
+            --coverage-clover=coverage-unit-${{ matrix.chunk }}.xml \
+            --ci
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+
+      - name: Upload Unit Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-unit-${{ matrix.chunk }}
+          path: backend/coverage-unit-${{ matrix.chunk }}.xml
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 2. Tests de sécurité séparés
+  # ---------------------------------------------------------------------------
+  security-tests:
+    name: "Security Tests"
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: secretis_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, pdo, pdo_mysql, bcmath
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+
+      - name: Install PHP dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare test environment
+        working-directory: backend
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+          php artisan migrate --env=testing --force
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+
+      - name: Run Security Tests
+        working-directory: backend
+        run: |
+          vendor/bin/pest tests/Security tests/Unit/Security \
+            --coverage \
+            --coverage-clover=coverage-security.xml \
+            --ci \
+            --group=security
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+
+      - name: Static Analysis (PHPStan)
+        working-directory: backend
+        run: |
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse app --level=6 --no-progress
+          fi
+        continue-on-error: true
+
+      - name: Upload Security Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-security
+          path: backend/coverage-security.xml
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 3. Tests fonctionnels (Feature) après les tests unitaires
+  # ---------------------------------------------------------------------------
+  feature-tests:
+    name: "Feature Tests"
+    runs-on: ubuntu-latest
+    needs: [unit-tests, security-tests]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: secretis_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, pdo, pdo_mysql, redis, bcmath, gd, zip
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
+
+      - name: Install PHP dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare test environment
+        working-directory: backend
+        run: |
+          cp .env.example .env.testing
+          php artisan key:generate --env=testing
+          php artisan migrate --env=testing --force
+          php artisan db:seed --class=RolesAndPermissionsSeeder --env=testing
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+
+      - name: Run Feature Tests
+        working-directory: backend
+        run: |
+          vendor/bin/pest tests/Feature \
+            --coverage \
+            --coverage-clover=coverage-feature.xml \
+            --ci
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: secretis_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+
+      - name: Upload Feature Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-feature
+          path: backend/coverage-feature.xml
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 4. Rapport de couverture consolidé + badge
+  # ---------------------------------------------------------------------------
+  coverage-report:
+    name: "Coverage Report"
+    runs-on: ubuntu-latest
+    needs: [unit-tests, security-tests, feature-tests]
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: true
+
+      - name: Setup PHP for coverage merge
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: phpcov
+
+      - name: Merge coverage reports
+        run: |
+          if [ -d coverage-reports ] && ls coverage-reports/*.xml 1>/dev/null 2>&1; then
+            echo "Coverage files found, merging..."
+            ls -la coverage-reports/
+          else
+            echo "No coverage files found — skipping merge"
+          fi
+        continue-on-error: true
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: ${{ !cancelled() }}
+        with:
+          directory: coverage-reports
+          flags: unit,feature,security
+          fail_ci_if_error: false
+          verbose: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload consolidated coverage as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-all-reports
+          path: coverage-reports/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # 5. Tests E2E (après tous les tests unitaires)
+  # ---------------------------------------------------------------------------
+  e2e-tests:
+    name: "E2E Tests (Playwright)"
+    runs-on: ubuntu-latest
+    needs: [unit-tests, security-tests, feature-tests]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, pdo, pdo_mysql, redis, bcmath
+
+      - name: Install PHP dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install Node dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Laravel server
+        working-directory: backend
+        run: php artisan serve --port=8000 &
+        env:
+          APP_ENV: testing
+          APP_DEBUG: false
+
+      - name: Start frontend dev server
+        working-directory: frontend
+        run: npm run dev &
+
+      - name: Wait for servers to be ready
+        run: |
+          npx wait-on http://localhost:8000/api/health http://localhost:5173 --timeout=60000
+
+      - name: Run Playwright E2E tests
+        working-directory: frontend
+        run: npx playwright test --reporter=html
+        env:
+          BASE_URL: http://localhost:5173
+          API_URL: http://localhost:8000
+
+      - name: Upload E2E test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

@@ -1,0 +1,264 @@
+﻿<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\VisitorCheckInRequest;
+use App\Models\Organization;
+use App\Models\VisitLog;
+use App\Models\Visitor;
+use App\Models\VisitorInvitation;
+use App\Services\VisitorService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class VisitorController extends Controller
+{
+    public function __construct(private readonly VisitorService $visitorService)
+    {
+    }
+
+    // GET /visitors — liste des visiteurs (filtres : blacklist, frequents)
+    public function index(Request $request): Response
+    {
+        $query = Visitor::where('organization_id', auth()->user()->organization_id)
+            ->when($request->boolean('blacklisted'), fn ($q) => $q->where('is_blacklisted', true))
+            ->when($request->boolean('frequent'), fn ($q) => $q->where('visit_count', '>=', 5))
+            ->when($request->search, fn ($q) => $q->where(function ($sq) use ($request) {
+                $sq->where('full_name', 'ilike', "%{$request->search}%")
+                   ->orWhere('id_number', 'ilike', "%{$request->search}%")
+                   ->orWhere('company', 'ilike', "%{$request->search}%");
+            }))
+            ->orderByDesc('last_visit_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        return Inertia::render('Reception/Blacklist', [
+            'visitors' => $query,
+            'filters'  => $request->only(['blacklisted', 'frequent', 'search']),
+        ]);
+    }
+
+    // POST /visitors/check-in — enregistrer une arrivee
+    public function checkIn(VisitorCheckInRequest $request): JsonResponse
+    {
+        $visitor = $this->visitorService->registerVisitor(
+            array_merge($request->validated(), [
+                'organization_id' => auth()->user()->organization_id,
+            ])
+        );
+
+        // Alerte liste noire avant tout
+        if ($visitor->is_blacklisted) {
+            return response()->json([
+                'blacklisted' => true,
+                'reason'      => $visitor->blacklist_reason,
+                'visitor'     => $visitor,
+            ], 403);
+        }
+
+        $visit = $this->visitorService->checkIn($visitor, array_merge(
+            $request->validated(),
+            ['created_by' => auth()->id()]
+        ));
+
+        $badgeHtml = $this->visitorService->generateBadge($visit);
+
+        return response()->json([
+            'visit'    => $visit->load(['visitor', 'host']),
+            'badge'    => $badgeHtml,
+            'message'  => "Check-in enregistré — badge {$visitor->badge_number}",
+        ], 201);
+    }
+
+    // POST /visits/{id}/check-out — enregistrer un depart
+    public function checkOut(VisitLog $visit): JsonResponse
+    {
+        abort_unless(
+            $visit->organization_id === auth()->user()->organization_id,
+            403
+        );
+
+        $this->visitorService->checkOut($visit);
+
+        return response()->json(['message' => 'Check-out enregistré avec succès.']);
+    }
+
+    // POST /visitor-invitations — creer une invitation (pour les employes)
+    public function storeInvitation(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'visitor_email'    => 'required|email',
+            'visitor_name'     => 'required|string|max:150',
+            'visit_date'       => 'required|date|after_or_equal:today',
+            'visit_time_start' => 'required|date_format:H:i',
+            'visit_time_end'   => 'required|date_format:H:i|after:visit_time_start',
+            'purpose'          => 'nullable|string|max:255',
+            'location'         => 'nullable|string|max:255',
+        ]);
+
+        $invitation = $this->visitorService->createInvitation(auth()->user(), $data);
+
+        return response()->json([
+            'invitation' => $invitation,
+            'message'    => 'Invitation envoyée à ' . $invitation->visitor_email,
+        ], 201);
+    }
+
+    // GET /visitor-invitations/{code} — valider un code d invitation (public)
+    public function validateInvitation(string $code): JsonResponse
+    {
+        $invitation = $this->visitorService->validateInvitation($code);
+
+        if (!$invitation) {
+            return response()->json([
+                'valid'   => false,
+                'message' => 'Code invalide, expiré ou déjà utilisé.',
+            ], 404);
+        }
+
+        return response()->json([
+            'valid'      => true,
+            'invitation' => $invitation,
+        ]);
+    }
+
+    // GET /visits/today — visiteurs presents aujourd hui
+    public function today(): Response
+    {
+        $orgId = auth()->user()->organization_id;
+
+        $present = VisitLog::where('organization_id', $orgId)
+            ->where('status', 'checked_in')
+            ->with(['visitor', 'host', 'accessZone'])
+            ->orderBy('check_in_at')
+            ->get();
+
+        $scheduled = VisitorInvitation::where('organization_id', $orgId)
+            ->where('visit_date', today())
+            ->where('is_used', false)
+            ->where('expires_at', '>', now())
+            ->with('invitedBy')
+            ->orderBy('visit_time_start')
+            ->get();
+
+        $todayTotal = VisitLog::where('organization_id', $orgId)
+            ->whereDate('check_in_at', today())
+            ->count();
+
+        return Inertia::render('Reception/Dashboard', [
+            'present'      => $present,
+            'scheduled'    => $scheduled,
+            'today_total'  => $todayTotal,
+            'pending_inv'  => $scheduled->count(),
+        ]);
+    }
+
+    // GET /visits/report — rapport journalier
+    public function report(Request $request): Response
+    {
+        $date = Carbon::parse($request->date ?? today());
+        $org  = auth()->user()->organization;
+
+        $report = $this->visitorService->getDailyReport($org, $date);
+
+        // Données 30 derniers jours pour les graphiques
+        $last30 = collect(range(0, 29))->map(function ($i) use ($org) {
+            $d = today()->subDays($i);
+            return [
+                'date'  => $d->toDateString(),
+                'count' => VisitLog::where('organization_id', $org->id)
+                    ->whereDate('check_in_at', $d)->count(),
+            ];
+        })->reverse()->values();
+
+        return Inertia::render('Reception/Reports', [
+            'report'  => $report,
+            'last30'  => $last30,
+            'date'    => $date->toDateString(),
+        ]);
+    }
+
+    // POST /visitors/{id}/blacklist — mettre sur liste noire
+    public function blacklist(Request $request, Visitor $visitor): JsonResponse
+    {
+        abort_unless(
+            $visitor->organization_id === auth()->user()->organization_id,
+            403
+        );
+
+        $data = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        $this->visitorService->blacklist($visitor, $data['reason'], auth()->user());
+
+        return response()->json(['message' => 'Visiteur ajouté à la liste noire.']);
+    }
+
+    // DELETE /visitors/{id}/blacklist — retirer de la liste noire
+    public function unblacklist(Visitor $visitor): JsonResponse
+    {
+        abort_unless(
+            $visitor->organization_id === auth()->user()->organization_id,
+            403
+        );
+
+        $this->visitorService->unblacklist($visitor, auth()->user());
+
+        return response()->json(['message' => 'Visiteur retiré de la liste noire.']);
+    }
+
+    // GET /reception/invitations — liste des invitations de l employe
+    public function invitations(Request $request): Response
+    {
+        $invitations = VisitorInvitation::where('organization_id', auth()->user()->organization_id)
+            ->where('invited_by', auth()->id())
+            ->with('visitLog')
+            ->orderByDesc('visit_date')
+            ->paginate(20);
+
+        return Inertia::render('Reception/Invitations', [
+            'invitations' => $invitations,
+        ]);
+    }
+
+    // GET /reception/kiosk — mode kiosque (sans auth complete)
+    public function kiosk(): Response
+    {
+        $orgSlug = request()->route('org');
+        $org     = Organization::where('slug', $orgSlug)->firstOrFail();
+
+        $hosts = \App\Models\User::where('organization_id', $org->id)
+            ->select('id', 'name', 'email', 'photo')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('Reception/Kiosk', [
+            'organization' => $org,
+            'hosts'        => $hosts,
+        ]);
+    }
+
+    // GET /reception/log — journal des visites
+    public function log(Request $request): Response
+    {
+        $query = VisitLog::where('organization_id', auth()->user()->organization_id)
+            ->with(['visitor', 'host', 'accessZone'])
+            ->when($request->date, fn ($q) => $q->whereDate('check_in_at', $request->date))
+            ->when($request->host_id, fn ($q) => $q->where('host_user_id', $request->host_id))
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->orderByDesc('check_in_at')
+            ->paginate(30)
+            ->withQueryString();
+
+        return Inertia::render('Reception/VisitorLog', [
+            'visits'  => $query,
+            'filters' => $request->only(['date', 'host_id', 'status']),
+            'hosts'   => \App\Models\User::where('organization_id', auth()->user()->organization_id)
+                ->select('id', 'name')->orderBy('name')->get(),
+        ]);
+    }
+}

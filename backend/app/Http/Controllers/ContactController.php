@@ -1,0 +1,333 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Contact;
+use App\Services\AuditService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
+use League\Csv\Writer;
+
+/**
+ * ContactController — Annuaire interne et externe
+ *
+ * Gère un annuaire d'entreprise mixte :
+ *  - Contacts internes : synchronisés depuis les utilisateurs de l'organisation
+ *  - Contacts externes : partenaires, clients, fournisseurs
+ * Supporte l'import/export CSV et Excel.
+ *
+ * SECURITE :
+ *  - Isolation tenant
+ *  - Validation des fichiers d'import (type MIME, taille max 5MB)
+ *  - Pas d'accès aux contacts des autres organisations
+ */
+class ContactController extends Controller
+{
+    public function __construct(
+        private AuditService $auditService,
+    ) {}
+
+    // -------------------------------------------------------------------------
+    // index() — Annuaire avec recherche rapide
+    // -------------------------------------------------------------------------
+
+    /**
+     * Retourne l'annuaire paginé avec recherche full-text rapide.
+     * Peut filtrer par type (interne/externe), département, entreprise.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        $query = Contact::where('organization_id', $user->organization_id)
+            ->with(['department:id,name', 'linkedUser:id,name,avatar,status'])
+            ->orderBy('last_name')
+            ->orderBy('first_name');
+
+        // Recherche rapide (nom, prénom, email, téléphone, entreprise)
+        $query->when($request->search, function ($q, $search) {
+            $q->where(fn ($inner) =>
+                $inner->where('last_name', 'ilike', "%{$search}%")
+                    ->orWhere('first_name', 'ilike', "%{$search}%")
+                    ->orWhere('email', 'ilike', "%{$search}%")
+                    ->orWhere('phone', 'ilike', "%{$search}%")
+                    ->orWhere('company', 'ilike', "%{$search}%")
+                    ->orWhere('job_title', 'ilike', "%{$search}%")
+            );
+        });
+
+        $query->when($request->type, fn ($q, $t) => $q->where('type', $t));
+        $query->when($request->department_id, fn ($q, $d) => $q->where('department_id', $d));
+        $query->when($request->company, fn ($q, $c) => $q->where('company', 'ilike', "%{$c}%"));
+        $query->when($request->has('active_only'), fn ($q) => $q->where('is_active', true));
+
+        $contacts = $query->paginate(50);
+
+        return response()->json($contacts);
+    }
+
+    // -------------------------------------------------------------------------
+    // store() — Créer un contact
+    // -------------------------------------------------------------------------
+
+    public function store(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->hasPermissionForModule('contacts', 'create')) {
+            return response()->json(['message' => 'Permission refusée.'], 403);
+        }
+
+        $validated = $request->validate($this->contactRules());
+
+        $contact = Contact::create([
+            ...$validated,
+            'organization_id' => $user->organization_id,
+            'created_by'      => $user->id,
+            'type'            => $validated['type'] ?? 'external',
+            'is_active'       => true,
+        ]);
+
+        $this->auditService->logCreated('contacts', 'contact', $contact->id, [
+            'name' => "{$contact->first_name} {$contact->last_name}",
+        ]);
+
+        return response()->json($contact->load('department:id,name'), 201);
+    }
+
+    // -------------------------------------------------------------------------
+    // update() — Mettre à jour un contact
+    // -------------------------------------------------------------------------
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        $contact = Contact::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        if (!$user->hasPermissionForModule('contacts', 'update')) {
+            return response()->json(['message' => 'Permission refusée.'], 403);
+        }
+
+        $validated = $request->validate($this->contactRules(update: true));
+        $original  = $contact->toArray();
+
+        $contact->update($validated);
+
+        $this->auditService->logUpdated('contacts', 'contact', $contact->id, $original, $validated);
+
+        return response()->json($contact->load('department:id,name'));
+    }
+
+    // -------------------------------------------------------------------------
+    // destroy() — Supprimer un contact
+    // -------------------------------------------------------------------------
+
+    public function destroy(int $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        $contact = Contact::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        if (!$user->hasPermissionForModule('contacts', 'delete')) {
+            return response()->json(['message' => 'Permission refusée.'], 403);
+        }
+
+        // Interdit de supprimer un contact lié à un utilisateur actif
+        if ($contact->linked_user_id && $contact->linkedUser?->isActive()) {
+            return response()->json([
+                'message' => 'Ce contact est lié à un utilisateur actif. Désactivez l\'utilisateur d\'abord.',
+            ], 422);
+        }
+
+        $this->auditService->logDeleted('contacts', 'contact', $contact->id, $contact->toArray());
+        $contact->delete();
+
+        return response()->json(['message' => 'Contact supprimé.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // importCsv() — Import CSV/Excel
+    // -------------------------------------------------------------------------
+
+    /**
+     * Importe des contacts depuis un fichier CSV ou Excel.
+     * Format CSV attendu : last_name, first_name, email, phone, company, job_title, type, department
+     * Retourne un rapport détaillé : importés, ignorés (doublons), erreurs.
+     */
+    public function importCsv(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->hasPermissionForModule('contacts', 'import')) {
+            return response()->json(['message' => 'Permission refusée.'], 403);
+        }
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx', 'max:5120'], // 5MB max
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->storeAs('imports', 'contacts_' . time() . '.csv', 'local');
+
+        // Lire le CSV avec League\Csv
+        $csv = Reader::createFromPath(Storage::disk('local')->path($path), 'r');
+        $csv->setHeaderOffset(0); // Première ligne = en-têtes
+        $csv->setDelimiter(',');
+
+        $imported = 0;
+        $skipped  = 0;
+        $errors   = [];
+
+        foreach ($csv->getRecords() as $index => $row) {
+            try {
+                // Normaliser les clés (insensible à la casse)
+                $row = array_change_key_case($row, CASE_LOWER);
+
+                $email = strtolower(trim($row['email'] ?? ''));
+
+                // Vérifier doublon par email
+                if ($email && Contact::where('organization_id', $user->organization_id)
+                    ->where('email', $email)->exists()) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Résoudre le département par nom si fourni
+                $departmentId = null;
+                if (!empty($row['department'])) {
+                    $dept = \App\Models\Department::where('organization_id', $user->organization_id)
+                        ->where('name', 'ilike', trim($row['department']))
+                        ->first();
+                    $departmentId = $dept?->id;
+                }
+
+                Contact::create([
+                    'organization_id' => $user->organization_id,
+                    'created_by'      => $user->id,
+                    'last_name'       => trim($row['last_name'] ?? $row['nom'] ?? ''),
+                    'first_name'      => trim($row['first_name'] ?? $row['prenom'] ?? ''),
+                    'email'           => $email ?: null,
+                    'phone'           => trim($row['phone'] ?? $row['telephone'] ?? '') ?: null,
+                    'mobile'          => trim($row['mobile'] ?? '') ?: null,
+                    'company'         => trim($row['company'] ?? $row['entreprise'] ?? '') ?: null,
+                    'job_title'       => trim($row['job_title'] ?? $row['poste'] ?? '') ?: null,
+                    'type'            => in_array($row['type'] ?? '', ['internal', 'external']) ? $row['type'] : 'external',
+                    'department_id'   => $departmentId,
+                    'is_active'       => true,
+                ]);
+
+                $imported++;
+            } catch (\Throwable $e) {
+                $errors[] = "Ligne " . ($index + 2) . " : " . $e->getMessage();
+            }
+        }
+
+        // Nettoyer le fichier temporaire
+        Storage::disk('local')->delete($path);
+
+        $this->auditService->log(
+            action: 'contacts_imported',
+            module: 'contacts',
+            resourceType: 'contact',
+            newValues: ['imported' => $imported, 'skipped' => $skipped, 'errors' => count($errors)],
+        );
+
+        return response()->json([
+            'imported' => $imported,
+            'skipped'  => $skipped,
+            'errors'   => $errors,
+            'message'  => "{$imported} contact(s) importé(s), {$skipped} ignoré(s), " . count($errors) . " erreur(s).",
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // exportCsv() — Export
+    // -------------------------------------------------------------------------
+
+    /**
+     * Exporte l'annuaire au format CSV.
+     * Respecte les mêmes filtres que l'index (search, type, department).
+     */
+    public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $user = Auth::user();
+
+        $contacts = Contact::where('organization_id', $user->organization_id)
+            ->with('department:id,name')
+            ->when($request->type, fn ($q, $t) => $q->where('type', $t))
+            ->when($request->department_id, fn ($q, $d) => $q->where('department_id', $d))
+            ->orderBy('last_name')
+            ->get();
+
+        $this->auditService->log(
+            action: 'contacts_exported',
+            module: 'contacts',
+            resourceType: 'contact',
+            newValues: ['count' => $contacts->count()],
+        );
+
+        // Générer le CSV avec League\Csv
+        $csv = Writer::createFromString();
+        $csv->insertOne([
+            'Nom', 'Prénom', 'Email', 'Téléphone', 'Mobile',
+            'Entreprise', 'Poste', 'Type', 'Département', 'Actif',
+        ]);
+
+        foreach ($contacts as $c) {
+            $csv->insertOne([
+                $c->last_name,
+                $c->first_name,
+                $c->email,
+                $c->phone,
+                $c->mobile,
+                $c->company,
+                $c->job_title,
+                $c->type === 'internal' ? 'Interne' : 'Externe',
+                $c->department?->name ?? '',
+                $c->is_active ? 'Oui' : 'Non',
+            ]);
+        }
+
+        return Response::streamDownload(function () use ($csv) {
+            echo $csv->toString();
+        }, 'contacts_export_' . now()->format('Y-m-d') . '.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper privé — Règles de validation
+    // -------------------------------------------------------------------------
+
+    private function contactRules(bool $update = false): array
+    {
+        $required = $update ? 'sometimes|required' : 'required';
+
+        return [
+            'last_name'      => ["{$required}", 'string', 'max:150'],
+            'first_name'     => ['nullable', 'string', 'max:150'],
+            'email'          => ['nullable', 'email', 'max:255'],
+            'phone'          => ['nullable', 'string', 'max:30'],
+            'mobile'         => ['nullable', 'string', 'max:30'],
+            'company'        => ['nullable', 'string', 'max:255'],
+            'job_title'      => ['nullable', 'string', 'max:255'],
+            'type'           => ['nullable', 'in:internal,external'],
+            'department_id'  => ['nullable', 'integer'],
+            'address'        => ['nullable', 'string', 'max:500'],
+            'notes'          => ['nullable', 'string', 'max:2000'],
+            'avatar'         => ['nullable', 'string', 'max:500'],
+            'social_links'   => ['nullable', 'array'],
+            'tags'           => ['nullable', 'array'],
+            'is_active'      => ['boolean'],
+        ];
+    }
+}

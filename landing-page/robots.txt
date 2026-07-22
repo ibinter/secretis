@@ -1,0 +1,73 @@
+User-agent: *
+
+# Autoriser toutes les pages publiques
+Allow: /
+Allow: /tarifs
+Allow: /contact
+Allow: /a-propos
+Allow: /fonctionnalites
+Allow: /securite
+Allow: /blog
+Allow: /blog/
+Allow: /mentions-legales
+Allow: /politique-confidentialite
+Allow: /conditions-utilisation
+Allow: /cgv
+Allow: /support
+
+# Interdire les routes d'administration et d'API
+Disallow: /superadmin
+Disallow: /superadmin/
+Disallow: /api/
+Disallow: /api/v1/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /agenda
+Disallow: /courrier
+Disallow: /reunions
+Disallow: /taches
+Disallow: /communication
+Disallow: /accueil
+Disallow: /ressources
+Disallow: /rh
+Disallow: /rapports
+Disallow: /parametres
+Disallow: /horizon
+Disallow: /telescope
+Disallow: /webhooks/
+Disallow: /storage/private/
+Disallow: /*.pdf$
+Disallow: /*.xlsx$
+Disallow: /*.csv$
+
+# Interdire les pages de recherche et filtres dynamiques
+Disallow: /search?
+Disallow: /*?page=
+Disallow: /*?sort=
+Disallow: /*?filter=
+
+# Crawl-delay pour éviter la surcharge
+Crawl-delay: 10
+
+# Sitemap
+Sitemap: https://secretis.ibigsoft.com/sitemap.xml
+
+# Règles spécifiques pour les bots publicitaires
+User-agent: Mediapartners-Google
+Allow: /
+
+# Exclure les robots d'archivage des pages dynamiques
+User-agent: ia_archiver
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /

@@ -1,0 +1,111 @@
+{
+  "name": "IBIG SECRETIS",
+  "short_name": "SECRETIS",
+  "description": "ERP SaaS de gestion documentaire et administrative pour entreprises africaines",
+  "theme_color": "#1A3A5C",
+  "background_color": "#1A3A5C",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda",
+      "short_name": "Agenda",
+      "description": "Accéder à mon agenda",
+      "url": "/agenda",
+      "icons": [{ "src": "/icons/shortcut-agenda.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Courrier",
+      "short_name": "Courrier",
+      "description": "Consulter mon courrier",
+      "url": "/courrier",
+      "icons": [{ "src": "/icons/shortcut-courrier.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Tâches",
+      "short_name": "Tâches",
+      "description": "Mes tâches en cours",
+      "url": "/taches",
+      "icons": [{ "src": "/icons/shortcut-taches.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Nouveau courrier",
+      "short_name": "Nouveau",
+      "description": "Rédiger un nouveau courrier",
+      "url": "/courrier/nouveau",
+      "icons": [{ "src": "/icons/shortcut-nouveau.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tableau de bord SECRETIS"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SECRETIS sur mobile"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

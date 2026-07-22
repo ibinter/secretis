@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBIG SECRETIS — App Shell</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary:   { DEFAULT: '#1A3A5C', 50:'#EAF0F7', 100:'#C6D8EC', 700:'#1A3A5C', 800:'#142D47', 900:'#0D1F32' },
+            secondary: { DEFAULT: '#2E86C1', 50:'#E8F4FB', 100:'#C5E1F4', 500:'#2E86C1', 600:'#256EA0' },
+            accent:    { DEFAULT: '#F39C12', 500:'#F39C12' },
+            success:   { DEFAULT: '#1E8449' },
+            warning:   { DEFAULT: '#E67E22' },
+            danger:    { DEFAULT: '#C0392B' },
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; }
+
+    /* ── Sidebar ── */
+    .sidebar { transition: width 0.25s ease, transform 0.25s ease; }
+    .sidebar .nav-item { transition: background 0.15s, color 0.15s; }
+    .sidebar .nav-item:hover { background: rgba(255,255,255,0.10); }
+    .sidebar .nav-item.active { background: #2E86C1; }
+    .sidebar .nav-item svg { flex-shrink: 0; }
+
+    /* ── Collapsed sidebar (desktop) ── */
+    .sidebar.collapsed { width: 68px; }
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .brand-text,
+    .sidebar.collapsed .section-label,
+    .sidebar.collapsed .user-info { display: none; }
+    .sidebar.collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
+    .sidebar.collapsed .nav-item { padding: 10px; margin: 0 auto; width: 44px; border-radius: 10px; }
+
+    /* ── Overlay mobile ── */
+    .sidebar-overlay { display: none; }
+    .sidebar-overlay.active { display: block; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.20); border-radius: 99px; }
+
+    .main-scrollbar::-webkit-scrollbar { width: 5px; background: #F5F7FA; }
+    .main-scrollbar::-webkit-scrollbar-thumb { background: #BDC3C7; border-radius: 99px; }
+
+    /* ── Toast ── */
+    @keyframes slideInRight { from { transform: translateX(110%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    .toast { animation: slideInRight 0.3s ease; }
+
+    /* ── Badge pulse ── */
+    @keyframes badgePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .badge-pulse { animation: badgePulse 2s ease-in-out infinite; }
+
+    /* ── Mobile bottom nav ── */
+    @media (min-width: 1024px) {
+      .bottom-nav { display: none; }
+      .desktop-sidebar { display: flex; }
+    }
+    @media (max-width: 1023px) {
+      .desktop-sidebar { display: none; }
+      .bottom-nav { display: flex; }
+      .main-content { margin-left: 0 !important; padding-bottom: 80px; }
+    }
+
+    /* ── Search ── */
+    .search-input::placeholder { color: #ADB5BD; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 overflow-hidden h-screen">
+
+<!-- ══════════════════════════════════════════════════════════
+     OVERLAY MOBILE (fond sombre quand sidebar ouverte)
+══════════════════════════════════════════════════════════ -->
+<div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR DESKTOP / MOBILE DRAWER
+══════════════════════════════════════════════════════════ -->
+<aside id="sidebar"
+  class="sidebar desktop-sidebar fixed top-0 left-0 h-full flex-col z-50 w-64
+         bg-gradient-to-b from-[#142D47] to-[#0D1F32] text-white overflow-hidden select-none
+         shadow-[2px_0_12px_rgba(0,0,0,0.25)]
+         lg:flex
+         max-lg:translate-x-[-100%] max-lg:transition-transform max-lg:duration-300">
+
+  <!-- Brand -->
+  <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+    <div class="w-9 h-9 rounded-xl bg-[#2E86C1] flex items-center justify-center flex-shrink-0 shadow-lg">
+      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path d="M9 12h6M9 16h6M7 8h10M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+      </svg>
+    </div>
+    <div class="brand-text leading-tight">
+      <div class="text-[10px] font-medium text-blue-300 uppercase tracking-widest">IBIG Soft</div>
+      <div class="text-base font-bold text-white">SECRETIS</div>
+    </div>
+    <button onclick="toggleCollapse()" class="ml-auto text-white/50 hover:text-white transition p-1 rounded lg:block hidden" title="Réduire">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M11 19l-7-7 7-7M18 19l-7-7 7-7"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+
+    <!-- Section : Principal -->
+    <div class="section-label text-[10px] font-semibold text-blue-400/70 uppercase tracking-widest px-3 pt-3 pb-1.5">Principal</div>
+
+    <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-white text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span class="nav-label">Tableau de bord</span>
+    </a>
+
+    <!-- Section : Modules -->
+    <div class="section-label text-[10px] font-semibold text-blue-400/70 uppercase tracking-widest px-3 pt-4 pb-1.5">Modules</div>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      <span class="nav-label">Courriers</span>
+      <span class="ml-auto bg-[#F39C12] text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 badge-pulse">7</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      <span class="nav-label">Tâches</span>
+      <span class="ml-auto bg-[#C0392B] text-white text-[10px] font-bold rounded-full px-1.5 py-0.5">3</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+      <span class="nav-label">Agenda / Réunions</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+      </svg>
+      <span class="nav-label">Visiteurs</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+      </svg>
+      <span class="nav-label">Documents</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M12 1a3 3 0 100 6 3 3 0 000-6zM6 8a6 6 0 1112 0H6zM4 20a8 8 0 1116 0H4z"/>
+      </svg>
+      <span class="nav-label">Décisions</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <span class="nav-label">Notes internes</span>
+    </a>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/>
+        <line x1="10" y1="12" x2="14" y2="12"/>
+      </svg>
+      <span class="nav-label">Archives</span>
+    </a>
+
+    <!-- Section : Administration -->
+    <div class="section-label text-[10px] font-semibold text-blue-400/70 uppercase tracking-widest px-3 pt-4 pb-1.5">Administration</div>
+
+    <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 text-sm font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      <span class="nav-label">Paramètres</span>
+    </a>
+
+  </nav>
+
+  <!-- Profil utilisateur en bas -->
+  <div class="border-t border-white/10 px-3 py-3">
+    <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/10 cursor-pointer transition">
+      <div class="w-9 h-9 rounded-full bg-[#2E86C1] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">DK</div>
+      <div class="user-info flex-1 min-w-0">
+        <div class="text-sm font-semibold text-white truncate">Diallo Konate</div>
+        <div class="text-xs text-blue-300 truncate">Secrétaire général</div>
+      </div>
+      <svg class="w-4 h-4 text-white/50 flex-shrink-0 user-info" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+      </svg>
+    </div>
+  </div>
+</aside>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     LAYOUT PRINCIPAL
+══════════════════════════════════════════════════════════ -->
+<div id="mainWrapper" class="flex flex-col h-screen lg:ml-64 transition-all duration-250">
+
+  <!-- ── HEADER ── -->
+  <header class="flex items-center gap-4 px-4 lg:px-6 h-[60px] bg-white border-b border-gray-100
+                 shadow-[0_2px_4px_rgba(0,0,0,0.06)] z-30 sticky top-0 flex-shrink-0">
+
+    <!-- Hamburger (mobile) + Toggle collapse (desktop) -->
+    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition" aria-label="Menu">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <button onclick="toggleCollapse()" class="hidden lg:flex p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition" aria-label="Réduire sidebar">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Breadcrumb -->
+    <nav class="hidden sm:flex items-center gap-1.5 text-sm text-gray-500">
+      <span class="font-medium text-[#1A3A5C]">SECRETIS</span>
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <span>Tableau de bord</span>
+    </nav>
+
+    <!-- Search -->
+    <div class="flex-1 max-w-md mx-auto lg:mx-4">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="Rechercher…" class="search-input w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg
+               focus:outline-none focus:ring-2 focus:ring-[#2E86C1]/30 focus:border-[#2E86C1] focus:bg-white transition" />
+        <kbd class="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-1 text-[10px] text-gray-400 bg-white border border-gray-200 rounded px-1.5 py-0.5">
+          Ctrl K
+        </kbd>
+      </div>
+    </div>
+
+    <!-- Actions droite -->
+    <div class="flex items-center gap-1.5 ml-auto">
+
+      <!-- Notifications -->
+      <button onclick="showToast()" class="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition" title="Notifications">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C0392B]"></span>
+      </button>
+
+      <!-- Aide -->
+      <button class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition hidden sm:flex" title="Aide">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/>
+        </svg>
+      </button>
+
+      <!-- Séparateur -->
+      <div class="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
+
+      <!-- Avatar utilisateur -->
+      <button class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-100 transition">
+        <div class="w-8 h-8 rounded-full bg-[#1A3A5C] flex items-center justify-center text-white font-bold text-xs">DK</div>
+        <span class="hidden md:block text-sm font-medium text-gray-700">Diallo K.</span>
+        <svg class="hidden md:block w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- ── ZONE DE CONTENU ── -->
+  <main class="main-content flex-1 overflow-y-auto main-scrollbar bg-[#F5F7FA]">
+    <div class="p-6">
+
+      <!-- Page header -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-[#1C1C1C]">Tableau de bord</h1>
+          <p class="text-sm text-gray-500 mt-0.5">Lundi 21 juillet 2026 — Bonne journée, Diallo !</p>
+        </div>
+        <button class="flex items-center gap-2 px-4 py-2.5 bg-[#1A3A5C] text-white text-sm font-medium rounded-xl
+                       hover:bg-[#142D47] shadow-sm transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Nouvelle action
+        </button>
+      </div>
+
+      <!-- Placeholder contenu -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+        <!-- KPI tiles placeholder -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#2E86C1]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-full">↑ 12%</span>
+          </div>
+          <div class="text-3xl font-bold text-[#1C1C1C]">24</div>
+          <div class="text-sm text-gray-500 mt-1">Courriers en attente</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#C0392B]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">Urgent</span>
+          </div>
+          <div class="text-3xl font-bold text-[#1C1C1C]">8</div>
+          <div class="text-sm text-gray-500 mt-1">Tâches urgentes</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#1E8449]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-full">↑ 5%</span>
+          </div>
+          <div class="text-3xl font-bold text-[#1C1C1C]">3</div>
+          <div class="text-sm text-gray-500 mt-1">Visiteurs du jour</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl bg-[#EAF0F7] flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#1A3A5C]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Aujourd'hui</span>
+          </div>
+          <div class="text-3xl font-bold text-[#1C1C1C]">5</div>
+          <div class="text-sm text-gray-500 mt-1">Réunions du jour</div>
+        </div>
+      </div>
+
+      <!-- Zone contenu scrollable -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 flex items-center justify-center min-h-[300px]">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full bg-[#EAF0F7] flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-[#2E86C1]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-[#1C1C1C] mb-1">Zone de contenu principal</h3>
+          <p class="text-sm text-gray-500">Le contenu de chaque module s'affiche ici.<br/>Consultez <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs">dashboard-mockup.html</code> pour le tableau de bord complet.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     BOTTOM NAVIGATION (MOBILE)
+══════════════════════════════════════════════════════════ -->
+<nav class="bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 px-2 py-1">
+  <div class="flex items-center justify-around">
+
+    <a href="#" class="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-[#2E86C1]">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      <span class="text-[10px] font-semibold">Accueil</span>
+    </a>
+
+    <a href="#" class="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-gray-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      <span class="text-[10px] font-medium">Courriers</span>
+      <span class="absolute top-1 right-1.5 w-4 h-4 bg-[#F39C12] text-white text-[9px] font-bold rounded-full flex items-center justify-center">7</span>
+    </a>
+
+    <a href="#" class="relative flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-gray-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      <span class="text-[10px] font-medium">Tâches</span>
+      <span class="absolute top-1 right-1.5 w-4 h-4 bg-[#C0392B] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-gray-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+      <span class="text-[10px] font-medium">Agenda</span>
+    </a>
+
+    <button class="flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-gray-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+      </svg>
+      <span class="text-[10px] font-medium">Plus</span>
+    </button>
+
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TOAST (démo)
+══════════════════════════════════════════════════════════ -->
+<div id="toastContainer" class="fixed top-5 right-5 z-[700] flex flex-col gap-3 pointer-events-none"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+  const sidebar     = document.getElementById('sidebar');
+  const overlay     = document.getElementById('sidebarOverlay');
+  const mainWrapper = document.getElementById('mainWrapper');
+  let isCollapsed   = false;
+  let mobileOpen    = false;
+
+  // Toggle sidebar mobile
+  function toggleSidebar() {
+    mobileOpen = !mobileOpen;
+    if (mobileOpen) {
+      sidebar.style.transform = 'translateX(0)';
+      overlay.classList.add('active');
+    } else {
+      sidebar.style.transform = '';
+      overlay.classList.remove('active');
+    }
+  }
+
+  // Collapse sidebar desktop
+  function toggleCollapse() {
+    isCollapsed = !isCollapsed;
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      sidebar.style.width = '68px';
+      mainWrapper.style.marginLeft = '68px';
+    } else {
+      sidebar.classList.remove('collapsed');
+      sidebar.style.width = '';
+      mainWrapper.style.marginLeft = '';
+    }
+  }
+
+  // Toast demo
+  function showToast() {
+    const toasts = [
+      { type:'info',    title:'3 nouvelles notifications', msg:'Courrier N°2026-124 reçu et 2 tâches assignées.' },
+      { type:'success', title:'Action réussie',            msg:'Le document a été archivé avec succès.' },
+      { type:'warning', title:'Tâche urgente',             msg:'La tâche "Rapport DG" est due dans 1 heure.' },
+      { type:'error',   title:'Erreur de synchronisation', msg:'Impossible de contacter le serveur de messagerie.' },
+    ];
+    const t = toasts[Math.floor(Math.random() * toasts.length)];
+    const colors = {
+      info:    { border:'#2E86C1', icon:'text-[#2E86C1]', bg:'bg-blue-50'  },
+      success: { border:'#1E8449', icon:'text-[#1E8449]', bg:'bg-green-50' },
+      warning: { border:'#E67E22', icon:'text-[#E67E22]', bg:'bg-orange-50'},
+      error:   { border:'#C0392B', icon:'text-[#C0392B]', bg:'bg-red-50'   },
+    };
+    const c = colors[t.type];
+    const icons = {
+      info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+      success: '<polyline points="20 6 9 17 4 12"/>',
+      warning: '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+      error:   '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+    };
+    const el = document.createElement('div');
+    el.className = `toast pointer-events-auto flex items-start gap-3 bg-white rounded-xl shadow-lg border border-gray-100 p-4 min-w-[280px] max-w-sm`;
+    el.style.borderLeft = `4px solid ${c.border}`;
+    el.innerHTML = `
+      <div class="mt-0.5 ${c.bg} rounded-lg p-1.5 flex-shrink-0">
+        <svg class="w-4 h-4 ${c.icon}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${icons[t.type]}</svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-[#1C1C1C]">${t.title}</div>
+        <div class="text-xs text-gray-500 mt-0.5">${t.msg}</div>
+      </div>
+      <button onclick="this.closest('.toast').remove()" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 5000);
+  }
+
+  // Init : gérer resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+      sidebar.style.transform = '';
+      overlay.classList.remove('active');
+      mobileOpen = false;
+    }
+  });
+</script>
+
+</body>
+</html>

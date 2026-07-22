@@ -1,0 +1,231 @@
+LICENCE PROPRIÉTAIRE IBIG SOFT
+IBIG SECRETIS ERP — Logiciel de gestion de secrétariat et de bureautique
+
+Copyright (c) 2025-2026 IBIG SARL
+Tous droits réservés.
+
+================================================================================
+
+ACCORD DE LICENCE UTILISATEUR FINAL (ALUF / EULA)
+
+Le présent Accord de Licence Utilisateur Final ("Accord") est un accord légal
+entre vous (personne physique ou morale, ci-après "le Licencié") et IBIG SARL,
+société de droit ivoirien dont le siège social est situé à Abidjan, Côte
+d'Ivoire (ci-après "IBIG Soft" ou "le Concédant"), concernant le logiciel
+IBIG SECRETIS ERP, y compris tous ses modules, composants, mises à jour,
+améliorations, manuels et documentations associés (ci-après "le Logiciel").
+
+EN INSTALLANT, COPIANT, TÉLÉCHARGEANT OU UTILISANT LE LOGICIEL, VOUS ACCEPTEZ
+D'ÊTRE LIÉ PAR LES TERMES DU PRÉSENT ACCORD. SI VOUS N'ACCEPTEZ PAS CES
+TERMES, N'INSTALLEZ PAS ET N'UTILISEZ PAS LE LOGICIEL.
+
+================================================================================
+
+ARTICLE 1 — OCTROI DE LICENCE
+
+1.1 Sous réserve du paiement des redevances de licence applicables et du respect
+    de toutes les dispositions du présent Accord, IBIG Soft accorde au Licencié
+    une licence non exclusive, non transférable, révocable et limitée pour :
+
+    (a) installer et utiliser le Logiciel sur les serveurs désignés dans le bon
+        de commande ou l'abonnement SaaS souscrit ;
+
+    (b) utiliser le Logiciel aux fins internes de l'organisation du Licencié,
+        conformément au plan d'abonnement souscrit (Starter, Pro, Enterprise
+        ou On-Premise) ;
+
+    (c) réaliser des copies de sauvegarde du Logiciel à des fins de sécurité,
+        dans la limite strictement nécessaire à la continuité d'activité.
+
+1.2 La présente licence ne confère au Licencié aucun droit de propriété sur le
+    Logiciel. IBIG Soft conserve l'intégralité des droits de propriété
+    intellectuelle sur le Logiciel.
+
+================================================================================
+
+ARTICLE 2 — RESTRICTIONS
+
+Le Licencié s'engage expressément à NE PAS :
+
+2.1 Copier, reproduire, distribuer ou diffuser le Logiciel ou toute partie de
+    celui-ci à des tiers, à titre gratuit ou onéreux, sans l'accord écrit
+    préalable d'IBIG Soft ;
+
+2.2 Modifier, adapter, traduire, décompiler, désassembler, procéder à de
+    l'ingénierie inverse (reverse engineering) ou tenter d'obtenir le code
+    source du Logiciel, sauf dans les cas expressément autorisés par la loi
+    applicable et non susceptibles d'être contractuellement exclus ;
+
+2.3 Créer des oeuvres dérivées basées sur tout ou partie du Logiciel ;
+
+2.4 Louer, prêter, sous-licencier, vendre, revendre, transférer, céder ou
+    autrement mettre le Logiciel à disposition de tiers ;
+
+2.5 Retirer, modifier ou masquer les mentions de copyright, marques déposées
+    ou autres mentions de propriété intellectuelle figurant dans le Logiciel ;
+
+2.6 Utiliser le Logiciel pour fournir des services de traitement à des tiers
+    (bureau de services, ASP, SaaS pour compte de tiers) sans licence
+    spécifique à cet effet ;
+
+2.7 Utiliser le Logiciel à des fins illégales, frauduleuses ou contraires aux
+    réglementations applicables, notamment la législation OHADA, le RGPD et
+    les lois ivoiriennes en vigueur.
+
+================================================================================
+
+ARTICLE 3 — PROPRIÉTÉ INTELLECTUELLE
+
+3.1 Le Logiciel, y compris son code source, son code objet, ses interfaces,
+    son contenu, sa structure, son organisation, ses algorithmes, ses bases
+    de données, sa documentation, ses marques et logos, est et demeure la
+    propriété exclusive d'IBIG Soft, protégée par le droit de la propriété
+    intellectuelle applicable.
+
+3.2 Les marques "IBIG SECRETIS", "IBIG Soft", "SARA" et tout autre nom de
+    produit ou service associé sont des marques déposées ou en cours
+    d'enregistrement d'IBIG SARL. Leur utilisation sans autorisation écrite
+    préalable est strictement interdite.
+
+3.3 Toute amélioration, modification ou contribution apportée au Logiciel par
+    le Licencié, même réalisée avec l'accord d'IBIG Soft, appartient
+    automatiquement à IBIG Soft, sauf accord écrit contraire.
+
+================================================================================
+
+ARTICLE 4 — CONFIDENTIALITÉ
+
+4.1 Le Licencié s'engage à maintenir la confidentialité du Logiciel et de
+    toute information technique, commerciale ou stratégique relative à celui-ci
+    dont il pourrait avoir connaissance dans le cadre du présent Accord.
+
+4.2 Cette obligation de confidentialité survivra à la résiliation du présent
+    Accord pour une durée de cinq (5) ans.
+
+================================================================================
+
+ARTICLE 5 — MISES À JOUR ET MAINTENANCE
+
+5.1 Dans le cadre d'un abonnement SaaS actif ou d'un contrat de maintenance
+    On-Premise, IBIG Soft fournira au Licencié les mises à jour et correctifs
+    du Logiciel selon les termes du plan souscrit.
+
+5.2 IBIG Soft se réserve le droit de modifier les fonctionnalités du Logiciel
+    dans le cadre de ses mises à jour, sous réserve de préavis raisonnable
+    pour les changements majeurs.
+
+5.3 Les mises à jour fournies dans le cadre d'un abonnement sont soumises aux
+    mêmes termes que le présent Accord.
+
+================================================================================
+
+ARTICLE 6 — GARANTIES ET LIMITATIONS DE RESPONSABILITÉ
+
+6.1 IBIG Soft garantit que le Logiciel fonctionnera de manière substantiellement
+    conforme à sa documentation pendant la durée de l'abonnement actif.
+
+6.2 DANS LES LIMITES AUTORISÉES PAR LA LOI APPLICABLE, LE LOGICIEL EST FOURNI
+    "EN L'ÉTAT". IBIG SOFT EXCLUT TOUTE GARANTIE IMPLICITE, NOTAMMENT LES
+    GARANTIES D'ADÉQUATION À UN USAGE PARTICULIER ET D'ABSENCE DE
+    CONTREFAÇON.
+
+6.3 EN AUCUN CAS IBIG SOFT NE SERA RESPONSABLE DES DOMMAGES INDIRECTS,
+    ACCESSOIRES, SPÉCIAUX, CONSÉCUTIFS OU PUNITIFS, Y COMPRIS LES PERTES
+    DE BÉNÉFICES, PERTES DE DONNÉES OU INTERRUPTIONS D'ACTIVITÉ, MÊME SI
+    IBIG SOFT A ÉTÉ AVISÉ DE L'ÉVENTUALITÉ DE TELS DOMMAGES.
+
+6.4 La responsabilité totale d'IBIG Soft au titre du présent Accord ne pourra
+    en aucun cas excéder le montant des redevances payées par le Licencié
+    au cours des douze (12) derniers mois précédant le fait générateur.
+
+================================================================================
+
+ARTICLE 7 — DURÉE ET RÉSILIATION
+
+7.1 Le présent Accord entre en vigueur à la date d'activation de la licence
+    et reste en vigueur tant que le Licencié dispose d'un abonnement ou d'une
+    licence valide.
+
+7.2 IBIG Soft peut résilier immédiatement le présent Accord en cas de violation
+    par le Licencié de l'une quelconque de ses dispositions.
+
+7.3 En cas de résiliation, le Licencié doit immédiatement cesser d'utiliser
+    le Logiciel et détruire toutes les copies en sa possession.
+
+7.4 Les articles relatifs à la propriété intellectuelle, la confidentialité,
+    les limitations de responsabilité et la loi applicable survivent à la
+    résiliation.
+
+================================================================================
+
+ARTICLE 8 — DONNÉES ET CONFIDENTIALITÉ
+
+8.1 Les données saisies par le Licencié dans le Logiciel restent la propriété
+    exclusive du Licencié. IBIG Soft traite ces données en qualité de
+    sous-traitant conformément au Règlement Général sur la Protection des
+    Données (RGPD) et aux lois locales applicables.
+
+8.2 Un Accord de Traitement de Données (DPA) distinct est disponible sur
+    demande à legal@ibigsoft.com et fait partie intégrante du présent Accord
+    pour les clients soumis au RGPD.
+
+================================================================================
+
+ARTICLE 9 — DROIT APPLICABLE ET JURIDICTION COMPÉTENTE
+
+9.1 Le présent Accord est régi par le droit ivoirien et, subsidiairement,
+    par le droit OHADA applicable.
+
+9.2 Tout litige relatif à l'interprétation ou l'exécution du présent Accord
+    sera soumis, à défaut de règlement amiable dans un délai de trente (30)
+    jours, à la compétence exclusive des tribunaux d'Abidjan, Côte d'Ivoire.
+
+9.3 Les parties reconnaissent la compétence de la CCJA (Cour Commune de
+    Justice et d'Arbitrage de l'OHADA) pour les litiges pouvant y être
+    soumis.
+
+================================================================================
+
+ARTICLE 10 — DISPOSITIONS GÉNÉRALES
+
+10.1 Le présent Accord constitue l'intégralité de l'accord entre les parties
+     concernant son objet et remplace tout accord antérieur.
+
+10.2 Si une disposition du présent Accord est jugée invalide ou inapplicable,
+     les autres dispositions restent en vigueur.
+
+10.3 Le fait pour IBIG Soft de ne pas exercer un droit prévu par le présent
+     Accord ne constitue pas une renonciation à ce droit.
+
+================================================================================
+
+COMPOSANTS TIERS
+
+Le Logiciel inclut des composants open-source soumis à leurs licences
+respectives. La liste complète des composants et de leurs licences est
+disponible dans le fichier THIRD-PARTY-LICENSES.md et via la commande :
+    php artisan secretis:licenses:list
+
+Les licences tierces principales incluent : MIT, Apache 2.0, LGPL.
+Ces composants sont utilisés conformément à leurs termes de licence.
+
+================================================================================
+
+CONTACT
+
+Pour toute question relative à la présente licence :
+
+IBIG SARL
+Direction Juridique
+Email  : legal@ibigsoft.com
+Web    : https://www.ibigsoft.com/legal
+Tél.   : +225 XX XX XX XX
+
+Pour l'acquisition d'une licence :
+Email  : commercial@ibigsoft.com
+Web    : https://www.ibig-secretis.com/pricing
+
+================================================================================
+
+Copyright (c) 2025-2026 IBIG SARL. Tous droits réservés.
+IBIG SECRETIS est une marque déposée d'IBIG SARL.

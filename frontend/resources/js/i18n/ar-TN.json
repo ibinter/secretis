@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "locale": "ar-TN",
+    "dir": "rtl",
+    "base": "ar",
+    "version": "1.0.0",
+    "description": "تونس — المصطلحات الإدارية التونسية"
+  },
+
+  "labels": {
+    "currency":   "الدينار التونسي",
+    "phone":      "+216 2X XXX XXX",
+    "country":    "تونس"
+  },
+
+  "placeholders": {
+    "phone": "+216 2X XXX XXX"
+  },
+
+  "comptabilite": {
+    "currency_symbol": "دت",
+    "currency_code":   "TND",
+    "currency_name":   "الدينار التونسي",
+    "vat":             "الأداء على القيمة المضافة (TVA)",
+    "tax_number":      "المعرف الجبائي",
+    "trade_register":  "السجل التجاري",
+    "cnss":            "الصندوق الوطني للضمان الاجتماعي (CNSS)",
+    "patente":         "قانون المالية"
+  },
+
+  "rh": {
+    "cnss_number":     "رقم الانتساب للـCNSS",
+    "cnam":            "الصندوق الوطني للتأمين على المرض (CNAM)",
+    "cavis":           "الصندوق الوطني للتقاعد (CAVIS)",
+    "congé_annuel":    "الإجازة السنوية",
+    "congé_maladie":   "الإجازة المرضية",
+    "congé_maternite": "إجازة الأمومة"
+  },
+
+  "courrier": {
+    "note_service":    "مذكرة مصلحية",
+    "circulaire":      "منشور",
+    "decision":        "قرار",
+    "arrete":          "أمر وزاري",
+    "decret":          "مرسوم"
+  },
+
+  "administration": {
+    "ministry":        "الوزارة",
+    "gouvernorat":     "الولاية",
+    "delegation":      "المعتمدية",
+    "imada":           "العمادة",
+    "gouverneur":      "الوالي",
+    "mutamad":         "المعتمد",
+    "omdha":           "العمدة",
+    "conseil_regional":"المجلس الجهوي",
+    "municipalite":    "البلدية"
+  },
+
+  "legal": {
+    "code_travail":    "مجلة الشغل التونسية",
+    "code_commerce":   "مجلة التجارة التونسية",
+    "code_societes":   "مجلة الشركات التجارية",
+    "tribunal":        "المحكمة",
+    "huissier":        "عدل تنفيذ"
+  },
+
+  "misc": {
+    "copyright": "© :year IBIG SECRETIS. جميع الحقوق محفوظة. — تونس"
+  }
+}

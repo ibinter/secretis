@@ -1,0 +1,70 @@
+/**
+ * SECRETIS ERP — Polices arabes
+ * Cairo (400-700) + Noto Sans Arabic via Google Fonts CDN
+ * Variable CSS --font-arabic appliquée sur [lang^="ar"]
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-arabic: 'Cairo', 'Noto Sans Arabic', 'Arial Unicode MS', sans-serif;
+  --font-arabic-size-base: 1rem;
+  --font-arabic-line-height: 1.7;
+  --font-arabic-letter-spacing: 0;
+}
+
+/* Application sur tous les variants arabes */
+[lang="ar"],
+[lang="ar-MA"],
+[lang="ar-TN"],
+[lang^="ar"] {
+  font-family: var(--font-arabic);
+  line-height: var(--font-arabic-line-height);
+  letter-spacing: var(--font-arabic-letter-spacing);
+}
+
+/* Titres arabes */
+[lang^="ar"] h1,
+[lang^="ar"] h2,
+[lang^="ar"] h3,
+[lang^="ar"] h4,
+[lang^="ar"] h5,
+[lang^="ar"] h6 {
+  font-family: 'Cairo', var(--font-arabic);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Boutons arabes */
+[lang^="ar"] .btn,
+[lang^="ar"] button {
+  font-family: 'Cairo', var(--font-arabic);
+  font-weight: 600;
+}
+
+/* Inputs et formulaires arabes */
+[lang^="ar"] input,
+[lang^="ar"] textarea,
+[lang^="ar"] select {
+  font-family: var(--font-arabic);
+  font-size: 1rem;
+}
+
+/* Labels et badges */
+[lang^="ar"] label,
+[lang^="ar"] .badge {
+  font-family: 'Cairo', var(--font-arabic);
+  font-weight: 500;
+}
+
+/* Navigation */
+[lang^="ar"] nav,
+[lang^="ar"] .nav-item {
+  font-family: 'Cairo', var(--font-arabic);
+  font-weight: 500;
+}
+
+/* Classe utilitaire pour forcer la police arabe */
+.font-arabic {
+  font-family: var(--font-arabic) !important;
+}

@@ -1,0 +1,35 @@
+{
+  "name": "secretis-load-tests",
+  "version": "1.0.0",
+  "description": "Suite de tests de charge et benchmarks pour IBIG SECRETIS ERP",
+  "scripts": {
+    "test:smoke":   "k6 run --env TEST_TYPE=smoke   scenarios/full-journey.js",
+    "test:load":    "k6 run --env TEST_TYPE=load    scenarios/full-journey.js",
+    "test:stress":  "k6 run --env TEST_TYPE=stress  scenarios/full-journey.js",
+    "test:spike":   "k6 run --env TEST_TYPE=spike   scenarios/full-journey.js",
+    "test:soak":    "k6 run --env TEST_TYPE=soak    scenarios/full-journey.js",
+
+    "test:auth":         "k6 run scenarios/auth-load.js",
+    "test:agenda":       "k6 run scenarios/agenda-load.js",
+    "test:courrier":     "k6 run scenarios/courrier-load.js",
+    "test:ged":          "k6 run scenarios/ged-load.js",
+    "test:dashboard":    "k6 run scenarios/dashboard-load.js",
+    "test:websocket":    "k6 run scenarios/websocket-load.js",
+    "test:webhook":      "k6 run scenarios/webhook-load.js",
+    "test:multitenancy": "k6 run scenarios/multitenancy-load.js",
+
+    "test:all": "npm run test:smoke && npm run test:load && npm run test:stress"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.52.0"
+  },
+  "optionalDependencies": {
+    "@grafana/k6-cloud": "^0.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["k6", "load-testing", "performance", "secretis", "erp"],
+  "author": "IBIG SECRETIS Team",
+  "license": "MIT"
+}

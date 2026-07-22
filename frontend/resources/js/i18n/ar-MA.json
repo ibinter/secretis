@@ -1,0 +1,83 @@
+{
+  "_meta": {
+    "locale": "ar-MA",
+    "dir": "rtl",
+    "base": "ar",
+    "version": "1.0.0",
+    "description": "المغرب — المصطلحات الإدارية المغربية (تجاوز اللغة العربية الفصحى)"
+  },
+
+  "nav": {
+    "courrier": "البريد الإداري",
+    "rh":       "الموارد البشرية",
+    "documents": "الوثائق الإدارية"
+  },
+
+  "labels": {
+    "currency":   "الدرهم المغربي",
+    "phone":      "+212 6 00 00 00 00",
+    "country":    "المغرب",
+    "organization": "المؤسسة / الإدارة"
+  },
+
+  "placeholders": {
+    "phone": "+212 6 00 00 00 00"
+  },
+
+  "comptabilite": {
+    "currency_symbol": "درهم",
+    "currency_code":   "MAD",
+    "currency_name":   "الدرهم المغربي",
+    "vat":             "الضريبة على القيمة المضافة (TVA)",
+    "tax_number":      "الرقم الضريبي (IF)",
+    "trade_register":  "السجل التجاري (RC)",
+    "cnss":            "الصندوق الوطني للضمان الاجتماعي (CNSS)",
+    "ice":             "المعرف المشترك للمقاولة (ICE)",
+    "patente":         "الضريبة المهنية (Patente)"
+  },
+
+  "rh": {
+    "cnss_number":     "رقم الانخراط في CNSS",
+    "anapec":          "ANAPEC",
+    "cimr":            "الصندوق المغربي للتقاعد (CIMR)",
+    "mutuelle":        "التعاضدية",
+    "congé_annuel":    "الرخصة السنوية",
+    "congé_maladie":   "الرخصة المرضية"
+  },
+
+  "courrier": {
+    "dahir":           "ظهير شريف",
+    "circulaire":      "منشور وزيري",
+    "note_service":    "مذكرة مصلحية",
+    "arrete":          "مرسوم",
+    "decision":        "قرار إداري",
+    "visa":            "تأشيرة",
+    "apostille":       "التصديق (Apostille)"
+  },
+
+  "dates": {
+    "hijri_note":      "يمكن عرض التواريخ بالتقويم الهجري",
+    "format_date":     "DD/MM/YYYY"
+  },
+
+  "administration": {
+    "ministry":        "الوزارة",
+    "prefecture":      "العمالة / الإقليم",
+    "commune":         "الجماعة الترابية",
+    "wilaya":          "الولاية",
+    "caïdat":          "القيادة",
+    "caid":            "القائد",
+    "wali":            "الوالي",
+    "gouverneur":      "العامل",
+    "secretaire_gen":  "الأمين العام",
+    "ministere":       "الوزارة",
+    "direction":       "المديرية",
+    "division":        "القسم",
+    "service":         "المصلحة",
+    "bureau":          "المكتب"
+  },
+
+  "misc": {
+    "copyright": "© :year IBIG SECRETIS. جميع الحقوق محفوظة. — المغرب"
+  }
+}

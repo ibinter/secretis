@@ -1,0 +1,521 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+|--------------------------------------------------------------------------
+| SECRETIS ERP — Routes Web (Inertia.js)
+| Toutes les 12 vagues — Version définitive
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\AutomationController;
+use App\Http\Controllers\BiController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CircularController;
+use App\Http\Controllers\ClientPortalController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CourrierController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentWorkflowController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\FleetController;
+use App\Http\Controllers\GedController;
+use App\Http\Controllers\HelpController;
+use App\Http\Controllers\HrController;
+use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\ParametresController;
+use App\Http\Controllers\Portal\ClientPortalController as PortalClientPortalController;
+use App\Http\Controllers\ProcurementController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\QualityController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\SaraController;
+use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\SsoController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SuperAdmin\AnnouncementController as SuperAdminAnnouncementController;
+use App\Http\Controllers\SuperAdmin\CrmController as SuperAdminCrmController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\SuperAdmin\FeatureFlagController;
+use App\Http\Controllers\SuperAdmin\LicenseController as SuperAdminLicenseController;
+use App\Http\Controllers\SuperAdmin\OrganizationController as SuperAdminOrganizationController;
+use App\Http\Controllers\SuperAdmin\SaasMetricsController;
+use App\Http\Controllers\SuperAdmin\SupportController as SuperAdminSupportController;
+use App\Http\Controllers\SupplierPortalController;
+use App\Http\Controllers\SyscohadaController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\VisitorController;
+use App\Http\Controllers\Public\VisitorPortalController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\LandingPageController;
+use Illuminate\Support\Facades\Route;
+
+// =============================================================================
+// ROUTES PUBLIQUES — Sans authentification
+// =============================================================================
+
+Route::middleware(['throttle:web'])->group(function () {
+
+    // Landing pages
+    Route::get('/', [LandingPageController::class, 'index'])->name('home');
+    Route::get('/about', [LandingPageController::class, 'about'])->name('about');
+    Route::get('/pricing', [LandingPageController::class, 'pricing'])->name('pricing');
+    Route::get('/features', [LandingPageController::class, 'features'])->name('features');
+    Route::get('/contact', [LandingPageController::class, 'contact'])->name('contact');
+    Route::post('/contact', [LandingPageController::class, 'sendContact'])->name('contact.send');
+
+    // Santé & API Docs
+    Route::get('/status', [HealthController::class, 'status'])->name('status');
+    Route::get('/docs/api', [LandingPageController::class, 'apiDocs'])->name('docs.api');
+
+    // Portail invitation visiteur (lien public envoyé par email)
+    Route::get('/visitor-invitation/{code}', [VisitorPortalController::class, 'showInvitation'])
+        ->name('visitor.invitation.show');
+
+    // Portail fournisseur (Vague 12)
+    Route::prefix('supplier-portal')->name('supplier-portal.')->group(function () {
+        Route::get('/', [SupplierPortalController::class, 'login'])->name('login');
+        Route::post('/login', [SupplierPortalController::class, 'authenticate'])->name('authenticate');
+        Route::middleware(['auth.supplier'])->group(function () {
+            Route::get('/dashboard', [SupplierPortalController::class, 'dashboard'])->name('dashboard');
+            Route::get('/rfqs', [SupplierPortalController::class, 'rfqs'])->name('rfqs.index');
+            Route::post('/rfqs/{id}/respond', [SupplierPortalController::class, 'respond'])->name('rfqs.respond');
+            Route::get('/orders', [SupplierPortalController::class, 'orders'])->name('orders.index');
+            Route::post('/orders/{id}/acknowledge', [SupplierPortalController::class, 'acknowledgeOrder'])->name('orders.acknowledge');
+            Route::post('/orders/{id}/invoice', [SupplierPortalController::class, 'uploadInvoice'])->name('orders.invoice');
+        });
+    });
+
+    // Signature électronique publique (Vague 7)
+    Route::get('/sign/{token}', [SignatureController::class, 'showPublic'])->name('sign.show');
+    Route::post('/sign/{token}', [SignatureController::class, 'processPublic'])->name('sign.process');
+
+    // Vérification certificat formation (Vague 7/12)
+    Route::get('/certificate/{uuid}', [TrainingController::class, 'verifyCertificate'])->name('certificate.verify');
+    Route::get('/training/catalog', [TrainingController::class, 'publicCatalog'])->name('training.public-catalog');
+
+    // Auth pages (Fortify / Breeze style via Inertia)
+    Route::middleware(['guest'])->group(function () {
+        Route::get('/login', [\App\Http\Controllers\Auth\AuthController::class, 'showLogin'])->name('login');
+        Route::get('/register', [\App\Http\Controllers\Auth\AuthController::class, 'showRegister'])->name('register');
+        Route::get('/forgot-password', [\App\Http\Controllers\Auth\AuthController::class, 'showForgotPassword'])->name('password.request');
+        Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
+    });
+
+    // Email verification (page publique affichée après connexion)
+    Route::get('/verify-email', [\App\Http\Controllers\Auth\AuthController::class, 'showVerifyEmail'])
+        ->middleware(['auth'])
+        ->name('verification.notice');
+    Route::get('/verify-email/{id}/{hash}', [\App\Http\Controllers\Auth\AuthController::class, 'verifyEmail'])
+        ->middleware(['auth', 'signed', 'throttle:6,1'])
+        ->name('verification.verify');
+});
+
+// =============================================================================
+// ROUTES AUTHENTIFIÉES — Inertia SPA
+// Middlewares : auth:sanctum, verified, license, tenant
+// =============================================================================
+
+Route::middleware([
+    'auth:sanctum',
+    'verified',
+    'license',
+    'tenant',
+    'throttle:web',
+])->group(function () {
+
+    // -------------------------------------------------------------------------
+    // Dashboard & Onboarding
+    // -------------------------------------------------------------------------
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding');
+
+    // -------------------------------------------------------------------------
+    // MODULE 1 — Agenda & Planning (Vague 1)
+    // -------------------------------------------------------------------------
+    Route::prefix('agenda')->name('agenda.')->group(function () {
+        Route::get('/', [AgendaController::class, 'index'])->name('index');
+        Route::get('/day', [AgendaController::class, 'day'])->name('day');
+        Route::get('/week', [AgendaController::class, 'week'])->name('week');
+        Route::get('/month', [AgendaController::class, 'month'])->name('month');
+        Route::get('/availability', [AgendaController::class, 'availability'])->name('availability');
+        Route::get('/smart-scheduler', [AgendaController::class, 'smartScheduler'])->name('smart-scheduler');
+
+        // Événements
+        Route::post('/events', [AgendaController::class, 'store'])->name('events.store');
+        Route::get('/events/{id}', [AgendaController::class, 'show'])->name('events.show');
+        Route::put('/events/{id}', [AgendaController::class, 'update'])->name('events.update');
+        Route::delete('/events/{id}', [AgendaController::class, 'destroy'])->name('events.destroy');
+        Route::post('/events/{id}/respond', [AgendaController::class, 'respond'])->name('events.respond');
+
+        // Salles de réunion
+        Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+        Route::post('/rooms/{id}/reserve', [RoomController::class, 'reserve'])->name('rooms.reserve');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 2 — Courrier & GED (Vague 2)
+    // -------------------------------------------------------------------------
+    Route::prefix('courrier')->name('courrier.')->group(function () {
+        Route::get('/', [CourrierController::class, 'index'])->name('index');
+        Route::post('/', [CourrierController::class, 'store'])->name('store');
+        Route::get('/{id}', [CourrierController::class, 'show'])->name('show');
+        Route::put('/{id}', [CourrierController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CourrierController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/assign', [CourrierController::class, 'assign'])->name('assign');
+        Route::post('/{id}/archive', [CourrierController::class, 'archive'])->name('archive');
+    });
+
+    Route::prefix('ged')->name('ged.')->group(function () {
+        Route::get('/', [DocumentController::class, 'index'])->name('index');
+        Route::post('/upload', [DocumentController::class, 'upload'])->name('upload');
+        Route::get('/search', [DocumentController::class, 'search'])->name('search');
+        Route::get('/archives', [DocumentController::class, 'archives'])->name('archives');
+        Route::get('/validation', [DocumentWorkflowController::class, 'myQueue'])->name('validation');
+        Route::get('/workflow-templates', [DocumentWorkflowController::class, 'templates'])->name('workflow-templates');
+
+        Route::prefix('documents')->name('documents.')->group(function () {
+            Route::get('/{id}', [DocumentController::class, 'show'])->name('show');
+            Route::put('/{id}', [DocumentController::class, 'update'])->name('update');
+            Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
+            Route::get('/{id}/download', [DocumentController::class, 'download'])->name('download');
+            Route::post('/{id}/share', [DocumentController::class, 'share'])->name('share');
+            Route::get('/{id}/versions', [DocumentController::class, 'versions'])->name('versions');
+            Route::post('/{id}/workflow/start', [DocumentWorkflowController::class, 'start'])->name('workflow.start');
+            Route::post('/{id}/workflow/steps/{stepId}/approve', [DocumentWorkflowController::class, 'approve'])->name('workflow.approve');
+            Route::post('/{id}/workflow/steps/{stepId}/reject', [DocumentWorkflowController::class, 'reject'])->name('workflow.reject');
+        });
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 3 — Réunions (Vague 3)
+    // -------------------------------------------------------------------------
+    Route::prefix('reunions')->name('reunions.')->group(function () {
+        Route::get('/', [MeetingController::class, 'index'])->name('index');
+        Route::post('/', [MeetingController::class, 'store'])->name('store');
+        Route::get('/{id}', [MeetingController::class, 'show'])->name('show');
+        Route::put('/{id}', [MeetingController::class, 'update'])->name('update');
+        Route::delete('/{id}', [MeetingController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/start', [MeetingController::class, 'start'])->name('start');
+        Route::post('/{id}/end', [MeetingController::class, 'end'])->name('end');
+        Route::get('/{id}/compte-rendu', [MeetingController::class, 'showMinutes'])->name('compte-rendu.show');
+        Route::post('/{id}/compte-rendu', [MeetingController::class, 'storeMinutes'])->name('compte-rendu.store');
+        Route::post('/{id}/tasks', [TaskController::class, 'createFromMeeting'])->name('tasks.create');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 4 — Tâches & Projets (Vague 4)
+    // -------------------------------------------------------------------------
+    Route::prefix('taches')->name('taches.')->group(function () {
+        Route::get('/', [TaskController::class, 'index'])->name('index');
+        Route::post('/', [TaskController::class, 'store'])->name('store');
+        Route::get('/{id}', [TaskController::class, 'show'])->name('show');
+        Route::put('/{id}', [TaskController::class, 'update'])->name('update');
+        Route::delete('/{id}', [TaskController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/complete', [TaskController::class, 'complete'])->name('complete');
+        Route::get('/kanban', [TaskController::class, 'kanban'])->name('kanban');
+    });
+
+    Route::prefix('projets')->name('projets.')->group(function () {
+        Route::get('/', [ProjectController::class, 'index'])->name('index');
+        Route::post('/', [ProjectController::class, 'store'])->name('store');
+        Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
+        Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/gantt', [ProjectController::class, 'gantt'])->name('gantt');
+        Route::get('/{id}/risk-matrix', [ProjectController::class, 'riskMatrix'])->name('risk-matrix');
+        Route::post('/{id}/timesheets', [ProjectController::class, 'storeTimesheet'])->name('timesheets.store');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 5 — Communication (Vague 5)
+    // -------------------------------------------------------------------------
+    Route::prefix('messages')->name('messages.')->group(function () {
+        Route::get('/', [MessageController::class, 'index'])->name('index');
+        Route::post('/', [MessageController::class, 'store'])->name('store');
+        Route::get('/{id}', [MessageController::class, 'show'])->name('show');
+    });
+
+    Route::prefix('circulaires')->name('circulaires.')->group(function () {
+        Route::get('/', [CircularController::class, 'index'])->name('index');
+        Route::post('/', [CircularController::class, 'store'])->name('store');
+        Route::get('/{id}', [CircularController::class, 'show'])->name('show');
+        Route::put('/{id}', [CircularController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CircularController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::get('/annuaire', [ContactController::class, 'index'])->name('annuaire');
+    Route::get('/tableau-affichage', [AnnouncementController::class, 'board'])->name('tableau-affichage');
+
+    // -------------------------------------------------------------------------
+    // MODULE 6 — Réception Visiteurs (Vague 6)
+    // -------------------------------------------------------------------------
+    Route::prefix('reception')->name('reception.')->group(function () {
+        Route::get('/', [VisitorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/kiosk', [VisitorController::class, 'kiosk'])->name('kiosk');
+        Route::post('/check-in', [VisitorController::class, 'checkIn'])->name('check-in');
+        Route::post('/visits/{id}/check-out', [VisitorController::class, 'checkOut'])->name('check-out');
+        Route::get('/log', [VisitorController::class, 'log'])->name('log');
+        Route::get('/reports', [VisitorController::class, 'reports'])->name('reports');
+        Route::get('/blacklist', [VisitorController::class, 'blacklist'])->name('blacklist');
+        Route::post('/visitors/{id}/blacklist', [VisitorController::class, 'addToBlacklist'])->name('visitors.blacklist');
+
+        Route::prefix('invitations')->name('invitations.')->group(function () {
+            Route::get('/', [VisitorController::class, 'invitations'])->name('index');
+            Route::post('/', [VisitorController::class, 'createInvitation'])->name('store');
+        });
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 7 — Ressources (Vague 3/4)
+    // -------------------------------------------------------------------------
+    Route::prefix('ressources')->name('ressources.')->group(function () {
+        Route::get('/salles', [ResourceController::class, 'salles'])->name('salles');
+        Route::get('/materiel', [ResourceController::class, 'materiel'])->name('materiel');
+        Route::get('/fournitures', [ResourceController::class, 'fournitures'])->name('fournitures');
+        Route::get('/vehicules', [ResourceController::class, 'vehicules'])->name('vehicules');
+    });
+
+    // Flotte & GPS (Vague 5/9)
+    Route::prefix('fleet')->name('fleet.')->group(function () {
+        Route::get('/map', [FleetController::class, 'map'])->name('map');
+        Route::get('/vehicles/{id}', [FleetController::class, 'vehicleDetail'])->name('vehicles.show');
+        Route::get('/maintenance', [FleetController::class, 'maintenancePlanning'])->name('maintenance');
+        Route::get('/carburant', [FleetController::class, 'fuelManagement'])->name('carburant');
+        Route::get('/rapport', [FleetController::class, 'report'])->name('rapport');
+        Route::get('/geofences', [FleetController::class, 'geofences'])->name('geofences');
+        Route::get('/carnet-de-bord', [FleetController::class, 'tripLogger'])->name('carnet-de-bord');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 8 — Ressources Humaines Légère (Vague 4/8)
+    // -------------------------------------------------------------------------
+    Route::prefix('rh')->name('rh.')->group(function () {
+        Route::get('/personnel', [HrController::class, 'index'])->name('personnel.index');
+        Route::get('/personnel/{id}', [EmployeeController::class, 'show'])->name('personnel.show');
+        Route::get('/organigramme', [HrController::class, 'orgChart'])->name('organigramme');
+        Route::get('/planning', [HrController::class, 'planning'])->name('planning');
+
+        // Congés
+        Route::prefix('conges')->name('conges.')->group(function () {
+            Route::get('/', [LeaveController::class, 'index'])->name('index');
+            Route::post('/', [LeaveController::class, 'store'])->name('store');
+            Route::get('/{id}', [LeaveController::class, 'show'])->name('show');
+            Route::put('/{id}', [LeaveController::class, 'update'])->name('update');
+            Route::post('/{id}/approve', [LeaveController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [LeaveController::class, 'reject'])->name('reject');
+        });
+
+        // Notes de frais
+        Route::prefix('notes-de-frais')->name('notes-de-frais.')->group(function () {
+            Route::get('/', [ExpenseController::class, 'index'])->name('index');
+            Route::post('/', [ExpenseController::class, 'store'])->name('store');
+            Route::get('/{id}', [ExpenseController::class, 'show'])->name('show');
+            Route::put('/{id}', [ExpenseController::class, 'update'])->name('update');
+            Route::post('/{id}/approve', [ExpenseController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [ExpenseController::class, 'reject'])->name('reject');
+        });
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 9 — Rapports & Business Intelligence (Vague 5/9)
+    // -------------------------------------------------------------------------
+    Route::prefix('rapports')->name('rapports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/builder', [ReportController::class, 'builder'])->name('builder');
+        Route::post('/generate', [ReportController::class, 'generate'])->name('generate');
+        Route::get('/{id}', [ReportController::class, 'show'])->name('show');
+        Route::get('/{id}/export', [ReportController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('bi')->name('bi.')->group(function () {
+        Route::get('/dashboard', [BiController::class, 'index'])->name('dashboard');
+        Route::get('/kpis', [BiController::class, 'kpis'])->name('kpis');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE 10 — Paramètres (Vague 3/10)
+    // -------------------------------------------------------------------------
+    Route::prefix('parametres')->name('parametres.')->group(function () {
+        Route::get('/', [ParametresController::class, 'index'])->name('index');
+        Route::put('/organisation', [ParametresController::class, 'updateOrganisation'])->name('organisation.update');
+
+        // Utilisateurs
+        Route::get('/utilisateurs', [ParametresController::class, 'utilisateurs'])->name('utilisateurs');
+        Route::post('/utilisateurs/invite', [ParametresController::class, 'inviteUtilisateur'])->name('utilisateurs.invite');
+
+        // Rôles & permissions
+        Route::get('/roles', [ParametresController::class, 'roles'])->name('roles');
+        Route::get('/notifications', [ParametresController::class, 'notifications'])->name('notifications');
+
+        // Langue & région
+        Route::get('/langue-region', [ParametresController::class, 'langueRegion'])->name('langue-region');
+        Route::put('/langue-region', [ParametresController::class, 'updateLangueRegion'])->name('langue-region.update');
+
+        // Intégrations (Vague 9)
+        Route::get('/integrations', [IntegrationController::class, 'marketplace'])->name('integrations');
+        Route::post('/integrations/{id}/install', [IntegrationController::class, 'install'])->name('integrations.install');
+        Route::delete('/integrations/{id}/uninstall', [IntegrationController::class, 'uninstall'])->name('integrations.uninstall');
+
+        // Webhooks & API
+        Route::get('/webhooks', [IntegrationController::class, 'webhooks'])->name('webhooks');
+        Route::get('/api-keys', [IntegrationController::class, 'apiKeys'])->name('api-keys');
+
+        // SSO (Vague 10)
+        Route::get('/sso', [SsoController::class, 'settings'])->name('sso');
+        Route::get('/securite', [ParametresController::class, 'securite'])->name('securite');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE COMPTABILITÉ SYSCOHADA (Vague 6/11)
+    // -------------------------------------------------------------------------
+    Route::prefix('comptabilite')->name('comptabilite.')->group(function () {
+        Route::get('/', [AccountingController::class, 'index'])->name('index');
+        Route::get('/generale', [SyscohadaController::class, 'index'])->name('generale');
+        Route::get('/journal', [SyscohadaController::class, 'journal'])->name('journal');
+        Route::get('/balance', [SyscohadaController::class, 'balance'])->name('balance');
+        Route::get('/bilan', [SyscohadaController::class, 'balanceSheet'])->name('bilan');
+        Route::get('/compte-resultat', [SyscohadaController::class, 'incomeStatement'])->name('compte-resultat');
+        Route::get('/grand-livre', [SyscohadaController::class, 'generalLedger'])->name('grand-livre');
+        Route::get('/plan-comptable', [SyscohadaController::class, 'chartOfAccounts'])->name('plan-comptable');
+        Route::get('/declarations', [SyscohadaController::class, 'taxDeclarations'])->name('declarations');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE BUDGET (Vague 11)
+    // -------------------------------------------------------------------------
+    Route::prefix('budget')->name('budget.')->group(function () {
+        Route::get('/', [BudgetController::class, 'index'])->name('index');
+        Route::get('/dashboard', [BudgetController::class, 'dashboard'])->name('dashboard');
+        Route::get('/{id}/ecarts', [BudgetController::class, 'variance'])->name('ecarts');
+        Route::get('/{id}/previsions', [BudgetController::class, 'forecast'])->name('previsions');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE ACHATS & PROCUREMENT (Vague 12)
+    // -------------------------------------------------------------------------
+    Route::prefix('achats')->name('achats.')->group(function () {
+        Route::get('/', [ProcurementController::class, 'dashboard'])->name('index');
+        Route::get('/demandes', [ProcurementController::class, 'purchaseRequests'])->name('demandes');
+        Route::get('/appels-offres', [ProcurementController::class, 'rfqs'])->name('appels-offres');
+        Route::get('/commandes', [ProcurementController::class, 'purchaseOrders'])->name('commandes');
+        Route::get('/fournisseurs', [ProcurementController::class, 'suppliers'])->name('fournisseurs');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE QUALITÉ (Vague 12)
+    // -------------------------------------------------------------------------
+    Route::prefix('qualite')->name('qualite.')->group(function () {
+        Route::get('/', [QualityController::class, 'dashboard'])->name('index');
+        Route::get('/non-conformites', [QualityController::class, 'nonconformities'])->name('non-conformites');
+        Route::get('/indicateurs', [QualityController::class, 'indicators'])->name('indicateurs');
+        Route::get('/audits', [QualityController::class, 'audits'])->name('audits');
+        Route::get('/documents', [QualityController::class, 'documents'])->name('documents');
+        Route::get('/reclamations', [QualityController::class, 'complaints'])->name('reclamations');
+        Route::get('/cartographie', [QualityController::class, 'processMap'])->name('cartographie');
+    });
+
+    // -------------------------------------------------------------------------
+    // MODULE FORMATION & E-LEARNING (Vague 7/12)
+    // -------------------------------------------------------------------------
+    Route::prefix('formation')->name('formation.')->group(function () {
+        Route::get('/', [TrainingController::class, 'index'])->name('index');
+        Route::get('/catalogue', [TrainingController::class, 'catalog'])->name('catalogue');
+        Route::get('/parcours', [TrainingController::class, 'learningPaths'])->name('parcours');
+        Route::get('/sessions-live', [TrainingController::class, 'liveSessions'])->name('sessions-live');
+        Route::get('/mon-espace', [TrainingController::class, 'mySpace'])->name('mon-espace');
+    });
+
+    // -------------------------------------------------------------------------
+    // SIGNATURES ÉLECTRONIQUES (Vague 7)
+    // -------------------------------------------------------------------------
+    Route::get('/signatures', [SignatureController::class, 'index'])->name('signatures');
+
+    // -------------------------------------------------------------------------
+    // AUTOMATISATIONS (Vague 9)
+    // -------------------------------------------------------------------------
+    Route::get('/automatisations', [AutomationController::class, 'index'])->name('automatisations');
+
+    // -------------------------------------------------------------------------
+    // SARA — Assistant IA (Vague 8)
+    // -------------------------------------------------------------------------
+    Route::get('/sara', [SaraController::class, 'index'])->name('sara');
+
+    // -------------------------------------------------------------------------
+    // PORTAIL CLIENT (Vague 7)
+    // -------------------------------------------------------------------------
+    Route::get('/portail-client', [PortalClientPortalController::class, 'index'])->name('portail-client');
+
+    // -------------------------------------------------------------------------
+    // MODULES TRANSVERSAUX
+    // -------------------------------------------------------------------------
+    Route::get('/abonnement', [SubscriptionController::class, 'index'])->name('abonnement');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::get('/aide', [HelpController::class, 'index'])->name('aide');
+
+    // -------------------------------------------------------------------------
+    // SUPERADMIN — Espace administration centrale IBIG Soft
+    // -------------------------------------------------------------------------
+    Route::prefix('superadmin')->name('superadmin.')->middleware(['role:super_admin'])->group(function () {
+
+        Route::get('/', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+        // Organisations / Tenants
+        Route::get('/organisations', [SuperAdminOrganizationController::class, 'index'])->name('organisations');
+        Route::get('/organisations/{id}', [SuperAdminOrganizationController::class, 'show'])->name('organisations.show');
+        Route::post('/organisations', [SuperAdminOrganizationController::class, 'store'])->name('organisations.store');
+        Route::put('/organisations/{id}', [SuperAdminOrganizationController::class, 'update'])->name('organisations.update');
+        Route::delete('/organisations/{id}', [SuperAdminOrganizationController::class, 'destroy'])->name('organisations.destroy');
+        Route::post('/organisations/{id}/activate', [SuperAdminOrganizationController::class, 'activate'])->name('organisations.activate');
+        Route::post('/organisations/{id}/deactivate', [SuperAdminOrganizationController::class, 'deactivate'])->name('organisations.deactivate');
+        Route::post('/organisations/{id}/impersonate', [SuperAdminOrganizationController::class, 'impersonate'])->name('organisations.impersonate');
+
+        // SaaS Metrics (Vague 10)
+        Route::prefix('saas')->name('saas.')->group(function () {
+            Route::get('/dashboard', [SaasMetricsController::class, 'dashboard'])->name('dashboard');
+            Route::get('/mrr', [SaasMetricsController::class, 'mrr'])->name('mrr');
+            Route::get('/cohortes', [SaasMetricsController::class, 'cohorts'])->name('cohortes');
+            Route::get('/health', [SaasMetricsController::class, 'health'])->name('health');
+        });
+
+        // CRM SuperAdmin (Vague 10)
+        Route::prefix('crm')->name('crm.')->group(function () {
+            Route::get('/pipeline', [SuperAdminCrmController::class, 'pipeline'])->name('pipeline');
+            Route::get('/contacts', [SuperAdminCrmController::class, 'contacts'])->name('contacts');
+            Route::get('/analytics', [SuperAdminCrmController::class, 'analytics'])->name('analytics');
+        });
+
+        // Support & Feature Flags
+        Route::get('/support', [SuperAdminSupportController::class, 'index'])->name('support');
+        Route::get('/feature-flags', [FeatureFlagController::class, 'index'])->name('feature-flags');
+        Route::get('/annonces', [SuperAdminAnnouncementController::class, 'index'])->name('annonces');
+        Route::get('/monitoring', [SaasMetricsController::class, 'monitoring'])->name('monitoring');
+
+        // Licences
+        Route::get('/licences', [SuperAdminLicenseController::class, 'index'])->name('licences');
+        Route::get('/licences/{id}', [SuperAdminLicenseController::class, 'show'])->name('licences.show');
+        Route::post('/licences', [SuperAdminLicenseController::class, 'store'])->name('licences.store');
+        Route::put('/licences/{id}', [SuperAdminLicenseController::class, 'update'])->name('licences.update');
+        Route::delete('/licences/{id}', [SuperAdminLicenseController::class, 'destroy'])->name('licences.destroy');
+        Route::post('/licences/{id}/extend', [SuperAdminLicenseController::class, 'extend'])->name('licences.extend');
+        Route::post('/licences/{id}/regenerate', [SuperAdminLicenseController::class, 'regenerate'])->name('licences.regenerate');
+    });
+});

@@ -1,0 +1,266 @@
+/**
+ * IBIG SECRETIS — Dark Mode CSS
+ * Mode sombre complet avec variables CSS
+ * Activé via [data-theme="dark"] sur <html>
+ * Version : 1.0.0
+ */
+
+/* ─────────────────────────────────────────────────────────────
+   Variables de durée d'animation (partagées)
+   ──────────────────────────────────────────────────────────── */
+:root {
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MODE SOMBRE — [data-theme="dark"] ou .dark
+   ──────────────────────────────────────────────────────────── */
+[data-theme="dark"],
+.dark {
+
+  /* ── Backgrounds ─────────────────────────────────────────── */
+  --bg-primary:   #0F1923;
+  --bg-secondary: #1A2A3A;
+  --bg-tertiary:  #243447;
+  --bg-card:      #1E2D40;
+
+  /* Alias vers les tokens globaux */
+  --color-bg:           #0F1923;
+  --color-bg-secondary: #1A2A3A;
+  --color-bg-tertiary:  #243447;
+  --color-bg-hover:     #1A2A3A;
+
+  /* ── Textes ──────────────────────────────────────────────── */
+  --text-primary:   #E8F1FA;
+  --text-secondary: #A8C0D6;
+  --text-muted:     #6B8BA4;
+
+  --color-text-primary:   #E8F1FA;
+  --color-text-secondary: #A8C0D6;
+  --color-text-muted:     #6B8BA4;
+  --color-text-inverse:   #0F1923;
+
+  /* ── Bordures ────────────────────────────────────────────── */
+  --border-color: #2A3F55;
+  --border-light: #1F3144;
+
+  --color-border:       #2A3F55;
+  --color-border-light: #1F3144;
+  --color-border-dark:  #3A5570;
+  --color-border-focus: #2E86C1;
+
+  /* ── Inputs ─────────────────────────────────────────────── */
+  --input-bg:     #162230;
+  --input-border: #2A3F55;
+  --input-focus:  #2E86C1;
+
+  --input-bg-dark:            #162230;
+  --input-border-dark:        #2A3F55;
+  --input-focus-ring:         0 0 0 3px rgba(46, 134, 193, 0.35);
+  --input-focus-border:       #2E86C1;
+
+  /* ── Sidebar ─────────────────────────────────────────────── */
+  --sidebar-bg:          #0D1820;
+  --sidebar-item-hover:  #1A2A3A;
+  --sidebar-border:      #1F3144;
+  --sidebar-text:        rgba(168, 192, 214, 0.90);
+  --sidebar-text-active: #E8F1FA;
+  --sidebar-item-active: #2E86C1;
+
+  /* ── Header ──────────────────────────────────────────────── */
+  --header-bg:     #0D1820;
+  --header-border: #1F3144;
+  --header-shadow: 0 2px 8px rgba(0, 0, 0, 0.40);
+
+  /* ── Couleurs sémantiques adaptées (luminosité réduite) ──── */
+  --color-primary:   #2A7BBE;
+  --color-secondary: #2E86C1;
+  --color-accent:    #D4880F;
+
+  /* Succès — luminosité réduite de 15% */
+  --color-success:          #1a7040;
+  --color-success-bg:       #0d2b1a;
+  --color-success-text:     #6fcf97;
+  --color-success-border:   #1a7040;
+
+  /* Alerte — luminosité réduite */
+  --color-warning:          #c96b1c;
+  --color-warning-bg:       #2b1a0d;
+  --color-warning-text:     #f2994a;
+  --color-warning-border:   #c96b1c;
+
+  /* Danger — luminosité réduite */
+  --color-danger:           #a23024;
+  --color-danger-bg:        #2b0d0d;
+  --color-danger-text:      #eb5757;
+  --color-danger-border:    #a23024;
+
+  /* Info */
+  --color-info:             #1565c0;
+  --color-info-bg:          #0a1a2e;
+  --color-info-text:        #64b5f6;
+  --color-info-border:      #1565c0;
+
+  /* ── Ombres adaptées (plus intenses sur fond sombre) ──────── */
+  --shadow-xs:    0 1px 2px 0 rgba(0, 0, 0, 0.30);
+  --shadow-sm:    0 1px 3px 0 rgba(0, 0, 0, 0.40), 0 1px 2px -1px rgba(0, 0, 0, 0.40);
+  --shadow:       0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.45);
+  --shadow-md:    0 4px 8px 0 rgba(0, 0, 0, 0.50), 0 2px 4px 0 rgba(0, 0, 0, 0.40);
+  --shadow-lg:    0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.55);
+  --shadow-xl:    0 20px 25px -5px rgba(0, 0, 0, 0.60), 0 8px 10px -6px rgba(0, 0, 0, 0.60);
+  --shadow-2xl:   0 25px 50px -12px rgba(0, 0, 0, 0.70);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.30);
+
+  --shadow-card:       0 2px 8px 0 rgba(0, 0, 0, 0.40);
+  --shadow-card-hover: 0 8px 24px 0 rgba(0, 0, 0, 0.55);
+  --shadow-modal:      0 20px 60px 0 rgba(0, 0, 0, 0.70);
+  --shadow-dropdown:   0 8px 24px 0 rgba(0, 0, 0, 0.55);
+  --shadow-sidebar:    2px 0 12px 0 rgba(0, 0, 0, 0.50);
+  --shadow-toast:      0 4px 16px 0 rgba(0, 0, 0, 0.55);
+
+  /* ── Overlay ─────────────────────────────────────────────── */
+  --color-overlay:       rgba(0, 0, 0, 0.75);
+  --color-overlay-light: rgba(0, 0, 0, 0.50);
+
+  /* ── Modal ───────────────────────────────────────────────── */
+  --modal-bg: #1E2D40;
+
+  /* ── Kanban ──────────────────────────────────────────────── */
+  --kanban-column-bg: #1A2A3A;
+  --kanban-card-bg:   #1E2D40;
+
+  /* ── Tables ──────────────────────────────────────────────── */
+  --table-header-bg:    #162230;
+  --table-row-hover:    #1A2A3A;
+  --table-row-even:     #182535;
+  --table-border:       #2A3F55;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Mode sombre via media query (pour mode "system")
+   ──────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-primary:   #0F1923;
+    --bg-secondary: #1A2A3A;
+    --bg-tertiary:  #243447;
+    --bg-card:      #1E2D40;
+
+    --color-bg:           #0F1923;
+    --color-bg-secondary: #1A2A3A;
+    --color-bg-tertiary:  #243447;
+    --color-bg-hover:     #1A2A3A;
+
+    --text-primary:   #E8F1FA;
+    --text-secondary: #A8C0D6;
+    --text-muted:     #6B8BA4;
+
+    --color-text-primary:   #E8F1FA;
+    --color-text-secondary: #A8C0D6;
+    --color-text-muted:     #6B8BA4;
+    --color-text-inverse:   #0F1923;
+
+    --border-color: #2A3F55;
+    --border-light: #1F3144;
+
+    --color-border:       #2A3F55;
+    --color-border-light: #1F3144;
+    --color-border-dark:  #3A5570;
+
+    --input-bg:     #162230;
+    --input-border: #2A3F55;
+    --input-focus:  #2E86C1;
+
+    --sidebar-bg:         #0D1820;
+    --sidebar-item-hover: #1A2A3A;
+    --sidebar-border:     #1F3144;
+
+    --header-bg:     #0D1820;
+    --header-border: #1F3144;
+
+    --shadow-card:  0 2px 8px 0 rgba(0, 0, 0, 0.40);
+    --shadow-modal: 0 20px 60px 0 rgba(0, 0, 0, 0.70);
+    --modal-bg:     #1E2D40;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Transition globale pour le changement de thème
+   ──────────────────────────────────────────────────────────── */
+html {
+  transition:
+    background-color var(--duration-normal) ease-in-out,
+    color var(--duration-normal) ease-in-out;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Scrollbar custom — fine et colorée en mode sombre
+   ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] ::-webkit-scrollbar,
+.dark ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+  background: #0F1923;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background: #2A3F55;
+  border-radius: 9999px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3A5570;
+}
+
+/* Firefox */
+[data-theme="dark"],
+.dark {
+  scrollbar-width: thin;
+  scrollbar-color: #2A3F55 #0F1923;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Sélection de texte en mode sombre
+   ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] ::selection,
+.dark ::selection {
+  background-color: rgba(46, 134, 193, 0.35);
+  color: #E8F1FA;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Focus visible en mode sombre — outline WCAG AA
+   ──────────────────────────────────────────────────────────── */
+[data-theme="dark"] :focus-visible,
+.dark :focus-visible {
+  outline: 2px solid #2E86C1;
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Utilitaires Tailwind dark: équivalents via classes CSS
+   (complémentaires aux classes dark: de Tailwind)
+   ──────────────────────────────────────────────────────────── */
+
+/* Backgrounds */
+[data-theme="dark"] .dark\:bg-primary   { background-color: #0F1923; }
+[data-theme="dark"] .dark\:bg-secondary { background-color: #1A2A3A; }
+[data-theme="dark"] .dark\:bg-card      { background-color: #1E2D40; }
+[data-theme="dark"] .dark\:bg-input     { background-color: #162230; }
+
+/* Textes */
+[data-theme="dark"] .dark\:text-primary   { color: #E8F1FA; }
+[data-theme="dark"] .dark\:text-secondary { color: #A8C0D6; }
+[data-theme="dark"] .dark\:text-muted     { color: #6B8BA4; }
+
+/* Bordures */
+[data-theme="dark"] .dark\:border-default { border-color: #2A3F55; }
+[data-theme="dark"] .dark\:border-light   { border-color: #1F3144; }
