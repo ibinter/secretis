@@ -10,6 +10,8 @@ use App\Services\AuditService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 /**
  * SubscriptionController — Gestion de l'abonnement de l'organisation
@@ -26,6 +28,106 @@ class SubscriptionController extends Controller
         private PaymentService  $paymentService,
         private AuditService    $auditService,
     ) {}
+
+    // =========================================================================
+    // Pages Inertia — /abonnement/*
+    // =========================================================================
+
+    /**
+     * Page principale d'abonnement : résumé du plan courant.
+     *
+     * GET /abonnement
+     */
+    public function index(Request $request): InertiaResponse
+    {
+        $org     = $request->user()->organization()->with('license')->firstOrFail();
+        $license = $org->license;
+
+        return Inertia::render('Subscription/Index', [
+            'organization' => [
+                'id'   => $org->id,
+                'name' => $org->name,
+            ],
+            'license' => $license ? [
+                'plan_id'        => $license->plan_id,
+                'plan_name'      => $license->plan_name,
+                'status'         => $license->status,
+                'billing_cycle'  => $license->billing_cycle,
+                'days_remaining' => max(0, (int) Carbon::now()->diffInDays(Carbon::parse($license->ends_at), false)),
+                'ends_at'        => Carbon::parse($license->ends_at)->toIso8601String(),
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Page de choix des plans disponibles.
+     *
+     * GET /abonnement/plans
+     */
+    public function plans(Request $request): InertiaResponse
+    {
+        $plans = Plan::where('active', true)->orderBy('price_monthly')->get([
+            'id', 'name', 'slug', 'price_monthly', 'price_yearly',
+            'max_users', 'storage_gb', 'features', 'is_popular',
+        ]);
+
+        return Inertia::render('Subscription/Plans', [
+            'plans' => $plans,
+        ]);
+    }
+
+    /**
+     * Page de paiement / checkout.
+     *
+     * GET /abonnement/checkout
+     */
+    public function checkout(Request $request): InertiaResponse
+    {
+        $planSlug = $request->query('plan');
+        $plan     = $planSlug ? Plan::where('slug', $planSlug)->firstOrFail() : null;
+
+        return Inertia::render('Subscription/Checkout', [
+            'plan'               => $plan,
+            'available_gateways' => $this->paymentService->availableGateways(),
+        ]);
+    }
+
+    /**
+     * Statut d'une commande / paiement.
+     *
+     * GET /abonnement/commandes/{ref}
+     */
+    public function orderStatus(string $ref): InertiaResponse
+    {
+        $payment = Payment::where('reference', $ref)->firstOrFail();
+
+        return Inertia::render('Subscription/OrderStatus', [
+            'order' => [
+                'ref'        => $payment->reference,
+                'status'     => $payment->status,
+                'amount'     => $payment->amount,
+                'currency'   => $payment->currency,
+                'plan_name'  => $payment->plan_name,
+                'created_at' => $payment->created_at->toIso8601String(),
+                'paid_at'    => $payment->paid_at?->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Page affichée quand la licence est expirée.
+     *
+     * GET /abonnement/expiree
+     */
+    public function expired(Request $request): InertiaResponse
+    {
+        $org = $request->user()->organization()->firstOrFail(['id', 'name']);
+
+        return Inertia::render('Subscription/Expired', [
+            'organization_name' => $org->name,
+            'renewal_link'      => route('abonnement.plans'),
+        ]);
+    }
 
     // =========================================================================
     // Plan courant

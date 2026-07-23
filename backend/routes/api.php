@@ -16,6 +16,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\Api\V1\AuthApiController;
+use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\EventApiController;
 use App\Http\Controllers\Api\V1\NotificationApiController;
 use App\Http\Controllers\Api\V1\TaskApiController;
@@ -41,7 +42,10 @@ use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\NotificationCenterController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OcrController;
 use App\Http\Controllers\OutlookController;
 use App\Http\Controllers\PartnerApiController;
@@ -294,6 +298,13 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::post('/{id}/subtasks', [TaskController::class, 'storeSubtask'])->name('subtasks.store');
         Route::put('/{id}/subtasks/{sid}', [TaskController::class, 'updateSubtask'])->name('subtasks.update');
         Route::delete('/{id}/subtasks/{sid}', [TaskController::class, 'destroySubtask'])->name('subtasks.destroy');
+    });
+
+    // ── Devices (push notifications) ─────────────────────────────────────────
+    Route::prefix('devices')->name('devices.')->group(function () {
+        Route::get('/', [DeviceController::class, 'index'])->name('index');
+        Route::post('/', [DeviceController::class, 'register'])->name('register');
+        Route::delete('/{device_id}', [DeviceController::class, 'unregister'])->name('unregister');
     });
 
     Route::prefix('projects')->name('projects.')->group(function () {
@@ -660,13 +671,33 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // NOTIFICATIONS (transversal)
     // -------------------------------------------------------------------------
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationApiController::class, 'index'])->name('index');
-        Route::put('/read-all', [NotificationApiController::class, 'markAllRead'])->name('read-all');
-        Route::put('/{id}/read', [NotificationApiController::class, 'markRead'])->name('read');
-        Route::delete('/{id}', [NotificationApiController::class, 'destroy'])->name('destroy');
-        Route::get('/preferences', [NotificationCenterController::class, 'preferences'])->name('preferences');
-        Route::put('/preferences', [NotificationCenterController::class, 'updatePreferences'])->name('preferences.update');
+        Route::get('/',            [NotificationController::class, 'apiIndex'])->name('index');
+        Route::get('/unread-count',[NotificationController::class, 'unreadCount'])->name('unread-count');
+        Route::put('/read-all',    [NotificationController::class, 'markAllRead'])->name('read-all');
+        Route::post('/read-all',   [NotificationController::class, 'markAllRead'])->name('read-all.post');
+        Route::put('/{id}/read',   [NotificationController::class, 'markRead'])->name('read');
+        Route::post('/{id}/read',  [NotificationController::class, 'markRead'])->name('read.post');
+        Route::delete('/{id}',     [NotificationController::class, 'destroy'])->name('destroy');
+        Route::get('/preferences', [NotificationController::class, 'getPreferences'])->name('preferences');
+        Route::put('/preferences', [NotificationController::class, 'updatePreferences'])->name('preferences.update');
     });
+
+    // -------------------------------------------------------------------------
+    // JOURNAL D'AUDIT — API
+    // -------------------------------------------------------------------------
+    Route::get('/audit-log', [AuditLogController::class, 'apiIndex'])
+        ->name('audit-log.index')
+        ->middleware('can:view.audit_logs');
+    Route::get('/audit-log/export', [AuditLogController::class, 'export'])
+        ->name('audit-log.export')
+        ->middleware('can:export.audit_logs');
+
+    // -------------------------------------------------------------------------
+    // RECHERCHE GLOBALE
+    // -------------------------------------------------------------------------
+    Route::get('/search', [GlobalSearchController::class, 'search'])
+        ->name('search')
+        ->middleware('throttle:60,1');
 
     // Push Notifications (PWA)
     Route::prefix('push')->name('push.')->group(function () {
@@ -717,6 +748,12 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::post('/delete', [GdprController::class, 'requestDeletion'])->name('delete');
         Route::get('/consents', [GdprController::class, 'consents'])->name('consents');
         Route::post('/consents', [GdprController::class, 'updateConsents'])->name('consents.update');
+    });
+
+    // Consentements cookies RGPD (CookieConsent in-app)
+    Route::prefix('privacy')->name('privacy.')->group(function () {
+        Route::get('/consent',  [\App\Http\Controllers\Api\PrivacyController::class, 'getConsent'])->name('consent.get');
+        Route::post('/consent', [\App\Http\Controllers\Api\PrivacyController::class, 'saveConsent'])->name('consent.save');
     });
 
     // Abonnement & Licence
@@ -783,6 +820,17 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::post('/announcements', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'store'])->name('announcements.store');
         Route::get('/announcements', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'index'])->name('announcements.index');
     });
+});
+
+// =============================================================================
+// API PUBLIQUE — Pas d'authentification requise
+// =============================================================================
+
+use App\Http\Controllers\Public\PublicController;
+
+Route::prefix('public')->name('public.')->middleware(['throttle:public'])->group(function () {
+    Route::post('/demo-request', [PublicController::class, 'demoRequest'])->name('demo-request');
+    Route::post('/newsletter',   [PublicController::class, 'newsletter'])->name('newsletter');
 });
 
 // =============================================================================

@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { announceToScreenReader } from '../../utils/accessibility'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 const SIZE_CLASSES = {
   sm:   'max-w-md',
@@ -14,6 +16,7 @@ export default function Modal({
   open      = false,
   onClose,
   title,
+  description,
   children,
   footer,
   size      = 'md',
@@ -21,38 +24,17 @@ export default function Modal({
   closeOnEsc     = true,
   className = '',
 }) {
+  const uid        = useId()
+  const titleId    = `modal-title-${uid}`
+  const descId     = `modal-desc-${uid}`
   const overlayRef = useRef(null)
-  const panelRef   = useRef(null)
 
-  // ESC key
-  useEffect(() => {
-    if (!open || !closeOnEsc) return
-    const handler = (e) => { if (e.key === 'Escape') onClose?.() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [open, closeOnEsc, onClose])
-
-  // Focus trap
-  useEffect(() => {
-    if (!open || !panelRef.current) return
-    const focusable = panelRef.current.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    )
-    const first = focusable[0]
-    const last  = focusable[focusable.length - 1]
-
-    const trap = (e) => {
-      if (e.key !== 'Tab') return
-      if (e.shiftKey) {
-        if (document.activeElement === first) { e.preventDefault(); last?.focus() }
-      } else {
-        if (document.activeElement === last)  { e.preventDefault(); first?.focus() }
-      }
-    }
-    document.addEventListener('keydown', trap)
-    first?.focus()
-    return () => document.removeEventListener('keydown', trap)
-  }, [open])
+  // Focus trap via hook (gère Tab/Shift+Tab + Échap + retour focus)
+  const { trapRef } = useFocusTrap({
+    active:      open,
+    onEscape:    closeOnEsc ? onClose : undefined,
+    returnFocus: true,
+  })
 
   // Scroll lock
   useEffect(() => {
@@ -60,23 +42,31 @@ export default function Modal({
     return () => { document.body.style.overflow = '' }
   }, [open])
 
+  // Annonce d'ouverture aux lecteurs d'écran
+  useEffect(() => {
+    if (open && title) {
+      announceToScreenReader(`Dialogue ouvert : ${title}`, 'assertive')
+    }
+  }, [open, title])
+
   if (!open) return null
 
   const content = (
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby={title ? 'modal-title' : undefined}
       onClick={(e) => { if (closeOnOverlay && e.target === overlayRef.current) onClose?.() }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" aria-hidden="true" />
 
-      {/* Panel */}
+      {/* Panel — focus trap ici */}
       <div
-        ref={panelRef}
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title       ? titleId : undefined}
+        aria-describedby={description ? descId  : undefined}
         className={[
           'relative w-full bg-white dark:bg-[#162032] rounded-2xl shadow-2xl flex flex-col',
           'animate-in zoom-in-95 fade-in duration-200',
@@ -89,20 +79,25 @@ export default function Modal({
         {(title || onClose) && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#1E3048] shrink-0">
             {title && (
-              <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 id={titleId} className="text-lg font-semibold text-gray-900 dark:text-white">
                 {title}
               </h2>
             )}
             {onClose && (
               <button
                 onClick={onClose}
-                className="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                aria-label="Fermer"
+                className="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1A3A5C] focus:ring-offset-1"
+                aria-label="Fermer la boîte de dialogue"
               >
-                <X size={18} />
+                <X size={18} aria-hidden="true" />
               </button>
             )}
           </div>
+        )}
+
+        {/* Description (SR) */}
+        {description && (
+          <p id={descId} className="sr-only">{description}</p>
         )}
 
         {/* Body */}

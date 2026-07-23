@@ -23,19 +23,25 @@ const SIZES = {
 
 export default function Button({
   children,
-  variant  = 'primary',
-  size     = 'md',
-  loading  = false,
-  disabled = false,
-  fullWidth= false,
-  iconLeft = null,
-  iconRight= null,
-  as       = 'button',
-  className= '',
+  variant     = 'primary',
+  size        = 'md',
+  loading     = false,
+  disabled    = false,
+  fullWidth   = false,
+  iconLeft    = null,
+  iconRight   = null,
+  icon        = null,        // alias pour iconLeft (compatibilité spec)
+  iconPosition = 'left',    // 'left' | 'right'
+  as          = 'button',
+  className   = '',
+  loadingText = 'Chargement…',
   ...props
 }) {
-  const Tag = as
+  const Tag        = as
   const isDisabled = disabled || loading
+  // icon prop peut être utilisé en position configurable
+  const effectiveIconLeft  = icon && iconPosition === 'left'  ? icon : iconLeft
+  const effectiveIconRight = icon && iconPosition === 'right' ? icon : iconRight
 
   return (
     <Tag
@@ -46,19 +52,31 @@ export default function Button({
         fullWidth ? 'w-full' : '',
         className,
       ].filter(Boolean).join(' ')}
-      disabled={isDisabled}
-      aria-disabled={isDisabled}
+      // Ne pas transmettre disabled=true sur <a> ou rôle custom — utiliser aria-disabled
+      {...(Tag === 'button' ? { disabled: isDisabled } : {})}
+      aria-disabled={isDisabled || undefined}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading ? (
-        <Loader2 className="animate-spin shrink-0" size={size === 'lg' || size === 'xl' ? 20 : 16} />
-      ) : iconLeft ? (
-        <span className="shrink-0">{iconLeft}</span>
-      ) : null}
-
-      {children && <span>{children}</span>}
-
-      {!loading && iconRight && <span className="shrink-0">{iconRight}</span>}
+        <>
+          <Loader2
+            className="animate-spin shrink-0"
+            size={size === 'lg' || size === 'xl' ? 20 : 16}
+            aria-hidden="true"
+          />
+          {/* Texte lisible pour les lecteurs d'écran */}
+          <span className="sr-only">{loadingText}</span>
+          {/* Texte visible masqué visuellement pendant le chargement */}
+          {children && <span aria-hidden="true">{children}</span>}
+        </>
+      ) : (
+        <>
+          {effectiveIconLeft  && <span className="shrink-0" aria-hidden="true">{effectiveIconLeft}</span>}
+          {children           && <span>{children}</span>}
+          {effectiveIconRight && <span className="shrink-0" aria-hidden="true">{effectiveIconRight}</span>}
+        </>
+      )}
     </Tag>
   )
 }

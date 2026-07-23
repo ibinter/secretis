@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
+import { biometricAuthService, BiometricType } from '../../services/biometricAuth';
 import { mmkv, STORAGE_KEYS } from '../../utils/storage';
 import SecretisButton from '../../components/ui/SecretisButton';
 import { Colors, Typography, Spacing, BorderRadius, Shadow } from '../../config/theme';
@@ -32,8 +33,25 @@ type LoginScreenProps = {
 // Composant
 // ============================================================
 
+function getBiometricMeta(type: BiometricType): {
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  label: string;
+} {
+  switch (type) {
+    case 'face':
+      return { icon: 'scan-outline', label: 'Face ID' };
+    case 'iris':
+      return { icon: 'eye-outline', label: 'Iris' };
+    case 'fingerprint':
+    default:
+      return { icon: 'finger-print', label: 'Empreinte digitale' };
+  }
+}
+
 export default function LoginScreen({ navigation }: LoginScreenProps) {
   const { login, loginWithBiometric, isBiometricEnabled, biometricAvailable } = useAuth();
+
+  const [biometricType, setBiometricType] = useState<BiometricType>(null);
 
   const [email, setEmail] = useState(
     () => mmkv.getString(STORAGE_KEYS.SAVED_EMAIL) ?? '',
@@ -52,6 +70,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
       Animated.spring(logoScale, { toValue: 1, tension: 60, friction: 8, useNativeDriver: true }),
       Animated.timing(fadeAnim, { toValue: 1, duration: 600, delay: 200, useNativeDriver: true }),
     ]).start();
+    biometricAuthService.isAvailable().then(({ type }) => setBiometricType(type));
   }, []);
 
   const handleLogin = async () => {
@@ -179,22 +198,21 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             />
 
             {/* Biométrie */}
-            {biometricAvailable && isBiometricEnabled && (
-              <TouchableOpacity
-                style={styles.bioBtn}
-                onPress={handleBiometric}
-                disabled={bioLoading}
-              >
-                <Ionicons
-                  name={Platform.OS === 'ios' ? 'finger-print' : 'finger-print'}
-                  size={28}
-                  color={Colors.primary}
-                />
-                <Text style={styles.bioText}>
-                  {Platform.OS === 'ios' ? 'Face ID / Touch ID' : 'Empreinte digitale'}
-                </Text>
-              </TouchableOpacity>
-            )}
+            {biometricAvailable && isBiometricEnabled && (() => {
+              const { icon, label } = getBiometricMeta(biometricType);
+              return (
+                <TouchableOpacity
+                  style={styles.bioBtn}
+                  onPress={handleBiometric}
+                  disabled={bioLoading}
+                >
+                  <Ionicons name={icon} size={28} color={Colors.primary} />
+                  <Text style={styles.bioText}>
+                    Se connecter avec {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })()}
           </Animated.View>
 
           {/* Footer */}

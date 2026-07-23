@@ -139,6 +139,7 @@ export const MODULES = [
   { id: 'catalogue',     label: 'Catalogue',        icon: 'Library',       route: 'training.catalog.index',  section: 'formation' },
   { id: 'parcours',      label: 'Parcours',         icon: 'Route',         route: 'training.paths.index',    section: 'formation' },
   { id: 'sessions_live', label: 'Sessions Live',    icon: 'Video',         route: 'training.live.index',     section: 'formation' },
+  { id: 'academie',      label: 'Académie SECRETIS',icon: 'BookOpenCheck', route: 'academie.index',          section: 'formation', badge: 'NEW' },
   // Rapports
   { id: 'bi',            label: 'BI',               icon: 'LineChart',     route: 'reports.bi.index',        section: 'rapports' },
   { id: 'report_builder',label: 'Report Builder',   icon: 'FileBarChart',  route: 'reports.builder.index',   section: 'rapports' },
@@ -147,6 +148,8 @@ export const MODULES = [
   { id: 'integrations',  label: 'Intégrations',     icon: 'Plug',          route: 'admin.integrations.index',section: 'admin' },
   { id: 'automations',   label: 'Automatisations',  icon: 'Zap',           route: 'admin.automations.index', section: 'admin' },
   { id: 'rgpd',          label: 'RGPD',             icon: 'Shield',        route: 'admin.rgpd.index',        section: 'admin' },
+  { id: 'abonnement',    label: 'Abonnement',        icon: 'CreditCard',    route: 'abonnement.index',        section: 'admin' },
+  { id: 'audit-log',     label: "Journal d'audit",  icon: 'Activity',      route: 'audit.index',             section: 'admin', adminOnly: true },
 ]
 
 export const MODULE_SECTIONS = [

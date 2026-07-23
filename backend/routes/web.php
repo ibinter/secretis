@@ -27,6 +27,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FleetController;
 use App\Http\Controllers\GedController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\IntegrationController;
@@ -486,9 +487,33 @@ Route::middleware([
     // -------------------------------------------------------------------------
     // MODULES TRANSVERSAUX
     // -------------------------------------------------------------------------
-    Route::get('/abonnement', [SubscriptionController::class, 'index'])->name('abonnement');
+    // -------------------------------------------------------------------------
+    // ABONNEMENT (Vague 10/12 — pages Inertia)
+    // -------------------------------------------------------------------------
+    Route::prefix('abonnement')->name('abonnement.')->group(function () {
+        Route::get('/',              [SubscriptionController::class, 'index'])->name('index');
+        Route::get('/plans',         [SubscriptionController::class, 'plans'])->name('plans');
+        Route::get('/checkout',      [SubscriptionController::class, 'checkout'])->name('checkout');
+        Route::get('/commandes/{ref}', [SubscriptionController::class, 'orderStatus'])->name('order-status');
+        Route::get('/expiree',       [SubscriptionController::class, 'expired'])->name('expired');
+    });
+
+    // -------------------------------------------------------------------------
+    // NOTIFICATIONS — Centre + Préférences
+    // -------------------------------------------------------------------------
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/',            [NotificationController::class, 'index'])->name('index');
+        Route::get('/preferences', [NotificationController::class, 'preferences'])->name('preferences');
+    });
+
+    // -------------------------------------------------------------------------
+    // JOURNAL D'AUDIT (admin uniquement)
+    // -------------------------------------------------------------------------
+    Route::get('/audit-log', [AuditLogController::class, 'index'])
+        ->name('audit.index')
+        ->middleware('can:view.audit_logs');
+
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/aide', [HelpController::class, 'index'])->name('aide');
 
     // -------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useId } from 'react'
 import { ChevronUp, ChevronDown, ChevronsUpDown, Download, Loader2 } from 'lucide-react'
 import EmptyState from './EmptyState'
 
@@ -16,6 +16,7 @@ export default function Table({
   emptyDesc  = '',
   rowKey     = 'id',
   className  = '',
+  caption    = '',     // <caption> accessible
 }) {
   const [sortKey,  setSortKey]  = useState(null)
   const [sortDir,  setSortDir]  = useState('asc')
@@ -89,38 +90,60 @@ export default function Table({
       )}
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-[#1E3048]">
-        <table className="w-full text-sm">
+        <table
+          className="w-full text-sm"
+          role={onRowClick ? 'grid' : 'table'}
+        >
+          {/* Caption (accessible) — visuellement masquée si vide, toujours dans le DOM */}
+          {caption && (
+            <caption className="sr-only">{caption}</caption>
+          )}
+
           <thead>
             <tr className="bg-gray-50 dark:bg-[#0F1923] border-b border-gray-200 dark:border-[#1E3048]">
               {selectable && (
-                <th className="w-10 px-4 py-3">
+                <th scope="col" className="w-10 px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selected.size === data.length && data.length > 0}
                     onChange={toggleAll}
-                    className="rounded border-gray-300"
+                    aria-label="Tout sélectionner"
+                    className="rounded border-gray-300 focus:ring-2 focus:ring-[#1A3A5C]"
                   />
                 </th>
               )}
               {columns.map((col) => (
                 <th
                   key={col.key}
+                  scope="col"
+                  aria-sort={
+                    col.sortable
+                      ? sortKey === col.key
+                        ? sortDir === 'asc' ? 'ascending' : 'descending'
+                        : 'none'
+                      : undefined
+                  }
                   className={[
                     'px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap',
                     col.sortable ? 'cursor-pointer hover:text-[#1A3A5C] dark:hover:text-white select-none' : '',
                     col.className ?? '',
                   ].join(' ')}
                   onClick={() => handleSort(col)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort(col) } }}
+                  tabIndex={col.sortable ? 0 : undefined}
                   style={col.width ? { width: col.width } : {}}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.label}
                     {col.sortable && (
-                      sortKey === col.key
-                        ? sortDir === 'asc'
-                          ? <ChevronUp size={14} />
-                          : <ChevronDown size={14} />
-                        : <ChevronsUpDown size={14} className="opacity-40" />
+                      <span aria-hidden="true">
+                        {sortKey === col.key
+                          ? sortDir === 'asc'
+                            ? <ChevronUp size={14} />
+                            : <ChevronDown size={14} />
+                          : <ChevronsUpDown size={14} className="opacity-40" />
+                        }
+                      </span>
                     )}
                   </span>
                 </th>
@@ -128,14 +151,18 @@ export default function Table({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100 dark:divide-[#1E3048]">
+          <tbody
+            className="divide-y divide-gray-100 dark:divide-[#1E3048]"
+            aria-live={loading ? 'polite' : undefined}
+            aria-busy={loading || undefined}
+          >
             {loading ? (
               skeletonRows.map((_, i) => (
-                <tr key={i} className="animate-pulse">
+                <tr key={i} className="animate-pulse" aria-hidden="true">
                   {selectable && <td className="px-4 py-3"><div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded" /></td>}
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded" style={{ width: `${60 + Math.random() * 30}%` }} />
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
                     </td>
                   ))}
                 </tr>
@@ -153,9 +180,13 @@ export default function Table({
                   <tr
                     key={key}
                     onClick={() => onRowClick?.(row)}
+                    onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && onRowClick) { e.preventDefault(); onRowClick(row) } }}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    role={onRowClick ? 'row' : undefined}
+                    aria-selected={selectable ? selected.has(key) : undefined}
                     className={[
                       'bg-white dark:bg-[#162032] hover:bg-blue-50/40 dark:hover:bg-white/5 transition-colors',
-                      onRowClick ? 'cursor-pointer' : '',
+                      onRowClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#1A3A5C]' : '',
                       selected.has(key) ? 'bg-blue-50 dark:bg-[#1A3A5C]/20' : '',
                     ].join(' ')}
                   >
@@ -165,7 +196,8 @@ export default function Table({
                           type="checkbox"
                           checked={selected.has(key)}
                           onChange={() => toggleRow(key)}
-                          className="rounded border-gray-300"
+                          aria-label={`Sélectionner la ligne ${key}`}
+                          className="rounded border-gray-300 focus:ring-2 focus:ring-[#1A3A5C]"
                         />
                       </td>
                     )}

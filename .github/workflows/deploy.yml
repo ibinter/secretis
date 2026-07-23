@@ -1,0 +1,62 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'production'
+        type: choice
+        options: [production, staging]
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment || 'production' }}
+    runs-on: ubuntu-22.04
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    concurrency:
+      group: deploy-${{ github.event.inputs.environment || 'production' }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -f deploy/docker/Dockerfile.app --target production \
+            -t secretis-app:${{ github.sha }} .
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/secretis
+            git pull origin main
+            docker compose -f deploy/docker/docker-compose.prod.yml pull
+            docker compose -f deploy/docker/docker-compose.prod.yml up -d --build
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan migrate --force
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan config:cache
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan route:cache
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan queue:restart
+            echo "Deploiement termine a $(date)"
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f https://app.secretis.ibigsoft.com/api/health || exit 1
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

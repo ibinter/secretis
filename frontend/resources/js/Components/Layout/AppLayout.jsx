@@ -10,10 +10,12 @@ import {
   PieChart, ShoppingCart, ClipboardCheck, BarChart2,
   Library, Route, Video, LineChart, FileBarChart,
   Settings, Plug, Zap, Shield,
+  BookOpenCheck, CreditCard, Activity, TrendingUp, Lock, Truck,
+  UserSquare, UserCog, HelpCircle, DoorOpen, Target, LayoutDashboard,
 } from 'lucide-react'
 import { Avatar } from '../UI'
 import GlobalSearch from '../Common/GlobalSearch'
-import NotificationCenter from '../Common/NotificationCenter'
+import NotificationBell from '../Common/NotificationBell'
 import { MODULES, MODULE_SECTIONS } from '../../utils/constants'
 import ToastContainer from '../UI/Toast'
 
@@ -31,6 +33,9 @@ const ICONS = {
   PieChart, ShoppingCart, ClipboardCheck, BarChart2,
   Library, Route, Video, LineChart, FileBarChart,
   Settings, Plug, Zap, Shield,
+  // Nouveaux modules (Vague 12 — Académie, Abonnement, Audit)
+  BookOpenCheck, CreditCard, Activity, TrendingUp, Lock, Truck,
+  UserSquare, UserCog, HelpCircle, DoorOpen, Target, LayoutDashboard,
 }
 
 function NavIcon({ name, size = 16 }) {
@@ -55,8 +60,13 @@ function NavItem({ module, collapsed, currentUrl }) {
       <span className={`shrink-0 ${isActive ? 'text-[#2E86C1]' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}>
         <NavIcon name={module.icon} />
       </span>
-      {!collapsed && <span className="truncate">{module.label}</span>}
-      {isActive && !collapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#2E86C1] shrink-0" />}
+      {!collapsed && <span className="truncate flex-1">{module.label}</span>}
+      {!collapsed && module.badge && (
+        <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-[#F39C12] text-white rounded-full uppercase tracking-wide shrink-0">
+          {module.badge}
+        </span>
+      )}
+      {isActive && !collapsed && !module.badge && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#2E86C1] shrink-0" />}
     </Link>
   )
 }
@@ -105,7 +115,9 @@ function NavSection({ section, modules, collapsed, currentUrl }) {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar({ collapsed, onClose, isMobile }) {
-  const { url } = usePage()
+  const { url, props } = usePage()
+  const userRole = props?.auth?.user?.role ?? 'user'
+  const isAdmin  = userRole === 'admin' || userRole === 'super_admin'
 
   const sidebarClass = isMobile
     ? 'fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-[#162032] shadow-2xl flex flex-col transition-transform duration-300'
@@ -134,7 +146,10 @@ function Sidebar({ collapsed, onClose, isMobile }) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
         {MODULE_SECTIONS.map(section => {
-          const mods = MODULES.filter(m => m.section === section.id)
+          const mods = MODULES.filter(m =>
+            m.section === section.id &&
+            (!m.adminOnly || isAdmin)
+          )
           if (!mods.length) return null
           return (
             <NavSection
@@ -234,7 +249,7 @@ function Header({ onMenuToggle, collapsed, onCollapseToggle, dark, onThemeToggle
           </button>
 
           {/* Notifications */}
-          <NotificationCenter notifications={notifications ?? []} />
+          <NotificationBell />
 
           {/* Avatar */}
           {user && (
