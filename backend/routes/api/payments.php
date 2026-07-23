@@ -1,148 +1,173 @@
 <?php
 
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\SuperAdmin\PaymentAdminController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Routes API — Module Paiements & Abonnements
+| Routes API — Module Paiements & Abonnements IBIG SECRETIS
 |--------------------------------------------------------------------------
 |
 | ARCHITECTURE DE SÉCURITÉ :
 |
-| 1. Routes paiements (auth + tenant + license) :
+| 1. Routes commandes (auth + tenant + license) :
 |    Nécessitent une session authentifiée ET un tenant résolu.
 |    Rate limiting standard via throttle:api.
 |
-| 2. Routes webhooks (SANS auth, AVEC vérification signature) :
-|    Ces routes doivent être accessibles sans token JWT car les prestataires
-|    externes ne peuvent pas s'authentifier.
-|    La sécurité repose sur la vérification HMAC de la signature.
-|    Rate limiting strict pour prévenir les attaques DDoS/flood.
+| 2. Routes webhooks (SANS auth, AVEC vérification signature HMAC) :
+|    Accessibles publiquement — sécurité uniquement via HMAC timing-safe.
+|    L'URL de retour passerelle (return_url) N'ACTIVE JAMAIS la licence.
+|    Rate limiting strict (30 req/min) pour prévenir les attaques flood.
 |
-| 3. Routes admin (auth + ibig_admin) :
+| 3. Routes admin (auth + ibig.admin) :
 |    Validation manuelle réservée aux super-admins IBIG Soft.
+|
+| CSRF : les routes webhook sont exclues du CSRF (voir bootstrap/app.php).
+|
+| FIREWALL RECOMMANDÉ : Whitelister les IPs des prestataires côté nginx.
+|   Paystack    : 52.31.139.75, 52.49.173.169, 52.214.14.220
+|   Flutterwave : 52.24.126.164, 52.26.197.188
 |
 */
 
 // =============================================================================
-// Routes Paiements — Authentifiées
+// Routes Commandes — Authentifiées (client)
 // =============================================================================
 
-Route::middleware(['auth:sanctum', 'tenant', 'license'])->prefix('payments')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant'])->prefix('v1')->group(function () {
 
-    // Initier un paiement
-    Route::post('/initiate', [PaymentController::class, 'initiatePayment'])
-         ->middleware('throttle:10,1'); // Max 10 initiations par minute
+    // Moyens de paiement disponibles (config publique uniquement, sans clés secrètes)
+    Route::get('/payment-methods', [OrderController::class, 'getPaymentMethods'])
+         ->name('api.payment-methods');
 
-    // Uploader une preuve de paiement
-    Route::post('/{id}/proof', [PaymentController::class, 'uploadProof'])
-         ->where('id', '[0-9]+');
+    // Créer une commande — montant calculé CÔTÉ SERVEUR
+    Route::post('/orders', [OrderController::class, 'createOrder'])
+         ->middleware('throttle:10,1')   // Max 10 créations par minute
+         ->name('api.orders.create');
 
-    // Statut d'un paiement (polling)
-    Route::get('/{id}/status', [PaymentController::class, 'getStatus'])
-         ->where('id', '[0-9]+')
-         ->middleware('throttle:60,1'); // Polling : 60 req/min max
+    // Détail d'une commande
+    Route::get('/orders/{reference}', [OrderController::class, 'showOrder'])
+         ->name('api.orders.show');
 
-    // Télécharger une facture
-    Route::get('/{id}/invoice', [PaymentController::class, 'generateInvoice'])
-         ->where('id', '[0-9]+');
+    // Annuler une commande non payée
+    Route::delete('/orders/{reference}', [OrderController::class, 'cancelOrder'])
+         ->name('api.orders.cancel');
 
-    // Historique des paiements
-    Route::get('/history', [PaymentController::class, 'history']);
-});
+    // Soumettre une preuve de paiement
+    Route::post('/orders/{reference}/proof', [OrderController::class, 'submitProof'])
+         ->middleware('throttle:5,1')    // Max 5 soumissions par minute
+         ->name('api.orders.proof');
 
-// =============================================================================
-// Routes Abonnement — Authentifiées
-// =============================================================================
+    // Télécharger sa propre preuve (stream sécurisé)
+    Route::get('/proofs/{id}/download', [OrderController::class, 'downloadProof'])
+         ->name('api.proofs.download');
 
-Route::middleware(['auth:sanctum', 'tenant'])->prefix('subscription')->group(function () {
-
-    // Plan courant
-    Route::get('/current', [SubscriptionController::class, 'currentPlan']);
-
-    // Méthodes de paiement disponibles
-    Route::get('/payment-methods', [SubscriptionController::class, 'getPaymentMethods']);
-
-    // Changement de plan (crée une intention de paiement)
-    Route::post('/change-plan', [SubscriptionController::class, 'changePlan'])
-         ->middleware('throttle:5,1');
-
-    // Annulation
-    Route::post('/cancel', [SubscriptionController::class, 'cancelSubscription'])
-         ->middleware('throttle:3,1');
-
-    // Réactivation
-    Route::post('/reactivate', [SubscriptionController::class, 'reactivate'])
-         ->middleware('throttle:5,1');
-});
-
-// =============================================================================
-// Routes Admin — Validation manuelle (IBIG Soft uniquement)
-// =============================================================================
-
-Route::middleware(['auth:sanctum', 'ibig.admin'])->prefix('admin/payments')->group(function () {
-
-    // Valider manuellement un paiement
-    Route::post('/{id}/validate', [PaymentController::class, 'adminValidate'])
-         ->where('id', '[0-9]+');
-
-    // Rejeter un paiement avec motif
-    Route::post('/{id}/reject', [PaymentController::class, 'adminReject'])
-         ->where('id', '[0-9]+');
-
-    // Liste de tous les paiements en attente de validation manuelle (pour le back-office)
-    Route::get('/pending-manual', function () {
-        return response()->json([
-            'data' => \App\Models\Payment::manualValidation()
-                ->with(['organization:id,name,email', 'validatedBy:id,name'])
-                ->orderBy('created_at')
-                ->paginate(25),
-        ]);
-    });
+    // Utiliser un code voucher
+    Route::post('/orders/{reference}/voucher', [OrderController::class, 'redeemVoucher'])
+         ->middleware('throttle:5,1')
+         ->name('api.orders.voucher');
 });
 
 // =============================================================================
 // Routes Webhooks — SANS authentification, AVEC rate limiting strict
 // =============================================================================
-
-/*
- * SÉCURITÉ WEBHOOK :
- *
- * Ces routes sont exposées publiquement mais protégées par :
- *   1. Vérification HMAC de la signature (dans le contrôleur)
- *   2. Rate limiting strict (30 requêtes par minute par IP)
- *   3. Exclusion du middleware CSRF (voir VerifyCsrfToken)
- *
- * CONFIGURATION CSRF : Ajouter dans App\Http\Middleware\VerifyCsrfToken::$except :
- *   'api/webhooks/*'
- *
- * FIREWALL RECOMMANDÉ : Whitelister les IPs des prestataires au niveau nginx/serveur.
- *   CinetPay    : voir leur doc (IPs variables)
- *   Paystack    : 52.31.139.75, 52.49.173.169, 52.214.14.220
- *   Flutterwave : 52.24.126.164, 52.26.197.188
- */
+//
+// SÉCURITÉ WEBHOOK :
+//   1. Aucun middleware auth (les prestataires ne s'authentifient pas)
+//   2. Vérification HMAC dans WebhookService (timing-safe hash_equals)
+//   3. Idempotence : event_id unique en base (SELECT FOR UPDATE)
+//   4. L'URL de retour passerelle NE FAIT RIEN — activation via webhooks uniquement
+//
+// CONFIGURATION CSRF : Dans bootstrap/app.php, exclure les routes webhook :
+//   ->withMiddleware(function (Middleware $middleware) {
+//       $middleware->validateCsrfTokens(except: ['webhooks/*']);
+//   });
+//
 Route::middleware(['throttle:30,1'])->prefix('webhooks')->group(function () {
 
-    // CinetPay — Paiements carte et mobile
+    // CinetPay — Paiements carte et mobile Afrique de l'Ouest
     Route::post('/cinetpay', [WebhookController::class, 'cinetpay'])
          ->name('webhook.cinetpay');
 
-    // Paystack — Paiements carte
+    // Paystack — Paiements carte (Nigeria, Ghana, Afrique du Sud, Kenya)
     Route::post('/paystack', [WebhookController::class, 'paystack'])
          ->name('webhook.paystack');
 
-    // Flutterwave — Paiements multicanal
+    // Flutterwave — Paiements multicanal Afrique
     Route::post('/flutterwave', [WebhookController::class, 'flutterwave'])
          ->name('webhook.flutterwave');
 
-    // Orange Money — Callback USSD
+    // Stripe — Paiements carte internationaux
+    Route::post('/stripe', [WebhookController::class, 'stripe'])
+         ->name('webhook.stripe');
+
+    // Orange Money — Mobile Money CI, SN, ML, GN
     Route::post('/orange-money', [WebhookController::class, 'orangeMoney'])
          ->name('webhook.orange_money');
 
-    // MTN Mobile Money — Callback de collection
+    // MTN Mobile Money — CI, CM, GH, RW
     Route::post('/mtn-momo', [WebhookController::class, 'mtnMomo'])
          ->name('webhook.mtn_momo');
+
+    // Wave — Mobile Money Sénégal / Côte d'Ivoire
+    Route::post('/wave', [WebhookController::class, 'wave'])
+         ->name('webhook.wave');
+});
+
+// =============================================================================
+// Routes Admin — Validation manuelle (SuperAdmin IBIG Soft uniquement)
+// =============================================================================
+
+Route::middleware(['auth:sanctum', 'ibig.admin'])->prefix('admin/payments')->group(function () {
+
+    // KPIs dashboard
+    Route::get('/kpis', [PaymentAdminController::class, 'kpis'])
+         ->name('admin.payments.kpis');
+
+    // Liste des commandes
+    Route::get('/orders', [PaymentAdminController::class, 'orders'])
+         ->name('admin.payments.orders');
+
+    // Activation forcée (journalisée)
+    Route::post('/orders/{id}/force-activate', [PaymentAdminController::class, 'forceActivate'])
+         ->name('admin.payments.force-activate');
+
+    // Liste des preuves
+    Route::get('/proofs', [PaymentAdminController::class, 'proofs'])
+         ->name('admin.payments.proofs');
+
+    // Télécharger une preuve (admin)
+    Route::get('/proofs/{id}/download', [PaymentAdminController::class, 'downloadProof'])
+         ->name('admin.proofs.download');
+
+    // Approuver une preuve
+    Route::post('/proofs/{id}/approve', [PaymentAdminController::class, 'approveProof'])
+         ->middleware('throttle:20,1')
+         ->name('admin.payments.proofs.approve');
+
+    // Rejeter une preuve avec motif
+    Route::post('/proofs/{id}/reject', [PaymentAdminController::class, 'rejectProof'])
+         ->middleware('throttle:20,1')
+         ->name('admin.payments.proofs.reject');
+
+    // Configuration des moyens de paiement
+    Route::get('/config', [PaymentAdminController::class, 'config'])
+         ->name('admin.payments.config');
+    Route::put('/config/{id}', [PaymentAdminController::class, 'updateConfig'])
+         ->name('admin.payments.config.update');
+
+    // Vouchers
+    Route::get('/vouchers', [PaymentAdminController::class, 'vouchers'])
+         ->name('admin.payments.vouchers');
+    Route::post('/vouchers/generate', [PaymentAdminController::class, 'generateVouchers'])
+         ->middleware('throttle:5,1')
+         ->name('admin.payments.vouchers.generate');
+    Route::get('/vouchers/export/{batch}', [PaymentAdminController::class, 'exportVouchers'])
+         ->name('admin.payments.vouchers.export');
+
+    // Journal des webhooks
+    Route::get('/webhook-logs', [PaymentAdminController::class, 'webhookLogs'])
+         ->name('admin.payments.webhook-logs');
 });

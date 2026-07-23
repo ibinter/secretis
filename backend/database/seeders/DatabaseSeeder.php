@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             CurrencySeeder::class,       // 16 devises (XOF par défaut)
             CountrySeeder::class,        // 18+ pays OHADA
             SuperAdminSeeder::class,     // Compte superadmin IBIG Soft + org interne
+            LegalPagesSeeder::class,     // 18 pages légales (OHADA + RGPD + droit ivoirien)
         ]);
 
         // ── Vague 2 : Données de démonstration ───────────────────────────────
@@ -51,6 +52,7 @@ class DatabaseSeeder extends Seeder
 
             $this->call([
                 DemoOrganizationSeeder::class,    // Org démo + users + depts + salles + stocks
+                DemoDataSeeder::class,             // Données démo complètes (agenda, GED, RH, achats…)
                 SyscohadaChartSeeder::class,       // Plan comptable SYSCOHADA Révisé 2
                 IntegrationConnectorSeeder::class, // Catalogue connecteurs marketplace (Vague 11)
                 FeatureFlagSeeder::class,          // Feature flags par défaut
