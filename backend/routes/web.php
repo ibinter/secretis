@@ -28,7 +28,9 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FleetController;
 use App\Http\Controllers\GedController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\HelpController;
+use App\Http\Controllers\Support\TicketController as SupportTicketController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\LeaveController;
@@ -66,8 +68,11 @@ use App\Http\Controllers\TrainingController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Public\VisitorPortalController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\PaymentReturnController;
+use App\Http\Controllers\GuideController;
+use App\Http\Controllers\FaqController;
 use Illuminate\Support\Facades\Route;
 
 // =============================================================================
@@ -88,9 +93,22 @@ Route::middleware(['throttle:web'])->group(function () {
     Route::get('/offers/accept/{token}', [CrmProspectsController::class, 'acceptOffer'])->name('offers.accept');
     Route::get('/offer-accepted', fn () => \Inertia\Inertia::render('Public/OfferAccepted'))->name('offer.accepted');
 
+    // -------------------------------------------------------------------------
+    // CENTRE D'AIDE (public — sans auth)
+    // -------------------------------------------------------------------------
+    Route::prefix('aide')->name('help.')->group(function () {
+        Route::get('/', [HelpCenterController::class, 'index'])->name('index');
+        Route::get('/search', [HelpCenterController::class, 'search'])->name('search');
+        Route::get('/{category:slug}', [HelpCenterController::class, 'category'])->name('category');
+        Route::get('/{category:slug}/{article:slug}', [HelpCenterController::class, 'article'])->name('article');
+    });
+
     // Santé & API Docs
     Route::get('/status', [HealthController::class, 'status'])->name('status');
     Route::get('/docs/api', [LandingPageController::class, 'apiDocs'])->name('docs.api');
+
+    // Changelog public
+    Route::get('/changelog', [ChangelogController::class, 'index'])->name('changelog');
 
     // Portail invitation visiteur (lien public envoyé par email)
     Route::get('/visitor-invitation/{code}', [VisitorPortalController::class, 'showInvitation'])
@@ -156,6 +174,13 @@ Route::middleware([
     // -------------------------------------------------------------------------
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/onboarding', [OnboardingController::class, 'index'])->name('onboarding');
+
+    // Onboarding gamifié (points, badges, checklist)
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/status', [OnboardingController::class, 'status'])->name('status');
+        Route::post('/complete', [OnboardingController::class, 'complete'])->name('complete');
+        Route::post('/skip', [OnboardingController::class, 'skip'])->name('skip');
+    });
 
     // -------------------------------------------------------------------------
     // MODULE 1 — Agenda & Planning (Vague 1)
@@ -542,6 +567,30 @@ Route::middleware([
     Route::get('/aide', [HelpController::class, 'index'])->name('aide');
 
     // -------------------------------------------------------------------------
+    // GUIDE UTILISATEUR & FAQ
+    // -------------------------------------------------------------------------
+    Route::prefix('guide')->name('guide.')->group(function () {
+        Route::get('/', [GuideController::class, 'index'])->name('index');
+        Route::get('/{section:slug}', [GuideController::class, 'section'])->name('section');
+        Route::get('/{section:slug}/{article:slug}', [GuideController::class, 'article'])->name('article');
+    });
+    Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+    Route::get('/api/faq', [FaqController::class, 'apiIndex'])->name('api.faq.index');
+
+    // -------------------------------------------------------------------------
+    // SUPPORT TICKETS (authentifié, scoped par org)
+    // -------------------------------------------------------------------------
+    Route::prefix('support/tickets')->name('support.tickets.')->group(function () {
+        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
+        Route::get('/create', [SupportTicketController::class, 'create'])->name('create');
+        Route::post('/', [SupportTicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [SupportTicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/message', [SupportTicketController::class, 'addMessage'])->name('message');
+        Route::post('/{ticket}/close', [SupportTicketController::class, 'close'])->name('close');
+        Route::post('/{ticket}/rate', [SupportTicketController::class, 'rate'])->name('rate');
+    });
+
+    // -------------------------------------------------------------------------
     // SUPERADMIN — Espace administration centrale IBIG Soft
     // -------------------------------------------------------------------------
     Route::prefix('superadmin')->name('superadmin.')->middleware(['role:super_admin'])->group(function () {
@@ -619,7 +668,9 @@ Route::middleware([
         Route::prefix('support')->name('support.')->group(function () {
             Route::get('/tickets', [SuperAdminSupportController::class, 'index'])->name('tickets');
             Route::get('/tickets/{ticket}', [SuperAdminSupportController::class, 'showInertia'])->name('tickets.show');
-            Route::post('/tickets/{ticket}/reply', [SuperAdminSupportController::class, 'message'])->name('tickets.reply');
+            Route::post('/tickets/{ticket}/reply', [SuperAdminSupportController::class, 'reply'])->name('tickets.reply');
+            Route::post('/tickets/{ticket}/message', [SuperAdminSupportController::class, 'message'])->name('tickets.message');
+            Route::patch('/tickets/{ticket}/status', [SuperAdminSupportController::class, 'updateStatus'])->name('tickets.status');
             Route::patch('/tickets/{ticket}', [SuperAdminSupportController::class, 'update'])->name('tickets.update');
             Route::post('/tickets/{ticket}/assign', [SuperAdminSupportController::class, 'assign'])->name('tickets.assign');
         });
@@ -652,4 +703,15 @@ Route::middleware([
         Route::post('/licences/{id}/extend', [SuperAdminLicenseController::class, 'extend'])->name('licences.extend');
         Route::post('/licences/{id}/regenerate', [SuperAdminLicenseController::class, 'regenerate'])->name('licences.regenerate');
     });
+});
+
+// ─── SARA Chat ────────────────────────────────────────────────────────────────
+Route::middleware('auth')->prefix('sara')->name('sara.')->group(function () {
+    Route::get('/chat', [\App\Http\Controllers\SaraChatController::class, 'index'])->name('chat');
+});
+
+// ─── Cas pratiques ────────────────────────────────────────────────────────────
+Route::middleware('auth')->prefix('aide/cas-pratiques')->name('practical-cases.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PracticalCasesController::class, 'index'])->name('index');
+    Route::get('/{practicalCase:slug}', [\App\Http\Controllers\PracticalCasesController::class, 'show'])->name('show');
 });

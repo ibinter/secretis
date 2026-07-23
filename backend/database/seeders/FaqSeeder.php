@@ -3,882 +3,1559 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Faq;
 
 class FaqSeeder extends Seeder
 {
     public function run(): void
     {
-        $now = Carbon::now();
+        Faq::truncate();
 
         $faqs = [
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Général (10 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+
+            // ═══════════════════════════════════════════════════════════════
+            // 1. DÉMARRAGE & COMPTE (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Qu\'est-ce qu\'IBIG SECRETIS ?',
-                'answer'     => 'IBIG SECRETIS est un ERP SaaS (logiciel de gestion en ligne) conçu pour les organisations africaines souhaitant digitaliser leur fonctionnement administratif. Il centralise la gestion du courrier, des réunions, des tâches, de la GED et des ressources humaines dans une seule plateforme. La solution est hébergée dans le cloud et accessible depuis n\'importe quel navigateur. Elle intègre également SARA, une assistante IA qui accompagne les utilisateurs au quotidien.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['ERP', 'SaaS', 'SECRETIS', 'IBIG', 'présentation', 'plateforme']),
-                'is_public'  => true,
-                'sort_order' => 1,
+                'category'    => 'demarrage',
+                'order'       => 1,
+                'is_featured' => true,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer mon compte IBIG SECRETIS ?',
+                        'answer'   => 'Rendez-vous sur app.ibig-secretis.com et cliquez sur « Démarrer gratuitement ». Renseignez votre nom, adresse e-mail professionnelle et choisissez un mot de passe sécurisé. Un e-mail de confirmation vous est envoyé immédiatement ; cliquez sur le lien pour activer votre compte. Vous serez ensuite guidé par l\'assistant d\'onboarding pour configurer votre organisation.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create my IBIG SECRETIS account?',
+                        'answer'   => 'Go to app.ibig-secretis.com and click "Start for free". Enter your name, professional email address and choose a secure password. A confirmation email is sent immediately; click the link to activate your account. The onboarding assistant will then guide you through setting up your organisation.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'À qui s\'adresse IBIG SECRETIS ?',
-                'answer'     => 'IBIG SECRETIS s\'adresse aux PME, ONG, administrations publiques, collectivités territoriales et grandes entreprises opérant en Afrique. Il est particulièrement adapté aux structures souhaitant moderniser leur gestion administrative sans investissements informatiques lourds. La plateforme convient aussi bien aux équipes de 5 personnes qu\'aux organisations de plusieurs centaines d\'utilisateurs. Chaque abonnement est dimensionné selon la taille et les besoins de l\'organisation.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['cible', 'PME', 'ONG', 'administration', 'entreprise', 'Afrique']),
-                'is_public'  => true,
-                'sort_order' => 2,
+                'category'    => 'demarrage',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'J\'ai oublié mon mot de passe, comment le réinitialiser ?',
+                        'answer'   => 'Sur la page de connexion, cliquez sur « Mot de passe oublié ». Saisissez votre adresse e-mail et un lien de réinitialisation vous sera envoyé dans les 2 minutes. Ce lien est valable 60 minutes. Si vous ne recevez rien, vérifiez votre dossier spam ou contactez votre administrateur système.',
+                    ],
+                    'en' => [
+                        'question' => 'I forgot my password, how do I reset it?',
+                        'answer'   => 'On the login page, click "Forgot password". Enter your email address and a reset link will be sent within 2 minutes. The link is valid for 60 minutes. If you receive nothing, check your spam folder or contact your system administrator.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Quelle est la différence entre IBIG SECRETIS et un ERP classique ?',
-                'answer'     => 'Contrairement aux ERP traditionnels qui nécessitent une installation sur des serveurs internes et des mois de déploiement, IBIG SECRETIS est accessible immédiatement en ligne. Il ne requiert aucune infrastructure informatique locale et les mises à jour sont automatiques. Sa conception est centrée sur les flux administratifs et documentaires propres au contexte africain (courriers officiels, comptes rendus, hiérarchies administratives). Le rapport qualité-prix est nettement plus avantageux pour les structures de taille moyenne.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['ERP classique', 'différence', 'cloud', 'déploiement', 'avantages']),
-                'is_public'  => true,
-                'sort_order' => 3,
+                'category'    => 'demarrage',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment activer la double authentification (2FA) ?',
+                        'answer'   => 'Allez dans Paramètres > Sécurité > Authentification à deux facteurs. Cliquez sur « Activer » et scannez le QR code avec une application comme Google Authenticator ou Authy. Entrez le code à 6 chiffres généré pour confirmer. À chaque connexion, un code temporaire vous sera demandé en plus de votre mot de passe.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I enable two-factor authentication (2FA)?',
+                        'answer'   => 'Go to Settings > Security > Two-factor authentication. Click "Enable" and scan the QR code with an app like Google Authenticator or Authy. Enter the 6-digit code generated to confirm. At each login, a temporary code will be required in addition to your password.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'IBIG SECRETIS est-il adapté au contexte africain ?',
-                'answer'     => 'Oui, IBIG SECRETIS a été conçu spécifiquement pour répondre aux réalités africaines. Il supporte les devises locales (FCFA, GNF, XOF, MAD, etc.), fonctionne avec une connexion internet limitée et s\'adapte aux structures hiérarchiques et protocoles administratifs en vigueur sur le continent. La numérotation des courriers, les modèles de documents et les workflows correspondent aux pratiques des administrations africaines. Le support est assuré dans les fuseaux horaires africains.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['Afrique', 'contexte', 'FCFA', 'devises', 'administration africaine']),
-                'is_public'  => true,
-                'sort_order' => 4,
+                'category'    => 'demarrage',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment modifier les informations de mon profil ?',
+                        'answer'   => 'Cliquez sur votre avatar en haut à droite, puis sur « Mon profil ». Vous pouvez y modifier votre nom, votre photo, votre titre de poste et vos coordonnées. Les modifications sont sauvegardées automatiquement. Notez que votre adresse e-mail ne peut être changée que par un administrateur.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I update my profile information?',
+                        'answer'   => 'Click your avatar at the top right, then "My profile". You can update your name, photo, job title and contact details. Changes are saved automatically. Note that your email address can only be changed by an administrator.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Combien d\'utilisateurs peut-on avoir sur IBIG SECRETIS ?',
-                'answer'     => 'Le nombre d\'utilisateurs dépend du plan d\'abonnement choisi. Le plan Starter permet jusqu\'à 10 utilisateurs, le plan Professionnel jusqu\'à 50, et le plan Entreprise est illimité. Des licences supplémentaires peuvent être ajoutées à tout moment depuis le module Paramètres > Abonnement. Chaque utilisateur dispose d\'un compte individuel avec ses propres droits d\'accès configurables par l\'administrateur.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['utilisateurs', 'nombre', 'plan', 'licences', 'abonnement']),
-                'is_public'  => true,
-                'sort_order' => 5,
+                'category'    => 'demarrage',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment changer la langue de l\'interface ?',
+                        'answer'   => 'La langue peut être changée depuis Paramètres > Préférences > Langue. IBIG SECRETIS est disponible en français et en anglais. Le choix de langue est personnel et n\'affecte pas les autres utilisateurs de votre organisation. La modification prend effet immédiatement sans rechargement.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I change the interface language?',
+                        'answer'   => 'The language can be changed from Settings > Preferences > Language. IBIG SECRETIS is available in French and English. The language choice is personal and does not affect other users in your organisation. The change takes effect immediately without reloading.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'IBIG SECRETIS fonctionne-t-il sans connexion internet ?',
-                'answer'     => 'IBIG SECRETIS est une application web nécessitant une connexion internet pour fonctionner pleinement. Cependant, certaines fonctionnalités sont disponibles en mode hors ligne limité grâce au cache du navigateur. Les données sont synchronisées automatiquement dès que la connexion est rétablie. Pour les zones à faible débit, l\'interface a été optimisée pour consommer un minimum de bande passante.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['hors ligne', 'internet', 'connexion', 'faible débit', 'cache']),
-                'is_public'  => true,
-                'sort_order' => 6,
+                'category'    => 'demarrage',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment configurer mon fuseau horaire ?',
+                        'answer'   => 'Rendez-vous dans Paramètres > Préférences > Fuseau horaire. Sélectionnez votre zone géographique dans la liste déroulante. SECRETIS gère automatiquement les conversions d\'heure pour les réunions multi-fuseaux. Si votre organisation est en Afrique, les fuseaux UTC+0 à UTC+3 sont préconfigurés.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I configure my time zone?',
+                        'answer'   => 'Go to Settings > Preferences > Time zone. Select your geographic zone from the dropdown list. SECRETIS automatically handles time conversions for multi-timezone meetings. If your organisation is in Africa, UTC+0 to UTC+3 zones are pre-configured.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on utiliser IBIG SECRETIS sur mobile ou tablette ?',
-                'answer'     => 'Oui, IBIG SECRETIS est entièrement responsive et s\'adapte automatiquement aux smartphones et tablettes. Une Progressive Web App (PWA) est disponible pour une expérience proche d\'une application native sans téléchargement depuis un store. Vous pouvez ainsi consulter votre agenda, valider des documents ou répondre à des tâches directement depuis votre téléphone. Une application mobile dédiée Android et iOS est en cours de développement.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['mobile', 'tablette', 'responsive', 'PWA', 'smartphone', 'Android', 'iOS']),
-                'is_public'  => true,
-                'sort_order' => 7,
+                'category'    => 'demarrage',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Puis-je me connecter depuis plusieurs appareils en même temps ?',
+                        'answer'   => 'Oui, IBIG SECRETIS autorise plusieurs sessions simultanées. Vous pouvez être connecté depuis votre ordinateur de bureau, un ordinateur portable et votre smartphone en même temps. Vos données sont synchronisées en temps réel. Vous pouvez visualiser et révoquer les sessions actives dans Paramètres > Sécurité > Sessions actives.',
+                    ],
+                    'en' => [
+                        'question' => 'Can I log in from multiple devices at the same time?',
+                        'answer'   => 'Yes, IBIG SECRETIS allows multiple simultaneous sessions. You can be logged in from your desktop, a laptop and your smartphone at the same time. Your data is synchronised in real time. You can view and revoke active sessions in Settings > Security > Active sessions.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'IBIG SECRETIS est-il disponible en anglais ?',
-                'answer'     => 'Oui, IBIG SECRETIS est disponible en français et en anglais. Chaque utilisateur peut choisir sa langue d\'interface depuis ses paramètres de profil. L\'administrateur peut aussi définir une langue par défaut pour toute l\'organisation. D\'autres langues (arabe, portugais, swahili) sont en cours d\'intégration pour couvrir l\'ensemble du continent africain.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['anglais', 'langue', 'multilingue', 'français', 'traduction']),
-                'is_public'  => true,
-                'sort_order' => 8,
+                'category'    => 'demarrage',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment inviter des collègues dans mon organisation ?',
+                        'answer'   => 'Les administrateurs peuvent inviter des utilisateurs depuis Administration > Utilisateurs > Inviter. Saisissez l\'adresse e-mail et choisissez le rôle (Secrétaire, Dirigeant, RH, etc.). Un e-mail d\'invitation est envoyé automatiquement. L\'invité dispose de 7 jours pour accepter. Vous pouvez renvoyer l\'invitation depuis la liste des invitations en attente.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I invite colleagues to my organisation?',
+                        'answer'   => 'Administrators can invite users from Administration > Users > Invite. Enter the email address and choose a role (Secretary, Executive, HR, etc.). An invitation email is sent automatically. The invitee has 7 days to accept. You can resend the invitation from the pending invitations list.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Qui est IBIG Soft ?',
-                'answer'     => 'IBIG Soft est l\'entreprise éditrice d\'IBIG SECRETIS, spécialisée dans le développement de solutions digitales pour les organisations africaines. Fondée par des ingénieurs africains, IBIG Soft a pour mission de proposer des outils technologiques adaptés aux spécificités du marché africain. L\'entreprise assure le développement, l\'hébergement, la maintenance et le support de la plateforme. Elle collabore avec des partenaires locaux pour accompagner les organisations dans leur transformation digitale.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['IBIG Soft', 'éditeur', 'entreprise', 'équipe', 'Afrique']),
-                'is_public'  => true,
-                'sort_order' => 9,
+                'category'    => 'demarrage',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment configurer le nom et le logo de mon organisation ?',
+                        'answer'   => 'Allez dans Administration > Organisation > Paramètres généraux. Vous pouvez y modifier le nom officiel, le logo (PNG/SVG recommandé, max 2 Mo), les couleurs de marque, et les informations légales (numéro RCCM, adresse, etc.). Ces informations apparaissent sur tous les documents générés par SECRETIS.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I configure my organisation name and logo?',
+                        'answer'   => 'Go to Administration > Organisation > General settings. You can update the official name, logo (PNG/SVG recommended, max 2 MB), brand colours, and legal information (RCCM number, address, etc.). This information appears on all documents generated by SECRETIS.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Qu\'est-ce que SARA ?',
-                'answer'     => 'SARA (Secrétaire Administrative et Relationnelle Augmentée) est l\'assistante IA intégrée à IBIG SECRETIS. Elle aide les utilisateurs à rédiger des courriers, extraire des décisions de comptes rendus, planifier des réunions, rechercher des documents et répondre à des questions sur l\'utilisation de la plateforme. SARA est propulsée par des modèles de langage avancés (Groq, OpenAI ou Anthropic selon votre configuration). Son utilisation est soumise aux conditions d\'abonnement de votre plan.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['SARA', 'IA', 'assistante', 'intelligence artificielle', 'chatbot']),
-                'is_public'  => true,
-                'sort_order' => 10,
+                'category'    => 'demarrage',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'L\'essai gratuit dure combien de temps ?',
+                        'answer'   => 'L\'essai gratuit dure 14 jours avec accès complet à toutes les fonctionnalités du plan Professional. Aucune carte bancaire n\'est requise à l\'inscription. À l\'issue de la période d\'essai, votre compte passe en mode limité (consultation uniquement). Vous pouvez souscrire à tout moment depuis Paramètres > Abonnement.',
+                    ],
+                    'en' => [
+                        'question' => 'How long does the free trial last?',
+                        'answer'   => 'The free trial lasts 14 days with full access to all Professional plan features. No credit card is required at sign-up. After the trial period, your account switches to limited mode (read only). You can subscribe at any time from Settings > Subscription.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Connexion & Sécurité (10 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 2. AGENDA & RÉUNIONS (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment me connecter à IBIG SECRETIS ?',
-                'answer'     => 'Accédez à l\'URL de votre organisation (ex : votreorganisation.secretis.africa) et saisissez votre adresse email professionnelle et votre mot de passe. Si c\'est votre première connexion, utilisez le lien d\'invitation reçu par email pour définir votre mot de passe. En cas de double authentification activée, un code vous sera envoyé par SMS ou application d\'authentification. Vos identifiants sont personnels et ne doivent pas être partagés.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['connexion', 'login', 'mot de passe', 'email', 'authentification']),
-                'is_public'  => true,
-                'sort_order' => 11,
+                'category'    => 'agenda',
+                'order'       => 1,
+                'is_featured' => true,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer un événement dans l\'agenda ?',
+                        'answer'   => 'Cliquez sur le bouton « + Nouvel événement » ou directement sur un créneau dans la vue calendrier. Renseignez le titre, la date, l\'heure de début et de fin, le lieu et la description. Vous pouvez ajouter des participants internes (membres de l\'organisation) et des invités externes (par e-mail). Cliquez sur « Enregistrer » pour créer l\'événement et notifier automatiquement les participants.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create an event in the calendar?',
+                        'answer'   => 'Click the "+ New event" button or directly on a time slot in the calendar view. Fill in the title, date, start and end time, location and description. You can add internal participants (organisation members) and external guests (by email). Click "Save" to create the event and automatically notify participants.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'J\'ai oublié mon mot de passe, que faire ?',
-                'answer'     => 'Sur la page de connexion, cliquez sur "Mot de passe oublié ?" et saisissez votre adresse email. Un lien de réinitialisation vous sera envoyé dans les 5 minutes. Ce lien est valable 60 minutes et à usage unique. Si vous ne recevez pas l\'email, vérifiez vos spams ou contactez votre administrateur qui peut réinitialiser votre mot de passe depuis le module Paramètres > Utilisateurs.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['mot de passe', 'oublié', 'réinitialisation', 'email', 'récupération']),
-                'is_public'  => true,
-                'sort_order' => 12,
+                'category'    => 'agenda',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer un événement récurrent (réunion hebdomadaire) ?',
+                        'answer'   => 'Lors de la création ou de la modification d\'un événement, activez l\'option « Récurrence » dans le formulaire. Choisissez la fréquence (quotidien, hebdomadaire, mensuel), les jours concernés et la date de fin de récurrence. Vous pouvez modifier une occurrence unique sans affecter les autres, ou modifier toute la série en une seule action.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create a recurring event (weekly meeting)?',
+                        'answer'   => 'When creating or editing an event, enable the "Recurrence" option in the form. Choose the frequency (daily, weekly, monthly), the days concerned and the end date of the recurrence. You can modify a single occurrence without affecting others, or modify the entire series in one action.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment activer la double authentification (2FA) ?',
-                'answer'     => 'Rendez-vous dans votre profil (icône en haut à droite) > Sécurité > Double authentification. Vous pouvez choisir entre la réception d\'un code par SMS ou l\'utilisation d\'une application comme Google Authenticator. Scannez le QR code affiché avec votre application et entrez le code à 6 chiffres pour valider l\'activation. La double authentification est fortement recommandée pour les comptes administrateurs.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['2FA', 'double authentification', 'sécurité', 'Google Authenticator', 'SMS']),
-                'is_public'  => true,
-                'sort_order' => 13,
+                'category'    => 'agenda',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment envoyer des invitations à des participants extérieurs ?',
+                        'answer'   => 'Dans le formulaire de création d\'événement, saisissez l\'adresse e-mail des invités externes dans le champ « Participants ». Ils recevront une invitation par e-mail avec les détails de la réunion et un lien de confirmation. Vous pouvez suivre leur statut de réponse (Accepté / Refusé / En attente) directement depuis l\'événement.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I send invitations to external participants?',
+                        'answer'   => 'In the event creation form, enter the email addresses of external guests in the "Participants" field. They will receive an email invitation with meeting details and a confirmation link. You can track their response status (Accepted / Declined / Pending) directly from the event.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Mon compte est verrouillé, comment le débloquer ?',
-                'answer'     => 'Le compte se verrouille automatiquement après 5 tentatives de connexion échouées pour des raisons de sécurité. Attendez 30 minutes pour un déverrouillage automatique, ou contactez votre administrateur pour un déblocage immédiat depuis Paramètres > Utilisateurs > Action sur le compte. Si vous êtes l\'administrateur, contactez le support IBIG SECRETIS via le portail d\'assistance.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['compte verrouillé', 'déblocage', 'tentatives', 'sécurité']),
-                'is_public'  => true,
-                'sort_order' => 14,
+                'category'    => 'agenda',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment configurer des rappels pour mes événements ?',
+                        'answer'   => 'Les rappels se configurent dans le formulaire de l\'événement, section « Rappels ». Vous pouvez ajouter plusieurs rappels à des délais différents (15 min, 1 heure, 1 jour avant…). Les rappels sont envoyés par e-mail et/ou notification dans l\'application selon vos préférences. Vous pouvez définir des rappels par défaut dans Paramètres > Notifications.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I set reminders for my events?',
+                        'answer'   => 'Reminders are configured in the event form, "Reminders" section. You can add multiple reminders at different intervals (15 min, 1 hour, 1 day before…). Reminders are sent by email and/or in-app notification according to your preferences. You can set default reminders in Settings > Notifications.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment me déconnecter de tous les appareils simultanément ?',
-                'answer'     => 'Dans votre profil > Sécurité > Sessions actives, vous verrez la liste de tous les appareils connectés à votre compte avec leur localisation et date de dernière activité. Cliquez sur "Déconnecter toutes les sessions" pour invalider tous les tokens actifs. Cette action est utile si vous avez perdu un appareil ou suspecté une connexion non autorisée. Vous devrez vous reconnecter sur tous vos appareils après cette opération.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['déconnexion', 'sessions', 'appareils', 'sécurité', 'tokens']),
-                'is_public'  => true,
-                'sort_order' => 15,
+                'category'    => 'agenda',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment synchroniser l\'agenda avec Google Calendar ?',
+                        'answer'   => 'Allez dans Paramètres > Intégrations > Google Calendar. Cliquez sur « Connecter » et autorisez l\'accès à votre compte Google. La synchronisation est bidirectionnelle : les événements créés dans SECRETIS apparaissent dans Google Calendar et vice versa. La synchronisation se fait toutes les 5 minutes automatiquement.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I sync the calendar with Google Calendar?',
+                        'answer'   => 'Go to Settings > Integrations > Google Calendar. Click "Connect" and grant access to your Google account. Synchronisation is bidirectional: events created in SECRETIS appear in Google Calendar and vice versa. Synchronisation runs automatically every 5 minutes.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Les données stockées dans SECRETIS sont-elles chiffrées ?',
-                'answer'     => 'Oui, toutes les données sont chiffrées en transit via le protocole TLS 1.3 et au repos via AES-256. Les pièces jointes et documents sensibles sont stockés dans un espace cloud sécurisé. Les clés de chiffrement sont gérées séparément des données. Des audits de sécurité réguliers sont effectués par des tiers indépendants pour garantir la conformité aux standards internationaux.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['chiffrement', 'sécurité', 'TLS', 'AES', 'données', 'conformité']),
-                'is_public'  => true,
-                'sort_order' => 16,
+                'category'    => 'agenda',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment réserver une salle de réunion ?',
+                        'answer'   => 'Dans le formulaire de création d\'événement, cliquez sur « Ajouter une salle ». La liste des salles disponibles au créneau choisi s\'affiche avec leur capacité. Sélectionnez la salle souhaitée et elle est automatiquement réservée. Un conflit de réservation vous sera signalé si la salle est déjà occupée.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I book a meeting room?',
+                        'answer'   => 'In the event creation form, click "Add a room". The list of rooms available for the chosen time slot is displayed with their capacity. Select the desired room and it is automatically booked. A booking conflict will be flagged if the room is already occupied.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Qui peut voir mes données dans SECRETIS ?',
-                'answer'     => 'Vos données sont accessibles uniquement par les utilisateurs de votre organisation selon les permissions qui leur sont attribuées. IBIG Soft n\'accède jamais à vos données opérationnelles sauf demande explicite de votre part pour un support technique, avec traçabilité complète. Les super-administrateurs IBIG ont un accès technique limité à des fins de maintenance. Une politique de confidentialité détaillée est disponible sur notre site.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['confidentialité', 'accès', 'données', 'RGPD', 'vie privée']),
-                'is_public'  => true,
-                'sort_order' => 17,
+                'category'    => 'agenda',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Peut-on partager un agenda avec toute l\'équipe ?',
+                        'answer'   => 'Oui. Les administrateurs peuvent créer des agendas partagés depuis Agenda > Gérer les agendas > Nouvel agenda partagé. Chaque agenda partagé peut avoir des droits différents : lecture seule pour certains rôles, lecture/écriture pour d\'autres. Les événements des agendas partagés apparaissent dans la vue de chaque membre autorisé.',
+                    ],
+                    'en' => [
+                        'question' => 'Can an agenda be shared with the whole team?',
+                        'answer'   => 'Yes. Administrators can create shared calendars from Agenda > Manage calendars > New shared calendar. Each shared calendar can have different rights: read-only for some roles, read/write for others. Events from shared calendars appear in each authorised member\'s view.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment changer mon mot de passe ?',
-                'answer'     => 'Accédez à votre Profil > Sécurité > Changer le mot de passe. Saisissez votre mot de passe actuel, puis votre nouveau mot de passe deux fois pour confirmation. Le nouveau mot de passe doit contenir au moins 8 caractères dont une majuscule, un chiffre et un caractère spécial. Le changement de mot de passe déconnecte toutes les autres sessions actives par mesure de sécurité.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['mot de passe', 'changement', 'modification', 'sécurité', 'profil']),
-                'is_public'  => true,
-                'sort_order' => 18,
+                'category'    => 'agenda',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment consulter la disponibilité de mes collègues ?',
+                        'answer'   => 'Dans le formulaire de réunion, utilisez la vue « Disponibilités » pour voir les créneaux libres de chaque participant. Les plages occupées apparaissent en gris, les disponibilités en vert. SECRETIS peut suggérer automatiquement le premier créneau commun disponible via le bouton « Suggérer un créneau ».',
+                    ],
+                    'en' => [
+                        'question' => 'How do I check my colleagues\' availability?',
+                        'answer'   => 'In the meeting form, use the "Availability" view to see free slots for each participant. Busy slots appear in grey, available slots in green. SECRETIS can automatically suggest the first common available slot via the "Suggest a slot" button.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on se connecter depuis plusieurs appareils en même temps ?',
-                'answer'     => 'Oui, IBIG SECRETIS autorise les connexions simultanées depuis plusieurs appareils (PC, tablette, smartphone). Il n\'y a pas de limite du nombre de sessions parallèles. Cependant, pour des raisons de sécurité, l\'administrateur peut configurer une limite maximale de sessions actives par utilisateur. Vous pouvez visualiser et gérer vos sessions actives depuis votre profil > Sécurité.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['plusieurs appareils', 'sessions', 'connexion simultanée', 'multi-device']),
-                'is_public'  => true,
-                'sort_order' => 19,
+                'category'    => 'agenda',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment exporter mes événements au format iCal ?',
+                        'answer'   => 'Cliquez sur l\'événement souhaité puis sur les trois points (⋯) > Exporter. Choisissez le format iCal (.ics). Vous pouvez également exporter tout l\'agenda d\'une période depuis Agenda > Exporter > Période personnalisée. Le fichier .ics est compatible avec tous les clients de messagerie et calendrier (Outlook, Apple Calendar, Thunderbird).',
+                    ],
+                    'en' => [
+                        'question' => 'How do I export my events in iCal format?',
+                        'answer'   => 'Click the desired event then the three dots (⋯) > Export. Choose iCal format (.ics). You can also export the entire agenda for a period from Agenda > Export > Custom period. The .ics file is compatible with all email and calendar clients (Outlook, Apple Calendar, Thunderbird).',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Qu\'est-ce que le journal d\'audit ?',
-                'answer'     => 'Le journal d\'audit enregistre toutes les actions importantes effectuées sur la plateforme : connexions, modifications de données, suppressions, changements de paramètres, etc. Chaque entrée contient l\'utilisateur concerné, l\'action réalisée, la date et l\'heure, et l\'adresse IP. Ce journal est accessible aux administrateurs depuis Paramètres > Sécurité > Journal d\'audit. Il est conservé pendant 24 mois et ne peut pas être modifié ni supprimé.',
-                'category'   => 'Connexion & Sécurité',
-                'keywords'   => json_encode(['journal d\'audit', 'logs', 'traçabilité', 'historique', 'actions']),
-                'is_public'  => true,
-                'sort_order' => 20,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Gestion des utilisateurs (10 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment inviter un nouveau collaborateur ?',
-                'answer'     => 'Depuis Paramètres > Utilisateurs, cliquez sur "Inviter un utilisateur" et renseignez l\'email professionnel, le rôle souhaité et le service de rattachement. Un email d\'invitation est automatiquement envoyé avec un lien valable 72 heures. Le collaborateur doit cliquer sur le lien pour créer son mot de passe et accéder à la plateforme. Les invitations en attente sont visibles dans l\'onglet "Invitations" et peuvent être renvoyées si nécessaire.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['invitation', 'collaborateur', 'nouvel utilisateur', 'email', 'ajout']),
-                'is_public'  => true,
-                'sort_order' => 21,
-            ],
-            [
-                'question'   => 'Comment attribuer un rôle à un utilisateur ?',
-                'answer'     => 'Depuis Paramètres > Utilisateurs, trouvez l\'utilisateur concerné et cliquez sur l\'icône de modification. Dans la liste déroulante "Rôle", sélectionnez le rôle approprié parmi les options disponibles et validez. Le changement de rôle prend effet immédiatement et l\'utilisateur sera informé par notification. L\'attribut de rôle peut aussi être défini lors de l\'invitation initiale.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['rôle', 'attribution', 'permission', 'utilisateur', 'modification']),
-                'is_public'  => true,
-                'sort_order' => 22,
-            ],
-            [
-                'question'   => 'Comment suspendre temporairement un compte utilisateur ?',
-                'answer'     => 'Dans Paramètres > Utilisateurs, cliquez sur les actions (⋮) de l\'utilisateur concerné et sélectionnez "Suspendre le compte". Le compte est immédiatement désactivé et l\'utilisateur ne peut plus se connecter. Toutes ses données et contributions sont conservées intactes. Vous pouvez réactiver le compte à tout moment depuis le même menu. La suspension est différente de la suppression définitive.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['suspension', 'désactiver', 'compte', 'utilisateur', 'bloquer']),
-                'is_public'  => true,
-                'sort_order' => 23,
-            ],
-            [
-                'question'   => 'Quelle est la différence entre les différents rôles ?',
-                'answer'     => 'IBIG SECRETIS propose plusieurs rôles prédéfinis : Super Administrateur (accès complet à tout), Administrateur (gestion de l\'organisation sauf facturation), Manager (gestion de son équipe et module), Employé (accès aux modules attribués en lecture/écriture), et Consultant (accès en lecture seule). Chaque rôle dispose d\'un ensemble de permissions préconfigurées qui peuvent être affinées par module. L\'administrateur peut visualiser la matrice des permissions depuis Paramètres > Rôles.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['rôles', 'permissions', 'administrateur', 'manager', 'différence']),
-                'is_public'  => true,
-                'sort_order' => 24,
-            ],
-            [
-                'question'   => 'Peut-on créer des rôles personnalisés ?',
-                'answer'     => 'Oui, les plans Professionnel et Entreprise permettent de créer des rôles personnalisés depuis Paramètres > Rôles & Permissions. Donnez un nom au rôle et cochez les permissions souhaitées module par module (voir, créer, modifier, supprimer, exporter). Ces rôles personnalisés apparaissent ensuite dans la liste déroulante lors de l\'invitation ou de la modification d\'un utilisateur. Vous pouvez créer jusqu\'à 20 rôles personnalisés.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['rôles personnalisés', 'permissions', 'custom', 'configuration']),
-                'is_public'  => true,
-                'sort_order' => 25,
-            ],
-            [
-                'question'   => 'Comment consulter l\'historique des connexions d\'un utilisateur ?',
-                'answer'     => 'Depuis Paramètres > Utilisateurs, cliquez sur le nom d\'un utilisateur pour ouvrir son profil détaillé. L\'onglet "Historique de connexion" affiche toutes les sessions avec date, heure, adresse IP et appareil utilisé. Les connexions suspectes (pays inhabituel, heure anormale) sont signalées en orange. Ces informations sont également disponibles dans le Journal d\'audit global filtré par utilisateur.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['historique', 'connexions', 'sessions', 'utilisateur', 'logs']),
-                'is_public'  => true,
-                'sort_order' => 26,
-            ],
-            [
-                'question'   => 'Comment réinitialiser le mot de passe d\'un utilisateur ?',
-                'answer'     => 'Dans Paramètres > Utilisateurs, cliquez sur les actions (⋮) de l\'utilisateur et sélectionnez "Réinitialiser le mot de passe". Un email est envoyé à l\'utilisateur avec un lien de réinitialisation valable 60 minutes. Vous pouvez aussi forcer un nouveau mot de passe temporaire que l\'utilisateur devra changer à sa prochaine connexion. Cette action est tracée dans le journal d\'audit.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['réinitialisation', 'mot de passe', 'utilisateur', 'email', 'admin']),
-                'is_public'  => true,
-                'sort_order' => 27,
-            ],
-            [
-                'question'   => 'Comment désactiver définitivement un compte utilisateur ?',
-                'answer'     => 'La désactivation définitive (archivage) est disponible depuis Paramètres > Utilisateurs > Actions > Archiver. Le compte est désactivé et l\'utilisateur libère une licence. Toutes ses données (courriers, tâches, documents) restent accessibles et sont réattribuées à son responsable. Cette action est irréversible depuis l\'interface et nécessite une confirmation. Pour une suppression totale des données, contactez le support.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['suppression', 'archivage', 'désactivation', 'compte', 'licence']),
-                'is_public'  => true,
-                'sort_order' => 28,
-            ],
-            [
-                'question'   => 'Comment gérer les permissions par module pour un utilisateur ?',
-                'answer'     => 'Dans le profil d\'un utilisateur, l\'onglet "Permissions" affiche un tableau modulaire avec des cases à cocher pour chaque action (voir, créer, modifier, supprimer) par module (Courrier, GED, Agenda, Réunions, Tâches, RH). Ces permissions s\'appliquent en plus ou en remplacement des permissions du rôle. Cela permet un contrôle granulaire sans créer de nouveaux rôles. Les permissions héritées du rôle sont affichées en grisé.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['permissions', 'module', 'granulaire', 'accès', 'droits']),
-                'is_public'  => true,
-                'sort_order' => 29,
-            ],
-            [
-                'question'   => 'Comment organiser les utilisateurs par service ou département ?',
-                'answer'     => 'Les services sont configurés depuis Paramètres > Organisation > Structure. Une fois créés, vous pouvez affecter chaque utilisateur à un service lors de l\'invitation ou depuis son profil. L\'arborescence des services permet une hiérarchie à plusieurs niveaux (Direction > Département > Service). Les managers d\'un service ont une visibilité automatique sur les tâches et courriers de leurs membres selon la configuration des permissions.',
-                'category'   => 'Gestion des utilisateurs',
-                'keywords'   => json_encode(['service', 'département', 'organisation', 'hiérarchie', 'structure']),
-                'is_public'  => true,
-                'sort_order' => 30,
+                'category'    => 'agenda',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment annuler ou supprimer un événement avec notification aux participants ?',
+                        'answer'   => 'Ouvrez l\'événement, cliquez sur « Annuler l\'événement ». Un message de notification d\'annulation sera automatiquement envoyé à tous les participants par e-mail. Pour les événements récurrents, vous pouvez choisir d\'annuler uniquement l\'occurrence en cours ou toute la série. L\'événement annulé reste visible dans l\'agenda avec un statut « Annulé ».',
+                    ],
+                    'en' => [
+                        'question' => 'How do I cancel or delete an event with participant notification?',
+                        'answer'   => 'Open the event, click "Cancel event". A cancellation notification will automatically be sent to all participants by email. For recurring events, you can choose to cancel only the current occurrence or the entire series. The cancelled event remains visible in the agenda with a "Cancelled" status.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Paramètres & Configuration (10 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 3. GESTION DOCUMENTAIRE (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment configurer les informations de mon organisation ?',
-                'answer'     => 'Accédez à Paramètres > Organisation et renseignez la raison sociale, l\'adresse complète, les contacts (téléphone, email, site web) et le numéro d\'identification fiscale. Vous pouvez également uploader votre logo officiel qui apparaîtra sur tous les documents générés. Ces informations sont utilisées automatiquement dans les en-têtes de courriers et modèles de documents. Seuls les administrateurs peuvent modifier ces informations.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['organisation', 'configuration', 'raison sociale', 'paramètres', 'informations']),
-                'is_public'  => true,
-                'sort_order' => 31,
+                'category'    => 'documents',
+                'order'       => 1,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quels types de fichiers puis-je uploader dans la GED ?',
+                        'answer'   => 'SECRETIS accepte la plupart des formats courants : PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), vidéos (MP4, MOV), archives (ZIP, RAR) et fichiers texte. La taille maximale par fichier est de 50 Mo sur le plan Starter, 200 Mo sur Professional et 1 Go sur Enterprise. Les fichiers exécutables (.exe, .bat, .sh) sont bloqués pour des raisons de sécurité.',
+                    ],
+                    'en' => [
+                        'question' => 'What types of files can I upload to the DMS?',
+                        'answer'   => 'SECRETIS accepts most common formats: PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), videos (MP4, MOV), archives (ZIP, RAR) and text files. Maximum file size is 50 MB on Starter plan, 200 MB on Professional and 1 GB on Enterprise. Executable files (.exe, .bat, .sh) are blocked for security reasons.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment ajouter ou modifier le logo de mon organisation ?',
-                'answer'     => 'Dans Paramètres > Organisation, cliquez sur la zone de logo et sélectionnez votre fichier image (PNG, JPG ou SVG, max 2 Mo). Un aperçu s\'affiche immédiatement et vous pouvez recadrer l\'image si nécessaire. Le logo apparaît dans le menu latéral, les emails système et tous les documents générés (courriers, comptes rendus, rapports). Un logo de qualité professionnelle recommandé : fond transparent en PNG, 400x200 px minimum.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['logo', 'image', 'upload', 'organisation', 'branding']),
-                'is_public'  => true,
-                'sort_order' => 32,
+                'category'    => 'documents',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment organiser mes documents en dossiers ?',
+                        'answer'   => 'Dans la GED, cliquez sur « Nouveau dossier » pour créer une arborescence personnalisée. Vous pouvez créer des sous-dossiers à l\'infini et déplacer des documents par glisser-déposer ou via le menu contextuel. Les dossiers peuvent avoir des droits d\'accès différents par équipe ou par rôle.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I organise my documents into folders?',
+                        'answer'   => 'In the DMS, click "New folder" to create a custom hierarchy. You can create unlimited sub-folders and move documents by drag-and-drop or via the context menu. Folders can have different access rights per team or role.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment changer la devise principale de mon organisation ?',
-                'answer'     => 'Depuis Paramètres > Organisation, dans la section "Localisation", sélectionnez la devise dans la liste déroulante (FCFA, GNF, MAD, EUR, USD, etc.). La devise choisie s\'affiche sur les factures, abonnements et rapports financiers. Le changement de devise n\'affecte pas les données historiques. Pour les organisations multi-devises, vous pouvez définir des devises secondaires depuis le module Comptabilité.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['devise', 'monnaie', 'FCFA', 'localisation', 'paramètres']),
-                'is_public'  => true,
-                'sort_order' => 33,
+                'category'    => 'documents',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment partager un document avec un collègue ?',
+                        'answer'   => 'Faites un clic droit sur le document et sélectionnez « Partager ». Vous pouvez partager avec des utilisateurs internes (recherche par nom) ou des externes (par e-mail). Choisissez les droits : Lecture, Commentaire ou Modification. Les destinataires internes reçoivent une notification ; les externes reçoivent un lien sécurisé par e-mail valable 30 jours.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I share a document with a colleague?',
+                        'answer'   => 'Right-click the document and select "Share". You can share with internal users (search by name) or externals (by email). Choose rights: View, Comment or Edit. Internal recipients receive a notification; externals receive a secure email link valid for 30 days.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment configurer les notifications de la plateforme ?',
-                'answer'     => 'Accédez à Paramètres > Notifications pour configurer les alertes par événement et par canal (application, email, SMS, WhatsApp). Vous pouvez activer ou désactiver chaque type de notification individuellement. Les préférences personnelles (son, fréquence des digests) sont disponibles dans Profil > Notifications. Les notifications critiques de sécurité ne peuvent pas être désactivées.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['notifications', 'alertes', 'email', 'SMS', 'WhatsApp', 'configuration']),
-                'is_public'  => true,
-                'sort_order' => 34,
+                'category'    => 'documents',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment fonctionne la gestion des versions de documents ?',
+                        'answer'   => 'Chaque fois qu\'un document est modifié et ré-uploadé, SECRETIS crée automatiquement une nouvelle version. Toutes les versions antérieures sont conservées et accessibles via l\'onglet « Historique des versions » du document. Vous pouvez restaurer n\'importe quelle version précédente en un clic. La version actuelle est toujours affichée en premier.',
+                    ],
+                    'en' => [
+                        'question' => 'How does document version management work?',
+                        'answer'   => 'Each time a document is modified and re-uploaded, SECRETIS automatically creates a new version. All previous versions are kept and accessible via the "Version history" tab of the document. You can restore any previous version with one click. The current version is always displayed first.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on gérer plusieurs sites ou agences depuis SECRETIS ?',
-                'answer'     => 'Oui, le plan Entreprise permet la gestion multi-sites. Depuis Paramètres > Organisation > Sites, vous pouvez créer autant de sites ou agences que nécessaire, chacun avec son adresse, ses contacts et ses utilisateurs. Les courriers, réunions et documents peuvent être filtrés par site. Les rapports consolidés permettent une vision globale de toute l\'organisation. Chaque site peut avoir son propre sous-domaine.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['multi-sites', 'agences', 'branches', 'organisation', 'entreprise']),
-                'is_public'  => true,
-                'sort_order' => 35,
+                'category'    => 'documents',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'La signature électronique est-elle légalement valide ?',
+                        'answer'   => 'SECRETIS intègre un module de signature électronique conforme aux normes OHADA et aux réglementations des pays africains membres. La signature génère un certificat d\'horodatage, une empreinte SHA-256 et un journal d\'audit complet (IP, heure, identité du signataire). Ce niveau de signature est reconnu pour les documents commerciaux et administratifs dans les 17 pays membres de l\'OHADA.',
+                    ],
+                    'en' => [
+                        'question' => 'Is the electronic signature legally valid?',
+                        'answer'   => 'SECRETIS integrates an electronic signature module compliant with OHADA standards and African member country regulations. The signature generates a timestamping certificate, a SHA-256 fingerprint and a complete audit log (IP, time, signer identity). This level of signature is recognised for commercial and administrative documents in all 17 OHADA member countries.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment configurer le serveur email SMTP pour les envois ?',
-                'answer'     => 'Depuis Paramètres > Intégrations > Email SMTP, renseignez l\'hôte SMTP, le port (587 ou 465), l\'email expéditeur, le login et le mot de passe. Cliquez sur "Tester la connexion" pour vérifier la configuration avant de sauvegarder. Si votre organisation utilise Gmail, Outlook ou un serveur Exchange, des guides de configuration dédiés sont disponibles dans notre documentation. Les identifiants SMTP sont stockés de façon chiffrée.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['SMTP', 'email', 'configuration', 'serveur', 'envoi']),
-                'is_public'  => true,
-                'sort_order' => 36,
+                'category'    => 'documents',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment archiver un document tout en le gardant consultable ?',
+                        'answer'   => 'Faites un clic droit sur le document et sélectionnez « Archiver ». Le document quitte l\'espace de travail actif et est déplacé dans l\'espace « Archives ». Il reste entièrement consultable et téléchargeable mais n\'apparaît plus dans les résultats de recherche par défaut. Pour retrouver un document archivé, filtrez avec l\'option « Afficher les archives ».',
+                    ],
+                    'en' => [
+                        'question' => 'How do I archive a document while keeping it accessible?',
+                        'answer'   => 'Right-click the document and select "Archive". The document leaves the active workspace and moves to the "Archives" area. It remains fully viewable and downloadable but no longer appears in default search results. To find an archived document, filter with the "Show archives" option.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment changer la langue d\'affichage de la plateforme ?',
-                'answer'     => 'La langue par défaut est définie par l\'administrateur dans Paramètres > Organisation > Localisation. Chaque utilisateur peut personnaliser sa propre langue depuis son Profil > Préférences > Langue. Le changement est instantané sans rechargement de page. Actuellement disponibles : français (FR) et anglais (EN). D\'autres langues (arabe, portugais) sont prévues dans les prochaines versions.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['langue', 'traduction', 'localisation', 'français', 'anglais']),
-                'is_public'  => true,
-                'sort_order' => 37,
+                'category'    => 'documents',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment rechercher un document dans toute la GED ?',
+                        'answer'   => 'Utilisez la barre de recherche globale (raccourci Ctrl+K / Cmd+K). La recherche porte sur les noms de fichiers, les tags, les descriptions et le contenu textuel des PDF. Vous pouvez affiner avec des filtres : type de fichier, date, dossier, propriétaire. La recherche en plein texte dans les documents est disponible dès le plan Professional.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I search for a document across the entire DMS?',
+                        'answer'   => 'Use the global search bar (shortcut Ctrl+K / Cmd+K). The search covers file names, tags, descriptions and textual content of PDFs. You can refine with filters: file type, date, folder, owner. Full-text search within documents is available from the Professional plan.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment configurer les formats de numérotation des références ?',
-                'answer'     => 'Depuis Paramètres > Organisation > Numérotation, définissez les formats de référence pour chaque type de document. Le format par défaut est REF-{ANNÉE}-{NUM} mais vous pouvez personnaliser le préfixe (ex : CORR-ENT pour les courriers entrants). Les compteurs peuvent être remis à zéro annuellement ou maintenus en continu. Exemple : CORR-ENT-2025-0001 pour le premier courrier entrant de 2025.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['numérotation', 'référence', 'format', 'préfixe', 'courrier']),
-                'is_public'  => true,
-                'sort_order' => 38,
+                'category'    => 'documents',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment ajouter des tags/métadonnées à un document ?',
+                        'answer'   => 'Ouvrez le document et cliquez sur « Modifier les propriétés ». Vous pouvez ajouter des tags libres, une description, une catégorie et des champs personnalisés définis par votre administrateur. Les tags facilitent la classification et la recherche. Vous pouvez appliquer des tags en masse en sélectionnant plusieurs documents.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I add tags/metadata to a document?',
+                        'answer'   => 'Open the document and click "Edit properties". You can add free tags, a description, a category and custom fields defined by your administrator. Tags facilitate classification and search. You can apply tags in bulk by selecting multiple documents.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Qu\'est-ce qu\'un exercice administratif dans SECRETIS ?',
-                'answer'     => 'Un exercice administratif correspond à une période de gestion (généralement une année civile ou fiscale) qui regroupe tous les courriers, réunions et documents de cette période. Il permet de clôturer une période, archiver les données correspondantes et démarrer une nouvelle séquence de numérotation. La clôture d\'un exercice est irréversible. Les données restent consultables en lecture seule après clôture.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['exercice', 'période', 'clôture', 'archivage', 'annuel']),
-                'is_public'  => true,
-                'sort_order' => 39,
+                'category'    => 'documents',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer un document depuis un modèle ?',
+                        'answer'   => 'Allez dans GED > Modèles de documents. Sélectionnez le modèle souhaité (contrat, rapport, compte-rendu, lettre administrative…) et cliquez sur « Créer depuis ce modèle ». Un formulaire vous demande de remplir les variables (nom, date, objet…) puis génère le document final en PDF ou Word selon vos préférences.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create a document from a template?',
+                        'answer'   => 'Go to DMS > Document templates. Select the desired template (contract, report, minutes, administrative letter…) and click "Create from this template". A form asks you to fill in variables (name, date, subject…) then generates the final document in PDF or Word according to your preferences.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment sauvegarder mes paramètres de configuration ?',
-                'answer'     => 'Les paramètres sont sauvegardés automatiquement à chaque modification. Vous pouvez aussi exporter l\'intégralité de votre configuration depuis Paramètres > Avancé > Exporter la configuration. Ce fichier JSON peut être utilisé pour restaurer la configuration ou la dupliquer sur une autre instance. Les sauvegardes automatiques des données sont effectuées quotidiennement par IBIG Soft.',
-                'category'   => 'Paramètres & Configuration',
-                'keywords'   => json_encode(['sauvegarde', 'configuration', 'export', 'backup', 'paramètres']),
-                'is_public'  => true,
-                'sort_order' => 40,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Agenda (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment créer un événement récurrent dans l\'agenda ?',
-                'answer'     => 'Lors de la création d\'un événement, activez l\'option "Récurrence" et choisissez la fréquence (quotidienne, hebdomadaire, mensuelle, annuelle). Vous pouvez définir les jours spécifiques (ex : chaque lundi et mercredi) et une date de fin ou un nombre d\'occurrences. Les événements récurrents affichent un indicateur visuel dans l\'agenda. Modifier un événement récurrent vous propose de modifier "cet événement" ou "tous les événements suivants".',
-                'category'   => 'Agenda',
-                'keywords'   => json_encode(['récurrence', 'événement', 'agenda', 'hebdomadaire', 'planification']),
-                'is_public'  => true,
-                'sort_order' => 41,
-            ],
-            [
-                'question'   => 'Comment inviter des participants externes à un événement ?',
-                'answer'     => 'Dans le formulaire de création d\'événement, le champ "Participants" accepte les emails internes (liste déroulante des utilisateurs) et externes (saisie libre d\'une adresse email). Les participants externes reçoivent un email d\'invitation avec les détails et un lien de confirmation (accepter/refuser/proposer un autre horaire). Leur statut de réponse est visible depuis l\'événement. Une invitation .ics compatible avec tous les clients email est jointe.',
-                'category'   => 'Agenda',
-                'keywords'   => json_encode(['invitation', 'participants', 'externe', 'agenda', 'email']),
-                'is_public'  => true,
-                'sort_order' => 42,
-            ],
-            [
-                'question'   => 'Comment réserver une salle de réunion depuis l\'agenda ?',
-                'answer'     => 'Les salles et ressources doivent d\'abord être configurées dans Paramètres > Ressources. Lors de la création d\'un événement, le champ "Ressource / Salle" affiche les salles disponibles pour le créneau choisi en temps réel. La disponibilité est vérifiée automatiquement et les conflits sont signalés. Une fois réservée, la salle est bloquée pour les autres utilisateurs pendant la durée de l\'événement.',
-                'category'   => 'Agenda',
-                'keywords'   => json_encode(['salle', 'réservation', 'ressource', 'agenda', 'disponibilité']),
-                'is_public'  => true,
-                'sort_order' => 43,
-            ],
-            [
-                'question'   => 'Comment exporter mon calendrier agenda ?',
-                'answer'     => 'Depuis l\'agenda, cliquez sur le bouton "Export" en haut à droite et choisissez la période (semaine, mois, trimestre) et le format (PDF pour impression, ICS pour import dans d\'autres calendriers). L\'export PDF génère une vue imprimable soignée avec votre logo. L\'export ICS est compatible avec Google Calendar, Outlook, Apple Calendar. Les événements confidentiels sont exclus selon vos permissions.',
-                'category'   => 'Agenda',
-                'keywords'   => json_encode(['export', 'calendrier', 'ICS', 'PDF', 'agenda', 'impression']),
-                'is_public'  => true,
-                'sort_order' => 44,
-            ],
-            [
-                'question'   => 'Comment synchroniser SECRETIS avec Google Calendar ?',
-                'answer'     => 'Depuis Paramètres > Intégrations > Google Calendar, cliquez sur "Connecter avec Google" et autorisez l\'accès. La synchronisation est bidirectionnelle : les événements créés dans SECRETIS apparaissent dans Google Calendar et vice versa. Vous pouvez choisir quels calendriers synchroniser et dans quel sens. La synchronisation se fait en temps réel. Notez que les événements confidentiels de SECRETIS ne sont pas exportés vers Google Calendar.',
-                'category'   => 'Agenda',
-                'keywords'   => json_encode(['Google Calendar', 'synchronisation', 'intégration', 'calendrier', 'agenda']),
-                'is_public'  => true,
-                'sort_order' => 45,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Courrier & GED (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment numéroter automatiquement les courriers ?',
-                'answer'     => 'La numérotation automatique est activée par défaut et configurée dans Paramètres > Organisation > Numérotation. Lors de l\'enregistrement d\'un courrier entrant ou sortant, un numéro de référence unique est attribué selon le format configuré (ex : CORR-ENT-2025-0001). Le compteur s\'incrémente automatiquement. Vous pouvez saisir un numéro manuel si nécessaire en activant le mode de saisie libre.',
-                'category'   => 'Courrier & GED',
-                'keywords'   => json_encode(['numérotation', 'courrier', 'référence', 'automatique', 'registre']),
-                'is_public'  => true,
-                'sort_order' => 46,
-            ],
-            [
-                'question'   => 'Comment rechercher un document ou courrier dans la GED ?',
-                'answer'     => 'La barre de recherche universelle (Ctrl+K) permet de chercher dans tous les modules simultanément. Dans la GED spécifiquement, vous disposez d\'une recherche plein texte dans le contenu des documents, ainsi que des filtres par type, date, émetteur, service, et niveau de confidentialité. La recherche dans les pièces jointes (PDF, Word) est possible grâce à l\'indexation OCR automatique des documents téléversés.',
-                'category'   => 'Courrier & GED',
-                'keywords'   => json_encode(['recherche', 'GED', 'document', 'filtre', 'OCR', 'plein texte']),
-                'is_public'  => true,
-                'sort_order' => 47,
-            ],
-            [
-                'question'   => 'Comment définir le niveau de confidentialité d\'un document ?',
-                'answer'     => 'Lors de la création ou du téléversement d\'un document, un champ "Confidentialité" permet de choisir parmi : Public (tous les utilisateurs), Interne (employés uniquement), Confidentiel (service concerné) ou Secret (personnes désignées). Chaque niveau restreint l\'accès en conséquence. Un document confidentiel affiche un badge de couleur rouge dans la liste. Les tentatives d\'accès non autorisées sont enregistrées dans le journal d\'audit.',
-                'category'   => 'Courrier & GED',
-                'keywords'   => json_encode(['confidentialité', 'document', 'accès', 'sécurité', 'niveaux']),
-                'is_public'  => true,
-                'sort_order' => 48,
-            ],
-            [
-                'question'   => 'Comment créer un modèle de document réutilisable ?',
-                'answer'     => 'Depuis GED > Modèles > Nouveau modèle, saisissez le titre, le type de document et rédigez le contenu avec l\'éditeur enrichi. Insérez des variables dynamiques via le menu {{variable}} (ex : {{nom_destinataire}}, {{date_du_jour}}, {{logo_organisation}}). Le modèle est disponible pour tous les utilisateurs autorisés. À l\'utilisation, les variables sont remplacées par les valeurs réelles. Vous pouvez créer autant de modèles que nécessaire.',
-                'category'   => 'Courrier & GED',
-                'keywords'   => json_encode(['modèle', 'document', 'template', 'variables', 'réutilisable']),
-                'is_public'  => true,
-                'sort_order' => 49,
-            ],
-            [
-                'question'   => 'Comment partager un document de façon sécurisée avec un tiers externe ?',
-                'answer'     => 'Depuis la fiche d\'un document, cliquez sur "Partager" et choisissez "Lien sécurisé". Un lien unique avec token est généré, valable pour une durée définie (1h à 30 jours) et optionnellement protégé par un code PIN. Vous pouvez restreindre le partage en lecture seule ou autoriser le téléchargement. Le lien peut être révoqué à tout moment. Chaque accès via ce lien est enregistré avec l\'IP et l\'heure.',
-                'category'   => 'Courrier & GED',
-                'keywords'   => json_encode(['partage', 'document', 'lien sécurisé', 'externe', 'token']),
-                'is_public'  => true,
-                'sort_order' => 50,
+                'category'    => 'documents',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quelle est la capacité de stockage disponible ?',
+                        'answer'   => 'La capacité de stockage dépend de votre plan : 10 Go (Starter), 100 Go (Professional), 1 To (Enterprise). Vous pouvez voir votre utilisation actuelle dans Administration > Stockage. En cas de dépassement, un avertissement est envoyé à 80% et 95% de la capacité. Des extensions de stockage à la carte sont disponibles pour tous les plans.',
+                    ],
+                    'en' => [
+                        'question' => 'What storage capacity is available?',
+                        'answer'   => 'Storage capacity depends on your plan: 10 GB (Starter), 100 GB (Professional), 1 TB (Enterprise). You can view your current usage in Administration > Storage. When approaching the limit, a warning is sent at 80% and 95% capacity. On-demand storage extensions are available for all plans.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Réunions (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 4. TÂCHES & PROJETS (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment générer automatiquement un compte rendu de réunion ?',
-                'answer'     => 'Depuis la fiche d\'une réunion terminée, cliquez sur "Générer le compte rendu". SECRETIS produit un document structuré avec l\'en-tête de l\'organisation, la liste des participants, l\'ordre du jour, les points discutés et les décisions prises. Si SARA est activée et que vous avez fourni des notes ou un enregistrement transcrit, elle peut enrichir automatiquement le contenu. Le compte rendu est éditable avant publication.',
-                'category'   => 'Réunions',
-                'keywords'   => json_encode(['compte rendu', 'réunion', 'génération', 'automatique', 'CR']),
-                'is_public'  => true,
-                'sort_order' => 51,
+                'category'    => 'taches',
+                'order'       => 1,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer une tâche et l\'affecter à un collègue ?',
+                        'answer'   => 'Dans le module Tâches, cliquez sur « + Nouvelle tâche ». Renseignez le titre, la description, la date d\'échéance et la priorité (Basse / Normale / Haute / Urgente). Dans le champ « Assigné à », sélectionnez le collègue concerné. Il reçoit immédiatement une notification et la tâche apparaît dans son tableau de bord.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create a task and assign it to a colleague?',
+                        'answer'   => 'In the Tasks module, click "+ New task". Fill in the title, description, due date and priority (Low / Normal / High / Urgent). In the "Assigned to" field, select the relevant colleague. They immediately receive a notification and the task appears in their dashboard.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment utiliser SARA pour extraire les décisions d\'une réunion ?',
-                'answer'     => 'Dans la fiche réunion, collez ou importez les notes brutes de la séance dans le champ "Notes de séance", puis cliquez sur "Analyser avec SARA". SARA identifie automatiquement les décisions, les actions à mener, les responsables et les échéances. Les éléments extraits sont présentés pour validation avant insertion dans le compte rendu. Cette fonctionnalité nécessite que l\'intégration IA soit configurée dans Paramètres > Intégrations.',
-                'category'   => 'Réunions',
-                'keywords'   => json_encode(['SARA', 'IA', 'décisions', 'réunion', 'extraction', 'notes']),
-                'is_public'  => true,
-                'sort_order' => 52,
+                'category'    => 'taches',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment utiliser la vue Kanban pour gérer mes tâches ?',
+                        'answer'   => 'Depuis le module Tâches, cliquez sur l\'icône Kanban (colonnes). Par défaut, vous avez les colonnes « À faire », « En cours » et « Terminé ». Déplacez les tâches par glisser-déposer entre les colonnes. Les administrateurs peuvent créer des colonnes personnalisées pour adapter le flux à leur processus métier.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I use the Kanban view to manage my tasks?',
+                        'answer'   => 'From the Tasks module, click the Kanban icon (columns). By default you have "To do", "In progress" and "Done" columns. Move tasks by drag-and-drop between columns. Administrators can create custom columns to adapt the flow to their business process.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment faire signer électroniquement un compte rendu ?',
-                'answer'     => 'Une fois le compte rendu validé, cliquez sur "Demander les signatures". Sélectionnez les signataires requis (présidents, secrétaires de séance, participants désignés). Chaque signataire reçoit une notification et peut signer depuis son interface avec un clic ou en dessinant sa signature numérique. Le document est verrouillé après la dernière signature et un certificat d\'authenticité est joint. Les signatures sont horodatées et vérifiables.',
-                'category'   => 'Réunions',
-                'keywords'   => json_encode(['signature électronique', 'compte rendu', 'validation', 'approbation']),
-                'is_public'  => true,
-                'sort_order' => 53,
+                'category'    => 'taches',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Peut-on créer des sous-tâches ?',
+                        'answer'   => 'Oui. Ouvrez une tâche et cliquez sur « Ajouter une sous-tâche » dans l\'onglet « Sous-tâches ». Chaque sous-tâche peut être assignée à un utilisateur différent, avoir sa propre date d\'échéance et sa propre priorité. La progression globale de la tâche parent est calculée automatiquement en fonction du nombre de sous-tâches complétées.',
+                    ],
+                    'en' => [
+                        'question' => 'Can sub-tasks be created?',
+                        'answer'   => 'Yes. Open a task and click "Add a sub-task" in the "Sub-tasks" tab. Each sub-task can be assigned to a different user, have its own due date and priority. The overall progress of the parent task is automatically calculated based on the number of completed sub-tasks.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment envoyer l\'ordre du jour aux participants avant la réunion ?',
-                'answer'     => 'Dans la fiche de réunion, onglet "Ordre du jour", rédigez les points à aborder. Cliquez ensuite sur "Envoyer l\'ordre du jour" pour notifier automatiquement tous les participants par email et notification in-app. L\'envoi peut être programmé (ex : 48h avant la réunion). Les participants peuvent commenter les points de l\'ordre du jour avant la réunion. Un rappel automatique est envoyé 30 minutes avant le début.',
-                'category'   => 'Réunions',
-                'keywords'   => json_encode(['ordre du jour', 'participants', 'notification', 'réunion', 'envoi']),
-                'is_public'  => true,
-                'sort_order' => 54,
+                'category'    => 'taches',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment définir et suivre les priorités de tâches ?',
+                        'answer'   => 'Chaque tâche a un niveau de priorité : Basse (bleu), Normale (gris), Haute (orange), Urgente (rouge). Vous pouvez filtrer et trier vos tâches par priorité. Le module affiche en premier les tâches urgentes dues dans les 24 heures. SARA peut également vous alerter si des tâches importantes approchent de leur échéance.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I set and track task priorities?',
+                        'answer'   => 'Each task has a priority level: Low (blue), Normal (grey), High (orange), Urgent (red). You can filter and sort your tasks by priority. The module displays first urgent tasks due within 24 hours. SARA can also alert you when important tasks are approaching their deadline.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment suivre les décisions et actions issues des réunions ?',
-                'answer'     => 'Les décisions et actions créées lors d\'une réunion sont automatiquement transformées en tâches dans le module Tâches, avec le responsable et l\'échéance associés. Un tableau de bord "Suivi des décisions" dans le module Réunions affiche l\'état d\'avancement de toutes les actions par réunion. Des rappels automatiques sont envoyés aux responsables à l\'approche des échéances. Les comptes rendus des réunions suivantes incluent un suivi des décisions précédentes.',
-                'category'   => 'Réunions',
-                'keywords'   => json_encode(['décisions', 'actions', 'suivi', 'tâches', 'réunion']),
-                'is_public'  => true,
-                'sort_order' => 55,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Tâches (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment utiliser la vue Kanban dans le module Tâches ?',
-                'answer'     => 'Dans le module Tâches, cliquez sur l\'icône Kanban en haut à droite pour basculer en vue tableau. Les colonnes représentent les statuts (À faire, En cours, En révision, Terminé) et les cartes représentent les tâches. Glissez-déposez les cartes pour changer leur statut. Vous pouvez personnaliser les colonnes et leurs couleurs depuis les paramètres de vue. La vue Kanban peut être filtrée par projet, responsable ou priorité.',
-                'category'   => 'Tâches',
-                'keywords'   => json_encode(['Kanban', 'tâches', 'tableau', 'drag and drop', 'statut']),
-                'is_public'  => true,
-                'sort_order' => 56,
+                'category'    => 'taches',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment attacher des fichiers à une tâche ?',
+                        'answer'   => 'Ouvrez la tâche et cliquez sur l\'onglet « Pièces jointes ». Faites glisser vos fichiers ou cliquez sur « Parcourir ». Vous pouvez également lier des documents existants depuis la GED via le bouton « Depuis la GED ». Tous les membres assignés à la tâche ont accès aux pièces jointes.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I attach files to a task?',
+                        'answer'   => 'Open the task and click the "Attachments" tab. Drag and drop your files or click "Browse". You can also link existing documents from the DMS via the "From DMS" button. All members assigned to the task have access to the attachments.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment créer des sous-tâches dans SECRETIS ?',
-                'answer'     => 'Ouvrez une tâche parente et dans la section "Sous-tâches", cliquez sur "Ajouter une sous-tâche". Chaque sous-tâche a son propre titre, responsable, échéance et statut. La progression de la tâche parente est calculée automatiquement selon le pourcentage de sous-tâches complétées. Les sous-tâches peuvent être converties en tâches indépendantes si nécessaire. La profondeur de l\'arborescence est limitée à 3 niveaux.',
-                'category'   => 'Tâches',
-                'keywords'   => json_encode(['sous-tâches', 'tâches', 'hiérarchie', 'progression', 'décomposition']),
-                'is_public'  => true,
-                'sort_order' => 57,
+                'category'    => 'taches',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment recevoir des rappels avant l\'échéance d\'une tâche ?',
+                        'answer'   => 'Dans le formulaire de tâche, cliquez sur « Rappels » et choisissez les délais de notification (1 jour avant, 2 jours avant, etc.). Vous pouvez aussi activer les rappels globaux dans Paramètres > Notifications > Tâches. Les rappels sont envoyés par e-mail et par notification push dans l\'application.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I receive reminders before a task deadline?',
+                        'answer'   => 'In the task form, click "Reminders" and choose notification delays (1 day before, 2 days before, etc.). You can also enable global reminders in Settings > Notifications > Tasks. Reminders are sent by email and push notification in the application.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment identifier et gérer les tâches en retard ?',
-                'answer'     => 'Les tâches dont l\'échéance est dépassée apparaissent en rouge dans toutes les vues. Le tableau de bord principal affiche un widget "Tâches en retard" avec le décompte et les tâches concernées. Des notifications automatiques sont envoyées au responsable et au manager dès qu\'une tâche dépasse son échéance. Le rapport "Performance des tâches" dans le module Rapports analyse les délais moyens et les récurrences.',
-                'category'   => 'Tâches',
-                'keywords'   => json_encode(['retard', 'tâches', 'échéance', 'notification', 'rapport']),
-                'is_public'  => true,
-                'sort_order' => 58,
+                'category'    => 'taches',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer et gérer un projet avec plusieurs tâches liées ?',
+                        'answer'   => 'Allez dans Projets > Nouveau projet. Donnez un nom au projet, définissez les dates de début et fin, le chef de projet et les membres. Ensuite créez des tâches à l\'intérieur du projet. Les tâches du projet sont liées et leur avancement contribue au pourcentage de complétion global. Un diagramme de Gantt est disponible depuis la vue Projet.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create and manage a project with multiple linked tasks?',
+                        'answer'   => 'Go to Projects > New project. Give the project a name, define start and end dates, the project manager and members. Then create tasks inside the project. Project tasks are linked and their progress contributes to the overall completion percentage. A Gantt chart is available from the Project view.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment affecter une tâche directement depuis une réunion ?',
-                'answer'     => 'Dans le compte rendu d\'une réunion, chaque décision ou action peut être convertie en tâche en un clic. Cliquez sur l\'icône "Créer une tâche" à côté de l\'action, puis renseignez ou confirmez le responsable et l\'échéance (souvent pré-remplis depuis les notes). La tâche est automatiquement liée à la réunion source pour la traçabilité. Elle apparaît immédiatement dans le module Tâches du responsable concerné.',
-                'category'   => 'Tâches',
-                'keywords'   => json_encode(['tâche', 'réunion', 'affectation', 'action', 'décision']),
-                'is_public'  => true,
-                'sort_order' => 59,
+                'category'    => 'taches',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment commenter une tâche pour collaborer avec mon équipe ?',
+                        'answer'   => 'Ouvrez la tâche et cliquez sur l\'onglet « Commentaires ». Rédigez votre message et appuyez sur Entrée. Vous pouvez mentionner un collègue avec @prénom pour lui envoyer une notification ciblée. Les commentaires supportent le texte formaté, les liens et les pièces jointes. Tous les membres assignés reçoivent une notification pour chaque nouveau commentaire.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I comment on a task to collaborate with my team?',
+                        'answer'   => 'Open the task and click the "Comments" tab. Write your message and press Enter. You can mention a colleague with @firstname to send them a targeted notification. Comments support formatted text, links and attachments. All assigned members receive a notification for each new comment.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment exporter le diagramme de Gantt de mes projets ?',
-                'answer'     => 'Dans la vue Gantt du module Tâches (accessible via l\'icône barre horizontale), cliquez sur "Exporter" et choisissez le format PNG (image haute résolution) ou PDF (document imprimable). Vous pouvez personnaliser la plage de dates, le niveau de détail (projet, tâche, sous-tâche) et les colonnes affichées. L\'export inclut les jalons, les dépendances entre tâches et le chemin critique. La légende de couleurs est personnalisable.',
-                'category'   => 'Tâches',
-                'keywords'   => json_encode(['Gantt', 'export', 'projet', 'planification', 'diagramme']),
-                'is_public'  => true,
-                'sort_order' => 60,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Imports & Exports (10 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Quels formats de fichiers sont supportés pour l\'import et l\'export ?',
-                'answer'     => 'IBIG SECRETIS supporte l\'import via Excel (.xlsx, .xls) et CSV (.csv). Pour l\'export, les formats disponibles sont PDF, Excel, CSV et JSON selon le module concerné. Les documents de la GED acceptent les formats PDF, Word (.docx), images (JPG, PNG) et archives (.zip). Une liste exhaustive des formats supportés par module est disponible dans la documentation technique.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['formats', 'Excel', 'CSV', 'PDF', 'import', 'export']),
-                'is_public'  => true,
-                'sort_order' => 61,
+                'category'    => 'taches',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment savoir si une tâche que j\'ai assignée a été complétée ?',
+                        'answer'   => 'Vous recevez une notification automatique lorsqu\'un assigné marque une tâche comme terminée. Vous pouvez aussi suivre l\'avancement depuis Mes tâches > Tâches assignées par moi. Le tableau de bord affiche un récapitulatif des tâches terminées ce jour et cette semaine.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I know if a task I assigned has been completed?',
+                        'answer'   => 'You receive an automatic notification when an assignee marks a task as done. You can also track progress from My tasks > Tasks assigned by me. The dashboard displays a summary of tasks completed today and this week.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment importer des contacts depuis un fichier Excel ?',
-                'answer'     => 'Dans le module correspondant (RH pour les employés, Contacts pour les tiers), cliquez sur "Importer" et téléchargez d\'abord le modèle Excel vierge. Remplissez ce modèle avec vos données en respectant les colonnes obligatoires. Re-téléversez le fichier complété et visualisez l\'aperçu avant import. Les lignes en erreur sont signalées et peuvent être corrigées sans relancer l\'import entier.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['import', 'contacts', 'Excel', 'fichier', 'masse']),
-                'is_public'  => true,
-                'sort_order' => 62,
-            ],
-            [
-                'question'   => 'Comment exporter le registre du courrier entrant et sortant ?',
-                'answer'     => 'Dans le module Courrier, appliquez les filtres souhaités (période, type, service) puis cliquez sur "Exporter le registre". Choisissez le format Excel pour un tableau complet ou PDF pour un registre officiel imprimable. L\'export PDF respecte la mise en page réglementaire avec en-tête de l\'organisation, numérotation des pages et signature de l\'administrateur. Les pièces jointes ne sont pas incluses dans l\'export registre.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['registre', 'courrier', 'export', 'Excel', 'PDF']),
-                'is_public'  => true,
-                'sort_order' => 63,
-            ],
-            [
-                'question'   => 'Comment générer un rapport en format PDF ?',
-                'answer'     => 'Dans le module Rapports ou dans chaque module (Tâches, Réunions, Courrier), cliquez sur l\'icône d\'export et sélectionnez "PDF". Le rapport est généré côté serveur et téléchargé automatiquement. Vous pouvez personnaliser l\'en-tête, le pied de page, les colonnes incluses et la plage de dates. Les rapports fréquemment utilisés peuvent être sauvegardés comme "favoris" pour un accès rapide.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['PDF', 'rapport', 'génération', 'export', 'impression']),
-                'is_public'  => true,
-                'sort_order' => 64,
-            ],
-            [
-                'question'   => 'Comment exporter les données pour la comptabilité ?',
-                'answer'     => 'Le module Rapports propose des exports comptables compatibles avec les logiciels courants (Sage, QuickBooks, format FEC). Depuis Rapports > Export Comptabilité, sélectionnez la période et le format cible. L\'export inclut les journaux de bord, les factures et les règlements avec les codes comptables mappés selon votre plan comptable. La configuration du mapping se fait depuis Paramètres > Comptabilité.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['comptabilité', 'export', 'Sage', 'FEC', 'journal', 'financier']),
-                'is_public'  => true,
-                'sort_order' => 65,
-            ],
-            [
-                'question'   => 'Comment importer des employés en masse dans le module RH ?',
-                'answer'     => 'Depuis RH > Employés > Importer, téléchargez le modèle Excel des employés. Ce modèle contient toutes les colonnes requises (matricule, nom, prénom, poste, service, date d\'embauche, email). Après avoir rempli le fichier, re-téléversez-le et vérifiez l\'aperçu d\'import. Les doublons sont détectés automatiquement. Une option "envoyer invitation" créera automatiquement les comptes utilisateurs correspondants.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['import', 'employés', 'RH', 'Excel', 'masse', 'ressources humaines']),
-                'is_public'  => true,
-                'sort_order' => 66,
-            ],
-            [
-                'question'   => 'Y a-t-il une limite de taille pour les fichiers téléversés ?',
-                'answer'     => 'La limite par défaut est de 25 Mo par fichier. Cette limite peut être augmentée jusqu\'à 100 Mo sur les plans Professionnel et Entreprise depuis Paramètres > Stockage. Pour les imports Excel, la limite est de 10 000 lignes par fichier. Les fichiers vidéo ne sont pas supportés directement mais peuvent être liés via URL externe. L\'espace de stockage total est indiqué dans Paramètres > Abonnement > Utilisation.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['limite', 'taille', 'fichier', 'stockage', 'upload']),
-                'is_public'  => true,
-                'sort_order' => 67,
-            ],
-            [
-                'question'   => 'Comment télécharger le modèle de fichier pour un import ?',
-                'answer'     => 'Dans chaque module disposant d\'une fonctionnalité d\'import, un bouton "Télécharger le modèle" est accessible avant l\'étape d\'upload. Ce modèle Excel contient les en-têtes exactes attendues, des exemples sur la première ligne de données et des notes de validation dans les cellules. Il est fortement recommandé d\'utiliser ce modèle officiel pour éviter les erreurs d\'import. Des modèles spécifiques par secteur sont disponibles sur demande.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['modèle', 'template', 'import', 'Excel', 'téléchargement']),
-                'is_public'  => true,
-                'sort_order' => 68,
-            ],
-            [
-                'question'   => 'Comment récupérer toutes mes données si je résilie mon abonnement ?',
-                'answer'     => 'IBIG Soft vous garantit la portabilité totale de vos données. Avant la résiliation, vous pouvez exporter l\'intégralité de vos données depuis Paramètres > Avancé > Export total des données. L\'archive ZIP contient tous vos documents, courriers, contacts et configurations au format standard (JSON + fichiers originaux). Cette opération peut prendre plusieurs heures selon le volume. L\'accès reste disponible 30 jours après la résiliation pour vous permettre de récupérer vos données.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['résiliation', 'données', 'export', 'portabilité', 'RGPD']),
-                'is_public'  => true,
-                'sort_order' => 69,
-            ],
-            [
-                'question'   => 'Que faire si un import échoue ou produit des erreurs ?',
-                'answer'     => 'En cas d\'échec, un rapport d\'erreur détaillé est généré avec le numéro de ligne problématique, le champ en erreur et le message explicatif. Téléchargez ce rapport depuis l\'écran d\'import pour corriger votre fichier. Les imports partiels (avec des lignes valides et d\'autres en erreur) peuvent être finalisés en ne réimportant que les lignes corrigées. Le support peut vous aider à diagnostiquer des erreurs complexes.',
-                'category'   => 'Imports & Exports',
-                'keywords'   => json_encode(['erreur', 'import', 'rapport', 'diagnostic', 'correction']),
-                'is_public'  => true,
-                'sort_order' => 70,
+                'category'    => 'taches',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment exporter la liste de mes tâches en Excel ou PDF ?',
+                        'answer'   => 'Dans la vue liste des tâches, cliquez sur le bouton « Exporter » en haut à droite. Choisissez le format (Excel ou PDF) et les filtres à appliquer (toutes les tâches, mes tâches, par projet, par période). Le rapport inclut les colonnes : titre, assigné, priorité, statut, date d\'échéance, progression.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I export my task list to Excel or PDF?',
+                        'answer'   => 'In the task list view, click the "Export" button at the top right. Choose the format (Excel or PDF) and the filters to apply (all tasks, my tasks, by project, by period). The report includes columns: title, assignee, priority, status, due date, progress.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Documents & Modèles (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 5. VISITEURS & RÉCEPTION (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment créer un modèle de lettre ou document officiel ?',
-                'answer'     => 'Dans GED > Modèles, cliquez sur "Nouveau modèle" et sélectionnez le type (lettre, note, circulaire, rapport, procès-verbal). L\'éditeur de texte enrichi permet de mettre en forme le document avec des polices, tableaux et images. Définissez les marges, l\'orientation et l\'en-tête/pied de page. Sauvegardez le modèle et définissez les services pouvant l\'utiliser. Les modèles peuvent être verrouillés en modification par les non-administrateurs.',
-                'category'   => 'Documents & Modèles',
-                'keywords'   => json_encode(['modèle', 'lettre', 'document', 'template', 'officiel']),
-                'is_public'  => true,
-                'sort_order' => 71,
+                'category'    => 'visiteurs',
+                'order'       => 1,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment enregistrer un visiteur à son arrivée ?',
+                        'answer'   => 'Depuis le module Visiteurs, cliquez sur « Enregistrer un visiteur » ou utilisez la tablette d\'accueil en mode kiosque. Saisissez le nom du visiteur, son entreprise, la personne visitée et l\'objet de la visite. Une photo peut être prise avec la webcam. Le badge est imprimé automatiquement si une imprimante est connectée. L\'hôte reçoit une notification instantanée.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I register a visitor upon arrival?',
+                        'answer'   => 'From the Visitors module, click "Register a visitor" or use the reception tablet in kiosk mode. Enter the visitor\'s name, company, person being visited and purpose of visit. A photo can be taken with the webcam. The badge is printed automatically if a printer is connected. The host receives an instant notification.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment insérer des variables dynamiques dans un modèle ?',
-                'answer'     => 'Dans l\'éditeur de modèle, placez le curseur à l\'endroit souhaité et cliquez sur "Insérer une variable". La liste propose des variables système ({{date_du_jour}}, {{nom_organisation}}, {{logo}}) et des variables métier ({{nom_destinataire}}, {{num_reference}}, {{expediteur_fonction}}). À l\'utilisation du modèle, un formulaire de saisie demande les valeurs des variables personnalisées. Des variables personnalisées peuvent être créées pour chaque type de modèle.',
-                'category'   => 'Documents & Modèles',
-                'keywords'   => json_encode(['variables', 'dynamiques', 'modèle', 'automatisation', 'template']),
-                'is_public'  => true,
-                'sort_order' => 72,
+                'category'    => 'visiteurs',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment notifier l\'hôte de l\'arrivée de son visiteur ?',
+                        'answer'   => 'Lors de l\'enregistrement du visiteur, sélectionnez l\'hôte interne dans le champ « Personne visitée ». Une notification est automatiquement envoyée par e-mail, notification push dans l\'application et SMS (si le module SMS est activé). L\'hôte peut confirmer sa disponibilité directement depuis la notification.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I notify the host of their visitor\'s arrival?',
+                        'answer'   => 'When registering the visitor, select the internal host in the "Person visited" field. A notification is automatically sent by email, push notification in the app and SMS (if the SMS module is enabled). The host can confirm their availability directly from the notification.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment ajouter mon logo sur les documents générés ?',
-                'answer'     => 'Le logo est automatiquement intégré dans l\'en-tête de tous les documents si vous l\'avez configuré dans Paramètres > Organisation. Dans l\'éditeur de modèles, la variable {{logo_organisation}} insère le logo à l\'emplacement choisi. Vous pouvez ajuster la taille en pixels directement dans l\'éditeur. Pour des mises en page complexes, le module gère l\'en-tête et le pied de page via des zones dédiées indépendantes du corps du document.',
-                'category'   => 'Documents & Modèles',
-                'keywords'   => json_encode(['logo', 'document', 'en-tête', 'modèle', 'branding']),
-                'is_public'  => true,
-                'sort_order' => 73,
+                'category'    => 'visiteurs',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment générer et imprimer un badge visiteur ?',
+                        'answer'   => 'SECRETIS génère automatiquement un badge PDF lors de l\'enregistrement du visiteur. Le badge inclut le nom, la photo, le nom de l\'hôte, la date/heure et un QR code unique. Si une imprimante d\'étiquettes est configurée dans Administration > Matériel, l\'impression est automatique. Sinon, vous pouvez imprimer manuellement depuis n\'importe quelle imprimante standard.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I generate and print a visitor badge?',
+                        'answer'   => 'SECRETIS automatically generates a PDF badge when the visitor is registered. The badge includes the name, photo, host name, date/time and a unique QR code. If a label printer is configured in Administration > Hardware, printing is automatic. Otherwise, you can print manually from any standard printer.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment générer un QR code de vérification sur les documents ?',
-                'answer'     => 'Activez l\'option "QR code de vérification" lors de la génération d\'un document officiel. Un QR code unique est inséré automatiquement sur le document, lié à une URL de vérification en ligne. Toute personne scannant ce QR code depuis un smartphone peut vérifier l\'authenticité du document, sa date d\'émission et son statut (valide, révoqué, modifié). Cette fonctionnalité est disponible pour les courriers, comptes rendus et attestations.',
-                'category'   => 'Documents & Modèles',
-                'keywords'   => json_encode(['QR code', 'vérification', 'authenticité', 'document', 'sécurité']),
-                'is_public'  => true,
-                'sort_order' => 74,
+                'category'    => 'visiteurs',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment pré-enregistrer un visiteur attendu ?',
+                        'answer'   => 'Dans le module Visiteurs > Visites planifiées, cliquez sur « Planifier une visite ». Renseignez les informations du visiteur et la date/heure prévue. Le visiteur reçoit un e-mail avec un code QR à présenter à l\'accueil. Lors de son arrivée, la réceptionniste scanne le code QR et la visite est enregistrée automatiquement en 2 secondes.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I pre-register an expected visitor?',
+                        'answer'   => 'In Visitors module > Planned visits, click "Plan a visit". Enter the visitor\'s information and the expected date/time. The visitor receives an email with a QR code to present at reception. Upon arrival, the receptionist scans the QR code and the visit is automatically registered in 2 seconds.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on avoir plusieurs modèles pour le même type de document ?',
-                'answer'     => 'Oui, vous pouvez créer autant de modèles que nécessaire pour chaque type de document. Par exemple, plusieurs modèles de lettres (lettre formelle, lettre simple, lettre de convocation) ou plusieurs modèles de comptes rendus selon le type de réunion. Un modèle peut être défini "par défaut" pour un type donné. L\'utilisateur choisit le modèle souhaité au moment de la création du document.',
-                'category'   => 'Documents & Modèles',
-                'keywords'   => json_encode(['modèles', 'multiples', 'document', 'choix', 'template']),
-                'is_public'  => true,
-                'sort_order' => 75,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Abonnements & Paiements (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment payer mon abonnement par Mobile Money ?',
-                'answer'     => 'Depuis Paramètres > Abonnement > Payer, sélectionnez "Mobile Money" comme mode de paiement. Choisissez votre opérateur (Orange Money, MTN MoMo, Wave, Moov Money, Airtel Money selon votre pays). Saisissez votre numéro de téléphone et validez. Une demande de paiement est envoyée sur votre téléphone à confirmer. La transaction est sécurisée et votre abonnement est activé dans les 5 minutes après confirmation.',
-                'category'   => 'Abonnements & Paiements',
-                'keywords'   => json_encode(['Mobile Money', 'paiement', 'Orange Money', 'MTN', 'Wave', 'abonnement']),
-                'is_public'  => true,
-                'sort_order' => 76,
+                'category'    => 'visiteurs',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment consulter l\'historique des visites ?',
+                        'answer'   => 'Allez dans Visiteurs > Historique. Vous pouvez filtrer par date, par hôte, par entreprise visitrice ou par statut (en cours / terminé). L\'export en Excel ou PDF est disponible pour les rapports de sécurité ou les audits. L\'historique est conservé 5 ans conformément aux recommandations RGPD/OHADA.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I view the visit history?',
+                        'answer'   => 'Go to Visitors > History. You can filter by date, host, visiting company or status (in progress / completed). Export to Excel or PDF is available for security reports or audits. The history is kept for 5 years in accordance with GDPR/OHADA recommendations.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment obtenir une facture pour mon abonnement ?',
-                'answer'     => 'Les factures sont générées automatiquement à chaque renouvellement d\'abonnement et accessibles depuis Paramètres > Facturation > Historique. Vous pouvez télécharger chaque facture en PDF avec les informations fiscales complètes. Pour les organisations nécessitant une facture proforma ou un bon de commande avant paiement, contactez notre service commercial via support@ibigsoft.africa. Les factures peuvent être adressées au nom de votre organisation avec votre numéro fiscal.',
-                'category'   => 'Abonnements & Paiements',
-                'keywords'   => json_encode(['facture', 'abonnement', 'paiement', 'PDF', 'fiscal']),
-                'is_public'  => true,
-                'sort_order' => 77,
+                'category'    => 'visiteurs',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment configurer le mode kiosque pour la tablette d\'accueil ?',
+                        'answer'   => 'Dans Administration > Visiteurs > Configuration kiosque, activez le mode kiosque et définissez un code PIN d\'accès. Installez l\'application SECRETIS sur votre tablette, connectez-vous et sélectionnez « Mode kiosque ». Le visiteur remplit lui-même ses informations, signe le registre numérique et l\'hôte est notifié automatiquement.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I configure kiosk mode for the reception tablet?',
+                        'answer'   => 'In Administration > Visitors > Kiosk configuration, enable kiosk mode and set an access PIN. Install the SECRETIS app on your tablet, log in and select "Kiosk mode". The visitor fills in their own information, signs the digital register and the host is automatically notified.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Que se passe-t-il à l\'expiration de mon abonnement ?',
-                'answer'     => 'Trois avertissements sont envoyés avant expiration (7 jours, 3 jours, 1 jour). À la date d\'expiration, l\'accès passe en mode lecture seule pendant 15 jours pour vous permettre de renouveler. Passé ce délai, l\'accès est suspendu mais toutes les données sont conservées pendant 60 jours supplémentaires. Aucune donnée n\'est supprimée avant un total de 75 jours après expiration. Un plan de renouvellement urgent peut être activé par le support.',
-                'category'   => 'Abonnements & Paiements',
-                'keywords'   => json_encode(['expiration', 'abonnement', 'renouvellement', 'suspension', 'données']),
-                'is_public'  => true,
-                'sort_order' => 78,
+                'category'    => 'visiteurs',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Peut-on gérer les accès sécurisés par zones pour les visiteurs ?',
+                        'answer'   => 'Oui. Dans Administration > Visiteurs > Zones d\'accès, définissez vos zones (Accueil, Salle de réunion, Zone technique, etc.). Lors de l\'enregistrement, précisez les zones autorisées pour le visiteur. Les zones s\'affichent sur le badge. Si votre immeuble dispose d\'un système de contrôle d\'accès connecté, SECRETIS peut l\'intégrer via l\'API.',
+                    ],
+                    'en' => [
+                        'question' => 'Can zone-based access control be managed for visitors?',
+                        'answer'   => 'Yes. In Administration > Visitors > Access zones, define your zones (Reception, Meeting room, Technical area, etc.). When registering, specify the authorised zones for the visitor. Zones appear on the badge. If your building has a connected access control system, SECRETIS can integrate it via the API.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on changer de plan en cours d\'abonnement ?',
-                'answer'     => 'Oui, la mise à niveau (upgrade) vers un plan supérieur est possible à tout moment et prend effet immédiatement. La différence de prix est calculée au prorata du temps restant. La rétrogradation vers un plan inférieur est possible à la date de renouvellement suivante. Si votre nombre d\'utilisateurs actifs dépasse la limite du nouveau plan, une alerte vous demande de réduire le nombre d\'utilisateurs avant de valider la rétrogradation.',
-                'category'   => 'Abonnements & Paiements',
-                'keywords'   => json_encode(['changement plan', 'upgrade', 'abonnement', 'prorata', 'mise à niveau']),
-                'is_public'  => true,
-                'sort_order' => 79,
+                'category'    => 'visiteurs',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment enregistrer le départ d\'un visiteur ?',
+                        'answer'   => 'Depuis Visiteurs > Visites en cours, sélectionnez la visite et cliquez sur « Enregistrer le départ ». L\'heure de départ est horodatée automatiquement. Vous pouvez aussi configurer le mode kiosque pour que le visiteur enregistre lui-même son départ en scannant son badge QR. La durée totale de la visite est calculée automatiquement.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I record a visitor\'s departure?',
+                        'answer'   => 'From Visitors > Ongoing visits, select the visit and click "Record departure". The departure time is automatically timestamped. You can also configure kiosk mode so the visitor records their own departure by scanning their QR badge. The total visit duration is calculated automatically.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment contacter le service de facturation ?',
-                'answer'     => 'Le service de facturation est joignable par email à facturation@ibigsoft.africa, par WhatsApp au numéro indiqué sur votre facture, ou via le formulaire de contact de la plateforme (support > Nouveau ticket > Catégorie "Facturation"). Les délais de réponse sont de 24h ouvrées. Pour les organisations avec un contrat entreprise, un gestionnaire de compte dédié est disponible.',
-                'category'   => 'Abonnements & Paiements',
-                'keywords'   => json_encode(['facturation', 'contact', 'support', 'email', 'WhatsApp']),
-                'is_public'  => true,
-                'sort_order' => 80,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Sauvegardes (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment déclencher une sauvegarde manuelle de mes données ?',
-                'answer'     => 'Les administrateurs peuvent déclencher une sauvegarde immédiate depuis Paramètres > Sauvegardes > Déclencher une sauvegarde maintenant. La sauvegarde est créée en arrière-plan et une notification vous prévient lorsqu\'elle est terminée. Cette fonctionnalité est utile avant une opération importante (import massif, changement de configuration). La sauvegarde manuelle s\'ajoute aux sauvegardes automatiques programmées.',
-                'category'   => 'Sauvegardes',
-                'keywords'   => json_encode(['sauvegarde', 'manuelle', 'backup', 'données', 'déclenchement']),
-                'is_public'  => true,
-                'sort_order' => 81,
+                'category'    => 'visiteurs',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Les données des visiteurs sont-elles protégées conformément au RGPD ?',
+                        'answer'   => 'Oui. SECRETIS applique les principes du RGPD : consentement explicite lors de l\'enregistrement, durée de conservation limitée (configurable par l\'administrateur, recommandation : 1 an), droit à l\'effacement sur demande, et accès restreint aux données visiteurs selon les rôles. Un registre de traitement des données est disponible pour votre DPO.',
+                    ],
+                    'en' => [
+                        'question' => 'Is visitor data protected in accordance with GDPR?',
+                        'answer'   => 'Yes. SECRETIS applies GDPR principles: explicit consent at registration, limited retention period (configurable by administrator, recommendation: 1 year), right to erasure on request, and restricted access to visitor data based on roles. A data processing register is available for your DPO.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Où sont stockées les sauvegardes de mes données ?',
-                'answer'     => 'Les sauvegardes sont répliquées dans plusieurs datacenters géographiquement distants pour garantir la disponibilité en cas de sinistre. Selon votre plan, les sauvegardes sont stockées dans des serveurs en Afrique (datacenter Dakar, Abidjan ou Nairobi) et répliquées dans un datacenter européen. Vous pouvez consulter l\'emplacement précis depuis Paramètres > Sauvegardes > Informations de stockage.',
-                'category'   => 'Sauvegardes',
-                'keywords'   => json_encode(['stockage', 'sauvegarde', 'datacenter', 'hébergement', 'réplication']),
-                'is_public'  => true,
-                'sort_order' => 82,
-            ],
-            [
-                'question'   => 'Comment restaurer mes données depuis une sauvegarde ?',
-                'answer'     => 'La restauration est une opération sensible réservée au support IBIG Soft pour éviter les pertes accidentelles de données. Depuis Paramètres > Sauvegardes, identifiez la sauvegarde souhaitée et cliquez sur "Demander une restauration". Un ticket est créé automatiquement et le support vous contacte pour valider et planifier la restauration. La restauration complète d\'une organisation prend généralement 2 à 4 heures.',
-                'category'   => 'Sauvegardes',
-                'keywords'   => json_encode(['restauration', 'sauvegarde', 'récupération', 'données', 'disaster recovery']),
-                'is_public'  => true,
-                'sort_order' => 83,
-            ],
-            [
-                'question'   => 'À quelle fréquence les sauvegardes automatiques sont-elles effectuées ?',
-                'answer'     => 'Les sauvegardes automatiques sont effectuées selon le plan : quotidiennement sur tous les plans (sauvegarde à 2h du matin, heure de votre fuseau horaire), toutes les 6 heures sur le plan Professionnel, et toutes les heures sur le plan Entreprise. Les sauvegardes sont conservées 30 jours pour les plans Starter et Professionnel, et 90 jours pour le plan Entreprise. Les sauvegardes manuelles ne comptent pas dans cette rétention.',
-                'category'   => 'Sauvegardes',
-                'keywords'   => json_encode(['fréquence', 'sauvegarde', 'automatique', 'quotidienne', 'rétention']),
-                'is_public'  => true,
-                'sort_order' => 84,
-            ],
-            [
-                'question'   => 'Comment vérifier qu\'une sauvegarde est valide et complète ?',
-                'answer'     => 'Chaque sauvegarde affiche un indicateur de santé dans Paramètres > Sauvegardes > Historique. Une coche verte indique une sauvegarde complète et vérifiée. Les sauvegardes sont automatiquement testées par un processus de vérification d\'intégrité après création. Vous pouvez voir la taille, la date de création, la durée de création et le rapport de vérification. En cas de sauvegarde marquée "incomplète", le support est automatiquement alerté.',
-                'category'   => 'Sauvegardes',
-                'keywords'   => json_encode(['validation', 'sauvegarde', 'intégrité', 'vérification', 'santé']),
-                'is_public'  => true,
-                'sort_order' => 85,
-            ],
-
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : SARA l'assistante IA (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
-            [
-                'question'   => 'Comment activer SARA dans IBIG SECRETIS ?',
-                'answer'     => 'SARA est activée depuis Paramètres > Intégrations > IA SARA. Sélectionnez votre fournisseur IA (Groq, OpenAI ou Anthropic), renseignez votre clé API et choisissez le modèle à utiliser. Cliquez sur "Tester la connexion" pour valider la configuration. Une fois activée, l\'icône SARA apparaît dans le coin inférieur droit de toutes les pages. Les quotas d\'utilisation sont définis par votre plan d\'abonnement SECRETIS.',
-                'category'   => 'SARA',
-                'keywords'   => json_encode(['SARA', 'IA', 'activation', 'configuration', 'Groq', 'OpenAI', 'Anthropic']),
-                'is_public'  => true,
-                'sort_order' => 86,
-            ],
-            [
-                'question'   => 'SARA peut-elle modifier ou supprimer des données dans SECRETIS ?',
-                'answer'     => 'Non, SARA est en lecture seule et ne peut pas modifier, créer ou supprimer des données directement. Elle peut suggérer des actions, rédiger des brouillons ou extraire des informations, mais toute modification requiert la validation explicite de l\'utilisateur. SARA n\'a accès qu\'aux données auxquelles l\'utilisateur a lui-même accès selon ses permissions. Cette approche garantit que l\'IA ne peut pas contourner les contrôles d\'accès.',
-                'category'   => 'SARA',
-                'keywords'   => json_encode(['SARA', 'IA', 'modifications', 'sécurité', 'permissions', 'lecture seule']),
-                'is_public'  => true,
-                'sort_order' => 87,
-            ],
-            [
-                'question'   => 'Dans quelle langue SARA répond-elle ?',
-                'answer'     => 'SARA répond dans la langue utilisée pour lui poser la question. Si vous écrivez en français, elle répond en français ; en anglais, elle répond en anglais. SARA comprend et peut répondre dans une vingtaine de langues dont le français, l\'anglais, l\'arabe, le portugais et l\'espagnol. Pour les documents officiels, SARA génère ses réponses dans la langue de l\'organisation définie dans Paramètres. La qualité des réponses est optimale en français et en anglais.',
-                'category'   => 'SARA',
-                'keywords'   => json_encode(['SARA', 'langue', 'multilingue', 'français', 'anglais', 'réponse']),
-                'is_public'  => true,
-                'sort_order' => 88,
-            ],
-            [
-                'question'   => 'Comment SARA accède-t-elle aux données de mon organisation ?',
-                'answer'     => 'SARA accède uniquement aux données auxquelles l\'utilisateur connecté a droit selon ses permissions SECRETIS. Elle utilise un système de Retrieval-Augmented Generation (RAG) qui récupère les informations pertinentes dans vos données pour contextualiser ses réponses. Vos données ne sont jamais envoyées aux fournisseurs IA tiers pour l\'entraînement. Seule la requête de l\'utilisateur et le contexte minimal nécessaire sont transmis de façon sécurisée et chiffrée.',
-                'category'   => 'SARA',
-                'keywords'   => json_encode(['SARA', 'données', 'accès', 'RAG', 'confidentialité', 'IA']),
-                'is_public'  => true,
-                'sort_order' => 89,
-            ],
-            [
-                'question'   => 'Y a-t-il une limite d\'utilisation de SARA ?',
-                'answer'     => 'Les quotas d\'utilisation de SARA dépendent de votre plan : 100 requêtes/mois sur Starter, 1000 requêtes/mois sur Professionnel, illimité sur Entreprise (sous réserve de fair use). L\'utilisation est visible depuis Paramètres > Intégrations > IA SARA > Utilisation du mois. Des crédits supplémentaires peuvent être achetés depuis le module Abonnement. SARA utilise votre propre clé API fournisseur, donc les coûts IA sont aussi soumis aux limites de votre compte fournisseur.',
-                'category'   => 'SARA',
-                'keywords'   => json_encode(['SARA', 'limite', 'quota', 'utilisation', 'crédits', 'abonnement']),
-                'is_public'  => true,
-                'sort_order' => 90,
+                'category'    => 'visiteurs',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment générer un rapport des visites du mois ?',
+                        'answer'   => 'Dans Visiteurs > Rapports, sélectionnez « Rapport mensuel » et choisissez le mois. Le rapport inclut : nombre total de visiteurs, répartition par jour, par hôte, par entreprise visitrice, durée moyenne des visites. Exportez en PDF pour le rapport de sécurité ou en Excel pour des analyses personnalisées.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I generate a monthly visit report?',
+                        'answer'   => 'In Visitors > Reports, select "Monthly report" and choose the month. The report includes: total number of visitors, breakdown by day, by host, by visiting company, average visit duration. Export to PDF for the security report or Excel for custom analysis.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // CATÉGORIE : Support (5 FAQ)
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 6. PAIEMENTS & ABONNEMENT (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment ouvrir un ticket de support technique ?',
-                'answer'     => 'Cliquez sur l\'icône "?" en haut à droite de l\'interface puis sur "Contacter le support". Remplissez le formulaire avec la catégorie du problème, une description détaillée et des captures d\'écran si possible. Un numéro de ticket vous est attribué immédiatement et vous recevez une confirmation par email. Vous pouvez suivre l\'avancement de votre ticket depuis le portail support accessible à support.ibigsoft.africa.',
-                'category'   => 'Support',
-                'keywords'   => json_encode(['support', 'ticket', 'aide', 'problème', 'contact']),
-                'is_public'  => true,
-                'sort_order' => 91,
+                'category'    => 'paiements',
+                'order'       => 1,
+                'is_featured' => true,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quels modes de paiement sont acceptés ?',
+                        'answer'   => 'SECRETIS accepte les cartes bancaires Visa et Mastercard, le virement bancaire, Mobile Money (Orange Money, MTN MoMo, Wave), et les paiements OHADA via les opérateurs locaux partenaires. Les factures peuvent être réglées en XOF (FCFA), XAF, USD et EUR. Pour les grandes organisations, des arrangements de paiement trimestriel ou annuel sont disponibles.',
+                    ],
+                    'en' => [
+                        'question' => 'What payment methods are accepted?',
+                        'answer'   => 'SECRETIS accepts Visa and Mastercard bank cards, bank transfer, Mobile Money (Orange Money, MTN MoMo, Wave), and OHADA payments via partner local operators. Invoices can be settled in XOF (FCFA), XAF, USD and EUR. For large organisations, quarterly or annual payment arrangements are available.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Quels sont les délais de réponse du support ?',
-                'answer'     => 'Les délais de réponse varient selon la priorité et le plan : incidents bloquants (P1) sous 4h ouvrées, problèmes majeurs (P2) sous 8h ouvrées, questions et demandes (P3) sous 24h ouvrées. Les clients Entreprise bénéficient d\'un SLA renforcé avec 2h pour les P1 et d\'une ligne d\'urgence disponible 24h/24. Le support est disponible du lundi au vendredi, 8h-18h (UTC+0) et le samedi matin pour les urgences.',
-                'category'   => 'Support',
-                'keywords'   => json_encode(['support', 'délai', 'SLA', 'réponse', 'priorité']),
-                'is_public'  => true,
-                'sort_order' => 92,
+                'category'    => 'paiements',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment changer de plan d\'abonnement ?',
+                        'answer'   => 'Allez dans Administration > Abonnement > Changer de plan. Sélectionnez le nouveau plan et confirmez. Le changement est effectif immédiatement. Si vous montez en gamme, vous êtes facturé au prorata pour la période restante. Si vous descendez en gamme, la réduction s\'applique au prochain cycle de facturation.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I change my subscription plan?',
+                        'answer'   => 'Go to Administration > Subscription > Change plan. Select the new plan and confirm. The change is effective immediately. If you upgrade, you are billed pro-rata for the remaining period. If you downgrade, the reduction applies at the next billing cycle.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Peut-on contacter le support par WhatsApp ?',
-                'answer'     => 'Oui, un canal WhatsApp Business est disponible pour les questions urgentes et le support de premier niveau. Le numéro WhatsApp est affiché dans Aide > Nous contacter. Ce canal est disponible du lundi au samedi de 8h à 20h (heure d\'Abidjan, UTC+0). Pour les problèmes techniques complexes nécessitant un partage d\'écran ou des logs, le ticket email reste le canal recommandé.',
-                'category'   => 'Support',
-                'keywords'   => json_encode(['WhatsApp', 'support', 'contact', 'urgence', 'assistance']),
-                'is_public'  => true,
-                'sort_order' => 93,
+                'category'    => 'paiements',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment télécharger mes factures ?',
+                        'answer'   => 'Allez dans Administration > Abonnement > Historique des factures. Toutes les factures sont listées avec leur date, montant et statut. Cliquez sur l\'icône de téléchargement pour obtenir le PDF officiel de chaque facture. Les factures respectent les normes comptables OHADA et sont directement utilisables pour votre comptabilité.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I download my invoices?',
+                        'answer'   => 'Go to Administration > Subscription > Invoice history. All invoices are listed with their date, amount and status. Click the download icon to get the official PDF of each invoice. Invoices comply with OHADA accounting standards and are directly usable for your accounting.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment accéder au guide utilisateur de SECRETIS ?',
-                'answer'     => 'Le guide utilisateur complet est accessible depuis Aide > Documentation ou directement à docs.ibigsoft.africa. Il est organisé par module et contient des tutoriels vidéo, des captures d\'écran annotées et des guides pas à pas. Un guide rapide "Prise en main" est disponible pour les nouveaux utilisateurs. Vous pouvez aussi consulter SARA pour des questions spécifiques sur l\'utilisation de la plateforme.',
-                'category'   => 'Support',
-                'keywords'   => json_encode(['guide', 'documentation', 'aide', 'tutoriel', 'utilisateur']),
-                'is_public'  => true,
-                'sort_order' => 94,
+                'category'    => 'paiements',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment résilier mon abonnement ?',
+                        'answer'   => 'Allez dans Administration > Abonnement > Résilier. Votre accès reste actif jusqu\'à la fin de la période payée. Avant la résiliation, nous vous recommandons d\'exporter toutes vos données (Administration > Exports). Après résiliation, vos données sont conservées 30 jours puis supprimées définitivement. La résiliation peut être annulée pendant ce délai.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I cancel my subscription?',
+                        'answer'   => 'Go to Administration > Subscription > Cancel. Your access remains active until the end of the paid period. Before cancelling, we recommend exporting all your data (Administration > Exports). After cancellation, your data is kept for 30 days then permanently deleted. Cancellation can be reversed during this period.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment soumettre une demande de nouvelle fonctionnalité ?',
-                'answer'     => 'Vos idées sont précieuses ! Soumettez vos demandes de fonctionnalités via Aide > Demande de fonctionnalité ou directement sur notre portail idées à ideas.ibigsoft.africa. Vous pouvez soumettre vos idées, voter pour celles d\'autres utilisateurs et suivre leur progression dans notre feuille de route publique. Les demandes les plus votées par la communauté sont priorisées dans nos sprints de développement. Les clients Entreprise bénéficient d\'un canal dédié pour les demandes personnalisées.',
-                'category'   => 'Support',
-                'keywords'   => json_encode(['fonctionnalité', 'demande', 'idée', 'roadmap', 'vote', 'développement']),
-                'is_public'  => true,
-                'sort_order' => 95,
+                'category'    => 'paiements',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Une remise est-elle disponible pour les ONG ou les institutions publiques ?',
+                        'answer'   => 'Oui. IBIG Soft offre des tarifs préférentiels aux ONG, associations à but non lucratif et institutions publiques africaines. Contactez notre équipe commerciale à sales@ibig-secretis.com avec votre statut juridique pour obtenir un devis personnalisé. Des remises pouvant aller jusqu\'à 40% sont disponibles selon votre profil.',
+                    ],
+                    'en' => [
+                        'question' => 'Is a discount available for NGOs or public institutions?',
+                        'answer'   => 'Yes. IBIG Soft offers preferential rates to NGOs, non-profit associations and African public institutions. Contact our sales team at sales@ibig-secretis.com with your legal status to get a custom quote. Discounts of up to 40% are available depending on your profile.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'paiements',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Que se passe-t-il si mon paiement échoue ?',
+                        'answer'   => 'En cas d\'échec de paiement, vous recevez un e-mail d\'alerte immédiatement. Une nouvelle tentative automatique est effectuée à J+3 et J+7. Si le paiement reste en échec après 7 jours, votre compte passe en mode dégradé (lecture seule). Vous avez 30 jours pour régulariser avant suspension définitive. Contactez support@ibig-secretis.com pour toute assistance.',
+                    ],
+                    'en' => [
+                        'question' => 'What happens if my payment fails?',
+                        'answer'   => 'If payment fails, you receive an alert email immediately. An automatic retry is made at D+3 and D+7. If payment remains failed after 7 days, your account switches to degraded mode (read only). You have 30 days to settle before permanent suspension. Contact support@ibig-secretis.com for assistance.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'paiements',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Puis-je payer annuellement pour obtenir un avantage ?',
+                        'answer'   => 'Oui. Le paiement annuel offre 2 mois gratuits (soit environ 17% de réduction) par rapport au paiement mensuel. Vous pouvez basculer en facturation annuelle depuis Administration > Abonnement > Fréquence de facturation. La différence est créditée ou facturée au prorata.',
+                    ],
+                    'en' => [
+                        'question' => 'Can I pay annually for a discount?',
+                        'answer'   => 'Yes. Annual payment offers 2 free months (approximately 17% discount) compared to monthly payment. You can switch to annual billing from Administration > Subscription > Billing frequency. The difference is credited or billed pro-rata.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'paiements',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Les tarifs incluent-ils la TVA ?',
+                        'answer'   => 'Les tarifs affichés sur notre site sont hors taxes. La TVA applicable est calculée selon le pays de votre organisation et ajoutée sur la facture finale. Pour les entreprises de la zone UEMOA, la TVA est de 18%. Pour les autres pays, le taux applicable selon la législation locale est appliqué. Les organisations exonérées peuvent fournir leur certificat d\'exonération.',
+                    ],
+                    'en' => [
+                        'question' => 'Do prices include VAT?',
+                        'answer'   => 'Prices displayed on our website are excluding taxes. Applicable VAT is calculated based on your organisation\'s country and added to the final invoice. For WAEMU zone companies, VAT is 18%. For other countries, the applicable rate under local law is applied. Exempt organisations can provide their exemption certificate.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'paiements',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment ajouter ou modifier un moyen de paiement ?',
+                        'answer'   => 'Allez dans Administration > Abonnement > Moyens de paiement. Cliquez sur « Ajouter un moyen de paiement » et suivez les instructions. Vous pouvez avoir plusieurs moyens de paiement enregistrés et définir l\'un d\'eux comme moyen par défaut. Les informations de carte sont sécurisées par notre prestataire de paiement certifié PCI-DSS.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I add or change a payment method?',
+                        'answer'   => 'Go to Administration > Subscription > Payment methods. Click "Add a payment method" and follow the instructions. You can have multiple payment methods registered and set one as default. Card information is secured by our PCI-DSS certified payment provider.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'paiements',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'La politique de remboursement est-elle applicable ?',
+                        'answer'   => 'IBIG Soft offre un remboursement complet si vous résiliez dans les 14 jours suivant votre premier abonnement (hors période d\'essai). Après ce délai, les abonnements mensuels ne sont pas remboursables pour le mois en cours. Les abonnements annuels peuvent être remboursés au prorata des mois restants en cas de circonstances exceptionnelles. Contactez support@ibig-secretis.com.',
+                    ],
+                    'en' => [
+                        'question' => 'Is the refund policy applicable?',
+                        'answer'   => 'IBIG Soft offers a full refund if you cancel within 14 days of your first subscription (excluding trial period). After this period, monthly subscriptions are not refundable for the current month. Annual subscriptions can be refunded pro-rata for remaining months in exceptional circumstances. Contact support@ibig-secretis.com.',
+                    ],
+                ],
             ],
 
-            // ─────────────────────────────────────────────────────────────────
-            // 5 FAQ bonus pour atteindre 100
-            // ─────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // 7. UTILISATEURS & PERMISSIONS (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
             [
-                'question'   => 'Comment personaliser le tableau de bord principal ?',
-                'answer'     => 'Le tableau de bord est personnalisable via le bouton "Personnaliser" en haut à droite. Ajoutez, supprimez ou réorganisez les widgets (tâches en cours, courriers récents, agenda du jour, statistiques). Chaque utilisateur a son propre tableau de bord. Les administrateurs peuvent définir un tableau de bord par défaut pour les nouveaux utilisateurs depuis Paramètres > Interface. Les modifications sont sauvegardées automatiquement.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['tableau de bord', 'dashboard', 'widgets', 'personnalisation', 'interface']),
-                'is_public'  => true,
-                'sort_order' => 96,
+                'category'    => 'utilisateurs',
+                'order'       => 1,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quels sont les rôles disponibles dans SECRETIS ?',
+                        'answer'   => 'SECRETIS propose 6 rôles prédéfinis : Super Admin (gestion globale), Admin (gestion de l\'organisation), Dirigeant (accès complet en lecture + validations), Secrétaire (gestion agenda, courrier, visiteurs), RH (module ressources humaines), et Comptable (module financier). Chaque rôle peut être personnalisé par l\'administrateur via les permissions granulaires.',
+                    ],
+                    'en' => [
+                        'question' => 'What roles are available in SECRETIS?',
+                        'answer'   => 'SECRETIS offers 6 predefined roles: Super Admin (global management), Admin (organisation management), Executive (full read access + validations), Secretary (calendar, mail, visitor management), HR (human resources module), and Accountant (financial module). Each role can be customised by the administrator via granular permissions.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment utiliser la recherche universelle dans SECRETIS ?',
-                'answer'     => 'La recherche universelle est accessible via le raccourci Ctrl+K (ou Cmd+K sur Mac) ou en cliquant sur la barre de recherche en haut de l\'interface. Elle parcourt simultanément tous les modules : courriers, documents, contacts, tâches, réunions, employés. Les résultats sont catégorisés et cliquables pour accéder directement à l\'élément. La recherche est indexée en temps réel et supporte les recherches approximatives (tolérance aux fautes de frappe).',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['recherche', 'universelle', 'Ctrl+K', 'recherche globale', 'navigation']),
-                'is_public'  => true,
-                'sort_order' => 97,
+                'category'    => 'utilisateurs',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment désactiver temporairement un compte utilisateur ?',
+                        'answer'   => 'Dans Administration > Utilisateurs, cliquez sur le nom de l\'utilisateur puis sur « Désactiver le compte ». L\'utilisateur ne peut plus se connecter mais ses données et son historique sont conservés intégralement. Vous pouvez réactiver le compte à tout moment. La désactivation est préférable à la suppression pour maintenir la cohérence des données.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I temporarily deactivate a user account?',
+                        'answer'   => 'In Administration > Users, click the user\'s name then "Deactivate account". The user can no longer log in but their data and history are fully preserved. You can reactivate the account at any time. Deactivation is preferable to deletion to maintain data integrity.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment gérer les notifications push sur mobile ?',
-                'answer'     => 'Si vous utilisez SECRETIS depuis votre navigateur mobile, autorisez les notifications lors du premier accès. Pour la PWA installée sur votre écran d\'accueil, les notifications push sont activées automatiquement. Gérez les types de notifications souhaités depuis Profil > Notifications > Mobile. Les notifications critiques (tâches urgentes, courriers importants) peuvent être configurées pour ne pas être silencieuses même en mode "Ne pas déranger".',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['notifications', 'mobile', 'push', 'PWA', 'alerte']),
-                'is_public'  => true,
-                'sort_order' => 98,
+                'category'    => 'utilisateurs',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Un administrateur peut-il réinitialiser le mot de passe d\'un utilisateur ?',
+                        'answer'   => 'Oui. Dans Administration > Utilisateurs, sélectionnez l\'utilisateur et cliquez sur « Réinitialiser le mot de passe ». Un e-mail de réinitialisation est envoyé à l\'utilisateur. L\'administrateur ne peut pas voir le nouveau mot de passe (sécurité). Si l\'utilisateur n\'a plus accès à son e-mail, contactez le support IBIG Soft.',
+                    ],
+                    'en' => [
+                        'question' => 'Can an administrator reset a user\'s password?',
+                        'answer'   => 'Yes. In Administration > Users, select the user and click "Reset password". A reset email is sent to the user. The administrator cannot see the new password (security). If the user no longer has access to their email, contact IBIG Soft support.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'Comment archiver des données anciennes pour alléger la plateforme ?',
-                'answer'     => 'L\'archivage manuel est disponible depuis chaque module via le menu "Actions > Archiver". Les archives sont compressées et restent consultables en lecture seule depuis l\'onglet "Archives" du module concerné. La clôture d\'un exercice administratif archive automatiquement tous les éléments de cette période. Les archives n\'affectent pas votre quota de stockage principal et sont conservées conformément à votre politique de rétention.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['archivage', 'archives', 'données', 'exercice', 'stockage']),
-                'is_public'  => true,
-                'sort_order' => 99,
+                'category'    => 'utilisateurs',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer un rôle personnalisé avec des permissions spécifiques ?',
+                        'answer'   => 'Dans Administration > Rôles et permissions > Nouveau rôle, définissez le nom et sélectionnez les permissions granulaires. Les permissions couvrent chaque module et chaque action (créer, lire, modifier, supprimer, exporter, valider). Les rôles personnalisés peuvent être assignés à n\'importe quel utilisateur et modifiés sans interruption de service.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create a custom role with specific permissions?',
+                        'answer'   => 'In Administration > Roles and permissions > New role, define the name and select granular permissions. Permissions cover each module and each action (create, read, update, delete, export, validate). Custom roles can be assigned to any user and modified without service interruption.',
+                    ],
+                ],
             ],
             [
-                'question'   => 'IBIG SECRETIS est-il conforme au RGPD et aux réglementations africaines ?',
-                'answer'     => 'Oui, IBIG SECRETIS est conçu dans le respect du RGPD européen et des réglementations africaines de protection des données (UEMOA, CEDEAO, lois nationales). Chaque organisation peut configurer sa politique de rétention des données et gérer les consentements. Un DPO (Délégué à la Protection des Données) peut être désigné dans les paramètres. IBIG Soft publie un registre de traitement des données accessible sur demande et signe des DPA (Data Processing Agreements) avec ses clients Entreprise.',
-                'category'   => 'Général',
-                'keywords'   => json_encode(['RGPD', 'conformité', 'données personnelles', 'protection', 'UEMOA', 'DPO']),
-                'is_public'  => true,
-                'sort_order' => 100,
+                'category'    => 'utilisateurs',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment gérer les utilisateurs avec plusieurs rôles ?',
+                        'answer'   => 'Un utilisateur peut avoir plusieurs rôles simultanément dans SECRETIS. Les permissions cumulatives s\'appliquent (union des permissions de chaque rôle). Par exemple, un employé peut être à la fois Secrétaire et RH. Assignez les rôles depuis la fiche de l\'utilisateur > onglet Rôles > Ajouter un rôle.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I manage users with multiple roles?',
+                        'answer'   => 'A user can have multiple roles simultaneously in SECRETIS. Cumulative permissions apply (union of permissions from each role). For example, an employee can be both Secretary and HR. Assign roles from the user profile > Roles tab > Add a role.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'utilisateurs',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment connecter SECRETIS à notre annuaire Active Directory ou LDAP ?',
+                        'answer'   => 'Le SSO Active Directory/LDAP est disponible dès le plan Professional. Dans Administration > Intégrations > SSO/LDAP, renseignez les paramètres de connexion (serveur LDAP, port, base DN, attributs de mapping). Une fois configuré, les utilisateurs se connectent avec leurs identifiants d\'entreprise existants. Contactez notre équipe technique pour l\'assistance à la configuration.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I connect SECRETIS to our Active Directory or LDAP directory?',
+                        'answer'   => 'Active Directory/LDAP SSO is available from the Professional plan. In Administration > Integrations > SSO/LDAP, enter the connection parameters (LDAP server, port, base DN, mapping attributes). Once configured, users log in with their existing company credentials. Contact our technical team for configuration assistance.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'utilisateurs',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Combien d\'utilisateurs puis-je avoir sur mon compte ?',
+                        'answer'   => 'Le nombre d\'utilisateurs dépend de votre plan : 5 utilisateurs (Starter), 25 utilisateurs (Professional), illimité (Enterprise). Des utilisateurs supplémentaires peuvent être ajoutés à l\'unité sur les plans Starter et Professional depuis Administration > Abonnement > Utilisateurs supplémentaires.',
+                    ],
+                    'en' => [
+                        'question' => 'How many users can I have on my account?',
+                        'answer'   => 'The number of users depends on your plan: 5 users (Starter), 25 users (Professional), unlimited (Enterprise). Additional users can be added individually on Starter and Professional plans from Administration > Subscription > Additional users.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'utilisateurs',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment voir toutes les activités d\'un utilisateur spécifique ?',
+                        'answer'   => 'Dans Administration > Journal d\'audit, filtrez par utilisateur pour voir toutes ses actions (connexions, modifications, téléchargements, etc.) avec horodatage et adresse IP. Les administrateurs peuvent générer un rapport d\'activité par utilisateur pour n\'importe quelle période. Cette fonctionnalité est disponible sur les plans Professional et Enterprise.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I view all activities of a specific user?',
+                        'answer'   => 'In Administration > Audit log, filter by user to see all their actions (logins, modifications, downloads, etc.) with timestamp and IP address. Administrators can generate an activity report per user for any period. This feature is available on Professional and Enterprise plans.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'utilisateurs',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment importer en masse des utilisateurs depuis un fichier CSV ?',
+                        'answer'   => 'Dans Administration > Utilisateurs > Importer, téléchargez le modèle CSV fourni. Remplissez les colonnes : prénom, nom, e-mail, rôle, département. Uploadez le fichier et prévisualisez les données avant de confirmer l\'import. Un e-mail d\'invitation est envoyé automatiquement à chaque nouvel utilisateur. Maximum 500 utilisateurs par import.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I bulk-import users from a CSV file?',
+                        'answer'   => 'In Administration > Users > Import, download the provided CSV template. Fill in columns: first name, last name, email, role, department. Upload the file and preview the data before confirming the import. An invitation email is automatically sent to each new user. Maximum 500 users per import.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'utilisateurs',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment définir un utilisateur comme délégué d\'un autre pendant ses congés ?',
+                        'answer'   => 'Dans la fiche de l\'utilisateur > onglet Délégation, activez la délégation et sélectionnez le délégué et la période. Pendant cette période, le délégué reçoit les notifications de l\'utilisateur absent et peut agir en son nom selon les permissions définies. La délégation se désactive automatiquement à la date de fin.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I set a user as another\'s delegate during leave?',
+                        'answer'   => 'In the user profile > Delegation tab, enable delegation and select the delegate and the period. During this period, the delegate receives the absent user\'s notifications and can act on their behalf according to defined permissions. Delegation automatically deactivates at the end date.',
+                    ],
+                ],
+            ],
+
+            // ═══════════════════════════════════════════════════════════════
+            // 8. RAPPORTS & EXPORTS (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
+            [
+                'category'    => 'rapports',
+                'order'       => 1,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quels rapports sont disponibles dans SECRETIS ?',
+                        'answer'   => 'SECRETIS propose des rapports pour chaque module : rapport d\'activité agenda, rapport de tâches par utilisateur/projet, rapport GED (documents uploadés, accès, partages), rapport de visiteurs, rapport RH, rapport financier, rapport de courrier, et rapport d\'utilisation global de la plateforme. Des rapports personnalisés peuvent être créés depuis le module Rapports avancés.',
+                    ],
+                    'en' => [
+                        'question' => 'What reports are available in SECRETIS?',
+                        'answer'   => 'SECRETIS offers reports for each module: calendar activity report, task report by user/project, DMS report (uploaded documents, access, shares), visitor report, HR report, financial report, mail report, and global platform usage report. Custom reports can be created from the Advanced Reports module.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Dans quels formats puis-je exporter mes rapports ?',
+                        'answer'   => 'Les rapports peuvent être exportés en PDF (mise en page professionnelle avec en-tête de votre organisation), Excel (.xlsx pour analyses personnalisées), CSV (données brutes pour intégration externe) et JSON (pour les développeurs). Certains rapports proposent également l\'export en Word (.docx).',
+                    ],
+                    'en' => [
+                        'question' => 'In what formats can I export my reports?',
+                        'answer'   => 'Reports can be exported as PDF (professional layout with your organisation\'s header), Excel (.xlsx for custom analysis), CSV (raw data for external integration) and JSON (for developers). Some reports also offer Word (.docx) export.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment planifier l\'envoi automatique d\'un rapport ?',
+                        'answer'   => 'Dans le module Rapports, sélectionnez un rapport puis cliquez sur « Planifier ». Configurez la fréquence (quotidien, hebdomadaire, mensuel), l\'heure d\'envoi et les destinataires (e-mails internes ou externes). Le rapport est généré automatiquement et envoyé par e-mail en pièce jointe au format choisi.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I schedule automatic report delivery?',
+                        'answer'   => 'In the Reports module, select a report then click "Schedule". Configure the frequency (daily, weekly, monthly), send time and recipients (internal or external emails). The report is automatically generated and sent by email as an attachment in the chosen format.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment créer un tableau de bord personnalisé ?',
+                        'answer'   => 'Dans le module Rapports > Tableaux de bord > Nouveau tableau de bord. Ajoutez des widgets parmi la bibliothèque disponible : graphiques en barres/courbes/camembert, KPI (indicateurs clés), tableaux de données, calendriers heat-map. Chaque widget est configurable (période, filtres, unité). Les tableaux de bord peuvent être partagés avec des équipes.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I create a custom dashboard?',
+                        'answer'   => 'In Reports module > Dashboards > New dashboard. Add widgets from the available library: bar/line/pie charts, KPIs (key indicators), data tables, heat-map calendars. Each widget is configurable (period, filters, unit). Dashboards can be shared with teams.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment exporter toutes mes données pour une migration ou une sauvegarde ?',
+                        'answer'   => 'Dans Administration > Exports > Export complet, sélectionnez les modules à inclure et lancez l\'export. Selon le volume de données, la génération peut prendre de 5 à 30 minutes. Vous recevez un e-mail avec le lien de téléchargement. L\'archive ZIP contient les données en JSON et les fichiers binaires de la GED. Ce lien est valide 48 heures.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I export all my data for a migration or backup?',
+                        'answer'   => 'In Administration > Exports > Full export, select the modules to include and launch the export. Depending on data volume, generation may take 5 to 30 minutes. You receive an email with the download link. The ZIP archive contains data in JSON and binary DMS files. This link is valid for 48 hours.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Les rapports peuvent-ils inclure les données de toute l\'organisation ?',
+                        'answer'   => 'Oui, si vous avez le rôle Admin ou Dirigeant. Les rapports organisationnels agrègent les données de tous les utilisateurs. Les managers peuvent voir les rapports de leur équipe. Les utilisateurs simples ne voient que leurs propres données. Les filtres de permission s\'appliquent automatiquement selon votre rôle.',
+                    ],
+                    'en' => [
+                        'question' => 'Can reports include data from the entire organisation?',
+                        'answer'   => 'Yes, if you have the Admin or Executive role. Organisational reports aggregate data from all users. Managers can see their team\'s reports. Regular users only see their own data. Permission filters automatically apply based on your role.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment accéder aux indicateurs de performance (KPI) en temps réel ?',
+                        'answer'   => 'Le tableau de bord principal affiche les KPI en temps réel : tâches en retard, événements du jour, documents en attente de validation, visiteurs actuellement présents, etc. Pour des KPI métier personnalisés, utilisez le module Rapports > Tableau de bord > Ajouter un widget KPI.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I access real-time performance indicators (KPIs)?',
+                        'answer'   => 'The main dashboard displays real-time KPIs: overdue tasks, today\'s events, documents pending validation, currently present visitors, etc. For custom business KPIs, use the Reports module > Dashboard > Add KPI widget.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Y a-t-il une limite au nombre de rapports que je peux créer ?',
+                        'answer'   => 'Les rapports prédéfinis sont illimités sur tous les plans. Pour les rapports personnalisés : 3 rapports sauvegardés (Starter), 20 rapports (Professional), illimité (Enterprise). Les tableaux de bord personnalisés : 1 (Starter), 10 (Professional), illimité (Enterprise).',
+                    ],
+                    'en' => [
+                        'question' => 'Is there a limit to the number of reports I can create?',
+                        'answer'   => 'Pre-defined reports are unlimited on all plans. For custom reports: 3 saved reports (Starter), 20 reports (Professional), unlimited (Enterprise). Custom dashboards: 1 (Starter), 10 (Professional), unlimited (Enterprise).',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment faire un rapport de conformité RGPD des données personnelles ?',
+                        'answer'   => 'Dans Administration > Conformité > Rapport RGPD, générez le rapport de conformité qui liste tous les traitements de données personnelles, les bases légales, les durées de conservation et les mesures de sécurité appliquées. Ce rapport est exportable en PDF et peut être remis à votre DPO ou à une autorité de contrôle.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I generate a GDPR compliance report of personal data?',
+                        'answer'   => 'In Administration > Compliance > GDPR report, generate the compliance report which lists all personal data processing, legal bases, retention periods and security measures applied. This report is exportable as PDF and can be submitted to your DPO or a supervisory authority.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'rapports',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment partager un rapport avec quelqu\'un qui n\'est pas dans SECRETIS ?',
+                        'answer'   => 'Générez le rapport et exportez-le en PDF. Vous pouvez également utiliser la fonction « Partager par lien » disponible sur certains rapports : un lien temporaire sécurisé (valable 7 jours) est généré, consultable sans compte SECRETIS. Pour des rapports récurrents, configurez l\'envoi automatique par e-mail à des destinataires externes.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I share a report with someone not in SECRETIS?',
+                        'answer'   => 'Generate the report and export it as PDF. You can also use the "Share by link" function available on some reports: a temporary secure link (valid 7 days) is generated, viewable without a SECRETIS account. For recurring reports, configure automatic email delivery to external recipients.',
+                    ],
+                ],
+            ],
+
+            // ═══════════════════════════════════════════════════════════════
+            // 9. SARA ASSISTANT IA (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
+            [
+                'category'    => 'sara',
+                'order'       => 1,
+                'is_featured' => true,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Qu\'est-ce que SARA et à quoi sert-elle ?',
+                        'answer'   => 'SARA (Secrétaire Assistante de Réunion et d\'Administration) est l\'assistante IA intégrée à IBIG SECRETIS. Elle répond à vos questions sur l\'utilisation de la plateforme, vous aide à rédiger des e-mails et comptes-rendus, résume des documents, crée des tâches et des événements à votre place, et analyse vos données pour proposer des recommandations. SARA est disponible 24h/24 via le bouton de chat en bas à droite.',
+                    ],
+                    'en' => [
+                        'question' => 'What is SARA and what is it for?',
+                        'answer'   => 'SARA (Secretary Assistant for Meetings and Administration) is the AI assistant integrated into IBIG SECRETIS. She answers your questions about using the platform, helps you draft emails and minutes, summarises documents, creates tasks and events on your behalf, and analyses your data to offer recommendations. SARA is available 24/7 via the chat button at the bottom right.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA peut-elle créer des tâches et des événements automatiquement ?',
+                        'answer'   => 'Oui. Dites simplement à SARA ce que vous voulez faire, par exemple : « Crée une réunion avec Marie et Paul vendredi à 14h pour discuter du budget ». SARA analyse votre demande, vérifie les disponibilités et crée l\'événement dans l\'agenda. Elle peut aussi créer des tâches, envoyer des rappels et rédiger des e-mails de convocation.',
+                    ],
+                    'en' => [
+                        'question' => 'Can SARA create tasks and events automatically?',
+                        'answer'   => 'Yes. Simply tell SARA what you want to do, for example: "Create a meeting with Marie and Paul on Friday at 2pm to discuss the budget". SARA analyses your request, checks availability and creates the event in the calendar. She can also create tasks, send reminders and draft convocation emails.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Mes conversations avec SARA sont-elles confidentielles ?',
+                        'answer'   => 'Oui. Les conversations avec SARA sont chiffrées et stockées uniquement dans votre espace organisationnel. IBIG Soft n\'accède pas au contenu de vos échanges. Les données ne sont pas utilisées pour entraîner des modèles IA tiers. Vous pouvez effacer l\'historique de vos conversations SARA à tout moment depuis Paramètres > SARA > Effacer l\'historique.',
+                    ],
+                    'en' => [
+                        'question' => 'Are my conversations with SARA confidential?',
+                        'answer'   => 'Yes. Conversations with SARA are encrypted and stored only within your organisational space. IBIG Soft does not access the content of your exchanges. Data is not used to train third-party AI models. You can clear your SARA conversation history at any time from Settings > SARA > Clear history.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA parle-t-elle plusieurs langues ?',
+                        'answer'   => 'SARA communique en français et en anglais. Elle détecte automatiquement la langue dans laquelle vous lui écrivez et répond dans cette même langue. Le support d\'autres langues africaines (wolof, bambara, swahili) est en cours de développement et sera disponible dans une prochaine version de SECRETIS.',
+                    ],
+                    'en' => [
+                        'question' => 'Does SARA speak multiple languages?',
+                        'answer'   => 'SARA communicates in French and English. She automatically detects the language you write in and responds in that same language. Support for other African languages (Wolof, Bambara, Swahili) is under development and will be available in a future version of SECRETIS.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA peut-elle résumer un long document PDF ?',
+                        'answer'   => 'Oui. Uploadez votre document dans SARA ou partagez un document de la GED, et demandez-lui « Résume ce document ». SARA extrait les points clés, la structure et les informations importantes. Pour les documents de plus de 50 pages, le résumé se concentre sur les sections principales. Les documents en français et anglais sont supportés.',
+                    ],
+                    'en' => [
+                        'question' => 'Can SARA summarise a long PDF document?',
+                        'answer'   => 'Yes. Upload your document to SARA or share a DMS document, and ask her to "Summarise this document". SARA extracts the key points, structure and important information. For documents of more than 50 pages, the summary focuses on the main sections. Documents in French and English are supported.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment désactiver SARA pour mon organisation ?',
+                        'answer'   => 'Les administrateurs peuvent désactiver SARA depuis Administration > Paramètres > Modules > SARA. Une fois désactivée, le bouton de chat SARA disparaît pour tous les utilisateurs de l\'organisation. Cette option est disponible si votre organisation a des politiques IA internes restrictives. La réactivation est immédiate et sans perte de données.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I disable SARA for my organisation?',
+                        'answer'   => 'Administrators can disable SARA from Administration > Settings > Modules > SARA. Once disabled, the SARA chat button disappears for all users in the organisation. This option is available if your organisation has restrictive internal AI policies. Reactivation is immediate and without data loss.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA peut-elle rédiger un compte-rendu de réunion ?',
+                        'answer'   => 'Oui. Après une réunion, demandez à SARA « Rédige le compte-rendu de la réunion de ce matin avec [participants] ». Fournissez les points discutés et les décisions prises, SARA les formate en un compte-rendu professionnel avec les sections : présents, ordre du jour, discussions, décisions, actions à suivre. Le document est directement sauvegardé dans la GED.',
+                    ],
+                    'en' => [
+                        'question' => 'Can SARA draft meeting minutes?',
+                        'answer'   => 'Yes. After a meeting, ask SARA "Draft the minutes of this morning\'s meeting with [participants]". Provide the points discussed and decisions taken, SARA formats them into professional minutes with sections: attendees, agenda, discussions, decisions, follow-up actions. The document is directly saved in the DMS.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quelles sont les limites de SARA ?',
+                        'answer'   => 'SARA n\'a pas accès à Internet en temps réel et ne peut pas effectuer d\'actions financières (paiements, virements). Elle ne peut pas modifier les paramètres administratifs critiques (suppression d\'utilisateurs, changements de plan). SARA ne mémorise pas les conversations entre sessions distinctes. Pour des questions complexes nécessitant expertise humaine, elle redirige vers le support.',
+                    ],
+                    'en' => [
+                        'question' => 'What are SARA\'s limitations?',
+                        'answer'   => 'SARA does not have real-time internet access and cannot perform financial actions (payments, transfers). She cannot modify critical administrative settings (user deletion, plan changes). SARA does not retain conversations between separate sessions. For complex questions requiring human expertise, she redirects to support.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA peut-elle analyser mes données et faire des recommandations ?',
+                        'answer'   => 'Oui. Demandez à SARA des analyses comme « Quelles tâches sont en retard cette semaine ? », « Quel est le taux de complétion de mes projets ? » ou « Qui sont les visiteurs les plus fréquents ce mois-ci ? ». SARA accède aux données de votre organisation selon vos permissions et propose des insights actionnables.',
+                    ],
+                    'en' => [
+                        'question' => 'Can SARA analyse my data and make recommendations?',
+                        'answer'   => 'Yes. Ask SARA for analyses like "Which tasks are overdue this week?", "What is my project completion rate?" or "Who are the most frequent visitors this month?". SARA accesses your organisation\'s data according to your permissions and offers actionable insights.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'sara',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SARA est-elle disponible sur mobile ?',
+                        'answer'   => 'Oui. SARA est disponible sur l\'application mobile SECRETIS (iOS et Android) via le bouton de chat flottant. L\'interface mobile de SARA est optimisée pour les échanges rapides. La fonctionnalité de dictée vocale permet de parler directement à SARA sans taper. Toutes les actions disponibles sur desktop sont accessibles sur mobile.',
+                    ],
+                    'en' => [
+                        'question' => 'Is SARA available on mobile?',
+                        'answer'   => 'Yes. SARA is available on the SECRETIS mobile app (iOS and Android) via the floating chat button. SARA\'s mobile interface is optimised for quick exchanges. The voice dictation feature allows you to speak directly to SARA without typing. All actions available on desktop are accessible on mobile.',
+                    ],
+                ],
+            ],
+
+            // ═══════════════════════════════════════════════════════════════
+            // 10. SÉCURITÉ & CONFORMITÉ (10 FAQ)
+            // ═══════════════════════════════════════════════════════════════
+            [
+                'category'    => 'securite',
+                'order'       => 1,
+                'is_featured' => true,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment SECRETIS protège-t-il mes données ?',
+                        'answer'   => 'IBIG SECRETIS applique plusieurs couches de sécurité : chiffrement des données au repos (AES-256) et en transit (TLS 1.3), isolation des données par organisation (multi-tenant sécurisé), journalisation de toutes les actions (audit trail), authentification forte avec 2FA, et sauvegardes quotidiennes chiffrées. Nos serveurs sont hébergés dans des datacenters certifiés ISO 27001.',
+                    ],
+                    'en' => [
+                        'question' => 'How does SECRETIS protect my data?',
+                        'answer'   => 'IBIG SECRETIS applies multiple security layers: encryption of data at rest (AES-256) and in transit (TLS 1.3), data isolation per organisation (secure multi-tenant), logging of all actions (audit trail), strong authentication with 2FA, and daily encrypted backups. Our servers are hosted in ISO 27001 certified datacenters.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 2,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SECRETIS est-il conforme au RGPD ?',
+                        'answer'   => 'Oui. SECRETIS est conforme au RGPD (Règlement Général sur la Protection des Données). Nous proposons un DPA (Data Processing Agreement) standard que vous pouvez signer depuis Administration > Conformité > RGPD. Les droits des personnes concernées (accès, rectification, effacement, portabilité) sont gérés depuis l\'interface. Un registre de traitement est disponible pour votre DPO.',
+                    ],
+                    'en' => [
+                        'question' => 'Is SECRETIS GDPR compliant?',
+                        'answer'   => 'Yes. SECRETIS is compliant with GDPR (General Data Protection Regulation). We offer a standard DPA (Data Processing Agreement) that you can sign from Administration > Compliance > GDPR. Data subject rights (access, rectification, erasure, portability) are managed from the interface. A processing register is available for your DPO.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 3,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment fonctionne le journal d\'audit ?',
+                        'answer'   => 'Le journal d\'audit (Administration > Journal d\'audit) enregistre toutes les actions effectuées dans SECRETIS : connexions, créations/modifications/suppressions, téléchargements, partages, changements de paramètres. Chaque entrée contient : l\'utilisateur, l\'action, l\'objet concerné, l\'horodatage et l\'adresse IP. Le journal est immuable et non modifiable, même par les administrateurs.',
+                    ],
+                    'en' => [
+                        'question' => 'How does the audit log work?',
+                        'answer'   => 'The audit log (Administration > Audit log) records all actions performed in SECRETIS: logins, creates/updates/deletes, downloads, shares, settings changes. Each entry contains: the user, action, object concerned, timestamp and IP address. The log is immutable and cannot be modified, even by administrators.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 4,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment sont gérées les sauvegardes de mes données ?',
+                        'answer'   => 'SECRETIS effectue des sauvegardes automatiques quotidiennes de toutes les données (base de données + fichiers GED). Les sauvegardes sont conservées 30 jours et stockées dans un datacenter géographiquement distinct. En cas de besoin de restauration, contactez le support avec votre demande et la date cible. Pour le plan Enterprise, des sauvegardes toutes les 6 heures sont disponibles.',
+                    ],
+                    'en' => [
+                        'question' => 'How are my data backups managed?',
+                        'answer'   => 'SECRETIS performs automatic daily backups of all data (database + DMS files). Backups are retained for 30 days and stored in a geographically separate datacenter. If restoration is needed, contact support with your request and target date. For the Enterprise plan, backups every 6 hours are available.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 5,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Quelle est la politique en cas de violation de données ?',
+                        'answer'   => 'En cas de violation de données, IBIG Soft s\'engage à vous notifier dans les 72 heures conformément au RGPD. Une analyse d\'impact est immédiatement lancée et des mesures correctives mises en place. Un rapport détaillé de l\'incident, des données potentiellement affectées et des actions entreprises vous est fourni. IBIG Soft dispose d\'une assurance responsabilité cyber.',
+                    ],
+                    'en' => [
+                        'question' => 'What is the policy in case of a data breach?',
+                        'answer'   => 'In case of a data breach, IBIG Soft commits to notifying you within 72 hours in accordance with GDPR. An impact assessment is immediately launched and corrective measures implemented. A detailed report of the incident, potentially affected data and actions taken is provided. IBIG Soft holds cyber liability insurance.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 6,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Puis-je configurer des restrictions d\'accès par adresse IP ?',
+                        'answer'   => 'Oui, sur les plans Professional et Enterprise. Dans Administration > Sécurité > Restrictions IP, définissez les plages IP autorisées (CIDR). Les connexions depuis des IP hors liste blanche seront bloquées automatiquement. Vous pouvez définir des exceptions par utilisateur (utile pour les dirigeants en déplacement). Un journal des tentatives bloquées est disponible.',
+                    ],
+                    'en' => [
+                        'question' => 'Can I configure access restrictions by IP address?',
+                        'answer'   => 'Yes, on Professional and Enterprise plans. In Administration > Security > IP restrictions, define allowed IP ranges (CIDR). Connections from IPs outside the whitelist will be automatically blocked. You can define exceptions per user (useful for executives travelling). A log of blocked attempts is available.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 7,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'SECRETIS est-il conforme aux normes OHADA en matière comptable ?',
+                        'answer'   => 'Oui. Le module financier de SECRETIS est développé selon le Plan Comptable OHADA (SYSCOHADA Révisé 2017). Les états financiers générés (bilan, compte de résultat, TAFIRE) respectent les formats imposés par l\'OHADA. Les journaux comptables sont paramétrés pour les pratiques des 17 pays membres. La piste d\'audit comptable est conforme aux exigences légales.',
+                    ],
+                    'en' => [
+                        'question' => 'Is SECRETIS compliant with OHADA accounting standards?',
+                        'answer'   => 'Yes. The financial module of SECRETIS is developed according to the OHADA Chart of Accounts (SYSCOHADA Revised 2017). Generated financial statements (balance sheet, income statement, TAFIRE) comply with OHADA-imposed formats. Accounting journals are configured for the practices of the 17 member countries. The accounting audit trail complies with legal requirements.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 8,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment configurer la politique de mot de passe de mon organisation ?',
+                        'answer'   => 'Dans Administration > Sécurité > Politique de mot de passe, configurez : longueur minimale, complexité requise (majuscules, chiffres, symboles), durée de validité (expiration automatique), historique (interdire la réutilisation des N derniers mots de passe), et le nombre de tentatives avant verrouillage. Ces règles s\'appliquent à tous les utilisateurs de l\'organisation.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I configure my organisation\'s password policy?',
+                        'answer'   => 'In Administration > Security > Password policy, configure: minimum length, required complexity (uppercase, numbers, symbols), validity period (automatic expiration), history (prevent reuse of last N passwords), and number of attempts before lockout. These rules apply to all users in the organisation.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 9,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Où sont hébergées mes données géographiquement ?',
+                        'answer'   => 'Par défaut, les données des organisations africaines sont hébergées en Europe (France/Allemagne) dans des datacenters conformes RGPD. Pour les plans Enterprise, l\'hébergement dans un datacenter africain (Côte d\'Ivoire, Sénégal, Maroc, Afrique du Sud) est disponible sur demande. L\'emplacement de vos données est indiqué dans Administration > Paramètres > Localisation des données.',
+                    ],
+                    'en' => [
+                        'question' => 'Where is my data geographically hosted?',
+                        'answer'   => 'By default, data for African organisations is hosted in Europe (France/Germany) in GDPR-compliant datacenters. For Enterprise plans, hosting in an African datacenter (Côte d\'Ivoire, Senegal, Morocco, South Africa) is available on request. Your data location is indicated in Administration > Settings > Data location.',
+                    ],
+                ],
+            ],
+            [
+                'category'    => 'securite',
+                'order'       => 10,
+                'is_featured' => false,
+                'translations' => [
+                    'fr' => [
+                        'question' => 'Comment signaler une faille de sécurité ou une vulnérabilité ?',
+                        'answer'   => 'Envoyez un e-mail à security@ibig-secretis.com avec les détails de la vulnérabilité découverte. Ne divulguez pas la faille publiquement avant que nous ayons eu la possibilité de la corriger (programme de responsible disclosure). Nous nous engageons à accuser réception dans les 24 heures, à corriger dans les 7 jours pour les failles critiques, et à vous reconnaître dans notre Hall of Fame sécurité.',
+                    ],
+                    'en' => [
+                        'question' => 'How do I report a security flaw or vulnerability?',
+                        'answer'   => 'Send an email to security@ibig-secretis.com with details of the vulnerability discovered. Do not disclose the flaw publicly before we have had the opportunity to fix it (responsible disclosure programme). We commit to acknowledging within 24 hours, fixing within 7 days for critical flaws, and recognising you in our security Hall of Fame.',
+                    ],
+                ],
             ],
         ];
 
         foreach ($faqs as $faq) {
-            DB::table('faqs')->insert(array_merge($faq, [
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]));
+            Faq::create($faq);
         }
     }
 }

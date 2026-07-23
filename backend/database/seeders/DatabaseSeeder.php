@@ -40,6 +40,8 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,        // 18+ pays OHADA
             SuperAdminSeeder::class,     // Compte superadmin IBIG Soft + org interne
             LegalPagesSeeder::class,     // 18 pages légales (OHADA + RGPD + droit ivoirien)
+            FaqSeeder::class,            // 100 FAQ bilingues FR+EN (10 catégories)
+            GuideSeeder::class,          // Guide utilisateur : 8 sections, 31 articles
         ]);
 
         // ── Vague 2 : Données de démonstration ───────────────────────────────

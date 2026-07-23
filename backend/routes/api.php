@@ -81,8 +81,18 @@ use Illuminate\Support\Facades\Route;
 // ROUTES PUBLIQUES — Sans authentification
 // =============================================================================
 
+use App\Http\Controllers\HelpCenterController;
+
 // Santé & Métriques
 Route::get('/health', [HealthController::class, 'check'])->name('api.health');
+
+// ─── Centre d'aide — Endpoints publics ───────────────────────────────────────
+Route::prefix('help')->name('api.help.')->middleware(['throttle:60,1'])->group(function () {
+    Route::get('/search', [HelpCenterController::class, 'search'])->name('search');
+    Route::post('/articles/{article}/feedback', [HelpCenterController::class, 'feedback'])
+        ->middleware('auth:sanctum')
+        ->name('articles.feedback');
+});
 Route::get('/metrics', [MetricsController::class, 'index'])->middleware(['ip.whitelist'])->name('api.metrics');
 
 // =============================================================================
@@ -885,4 +895,21 @@ Route::prefix('partner/v1')->name('partner.')->middleware([
     Route::get('/contacts', [PartnerApiController::class, 'contacts'])->name('contacts');
     Route::post('/webhook-subscribe', [PartnerApiController::class, 'subscribeWebhook'])->name('webhook.subscribe');
     Route::delete('/webhook-subscribe/{id}', [PartnerApiController::class, 'unsubscribeWebhook'])->name('webhook.unsubscribe');
+});
+
+// ─── SARA Chat API ────────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->prefix('sara')->name('api.sara.')->group(function () {
+    Route::post('/chat', [\App\Http\Controllers\SaraChatController::class, 'chat'])
+        ->middleware('throttle:20,1')
+        ->name('chat');
+    Route::get('/conversations', [\App\Http\Controllers\SaraChatController::class, 'conversations'])->name('conversations');
+    Route::get('/conversations/{conversation}', [\App\Http\Controllers\SaraChatController::class, 'conversation'])->name('conversation');
+    Route::delete('/conversations/{conversation}', [\App\Http\Controllers\SaraChatController::class, 'deleteConversation'])->name('conversation.delete');
+    Route::post('/conversations/{conversation}/feedback', [\App\Http\Controllers\SaraChatController::class, 'feedback'])->name('feedback');
+});
+
+// ─── Cas pratiques API ────────────────────────────────────────────────────────
+Route::middleware('auth:sanctum')->prefix('practical-cases')->name('api.practical-cases.')->group(function () {
+    Route::post('/{practicalCase}/complete', [\App\Http\Controllers\PracticalCasesController::class, 'complete'])->name('complete');
+    Route::get('/progress', [\App\Http\Controllers\PracticalCasesController::class, 'progress'])->name('progress');
 });

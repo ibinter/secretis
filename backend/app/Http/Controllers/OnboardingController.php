@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InviteUserRequest;
+use App\Services\GamifiedOnboardingService;
 use App\Services\OnboardingService;
 use App\Services\TrialService;
 use Illuminate\Http\JsonResponse;
@@ -13,8 +14,9 @@ use Inertia\Response;
 class OnboardingController extends Controller
 {
     public function __construct(
-        private readonly OnboardingService $onboarding,
-        private readonly TrialService      $trial,
+        private readonly OnboardingService         $onboarding,
+        private readonly GamifiedOnboardingService $gamified,
+        private readonly TrialService              $trial,
     ) {}
 
     // ── GET /onboarding ───────────────────────────────────────────────────────
@@ -117,6 +119,50 @@ class OnboardingController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Vous avez rejoint '.$invitation->organization->name.' avec succès !');
+    }
+
+    // =========================================================================
+    // Gamified Onboarding — Routes: /onboarding/status|complete|skip
+    // =========================================================================
+
+    // ── GET /onboarding/status ────────────────────────────────────────────────
+    /** Progression gamifiée complète du user connecté (points + badges). */
+    public function status(Request $request): JsonResponse
+    {
+        $progress = $this->gamified->getProgress($request->user());
+        return response()->json($progress);
+    }
+
+    // ── POST /onboarding/complete ─────────────────────────────────────────────
+    /** Marque une étape gamifiée comme complétée. */
+    public function complete(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'key'      => 'required|string|max:50',
+            'metadata' => 'sometimes|array',
+        ]);
+
+        $user = $request->user();
+        $this->gamified->completeStep($user, $validated['key'], $validated['metadata'] ?? []);
+
+        return response()->json([
+            'message'  => 'Étape complétée.',
+            'progress' => $this->gamified->getProgress($user),
+        ]);
+    }
+
+    // ── POST /onboarding/skip ─────────────────────────────────────────────────
+    /** Ignore l'onboarding gamifié (flag sur les metadata user). */
+    public function skip(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // Stocker le flag dans les metadata utilisateur
+        $meta = $user->metadata ?? [];
+        $meta['onboarding_skipped_at'] = now()->toIso8601String();
+        $user->update(['metadata' => $meta]);
+
+        return response()->json(['message' => 'Onboarding ignoré.']);
     }
 
     // ── POST /trial/start ─────────────────────────────────────────────────────

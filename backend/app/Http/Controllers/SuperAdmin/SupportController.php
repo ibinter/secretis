@@ -4,24 +4,108 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
+use App\Models\TicketMessage;
+use App\Models\User;
+use App\Notifications\TicketReplyNotification;
 use App\Services\AuditService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
  * SupportController — Gestion des tickets support SuperAdmin IBIG Soft
  *
- * ACCÈS RESTREINT : middleware 'role:superadmin_ibig'
+ * ACCÈS RESTREINT : middleware 'role:superadmin_ibig' | 'role:super-admin'
  */
 class SupportController extends Controller
 {
     public function __construct(private readonly AuditService $audit)
     {
         $this->middleware(['auth', 'role:superadmin_ibig']);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /superadmin/support/tickets/{ticket}/reply  — Réponse ou note interne
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function reply(Request $request, SupportTicket $ticket): RedirectResponse
+    {
+        $validated = $request->validate([
+            'message'       => 'required|string|min:1|max:10000',
+            'is_internal'   => 'nullable|boolean',
+            'attachments'   => 'nullable|array|max:3',
+            'attachments.*' => 'file|max:5120|mimes:pdf,png,jpg,jpeg,docx,doc',
+        ]);
+
+        $user       = Auth::user();
+        $isInternal = (bool) $request->input('is_internal', false);
+
+        $attachments = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store("support/tickets/{$ticket->id}", 'private');
+                $attachments[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+        }
+
+        $msg = TicketMessage::create([
+            'ticket_id'   => $ticket->id,
+            'user_id'     => $user->id,
+            'message'     => $validated['message'],
+            'is_internal' => $isInternal,
+            'attachments' => $attachments,
+        ]);
+
+        $updates = [];
+        if (! $isInternal && $ticket->first_response_at === null) {
+            $updates['first_response_at'] = now();
+        }
+        if (! $isInternal && in_array($ticket->status, ['open', 'in_progress'])) {
+            $updates['status'] = 'waiting_client';
+        }
+        if (! empty($updates)) {
+            $ticket->update($updates);
+        }
+
+        if (! $isInternal && $ticket->user_id) {
+            optional($ticket->user)->notify(new TicketReplyNotification($ticket, $msg, $user));
+        }
+
+        return back()->with('success', $isInternal ? 'Note interne ajoutée.' : 'Réponse envoyée au client.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // PATCH /superadmin/support/tickets/{ticket}/status
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function updateStatus(Request $request, SupportTicket $ticket): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:open,in_progress,waiting_client,resolved,closed',
+        ]);
+
+        $updates = ['status' => $validated['status']];
+
+        if ($validated['status'] === 'resolved' && ! $ticket->resolved_at) {
+            $updates['resolved_at'] = now();
+        }
+        if ($validated['status'] === 'closed' && ! $ticket->closed_at) {
+            $updates['closed_at'] = now();
+        }
+
+        $ticket->update($updates);
+
+        return back()->with('success', 'Statut mis à jour.');
     }
 
     // ─────────────────────────────────────────────────────────────────────────
