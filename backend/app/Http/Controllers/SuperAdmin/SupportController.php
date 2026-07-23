@@ -56,14 +56,27 @@ class SupportController extends Controller
 
         $tickets = $query->paginate(25)->through(fn ($t) => $this->formatTicket($t));
 
-        return Inertia::render('SuperAdmin/SupportDashboard', [
+        return Inertia::render('SuperAdmin/Support/Tickets/Index', [
             'tickets' => $tickets,
-            'stats'   => $this->getStats(),
+            'sla'     => $this->getStats(),
         ]);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // GET /superadmin/support/tickets/{id}
+    // GET /superadmin/support/tickets/{id}  — Inertia (SuperAdmin/Support/Tickets/Show)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function showInertia(SupportTicket $ticket): Response
+    {
+        $ticket->load(['organization', 'assignee']);
+        return Inertia::render('SuperAdmin/Support/Tickets/Show', [
+            'ticket'   => $this->formatTicket($ticket),
+            'messages' => $ticket->messages ?? [],
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /superadmin/support/tickets/{id}  — JSON
     // ─────────────────────────────────────────────────────────────────────────
 
     public function show(SupportTicket $ticket): JsonResponse

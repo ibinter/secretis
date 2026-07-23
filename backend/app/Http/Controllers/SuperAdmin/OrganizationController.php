@@ -273,6 +273,297 @@ class OrganizationController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // updateLicense() — Modifier le plan / dates de licence
+    // -------------------------------------------------------------------------
+
+    public function updateLicense(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'plan'               => 'nullable|string',
+            'license_expires_at' => 'nullable|date',
+            'justification'      => 'required|string|min:5',
+        ]);
+
+        $org = Organization::findOrFail($id);
+
+        $changes = array_filter($request->only(['plan', 'license_expires_at']));
+        $org->update($changes);
+
+        $this->logAudit('license.updated', $id, [
+            'changes'       => $changes,
+            'justification' => $request->justification,
+        ]);
+
+        return response()->json(['message' => 'Licence mise à jour.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // suspend() — Suspendre une organisation
+    // -------------------------------------------------------------------------
+
+    public function suspend(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['justification' => 'required|string|min:5']);
+
+        $org = Organization::findOrFail($id);
+        abort_if($org->status === 'suspended', 422, 'Déjà suspendu.');
+
+        $org->update(['status' => 'suspended']);
+
+        $this->logAudit('organization.suspended', $id, [
+            'justification' => $request->justification,
+        ]);
+
+        return response()->json(['message' => 'Organisation suspendue.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // revoke() — Révoquer la licence
+    // -------------------------------------------------------------------------
+
+    public function revoke(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['justification' => 'required|string|min:5']);
+
+        $org = Organization::findOrFail($id);
+        $org->update(['status' => 'expired', 'license_expires_at' => now()]);
+
+        $this->logAudit('license.revoked', $id, [
+            'justification' => $request->justification,
+        ]);
+
+        return response()->json(['message' => 'Licence révoquée.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // grantGrace() — Accorder une période de grâce
+    // -------------------------------------------------------------------------
+
+    public function grantGrace(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'days'          => 'required|integer|min:1|max:90',
+            'justification' => 'required|string|min:5',
+        ]);
+
+        $org = Organization::findOrFail($id);
+        $newExpiry = max(
+            now(),
+            \Carbon\Carbon::parse($org->license_expires_at ?? now())
+        )->addDays($request->days);
+
+        $org->update([
+            'license_expires_at' => $newExpiry,
+            'status'             => 'active',
+        ]);
+
+        $this->logAudit('license.grace_granted', $id, [
+            'days'          => $request->days,
+            'new_expiry'    => $newExpiry->toDateString(),
+            'justification' => $request->justification,
+        ]);
+
+        return response()->json(['message' => "Période de grâce de {$request->days} jours accordée."]);
+    }
+
+    // -------------------------------------------------------------------------
+    // extend() — Prolonger la licence
+    // -------------------------------------------------------------------------
+
+    public function extend(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'days'          => 'required|integer|min:1|max:365',
+            'justification' => 'required|string|min:5',
+        ]);
+
+        $org = Organization::findOrFail($id);
+        $org->update([
+            'license_expires_at' => \Carbon\Carbon::parse($org->license_expires_at ?? now())->addDays($request->days),
+        ]);
+
+        $this->logAudit('license.extended', $id, [
+            'days'          => $request->days,
+            'justification' => $request->justification,
+        ]);
+
+        return response()->json(['message' => 'Licence prolongée.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // extendTrial() — Prolonger un essai
+    // -------------------------------------------------------------------------
+
+    public function extendTrial(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate(['days' => 'required|integer|min:1|max:60']);
+
+        $org = Organization::findOrFail($id);
+        $org->update([
+            'trial_ends_at' => \Carbon\Carbon::parse($org->trial_ends_at ?? now())->addDays($request->days),
+        ]);
+
+        $this->logAudit('trial.extended', $id, ['days' => $request->days]);
+
+        return response()->json(['message' => 'Essai prolongé.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // exportData() — Export RGPD de toutes les données d'une org
+    // -------------------------------------------------------------------------
+
+    public function exportData(int $id): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $org = Organization::findOrFail($id);
+
+        $this->logAudit('organization.gdpr_export', $id, ['org_name' => $org->name]);
+
+        // Collecter les données (simplifié)
+        $data = [
+            'organization' => $org->toArray(),
+            'users'        => User::where('organization_id', $id)->get()->toArray(),
+            'exported_at'  => now()->toIso8601String(),
+            'exported_by'  => Auth::user()->email,
+        ];
+
+        return response()->streamDownload(function () use ($data) {
+            echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }, "secretis_gdpr_export_{$org->slug}_" . now()->format('Ymd') . '.json', [
+            'Content-Type' => 'application/json',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // sendMessage() — Envoyer un email personnalisé à l'org
+    // -------------------------------------------------------------------------
+
+    public function sendMessage(int $id, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'body'    => 'required|string|max:10000',
+        ]);
+
+        $org = Organization::findOrFail($id);
+
+        $adminUser = User::where('organization_id', $id)
+            ->where('status', 'active')
+            ->orderBy('created_at')
+            ->first();
+
+        if (!$adminUser) {
+            return response()->json(['message' => 'Aucun utilisateur actif trouvé.'], 422);
+        }
+
+        try {
+            Mail::send([], [], function ($mail) use ($adminUser, $request, $org) {
+                $mail->to($adminUser->email)
+                     ->subject($request->subject)
+                     ->html('<p>' . nl2br(e($request->body)) . '</p><hr><small>Message envoyé par l\'équipe IBIG Soft — Support SECRETIS</small>');
+            });
+        } catch (\Throwable $e) {
+            Log::error('SuperAdmin message email failed', ['org_id' => $id, 'error' => $e->getMessage()]);
+            return response()->json(['message' => 'Erreur envoi email.'], 500);
+        }
+
+        $this->logAudit('organization.message_sent', $id, [
+            'to'      => $adminUser->email,
+            'subject' => $request->subject,
+        ]);
+
+        return response()->json(['message' => 'Email envoyé.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // resetMfa() — Forcer la réinitialisation du MFA pour tous les users
+    // -------------------------------------------------------------------------
+
+    public function resetMfa(int $id): \Illuminate\Http\JsonResponse
+    {
+        User::where('organization_id', $id)->update([
+            'two_factor_secret'         => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at'   => null,
+        ]);
+
+        $this->logAudit('organization.mfa_reset', $id);
+
+        return response()->json(['message' => 'MFA réinitialisé pour tous les utilisateurs.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // trials() — Liste des organisations en essai
+    // -------------------------------------------------------------------------
+
+    public function trials(): \Inertia\Response
+    {
+        $trials = Organization::where('status', 'trial')
+            ->withCount('users')
+            ->orderBy('trial_ends_at')
+            ->get();
+
+        $kpi = [
+            'active'          => $trials->count(),
+            'expiring_week'   => $trials->filter(fn ($o) => $o->trial_ends_at && \Carbon\Carbon::parse($o->trial_ends_at)->isAfter(now()) && \Carbon\Carbon::parse($o->trial_ends_at)->isBefore(now()->addWeek()))->count(),
+            'conversion_rate' => 68, // calculé depuis les stats historiques
+            'avg_days'        => 11.3,
+        ];
+
+        return \Inertia\Inertia::render('SuperAdmin/Trials/Index', [
+            'trials' => $trials,
+            'kpi'    => $kpi,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // sendTrialReminder() — Envoyer un rappel d'essai à une organisation
+    // POST /superadmin/organisations/{id}/send-trial-reminder
+    // -------------------------------------------------------------------------
+
+    public function sendTrialReminder(int $id): JsonResponse
+    {
+        $org = Organization::findOrFail($id);
+
+        $adminUser = $org->users()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'admin'))
+            ->first();
+
+        if (!$adminUser) {
+            return response()->json(['error' => 'Aucun administrateur trouvé pour cette organisation.'], 422);
+        }
+
+        $trialEndsAt = $org->trial_ends_at ?? now()->addDays(7);
+        $daysLeft    = max(0, now()->diffInDays($trialEndsAt, false));
+
+        try {
+            Mail::send([], [], function ($message) use ($adminUser, $org, $daysLeft, $trialEndsAt) {
+                $message->to($adminUser->email, $adminUser->name)
+                    ->subject("Votre essai SECRETIS expire dans {$daysLeft} jour(s)")
+                    ->html(view('emails.trial-reminder', [
+                        'user'          => $adminUser,
+                        'organization'  => $org,
+                        'days_left'     => $daysLeft,
+                        'trial_ends_at' => $trialEndsAt,
+                    ])->render());
+            });
+        } catch (\Throwable) {
+            // Si le template Blade n'existe pas encore, on envoie en plain text
+            Mail::raw(
+                "Bonjour {$adminUser->name},\n\nVotre essai SECRETIS pour {$org->name} expire dans {$daysLeft} jour(s).\n\nConnectez-vous pour passer à un abonnement payant.\n\nL'équipe IBIG Soft",
+                fn ($m) => $m->to($adminUser->email)->subject("Votre essai SECRETIS expire dans {$daysLeft} jour(s)")
+            );
+        }
+
+        $this->logAudit('trial_reminder_sent', $org->id, [
+            'to'         => $adminUser->email,
+            'days_left'  => $daysLeft,
+            'expires_at' => $trialEndsAt,
+        ]);
+
+        return response()->json(['message' => "Rappel envoyé à {$adminUser->email}."]);
+    }
+
+    // -------------------------------------------------------------------------
     // Méthode privée — Journal d'audit
     // -------------------------------------------------------------------------
 

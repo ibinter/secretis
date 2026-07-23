@@ -1,19 +1,33 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { Search, X, Clock, Mail, FileText, Users, Calendar, CheckSquare, UserCheck, ShoppingCart, ArrowRight } from 'lucide-react'
+import {
+  Search, X, Clock, Mail, FileText, Users, Calendar, CheckSquare,
+  UserCheck, ShoppingCart, HelpCircle, ArrowRight, User,
+} from 'lucide-react'
 import { debounce } from '../../utils/helpers'
 
 const TYPE_META = {
-  courrier:    { label: 'Courrier',    icon: Mail,         color: 'text-[#2E86C1]' },
-  document:    { label: 'Document',   icon: FileText,     color: 'text-[#1A3A5C]' },
-  contact:     { label: 'Contact',    icon: Users,        color: 'text-[#1E8449]' },
-  evenement:   { label: 'Événement',  icon: Calendar,     color: 'text-[#F39C12]' },
-  tache:       { label: 'Tâche',      icon: CheckSquare,  color: 'text-purple-500' },
-  visiteur:    { label: 'Visiteur',   icon: UserCheck,    color: 'text-[#C0392B]' },
-  fournisseur: { label: 'Fournisseur',icon: ShoppingCart, color: 'text-gray-500'  },
+  // Types hérités (rétrocompatibilité)
+  courrier:    { label: 'Courrier',         icon: Mail,         color: 'text-[#2E86C1]' },
+  document:    { label: 'Document',         icon: FileText,     color: 'text-[#1A3A5C]' },
+  contact:     { label: 'Contact',          icon: Users,        color: 'text-[#1E8449]' },
+  evenement:   { label: 'Événement',        icon: Calendar,     color: 'text-[#F39C12]' },
+  tache:       { label: 'Tâche',            icon: CheckSquare,  color: 'text-purple-500' },
+  visiteur:    { label: 'Visiteur',         icon: UserCheck,    color: 'text-[#C0392B]' },
+  fournisseur: { label: 'Fournisseur',      icon: ShoppingCart, color: 'text-gray-500'  },
+  // Nouveaux types (API v2)
+  events:      { label: 'Événements',       icon: Calendar,     color: 'text-[#F39C12]' },
+  documents:   { label: 'Documents',        icon: FileText,     color: 'text-[#1A3A5C]' },
+  contacts:    { label: 'Contacts',         icon: Users,        color: 'text-[#1E8449]' },
+  tasks:       { label: 'Tâches',           icon: CheckSquare,  color: 'text-purple-500' },
+  visitors:    { label: 'Visiteurs',        icon: UserCheck,    color: 'text-[#C0392B]' },
+  suppliers:   { label: 'Fournisseurs',     icon: ShoppingCart, color: 'text-gray-500'  },
+  users:       { label: 'Utilisateurs',     icon: User,         color: 'text-indigo-500' },
+  help:        { label: 'Articles d\'aide', icon: HelpCircle,   color: 'text-teal-500'  },
 }
 
 const RECENT_KEY = 'secretis_search_recent'
+const HISTORY_KEY = 'secretis_search_history'
 
 function loadRecent() {
   try { return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]') } catch { return [] }
@@ -25,12 +39,24 @@ function saveRecent(item) {
   } catch {}
 }
 
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]') } catch { return [] }
+}
+function saveHistory(query) {
+  try {
+    if (!query?.trim() || query.length < 2) return
+    const prev = loadHistory().filter(q => q !== query)
+    localStorage.setItem(HISTORY_KEY, JSON.stringify([query, ...prev].slice(0, 5)))
+  } catch {}
+}
+
 export default function GlobalSearch({ open, onClose }) {
   const [query,    setQuery]    = useState('')
   const [results,  setResults]  = useState({})
   const [loading,  setLoading]  = useState(false)
   const [activeIdx,setActiveIdx]= useState(-1)
   const [recent,   setRecent]   = useState(loadRecent)
+  const [history,  setHistory]  = useState(loadHistory)
   const inputRef   = useRef(null)
 
   // Keyboard shortcut Cmd/Ctrl+K
@@ -56,13 +82,17 @@ export default function GlobalSearch({ open, onClose }) {
   )
 
   const doSearch = useCallback(debounce(async (q) => {
-    if (!q.trim()) { setResults({}); return }
+    if (!q.trim() || q.trim().length < 2) { setResults({}); return }
     setLoading(true)
     try {
       const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
       })
-      if (res.ok) setResults(await res.json())
+      if (res.ok) {
+        const data = await res.json()
+        // Supporte les deux formats : { events: [...] } ou { results: { events: [...] } }
+        setResults(data.results ?? data)
+      }
     } catch {
       // API not available in dev — show empty
     } finally { setLoading(false) }
@@ -87,7 +117,9 @@ export default function GlobalSearch({ open, onClose }) {
 
   const handleSelect = (item) => {
     saveRecent({ label: item.label ?? item.title ?? '', url: item.url, type: item._type })
+    if (query.trim().length >= 2) saveHistory(query.trim())
     setRecent(loadRecent())
+    setHistory(loadHistory())
     onClose?.()
     if (item.url) window.location.href = item.url
   }
@@ -152,10 +184,29 @@ export default function GlobalSearch({ open, onClose }) {
             </div>
           )}
 
+          {/* Historique des recherches */}
+          {!query && history.length > 0 && (
+            <div className="px-4 py-3 border-b border-gray-50 dark:border-[#1E3048]">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Recherches récentes</p>
+              <div className="flex flex-wrap gap-2">
+                {history.map((h, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setQuery(h); setActiveIdx(-1) }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <Clock size={11} className="text-gray-400" /> {h}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {!loading && query && !hasResults && (
             <div className="flex flex-col items-center py-12 text-center text-sm text-gray-400">
               <Search size={36} className="mb-3 opacity-30" />
-              Aucun résultat pour <strong className="text-gray-600 dark:text-gray-300 ml-1">"{query}"</strong>
+              <p>Aucun résultat pour <strong className="text-gray-600 dark:text-gray-300">"{query}"</strong></p>
+              <a href="/help" className="mt-3 text-xs text-[#2E86C1] hover:underline">Consulter l'aide</a>
             </div>
           )}
 

@@ -3,12 +3,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 /**
  * Hook usePwa — gestion complète de la PWA SECRETIS.
  * Expose : isInstalled, isPwaSupported, isOffline, promptInstall,
- *           requestPushPermission, subscribeToPush.
+ *           requestPushPermission, subscribeToPush,
+ *           updateAvailable, pendingSync, updateApp.
  */
 export function usePwa() {
   const [offline, setOffline] = useState(!navigator.onLine);
   const deferredPromptRef = useRef(null);
   const [installable, setInstallable] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [pendingSync, setPendingSync] = useState(0);
+  const waitingWorkerRef = useRef(null);
 
   // ── Écoute online / offline ──────────────────────────────────────────
   useEffect(() => {
@@ -41,6 +45,52 @@ export function usePwa() {
     });
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  // ── Détection mise à jour SW disponible ─────────────────────────────
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+
+    const handleControllerChange = () => {
+      // Un nouveau SW a pris le contrôle → recharger la page
+      window.location.reload();
+    };
+
+    const handleMessage = (event) => {
+      if (event.data?.type === 'SW_UPDATE_AVAILABLE') {
+        setUpdateAvailable(true);
+      }
+      if (event.data?.type === 'SYNC_COUNT') {
+        setPendingSync(event.data.count ?? 0);
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    navigator.serviceWorker.addEventListener('message', handleMessage);
+
+    // Surveiller les mises à jour SW dès qu'un registration est actif
+    navigator.serviceWorker.ready.then((registration) => {
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          if (
+            newWorker.state === 'installed' &&
+            navigator.serviceWorker.controller
+          ) {
+            // Un nouveau SW est installé et prêt → notifier l'utilisateur
+            waitingWorkerRef.current = newWorker;
+            setUpdateAvailable(true);
+          }
+        });
+      });
+    }).catch(() => {});
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+      navigator.serviceWorker.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   // ── isInstalled ──────────────────────────────────────────────────────
@@ -82,6 +132,21 @@ export function usePwa() {
     }
 
     return outcome;
+  }, []);
+
+  // ── updateApp ────────────────────────────────────────────────────────
+  /**
+   * Déclenche la mise à jour immédiate du service worker.
+   * Envoie SKIP_WAITING au SW en attente puis recharge la page.
+   */
+  const updateApp = useCallback(() => {
+    if (waitingWorkerRef.current) {
+      waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' });
+    } else if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      window.location.reload();
+    }
   }, []);
 
   // ── requestPushPermission ────────────────────────────────────────────
@@ -155,8 +220,14 @@ export function usePwa() {
     isOffline,
     /** true si le prompt d'installation est disponible */
     installable,
+    /** true si une mise à jour du SW est prête à être appliquée */
+    updateAvailable,
+    /** Nombre de requêtes en attente de synchronisation (mode offline) */
+    pendingSync,
     /** Déclenche le prompt natif d'installation → Promise<'accepted'|'dismissed'|'not-available'> */
     promptInstall,
+    /** Active le nouveau service worker et recharge la page */
+    updateApp,
     /** Demande la permission de notifications → Promise<NotificationPermission> */
     requestPushPermission,
     /** Abonne aux push VAPID → Promise<PushSubscription|null> */

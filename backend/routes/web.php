@@ -55,6 +55,7 @@ use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardCo
 use App\Http\Controllers\SuperAdmin\FeatureFlagController;
 use App\Http\Controllers\SuperAdmin\LicenseController as SuperAdminLicenseController;
 use App\Http\Controllers\SuperAdmin\OrganizationController as SuperAdminOrganizationController;
+use App\Http\Controllers\SuperAdmin\CrmProspectsController;
 use App\Http\Controllers\SuperAdmin\SaasMetricsController;
 use App\Http\Controllers\SuperAdmin\SupportController as SuperAdminSupportController;
 use App\Http\Controllers\SupplierPortalController;
@@ -80,6 +81,10 @@ Route::middleware(['throttle:web'])->group(function () {
     Route::get('/features', [LandingPageController::class, 'features'])->name('features');
     Route::get('/contact', [LandingPageController::class, 'contact'])->name('contact');
     Route::post('/contact', [LandingPageController::class, 'sendContact'])->name('contact.send');
+
+    // Acceptation d'offre commerciale (lien sécurisé par token)
+    Route::get('/offers/accept/{token}', [CrmProspectsController::class, 'acceptOffer'])->name('offers.accept');
+    Route::get('/offer-accepted', fn () => \Inertia\Inertia::render('Public/OfferAccepted'))->name('offer.accepted');
 
     // Santé & API Docs
     Route::get('/status', [HealthController::class, 'status'])->name('status');
@@ -110,6 +115,9 @@ Route::middleware(['throttle:web'])->group(function () {
     // Vérification certificat formation (Vague 7/12)
     Route::get('/certificate/{uuid}', [TrainingController::class, 'verifyCertificate'])->name('certificate.verify');
     Route::get('/training/catalog', [TrainingController::class, 'publicCatalog'])->name('training.public-catalog');
+
+    // Vérification certificat Académie SECRETIS (Section 12.4 — public, sans auth)
+    Route::get('/training/verify/{uuid}', [\App\Http\Controllers\AcademyController::class, 'verifyCertificate'])->name('training.verify');
 
     // Auth pages (Fortify / Breeze style via Inertia)
     Route::middleware(['guest'])->group(function () {
@@ -444,6 +452,18 @@ Route::middleware([
     });
 
     // -------------------------------------------------------------------------
+    // ACADÉMIE IBIG SECRETIS (Section 12.4)
+    // -------------------------------------------------------------------------
+    Route::prefix('academie')->name('academie.')->group(function () {
+        Route::get('/',              [\App\Http\Controllers\AcademyController::class, 'index'])->name('index');
+        Route::get('/catalogue',     [\App\Http\Controllers\AcademyController::class, 'catalog'])->name('catalogue');
+        Route::get('/mon-espace',    [\App\Http\Controllers\AcademyController::class, 'mySpace'])->name('mon-espace');
+        Route::get('/ressources',    [\App\Http\Controllers\AcademyController::class, 'resources'])->name('ressources');
+        Route::get('/cours/{slug}',  [\App\Http\Controllers\AcademyController::class, 'course'])->name('cours');
+        Route::get('/certificat/{uuid}', [\App\Http\Controllers\AcademyController::class, 'certificate'])->name('certificat');
+    });
+
+    // -------------------------------------------------------------------------
     // SIGNATURES ÉLECTRONIQUES (Vague 7)
     // -------------------------------------------------------------------------
     Route::get('/signatures', [SignatureController::class, 'index'])->name('signatures');
@@ -487,6 +507,17 @@ Route::middleware([
         Route::post('/organisations/{id}/activate', [SuperAdminOrganizationController::class, 'activate'])->name('organisations.activate');
         Route::post('/organisations/{id}/deactivate', [SuperAdminOrganizationController::class, 'deactivate'])->name('organisations.deactivate');
         Route::post('/organisations/{id}/impersonate', [SuperAdminOrganizationController::class, 'impersonate'])->name('organisations.impersonate');
+        Route::put('/organisations/{id}/license', [SuperAdminOrganizationController::class, 'updateLicense'])->name('organisations.license.update');
+        Route::post('/organisations/{id}/suspend', [SuperAdminOrganizationController::class, 'suspend'])->name('organisations.suspend');
+        Route::post('/organisations/{id}/revoke', [SuperAdminOrganizationController::class, 'revoke'])->name('organisations.revoke');
+        Route::post('/organisations/{id}/grant-grace', [SuperAdminOrganizationController::class, 'grantGrace'])->name('organisations.grace');
+        Route::post('/organisations/{id}/extend', [SuperAdminOrganizationController::class, 'extend'])->name('organisations.extend');
+        Route::post('/organisations/{id}/extend-trial', [SuperAdminOrganizationController::class, 'extendTrial'])->name('organisations.extend-trial');
+        Route::post('/organisations/{id}/send-message', [SuperAdminOrganizationController::class, 'sendMessage'])->name('organisations.send-message');
+        Route::post('/organisations/{id}/reset-mfa', [SuperAdminOrganizationController::class, 'resetMfa'])->name('organisations.reset-mfa');
+        Route::get('/organisations/{id}/export-data', [SuperAdminOrganizationController::class, 'exportData'])->name('organisations.export-data');
+        Route::post('/organisations/{id}/send-trial-reminder', [SuperAdminOrganizationController::class, 'sendTrialReminder'])->name('organisations.trial-reminder');
+        Route::get('/trials', [SuperAdminOrganizationController::class, 'trials'])->name('trials');
 
         // SaaS Metrics (Vague 10)
         Route::prefix('saas')->name('saas.')->group(function () {
@@ -496,12 +527,65 @@ Route::middleware([
             Route::get('/health', [SaasMetricsController::class, 'health'])->name('health');
         });
 
-        // CRM SuperAdmin (Vague 10)
+        // CRM SuperAdmin (Vague 10 + 12)
         Route::prefix('crm')->name('crm.')->group(function () {
+            // Anciens endpoints
             Route::get('/pipeline', [SuperAdminCrmController::class, 'pipeline'])->name('pipeline');
             Route::get('/contacts', [SuperAdminCrmController::class, 'contacts'])->name('contacts');
             Route::get('/analytics', [SuperAdminCrmController::class, 'analytics'])->name('analytics');
+
+            // Prospects
+            Route::get('/prospects', [CrmProspectsController::class, 'prospects'])->name('prospects');
+            Route::get('/prospects/create', fn () => \Inertia\Inertia::render('SuperAdmin/Crm/Prospects/Create'))->name('prospects.create');
+            Route::post('/prospects', [CrmProspectsController::class, 'storeProspect'])->name('prospects.store');
+            Route::get('/prospects/{id}', [CrmProspectsController::class, 'showProspect'])->name('prospects.show');
+            Route::put('/prospects/{id}', [CrmProspectsController::class, 'updateProspect'])->name('prospects.update');
+            Route::post('/prospects/{id}/move-stage', [CrmProspectsController::class, 'moveStage'])->name('prospects.move-stage');
+            Route::post('/prospects/{id}/convert-to-trial', [CrmProspectsController::class, 'convertToTrial'])->name('prospects.convert');
+            Route::post('/prospects/{id}/interactions', [CrmProspectsController::class, 'logInteraction'])->name('prospects.interactions');
+
+            // Démonstrations
+            Route::get('/demonstrations', [CrmProspectsController::class, 'demonstrations'])->name('demonstrations');
+            Route::post('/demonstrations', [CrmProspectsController::class, 'scheduleDemo'])->name('demonstrations.store');
+            Route::post('/demonstrations/{id}/confirm', [CrmProspectsController::class, 'confirmDemo'])->name('demonstrations.confirm');
+            Route::post('/demonstrations/{id}/send-reminder', [CrmProspectsController::class, 'sendDemoReminder'])->name('demonstrations.reminder');
+            Route::post('/demonstrations/{id}/notes', [CrmProspectsController::class, 'recordDemoNotes'])->name('demonstrations.notes');
+
+            // Offres
+            Route::get('/offers', [CrmProspectsController::class, 'offers'])->name('offers');
+            Route::get('/offers/create', fn () => \Inertia\Inertia::render('SuperAdmin/Crm/Offers/Create'))->name('offers.create');
+            Route::post('/offers', [CrmProspectsController::class, 'createOffer'])->name('offers.store');
+            Route::post('/offers/{id}/send', [CrmProspectsController::class, 'sendOffer'])->name('offers.send');
+            Route::get('/offers/{id}/pdf', [CrmProspectsController::class, 'generateOfferPdf'])->name('offers.pdf');
+            Route::post('/offers/{id}/duplicate', [CrmProspectsController::class, 'duplicateOffer'])->name('offers.duplicate');
+
+            // Campagnes
+            Route::get('/campaigns', [CrmProspectsController::class, 'campaigns'])->name('campaigns');
+            Route::post('/campaigns', [CrmProspectsController::class, 'createCampaign'])->name('campaigns.store');
+            Route::post('/campaigns/{id}/send', [CrmProspectsController::class, 'sendCampaign'])->name('campaigns.send');
         });
+
+        // Routes plateforme
+        Route::prefix('support')->name('support.')->group(function () {
+            Route::get('/tickets', [SuperAdminSupportController::class, 'index'])->name('tickets');
+            Route::get('/tickets/{ticket}', [SuperAdminSupportController::class, 'showInertia'])->name('tickets.show');
+            Route::post('/tickets/{ticket}/reply', [SuperAdminSupportController::class, 'message'])->name('tickets.reply');
+            Route::patch('/tickets/{ticket}', [SuperAdminSupportController::class, 'update'])->name('tickets.update');
+            Route::post('/tickets/{ticket}/assign', [SuperAdminSupportController::class, 'assign'])->name('tickets.assign');
+        });
+
+        Route::get('/announcements', fn () => \Inertia\Inertia::render('SuperAdmin/Platform/Announcements'))->name('announcements');
+        Route::post('/announcements', [SuperAdminAnnouncementController::class, 'store'])->name('announcements.store');
+        Route::put('/announcements/{id}', [SuperAdminAnnouncementController::class, 'update'])->name('announcements.update');
+        Route::patch('/announcements/{id}', [SuperAdminAnnouncementController::class, 'patch'])->name('announcements.patch');
+        Route::delete('/announcements/{id}', [SuperAdminAnnouncementController::class, 'destroy'])->name('announcements.destroy');
+
+        Route::get('/feature-flags', fn () => \Inertia\Inertia::render('SuperAdmin/Platform/FeatureFlags'))->name('feature-flags');
+        Route::put('/feature-flags/{id}', [FeatureFlagController::class, 'update'])->name('feature-flags.update');
+
+        Route::get('/settings', fn () => \Inertia\Inertia::render('SuperAdmin/Settings/EditorConfig'))->name('settings');
+        Route::put('/settings/{section}', [\App\Http\Controllers\SuperAdmin\SystemController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/settings/smtp/test', [\App\Http\Controllers\SuperAdmin\SystemController::class, 'testSmtp'])->name('settings.smtp.test');
 
         // Support & Feature Flags
         Route::get('/support', [SuperAdminSupportController::class, 'index'])->name('support');

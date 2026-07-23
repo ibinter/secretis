@@ -550,15 +550,272 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
+   Animated Counters (IntersectionObserver)
+   ============================================================ */
+(function initCounters() {
+  function animateCounter(el) {
+    const raw    = el.dataset.counter || el.textContent;
+    const target = parseInt(raw.replace(/\D/g, ''), 10);
+    if (isNaN(target)) return;
+    const suffix   = raw.replace(/[\d]/g, '');
+    const duration = 2000;
+    let startTime  = null;
+
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const ease     = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      el.textContent = Math.round(target * ease) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const counters = document.querySelectorAll('[data-counter]');
+    if (!counters.length) return;
+
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          animateCounter(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    counters.forEach(el => io.observe(el));
+  });
+})();
+
+/* ============================================================
+   Cookie Consent — full RGPD helpers
+   ============================================================ */
+function getCookieConsent() {
+  try { return JSON.parse(localStorage.getItem('ibig_cookies') || 'null'); } catch { return null; }
+}
+
+function acceptAll() {
+  const v = { necessary: true, preferences: true, statistics: true, marketing: true };
+  localStorage.setItem('ibig_cookies', JSON.stringify(v));
+  hideCookieBanner();
+  trackEvent('cookie_consent', { choice: 'accept_all' });
+}
+
+function refuseAll() {
+  const v = { necessary: true, preferences: false, statistics: false, marketing: false };
+  localStorage.setItem('ibig_cookies', JSON.stringify(v));
+  hideCookieBanner();
+  trackEvent('cookie_consent', { choice: 'refuse_all' });
+}
+
+function saveCustom(prefs) {
+  const v = Object.assign({ necessary: true, preferences: false, statistics: false, marketing: false }, prefs);
+  localStorage.setItem('ibig_cookies', JSON.stringify(v));
+  hideCookieBanner();
+  trackEvent('cookie_consent', { choice: 'custom', ...v });
+}
+
+function hideCookieBanner() {
+  const b = document.getElementById('cookie-banner');
+  if (b) b.style.display = 'none';
+}
+
+/* ============================================================
+   Analytics — RGPD-aware
+   ============================================================ */
+const _sessionId = (() => {
+  let id = sessionStorage.getItem('ibig_session');
+  if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2); sessionStorage.setItem('ibig_session', id); }
+  return id;
+})();
+
+function canTrack() {
+  const c = getCookieConsent();
+  return !c || c.statistics !== false; // track unless explicitly refused
+}
+
+/* ============================================================
+   PWA Install Prompt
+   ============================================================ */
+let pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  pwaPrompt = e;
+  document.querySelectorAll('.pwa-install-btn').forEach(btn => btn.style.display = 'inline-flex');
+});
+
+function installPWA() {
+  if (!pwaPrompt) {
+    alert(currentLang === 'fr'
+      ? 'Pour installer : ouvrez le menu de votre navigateur et choisissez "Installer l\'application" ou "Ajouter à l\'écran d\'accueil".'
+      : 'To install: open your browser menu and choose "Install app" or "Add to Home Screen".');
+    return;
+  }
+  pwaPrompt.prompt();
+  pwaPrompt.userChoice.then(r => {
+    trackEvent('pwa_install', { outcome: r.outcome });
+    if (r.outcome === 'accepted') {
+      document.querySelectorAll('.pwa-install-btn').forEach(btn => btn.style.display = 'none');
+    }
+    pwaPrompt = null;
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  trackEvent('pwa_installed');
+  document.querySelectorAll('.pwa-install-btn').forEach(btn => btn.style.display = 'none');
+});
+
+/* ============================================================
+   Scroll-to-top
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('scroll-top');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 500);
+  }, { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+});
+
+/* ============================================================
+   Newsletter form
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('newsletter-form');
+  if (!form) return;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn  = form.querySelector('[type="submit"]');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '…';
+    const data = Object.fromEntries(new FormData(form));
+    try {
+      await fetch('/api/public/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch { /* silent — still show success */ }
+    form.innerHTML = '<p style="color:rgba(255,255,255,.85);font-size:.9rem;padding:.5rem 0">✓ Merci ! Vous êtes inscrit(e).</p>';
+    trackEvent('newsletter_subscribe', { email: data.email });
+  });
+});
+
+/* ============================================================
+   Trial registration form
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('trial-form');
+  if (!form) return;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn  = form.querySelector('[type="submit"]');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = currentLang === 'fr' ? 'Création en cours…' : 'Creating…';
+    const data = Object.fromEntries(new FormData(form));
+
+    // Client-side validation
+    if (!data.full_name?.trim() || !data.email?.trim() || !data.country) {
+      alert(currentLang === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.');
+      btn.disabled = false;
+      btn.textContent = orig;
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/public/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        form.innerHTML = `
+          <div style="text-align:center;padding:2rem">
+            <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
+            <h3 style="color:var(--primary);margin-bottom:.5rem">${currentLang === 'fr' ? 'Compte créé !' : 'Account created!'}</h3>
+            <p>${currentLang === 'fr' ? 'Vérifiez votre email pour activer votre essai gratuit.' : 'Check your email to activate your free trial.'}</p>
+          </div>`;
+        trackEvent('trial_signup', { country: data.country });
+      } else {
+        throw new Error('server_error');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = orig;
+      alert(currentLang === 'fr'
+        ? 'Une erreur est survenue. Veuillez réessayer ou nous contacter.'
+        : 'An error occurred. Please try again or contact us.');
+    }
+  });
+});
+
+/* ============================================================
+   Partner form
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('partner-form');
+  if (!form) return;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn  = form.querySelector('[type="submit"]');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Envoi…';
+    const data = Object.fromEntries(new FormData(form));
+    try {
+      await fetch('/api/public/partner-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      form.innerHTML = '<p style="color:var(--success);text-align:center;padding:1rem;font-weight:600">✓ Candidature reçue ! Notre équipe vous contactera sous 48h.</p>';
+      trackEvent('partner_application', { level: data.level });
+    } catch {
+      btn.disabled = false;
+      btn.textContent = orig;
+      alert('Erreur. Veuillez réessayer ou écrire à partners@ibig-soft.com');
+    }
+  });
+});
+
+/* ============================================================
+   Sector tabs
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  const tabBtns = document.querySelectorAll('.sector-tab-btn');
+  const panels  = document.querySelectorAll('.sector-panel');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.querySelector(`[data-panel="${btn.dataset.sector}"]`);
+      if (target) target.classList.add('active');
+      trackEvent('sector_tab_click', { sector: btn.dataset.sector });
+    });
+  });
+});
+
+/* ============================================================
    Init
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   applyLang();
 
-  // Lang toggle buttons
+  // Lang toggle buttons (nav + footer select)
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => setLang(btn.dataset.lang));
   });
+  const footerLangSelect = document.querySelector('.footer-lang-select');
+  if (footerLangSelect) {
+    footerLangSelect.value = currentLang;
+    footerLangSelect.addEventListener('change', () => setLang(footerLangSelect.value));
+  }
 
   trackEvent('page_view', { lang: currentLang, referrer: document.referrer });
 });

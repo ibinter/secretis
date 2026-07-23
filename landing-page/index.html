@@ -3,1071 +3,453 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="IBIG SECRETIS — ERP Secrétariat & Bureautique conçu pour l'Afrique. Gérez courrier, agenda, réunions, tâches et ressources humaines depuis une seule plateforme sécurisée.">
-<meta name="keywords" content="ERP Afrique, secrétariat numérique, logiciel bureautique, OHADA, gestion administrative, SARA IA">
+<title>IBIG SECRETIS &#8212; Logiciel de Gestion Administrative &amp; Secrétariat pour l&#39;Afrique</title>
+<meta name="description" content="IBIG SECRETIS est la solution ERP de secrétariat et gestion administrative conçue pour les entreprises africaines. Gestion des courriers, agenda, réunions, RH, comptabilité SYSCOHADA et bien plus.">
+<meta name="keywords" content="ERP Afrique, secrétariat numérique, logiciel bureautique, OHADA, SYSCOHADA, gestion administrative, SARA IA, Mobile Money">
 <meta name="author" content="IBIG Soft">
-<meta property="og:title" content="IBIG SECRETIS — ERP Secrétariat & Bureautique pour l'Afrique">
-<meta property="og:description" content="Gérez votre secrétariat comme les entreprises de classe mondiale. Solution tout-en-un, conçue pour l'Afrique francophone.">
+<meta property="og:title" content="IBIG SECRETIS &#8212; ERP Secrétariat Afrique">
+<meta property="og:description" content="La plateforme de gestion administrative tout-en-un pour les entreprises africaines. OHADA, SYSCOHADA, Mobile Money, IA SARA.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://ibig-secretis.com/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<title>IBIG SECRETIS — ERP Secrétariat & Bureautique pour l'Afrique</title>
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-/* =============================================
-   CSS RESET & VARIABLES
-   ============================================= */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
-body { font-family: 'Inter', -apple-system, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; overflow-x: hidden; }
-img { max-width: 100%; display: block; }
-a { color: inherit; text-decoration: none; }
-ul { list-style: none; }
-button { cursor: pointer; border: none; background: none; font-family: inherit; }
-input, textarea, select { font-family: inherit; }
-
-/* =============================================
-   DESIGN TOKENS
-   ============================================= */
-:root {
-  --primary: #1A3A5C;
-  --primary-dark: #122840;
-  --primary-light: #234d78;
-  --secondary: #2E86C1;
-  --accent: #F39C12;
-  --accent-dark: #d4890e;
-  --success: #1E8449;
-  --danger: #C0392B;
-  --text: #1C1C1C;
-  --text-muted: #5a6a7a;
-  --text-light: #8fa0b0;
-  --bg: #F5F7FA;
-  --bg-white: #ffffff;
-  --bg-dark: #0e2035;
-  --border: #dde3ea;
-  --border-light: #eef1f5;
-  --shadow-sm: 0 1px 3px rgba(26,58,92,0.08), 0 1px 2px rgba(26,58,92,0.04);
-  --shadow-md: 0 4px 16px rgba(26,58,92,0.10), 0 2px 6px rgba(26,58,92,0.06);
-  --shadow-lg: 0 12px 40px rgba(26,58,92,0.14), 0 4px 12px rgba(26,58,92,0.08);
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
-  --max-w: 1240px;
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary:   '#1A3A5C',
+        secondary: '#2E86C1',
+        accent:    '#F39C12',
+        success:   '#1E8449',
+        danger:    '#C0392B',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      }
+    }
+  }
 }
-
-[data-theme="dark"] {
-  --text: #e8edf2;
-  --text-muted: #8fa0b0;
-  --text-light: #5a6a7a;
-  --bg: #0e1e2e;
-  --bg-white: #142333;
-  --bg-dark: #07111b;
-  --border: #1e3348;
-  --border-light: #192d40;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.4);
-}
-
-/* =============================================
-   TYPOGRAPHY SCALE
-   ============================================= */
-.t-display { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; text-wrap: balance; }
-.t-h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; }
-.t-h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 600; line-height: 1.3; }
-.t-body { font-size: 1rem; font-weight: 400; line-height: 1.7; }
-.t-small { font-size: 0.875rem; line-height: 1.5; }
-.t-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
-
-/* =============================================
-   LAYOUT UTILITIES
-   ============================================= */
-.container { width: 100%; max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
-.section { padding: 80px 0; }
-.section-sm { padding: 48px 0; }
-.section-header { text-align: center; margin-bottom: 56px; }
-.section-eyebrow { color: var(--secondary); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
-.section-title { color: var(--text); margin-bottom: 16px; }
-.section-subtitle { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
-
-/* =============================================
-   BUTTONS
-   ============================================= */
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; transition: var(--transition); white-space: nowrap; }
-.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(26,58,92,0.3); }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,58,92,0.35); }
-.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-.btn-outline:hover { background: var(--primary); color: #fff; }
-.btn-outline-white { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
-.btn-outline-white:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
-.btn-accent { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(243,156,18,0.35); }
-.btn-accent:hover { background: var(--accent-dark); transform: translateY(-1px); }
-.btn-lg { padding: 16px 32px; font-size: 1.05rem; border-radius: var(--radius-md); }
-
-/* =============================================
-   ZONE 1 — TOP BAR
-   ============================================= */
-#topbar {
-  background: var(--primary);
-  color: #fff;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  font-size: 0.8rem;
-  position: relative;
-  z-index: 200;
-}
-#topbar .tb-inner {
-  width: 100%;
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-#topbar .tb-left { display: flex; align-items: center; gap: 6px; font-weight: 500; }
-#topbar .tb-left .gift-icon { color: var(--accent); }
-#topbar .tb-center { display: flex; align-items: center; gap: 20px; opacity: 0.85; }
-#topbar .tb-center a { display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
-#topbar .tb-center a:hover { opacity: 1; }
-#topbar .tb-right { display: flex; gap: 4px; }
-#topbar .lang-btn { padding: 2px 10px; border-radius: 3px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; transition: background 0.2s; color: rgba(255,255,255,0.7); }
-#topbar .lang-btn.active, #topbar .lang-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
-@media (max-width: 767px) {
-  #topbar .tb-center { display: none; }
-  #topbar .tb-left { font-size: 0.72rem; }
-}
-
-/* =============================================
-   ZONE 2 — HEADER STICKY
-   ============================================= */
-#header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: var(--bg-white);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-#header.scrolled { border-color: var(--border); box-shadow: 0 2px 16px rgba(26,58,92,0.09); }
-#header .hd-inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 24px;
-  height: 68px;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-.logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.logo-mark { width: 38px; height: 38px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.02em; flex-shrink: 0; }
-.logo-text { font-weight: 700; font-size: 1.05rem; color: var(--primary); line-height: 1; }
-.logo-text span { display: block; font-size: 0.65rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0.05em; margin-top: 2px; }
-nav { flex: 1; display: flex; align-items: center; gap: 4px; }
-nav a { padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.2s, background 0.2s; white-space: nowrap; }
-nav a:hover { color: var(--primary); background: var(--bg); }
-nav a.partners { color: var(--secondary); font-weight: 600; }
-.hd-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.hamburger { display: none; flex-direction: column; gap: 5px; width: 28px; cursor: pointer; padding: 4px; }
-.hamburger span { display: block; height: 2px; background: var(--primary); border-radius: 2px; transition: var(--transition); }
-@media (max-width: 1024px) { nav a { padding: 8px 10px; font-size: 0.85rem; } }
-@media (max-width: 860px) {
-  nav { display: none; position: fixed; top: 108px; left: 0; right: 0; background: var(--bg-white); flex-direction: column; align-items: flex-start; padding: 16px 24px 24px; border-bottom: 1px solid var(--border); box-shadow: var(--shadow-lg); gap: 2px; }
-  nav.open { display: flex; }
-  nav a { width: 100%; padding: 12px 16px; font-size: 1rem; border-radius: var(--radius-sm); }
-  .hd-actions .btn-outline { display: none; }
-  .hamburger { display: flex; }
-}
-
-/* =============================================
-   ZONE 3 — HERO
-   ============================================= */
-#hero {
-  background: var(--bg-white);
-  padding: 80px 0 0;
-  overflow: hidden;
-}
-.hero-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(243,156,18,0.1); color: var(--accent-dark); border: 1px solid rgba(243,156,18,0.3); padding: 6px 14px; border-radius: 100px; font-size: 0.8rem; font-weight: 600; margin-bottom: 24px; }
-.hero-h1 { margin-bottom: 20px; color: var(--primary); }
-.hero-h1 em { font-style: normal; color: var(--secondary); }
-.hero-sub { color: var(--text-muted); font-size: 1.1rem; line-height: 1.7; margin-bottom: 36px; max-width: 520px; }
-.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
-.hero-trust { display: flex; gap: 20px; flex-wrap: wrap; }
-.hero-trust-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; font-weight: 500; color: var(--text-muted); }
-.hero-trust-item i { color: var(--success); font-size: 0.75rem; }
-
-/* Dashboard mockup */
-.hero-visual { position: relative; padding-bottom: 40px; }
-.dashboard-mockup {
-  background: linear-gradient(145deg, #1A3A5C 0%, #2E86C1 60%, #1e6fa8 100%);
-  border-radius: var(--radius-xl);
-  padding: 20px;
-  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.08);
-  position: relative;
-  overflow: hidden;
-}
-.dashboard-mockup::before {
-  content: '';
-  position: absolute;
-  top: -40%;
-  right: -20%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(243,156,18,0.15) 0%, transparent 70%);
-  pointer-events: none;
-}
-.dm-topbar { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
-.dm-dot { width: 10px; height: 10px; border-radius: 50%; }
-.dm-dot:nth-child(1) { background: #ff5f57; }
-.dm-dot:nth-child(2) { background: #ffbd2e; }
-.dm-dot:nth-child(3) { background: #28ca41; }
-.dm-title { margin-left: 10px; color: rgba(255,255,255,0.6); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.05em; }
-.dm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.dm-card { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; }
-.dm-card-label { color: rgba(255,255,255,0.55); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
-.dm-card-value { color: #fff; font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dm-card-sub { color: rgba(255,255,255,0.5); font-size: 0.65rem; margin-top: 3px; }
-.dm-chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
-.dm-chart { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; }
-.dm-chart-label { color: rgba(255,255,255,0.55); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 10px; }
-.dm-bars { display: flex; align-items: flex-end; gap: 5px; height: 50px; }
-.dm-bar { flex: 1; border-radius: 3px 3px 0 0; background: rgba(255,255,255,0.25); }
-.dm-bar:nth-child(4) { background: var(--accent); }
-.dm-list { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; }
-.dm-list-item { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
-.dm-list-item:last-child { margin-bottom: 0; }
-.dm-avatar { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
-.dm-list-text { color: rgba(255,255,255,0.7); font-size: 0.65rem; }
-.dm-badge-row { display: flex; gap: 8px; margin-top: 10px; }
-.dm-badge { background: rgba(30,132,73,0.3); border: 1px solid rgba(30,132,73,0.5); color: #5dde8a; font-size: 0.6rem; font-weight: 600; padding: 3px 8px; border-radius: 100px; }
-.dm-badge.amber { background: rgba(243,156,18,0.25); border-color: rgba(243,156,18,0.4); color: var(--accent); }
-
-@media (max-width: 860px) {
-  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
-  #hero { padding: 56px 0 0; }
-}
-@media (max-width: 480px) {
-  .hero-ctas { flex-direction: column; }
-  .hero-ctas .btn { justify-content: center; }
-  .dm-grid { grid-template-columns: 1fr 1fr; }
-}
-
-/* =============================================
-   ZONE 4 — TRUST BAND
-   ============================================= */
-#trust-band {
-  background: var(--bg-white);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 0;
-}
-.trust-inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-}
-.trust-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 24px 20px;
-  border-right: 1px solid var(--border);
-}
-.trust-item:last-child { border-right: none; }
-.trust-icon { font-size: 1.5rem; flex-shrink: 0; }
-.trust-item-label { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-.trust-item-sub { font-size: 0.72rem; color: var(--text-muted); }
-@media (max-width: 760px) {
-  .trust-inner { grid-template-columns: 1fr 1fr; }
-  .trust-item:nth-child(2) { border-right: none; }
-  .trust-item { border-bottom: 1px solid var(--border); }
-  .trust-item:nth-child(3), .trust-item:nth-child(4) { border-bottom: none; }
-}
-@media (max-width: 480px) {
-  .trust-inner { grid-template-columns: 1fr; }
-  .trust-item { border-right: none; border-bottom: 1px solid var(--border); }
-  .trust-item:last-child { border-bottom: none; }
-}
-
-/* =============================================
-   ZONE 5 — PROBLÈMES RÉSOLUS
-   ============================================= */
-#problems { background: var(--bg); }
-.problems-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.problems-col { border-radius: var(--radius-lg); padding: 32px; }
-.problems-col.before { background: rgba(192,57,43,0.06); border: 1px solid rgba(192,57,43,0.15); }
-.problems-col.after { background: rgba(30,132,73,0.06); border: 1px solid rgba(30,132,73,0.15); }
-.problems-col-header { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
-.problems-col-title { font-size: 1rem; font-weight: 700; }
-.problems-col.before .problems-col-title { color: var(--danger); }
-.problems-col.after .problems-col-title { color: var(--success); }
-.prob-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; font-size: 0.9rem; color: var(--text); }
-.prob-icon { flex-shrink: 0; margin-top: 2px; font-size: 0.85rem; }
-.problems-col.before .prob-icon { color: var(--danger); }
-.problems-col.after .prob-icon { color: var(--success); }
-@media (max-width: 640px) { .problems-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 6 — 12 BÉNÉFICES
-   ============================================= */
-#benefits { background: var(--bg-white); }
-.benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.benefit-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 20px; transition: var(--transition); }
-.benefit-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(46,134,193,0.3); }
-.benefit-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 14px; }
-.benefit-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.benefit-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.55; }
-@media (max-width: 1024px) { .benefits-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 640px) { .benefits-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 380px) { .benefits-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 7 — 10 MODULES
-   ============================================= */
-#modules { background: var(--bg); }
-.modules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.module-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; display: flex; gap: 18px; transition: var(--transition); }
-.module-card:hover { box-shadow: var(--shadow-md); border-color: rgba(46,134,193,0.3); }
-.module-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-.module-content { flex: 1; }
-.module-name { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-.module-features { display: flex; flex-direction: column; gap: 5px; }
-.module-feature { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-.module-feature::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--secondary); flex-shrink: 0; }
-@media (max-width: 640px) { .modules-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 8 — COMMENT ÇA MARCHE
-   ============================================= */
-#how-it-works { background: var(--bg-white); }
-.steps-row { display: flex; align-items: flex-start; gap: 0; position: relative; }
-.steps-row::before { content: ''; position: absolute; top: 28px; left: calc(10% + 28px); right: calc(10% + 28px); height: 2px; background: linear-gradient(90deg, var(--secondary), var(--accent)); z-index: 0; }
-.step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 12px; position: relative; z-index: 1; }
-.step-num { width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; border: 3px solid var(--bg-white); box-shadow: 0 0 0 3px var(--primary); flex-shrink: 0; }
-.step-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.step-desc { font-size: 0.75rem; color: var(--text-muted); }
-@media (max-width: 640px) {
-  .steps-row { flex-direction: column; gap: 24px; align-items: flex-start; }
-  .steps-row::before { display: none; }
-  .step { flex-direction: row; text-align: left; gap: 16px; align-items: flex-start; padding: 0; }
-  .step-num { margin-bottom: 0; flex-shrink: 0; }
-}
-
-/* =============================================
-   ZONE 9 — SARA IA
-   ============================================= */
-#sara {
-  background: linear-gradient(135deg, var(--primary) 0%, #1e5a8a 50%, var(--secondary) 100%);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-#sara::before {
-  content: '';
-  position: absolute;
-  top: -30%;
-  left: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(243,156,18,0.1) 0%, transparent 60%);
-  pointer-events: none;
-}
-.sara-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-.sara-eyebrow { color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-.sara-title { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.2; text-wrap: balance; }
-.sara-desc { color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.7; margin-bottom: 28px; }
-.sara-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-.sara-feature { display: flex; align-items: flex-start; gap: 10px; color: rgba(255,255,255,0.85); font-size: 0.9rem; }
-.sara-feature i { color: var(--accent); margin-top: 3px; flex-shrink: 0; font-size: 0.8rem; }
-
-/* Chat mockup */
-.chat-mockup { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-xl); padding: 20px; backdrop-filter: blur(10px); }
-.chat-header { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-.chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, #e67e22 100%); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #fff; flex-shrink: 0; }
-.chat-name { font-size: 0.85rem; font-weight: 700; color: #fff; }
-.chat-status { font-size: 0.7rem; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 4px; }
-.chat-status::before { content: ''; width: 6px; height: 6px; background: #28ca41; border-radius: 50%; display: inline-block; }
-.chat-messages { display: flex; flex-direction: column; gap: 14px; }
-.chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 0.82rem; line-height: 1.5; }
-.chat-bubble.user { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); align-self: flex-end; border-bottom-right-radius: 4px; }
-.chat-bubble.sara { background: rgba(243,156,18,0.15); border: 1px solid rgba(243,156,18,0.25); color: rgba(255,255,255,0.9); align-self: flex-start; border-bottom-left-radius: 4px; }
-.chat-bubble.sara strong { color: var(--accent); }
-.chat-time { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px; text-align: right; }
-.chat-input-row { margin-top: 16px; display: flex; gap: 8px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
-.chat-input-fake { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 8px 16px; font-size: 0.78rem; color: rgba(255,255,255,0.4); }
-.chat-send { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.7rem; flex-shrink: 0; }
-
-@media (max-width: 860px) { .sara-inner { grid-template-columns: 1fr; gap: 40px; } }
-
-/* =============================================
-   ZONE 10 — PWA
-   ============================================= */
-#pwa { background: var(--bg); }
-.pwa-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
-.pwa-devices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.pwa-device { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px; background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); transition: var(--transition); }
-.pwa-device:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-.pwa-device i { font-size: 2rem; }
-.pwa-device-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
-.pwa-device-badge { font-size: 0.65rem; font-weight: 600; color: var(--success); background: rgba(30,132,73,0.1); padding: 2px 7px; border-radius: 100px; }
-.pwa-steps { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
-.pwa-step { display: flex; align-items: center; gap: 14px; font-size: 0.88rem; color: var(--text-muted); }
-.pwa-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--secondary); color: #fff; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-@media (max-width: 860px) { .pwa-inner { grid-template-columns: 1fr; } }
-@media (max-width: 480px) { .pwa-devices { grid-template-columns: repeat(2, 1fr); } }
-
-/* =============================================
-   ZONE 11 — SÉCURITÉ
-   ============================================= */
-#security { background: var(--bg-white); }
-.security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.security-badge { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 28px 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; transition: var(--transition); }
-.security-badge:hover { border-color: rgba(46,134,193,0.3); box-shadow: var(--shadow-sm); }
-.security-badge-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(26,58,92,0.08); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary); }
-.security-badge-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
-.security-badge-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
-@media (max-width: 640px) { .security-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 400px) { .security-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 12 — TARIFS
-   ============================================= */
-#pricing { background: var(--bg); }
-.pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 48px; }
-.toggle-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-.toggle-label.active { color: var(--primary); }
-.toggle-switch { width: 44px; height: 24px; background: var(--border); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
-.toggle-switch.on { background: var(--secondary); }
-.toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-.toggle-switch.on::after { transform: translateX(20px); }
-.toggle-save { background: rgba(30,132,73,0.1); color: var(--success); font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 100px; }
-.pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.pricing-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px; display: flex; flex-direction: column; position: relative; transition: var(--transition); }
-.pricing-card:hover { box-shadow: var(--shadow-md); }
-.pricing-card.recommended { border: 2px solid var(--accent); box-shadow: 0 0 0 4px rgba(243,156,18,0.08); }
-.pricing-recommended-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.04em; }
-.pricing-plan { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-.pricing-price { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; font-variant-numeric: tabular-nums; }
-.pricing-price sub { font-size: 0.9rem; font-weight: 500; }
-.pricing-period { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; }
-.pricing-cta { margin-bottom: 24px; text-align: center; }
-.pricing-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
-.pricing-features { display: flex; flex-direction: column; gap: 10px; flex: 1; }
-.pricing-feature { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: var(--text-muted); }
-.pricing-feature i { color: var(--success); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
-@media (max-width: 900px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 540px) { .pricing-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 13 — FORMULAIRE DÉMO
-   ============================================= */
-#demo-form {
-  background: var(--primary);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-#demo-form::after {
-  content: '';
-  position: absolute;
-  bottom: -20%;
-  right: -5%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(46,134,193,0.2) 0%, transparent 60%);
-  pointer-events: none;
-}
-.demo-inner { display: grid; grid-template-columns: 1fr 1.5fr; gap: 64px; align-items: start; position: relative; z-index: 1; }
-.demo-left h2 { color: #fff; font-size: clamp(1.5rem, 2.5vw, 2.2rem); margin-bottom: 16px; text-wrap: balance; }
-.demo-left p { color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.7; margin-bottom: 28px; }
-.demo-perks { display: flex; flex-direction: column; gap: 10px; }
-.demo-perk { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.8); }
-.demo-perk i { color: var(--accent); width: 16px; flex-shrink: 0; }
-.demo-form-box { background: var(--bg-white); border-radius: var(--radius-xl); padding: 36px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.form-group:last-of-type { margin-bottom: 0; }
-.form-label { font-size: 0.78rem; font-weight: 600; color: var(--text); }
-.form-control { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 0.9rem; color: var(--text); background: var(--bg); transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
-.form-control:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(46,134,193,0.15); }
-.form-control::placeholder { color: var(--text-light); }
-.form-submit { width: 100%; margin-top: 20px; padding: 14px; font-size: 1rem; font-weight: 700; border-radius: var(--radius-sm); }
-@media (max-width: 860px) { .demo-inner { grid-template-columns: 1fr; gap: 36px; } }
-@media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } .demo-form-box { padding: 24px; } }
-
-/* =============================================
-   ZONE 14 — FAQ
-   ============================================= */
-#faq { background: var(--bg-white); }
-.faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 2px; }
-.faq-item { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-.faq-item + .faq-item { margin-top: 6px; }
-.faq-question { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; font-size: 0.92rem; font-weight: 600; color: var(--text); background: var(--bg-white); cursor: pointer; text-align: left; transition: background 0.2s; }
-.faq-question:hover { background: var(--bg); }
-.faq-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; color: var(--text-muted); transition: transform 0.25s, background 0.2s; }
-.faq-item.open .faq-icon { transform: rotate(45deg); background: var(--primary); color: #fff; border-color: var(--primary); }
-.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; }
-.faq-answer-inner { padding: 0 20px 18px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 14px; }
-.faq-item.open .faq-answer { max-height: 300px; }
-
-/* =============================================
-   ZONE 15 — FOOTER
-   ============================================= */
-#footer {
-  background: var(--primary-dark, #0e2035);
-  color: rgba(255,255,255,0.75);
-  padding: 64px 0 0;
-}
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
-.footer-brand .logo-mark { background: rgba(255,255,255,0.1); margin-bottom: 16px; }
-.footer-brand .logo-text { color: #fff; }
-.footer-brand .logo-text span { color: rgba(255,255,255,0.4); }
-.footer-brand p { font-size: 0.85rem; line-height: 1.7; color: rgba(255,255,255,0.55); margin-bottom: 20px; }
-.footer-socials { display: flex; gap: 10px; }
-.social-link { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.85rem; transition: var(--transition); }
-.social-link:hover { background: rgba(255,255,255,0.15); color: #fff; }
-.footer-col-title { color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 18px; }
-.footer-links { display: flex; flex-direction: column; gap: 10px; }
-.footer-links a { font-size: 0.83rem; color: rgba(255,255,255,0.55); transition: color 0.2s; }
-.footer-links a:hover { color: #fff; }
-.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding: 20px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.footer-copyright { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
-.footer-legal { display: flex; gap: 20px; }
-.footer-legal a { font-size: 0.78rem; color: rgba(255,255,255,0.4); transition: color 0.2s; }
-.footer-legal a:hover { color: rgba(255,255,255,0.8); }
-@media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; } .footer-brand { grid-column: 1 / -1; } }
-@media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
-
-/* =============================================
-   ZONE 16 — FLOATING BUTTONS
-   ============================================= */
-.float-btn {
-  position: fixed;
-  bottom: 28px;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  z-index: 999;
-  transition: var(--transition);
-  cursor: pointer;
-  border: none;
-}
-.float-btn:hover { transform: scale(1.1); }
-.float-sara { right: 28px; background: var(--primary); color: #fff; }
-.float-sara .float-tooltip { position: absolute; right: 60px; white-space: nowrap; background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.float-sara:hover .float-tooltip { opacity: 1; }
-.float-whatsapp { left: 28px; background: #25D366; color: #fff; }
-.float-badge { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; background: var(--accent); border-radius: 50%; font-size: 0.6rem; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; }
-
-/* =============================================
-   ANIMATIONS
-   ============================================= */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-.fade-up { animation: fadeUp 0.6s ease both; }
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-/* Focus styles */
-:focus-visible { outline: 2px solid var(--secondary); outline-offset: 3px; }
-</style>
+</script>
+<link rel="stylesheet" href="assets/css/landing.css">
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script defer src="assets/js/landing.js"></script>
 </head>
-<body>
+<body class="font-sans">
 
-<!-- ============================================
-     ZONE 1 — BARRE SUPÉRIEURE
-     ============================================ -->
-<div id="topbar">
-  <div class="tb-inner">
-    <div class="tb-left">
-      <span class="gift-icon">🎁</span>
-      <span>Essai gratuit 14 jours &mdash; Sans carte bancaire</span>
-    </div>
-    <div class="tb-center">
-      <a href="tel:+22500000000"><i class="fa fa-phone"></i> +225 00 00 00 00</a>
-      <a href="mailto:contact@ibig-secretis.com"><i class="fa fa-envelope"></i> contact@ibig-secretis.com</a>
-    </div>
-    <div class="tb-right">
-      <button class="lang-btn active">FR</button>
-      <button class="lang-btn">EN</button>
+<!-- =========================================================
+     S1 — NAVBAR
+     ========================================================= -->
+<header x-data="{ open: false, scrolled: false }"
+  @scroll.window="scrolled = window.scrollY > 50"
+  :class="scrolled ? 'bg-white shadow-lg' : 'bg-white/95'"
+  class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-[var(--c-border)]"
+  id="header">
+  <div class="container">
+    <div class="flex items-center justify-between h-16 gap-4">
+      <!-- Logo -->
+      <a href="#" class="flex-shrink-0 flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+          <span class="text-white font-extrabold text-sm tracking-tight">IS</span>
+        </div>
+        <div>
+          <div class="text-primary font-bold text-base leading-tight" style="font-family:Georgia,serif;">
+            IBIG <span style="color:var(--c-gold);">SECRETIS</span>
+          </div>
+          <div class="text-[0.6rem] text-[var(--c-text-muted)] font-medium tracking-wide leading-tight">ERP Bureautique &amp; Secrétariat</div>
+        </div>
+      </a>
+      <!-- Desktop nav -->
+      <nav class="hidden lg:flex items-center gap-1 flex-1 justify-center" id="nav-main">
+        <a href="#features"      class="feature-tab-btn">Fonctionnalités</a>
+        <a href="#pricing"       class="feature-tab-btn">Tarifs</a>
+        <a href="#academy"       class="feature-tab-btn">Académie</a>
+        <a href="#ibig-partners" class="feature-tab-btn" style="color:var(--c-secondary);font-weight:600;">IBIG PARTNERS</a>
+        <a href="#security"      class="feature-tab-btn">Sécurité</a>
+      </nav>
+      <!-- Actions -->
+      <div class="hidden lg:flex items-center gap-2 flex-shrink-0">
+        <div class="lang-toggle">
+          <button class="lang-btn active" data-lang="fr">FR</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="ar">AR</button>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm">Se connecter</a>
+        <a href="#demo" class="btn btn-primary btn-sm" data-track="nav_trial">Essai gratuit 30j</a>
+      </div>
+      <!-- Hamburger -->
+      <button @click="open=!open" class="lg:hidden flex flex-col gap-1.5 w-8 h-8 justify-center items-center" aria-label="Menu" id="hamburger">
+        <span class="block w-5 h-0.5 bg-primary rounded transition-all" :class="open?'rotate-45 translate-y-2':''"></span>
+        <span class="block w-5 h-0.5 bg-primary rounded transition-all" :class="open?'opacity-0':''"></span>
+        <span class="block w-5 h-0.5 bg-primary rounded transition-all" :class="open?'-rotate-45 -translate-y-2':''"></span>
+      </button>
     </div>
   </div>
-</div>
-
-<!-- ============================================
-     ZONE 2 — HEADER STICKY
-     ============================================ -->
-<header id="header">
-  <div class="hd-inner">
-    <a href="#" class="logo">
-      <div class="logo-mark">IS</div>
-      <div class="logo-text">IBIG SECRETIS<span>ERP Bureautique</span></div>
-    </a>
-    <nav id="nav">
-      <a href="#benefits">Fonctionnalités</a>
-      <a href="#modules">Modules</a>
-      <a href="#pricing">Tarifs</a>
-      <a href="#faq">Support</a>
-      <a href="#" class="partners">IBIG PARTNERS</a>
+  <!-- Mobile drawer -->
+  <div x-show="open" x-transition class="lg:hidden bg-white border-t border-[var(--c-border)] px-6 pb-6 pt-4 shadow-xl" id="mobile-drawer">
+    <nav class="flex flex-col gap-1 mb-5">
+      <a @click="open=false" href="#features"      class="py-3 px-3 text-sm font-medium text-[var(--c-text)] border-b border-[var(--c-border)]">Fonctionnalités</a>
+      <a @click="open=false" href="#pricing"        class="py-3 px-3 text-sm font-medium text-[var(--c-text)] border-b border-[var(--c-border)]">Tarifs</a>
+      <a @click="open=false" href="#academy"        class="py-3 px-3 text-sm font-medium text-[var(--c-text)] border-b border-[var(--c-border)]">Académie</a>
+      <a @click="open=false" href="#ibig-partners"  class="py-3 px-3 text-sm font-semibold border-b border-[var(--c-border)]" style="color:var(--c-secondary);">IBIG PARTNERS</a>
+      <a @click="open=false" href="#security"       class="py-3 px-3 text-sm font-medium text-[var(--c-text)]">Sécurité</a>
     </nav>
-    <div class="hd-actions">
-      <a href="#" class="btn btn-outline" style="padding:9px 18px;font-size:0.88rem;">Se connecter</a>
-      <a href="#demo-form" class="btn btn-primary" style="padding:9px 18px;font-size:0.88rem;">Essai gratuit <i class="fa fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    <div class="flex gap-2">
+      <a href="#" class="btn btn-ghost btn-sm flex-1 justify-center">Se connecter</a>
+      <a href="#demo" @click="open=false" class="btn btn-primary btn-sm flex-1 justify-center">Essai gratuit 30j</a>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
   </div>
 </header>
 
-<!-- ============================================
-     ZONE 3 — HERO
-     ============================================ -->
-<section id="hero">
-  <div class="hero-inner">
-    <div class="hero-content fade-up">
-      <div class="hero-badge">⭐ Trusted by 500+ organisations en Afrique</div>
-      <h1 class="t-display hero-h1">Gérez votre secrétariat comme les <em>entreprises de classe mondiale</em></h1>
-      <p class="hero-sub">IBIG SECRETIS centralise courrier, agenda, réunions, tâches et ressources humaines dans une plateforme sécurisée, pensée pour les organisations africaines.</p>
-      <div class="hero-ctas">
-        <a href="#demo-form" class="btn btn-primary btn-lg">
-          <i class="fa fa-rocket"></i> Démarrer l'essai gratuit — 14 jours
-        </a>
-        <a href="#how-it-works" class="btn btn-outline btn-lg">
-          <i class="fa fa-play-circle"></i> Voir la démonstration
-        </a>
-      </div>
-      <div class="hero-trust">
-        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Aucune carte requise</div>
-        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Installation en 5 min</div>
-        <div class="hero-trust-item"><i class="fa fa-check-circle"></i> Support francophone</div>
-      </div>
-    </div>
-    <div class="hero-visual fade-up delay-2">
-      <div class="dashboard-mockup">
-        <div class="dm-topbar">
-          <div class="dm-dot"></div><div class="dm-dot"></div><div class="dm-dot"></div>
-          <span class="dm-title">IBIG SECRETIS — Tableau de bord</span>
+
+<!-- =========================================================
+     S2 — HERO
+     ========================================================= -->
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden"
+  style="background:linear-gradient(135deg,#1A3A5C 0%,#1e5080 40%,#2E86C1 100%);padding-top:4rem;">
+  <!-- Grid overlay -->
+  <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image:repeating-linear-gradient(0deg,#F39C12 0,#F39C12 1px,transparent 0,transparent 48px),repeating-linear-gradient(90deg,#F39C12 0,#F39C12 1px,transparent 0,transparent 48px);background-size:48px 48px;"></div>
+  <!-- Radial glow -->
+  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 75% 40%,rgba(46,134,193,0.3) 0%,transparent 65%);"></div>
+  <div class="container relative z-10 py-24 lg:py-32">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Copy -->
+      <div class="animate-fadeinup">
+        <div class="inline-flex items-center gap-2 border border-white/20 text-white/90 text-xs font-semibold px-4 py-2 rounded-full mb-6" style="background:rgba(255,255,255,0.1);">
+          <span class="w-2 h-2 rounded-full" style="background:var(--c-gold);animation:pulse 2s infinite;"></span>
+          Conçu pour l'Afrique &middot; Conforme OHADA
         </div>
-        <div class="dm-grid">
-          <div class="dm-card">
-            <div class="dm-card-label">Courriers</div>
-            <div class="dm-card-value">248</div>
-            <div class="dm-card-sub">+12 aujourd'hui</div>
-          </div>
-          <div class="dm-card">
-            <div class="dm-card-label">Réunions</div>
-            <div class="dm-card-value">14</div>
-            <div class="dm-card-sub">Cette semaine</div>
-          </div>
-          <div class="dm-card">
-            <div class="dm-card-label">Tâches</div>
-            <div class="dm-card-value">93%</div>
-            <div class="dm-card-sub">Taux résolution</div>
-          </div>
+        <h1 class="text-white font-extrabold leading-tight mb-5" style="font-size:clamp(2rem,5vw,3.25rem);text-wrap:balance;">
+          Gérez votre secrétariat et vos opérations administratives
+          <span style="color:var(--c-gold);"> avec intelligence</span>
+        </h1>
+        <p style="color:rgba(255,255,255,0.8);font-size:1.1rem;line-height:1.7;margin-bottom:2rem;max-width:46ch;">
+          IBIG SECRETIS centralise courrier, agenda, réunions, RH et comptabilité SYSCOHADA dans une seule plateforme sécurisée &mdash; accessible en Mobile Money.
+        </p>
+        <div class="flex flex-wrap gap-3 mb-8">
+          <a href="#demo" class="btn btn-lg" style="background:var(--c-gold);color:#fff;border:2px solid var(--c-gold);" data-track="hero_trial">
+            Démarrer l'essai gratuit &mdash; 30 jours
+          </a>
+          <a href="#features" class="btn btn-outline-white btn-lg" data-track="hero_demo">Voir une démonstration</a>
         </div>
-        <div class="dm-chart-row">
-          <div class="dm-chart">
-            <div class="dm-chart-label">Activité mensuelle</div>
-            <div class="dm-bars">
-              <div class="dm-bar" style="height:40%"></div>
-              <div class="dm-bar" style="height:60%"></div>
-              <div class="dm-bar" style="height:45%"></div>
-              <div class="dm-bar" style="height:80%"></div>
-              <div class="dm-bar" style="height:65%"></div>
-              <div class="dm-bar" style="height:90%"></div>
-              <div class="dm-bar" style="height:72%"></div>
+        <div class="flex flex-wrap gap-5">
+          <span style="color:rgba(255,255,255,.75);font-size:.875rem;display:flex;align-items:center;gap:.4rem;"><span style="color:#1E8449;font-weight:bold;">&#10003;</span> Sans carte bancaire</span>
+          <span style="color:rgba(255,255,255,.75);font-size:.875rem;display:flex;align-items:center;gap:.4rem;"><span style="color:#1E8449;font-weight:bold;">&#10003;</span> Installation gratuite</span>
+          <span style="color:rgba(255,255,255,.75);font-size:.875rem;display:flex;align-items:center;gap:.4rem;"><span style="color:#1E8449;font-weight:bold;">&#10003;</span> Support en français</span>
+        </div>
+        <!-- Mini stats -->
+        <div class="grid grid-cols-3 gap-6 mt-10 pt-8" style="border-top:1px solid rgba(255,255,255,0.15);">
+          <div><div style="font-size:1.5rem;font-weight:800;color:#fff;font-family:Georgia,serif;">2 500<span style="color:var(--c-gold);">+</span></div><div style="color:rgba(255,255,255,.6);font-size:.75rem;margin-top:.25rem;">Entreprises</div></div>
+          <div><div style="font-size:1.5rem;font-weight:800;color:#fff;font-family:Georgia,serif;">18</div><div style="color:rgba(255,255,255,.6);font-size:.75rem;margin-top:.25rem;">Pays OHADA</div></div>
+          <div><div style="font-size:1.5rem;font-weight:800;color:#fff;font-family:Georgia,serif;">4</div><div style="color:rgba(255,255,255,.6);font-size:.75rem;margin-top:.25rem;">Langues</div></div>
+        </div>
+      </div>
+      <!-- Dashboard mockup -->
+      <div class="animate-float hidden lg:block">
+        <div class="dashboard-mockup">
+          <div class="dm-topbar">
+            <div class="dm-dot"></div><div class="dm-dot"></div><div class="dm-dot"></div>
+            <span class="dm-title">IBIG SECRETIS &mdash; Tableau de bord</span>
+          </div>
+          <div class="dm-grid">
+            <div class="dm-card"><div class="dm-card-label">Courriers</div><div class="dm-card-value">248</div><div class="dm-card-sub">+12 aujourd'hui</div></div>
+            <div class="dm-card"><div class="dm-card-label">Réunions</div><div class="dm-card-value">14</div><div class="dm-card-sub">Cette semaine</div></div>
+            <div class="dm-card"><div class="dm-card-label">Tâches</div><div class="dm-card-value">93%</div><div class="dm-card-sub">Taux résolution</div></div>
+          </div>
+          <div class="dm-chart-row">
+            <div class="dm-chart">
+              <div class="dm-chart-label">Activité mensuelle</div>
+              <div class="dm-bars">
+                <div class="dm-bar" style="height:40%"></div>
+                <div class="dm-bar" style="height:60%"></div>
+                <div class="dm-bar" style="height:45%"></div>
+                <div class="dm-bar" style="height:80%"></div>
+                <div class="dm-bar" style="height:65%"></div>
+                <div class="dm-bar" style="height:90%"></div>
+                <div class="dm-bar" style="height:72%"></div>
+              </div>
+            </div>
+            <div class="dm-list">
+              <div class="dm-chart-label">Équipe active</div>
+              <div class="dm-list-item"><div class="dm-avatar"></div><div class="dm-list-text">Koné A. &middot; En ligne</div></div>
+              <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(243,156,18,.3)"></div><div class="dm-list-text">Diallo F. &middot; Réunion</div></div>
+              <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(30,132,73,.3)"></div><div class="dm-list-text">Yao M. &middot; En ligne</div></div>
             </div>
           </div>
-          <div class="dm-list">
-            <div class="dm-chart-label">Équipe active</div>
-            <div class="dm-list-item"><div class="dm-avatar"></div><div class="dm-list-text">Koné A. · En ligne</div></div>
-            <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(243,156,18,0.3)"></div><div class="dm-list-text">Diallo F. · Réunion</div></div>
-            <div class="dm-list-item"><div class="dm-avatar" style="background:rgba(30,132,73,0.3)"></div><div class="dm-list-text">Yao M. · En ligne</div></div>
+          <div class="dm-badge-row">
+            <div class="dm-badge">&#10003; Synchronisé</div>
+            <div class="dm-badge amber">3 alertes SARA</div>
           </div>
         </div>
-        <div class="dm-badge-row">
-          <div class="dm-badge">✓ Synchronisé</div>
-          <div class="dm-badge amber">3 alertes SARA</div>
-        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 4 — BANDE DE CONFIANCE
-     ============================================ -->
-<section id="trust-band">
-  <div class="trust-inner">
-    <div class="trust-item">
-      <div class="trust-icon">🔒</div>
-      <div>
-        <div class="trust-item-label">Données chiffrées SSL</div>
-        <div class="trust-item-sub">Chiffrement bout-en-bout</div>
-      </div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-icon">🌍</div>
-      <div>
-        <div class="trust-item-label">Conçu pour l'Afrique OHADA</div>
-        <div class="trust-item-sub">Conformité juridique locale</div>
-      </div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-icon">⚡</div>
-      <div>
-        <div class="trust-item-label">Support 24/7</div>
-        <div class="trust-item-sub">Équipe francophone dédiée</div>
-      </div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-icon">💳</div>
-      <div>
-        <div class="trust-item-label">10 modes de paiement</div>
-        <div class="trust-item-sub">Mobile Money, virement, carte</div>
-      </div>
+
+<!-- =========================================================
+     S3 — TRUST SCROLL BANNER
+     ========================================================= -->
+<section class="bg-white border-y border-[var(--c-border)] py-5 overflow-hidden">
+  <div style="text-align:center;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--c-text-muted);margin-bottom:1rem;">Intégré avec vos outils préférés</div>
+  <div class="trust-scroll-wrap">
+    <div class="trust-scroll-track scroll-banner">
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127802; Orange Money</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127881; MTN MoMo</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128153; Wave</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128307; CinetPay</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128994; Paystack</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128156; Stripe</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127758; OIF</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128994; Flutterwave</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128172; WhatsApp Business</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128197; Google Calendar</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#9729;&#65039; Google Drive</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128202; Power BI</span>
+      <!-- duplicate for seamless loop -->
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127802; Orange Money</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127881; MTN MoMo</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128153; Wave</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128307; CinetPay</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128994; Paystack</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128156; Stripe</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#127758; OIF</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128994; Flutterwave</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128172; WhatsApp Business</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128197; Google Calendar</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#9729;&#65039; Google Drive</span>
+      <span style="font-weight:600;color:var(--c-text-muted);font-size:.875rem;padding:0 1.5rem;">&#128202; Power BI</span>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 5 — PROBLÈMES RÉSOLUS
-     ============================================ -->
-<section id="problems" class="section">
+
+<!-- =========================================================
+     S4 — PROBLÈMES RÉSOLUS
+     ========================================================= -->
+<section id="problems" class="section" style="background:var(--c-bg);">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Transformation</div>
-      <h2 class="t-h2 section-title">Fini le chaos administratif</h2>
-      <p class="section-subtitle">SECRETIS transforme chaque douleur quotidienne en processus fluide et traçable.</p>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Transformation</span>
+      <h2 class="section-title">Vous en avez assez de&hellip;</h2>
+      <p class="section-lead">Ces douleurs du quotidien administratif, SECRETIS les résout une par une.</p>
     </div>
-    <div class="problems-grid">
-      <div class="problems-col before">
-        <div class="problems-col-header">
-          <span style="font-size:1.4rem;">❌</span>
-          <div class="problems-col-title">Avant SECRETIS</div>
-        </div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Courriers perdus dans des piles de papier sans traçabilité</span></div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Réunions mal organisées, comptes-rendus inexistants ou introuvables</span></div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Agenda partagé par messages WhatsApp et conflits de planning</span></div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Tâches assignées verbalement, oubliées sans suivi ni relance</span></div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Rapport mensuel préparé en urgence sur tableur non sécurisé</span></div>
-        <div class="prob-item"><i class="fa fa-times prob-icon"></i><span>Visiteurs accueillis sans registre, responsables introuvables</span></div>
+    <div class="grid-3 reveal">
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#128196;</div>
+        <h4>Courriers perdus dans les piles</h4>
+        <p style="max-width:none;">Des courriers critiques introuvables, sans traçabilité ni workflow de validation.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; GED + signature + archivage automatique</div>
       </div>
-      <div class="problems-col after">
-        <div class="problems-col-header">
-          <span style="font-size:1.4rem;">✅</span>
-          <div class="problems-col-title">Avec SECRETIS</div>
-        </div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Chaque courrier enregistré, horodaté, acheminé et signé électroniquement</span></div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Réunions planifiées, convocations envoyées, PV générés automatiquement</span></div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Agenda unifié pour toute l'équipe, visible sur tous les appareils</span></div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Tâches assignées, suivies, relancées et clôturées avec historique complet</span></div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Rapports générés en un clic depuis un tableau de bord en temps réel</span></div>
-        <div class="prob-item"><i class="fa fa-check prob-icon"></i><span>Accueil visiteurs digitalisé, badge imprimé, notification automatique</span></div>
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#128197;</div>
+        <h4>Réunions et rendez-vous oubliés</h4>
+        <p style="max-width:none;">Conflits de planning, convocations tardives, comptes-rendus jamais rédigés.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; Agenda unifié + PV automatiques via SARA</div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#128202;</div>
+        <h4>Saisie comptable SYSCOHADA laborieuse</h4>
+        <p style="max-width:none;">Des heures sur des tableurs non conformes au plan comptable 2017.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; Module SYSCOHADA natif, bilans en 1 clic</div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#128663;</div>
+        <h4>Flotte de véhicules impossible à piloter</h4>
+        <p style="max-width:none;">Aucune visibilité sur la position, le carburant ou les entretiens à venir.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; GPS temps réel + alertes entretien</div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#128101;</div>
+        <h4>Absences RH gérées sous Excel</h4>
+        <p style="max-width:none;">Fichiers partagés, versions incohérentes, validation manuelle fastidieuse.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; Module RH avec workflow de validation</div>
+      </div>
+      <div class="card" style="border-left:4px solid var(--c-danger);">
+        <div style="font-size:1.4rem;margin-bottom:.5rem;">&#127970;</div>
+        <h4>Accueil visiteurs sans processus formel</h4>
+        <p style="max-width:none;">Registre papier, badges manuscrits, responsables introuvables à l'arrivée.</p>
+        <div style="margin-top:.6rem;font-size:.75rem;font-weight:600;color:var(--c-success);">&#10003; Badge digital, QR code, notification auto</div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ============================================
-     ZONE 6 — 12 BÉNÉFICES
-     ============================================ -->
-<section id="benefits" class="section">
-  <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Bénéfices</div>
-      <h2 class="t-h2 section-title">Tout ce dont votre organisation a besoin</h2>
-      <p class="section-subtitle">Des avantages concrets, mesurables, dès le premier jour d'utilisation.</p>
-    </div>
-    <div class="benefits-grid">
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-clock"></i></div>
-        <div class="benefit-title">Gain de temps</div>
-        <div class="benefit-desc">Automatisez les tâches répétitives. Récupérez jusqu'à 3h par jour par collaborateur.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-leaf"></i></div>
-        <div class="benefit-title">Zéro papier</div>
-        <div class="benefit-desc">Dématérialisez tous vos flux : courrier, signatures, archivage — 100% numérique.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-route"></i></div>
-        <div class="benefit-title">Traçabilité totale</div>
-        <div class="benefit-desc">Journal d'audit complet. Chaque action est datée, attribuée et conservée.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-users"></i></div>
-        <div class="benefit-title">Collaboration temps réel</div>
-        <div class="benefit-desc">Travaillez ensemble depuis n'importe quel lieu. Modifications synchronisées à la seconde.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-mobile-alt"></i></div>
-        <div class="benefit-title">Mobilité totale</div>
-        <div class="benefit-desc">PWA installable sur Android, iOS, Windows et Mac. Hors connexion disponible.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-robot"></i></div>
-        <div class="benefit-title">IA intégrée (SARA)</div>
-        <div class="benefit-desc">Votre assistante IA analyse, rédige et alerte. Disponible 24h/24 dans l'interface.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-chart-bar"></i></div>
-        <div class="benefit-title">Rapports automatiques</div>
-        <div class="benefit-desc">Tableaux de bord et rapports PDF générés automatiquement selon vos périodes.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(192,57,43,0.1);color:#C0392B;"><i class="fa fa-shield-alt"></i></div>
-        <div class="benefit-title">Sécurité bancaire</div>
-        <div class="benefit-desc">Chiffrement AES-256, authentification MFA, isolation des données par tenant.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-coins"></i></div>
-        <div class="benefit-title">Multi-devises FCFA</div>
-        <div class="benefit-desc">Gérez FCFA, USD, EUR dans une interface adaptée à l'espace UEMOA et CEMAC.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-building"></i></div>
-        <div class="benefit-title">Multi-sites</div>
-        <div class="benefit-desc">Pilotez plusieurs antennes ou filiales depuis une console centrale unifiée.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-graduation-cap"></i></div>
-        <div class="benefit-title">Formation incluse</div>
-        <div class="benefit-desc">Onboarding guidé, tutoriels vidéo, webinaires mensuels et base de connaissance.</div>
-      </div>
-      <div class="benefit-card">
-        <div class="benefit-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-headset"></i></div>
-        <div class="benefit-title">Support local</div>
-        <div class="benefit-desc">Équipe basée en Afrique, fuseau horaire commun, langue française. Chat et téléphone.</div>
-      </div>
+    <div style="text-align:center;margin-top:2.5rem;" class="reveal">
+      <a href="#features" class="btn btn-primary">SECRETIS résout tout ça &mdash; et bien plus encore &rarr;</a>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 7 — 10 MODULES
-     ============================================ -->
-<section id="modules" class="section">
-  <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Modules</div>
-      <h2 class="t-h2 section-title">10 modules pour couvrir 100% de vos besoins</h2>
-      <p class="section-subtitle">Activez uniquement ce dont vous avez besoin. Chaque module s'intègre aux autres.</p>
-    </div>
-    <div class="modules-grid">
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-calendar-alt"></i></div>
-        <div class="module-content">
-          <div class="module-name">Agenda & Planning</div>
-          <div class="module-features">
-            <div class="module-feature">Agenda partagé multi-utilisateurs</div>
-            <div class="module-feature">Rappels et notifications automatiques</div>
-            <div class="module-feature">Synchronisation calendrier externe (iCal)</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-envelope-open-text"></i></div>
-        <div class="module-content">
-          <div class="module-name">Courrier & GED</div>
-          <div class="module-features">
-            <div class="module-feature">Enregistrement et acheminement automatique</div>
-            <div class="module-feature">Signature électronique intégrée</div>
-            <div class="module-feature">Archivage sécurisé avec recherche full-text</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-chalkboard-teacher"></i></div>
-        <div class="module-content">
-          <div class="module-name">Réunions & Comptes-rendus</div>
-          <div class="module-features">
-            <div class="module-feature">Convocations et ordre du jour automatisés</div>
-            <div class="module-feature">Rédaction assistée par SARA (IA)</div>
-            <div class="module-feature">Suivi des décisions et points d'action</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-tasks"></i></div>
-        <div class="module-content">
-          <div class="module-name">Tâches & Projets</div>
-          <div class="module-features">
-            <div class="module-feature">Kanban, liste et vue Gantt intégrés</div>
-            <div class="module-feature">Assignation et relance automatique</div>
-            <div class="module-feature">Suivi du temps et reporting d'avancement</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-comments"></i></div>
-        <div class="module-content">
-          <div class="module-name">Communication interne</div>
-          <div class="module-features">
-            <div class="module-feature">Messagerie instantanée par équipe</div>
-            <div class="module-feature">Annonces et bulletins d'information</div>
-            <div class="module-feature">Notifications push sur tous les appareils</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(192,57,43,0.1);color:#C0392B;"><i class="fa fa-user-check"></i></div>
-        <div class="module-content">
-          <div class="module-name">Accueil Visiteurs</div>
-          <div class="module-features">
-            <div class="module-feature">Enregistrement et badge visiteur digital</div>
-            <div class="module-feature">Notification automatique du responsable</div>
-            <div class="module-feature">Registre consultable et exportable</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(46,134,193,0.12);color:#2E86C1;"><i class="fa fa-boxes"></i></div>
-        <div class="module-content">
-          <div class="module-name">Ressources & Matériel</div>
-          <div class="module-features">
-            <div class="module-feature">Réservation salles et équipements</div>
-            <div class="module-feature">Inventaire et maintenance planifiée</div>
-            <div class="module-feature">Alertes de disponibilité en temps réel</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(30,132,73,0.1);color:#1E8449;"><i class="fa fa-id-badge"></i></div>
-        <div class="module-content">
-          <div class="module-name">RH Légère</div>
-          <div class="module-features">
-            <div class="module-feature">Gestion des congés et absences</div>
-            <div class="module-feature">Fiche collaborateur et organigramme</div>
-            <div class="module-feature">Suivi des performances et évaluations</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(243,156,18,0.12);color:#d4890e;"><i class="fa fa-chart-pie"></i></div>
-        <div class="module-content">
-          <div class="module-name">Rapports & Statistiques</div>
-          <div class="module-features">
-            <div class="module-feature">Tableaux de bord personnalisables</div>
-            <div class="module-feature">Export PDF, Excel et CSV en un clic</div>
-            <div class="module-feature">Envoi automatique par email périodique</div>
-          </div>
-        </div>
-      </div>
-      <div class="module-card">
-        <div class="module-icon" style="background:rgba(26,58,92,0.1);color:#1A3A5C;"><i class="fa fa-cog"></i></div>
-        <div class="module-content">
-          <div class="module-name">Paramètres & Administration</div>
-          <div class="module-features">
-            <div class="module-feature">Gestion rôles et droits d'accès granulaires</div>
-            <div class="module-feature">Configuration multi-entités et multi-sites</div>
-            <div class="module-feature">API REST ouverte et intégrations tierces</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ============================================
-     ZONE 8 — COMMENT ÇA MARCHE
-     ============================================ -->
-<section id="how-it-works" class="section">
+<!-- =========================================================
+     S5 — FEATURE TABS
+     ========================================================= -->
+<section id="features" class="section" style="background:var(--c-surface);" x-data="{ tab: 'agenda' }">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Mise en route</div>
-      <h2 class="t-h2 section-title">Opérationnel en 5 étapes</h2>
-      <p class="section-subtitle">De l'inscription au tableau de bord en direct — en moins de 30 minutes.</p>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Fonctionnalités</span>
+      <h2 class="section-title">Une plateforme, toutes vos opérations</h2>
+      <p class="section-lead">Chaque fonctionnalité est conçue pour les réalités des organisations africaines.</p>
     </div>
-    <div class="steps-row">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-title">Créer votre compte</div>
-        <div class="step-desc">Inscription gratuite en 2 minutes, sans carte bancaire</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-title">Configurer votre organisation</div>
-        <div class="step-desc">Nom, logo, structure, fuseaux horaires et devises</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-title">Inviter votre équipe</div>
-        <div class="step-desc">Par email ou lien d'invitation avec rôles préconfigurés</div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-title">Activer vos modules</div>
-        <div class="step-desc">Choisissez les modules adaptés à votre activité</div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-title">Tableau de bord en direct</div>
-        <div class="step-desc">Vos données s'affichent en temps réel dès le premier usage</div>
-      </div>
+    <!-- Tab buttons -->
+    <div class="flex flex-wrap gap-2 justify-center mb-10 reveal">
+      <button @click="tab='agenda'"   :class="tab==='agenda'   ? 'feature-tab-btn active' : 'feature-tab-btn'">Agenda &amp; Planning</button>
+      <button @click="tab='courrier'" :class="tab==='courrier' ? 'feature-tab-btn active' : 'feature-tab-btn'">Courrier &amp; GED</button>
+      <button @click="tab='reunions'" :class="tab==='reunions' ? 'feature-tab-btn active' : 'feature-tab-btn'">Réunions &amp; PV</button>
+      <button @click="tab='rh'"       :class="tab==='rh'       ? 'feature-tab-btn active' : 'feature-tab-btn'">Module RH</button>
+      <button @click="tab='compta'"   :class="tab==='compta'   ? 'feature-tab-btn active' : 'feature-tab-btn'">Comptabilité SYSCOHADA</button>
+      <button @click="tab='bi'"       :class="tab==='bi'       ? 'feature-tab-btn active' : 'feature-tab-btn'">Tableau de bord BI</button>
     </div>
-  </div>
-</section>
-
-<!-- ============================================
-     ZONE 9 — SARA IA
-     ============================================ -->
-<section id="sara" class="section">
-  <div class="container">
-    <div class="sara-inner">
+    <!-- Tab content -->
+    <div class="grid lg:grid-cols-2 items-center gap-12 reveal">
       <div>
-        <div class="sara-eyebrow">Intelligence Artificielle</div>
-        <h2 class="sara-title">SARA, votre assistante IA intégrée</h2>
-        <p class="sara-desc">SARA (Secrétaire Artificielle à Réponse Augmentée) est l'IA native de SECRETIS. Elle analyse vos données, rédige vos documents et vous alerte proactivement — sans quitter votre plateforme.</p>
+        <div x-show="tab==='agenda'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Agenda &amp; Planification intelligente</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">Centralisez tous les événements dans un agenda partagé, visible sur desktop et mobile, synchronisé en temps réel.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Agenda multi-utilisateurs avec gestion des conflits</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Rappels par email, SMS et push notification</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Réservation de salles et ressources en ligne</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Synchronisation Google Calendar &amp; Outlook</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Vue jour, semaine, mois et timeline Gantt</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer l'agenda gratuit &rarr;</a>
+        </div>
+        <div x-show="tab==='courrier'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Gestion du courrier &amp; GED</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">Enregistrez, acheminez et archivez chaque courrier avec un workflow configurable et signature électronique intégrée.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Enregistrement avec numérotation automatique</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Workflow de validation multi-niveaux</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Signature électronique légalement valide</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Archivage sécurisé avec recherche full-text</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Suivi des délais et relances automatiques</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer la GED gratuit &rarr;</a>
+        </div>
+        <div x-show="tab==='reunions'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Réunions &amp; Procès-verbaux</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">De la convocation au suivi des décisions, SECRETIS gère l'intégralité du cycle de vie de vos réunions.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Convocations avec ordre du jour automatisé</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Rédaction du PV assistée par SARA (IA)</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Suivi des décisions et points d'action</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Signature numérique du procès-verbal</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Visioconférence intégrée (Jitsi)</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer les réunions gratuit &rarr;</a>
+        </div>
+        <div x-show="tab==='rh'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Module RH complet</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">Gérez l'ensemble du cycle de vie de vos collaborateurs en conformité avec le droit du travail local OHADA.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Dossiers collaborateurs avec historique complet</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Gestion des congés, absences et jours fériés locaux</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Organigramme interactif dynamique</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Suivi des formations et certifications</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Évaluations de performance périodiques</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer le module RH gratuit &rarr;</a>
+        </div>
+        <div x-show="tab==='compta'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Comptabilité SYSCOHADA native</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">Le seul ERP de secrétariat avec un module comptable SYSCOHADA 2017 natif &mdash; journaux, états financiers, audits sans plugin.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Plan comptable SYSCOHADA 2017 préconfigurés</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Journaux achat, vente, caisse, banque</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Bilan, compte de résultat, grand livre</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Multi-devises : FCFA, USD, EUR + 12 autres</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Export DGI, exports pour auditeurs certifiés</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer la comptabilité gratuit &rarr;</a>
+        </div>
+        <div x-show="tab==='bi'" x-transition>
+          <h3 style="color:var(--c-navy);margin-bottom:.6rem;">Tableau de bord Business Intelligence</h3>
+          <p style="color:var(--c-text-muted);margin-bottom:1rem;max-width:none;">Des dashboards personnalisables, des rapports automatiques et des indicateurs clés en temps réel pour piloter votre organisation.</p>
+          <ul style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1.25rem;">
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> KPIs personnalisables par rôle et département</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Graphiques interactifs (courbes, camemberts, barres)</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Rapports PDF &amp; Excel en un clic</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Envoi automatique par email (hebdo/mensuel)</li>
+            <li style="display:flex;gap:.5rem;font-size:.875rem;"><span style="color:var(--c-success);">&#10003;</span> Connecteurs Power BI, Tableau, Data Studio</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary">Essayer le BI gratuit &rarr;</a>
+        </div>
+      </div>
+      <!-- Mockup placeholder -->
+      <div class="mockup-placeholder">
+        <div class="mockup-dots"><span></span><span></span><span></span></div>
+        <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <div style="color:rgba(255,255,255,0.4);font-size:.78rem;margin-top:.5rem;">Capture d'écran du module</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     S6 — 10 MODULES
+     ========================================================= -->
+<section id="modules" class="section" style="background:var(--c-navy);">
+  <div class="container">
+    <div class="section-header center reveal">
+      <span class="eyebrow" style="color:var(--c-gold);">Suite intégrée</span>
+      <h2 class="section-title" style="color:#fff;">Une suite complète de 10 modules intégrés</h2>
+      <p class="section-lead" style="color:rgba(255,255,255,0.7);">Chaque module communique avec les autres. Activez uniquement ce dont vous avez besoin.</p>
+    </div>
+    <div class="grid-4 reveal" style="gap:1rem;">
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><h4>Agenda &amp; Événements</h4><p>Planification, invitations, salles, rappels</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z"/><path d="M22 6l-10 7L2 6"/></svg></div><h4>Courrier &amp; GED</h4><p>Workflows, archivage, GED</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><h4>Réunions</h4><p>Convocations, PV, suivi décisions</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h4>Tâches &amp; Projets</h4><p>Kanban, Gantt, collaboration</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h4>Visiteurs &amp; Accueil</h4><p>Badges, QR code, kiosk</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h4>Flotte GPS</h4><p>Suivi temps réel, entretiens</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></div><h4>RH &amp; Employés</h4><p>Dossiers, congés, organigramme</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><h4>Comptabilité SYSCOHADA</h4><p>Plan 2017, journaux, bilans</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div><h4>Budget &amp; Achats</h4><p>Planification, commandes, contrôle</p><span class="badge badge-gold">Inclus Pro</span></div>
+      <div class="module-card"><div class="module-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><h4>Qualité ISO 9001</h4><p>Processus, non-conformités, audits</p><span class="badge badge-gold">Inclus Pro</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     S7 — IA SARA
+     ========================================================= -->
+<section id="sara" class="section" style="background:linear-gradient(135deg,var(--c-navy-deep) 0%,var(--c-navy-mid) 100%);color:#fff;">
+  <div class="container">
+    <div class="grid lg:grid-cols-2 items-center gap-16 reveal">
+      <div>
+        <span class="eyebrow">Intelligence Artificielle</span>
+        <h2 class="section-title" style="color:#fff;">SARA &mdash; Votre assistante intelligente</h2>
+        <p style="color:rgba(255,255,255,.75);font-size:1rem;line-height:1.7;margin-bottom:1.25rem;">SARA (Secrétaire Artificielle à Réponse Augmentée) analyse vos données, rédige vos documents et vous alerte proactivement &mdash; sans quitter votre plateforme.</p>
         <div class="sara-features">
-          <div class="sara-feature"><i class="fa fa-check-circle"></i> Rédaction automatique de comptes-rendus et courriers</div>
-          <div class="sara-feature"><i class="fa fa-check-circle"></i> Résumé intelligent de documents longs</div>
-          <div class="sara-feature"><i class="fa fa-check-circle"></i> Détection d'anomalies et alertes proactives</div>
-          <div class="sara-feature"><i class="fa fa-check-circle"></i> Recherche sémantique dans tous vos documents</div>
-          <div class="sara-feature"><i class="fa fa-check-circle"></i> Suggestions de planification et optimisation d'agenda</div>
+          <div class="sara-feature"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span>Multilingue &mdash; 6 langues (FR, EN, AR, PT, ES, WL)</span></div>
+          <div class="sara-feature"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span>Multi-provider IA (OpenAI, Mistral, Anthropic, local)</span></div>
+          <div class="sara-feature"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span>18 garde-fous sécurité &amp; conformité</span></div>
+          <div class="sara-feature"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg><span>RAG sur vos propres données organisationnelles</span></div>
         </div>
-        <a href="#demo-form" class="btn btn-accent btn-lg">Tester SARA gratuitement <i class="fa fa-arrow-right"></i></a>
+        <a href="#demo" class="btn btn-lg" style="background:var(--c-gold);color:#fff;border:2px solid var(--c-gold);margin-top:1.5rem;" data-track="sara_cta">Tester SARA gratuitement &rarr;</a>
       </div>
       <div>
         <div class="chat-mockup">
           <div class="chat-header">
             <div class="chat-avatar">S</div>
-            <div>
-              <div class="chat-name">SARA — Assistante IA</div>
-              <div class="chat-status">En ligne et disponible</div>
-            </div>
+            <div><div class="chat-name">SARA &mdash; Assistante IA</div><div class="chat-status">En ligne et disponible</div></div>
           </div>
           <div class="chat-messages">
-            <div class="chat-bubble user">Rédige le compte-rendu de notre réunion de direction du 15 juillet.</div>
-            <div style="color:rgba(255,255,255,0.35);font-size:0.65rem;text-align:right;margin-top:-8px;">10h14</div>
-            <div class="chat-bubble sara"><strong>SARA :</strong> Bien sûr. J'ai analysé l'enregistrement et les points à l'ordre du jour. Voici le brouillon :<br><br>📄 <strong>CR — Réunion de direction · 15/07</strong><br>Présents : 8 participants · Durée : 1h20<br>Décisions : 5 validées · Actions : 12 assignées</div>
-            <div class="chat-bubble user">Envoie-le à tous les participants pour validation.</div>
-            <div class="chat-bubble sara"><strong>SARA :</strong> Envoi effectué à 8 destinataires. Délai de validation fixé à 48h. Je vous relancerai automatiquement le 17/07 si aucune réponse.</div>
+            <div class="chat-bubble user">Prépare le compte-rendu de la réunion du 15 janvier.</div>
+            <div style="color:rgba(255,255,255,.35);font-size:.62rem;text-align:right;margin-top:-8px;">09h47</div>
+            <div class="chat-bubble sara"><strong>SARA :</strong> Bien sûr. J'ai analysé les 8 points de l'ordre du jour.<br><br>&#128196; <strong>CR &mdash; Réunion direction &middot; 15 janv.</strong><br>Présents : 11 &middot; Durée : 1h35 &middot; Décisions : 6 &middot; Actions : 14<br><br>Voulez-vous que je l'envoie pour validation ?</div>
+            <div class="chat-bubble user">Oui, envoie-le aux participants pour signature.</div>
+            <div class="chat-bubble sara"><strong>SARA :</strong> &#10003; Envoi effectué à 11 destinataires. Délai : 48h. Relance automatique le 17/01 si aucune réponse.</div>
           </div>
           <div class="chat-input-row">
-            <div class="chat-input-fake">Demandez quelque chose à SARA...</div>
-            <div class="chat-send"><i class="fa fa-paper-plane"></i></div>
+            <div class="chat-input-fake">Demandez quelque chose à SARA&hellip;</div>
+            <div class="chat-send">&#10148;</div>
           </div>
         </div>
       </div>
@@ -1075,508 +457,475 @@ nav a.partners { color: var(--secondary); font-weight: 600; }
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 10 — PWA
-     ============================================ -->
-<section id="pwa" class="section">
+
+<!-- =========================================================
+     S8 — CONFORMITÉ AFRIQUE
+     ========================================================= -->
+<section id="africa" class="section" style="background:var(--c-bg);">
   <div class="container">
-    <div class="pwa-inner">
-      <div>
-        <div class="section-eyebrow">Application mobile & desktop</div>
-        <h2 class="t-h2" style="margin-bottom:16px;">Installez SECRETIS sur tous vos appareils</h2>
-        <p style="color:var(--text-muted);font-size:1rem;line-height:1.7;margin-bottom:28px;">SECRETIS est une Progressive Web App (PWA). Pas de magasin d'applications, pas de configuration complexe. Une URL, une installation, tous vos appareils synchronisés.</p>
-        <div class="pwa-steps">
-          <div class="pwa-step"><div class="pwa-step-num">1</div> Ouvrez SECRETIS dans votre navigateur</div>
-          <div class="pwa-step"><div class="pwa-step-num">2</div> Cliquez sur "Installer l'application" dans la barre d'adresse</div>
-          <div class="pwa-step"><div class="pwa-step-num">3</div> L'icône apparaît sur votre écran d'accueil</div>
-          <div class="pwa-step"><div class="pwa-step-num">4</div> Utilisez-le hors-ligne avec synchronisation automatique</div>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Conformité locale</span>
+      <h2 class="section-title">Fait pour l'Afrique, respecte vos lois</h2>
+      <p class="section-lead">SECRETIS est le seul ERP de secrétariat conçu depuis l'Afrique, pour l'Afrique.</p>
+    </div>
+    <div class="grid-4 reveal">
+      <div class="card text-center">
+        <div style="font-size:2rem;margin-bottom:.75rem;">&#127758;</div>
+        <h3>Zone OHADA</h3>
+        <p style="max-width:none;font-size:.875rem;">18 pays couverts. Plan comptable SYSCOHADA 2017 natif. Conformité juridique locale.</p>
+        <div style="margin-top:.75rem;"><span class="badge badge-success">18 pays</span></div>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2rem;margin-bottom:.75rem;">&#128178;</div>
+        <h3>Multi-devises</h3>
+        <p style="max-width:none;font-size:.875rem;">FCFA UEMOA &amp; CEMAC, USD, EUR, GBP, GHS, NGN + 8 autres devises africaines.</p>
+        <div style="margin-top:.75rem;"><span class="badge badge-blue">15+ devises</span></div>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2rem;margin-bottom:.75rem;">&#128241;</div>
+        <h3>Mobile Money</h3>
+        <p style="max-width:none;font-size:.875rem;">Orange Money, MTN MoMo, Wave, Moov Money, Airtel Money &mdash; payez et encaissez nativement.</p>
+        <div style="margin-top:.75rem;"><span class="badge badge-gold">5 opérateurs</span></div>
+      </div>
+      <div class="card text-center">
+        <div style="font-size:2rem;margin-bottom:.75rem;">&#128274;</div>
+        <h3>Données souveraines</h3>
+        <p style="max-width:none;font-size:.875rem;">Hébergement local possible (On-Premise), conformité RGPD et lois nationales de protection des données.</p>
+        <div style="margin-top:.75rem;"><span class="badge badge-navy">On-Premise dispo</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     S9 — TÉMOIGNAGES
+     ========================================================= -->
+<section id="testimonials" class="section" style="background:var(--c-surface);">
+  <div class="container">
+    <div class="section-header center reveal">
+      <span class="eyebrow">Témoignages</span>
+      <h2 class="section-title">Ils nous font confiance</h2>
+      <p class="section-lead">Des organisations de toute l'Afrique témoignent de leur transformation avec SECRETIS.</p>
+    </div>
+    <div class="grid-3 reveal">
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"Nous avons réduit le temps de traitement des courriers de 70%. SECRETIS a transformé notre secrétariat en véritable centre de pilotage."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#1A3A5C;">MCA</div>
+          <div><div class="testi-name">Marie-Claire ADJOUMANI</div><div class="testi-role">Directrice Administrative &mdash; Abidjan &#127464;&#127470;</div></div>
         </div>
       </div>
-      <div>
-        <div class="pwa-devices">
-          <div class="pwa-device">
-            <i class="fab fa-android" style="color:#3ddc84;"></i>
-            <div class="pwa-device-name">Android</div>
-            <div class="pwa-device-badge">Disponible</div>
-          </div>
-          <div class="pwa-device">
-            <i class="fab fa-apple" style="color:#555;"></i>
-            <div class="pwa-device-name">iOS</div>
-            <div class="pwa-device-badge">Disponible</div>
-          </div>
-          <div class="pwa-device">
-            <i class="fab fa-windows" style="color:#0078d4;"></i>
-            <div class="pwa-device-name">Windows</div>
-            <div class="pwa-device-badge">Disponible</div>
-          </div>
-          <div class="pwa-device">
-            <i class="fab fa-apple" style="color:#888;"></i>
-            <div class="pwa-device-name">macOS</div>
-            <div class="pwa-device-badge">Disponible</div>
-          </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"La conformité SYSCOHADA nous a sauvé lors du dernier audit. Tout était parfaitement tracé, chaque journal disponible en un clic."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#2E86C1;">KA</div>
+          <div><div class="testi-name">Kofi ASANTE</div><div class="testi-role">DAF &mdash; Accra &#127468;&#127469;</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"L'équipe support est réactive et parle notre langue. C'est un vrai partenariat africain, pas juste un abonnement logiciel."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#F39C12;">AD</div>
+          <div><div class="testi-name">Aminata DIALLO</div><div class="testi-role">Responsable RH &mdash; Dakar &#127480;&#127475;</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"Nous gérons notre flotte de 45 véhicules sans stress depuis SECRETIS GPS. Les alertes entretien ont divisé nos coûts par deux."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#1E8449;">JPM</div>
+          <div><div class="testi-name">Jean-Paul MBOMBO</div><div class="testi-role">Directeur Logistique &mdash; Douala &#127464;&#127474;</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"L'IA SARA rédige nos PV de réunions automatiquement. Ce gain de temps est incroyable &mdash; j'estime 8 heures économisées par semaine."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#8E44AD;">FO</div>
+          <div><div class="testi-name">Fatima OUEDRAOGO</div><div class="testi-role">Secrétaire Générale &mdash; Ouagadougou &#127463;&#127467;</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"Déploiement rapide, formation en 2 jours, équipe opérationnelle en 1 semaine. Le meilleur onboarding que j'ai vécu en 15 ans de DSI."</p>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:auto;padding-top:.75rem;">
+          <div class="testi-avatar" style="background:#C0392B;">AH</div>
+          <div><div class="testi-name">Alain HOUESSOU</div><div class="testi-role">DSI &mdash; Cotonou &#127463;&#127471;</div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 11 — SÉCURITÉ
-     ============================================ -->
-<section id="security" class="section">
+
+<!-- =========================================================
+     S10 — STATS COUNTERS
+     ========================================================= -->
+<section id="stats" class="section" style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-secondary) 100%);">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Sécurité & Conformité</div>
-      <h2 class="t-h2 section-title">Vos données, protégées au niveau bancaire</h2>
-      <p class="section-subtitle">SECRETIS applique les mêmes standards de sécurité que les institutions financières internationales.</p>
+    <div class="section-header center reveal">
+      <h2 class="section-title" style="color:#fff;">SECRETIS en chiffres</h2>
     </div>
-    <div class="security-grid">
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-lock"></i></div>
-        <div class="security-badge-title">HTTPS / SSL</div>
-        <div class="security-badge-desc">Toutes les communications chiffrées en transit via TLS 1.3. Certificat SSL renouvelé automatiquement.</div>
-      </div>
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-key"></i></div>
-        <div class="security-badge-title">Authentification MFA</div>
-        <div class="security-badge-desc">Double facteur d'authentification par SMS, TOTP ou email. Obligatoire pour les comptes administrateurs.</div>
-      </div>
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-database"></i></div>
-        <div class="security-badge-title">Chiffrement des données</div>
-        <div class="security-badge-desc">Données chiffrées au repos avec AES-256. Clés de chiffrement gérées par tenant, rotation automatique.</div>
-      </div>
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-clipboard-list"></i></div>
-        <div class="security-badge-title">Journal d'audit complet</div>
-        <div class="security-badge-desc">Chaque action enregistrée avec horodatage, utilisateur et adresse IP. Export disponible pour audit externe.</div>
-      </div>
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-sitemap"></i></div>
-        <div class="security-badge-title">Isolation multi-tenant</div>
-        <div class="security-badge-desc">Chaque organisation dispose d'une base de données isolée. Aucun partage de données entre clients.</div>
-      </div>
-      <div class="security-badge">
-        <div class="security-badge-icon"><i class="fa fa-balance-scale"></i></div>
-        <div class="security-badge-title">RGPD & Droit OHADA</div>
-        <div class="security-badge-desc">Conformité RGPD européen et droit OHADA africain. Données hébergées en Afrique de l'Ouest sur demande.</div>
-      </div>
+    <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2rem;text-align:center;">
+      <div><div class="stat-value" data-target="2500">2 500+</div><div class="stat-label">Entreprises</div></div>
+      <div><div class="stat-value" data-target="18">18</div><div class="stat-label">Pays OHADA</div></div>
+      <div><div class="stat-value">99,8%</div><div class="stat-label">Uptime garanti</div></div>
+      <div><div class="stat-value" data-target="4">4</div><div class="stat-label">Langues</div></div>
+      <div><div class="stat-value" data-target="120">120+</div><div class="stat-label">Fonctionnalités</div></div>
+      <div><div class="stat-value">&lt;&nbsp;2s</div><div class="stat-label">Temps de réponse</div></div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 12 — TARIFS
-     ============================================ -->
-<section id="pricing" class="section">
+
+<!-- =========================================================
+     S11 — PRICING
+     ========================================================= -->
+<section id="pricing" class="section" style="background:var(--c-bg);" x-data="{ annual: false }">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Tarification</div>
-      <h2 class="t-h2 section-title">Des plans adaptés à chaque organisation</h2>
-      <p class="section-subtitle">Commencez gratuitement. Passez à l'échelle selon vos besoins.</p>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Tarification</span>
+      <h2 class="section-title">Des tarifs pensés pour l'Afrique</h2>
+      <p class="section-lead">Payez en Mobile Money, par virement ou par carte bancaire. Essai 30 jours sans engagement.</p>
     </div>
-    <div class="pricing-toggle">
-      <span class="toggle-label active" id="lbl-monthly">Mensuel</span>
-      <div class="toggle-switch" id="billing-toggle" role="switch" aria-checked="false" tabindex="0"></div>
-      <span class="toggle-label" id="lbl-annual">Annuel</span>
-      <span class="toggle-save">−20%</span>
+    <!-- Toggle -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:3rem;" class="reveal">
+      <span style="font-size:.875rem;font-weight:600;" :style="!annual ? 'color:var(--c-navy)' : 'color:var(--c-text-muted)'">Mensuel</span>
+      <button @click="annual=!annual" role="switch" :aria-checked="annual.toString()"
+        style="width:2.75rem;height:1.5rem;border-radius:999px;position:relative;border:none;cursor:pointer;transition:background .25s;"
+        :style="annual ? 'background:var(--c-secondary)' : 'background:var(--c-border)'">
+        <span style="position:absolute;top:.15rem;width:1.2rem;height:1.2rem;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .25s;" :style="annual ? 'left:1.4rem' : 'left:.15rem'"></span>
+      </button>
+      <span style="font-size:.875rem;font-weight:600;" :style="annual ? 'color:var(--c-navy)' : 'color:var(--c-text-muted)'">Annuel <span class="badge badge-success" style="margin-left:.25rem;">-20%</span></span>
     </div>
-    <div class="pricing-grid">
+    <!-- Cards -->
+    <div class="pricing-grid reveal">
       <div class="pricing-card">
-        <div class="pricing-plan">Starter</div>
-        <div class="pricing-price">Gratuit <sub>14j</sub></div>
-        <div class="pricing-period">Puis sur devis — sans engagement</div>
-        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Commencer gratuitement</a></div>
-        <div class="pricing-divider"></div>
-        <div class="pricing-features">
-          <div class="pricing-feature"><i class="fa fa-check"></i> Jusqu'à 5 utilisateurs</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Agenda & Courrier de base</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> 5 Go de stockage</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Support par email</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Tableau de bord simplifié</div>
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price">
+          <span class="pricing-amount" x-text="annual ? '12 000' : '15 000'">15 000</span>
+          <div><div class="pricing-currency">FCFA</div><div class="pricing-period">/mois &middot; 5 utilisateurs</div></div>
         </div>
+        <div class="pricing-annual-note" :style="annual ? 'visibility:visible' : 'visibility:hidden'">Économisez 36 000 FCFA/an</div>
+        <div class="pricing-cta"><a href="#demo" class="btn btn-ghost" style="width:100%;justify-content:center;" data-track="starter_cta">Commencer l'essai gratuit</a></div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Agenda &amp; Planning</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Courrier &amp; GED</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Réunions &amp; PV</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Tâches &amp; Communication</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Centre d'aide inclus</li>
+        </ul>
       </div>
       <div class="pricing-card recommended">
-        <div class="pricing-recommended-badge">Recommandé</div>
-        <div class="pricing-plan">PME</div>
-        <div class="pricing-price">Sur devis</div>
-        <div class="pricing-period">Tarif selon effectif et modules</div>
-        <div class="pricing-cta"><a href="#demo-form" class="btn btn-primary" style="width:100%;justify-content:center;">Demander un devis</a></div>
-        <div class="pricing-divider"></div>
-        <div class="pricing-features">
-          <div class="pricing-feature"><i class="fa fa-check"></i> Jusqu'à 50 utilisateurs</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Tous les modules actifs</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> SARA IA incluse</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> 100 Go de stockage</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Support chat + téléphone</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Formation onboarding incluse</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Rapports avancés</div>
+        <div class="pricing-recommended-badge">&#11088; Le plus populaire</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">
+          <span class="pricing-amount" x-text="annual ? '36 000' : '45 000'">45 000</span>
+          <div><div class="pricing-currency">FCFA</div><div class="pricing-period">/mois &middot; 25 utilisateurs</div></div>
         </div>
+        <div class="pricing-annual-note" :style="annual ? 'visibility:visible' : 'visibility:hidden'">Économisez 108 000 FCFA/an</div>
+        <div class="pricing-cta"><a href="#demo" class="btn btn-primary" style="width:100%;justify-content:center;" data-track="pro_cta">Choisir Pro</a></div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Tous les modules Starter +</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> SYSCOHADA, Budget &amp; Qualité</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> IA SARA avancée (RAG)</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Flotte GPS &amp; Visiteurs</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Support tickets 24h</li>
+        </ul>
       </div>
       <div class="pricing-card">
-        <div class="pricing-plan">Entreprise</div>
-        <div class="pricing-price">Sur devis</div>
-        <div class="pricing-period">Tarif personnalisé par site</div>
-        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Nous contacter</a></div>
-        <div class="pricing-divider"></div>
-        <div class="pricing-features">
-          <div class="pricing-feature"><i class="fa fa-check"></i> Utilisateurs illimités</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Multi-sites & multi-entités</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Hébergement dédié possible</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> API & intégrations sur mesure</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> SLA garanti 99,9%</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Account manager dédié</div>
-        </div>
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-price"><span class="pricing-amount">Sur devis</span></div>
+        <div class="pricing-annual-note" style="visibility:hidden;">&mdash;</div>
+        <div class="pricing-cta"><a href="#demo" class="btn btn-secondary" style="width:100%;justify-content:center;" data-track="enterprise_cta">Nous contacter</a></div>
+        <hr class="pricing-divider">
+        <ul class="pricing-features">
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Tout Pro inclus +</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> SSO SAML/LDAP + API complète</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> On-Premise disponible</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Account Manager dédié</li>
+          <li><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="var(--c-success)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> SLA garanti 99,95%</li>
+        </ul>
       </div>
-      <div class="pricing-card">
-        <div class="pricing-plan">Institution</div>
-        <div class="pricing-price">Sur devis</div>
-        <div class="pricing-period">Ministères, ONG, collectivités</div>
-        <div class="pricing-cta"><a href="#demo-form" class="btn btn-outline" style="width:100%;justify-content:center;">Nous contacter</a></div>
-        <div class="pricing-divider"></div>
-        <div class="pricing-features">
-          <div class="pricing-feature"><i class="fa fa-check"></i> Conformité OHADA renforcée</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Hébergement souverain local</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Formation équipes sur site</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Contrat de maintenance annuel</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Audit de sécurité inclus</div>
-          <div class="pricing-feature"><i class="fa fa-check"></i> Personnalisation interface</div>
-        </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem;" class="reveal">
+      <p style="font-size:.8rem;color:var(--c-text-muted);margin-bottom:.6rem;">Modes de paiement acceptés :</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;">
+        <span class="badge badge-gold">&#128241; Mobile Money</span>
+        <span class="badge badge-blue">&#127968; Virement bancaire</span>
+        <span class="badge badge-navy">&#128179; Carte bancaire</span>
+        <span class="badge" style="background:var(--c-surface-alt);color:var(--c-text-muted);">&#8383; Crypto</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 13 — FORMULAIRE DÉMO
-     ============================================ -->
-<section id="demo-form" class="section">
+
+<!-- =========================================================
+     S12 — COMPARAISON
+     ========================================================= -->
+<section id="comparison" class="section" style="background:var(--c-surface);">
   <div class="container">
-    <div class="demo-inner">
-      <div class="demo-left">
-        <div class="section-eyebrow" style="color:rgba(255,255,255,0.5);">Démonstration gratuite</div>
-        <h2>Demandez votre démonstration gratuite</h2>
-        <p>Un expert SECRETIS vous contacte sous 24h pour une démonstration personnalisée de 45 minutes, adaptée à votre secteur d'activité.</p>
-        <div class="demo-perks">
-          <div class="demo-perk"><i class="fa fa-check-circle"></i> Aucun engagement, aucune carte requise</div>
-          <div class="demo-perk"><i class="fa fa-check-circle"></i> Démonstration en français sur votre cas réel</div>
-          <div class="demo-perk"><i class="fa fa-check-circle"></i> Accès immédiat à l'essai gratuit 14 jours</div>
-          <div class="demo-perk"><i class="fa fa-check-circle"></i> Devis personnalisé offert après la démo</div>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Comparaison</span>
+      <h2 class="section-title">Pourquoi SECRETIS surpasse les alternatives</h2>
+      <p class="section-lead">Un seul outil conçu pour vos réalités africaines, là où les autres échouent.</p>
+    </div>
+    <div class="compare-table-wrap reveal">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Fonctionnalité</th>
+            <th class="col-secretis">SECRETIS</th>
+            <th>Solution A</th>
+            <th>Solution B</th>
+            <th>Excel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SYSCOHADA natif</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>Mobile Money intégré</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>IA SARA (RAG)</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-partial">Partiel</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>Zone OHADA (18 pays)</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-partial">Partiel</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>On-Premise disponible</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-yes">&#10003;</span></td><td>&mdash;</td></tr>
+          <tr><td>Multilingue (6 langues)</td><td class="col-secretis"><span class="check-yes">&#10003; 6</span></td><td><span class="check-partial">2</span></td><td><span class="check-partial">3</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>PWA Mobile (hors-ligne)</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-partial">Partiel</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td></tr>
+          <tr><td>Prix accessible (FCFA)</td><td class="col-secretis"><span class="check-yes">&#10003;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-no">&#10007;</span></td><td><span class="check-yes">&#10003;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     S13 — DEMO FORM
+     ========================================================= -->
+<section id="demo" class="section" style="background:var(--c-navy);">
+  <div class="container">
+    <div class="grid lg:grid-cols-2 items-start gap-16 reveal">
+      <div style="color:#fff;">
+        <span class="eyebrow">Démonstration</span>
+        <h2 class="section-title" style="color:#fff;">Voyez SECRETIS en action</h2>
+        <p style="color:rgba(255,255,255,.75);font-size:1rem;line-height:1.7;margin-bottom:1.25rem;">Demandez une démo personnalisée ou accédez directement à notre sandbox. Disponible du lundi au vendredi, 8h&ndash;18h GMT.</p>
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Démo personnalisée 45 min avec un expert</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Adaptation à votre secteur d'activité</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Questions libres, sans pression commerciale</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Accès sandbox immédiat si souhaité</div>
         </div>
+        <a href="#" class="btn btn-outline-white" data-track="sandbox_cta">Essayer la démo sandbox &rarr;</a>
       </div>
-      <div class="demo-form-box">
-        <form id="contact-form" novalidate>
-          <div class="form-row">
+      <div class="demo-form">
+        <h3 style="font-size:1.05rem;font-weight:700;color:var(--c-text);margin-bottom:1.25rem;">Demander une démonstration personnalisée</h3>
+        <form id="demo-form" novalidate>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label" for="demo-prenom">Prénom *</label><input type="text" id="demo-prenom" name="prenom" class="form-control" placeholder="Amadou" required></div>
+            <div class="form-group"><label class="form-label" for="demo-nom">Nom *</label><input type="text" id="demo-nom" name="nom" class="form-control" placeholder="COULIBALY" required></div>
+            <div class="form-group"><label class="form-label" for="demo-email">Email professionnel *</label><input type="email" id="demo-email" name="email" class="form-control" placeholder="a.coulibaly@entreprise.ci" required></div>
+            <div class="form-group"><label class="form-label" for="demo-tel">Téléphone / WhatsApp</label><input type="tel" id="demo-tel" name="telephone" class="form-control" placeholder="+225 07 00 00 00"></div>
             <div class="form-group">
-              <label class="form-label" for="f-prenom">Prénom *</label>
-              <input class="form-control" type="text" id="f-prenom" name="prenom" placeholder="Jean" required>
+              <label class="form-label" for="demo-pays">Pays *</label>
+              <select id="demo-pays" name="pays" class="form-control" required>
+                <option value="">Sélectionner&hellip;</option>
+                <option>Côte d'Ivoire</option><option>Sénégal</option><option>Cameroun</option><option>Ghana</option><option>Burkina Faso</option><option>Mali</option><option>Bénin</option><option>Togo</option><option>Niger</option><option>Congo-Brazzaville</option><option>RDC</option><option>Gabon</option><option>Autre</option>
+              </select>
             </div>
             <div class="form-group">
-              <label class="form-label" for="f-nom">Nom *</label>
-              <input class="form-control" type="text" id="f-nom" name="nom" placeholder="Kouassi" required>
+              <label class="form-label" for="demo-taille">Taille entreprise</label>
+              <select id="demo-taille" name="taille" class="form-control">
+                <option value="">Sélectionner&hellip;</option>
+                <option>1&ndash;10 personnes</option><option>11&ndash;50 personnes</option><option>51&ndash;200 personnes</option><option>201&ndash;500 personnes</option><option>500+ personnes</option>
+              </select>
+            </div>
+            <div class="form-group full"><label class="form-label" for="demo-msg">Message (optionnel)</label><textarea id="demo-msg" name="message" class="form-control" rows="3" placeholder="Décrivez brièvement votre besoin principal&hellip;"></textarea></div>
+            <div class="form-group full">
+              <label class="form-check"><input type="checkbox" required> <span>J'accepte la <a href="#" style="color:var(--c-blue);">politique de confidentialité</a> et d'être contacté par IBIG Soft.</span></label>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="f-email">Email professionnel *</label>
-              <input class="form-control" type="email" id="f-email" name="email" placeholder="j.kouassi@entreprise.com" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="f-tel">Téléphone *</label>
-              <input class="form-control" type="tel" id="f-tel" name="tel" placeholder="+225 07 00 00 00 00" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-org">Organisation *</label>
-            <input class="form-control" type="text" id="f-org" name="organisation" placeholder="Nom de votre organisation" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-type">Type de structure *</label>
-            <select class="form-control" id="f-type" name="type" required>
-              <option value="">Sélectionnez votre type de structure...</option>
-              <option>PME / Startup</option>
-              <option>Grande entreprise</option>
-              <option>Administration publique / Ministère</option>
-              <option>ONG / Association</option>
-              <option>Collectivité territoriale</option>
-              <option>Établissement scolaire / Université</option>
-              <option>Hôpital / Clinique</option>
-              <option>Autre</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-message">Message (optionnel)</label>
-            <textarea class="form-control" id="f-message" name="message" rows="3" placeholder="Décrivez brièvement vos besoins ou vos questions..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-accent form-submit">
-            <i class="fa fa-paper-plane"></i> Envoyer ma demande
-          </button>
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:1rem;" data-track="demo_submit">Envoyer ma demande de démonstration</button>
         </form>
+        <p style="font-size:.72rem;color:var(--c-text-muted);text-align:center;margin-top:.6rem;">Réponse garantie dans les 24h ouvrées &middot; Données protégées</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 14 — FAQ
-     ============================================ -->
-<section id="faq" class="section">
+
+<!-- =========================================================
+     S14 — SÉCURITÉ
+     ========================================================= -->
+<section id="security" class="section" style="background:var(--c-bg);">
   <div class="container">
-    <div class="section-header">
-      <div class="section-eyebrow">Questions fréquentes</div>
-      <h2 class="t-h2 section-title">Tout ce que vous voulez savoir</h2>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Sécurité</span>
+      <h2 class="section-title">Votre sécurité est notre priorité absolue</h2>
+      <p class="section-lead">Une architecture conçue pour les données sensibles des organisations africaines.</p>
     </div>
-    <div class="faq-list" id="faq-list">
-
-      <div class="faq-item">
-        <button class="faq-question">Puis-je tester SECRETIS sans donner ma carte bancaire ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Oui, absolument. L'essai gratuit de 14 jours ne nécessite aucune information de paiement. Vous accédez à toutes les fonctionnalités du plan PME sans aucune limite, et vous pouvez décider à tout moment de souscrire ou non.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">SECRETIS fonctionne-t-il sans connexion internet ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Oui, grâce à la technologie PWA, SECRETIS dispose d'un mode hors-ligne. Les données consultées récemment sont mises en cache localement. Dès que la connexion est rétablie, tout se synchronise automatiquement.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Mes données sont-elles hébergées en Afrique ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Par défaut, les données sont hébergées dans des datacentres certifiés ISO 27001. Pour les institutions publiques et les clients Enterprise, nous proposons un hébergement souverain sur des serveurs situés en Afrique de l'Ouest (Côte d'Ivoire, Sénégal, Ghana) sur demande.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Combien d'utilisateurs puis-je ajouter ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Le plan Starter inclut 5 utilisateurs. Le plan PME monte jusqu'à 50. Les plans Entreprise et Institution offrent un nombre illimité d'utilisateurs, facturés selon des paliers définis dans votre contrat personnalisé.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Quels modes de paiement acceptez-vous ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Nous acceptons 10 modes de paiement : Mobile Money (Orange Money, MTN MoMo, Wave, Moov), cartes Visa/Mastercard, virement bancaire SEPA et UEMOA, paiement en FCFA XOF et XAF. Des facilités de paiement sont disponibles pour les institutions publiques.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Puis-je importer mes données existantes ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Oui. SECRETIS propose des outils d'import pour les fichiers Excel, CSV, et des connecteurs vers des systèmes courants. Notre équipe technique vous accompagne gratuitement lors de la migration initiale pour les plans PME, Entreprise et Institution.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Comment fonctionne l'IA SARA ? Est-elle sécurisée ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">SARA est un modèle de traitement du langage naturel déployé dans votre espace isolé. Vos données ne sont jamais partagées avec d'autres clients ni utilisées pour entraîner des modèles publics. SARA opère exclusivement sur votre tenant sécurisé.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Y a-t-il une API pour connecter SECRETIS à nos autres outils ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Oui. SECRETIS expose une API REST complète avec documentation Swagger. Des webhooks sont disponibles pour les événements clés. Des connecteurs natifs existent pour Google Workspace, Microsoft 365, Slack, et les ERP comptables courants en Afrique.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Que se passe-t-il si je dépasse la limite de stockage ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Vous recevrez une alerte automatique à 80% de votre quota. Vous pouvez augmenter votre stockage à tout moment depuis les paramètres de votre compte, sans interruption de service. La facturation est au prorata du mois en cours.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">Comment contacter le support technique ?<div class="faq-icon"><i class="fa fa-plus"></i></div></button>
-        <div class="faq-answer"><div class="faq-answer-inner">Le support est disponible par chat intégré, email (support@ibig-secretis.com), WhatsApp Business et téléphone. Les plans PME et supérieurs bénéficient d'un support prioritaire avec un temps de réponse garanti inférieur à 4 heures ouvrées. Un support 24/7 est disponible pour les plans Entreprise et Institution.</div></div>
-      </div>
-
+    <div class="grid-4 reveal" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128272;</div><h4>Chiffrement AES-256</h4><p>Données chiffrées au repos et en transit (TLS 1.3). Clés gérées par client possible.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128737;&#65039;</div><h4>MFA obligatoire</h4><p>Authentification multi-facteurs TOTP, biométrie et clé FIDO2 disponibles.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128203;</div><h4>Conformité RGPD</h4><p>Droit à l'oubli, export des données, consentement granulaire, DPO désigné.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128269;</div><h4>Journal d'audit complet</h4><p>Traçabilité totale : qui a fait quoi, quand, depuis quelle IP. Non modifiable.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#127760;</div><h4>Hébergement local</h4><p>Option On-Premise pour garder vos données dans votre infrastructure ou pays.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128190;</div><h4>Sauvegardes chiffrées</h4><p>Sauvegardes toutes les 4h, conservées 90 jours, testées mensuellement.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128300;</div><h4>Pentests réguliers</h4><p>Tests d'intrusion semestriels par des experts certifiés OSCP indépendants.</p></div>
+      <div class="security-card"><div style="font-size:1.5rem;margin:0 auto .6rem;text-align:center;">&#128222;</div><h4>Support sécurité 24/7</h4><p>Équipe sécurité disponible en continu pour incidents critiques (SLA : 1h).</p></div>
     </div>
   </div>
 </section>
 
-<!-- ============================================
-     ZONE 15 — FOOTER
-     ============================================ -->
-<footer id="footer">
+
+<!-- =========================================================
+     S15 — INTÉGRATIONS
+     ========================================================= -->
+<section id="integrations" class="section" style="background:var(--c-surface);">
   <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="#" class="logo" style="margin-bottom:16px;">
-          <div class="logo-mark">IS</div>
-          <div class="logo-text" style="color:#fff;">IBIG SECRETIS<span style="color:rgba(255,255,255,0.4);">ERP Bureautique Africain</span></div>
-        </a>
-        <p>La plateforme de gestion administrative conçue pour les organisations africaines. Secrétariat, GED, RH légère et IA réunis dans un seul outil sécurisé.</p>
-        <div class="footer-socials">
-          <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-          <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
-          <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-          <a href="#" class="social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        </div>
-      </div>
-      <div>
-        <div class="footer-col-title">Produit</div>
-        <div class="footer-links">
-          <a href="#benefits">Fonctionnalités</a>
-          <a href="#modules">Modules</a>
-          <a href="#sara">SARA IA</a>
-          <a href="#pwa">Application mobile</a>
-          <a href="#security">Sécurité</a>
-          <a href="#pricing">Tarifs</a>
-          <a href="#">Nouveautés</a>
-        </div>
-      </div>
-      <div>
-        <div class="footer-col-title">Ressources</div>
-        <div class="footer-links">
-          <a href="#">Documentation</a>
-          <a href="#">Tutoriels vidéo</a>
-          <a href="#">Blog</a>
-          <a href="#">Webinaires</a>
-          <a href="#">API Reference</a>
-          <a href="#">Centre d'aide</a>
-          <a href="#faq">FAQ</a>
-        </div>
-      </div>
-      <div>
-        <div class="footer-col-title">IBIG Soft</div>
-        <div class="footer-links">
-          <a href="#">À propos</a>
-          <a href="#">Notre équipe</a>
-          <a href="#">IBIG PARTNERS</a>
-          <a href="#">Devenir revendeur</a>
-          <a href="#">Carrières</a>
-          <a href="#demo-form">Contact</a>
-          <a href="#">Presse</a>
-        </div>
-      </div>
+    <div class="section-header center reveal">
+      <span class="eyebrow">Connecteurs</span>
+      <h2 class="section-title">Connecté à vos outils</h2>
+      <p class="section-lead">19 connecteurs natifs pour ne jamais quitter votre écosystème habituel.</p>
     </div>
-    <div class="footer-bottom">
-      <div class="footer-copyright">&copy; 2024 IBIG Soft. Tous droits réservés. Fait avec soin en Afrique.</div>
-      <div class="footer-legal">
-        <a href="#">Mentions légales</a>
-        <a href="#">Politique de confidentialité</a>
-        <a href="#">CGU</a>
-        <a href="#">Cookies</a>
+    <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.75rem;">
+      <div class="integration-logo"><div class="integration-logo-icon">&#127802;</div><div>Orange Money</div><div class="integration-logo-category">Mobile Money</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#127881;</div><div>MTN MoMo</div><div class="integration-logo-category">Mobile Money</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128153;</div><div>Wave</div><div class="integration-logo-category">Mobile Money</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128307;</div><div>Moov Money</div><div class="integration-logo-category">Mobile Money</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128308;</div><div>Airtel Money</div><div class="integration-logo-category">Mobile Money</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128179;</div><div>CinetPay</div><div class="integration-logo-category">Paiement</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128994;</div><div>Paystack</div><div class="integration-logo-category">Paiement</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128994;</div><div>Flutterwave</div><div class="integration-logo-category">Paiement</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128156;</div><div>Stripe</div><div class="integration-logo-category">Paiement</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128172;</div><div>WhatsApp Biz</div><div class="integration-logo-category">Communication</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128310;</div><div>Slack</div><div class="integration-logo-category">Communication</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128310;</div><div>Teams</div><div class="integration-logo-category">Communication</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128140;</div><div>Gmail</div><div class="integration-logo-category">Communication</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128197;</div><div>Google Cal</div><div class="integration-logo-category">Calendrier</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128198;</div><div>Outlook Cal</div><div class="integration-logo-category">Calendrier</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#9729;&#65039;</div><div>Google Drive</div><div class="integration-logo-category">Stockage</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128230;</div><div>Dropbox</div><div class="integration-logo-category">Stockage</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128309;</div><div>OneDrive</div><div class="integration-logo-category">Stockage</div></div>
+      <div class="integration-logo"><div class="integration-logo-icon">&#128202;</div><div>Power BI</div><div class="integration-logo-category">BI &amp; Analytics</div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =========================================================
+     S16 — IBIG PARTNERS
+     ========================================================= -->
+<section id="ibig-partners" class="section" style="background:var(--c-navy-deep);">
+  <div class="container">
+    <div class="grid lg:grid-cols-2 items-center gap-16 reveal">
+      <div>
+        <span class="eyebrow">Programme partenaires</span>
+        <h2 class="section-title" style="color:var(--c-gold);">Programme IBIG PARTNERS</h2>
+        <p style="color:rgba(255,255,255,.75);font-size:1rem;line-height:1.7;margin-bottom:1.25rem;">Rejoignez le réseau d'intégrateurs, revendeurs et distributeurs qui déploient IBIG SECRETIS en Afrique. Générez des revenus récurrents en accompagnant vos clients vers la transformation numérique.</p>
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Formation et certification IBIG offertes</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Accès au portail partenaire &amp; leads qualifiés</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Support technique prioritaire</div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.875rem;color:rgba(255,255,255,.8);"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--c-gold)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Co-marketing et visibilité sur nos canaux</div>
+        </div>
+        <a href="https://ibigpartners.com" target="_blank" rel="noopener" class="btn btn-lg" style="background:var(--c-gold);color:#fff;border:2px solid var(--c-gold);" data-track="partners_cta">Devenir partenaire &rarr;</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="partner-level-card">
+          <div class="partner-level-name">Revendeur</div>
+          <p class="partner-level-desc">Recommandez SECRETIS à vos clients existants et percevez une commission sur chaque vente.</p>
+          <div class="partner-level-commission">Jusqu'à 15%</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:.2rem;">sur revenus générés</div>
+        </div>
+        <div class="partner-level-card" style="border-color:var(--c-gold);">
+          <div class="partner-level-name">Intégrateur</div>
+          <p class="partner-level-desc">Déployez et configurez SECRETIS chez vos clients. Facturation services d'intégration + commission.</p>
+          <div class="partner-level-commission">Jusqu'à 22%</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:.2rem;">+ revenus services d'intégration</div>
+        </div>
+        <div class="partner-level-card">
+          <div class="partner-level-name">Distributeur</div>
+          <p class="partner-level-desc">Distribuez SECRETIS dans votre pays avec territoire exclusif. Formation avancée et Account Manager dédié.</p>
+          <div class="partner-level-commission">Jusqu'à 30%</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:.2rem;">exclusivité territoriale disponible</div>
+        </div>
       </div>
     </div>
   </div>
-</footer>
+</section>
 
-<!-- ============================================
-     ZONE 16 — BOUTONS FLOTTANTS
-     ============================================ -->
-<button class="float-btn float-whatsapp" aria-label="Contacter sur WhatsApp" onclick="window.open('https://wa.me/22500000000','_blank')">
-  <i class="fab fa-whatsapp"></i>
-</button>
 
-<button class="float-btn float-sara" aria-label="Parler à SARA" onclick="document.getElementById('sara').scrollIntoView({behavior:'smooth'})">
-  <div class="float-tooltip">Parler à SARA</div>
-  <div class="float-badge">IA</div>
-  <i class="fa fa-robot"></i>
-</button>
+<!-- =========================================================
+     S17 — ACADÉMIE SECRETIS
+     ========================================================= -->
+<section id="academy" class="section" style="background:var(--c-bg);">
+  <div class="container">
+    <div class="grid lg:grid-cols-2 items-center gap-16 reveal">
+      <div>
+        <span class="eyebrow">Formation</span>
+        <h2 class="section-title">Formez vos équipes avec l'Académie IBIG</h2>
+        <p style="color:var(--c-text-muted);line-height:1.7;margin-bottom:1.5rem;max-width:50ch;">L'Académie IBIG est la plateforme de formation officielle pour maîtriser SECRETIS. Cours vidéo, quiz interactifs, certificats vérifiables &mdash; inclus dans Pro et Enterprise.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+          <div style="text-align:center;padding:.875rem;background:var(--c-surface);border-radius:var(--radius-lg);border:1px solid var(--c-border);">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--c-navy);font-family:Georgia,serif;">50+</div>
+            <div style="font-size:.72rem;color:var(--c-text-muted);margin-top:.2rem;">Cours</div>
+          </div>
+          <div style="text-align:center;padding:.875rem;background:var(--c-surface);border-radius:var(--radius-lg);border:1px solid var(--c-border);">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--c-navy);font-family:Georgia,serif;">200+</div>
+            <div style="font-size:.72rem;color:var(--c-text-muted);margin-top:.2rem;">Leçons vidéo</div>
+          </div>
+          <div style="text-align:center;padding:.875rem;background:var(--c-surface);border-radius:var(--radius-lg);border:1px solid var(--c-border);">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--c-navy);font-family:Georgia,serif;">100%</div>
+            <div style="font-size:.72rem;color:var(--c-text-muted);margin-top:.2rem;">Certifiés</div>
+          </div>
+        </div>
+        <a href="#" class="btn btn-primary btn-lg" data-track="academy_cta">Accéder à l'Académie &rarr;</a>
+        <p style="font-size:.72rem;color:var(--c-text-muted);margin-top:.6rem;">Inclus dans l'abonnement Pro et Enterprise</p>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:1.25rem;">
+          <div class="academy-cat"><div class="academy-cat-icon">&#128640;</div><div class="academy-cat-name">Démarrage</div><div class="academy-cat-count">8 cours &middot; 32 leçons</div></div>
+          <div class="academy-cat"><div class="academy-cat-icon">&#9881;&#65039;</div><div class="academy-cat-name">Administration</div><div class="academy-cat-count">12 cours &middot; 48 leçons</div></div>
+          <div class="academy-cat"><div class="academy-cat-icon">&#128176;</div><div class="academy-cat-name">Finance SYSCOHADA</div><div class="academy-cat-count">10 cours &middot; 40 leçons</div></div>
+          <div class="academy-cat"><div class="academy-cat-icon">&#128241;</div><div class="academy-cat-name">Mobile &amp; PWA</div><div class="academy-cat-count">6 cours &middot; 22 leçons</div></div>
+          <div class="academy-cat"><div class="academy-cat-icon">&#128274;</div><div class="academy-cat-name">Sécurité</div><div class="academy-cat-count">7 cours &middot; 28 leçons</div></div>
+          <div class="academy-cat"><div class="academy-cat-icon">&#129302;</div><div class="academy-cat-name">IA &amp; SARA</div><div class="academy-cat-count">7 cours &middot; 30 leçons</div></div>
+        </div>
+        <div style="padding:1rem;border-radius:var(--radius-lg);border:1px solid var(--c-border);background:var(--c-surface);display:flex;align-items:center;gap:.75rem;">
+          <div style="width:2.25rem;height:2.25rem;border-radius:50%;background:var(--c-gold-pale);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">&#127942;</div>
+          <div>
+            <div style="font-weight:700;font-size:.85rem;color:var(--c-text);">Certificat IBIG SECRETIS</div>
+            <div style="font-size:.72rem;color:var(--c-text-muted);">Badge LinkedIn vérifiable &middot; Reconnu par 250+ employeurs partenaires en Afrique</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<!-- ============================================
-     JAVASCRIPT
-     ============================================ -->
+
+<!-- =========================================================
+     COOKIE BANNER
+     ========================================================= -->
+<div id="cookie-banner" class="cookie-banner" style="display:none;">
+  <p class="cookie-text">Nous utilisons des cookies pour améliorer votre expérience et analyser notre trafic. <a href="#" style="color:var(--c-blue);">En savoir plus</a></p>
+  <div class="cookie-actions">
+    <button id="cookie-refuse" class="btn btn-ghost btn-sm">Essentiels uniquement</button>
+    <button id="cookie-accept" class="btn btn-primary btn-sm">Accepter tout</button>
+  </div>
+</div>
 <script>
-(function() {
-  'use strict';
-
-  // --- Header scroll shadow ---
-  const header = document.getElementById('header');
-  const topbar = document.getElementById('topbar');
-  function onScroll() {
-    const scrolled = window.scrollY > 10;
-    header.classList.toggle('scrolled', scrolled);
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-
-  // --- Hamburger menu ---
-  const hamburger = document.getElementById('hamburger');
-  const nav = document.getElementById('nav');
-  hamburger.addEventListener('click', function() {
-    const isOpen = nav.classList.toggle('open');
-    hamburger.setAttribute('aria-expanded', isOpen);
-    const spans = hamburger.querySelectorAll('span');
-    if (isOpen) {
-      spans[0].style.transform = 'translateY(7px) rotate(45deg)';
-      spans[1].style.opacity = '0';
-      spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
-    } else {
-      spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+  (function() {
+    if (!localStorage.getItem('ibig_cookies_accepted')) {
+      document.getElementById('cookie-banner').style.display = 'flex';
     }
-  });
-
-  // Close nav on link click
-  nav.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      nav.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      hamburger.querySelectorAll('span').forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
-    });
-  });
-
-  // --- Billing toggle ---
-  const toggle = document.getElementById('billing-toggle');
-  const lblMonthly = document.getElementById('lbl-monthly');
-  const lblAnnual = document.getElementById('lbl-annual');
-  let isAnnual = false;
-  function updateToggle() {
-    toggle.classList.toggle('on', isAnnual);
-    toggle.setAttribute('aria-checked', isAnnual);
-    lblMonthly.classList.toggle('active', !isAnnual);
-    lblAnnual.classList.toggle('active', isAnnual);
-  }
-  toggle.addEventListener('click', function() { isAnnual = !isAnnual; updateToggle(); });
-  toggle.addEventListener('keydown', function(e) {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); isAnnual = !isAnnual; updateToggle(); }
-  });
-
-  // --- FAQ Accordion ---
-  const faqItems = document.querySelectorAll('.faq-item');
-  faqItems.forEach(function(item) {
-    const btn = item.querySelector('.faq-question');
-    btn.addEventListener('click', function() {
-      const isOpen = item.classList.contains('open');
-      faqItems.forEach(function(i) { i.classList.remove('open'); });
-      if (!isOpen) item.classList.add('open');
-    });
-  });
-
-  // --- Contact form submit (demo) ---
-  const form = document.getElementById('contact-form');
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = form.querySelector('.form-submit');
-    btn.innerHTML = '<i class="fa fa-check"></i> Demande envoyée !';
-    btn.style.background = 'var(--success)';
-    btn.disabled = true;
-    setTimeout(function() {
-      btn.innerHTML = '<i class="fa fa-paper-plane"></i> Envoyer ma demande';
-      btn.style.background = '';
-      btn.disabled = false;
-      form.reset();
-    }, 4000);
-  });
-
-  // --- Scroll-triggered fade-in for sections ---
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08 });
-
-    document.querySelectorAll('.benefit-card, .module-card, .security-badge, .pricing-card, .step').forEach(function(el) {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(18px)';
-      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-      observer.observe(el);
-    });
-  }
-
-  // --- Language buttons ---
-  document.querySelectorAll('.lang-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
-  });
-
-})();
+  })();
 </script>
+
 </body>
 </html>

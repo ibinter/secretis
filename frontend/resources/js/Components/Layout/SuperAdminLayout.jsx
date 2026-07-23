@@ -1,30 +1,36 @@
 import React, { useState } from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import {
-  LayoutDashboard, TrendingUp, Users2, Heart, Briefcase,
-  MessageSquare, Flag, Megaphone, Activity, Settings,
-  ChevronRight, Shield, LogOut, AlertTriangle, BarChart3,
+  LayoutDashboard, TrendingUp, Building2, CreditCard, BarChart3,
+  Headphones, Settings, Cog, ChevronRight, ChevronDown,
+  Shield, LogOut, AlertTriangle,
 } from 'lucide-react'
 import { Avatar } from '../UI'
 import ToastContainer from '../UI/Toast'
+import { superAdminNav } from './SuperAdminNav'
 
-const NAV_ITEMS = [
-  { label: 'Dashboard SaaS',   icon: LayoutDashboard, href: '/super-admin' },
-  { label: 'MRR & Revenus',    icon: TrendingUp,      href: '/super-admin/mrr' },
-  { label: 'Cohortes',         icon: BarChart3,       href: '/super-admin/cohorts' },
-  { label: 'Organisations',    icon: Briefcase,       href: '/super-admin/organizations' },
-  { label: 'Health Monitor',   icon: Heart,           href: '/super-admin/health' },
-  { label: 'CRM Pipeline',     icon: Users2,          href: '/super-admin/crm' },
-  { label: 'Support',          icon: MessageSquare,   href: '/super-admin/support' },
-  { label: 'Feature Flags',    icon: Flag,            href: '/super-admin/flags' },
-  { label: 'Annonces',         icon: Megaphone,       href: '/super-admin/announcements' },
-  { label: 'Monitoring',       icon: Activity,        href: '/super-admin/monitoring' },
-  { label: 'Paramètres',       icon: Settings,        href: '/super-admin/settings' },
-]
+// ─── Icône resolver ──────────────────────────────────────────────────────────
+const ICON_MAP = {
+  LayoutDashboard,
+  TrendingUp,
+  Building2,
+  CreditCard,
+  BarChart3,
+  Headphones,
+  Settings,
+  Cog,
+}
 
-function SuperNavItem({ item, currentUrl }) {
-  const isActive = currentUrl?.startsWith(item.href) && (item.href !== '/super-admin' || currentUrl === '/super-admin')
-  const Icon = item.icon
+function resolveIcon(name) {
+  return ICON_MAP[name] ?? Settings
+}
+
+// ─── Item plat (sans enfants) ─────────────────────────────────────────────────
+function NavLeaf({ item, currentUrl }) {
+  const isActive = item.exact
+    ? currentUrl === item.href
+    : currentUrl?.startsWith(item.href)
+  const Icon = resolveIcon(item.icon)
 
   return (
     <Link
@@ -36,22 +42,76 @@ function SuperNavItem({ item, currentUrl }) {
           : 'text-blue-200/70 hover:text-white hover:bg-white/10',
       ].join(' ')}
     >
-      <Icon size={16} className="shrink-0" />
-      {item.label}
-      {isActive && <ChevronRight size={14} className="ml-auto opacity-60" />}
+      {Icon && <Icon size={16} className="shrink-0" />}
+      <span className="truncate">{item.label}</span>
+      {isActive && <ChevronRight size={14} className="ml-auto opacity-60 shrink-0" />}
     </Link>
   )
 }
 
-export default function SuperAdminLayout({ children }) {
+// ─── Groupe avec enfants (accordéon) ─────────────────────────────────────────
+function NavGroup({ item, currentUrl }) {
+  const Icon = resolveIcon(item.icon)
+  const isChildActive = item.children?.some(c => currentUrl?.startsWith(c.href))
+  const [open, setOpen] = useState(isChildActive)
+
+  return (
+    <div className="mx-2">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={[
+          'flex items-center gap-3 w-full px-2 py-2.5 text-sm font-medium transition-colors rounded-lg',
+          isChildActive
+            ? 'text-white'
+            : 'text-blue-200/70 hover:text-white hover:bg-white/10',
+        ].join(' ')}
+      >
+        {Icon && <Icon size={16} className="shrink-0" />}
+        <span className="truncate flex-1 text-left">{item.label}</span>
+        {open
+          ? <ChevronDown size={13} className="shrink-0 opacity-60" />
+          : <ChevronRight size={13} className="shrink-0 opacity-60" />
+        }
+      </button>
+
+      {open && (
+        <div className="mt-0.5 ml-4 border-l border-white/10 pl-2 space-y-0.5">
+          {item.children.map(child => {
+            const active = currentUrl?.startsWith(child.href)
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={[
+                  'flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors',
+                  active
+                    ? 'bg-white/15 text-white'
+                    : 'text-blue-200/60 hover:text-white hover:bg-white/10',
+                ].join(' ')}
+              >
+                <span className="w-1 h-1 rounded-full bg-current opacity-60 shrink-0" />
+                {child.label}
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Layout principal ─────────────────────────────────────────────────────────
+export default function SuperAdminLayout({ children, title }) {
   const { url } = usePage()
   const { auth } = usePage().props ?? {}
   const [warningDismissed, setWarningDismissed] = useState(false)
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside className="w-64 shrink-0 flex flex-col bg-[#1A3A5C] h-screen sticky top-0">
+
         {/* Logo */}
         <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
@@ -61,26 +121,34 @@ export default function SuperAdminLayout({ children }) {
             <p className="text-white font-bold text-sm leading-tight">IBIG Soft</p>
             <p className="text-blue-200/70 text-[10px] font-medium">Super Admin</p>
           </div>
-          <span className="ml-auto px-2 py-0.5 rounded text-[10px] font-black bg-[#C0392B] text-white tracking-wide">
-            SUPER ADMIN
+          <span className="ml-auto px-2 py-0.5 rounded text-[10px] font-black bg-[#C0392B] text-white tracking-wide shrink-0">
+            SUPER
           </span>
         </div>
 
-        {/* Warning */}
+        {/* Alerte */}
         {!warningDismissed && (
           <div className="mx-2 mt-3 px-3 py-2 rounded-lg bg-[#C0392B]/20 border border-[#C0392B]/40 flex items-start gap-2">
             <AlertTriangle size={14} className="text-[#C0392B] shrink-0 mt-0.5" />
-            <p className="text-[11px] text-red-200 leading-tight">
-              Vous êtes en mode Super Admin — toutes vos actions sont enregistrées
+            <p className="text-[11px] text-red-200 leading-tight flex-1">
+              Mode Super Admin — actions enregistrées
             </p>
+            <button
+              onClick={() => setWarningDismissed(true)}
+              className="text-red-300 hover:text-white text-[10px] shrink-0"
+            >
+              ✕
+            </button>
           </div>
         )}
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 space-y-0.5">
-          {NAV_ITEMS.map(item => (
-            <SuperNavItem key={item.href} item={item} currentUrl={url} />
-          ))}
+        <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
+          {superAdminNav.map(item =>
+            item.children
+              ? <NavGroup key={item.label} item={item} currentUrl={url} />
+              : <NavLeaf  key={item.href}  item={item} currentUrl={url} />
+          )}
         </nav>
 
         {/* Footer */}
@@ -106,16 +174,17 @@ export default function SuperAdminLayout({ children }) {
 
       {/* ── Main ─────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+
         {/* Header */}
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 px-6 shrink-0">
-          <h1 className="text-base font-semibold text-[#1A3A5C] dark:text-white">
-            IBIG Soft — Super Admin
+          <h1 className="text-base font-semibold text-[#1A3A5C] dark:text-white truncate">
+            {title ?? 'IBIG Soft — Super Admin'}
           </h1>
-          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#C0392B] text-white tracking-wide">
+          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#C0392B] text-white tracking-wide shrink-0">
             SUPER ADMIN
           </span>
           <div className="flex-1" />
-          <span className="text-xs text-gray-400 italic">
+          <span className="text-xs text-gray-400 italic hidden sm:block">
             Session enregistrée — {new Date().toLocaleString('fr-FR')}
           </span>
         </header>

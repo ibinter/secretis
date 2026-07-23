@@ -110,6 +110,18 @@ class AnnouncementController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // PATCH /superadmin/announcements/{id}  — Toggle active, etc.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function patch(Request $request, int $id): JsonResponse
+    {
+        $announcement = PlatformAnnouncement::findOrFail($id);
+        $data = $request->only(['active', 'is_published', 'title_fr', 'title_en', 'message_fr', 'message_en']);
+        $announcement->update($data);
+        return response()->json($announcement->fresh());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // POST /superadmin/announcements/{announcement}/publish
     // ─────────────────────────────────────────────────────────────────────────
 

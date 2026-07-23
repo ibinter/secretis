@@ -609,6 +609,16 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     });
 
     // -------------------------------------------------------------------------
+    // ACADÉMIE IBIG SECRETIS — API (Section 12.4)
+    // -------------------------------------------------------------------------
+    Route::prefix('academy')->name('academy.')->group(function () {
+        Route::post('/progress', [\App\Http\Controllers\AcademyController::class, 'markLessonComplete'])->name('progress');
+        Route::post('/quiz',     [\App\Http\Controllers\AcademyController::class, 'submitQuiz'])->name('quiz');
+        Route::get('/resources/{id}/download', [\App\Http\Controllers\AcademyController::class, 'downloadResource'])->name('resources.download');
+        Route::get('/certificate/{uuid}/pdf',  [\App\Http\Controllers\AcademyController::class, 'downloadCertificatePdf'])->name('certificate.pdf');
+    });
+
+    // -------------------------------------------------------------------------
     // SIGNATURES ÉLECTRONIQUES (Vague 7)
     // -------------------------------------------------------------------------
     Route::prefix('signatures')->name('signatures.')->group(function () {

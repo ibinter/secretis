@@ -497,4 +497,89 @@ class SystemController extends Controller
             return 0;
         }
     }
+
+    // -------------------------------------------------------------------------
+    // updateSettings() — Mise à jour d'une section de configuration
+    // PUT /superadmin/settings/{section}
+    // -------------------------------------------------------------------------
+
+    public function updateSettings(Request $request, string $section): JsonResponse
+    {
+        $allowed = ['ibig', 'smtp', 'ai', 'security', 'trial', 'license'];
+        abort_unless(in_array($section, $allowed), 422, 'Section invalide.');
+
+        $data = $request->all();
+
+        // Stocker dans la config DB ou un fichier de paramètres
+        $key = "platform_settings.{$section}";
+        Cache::forever($key, $data);
+
+        // Pour SMTP : mettre à jour le .env en mémoire (ne pas modifier le fichier)
+        if ($section === 'smtp' && isset($data['host'])) {
+            config([
+                'mail.mailers.smtp.host'       => $data['host'],
+                'mail.mailers.smtp.port'       => $data['port'] ?? 587,
+                'mail.mailers.smtp.username'   => $data['username'] ?? null,
+                'mail.mailers.smtp.password'   => $data['password'] ?? null,
+                'mail.mailers.smtp.encryption' => $data['encryption'] ?? 'tls',
+                'mail.from.name'               => $data['from_name'] ?? config('mail.from.name'),
+                'mail.from.address'            => $data['from_email'] ?? config('mail.from.address'),
+            ]);
+        }
+
+        try {
+            DB::table('platform_settings')->updateOrInsert(
+                ['section' => $section],
+                ['data' => json_encode($data), 'updated_at' => now()]
+            );
+        } catch (\Throwable) {
+            // table may not exist in all environments
+        }
+
+        Log::info("SuperAdmin settings updated: {$section}", ['by' => auth()->id()]);
+
+        return response()->json(['message' => "Section '{$section}' mise à jour."]);
+    }
+
+    // -------------------------------------------------------------------------
+    // testSmtp() — Tester la connexion SMTP
+    // POST /superadmin/settings/smtp/test
+    // -------------------------------------------------------------------------
+
+    public function testSmtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'host'       => 'required|string',
+            'port'       => 'required|integer',
+            'username'   => 'nullable|string',
+            'password'   => 'nullable|string',
+            'from_email' => 'required|email',
+            'from_name'  => 'nullable|string',
+            'encryption' => 'nullable|string',
+        ]);
+
+        // Configurer temporairement le mailer
+        config([
+            'mail.mailers.smtp.host'       => $request->host,
+            'mail.mailers.smtp.port'       => (int) $request->port,
+            'mail.mailers.smtp.username'   => $request->username,
+            'mail.mailers.smtp.password'   => $request->password,
+            'mail.mailers.smtp.encryption' => $request->encryption ?? 'tls',
+            'mail.from.address'            => $request->from_email,
+            'mail.from.name'               => $request->from_name ?? 'SECRETIS',
+        ]);
+
+        try {
+            Mail::raw('Test de connexion SMTP — IBIG SECRETIS SuperAdmin', function ($msg) use ($request) {
+                $msg->to(auth()->user()->email)
+                    ->subject('[SECRETIS] Test SMTP — ' . now()->format('d/m/Y H:i'));
+            });
+
+            return response()->json(['message' => 'Email de test envoyé avec succès.']);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Connexion SMTP échouée : ' . $e->getMessage(),
+            ], 422);
+        }
+    }
 }
