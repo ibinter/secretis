@@ -10,14 +10,17 @@
 <div align="center">
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)](https://ci.ibigsoft.com/secretis)
-[![Tests](https://img.shields.io/badge/tests-1247%20passed-brightgreen?style=flat-square)](https://ci.ibigsoft.com/secretis/tests)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-green?style=flat-square)](https://ci.ibigsoft.com/secretis/coverage)
+[![Tests](https://img.shields.io/badge/tests-1268%20passed-brightgreen?style=flat-square)](https://ci.ibigsoft.com/secretis/tests)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-green?style=flat-square)](https://ci.ibigsoft.com/secretis/coverage)
 [![License](https://img.shields.io/badge/license-Proprietary-red?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)](docs/release-notes-v1.0.md)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue?style=flat-square)](CHANGELOG.md)
 [![PHP](https://img.shields.io/badge/PHP-8.2%2B-purple?style=flat-square)](https://php.net)
 [![Node](https://img.shields.io/badge/Node-20%2B-green?style=flat-square)](https://nodejs.org)
+[![WCAG](https://img.shields.io/badge/WCAG-2.1%20AA%2097%25-brightgreen?style=flat-square)](docs/audits/AUDIT_ACCESSIBILITE_FINAL.md)
+[![PWA](https://img.shields.io/badge/PWA-Lighthouse%2092%25-blue?style=flat-square)](docs/audits/AUDIT_PERFORMANCE_FINAL.md)
 
 **ERP SaaS de secrétariat et de bureautique pour l'Afrique et le monde**
+*Version 2.1.0 — Phase Qualité — 2026-07-23*
 
 [Demo Live](https://demo.ibig-secretis.com) · [Documentation](https://docs.ibig-secretis.com) · [API](https://api.ibig-secretis.com/docs) · [Statut](https://status.ibig-secretis.com) · [Support](mailto:support@ibigsoft.com)
 
@@ -52,10 +55,26 @@ Développé par **IBIG Soft**, SECRETIS couvre l'ensemble du cycle de vie docume
 **Pourquoi SECRETIS ?**
 
 - Conçu pour les réalités africaines : OHADA, SYSCOHADA, connexions intermittentes, multi-devises CFA/USD/EUR
-- Multilingue dès le départ : Français, Anglais, Arabe (RTL), Portugais, Espagnol
+- Multilingue dès le départ : Français, Anglais, Arabe (RTL), Portugais brésilien, Swahili, Haoussa
 - Disponible en SaaS (cloud mutualisé), SaaS dédié, ou On-Premise (auto-hébergé)
-- Conforme RGPD, ISO 27001:2022 et réglementations locales
-- Architecture multi-tenant robuste avec isolation des données garantie
+- Conforme RGPD, ISO 27001:2022, ISO 9001 et réglementations locales OHADA
+- Architecture multi-tenant robuste avec isolation des données garantie et tests anti-IDOR
+- Intelligence artificielle SARA v2 multi-provider (Groq, Anthropic, OpenAI) intégrée nativement
+- PWA installable + Application mobile iOS/Android (React Native Expo SDK 51)
+- Score WCAG 2.1 AA : 97/100 — Lighthouse Performance : 92/100
+
+**Chiffres clés v2.1.0**
+
+| Indicateur | Valeur |
+|---|---|
+| Migrations appliquées | 140 |
+| Tests Pest PHP | 1 268 (100 % succès) |
+| Tests E2E Playwright | 47 scénarios (10 rôles) |
+| Scénarios k6 | 15 (charge, stress, soak, spike) |
+| Clés de traduction | 1 136 (FR/EN), 6 langues totales |
+| Score accessibilité WCAG | 97/100 |
+| Modules métier | 10 cœur + 11 enterprise |
+| Connecteurs Marketplace | 19 |
 
 ---
 

@@ -3,29 +3,45 @@ import path from 'path';
 
 /**
  * Configuration Playwright — IBIG SECRETIS ERP
- * Couvre 10 rôles, desktop + mobile, setup/teardown global.
  *
  * Projets :
- *   setup      — crée les auth states pour chaque rôle (dépendance universelle)
- *   cleanup    — supprime les données E2E après la suite (teardown du setup)
- *   chromium   — Chrome desktop, auth admin par défaut
- *   firefox    — Firefox desktop
- *   mobile-chrome — Pixel 5
- *   mobile-safari — iPhone 12 (uniquement les specs *mobile*)
+ *   setup         — crée les auth states pour chaque rôle (dépendance universelle)
+ *   cleanup       — supprime les données E2E après la suite (teardown du setup)
+ *   chromium      — Chrome desktop, navigateur principal
+ *   firefox       — Firefox desktop
+ *   mobile-chrome — Pixel 7 (Android)
+ *   mobile-safari — iPhone 14 (iOS)
+ *
+ * Suites :
+ *   tests/        — Tests fonctionnels de base (auth, agenda, courrier…)
+ *   roles/        — Un spec par rôle Spatie (10 rôles)
+ *   security/     — Multitenancy et paiements
+ *   features/     — Recherche, notifications, SARA, academy
+ *   accessibility/ — WCAG 2.1 clavier/focus
+ *   recette/      — Flux métier complets (secrétaire, dirigeant, admin)
+ *   regression/   — Non-régression sécurité paiements, multitenancy, a11y
+ *   performance/  — Temps de chargement pages critiques
  */
 export default defineConfig({
   // -------------------------------------------------------------------------
-  // Répertoire racine : couvre tests/, roles/, security/, features/
+  // Répertoire racine : couvre toutes les suites
   // -------------------------------------------------------------------------
   testDir: '.',
 
-  // Exclure node_modules et les fichiers de config
-  testIgnore: ['**/node_modules/**', '**/.auth/**'],
+  // Exclure node_modules, .auth et les fichiers de configuration
+  testIgnore: [
+    '**/node_modules/**',
+    '**/.auth/**',
+    '**/playwright.config.ts',
+    '**/global.setup.ts',
+    '**/global.teardown.ts',
+  ],
 
-  // Timeout global par test (45 s pour les tests de rôles complexes)
+  // Timeout global par test
+  // recette/ et performance/ peuvent être longs → 45 s
   timeout: 45_000,
 
-  // Timeout pour les expect()
+  // Timeout pour les assertions expect()
   expect: { timeout: 12_000 },
 
   fullyParallel: true,
@@ -33,31 +49,42 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
 
+  // -------------------------------------------------------------------------
   // Reporters
+  // -------------------------------------------------------------------------
   reporter: [
-    ['html', { outputFolder: '../playwright-report', open: 'never' }],
-    ['junit', { outputFile: '../test-results/junit.xml' }],
+    // Rapport HTML interactif (navigateur)
+    ['html', { outputFolder: 'reports/html', open: 'never' }],
+    // JSON machine-readable (dashboards, scripts de recette)
+    ['json', { outputFile: 'reports/results.json' }],
+    // JUnit pour les CI (Jenkins, GitLab, GitHub Actions)
+    ['junit', { outputFile: 'reports/junit.xml' }],
+    // Annotations inline GitHub Actions (annotations PR)
+    ...(process.env.CI ? [['github'] as ['github']] : []),
+    // Sortie console lisible en local
     ['list'],
   ],
 
+  // -------------------------------------------------------------------------
   // Artifacts globaux
+  // -------------------------------------------------------------------------
   use: {
     baseURL: process.env.E2E_BASE_URL ?? process.env.BASE_URL ?? 'http://localhost:8000',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    trace: process.env.CI ? 'on-first-retry' : 'off',
+    video: 'on-first-retry',
+    trace: 'on-first-retry',
     extraHTTPHeaders: { 'Accept-Language': 'fr-FR,fr;q=0.9' },
     locale: 'fr-FR',
     timezoneId: 'Africa/Abidjan',
   },
 
-  outputDir: '../test-results/artifacts',
+  outputDir: 'reports/artifacts',
 
+  // -------------------------------------------------------------------------
+  // Projets
+  // -------------------------------------------------------------------------
   projects: [
-    // -------------------------------------------------------------------------
-    // Setup : pré-authentifie les 10 rôles et les stocke dans .auth/
-    // Teardown : nettoie les données E2E après la suite complète
-    // -------------------------------------------------------------------------
+    // -- Orchestration -------------------------------------------------------
     {
       name: 'setup',
       testMatch: /global\.setup\.ts/,
@@ -67,19 +94,14 @@ export default defineConfig({
       name: 'cleanup',
       testMatch: /global\.teardown\.ts/,
     },
-
-    // Setup legacy (tests/auth.setup.ts pour compatibilité avec les specs existants)
+    // Setup legacy pour les specs tests/ qui utilisent tests/auth.setup.ts
     {
       name: 'legacy-setup',
       testMatch: /tests[\\/]auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
 
-    // -------------------------------------------------------------------------
-    // Desktop Chrome — navigateur principal
-    // auth state : admin (les specs qui ont besoin d'un rôle précis
-    // chargent leur propre storageState via test.use)
-    // -------------------------------------------------------------------------
+    // -- Desktop Chrome (navigateur principal) --------------------------------
     {
       name: 'chromium',
       use: {
@@ -89,9 +111,7 @@ export default defineConfig({
       dependencies: ['setup', 'legacy-setup'],
     },
 
-    // -------------------------------------------------------------------------
-    // Firefox
-    // -------------------------------------------------------------------------
+    // -- Desktop Firefox ------------------------------------------------------
     {
       name: 'firefox',
       use: {
@@ -101,37 +121,46 @@ export default defineConfig({
       dependencies: ['setup', 'legacy-setup'],
     },
 
-    // -------------------------------------------------------------------------
-    // Mobile Chrome — Pixel 5
-    // -------------------------------------------------------------------------
+    // -- Mobile Chrome — Pixel 7 ----------------------------------------------
     {
       name: 'mobile-chrome',
       use: {
-        ...devices['Pixel 5'],
+        ...devices['Pixel 7'],
         storageState: path.join(__dirname, '.auth/admin.json'),
       },
       dependencies: ['setup', 'legacy-setup'],
     },
 
-    // -------------------------------------------------------------------------
-    // Mobile Safari — iPhone 12 (uniquement les specs *mobile*)
-    // -------------------------------------------------------------------------
+    // -- Mobile Safari — iPhone 14 (specs *mobile* uniquement) ---------------
     {
       name: 'mobile-safari',
-      use: { ...devices['iPhone 12'] },
+      use: {
+        ...devices['iPhone 14'],
+        storageState: path.join(__dirname, '.auth/admin.json'),
+      },
       testMatch: /.*mobile.*/,
       dependencies: ['setup', 'legacy-setup'],
     },
   ],
 
   // -------------------------------------------------------------------------
-  // Serveur web (décommentez en CI ou si vous ne l'avez pas déjà lancé)
+  // Serveur web
+  // Activé automatiquement en CI ; en local le serveur doit être déjà lancé.
   // -------------------------------------------------------------------------
-  // webServer: {
-  //   command: 'php artisan serve --env=testing --port=8000',
-  //   cwd: '../backend',
-  //   port: 8000,
-  //   reuseExistingServer: !process.env.CI,
-  //   timeout: 60_000,
-  // },
+  webServer: process.env.CI
+    ? {
+        command: 'php artisan serve --env=testing --port=8000',
+        cwd: path.join(__dirname, '..'),
+        port: 8000,
+        reuseExistingServer: false,
+        timeout: 120_000,
+        env: {
+          APP_ENV: 'testing',
+          APP_DEBUG: 'false',
+          CACHE_DRIVER: 'array',
+          SESSION_DRIVER: 'array',
+          QUEUE_CONNECTION: 'sync',
+        },
+      }
+    : undefined,
 });

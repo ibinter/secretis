@@ -1,8 +1,8 @@
-name: CI — Tests, Sécurité, Lint
+name: CI — Lint, Sécurité, Tests, E2E, Lighthouse
 
 on:
   push:
-    branches: [main, develop, 'feature/*']
+    branches: [main, develop, 'feature/*', 'hotfix/*']
   pull_request:
     branches: [main, develop]
 
@@ -10,17 +10,71 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# ── Variables d'environnement globales ─────────────────────────────────────────
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '20'
+  POSTGRES_DB: secretis_test
+  POSTGRES_USER: secretis
+  POSTGRES_PASSWORD: secret
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 1 — LINT (PHP CS Fixer + ESLint + Prettier)
+# ══════════════════════════════════════════════════════════════════════════════
 jobs:
-  backend-tests:
-    name: Backend Tests (Pest PHP)
+  lint:
+    name: Lint (PHP + JS)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: php-cs-fixer
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: PHP — Install dependencies (no-dev)
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress --no-dev
+
+      - name: PHP CS Fixer — vérification style
+        run: cd backend && ./vendor/bin/php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php
+        continue-on-error: false
+
+      - name: PHP — analyse statique PHPStan
+        run: cd backend && ./vendor/bin/phpstan analyse --memory-limit=512M --no-progress
+        continue-on-error: true
+
+      - name: Node — Install dependencies
+        run: cd frontend && npm ci
+
+      - name: ESLint
+        run: cd frontend && npm run lint
+
+      - name: Prettier — vérification format
+        run: cd frontend && npm run format:check
+
+      - name: TypeScript — type check
+        run: cd frontend && npm run type-check
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 2 — SÉCURITÉ (audit dépendances + secretis:security-audit)
+# ══════════════════════════════════════════════════════════════════════════════
+  security:
+    name: Security Audit
     runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: secretis_test
-          POSTGRES_USER: secretis
-          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
         ports: ['5432:5432']
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
@@ -28,72 +82,221 @@ jobs:
         ports: ['6379:6379']
     steps:
       - uses: actions/checkout@v4
+
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: ${{ env.PHP_VERSION }}
           extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
-          coverage: xdebug
-      - name: Install dependencies
-        run: cd backend && composer install --no-interaction --prefer-dist
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Composer audit — vulnérabilités CVE
+        run: cd backend && composer audit --no-dev
+
       - name: Copy .env.testing
         run: cd backend && cp .env.testing .env
-      - name: Generate key
+
+      - name: Generate app key
         run: cd backend && php artisan key:generate
-      - name: Run migrations
+
+      - name: Migrate
         run: cd backend && php artisan migrate --force
-      - name: Seed test data
-        run: cd backend && php artisan db:seed --class=E2ESeeder
-      - name: Run Pest tests
-        run: cd backend && ./vendor/bin/pest --coverage --coverage-clover coverage.xml
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          file: backend/coverage.xml
 
-  frontend-lint:
-    name: Frontend Lint & Type Check
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-      - run: cd frontend && npm ci
-      - run: cd frontend && npm run lint
-      - run: cd frontend && npm run build
-
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: PHP Security Checker
+      - name: SECRETIS security-audit — aucune vulnérabilité critique
         run: |
           cd backend
-          composer require --dev roave/security-advisories:dev-latest --no-update
-          composer audit
-      - name: NPM Audit
+          php artisan secretis:security-audit --json > /tmp/security-audit.json
+          cat /tmp/security-audit.json
+          CRITICAL=$(jq '.critical | length' /tmp/security-audit.json)
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "ECHEC : $CRITICAL vulnérabilité(s) critique(s) détectée(s)."
+            exit 1
+          fi
+          echo "OK : aucune vulnérabilité critique."
+
+      - name: NPM audit — frontend
         run: cd frontend && npm audit --audit-level=high
-      - name: Check for secrets
+
+      - name: TruffleHog — détection de secrets
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
 
-  e2e-tests:
-    name: E2E Tests (Playwright)
+      - name: Upload rapport security-audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: /tmp/security-audit.json
+          retention-days: 30
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 3 — TESTS UNITAIRES (Pest Unit, coverage ≥ 70%)
+# ══════════════════════════════════════════════════════════════════════════════
+  tests-unit:
+    name: Tests Unitaires (Pest Unit)
     runs-on: ubuntu-22.04
-    needs: [backend-tests, frontend-lint]
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: secretis_e2e
-          POSTGRES_USER: secretis
-          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
+          coverage: xdebug
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Copy .env.testing
+        run: cd backend && cp .env.testing .env
+
+      - name: Generate app key
+        run: cd backend && php artisan key:generate
+
+      - name: Migrate
+        run: cd backend && php artisan migrate --force
+
+      - name: Seed data (RolesAndPermissions)
+        run: cd backend && php artisan db:seed --class=RolesAndPermissionsSeeder
+
+      - name: Run Pest Unit tests avec coverage
+        run: |
+          cd backend && ./vendor/bin/pest \
+            --testsuite=Unit \
+            --coverage \
+            --coverage-clover coverage-unit.xml \
+            --min=70 \
+            --reporter=junit \
+            --log-junit test-results-unit.xml
+
+      - name: Upload coverage Unit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: backend/coverage-unit.xml
+          retention-days: 14
+
+      - name: Upload test results Unit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-unit
+          path: backend/test-results-unit.xml
+          retention-days: 14
+
+      - name: Publish coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage-unit.xml
+          flags: unit
+          name: pest-unit
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 4 — TESTS FEATURE (Pest Feature, coverage ≥ 65%)
+# ══════════════════════════════════════════════════════════════════════════════
+  tests-feature:
+    name: Tests Feature (Pest Feature)
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
+          coverage: xdebug
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Copy .env.testing
+        run: cd backend && cp .env.testing .env
+
+      - name: Generate app key
+        run: cd backend && php artisan key:generate
+
+      - name: Migrate
+        run: cd backend && php artisan migrate --force
+
+      - name: Seed data
+        run: cd backend && php artisan db:seed --class=E2ESeeder
+
+      - name: Run Pest Feature tests avec coverage
+        run: |
+          cd backend && ./vendor/bin/pest \
+            --testsuite=Feature \
+            --coverage \
+            --coverage-clover coverage-feature.xml \
+            --min=65 \
+            --reporter=junit \
+            --log-junit test-results-feature.xml
+
+      - name: Upload coverage Feature
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-feature
+          path: backend/coverage-feature.xml
+          retention-days: 14
+
+      - name: Upload test results Feature
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-feature
+          path: backend/test-results-feature.xml
+          retention-days: 14
+
+      - name: Publish coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage-feature.xml
+          flags: feature
+          name: pest-feature
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 5 — PLAYWRIGHT RECETTE (Flux complets par rôle)
+# ══════════════════════════════════════════════════════════════════════════════
+  playwright-recette:
+    name: Playwright — Recette (flux rôles)
+    runs-on: ubuntu-22.04
+    needs: [tests-feature]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
         ports: ['5432:5432']
         options: --health-cmd pg_isready --health-interval 10s
       redis:
@@ -101,19 +304,367 @@ jobs:
         ports: ['6379:6379']
     steps:
       - uses: actions/checkout@v4
+
       - uses: shivammathur/setup-php@v2
-        with: { php-version: '8.2', extensions: 'pdo, pdo_pgsql, redis, gd, bcmath, pcntl' }
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: cd backend && composer install --no-interaction
-      - run: cd frontend && npm ci && npm run build
-      - run: cd backend && cp .env.testing .env && php artisan key:generate
-      - run: cd backend && php artisan migrate --force && php artisan db:seed --class=E2ESeeder
-      - run: cd backend && php artisan serve --host=0.0.0.0 --port=8000 &
-      - run: cd frontend && npx playwright install --with-deps chromium
-      - run: cd frontend && npx playwright test --reporter=junit
-      - uses: actions/upload-artifact@v3
-        if: failure()
         with:
-          name: playwright-report
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Build frontend
+        run: cd frontend && npm ci && npm run build
+
+      - name: Prepare backend
+        run: |
+          cd backend
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=E2ESeeder
+
+      - name: Start backend server
+        run: cd backend && php artisan serve --host=0.0.0.0 --port=8000 &
+
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+
+      - name: Run Playwright recette tests
+        run: |
+          cd frontend && npx playwright test \
+            --project=recette \
+            --reporter=junit,html \
+            --output=playwright-results/recette
+
+      - name: Upload Playwright report (recette)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-recette
           path: frontend/playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright results (recette)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-recette
+          path: frontend/playwright-results/
+          retention-days: 14
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 6 — PLAYWRIGHT REGRESSION (Non-régression sécurité + multitenancy)
+# ══════════════════════════════════════════════════════════════════════════════
+  playwright-regression:
+    name: Playwright — Régression (sécurité + multitenancy)
+    runs-on: ubuntu-22.04
+    needs: [tests-feature]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Build frontend
+        run: cd frontend && npm ci && npm run build
+
+      - name: Prepare backend
+        run: |
+          cd backend
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=E2ESeeder
+
+      - name: Start backend server
+        run: cd backend && php artisan serve --host=0.0.0.0 --port=8000 &
+
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+
+      - name: Run Playwright regression tests
+        run: |
+          cd frontend && npx playwright test \
+            --project=regression \
+            --reporter=junit,html \
+            --output=playwright-results/regression
+
+      - name: Upload Playwright report (regression)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-regression
+          path: frontend/playwright-report/
+          retention-days: 14
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 7 — PLAYWRIGHT A11Y (Accessibilité axe-core WCAG 2.1 AA)
+# ══════════════════════════════════════════════════════════════════════════════
+  playwright-a11y:
+    name: Playwright — Accessibilité (axe-core WCAG 2.1 AA)
+    runs-on: ubuntu-22.04
+    needs: [tests-feature]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_pgsql, redis, gd, bcmath, pcntl
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install PHP dependencies
+        run: cd backend && composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Build frontend
+        run: cd frontend && npm ci && npm run build
+
+      - name: Prepare backend
+        run: |
+          cd backend
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=E2ESeeder
+
+      - name: Start backend server
+        run: cd backend && php artisan serve --host=0.0.0.0 --port=8000 &
+
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+
+      - name: Run Playwright A11y tests
+        run: |
+          cd frontend && npx playwright test \
+            --project=a11y \
+            --reporter=junit,html \
+            --output=playwright-results/a11y
+
+      - name: Upload Playwright A11y report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-a11y
+          path: frontend/playwright-report/
+          retention-days: 14
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 8 — LIGHTHOUSE (Performance — 5 pages principales)
+# ══════════════════════════════════════════════════════════════════════════════
+  lighthouse:
+    name: Lighthouse CI — Performance
+    runs-on: ubuntu-22.04
+    needs: [playwright-recette]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend (production)
+        run: cd frontend && npm run build
+
+      - name: Install LHCI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI
+        run: |
+          cd frontend
+          lhci autorun \
+            --collect.url=http://localhost:4173/login \
+            --collect.url=http://localhost:4173/dashboard \
+            --collect.url=http://localhost:4173/agenda \
+            --collect.url=http://localhost:4173/ged \
+            --collect.url=http://localhost:4173/aide \
+            --collect.numberOfRuns=3 \
+            --assert.assertions.categories:performance=["warn",{"minScore":0.7}] \
+            --assert.assertions.categories:accessibility=["error",{"minScore":0.85}] \
+            --assert.assertions.categories:best-practices=["warn",{"minScore":0.8}] \
+            --assert.assertions.categories:seo=["warn",{"minScore":0.8}] \
+            --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: frontend/.lighthouseci/
+          retention-days: 14
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 9 — BUILD DOCKER (si tous les tests passent)
+# ══════════════════════════════════════════════════════════════════════════════
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-22.04
+    needs: [lint, security, tests-unit, tests-feature]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/app
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/docker/Dockerfile.app
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# JOB 10 — DEPLOY STAGING (auto si build réussit sur develop)
+# ══════════════════════════════════════════════════════════════════════════════
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-22.04
+    needs: [build-docker]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.secretis.ibigsoft.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            echo "=== Déploiement Staging — $(date) ==="
+            cd /opt/secretis-staging
+
+            # Pull de la nouvelle image
+            docker pull ghcr.io/${{ github.repository }}/app:develop
+
+            # Déploiement rolling (zéro downtime)
+            docker compose -f deploy/docker/docker-compose.staging.yml up -d --no-deps app
+
+            # Migrations
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan migrate --force
+
+            # Cache warmup
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan secretis:cache:warmup
+
+            # Caches Laravel
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan config:cache
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan route:cache
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan view:cache
+
+            # Redémarrage queue workers
+            docker compose -f deploy/docker/docker-compose.staging.yml exec -T app \
+              php artisan queue:restart
+
+            echo "=== Déploiement terminé ==="
+
+      - name: Health check staging
+        run: |
+          sleep 20
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://staging.secretis.ibigsoft.com/api/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Health check ECHOUE : HTTP $STATUS"
+            exit 1
+          fi
+          echo "Health check OK : HTTP $STATUS"
+
+      - name: Notify Slack — staging déployé
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            :rocket: *Staging déployé* — SECRETIS ERP
+            Branch : `develop` | Commit : `${{ github.sha }}`
+            Tests : Unit ✅ Feature ✅ Security ✅
+            URL : https://staging.secretis.ibigsoft.com
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

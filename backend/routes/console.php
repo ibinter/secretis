@@ -666,3 +666,33 @@ Schedule::command('secretis:clean-email-logs --days=90 --no-interaction')
     ->weeklyOn(0, '03:00')
     ->name('secretis-clean-email-logs')
     ->description('Nettoyage logs emails anciens (RGPD)');
+
+// -------------------------------------------------------------------------
+// VAGUE 8 FINALE — Notifications expiration in-app + Emails trial ending
+// -------------------------------------------------------------------------
+
+// Vérification licences expirant dans 7j, 3j, 1j — notifications in-app + email
+Schedule::command('secretis:check-expiring-licenses')
+    ->dailyAt('08:30')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->name('secretis-check-expiring-licenses')
+    ->description('Notifications in-app et emails licences expirant sous peu');
+
+// Email J-7 fin d'essai (dispatche le job via la queue emails)
+Schedule::job(new \App\Jobs\SendTrialEndingEmailJob(days: 7))
+    ->dailyAt('09:00')
+    ->name('trial-ending-email-7')
+    ->description('Email de rappel fin d\'essai J-7');
+
+// Email J-3 fin d'essai
+Schedule::job(new \App\Jobs\SendTrialEndingEmailJob(days: 3))
+    ->dailyAt('09:00')
+    ->name('trial-ending-email-3')
+    ->description('Email de rappel fin d\'essai J-3');
+
+// Email J-1 fin d'essai
+Schedule::job(new \App\Jobs\SendTrialEndingEmailJob(days: 1))
+    ->dailyAt('09:00')
+    ->name('trial-ending-email-1')
+    ->description('Email de rappel fin d\'essai J-1');

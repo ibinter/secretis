@@ -848,6 +848,9 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::get('/saas/churn', [SaasMetricsController::class, 'churn'])->name('saas.churn');
         Route::get('/saas/health', [SaasMetricsController::class, 'health'])->name('saas.health');
 
+        // Métriques SaaS consolidées — API temps réel (Vague 8 finale)
+        Route::get('/metrics', [\App\Http\Controllers\SuperAdmin\MetricsController::class, 'apiMetrics'])->name('metrics.api');
+
         // CRM SuperAdmin (Vague 10)
         Route::get('/crm/pipeline', [SuperAdminCrmController::class, 'pipeline'])->name('crm.pipeline');
         Route::get('/crm/contacts', [SuperAdminCrmController::class, 'contacts'])->name('crm.contacts');

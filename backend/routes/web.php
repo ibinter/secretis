@@ -59,6 +59,8 @@ use App\Http\Controllers\SuperAdmin\FeatureFlagController;
 use App\Http\Controllers\SuperAdmin\LicenseController as SuperAdminLicenseController;
 use App\Http\Controllers\SuperAdmin\OrganizationController as SuperAdminOrganizationController;
 use App\Http\Controllers\SuperAdmin\CrmProspectsController;
+use App\Http\Controllers\SuperAdmin\MetricsController;
+use App\Http\Controllers\SuperAdmin\PlansController;
 use App\Http\Controllers\SuperAdmin\SaasMetricsController;
 use App\Http\Controllers\SuperAdmin\SupportController as SuperAdminSupportController;
 use App\Http\Controllers\SupplierPortalController;
@@ -624,6 +626,20 @@ Route::middleware([
             Route::get('/mrr', [SaasMetricsController::class, 'mrr'])->name('mrr');
             Route::get('/cohortes', [SaasMetricsController::class, 'cohorts'])->name('cohortes');
             Route::get('/health', [SaasMetricsController::class, 'health'])->name('health');
+        });
+
+        // Métriques SaaS consolidées (Vague 8 finale)
+        Route::prefix('metrics')->name('metrics.')->group(function () {
+            Route::get('/', [MetricsController::class, 'index'])->name('index');
+            Route::get('/export', [MetricsController::class, 'export'])->name('export');
+        });
+
+        // Plans tarifaires (Vague 8 finale)
+        Route::prefix('plans')->name('plans.')->group(function () {
+            Route::get('/', [PlansController::class, 'index'])->name('index');
+            Route::get('/{plan}/edit', [PlansController::class, 'edit'])->name('edit');
+            Route::put('/{plan}', [PlansController::class, 'update'])->name('update');
+            Route::post('/{plan}/toggle', [PlansController::class, 'toggle'])->name('toggle');
         });
 
         // CRM SuperAdmin (Vague 10 + 12)

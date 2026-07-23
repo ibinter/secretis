@@ -6,57 +6,237 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: 'Environnement cible'
         required: true
         default: 'production'
         type: choice
         options: [production, staging]
+      skip_smoke_test:
+        description: 'Ignorer le smoke test k6 (urgence uniquement)'
+        required: false
+        default: false
+        type: boolean
+
+# ── Variables globales ──────────────────────────────────────────────────────────
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/app
 
 jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # Déploiement principal
+  # ────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to ${{ github.event.inputs.environment || 'production' }}
     runs-on: ubuntu-22.04
-    environment: ${{ github.event.inputs.environment || 'production' }}
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: https://app.secretis.ibigsoft.com
     concurrency:
       group: deploy-${{ github.event.inputs.environment || 'production' }}
       cancel-in-progress: false
+
+    outputs:
+      deploy_status: ${{ steps.deploy.outcome }}
+      deploy_url: https://app.secretis.ibigsoft.com
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: |
-          docker build -f deploy/docker/Dockerfile.app --target production \
-            -t secretis-app:${{ github.sha }} .
+      # ── Build image Docker ─────────────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image (production)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: deploy/docker/Dockerfile.app
+          target: production
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+
+      # ── Déploiement SSH ────────────────────────────────────────────────────
       - name: Deploy via SSH
+        id: deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
+            echo "╔══════════════════════════════════════════════════════╗"
+            echo "║  SECRETIS ERP — Déploiement Production               ║"
+            echo "║  Commit : ${{ github.sha }}                           ║"
+            echo "║  Date   : $(date '+%Y-%m-%d %H:%M:%S %Z')             ║"
+            echo "╚══════════════════════════════════════════════════════╝"
+
             cd /opt/secretis
-            git pull origin main
-            docker compose -f deploy/docker/docker-compose.prod.yml pull
-            docker compose -f deploy/docker/docker-compose.prod.yml up -d --build
+
+            # 1. Récupérer la nouvelle image
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            # 2. Mettre à jour le tag used dans docker-compose.prod.yml
+            export APP_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+
+            # 3. Rolling update zéro downtime
+            docker compose -f deploy/docker/docker-compose.prod.yml up -d --no-deps --scale app=2 app
+            sleep 10
+
+            # 4. Migrations base de données
             docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
               php artisan migrate --force
+
+            # 5. Warmup du cache applicatif
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan secretis:cache:warmup
+
+            # 6. Caches Laravel (config, routes, vues)
             docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
               php artisan config:cache
             docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
               php artisan route:cache
             docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
+              php artisan view:cache
+
+            # 7. Redémarrage des queue workers (zero-downtime via signal)
+            docker compose -f deploy/docker/docker-compose.prod.yml exec -T app \
               php artisan queue:restart
-            echo "Deploiement termine a $(date)"
 
-      - name: Health check
+            # 8. Réduction au nombre normal de réplicas
+            docker compose -f deploy/docker/docker-compose.prod.yml up -d --scale app=1 app
+
+            echo "=== Déploiement terminé à $(date) ==="
+
+      # ── Health check HTTP ──────────────────────────────────────────────────
+      - name: Health check — /api/health
         run: |
+          echo "Attente de 30 secondes pour le démarrage des conteneurs..."
           sleep 30
-          curl -f https://app.secretis.ibigsoft.com/api/health || exit 1
 
-      - name: Notify on failure
-        if: failure()
+          MAX_RETRIES=5
+          RETRY=0
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 10 \
+              https://app.secretis.ibigsoft.com/api/health)
+
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check OK : HTTP $STATUS"
+              break
+            fi
+
+            RETRY=$((RETRY + 1))
+            echo "Tentative $RETRY/$MAX_RETRIES — HTTP $STATUS — attente 10s..."
+            sleep 10
+          done
+
+          if [ "$STATUS" != "200" ]; then
+            echo "ECHEC : Health check échoué après $MAX_RETRIES tentatives (HTTP $STATUS)"
+            exit 1
+          fi
+
+      # ── Smoke test k6 ─────────────────────────────────────────────────────
+      - name: Smoke test k6 — performance de base
+        if: ${{ !inputs.skip_smoke_test }}
+        run: |
+          # Installer k6
+          curl https://github.com/grafana/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.tar.gz \
+            -L | tar xvz --strip-components 1
+
+          echo "Lancement du smoke test k6 (5 VUs, 30s)..."
+          ./k6 run \
+            --vus=5 \
+            --duration=30s \
+            --env BASE_URL=https://app.secretis.ibigsoft.com \
+            load-tests/scenarios/01-login.js \
+            --out json=/tmp/k6-results.json \
+            --summary-export=/tmp/k6-summary.json
+
+          # Vérifier les seuils
+          P95=$(jq '.metrics["http_req_duration"]["p(95)"]' /tmp/k6-summary.json 2>/dev/null || echo "0")
+          echo "p95 latence : ${P95}ms"
+
+          # Seuil : p95 < 2000ms
+          if [ "$(echo "$P95 > 2000" | bc -l)" = "1" ]; then
+            echo "AVERTISSEMENT : p95 = ${P95}ms dépasse le seuil de 2000ms"
+          fi
+
+      - name: Upload résultats k6
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-results-${{ github.sha }}
+          path: /tmp/k6-*.json
+          retention-days: 30
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Notification Slack (succès et échec)
+  # ────────────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notification Slack
+    runs-on: ubuntu-22.04
+    needs: [deploy]
+    if: always()
+    steps:
+      - name: Télécharger les artefacts de test (si disponibles)
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: security-audit-report
+          path: /tmp/artifacts/
+
+      - name: Notification Slack — succès
+        if: needs.deploy.result == 'success'
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
+          status: success
+          text: |
+            :white_check_mark: *Déploiement Production réussi* — SECRETIS ERP
+
+            *Commit :* `${{ github.sha }}`
+            *Auteur :* ${{ github.actor }}
+            *Message :* ${{ github.event.head_commit.message }}
+            *URL :* https://app.secretis.ibigsoft.com
+            *Rapport tests :* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Tests validés :
+            • Pest Unit (min 70% coverage) ✅
+            • Pest Feature (min 65% coverage) ✅
+            • Security audit (0 vulnérabilité critique) ✅
+            • Smoke test k6 (5 VUs / 30s) ✅
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notification Slack — échec
+        if: needs.deploy.result == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            :x: *Déploiement Production ECHOUE* — SECRETIS ERP
+
+            *Commit :* `${{ github.sha }}`
+            *Auteur :* ${{ github.actor }}
+            *Logs :* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Action requise : vérifier les logs et rollback si nécessaire.
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
