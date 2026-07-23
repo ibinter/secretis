@@ -916,3 +916,15 @@ Route::middleware('auth:sanctum')->prefix('practical-cases')->name('api.practica
     Route::post('/{practicalCase}/complete', [\App\Http\Controllers\PracticalCasesController::class, 'complete'])->name('complete');
     Route::get('/progress', [\App\Http\Controllers\PracticalCasesController::class, 'progress'])->name('progress');
 });
+
+// ─── IBIG PARTNERS API ────────────────────────────────────────────────────────
+
+// Public — Inscription depuis la landing page (sans session)
+Route::post('/partners/register', [\App\Http\Controllers\PartnerController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('api.partner.store');
+
+// Authentifié — Rapport mensuel partenaire
+Route::middleware('auth:sanctum')->prefix('partner')->name('api.partner.')->group(function () {
+    Route::get('/report/{month}', [\App\Http\Controllers\PartnerController::class, 'monthlyReport'])->name('report');
+});

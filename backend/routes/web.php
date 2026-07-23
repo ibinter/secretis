@@ -731,3 +731,30 @@ Route::middleware('auth')->prefix('aide/cas-pratiques')->name('practical-cases.'
     Route::get('/', [\App\Http\Controllers\PracticalCasesController::class, 'index'])->name('index');
     Route::get('/{practicalCase:slug}', [\App\Http\Controllers\PracticalCasesController::class, 'show'])->name('show');
 });
+
+// ─── IBIG PARTNERS — Programme partenaires ────────────────────────────────────
+
+// Public — Inscription partenaire (accessible sans compte)
+Route::get('/partenaires/rejoindre', [\App\Http\Controllers\PartnerController::class, 'register'])->name('partner.register');
+Route::post('/partenaires/candidature', [\App\Http\Controllers\PartnerController::class, 'store'])->name('partner.store');
+
+// Partenaire authentifié — Espace partenaire
+Route::middleware('auth')->prefix('partenaire')->name('partner.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\PartnerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/clients', [\App\Http\Controllers\PartnerController::class, 'clients'])->name('clients');
+    Route::get('/commissions', [\App\Http\Controllers\PartnerController::class, 'commissionsIndex'])->name('commissions');
+});
+
+// SuperAdmin — Gestion des partenaires
+Route::middleware(['auth', 'role:super-admin'])
+    ->prefix('superadmin/partenaires')
+    ->name('superadmin.partners.')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'index'])->name('index');
+        Route::get('/commissions', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'commissions'])->name('commissions');
+        Route::get('/stats', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'stats'])->name('stats');
+        Route::get('/{partner}', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'show'])->name('show');
+        Route::post('/{partner}/approve', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'approve'])->name('approve');
+        Route::post('/{partner}/suspend', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'suspend'])->name('suspend');
+        Route::post('/commissions/{commission}/pay', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'payCommission'])->name('commission.pay');
+    });

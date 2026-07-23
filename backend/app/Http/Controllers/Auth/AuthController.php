@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\LicenseService;
+use App\Services\PartnerService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class AuthController extends Controller
     public function __construct(
         private AuditService $auditService,
         private LicenseService $licenseService,
+        private PartnerService $partnerService,
     ) {}
 
     // -------------------------------------------------------------------------
@@ -185,6 +187,8 @@ class AuthController extends Controller
             'admin_name'        => ['required', 'string', 'max:255'],
             'email'             => ['required', 'email', 'max:255', 'unique:users,email'],
             'password'          => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()->uncompromised()],
+            // IBIG PARTNERS — code de parrainage optionnel
+            'referral_code'     => ['nullable', 'string', 'max:12'],
         ]);
 
         $result = DB::transaction(function () use ($validated) {
@@ -217,6 +221,14 @@ class AuthController extends Controller
 
             return compact('organization', 'admin');
         });
+
+        // IBIG PARTNERS — enregistrer le parrainage si un code valide a été fourni
+        if (!empty($validated['referral_code'])) {
+            $this->partnerService->recordReferral(
+                strtoupper(trim($validated['referral_code'])),
+                $result['organization']
+            );
+        }
 
         event(new Registered($result['admin']));
 

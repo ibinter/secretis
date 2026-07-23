@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBIG PARTNERS — Programme Partenaires SECRETIS</title>
+<meta name="description" content="Rejoignez le programme IBIG PARTNERS et développez votre activité en revendant SECRETIS ERP aux entreprises africaines. Commissions récurrentes jusqu'à 25%, support dédié, certification.">
+<meta name="author" content="IBIG Soft">
+<meta property="og:title" content="IBIG PARTNERS — Devenez partenaire SECRETIS">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary:   '#1A3A5C',
+        secondary: '#2E86C1',
+        accent:    '#F39C12',
+        success:   '#1E8449',
+        danger:    '#C0392B',
+      },
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+    }
+  }
+}
+</script>
+<link rel="stylesheet" href="assets/css/landing.css">
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+  :root {
+    --c-primary: #1A3A5C;
+    --c-secondary: #2E86C1;
+    --c-accent: #F39C12;
+    --c-success: #1E8449;
+  }
+  .gradient-hero { background: linear-gradient(135deg, #1A3A5C 0%, #2E86C1 60%, #1A3A5C 100%); }
+  .card-hover { transition: transform .2s, box-shadow .2s; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(30,58,92,.15); }
+  .badge-partner { background: linear-gradient(135deg, var(--c-secondary), var(--c-primary)); }
+</style>
+</head>
+<body class="font-sans bg-white text-gray-900">
+
+<!-- ====== NAVBAR ====== -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 gap-4">
+    <a href="index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+        <span class="text-white font-extrabold text-sm">IS</span>
+      </div>
+      <span class="font-bold text-primary text-lg hidden sm:block">IBIG SECRETIS</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+      <a href="#types" class="hover:text-secondary transition-colors">Types de partenaires</a>
+      <a href="#avantages" class="hover:text-secondary transition-colors">Avantages</a>
+      <a href="#commissions" class="hover:text-secondary transition-colors">Commissions</a>
+      <a href="#temoignages" class="hover:text-secondary transition-colors">Témoignages</a>
+      <a href="#faq" class="hover:text-secondary transition-colors">FAQ</a>
+    </nav>
+    <a href="partenaires-form.html"
+       class="px-5 py-2.5 bg-accent hover:bg-yellow-500 text-white font-semibold rounded-lg text-sm transition-colors shadow-md">
+      Devenir partenaire
+    </a>
+  </div>
+</header>
+
+<!-- ====== HERO ====== -->
+<section class="gradient-hero pt-28 pb-20 px-4 text-white">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium mb-6">
+      <span class="w-2 h-2 rounded-full bg-accent animate-pulse inline-block"></span>
+      Programme IBIG PARTNERS — Actif dans 18 pays OHADA
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-6">
+      Rejoignez le programme<br>
+      <span class="text-accent">IBIG PARTNERS</span>
+    </h1>
+    <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-8">
+      Développez votre activité en revendant SECRETIS ERP aux entreprises africaines. Commissions récurrentes à vie,
+      support dédié et certification officielle IBIG Soft.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="partenaires-form.html"
+         class="px-8 py-4 bg-accent hover:bg-yellow-500 text-white font-bold rounded-xl text-lg transition-colors shadow-lg">
+        Soumettre ma candidature
+      </a>
+      <a href="#types"
+         class="px-8 py-4 border-2 border-white/50 text-white hover:bg-white/10 font-semibold rounded-xl text-lg transition-colors">
+        Découvrir le programme
+      </a>
+    </div>
+    <!-- 3 stats clés -->
+    <div class="mt-14 grid grid-cols-3 gap-6 max-w-2xl mx-auto border-t border-white/20 pt-8">
+      <div>
+        <p class="text-3xl font-extrabold text-accent">25%</p>
+        <p class="text-blue-200 text-sm mt-1">Commission max récurrente</p>
+      </div>
+      <div>
+        <p class="text-3xl font-extrabold text-accent">18</p>
+        <p class="text-blue-200 text-sm mt-1">Pays OHADA couverts</p>
+      </div>
+      <div>
+        <p class="text-3xl font-extrabold text-accent">∞</p>
+        <p class="text-blue-200 text-sm mt-1">Durée de commission</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== TYPES DE PARTENAIRES ====== -->
+<section id="types" class="py-20 px-4 bg-gray-50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold text-primary">4 types de partenariats</h2>
+      <p class="text-gray-500 mt-3 max-w-xl mx-auto">
+        Choisissez le modèle qui correspond à votre activité et vos compétences.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+      <!-- Revendeur -->
+      <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">🏪</span>
+        </div>
+        <div class="inline-block px-3 py-1 rounded-full bg-secondary text-white text-xs font-bold mb-3">20% commission</div>
+        <h3 class="text-lg font-bold text-primary mb-2">Revendeur</h3>
+        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+          Vendez des licences SECRETIS à vos clients. Commission récurrente de 20% sur l'abonnement mensuel à vie.
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 text-left">
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Accès portail revendeur</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Matériel marketing inclus</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Formation produit 2 jours</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Support technique prioritaire</li>
+        </ul>
+      </div>
+
+      <!-- Intégrateur -->
+      <div class="card-hover bg-white rounded-2xl p-6 border-2 border-secondary shadow-md text-center relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span class="px-3 py-1 bg-accent text-white text-xs font-bold rounded-full">Recommandé</span>
+        </div>
+        <div class="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">⚙️</span>
+        </div>
+        <div class="inline-block px-3 py-1 rounded-full bg-purple-600 text-white text-xs font-bold mb-3">25% + forfait</div>
+        <h3 class="text-lg font-bold text-primary mb-2">Intégrateur</h3>
+        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+          Déployez et configurez SECRETIS chez vos clients. Commission 25% + forfait d'intégration facturé au client.
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 text-left">
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Accès API & sandbox illimité</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Certification technique IBIG</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Support L2 dédié</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Formation avancée 5 jours</li>
+        </ul>
+      </div>
+
+      <!-- Consultant -->
+      <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+        <div class="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">💼</span>
+        </div>
+        <div class="inline-block px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-bold mb-3">15% commission</div>
+        <h3 class="text-lg font-bold text-primary mb-2">Consultant</h3>
+        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+          Accompagnez vos clients dans leur transformation digitale avec SECRETIS. Commission de 15% récurrente.
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 text-left">
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Ressources consulting</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Modèles de propositions</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Accès démo personnalisable</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Communauté partenaires</li>
+        </ul>
+      </div>
+
+      <!-- Formateur -->
+      <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
+        <div class="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">🎓</span>
+        </div>
+        <div class="inline-block px-3 py-1 rounded-full bg-teal-600 text-white text-xs font-bold mb-3">10% + badge</div>
+        <h3 class="text-lg font-bold text-primary mb-2">Formateur certifié</h3>
+        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+          Dispensez des formations SECRETIS certifiées IBIG. Badge certification officiel et 10% de commission.
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 text-left">
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Badge certifié IBIG</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Supports pédagogiques</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Accès plateforme e-learning</li>
+          <li class="flex items-center gap-2"><span class="text-success">✓</span> Mention sur annuaire IBIG</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====== AVANTAGES ====== -->
+<section id="avantages" class="py-20 px-4 bg-white">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold text-primary">Pourquoi rejoindre IBIG PARTNERS ?</h2>
+      <p class="text-gray-500 mt-3 max-w-xl mx-auto">Des avantages conçus pour accélérer votre croissance.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 6 avantages -->
+      <div class="flex gap-4 p-5 rounded-xl bg-blue-50 border border-blue-100">
+        <span class="text-3xl shrink-0">💰</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Commissions récurrentes à vie</h3>
+          <p class="text-gray-500 text-sm">Percevez votre commission chaque mois tant que votre client reste abonné. Aucune limite de durée.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 p-5 rounded-xl bg-green-50 border border-green-100">
+        <span class="text-3xl shrink-0">🎯</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Support partenaire dédié</h3>
+          <p class="text-gray-500 text-sm">Un responsable partenaire IBIG vous accompagne dans votre développement commercial et technique.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 p-5 rounded-xl bg-orange-50 border border-orange-100">
+        <span class="text-3xl shrink-0">📦</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Kit marketing complet</h3>
+          <p class="text-gray-500 text-sm">Brochures, présentations, démos, vidéos et templates — tout pour convaincre vos prospects.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 p-5 rounded-xl bg-purple-50 border border-purple-100">
+        <span class="text-3xl shrink-0">🏅</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Formation certifiante</h3>
+          <p class="text-gray-500 text-sm">Accédez à notre programme de formation et obtenez la certification officielle IBIG Soft.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 p-5 rounded-xl bg-teal-50 border border-teal-100">
+        <span class="text-3xl shrink-0">🧪</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Sandbox illimité</h3>
+          <p class="text-gray-500 text-sm">Environnement de test dédié pour vos démonstrations client et vos développements d'intégration.</p>
+        </div>
+      </div>
+      <div class="flex gap-4 p-5 rounded-xl bg-yellow-50 border border-yellow-100">
+        <span class="text-3xl shrink-0">📊</span>
+        <div>
+          <h3 class="font-semibold text-primary mb-1">Dashboard temps réel</h3>
+          <p class="text-gray-500 text-sm">Suivez vos clients, vos commissions et vos performances depuis votre espace partenaire sécurisé.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== COMMENT ÇA MARCHE ====== -->
+<section class="py-20 px-4 bg-primary text-white">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold">Comment ça marche ?</h2>
+      <p class="text-blue-200 mt-3">4 étapes simples pour commencer à générer des revenus</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+      <!-- Ligne de progression -->
+      <div class="hidden lg:block absolute top-8 left-[12.5%] right-[12.5%] h-0.5 bg-white/20"></div>
+
+      <div class="text-center relative">
+        <div class="w-16 h-16 rounded-full bg-accent text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-4 shadow-lg">1</div>
+        <h3 class="font-semibold text-lg mb-2">Candidature</h3>
+        <p class="text-blue-200 text-sm">Remplissez le formulaire en ligne avec vos informations professionnelles et votre motivation.</p>
+      </div>
+      <div class="text-center relative">
+        <div class="w-16 h-16 rounded-full bg-secondary text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-4 shadow-lg">2</div>
+        <h3 class="font-semibold text-lg mb-2">Approbation</h3>
+        <p class="text-blue-200 text-sm">Notre équipe examine votre dossier sous 2 à 5 jours ouvrables et vous contacte pour finaliser.</p>
+      </div>
+      <div class="text-center relative">
+        <div class="w-16 h-16 rounded-full bg-success text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-4 shadow-lg">3</div>
+        <h3 class="font-semibold text-lg mb-2">Intégration</h3>
+        <p class="text-blue-200 text-sm">Accédez à votre espace partenaire, votre code de parrainage et les ressources de démarrage.</p>
+      </div>
+      <div class="text-center relative">
+        <div class="w-16 h-16 rounded-full bg-white text-primary font-extrabold text-xl flex items-center justify-center mx-auto mb-4 shadow-lg">4</div>
+        <h3 class="font-semibold text-lg mb-2">Commission</h3>
+        <p class="text-blue-200 text-sm">Référez vos clients, suivez vos revenus en temps réel et percevez vos commissions chaque mois.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== TABLEAU COMMISSIONS ====== -->
+<section id="commissions" class="py-20 px-4 bg-gray-50">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold text-primary">Grille de commissions</h2>
+      <p class="text-gray-500 mt-3">Commissions récurrentes mensuelles par type de partenaire et par plan SECRETIS</p>
+    </div>
+    <div class="overflow-x-auto rounded-2xl shadow-sm border border-gray-200">
+      <table class="min-w-full bg-white">
+        <thead>
+          <tr class="bg-primary text-white text-sm">
+            <th class="px-5 py-4 text-left font-semibold rounded-tl-2xl">Plan SECRETIS</th>
+            <th class="px-5 py-4 text-center font-semibold">Tarif mensuel</th>
+            <th class="px-5 py-4 text-center font-semibold">Revendeur (20%)</th>
+            <th class="px-5 py-4 text-center font-semibold">Intégrateur (25%)</th>
+            <th class="px-5 py-4 text-center font-semibold">Consultant (15%)</th>
+            <th class="px-5 py-4 text-center font-semibold rounded-tr-2xl">Formateur (10%)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          <tr class="hover:bg-blue-50 transition-colors">
+            <td class="px-5 py-4 font-semibold text-primary">Starter</td>
+            <td class="px-5 py-4 text-center text-gray-600">15 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-success">3 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-purple-600">3 750 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-orange-600">2 250 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-teal-600">1 500 FCFA</td>
+          </tr>
+          <tr class="hover:bg-blue-50 transition-colors bg-gray-50">
+            <td class="px-5 py-4 font-semibold text-primary">Business</td>
+            <td class="px-5 py-4 text-center text-gray-600">35 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-success">7 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-purple-600">8 750 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-orange-600">5 250 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-teal-600">3 500 FCFA</td>
+          </tr>
+          <tr class="hover:bg-blue-50 transition-colors">
+            <td class="px-5 py-4 font-semibold text-primary">Enterprise</td>
+            <td class="px-5 py-4 text-center text-gray-600">75 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-success">15 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-purple-600">18 750 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-orange-600">11 250 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-teal-600">7 500 FCFA</td>
+          </tr>
+          <tr class="hover:bg-blue-50 transition-colors bg-gray-50">
+            <td class="px-5 py-4 font-semibold text-primary">Premium</td>
+            <td class="px-5 py-4 text-center text-gray-600">150 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-success">30 000 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-purple-600">37 500 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-orange-600">22 500 FCFA</td>
+            <td class="px-5 py-4 text-center font-bold text-teal-600">15 000 FCFA</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-accent/10 text-xs text-gray-500">
+            <td colspan="6" class="px-5 py-3 rounded-b-2xl">
+              * Commissions calculées sur l'abonnement mensuel HT. Versement mensuel par virement bancaire ou Mobile Money.
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="text-center mt-6 text-sm text-gray-500">
+      Exemple : Avec 10 clients Enterprise sur plan Business = <strong class="text-success">70 000 FCFA/mois</strong> en tant que revendeur.
+    </p>
+  </div>
+</section>
+
+<!-- ====== TÉMOIGNAGES ====== -->
+<section id="temoignages" class="py-20 px-4 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold text-primary">Ils font déjà partie du programme</h2>
+      <p class="text-gray-500 mt-3">Des partenaires actifs dans toute l'Afrique de l'Ouest et Centrale</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Témoignage 1 — Côte d'Ivoire -->
+      <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-600 text-lg">AK</div>
+          <div>
+            <p class="font-semibold text-primary text-sm">Ama Kouassi</p>
+            <p class="text-xs text-gray-400">Intégratrice — Abidjan, Côte d'Ivoire 🇨🇮</p>
+          </div>
+        </div>
+        <div class="flex gap-0.5 mb-3">
+          <span class="text-accent text-sm">★★★★★</span>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed italic">
+          "SECRETIS m'a permis de structurer mon offre d'intégration ERP. En 8 mois, j'ai déployé SECRETIS chez 14 PME ivoiriennes. Les commissions couvrent maintenant la moitié de mes charges fixes. L'équipe IBIG est très réactive."
+        </p>
+        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between text-xs text-gray-400">
+          <span>Intégratrice certifiée</span>
+          <span class="font-semibold text-success">14 clients actifs</span>
+        </div>
+      </div>
+
+      <!-- Témoignage 2 — Sénégal -->
+      <div class="card-hover bg-white rounded-2xl p-6 border-2 border-secondary shadow-md">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-secondary text-lg">MD</div>
+          <div>
+            <p class="font-semibold text-primary text-sm">Mamadou Diallo</p>
+            <p class="text-xs text-gray-400">Revendeur — Dakar, Sénégal 🇸🇳</p>
+          </div>
+        </div>
+        <div class="flex gap-0.5 mb-3">
+          <span class="text-accent text-sm">★★★★★</span>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed italic">
+          "Je revendais déjà des logiciels comptables, mais SECRETIS a changé la donne. Le produit se vend tout seul une fois que le prospect voit la démo. Mes commissions récurrentes ont dépassé mon salaire de consultant en 6 mois."
+        </p>
+        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between text-xs text-gray-400">
+          <span>Revendeur agréé</span>
+          <span class="font-semibold text-success">23 clients actifs</span>
+        </div>
+      </div>
+
+      <!-- Témoignage 3 — Cameroun -->
+      <div class="card-hover bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center font-bold text-success text-lg">CE</div>
+          <div>
+            <p class="font-semibold text-primary text-sm">Christelle Eba</p>
+            <p class="text-xs text-gray-400">Formatrice — Douala, Cameroun 🇨🇲</p>
+          </div>
+        </div>
+        <div class="flex gap-0.5 mb-3">
+          <span class="text-accent text-sm">★★★★☆</span>
+        </div>
+        <p class="text-gray-600 text-sm leading-relaxed italic">
+          "Je forme des secrétaires et assistants de direction depuis 5 ans. La certification IBIG a renforcé ma crédibilité. Mes stagiaires deviennent utilisateurs SECRETIS et me génèrent une commission mensuelle passive. Un excellent complément de revenus."
+        </p>
+        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between text-xs text-gray-400">
+          <span>Formatrice certifiée IBIG</span>
+          <span class="font-semibold text-success">8 clients actifs</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====== CTA INSCRIPTION ====== -->
+<section class="py-20 px-4 bg-gradient-to-br from-secondary to-primary text-white">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="text-3xl font-bold mb-4">Prêt à rejoindre IBIG PARTNERS ?</h2>
+    <p class="text-blue-100 mb-8 text-lg">
+      Soumettez votre candidature en moins de 5 minutes. Notre équipe vous contactera sous 2 à 5 jours ouvrables.
+    </p>
+    <a href="partenaires-form.html"
+       class="inline-block px-10 py-4 bg-accent hover:bg-yellow-500 text-white font-bold rounded-xl text-lg transition-colors shadow-xl">
+      Soumettre ma candidature →
+    </a>
+    <p class="mt-4 text-blue-200 text-sm">Gratuit · Sans engagement · Réponse sous 5 jours ouvrables</p>
+  </div>
+</section>
+
+<!-- ====== FAQ ====== -->
+<section id="faq" class="py-20 px-4 bg-gray-50">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-bold text-primary">Questions fréquentes</h2>
+    </div>
+
+    <div x-data="{ open: null }" class="space-y-3">
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 1 ? null : 1"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Qui peut rejoindre le programme IBIG PARTNERS ?</span>
+          <span x-text="open === 1 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 1" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Toute entreprise ou personne physique exerçant une activité commerciale, de consulting, d'intégration informatique ou de formation peut candidater. Nous acceptons les candidatures de tous les 18 pays membres de l'OHADA.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 2 ? null : 2"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Comment sont calculées les commissions ?</span>
+          <span x-text="open === 2 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 2" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Les commissions sont calculées chaque mois sur la base de l'abonnement mensuel HT de chaque client référé actif. Votre taux de commission s'applique tant que le client maintient son abonnement, sans limite de durée.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 3 ? null : 3"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Quand et comment sont versées les commissions ?</span>
+          <span x-text="open === 3 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 3" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Les commissions sont calculées le 1er de chaque mois et versées entre le 10 et le 15 du mois suivant, par virement bancaire ou Mobile Money (Orange Money, Wave, MTN Money). Un justificatif de paiement est disponible dans votre espace partenaire.
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 4 ? null : 4"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Y a-t-il un quota minimum de clients à référer ?</span>
+          <span x-text="open === 4 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 4" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Non, il n'y a pas de quota minimum. Vous percevez une commission dès le premier client référé. Cependant, pour maintenir le statut partenaire actif, nous demandons au minimum 1 référé actif par an.
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 5 ? null : 5"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Puis-je cumuler plusieurs types de partenariat ?</span>
+          <span x-text="open === 5 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 5" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Vous êtes enregistré avec un type principal lors de votre candidature. Une évolution de statut est possible après 6 mois d'activité partenaire, sur demande auprès de votre responsable partenaire.
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 6 ? null : 6"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Comment fonctionne le suivi de mes clients référés ?</span>
+          <span x-text="open === 6 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 6" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          Chaque partenaire dispose d'un code de parrainage unique (format IBPxxxxxxxxx). Lorsqu'un prospect crée son compte SECRETIS en renseignant votre code, le lien est automatiquement enregistré. Vous suivez tout depuis votre tableau de bord partenaire en temps réel.
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 7 ? null : 7"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>Que se passe-t-il si un client que j'ai référé résilie son abonnement ?</span>
+          <span x-text="open === 7 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 7" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          La commission liée à ce client cesse automatiquement dès le mois de résiliation. Vous conservez toutes les commissions déjà versées pour les mois précédents. Si le client se réabonne, la commission reprend.
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <button @click="open = open === 8 ? null : 8"
+                class="w-full flex items-center justify-between px-6 py-4 text-left font-semibold text-primary hover:bg-gray-50 transition-colors">
+          <span>La participation au programme est-elle payante ?</span>
+          <span x-text="open === 8 ? '−' : '+'" class="text-secondary text-xl font-bold shrink-0 ml-3"></span>
+        </button>
+        <div x-show="open === 8" x-collapse class="px-6 pb-4 text-gray-500 text-sm leading-relaxed">
+          L'adhésion au programme IBIG PARTNERS est entièrement gratuite. Il n'y a aucun frais d'entrée ni d'abonnement mensuel. Seule votre candidature et l'approbation de notre équipe sont nécessaires pour démarrer.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer class="bg-primary text-white py-10 px-4">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+        <span class="text-primary font-extrabold text-xs">IS</span>
+      </div>
+      <span class="font-bold">IBIG SECRETIS</span>
+    </div>
+    <p class="text-blue-200 text-sm text-center">
+      Programme IBIG PARTNERS · <a href="mailto:partners@ibigsoft.com" class="hover:text-white underline">partners@ibigsoft.com</a>
+    </p>
+    <div class="flex gap-4 text-sm text-blue-200">
+      <a href="index.html" class="hover:text-white transition-colors">Accueil</a>
+      <a href="partenaires-form.html" class="hover:text-white transition-colors">Candidature</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

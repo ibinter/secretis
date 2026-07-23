@@ -1,31 +1,67 @@
 {
   "cli": {
-    "version": ">= 10.0.0"
+    "version": ">= 10.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
         "APP_ENV": "development",
-        "API_BASE_URL": "https://dev-api.secretis.ibigsoft.com"
+        "API_URL": "http://localhost:8000"
       }
     },
     "preview": {
       "distribution": "internal",
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "channel": "preview",
       "env": {
-        "APP_ENV": "preview",
-        "API_BASE_URL": "https://staging-api.secretis.ibigsoft.com"
+        "APP_ENV": "staging",
+        "API_URL": "https://staging.secretis.ibigsoft.com"
       }
     },
     "production": {
+      "autoIncrement": "version",
+      "ios": {
+        "buildConfiguration": "Release",
+        "credentialsSource": "remote"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "credentialsSource": "remote"
+      },
+      "channel": "production",
       "env": {
         "APP_ENV": "production",
-        "API_BASE_URL": "https://api.secretis.ibigsoft.com"
+        "API_URL": "https://app.secretis.ibigsoft.com"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "dev@ibigsoft.com",
+        "ascAppId": "XXXXXXXXXX",
+        "appleTeamId": "XXXXXXXXXX"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-services-key.json",
+        "track": "production",
+        "releaseStatus": "completed",
+        "rollout": 0.1
+      }
+    }
   }
 }
