@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SECRETIS pour l'Éducation — Universités, Lycées, Écoles | IBIG Soft</title>
+<meta name="description" content="IBIG SECRETIS : gestion administrative numérique pour les établissements d'enseignement africains. Scolarité, planification, RH et communication institutionnelle.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { theme: { extend: { colors: { primary: '#1A3A5C', secondary: '#2E86C1', accent: '#F39C12', success: '#1E8449' }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }</script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="font-sans bg-white">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+    <a href="../index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-extrabold text-sm">IS</span></div>
+      <div class="text-primary font-bold leading-tight" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></div>
+    </a>
+    <nav class="hidden lg:flex items-center gap-1">
+      <a href="../index.html#features" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Fonctionnalités</a>
+      <a href="../index.html#pricing" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Tarifs</a>
+      <a href="#" class="text-sm font-semibold text-secondary px-3 py-2">Secteurs</a>
+    </nav>
+    <a href="/register" class="hidden lg:inline-flex bg-primary text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-secondary transition-colors">Essai gratuit</a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="pt-16 bg-gray-50 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-sm text-gray-500">
+    <a href="../index.html" class="hover:text-primary">Accueil</a>
+    <span class="text-gray-300">/</span><span>Secteurs</span>
+    <span class="text-gray-300">/</span>
+    <span class="text-primary font-medium">Éducation</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="bg-gradient-to-br from-[#4a2c8a] to-[#7c3aed] text-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-3xl">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="text-5xl">🎓</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">Secteur Éducation</span>
+      </div>
+      <h1 class="text-4xl lg:text-5xl font-extrabold mb-5 leading-tight">SECRETIS pour les Établissements d'Enseignement</h1>
+      <p class="text-xl text-purple-100 mb-8 leading-relaxed max-w-2xl">
+        Simplifiez la gestion administrative de votre université, lycée ou école. Du secrétariat de scolarité à la communication institutionnelle, tout est centralisé.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="/register" class="bg-accent text-white px-7 py-3.5 rounded-xl font-bold hover:opacity-90 shadow-lg">Démo gratuite</a>
+        <a href="../index.html#pricing" class="border-2 border-white text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10">Tarification éducation</a>
+      </div>
+      <div class="flex flex-wrap gap-6 mt-8 pt-8 border-t border-white/20">
+        <span class="text-purple-100 text-sm">✓ Tarif préférentiel établissements publics</span>
+        <span class="text-purple-100 text-sm">✓ Formation du personnel incluse</span>
+        <span class="text-purple-100 text-sm">✓ Déploiement en 48h</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAS D'USAGE -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="text-sm font-bold text-secondary uppercase tracking-wider">Fonctionnalités clés</span>
+      <h2 class="text-3xl font-extrabold text-primary mt-2 mb-4">Des outils pour chaque service</h2>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🎒</div>
+        <h3 class="font-bold text-gray-900 mb-2">Secrétariat de scolarité</h3>
+        <p class="text-gray-500 text-sm">Inscriptions, réinscriptions, dossiers étudiants numérisés, attestations de scolarité, relevés de notes. Traitement rapide des demandes.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🗓️</div>
+        <h3 class="font-bold text-gray-900 mb-2">Planning académique</h3>
+        <p class="text-gray-500 text-sm">Gestion des emplois du temps, planning des examens, réservation des salles, suivi des congés enseignants. Synchronisation avec Google Calendar.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📢</div>
+        <h3 class="font-bold text-gray-900 mb-2">Communication institutionnelle</h3>
+        <p class="text-gray-500 text-sm">Circulaires et annonces aux enseignants, SMS aux parents d'élèves, tableau d'affichage numérique, newsletter automatisée.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📬</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion du courrier institutionnel</h3>
+        <p class="text-gray-500 text-sm">Registre numérique du courrier entrant/sortant, correspondances avec le Ministère, les partenaires et les parents. Traçabilité complète.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">👩‍💼</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion RH du personnel</h3>
+        <p class="text-gray-500 text-sm">Dossiers enseignants, suivi des absences, demandes de congé, notes de service, fiches de paie. Organigramme dynamique.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📊</div>
+        <h3 class="font-bold text-gray-900 mb-2">Rapports et statistiques</h3>
+        <p class="text-gray-500 text-sm">Taux de réussite, statistiques d'inscription, rapports pour l'Inspection académique, tableaux de bord direction. Export automatique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVANTAGES -->
+<section class="py-20 bg-purple-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="bg-[#4a2c8a] text-white rounded-3xl p-8">
+        <h3 class="text-xl font-bold mb-6">Ils utilisent SECRETIS</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold">120+</div><div class="text-purple-200 text-xs mt-1">Établissements</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold">45 000</div><div class="text-purple-200 text-xs mt-1">Étudiants gérés</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold">8</div><div class="text-purple-200 text-xs mt-1">Pays OHADA</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-2xl font-extrabold">-60%</div><div class="text-purple-200 text-xs mt-1">Tâches répétitives</div></div>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-3xl font-extrabold text-primary mb-6">Adapté aux contraintes éducatives</h2>
+        <div class="space-y-4">
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Tarification accessible pour les établissements publics</div><div class="text-gray-500 text-sm">Des plans adaptés aux contraintes budgétaires du secteur éducatif.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Gestion multi-campus et multi-niveaux</div><div class="text-gray-500 text-sm">Maternelle, primaire, secondaire, supérieur — une seule plateforme.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Communication parents-école simplifiée</div><div class="text-gray-500 text-sm">Notifications SMS/WhatsApp aux parents sur les événements importants.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Conformité aux exigences du Ministère</div><div class="text-gray-500 text-sm">Rapports standardisés aux formats exigés par les autorités éducatives.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-extrabold text-primary text-center mb-14">Ce qu'ils disent</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"La délivrance des attestations de scolarité prend maintenant 2 minutes contre 2 jours avant. Les étudiants sont ravis et notre service est enfin moderne."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[#4a2c8a] rounded-full flex items-center justify-center text-white font-bold text-sm">PS</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Prof. Sidibé Moussa</div><div class="text-gray-400 text-xs">Doyen — Faculté de Droit, Université de Lomé, TG</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Nous gérons 3 200 élèves et 180 enseignants. SECRETIS a unifié toute notre administration. Les parents reçoivent les communications en temps réel. Remarquable."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">MK</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Marie-Claire Konan</div><div class="text-gray-400 text-xs">Proviseure — Lycée Moderne de Bouaké, CI</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Le suivi des absences enseignants et la gestion des remplacements se font automatiquement. Nous avons réduit les perturbations de cours de 70%. Indispensable."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">BT</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Boubacar Traoré</div><div class="text-gray-400 text-xs">Directeur — Institut Polytechnique de Dakar, SN</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-gradient-to-r from-[#4a2c8a] to-[#7c3aed] text-white">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-extrabold mb-4">Modernisez votre établissement dès aujourd'hui</h2>
+    <p class="text-purple-100 text-lg mb-8">Tarification spéciale éducation. Démo adaptée à votre type d'établissement.</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="/register" class="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:opacity-90 shadow-lg">Essai gratuit — 30 jours</a>
+      <a href="mailto:education@ibig-secretis.com" class="border-2 border-white text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/10">Contacter l'équipe éducation</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-10">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xs">IS</span></div><span class="text-white font-bold" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></span></div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="administration-publique.html" class="hover:text-white">Administration</a>
+      <a href="sante.html" class="hover:text-white">Santé</a>
+      <a href="education.html" class="text-white font-medium">Éducation</a>
+      <a href="finance-assurance.html" class="hover:text-white">Finance</a>
+      <a href="btp-industrie.html" class="hover:text-white">BTP</a>
+      <a href="commerce-distribution.html" class="hover:text-white">Commerce</a>
+    </div>
+    <div class="text-xs">© 2026 IBIG Soft</div>
+  </div>
+</footer>
+</body>
+</html>

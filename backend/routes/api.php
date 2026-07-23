@@ -480,6 +480,38 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::post('/{id}/schedule', [ReportController::class, 'schedule'])->name('schedule');
     });
 
+    // -------------------------------------------------------------------------
+    // REPORT BUILDER drag-and-drop (Vague 13)
+    // -------------------------------------------------------------------------
+    Route::prefix('report-builder')->name('report-builder.')->group(function () {
+        Route::get('/modules', [\App\Http\Controllers\ReportBuilderController::class, 'modules'])->name('modules');
+        Route::post('/preview', [\App\Http\Controllers\ReportBuilderController::class, 'preview'])->name('preview');
+
+        // CRUD rapports
+        Route::post('/reports', [\App\Http\Controllers\ReportBuilderController::class, 'store'])->name('store');
+        Route::put('/reports/{id}', [\App\Http\Controllers\ReportBuilderController::class, 'update'])->name('update');
+        Route::delete('/reports/{id}', [\App\Http\Controllers\ReportBuilderController::class, 'destroy'])->name('destroy');
+        Route::post('/reports/{id}/duplicate', [\App\Http\Controllers\ReportBuilderController::class, 'duplicate'])->name('duplicate');
+
+        // Exécution
+        Route::post('/reports/{id}/run', [\App\Http\Controllers\ReportBuilderController::class, 'run'])->name('run');
+        Route::get('/runs/{runId}/status', [\App\Http\Controllers\ReportBuilderController::class, 'runStatus'])->name('run.status');
+        Route::get('/runs/{runId}/download', [\App\Http\Controllers\ReportBuilderController::class, 'download'])->name('run.download');
+    });
+
+    // -------------------------------------------------------------------------
+    // IMPORT/EXPORT universel (Vague 13)
+    // -------------------------------------------------------------------------
+    Route::prefix('import')->name('import.')->group(function () {
+        Route::get('/template/{module}', [\App\Http\Controllers\ImportController::class, 'template'])->name('template');
+        Route::post('/upload', [\App\Http\Controllers\ImportController::class, 'upload'])->name('upload');
+        Route::post('/{jobId}/validate', [\App\Http\Controllers\ImportController::class, 'validateImport'])->name('validate');
+        Route::post('/{jobId}/start', [\App\Http\Controllers\ImportController::class, 'start'])->name('start');
+        Route::get('/{jobId}/status', [\App\Http\Controllers\ImportController::class, 'status'])->name('status');
+        Route::get('/{jobId}/error-report', [\App\Http\Controllers\ImportController::class, 'errorReport'])->name('error-report');
+        Route::delete('/{jobId}', [\App\Http\Controllers\ImportController::class, 'destroy'])->name('destroy');
+    });
+
     Route::prefix('bi')->name('bi.')->middleware(['permission:bi.view'])->group(function () {
         Route::get('/kpis', [BiController::class, 'kpis'])->name('kpis');
         Route::get('/correspondence', [BiController::class, 'correspondence'])->name('correspondence');

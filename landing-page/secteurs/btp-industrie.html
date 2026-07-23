@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SECRETIS pour BTP & Industrie — Chantiers, Usines, Génie Civil | IBIG Soft</title>
+<meta name="description" content="IBIG SECRETIS : gestion administrative pour les entreprises BTP et industrielles africaines. Chantiers, appels d'offres, flotte, RH terrain et facturation SYSCOHADA.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { theme: { extend: { colors: { primary: '#1A3A5C', secondary: '#2E86C1', accent: '#F39C12', success: '#1E8449' }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }</script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="font-sans bg-white">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+    <a href="../index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-extrabold text-sm">IS</span></div>
+      <div class="text-primary font-bold leading-tight" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></div>
+    </a>
+    <nav class="hidden lg:flex items-center gap-1">
+      <a href="../index.html#features" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Fonctionnalités</a>
+      <a href="../index.html#pricing" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Tarifs</a>
+      <a href="#" class="text-sm font-semibold text-secondary px-3 py-2">Secteurs</a>
+    </nav>
+    <a href="/register" class="hidden lg:inline-flex bg-primary text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-secondary transition-colors">Essai gratuit</a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="pt-16 bg-gray-50 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-sm text-gray-500">
+    <a href="../index.html" class="hover:text-primary">Accueil</a>
+    <span class="text-gray-300">/</span><span>Secteurs</span>
+    <span class="text-gray-300">/</span>
+    <span class="text-primary font-medium">BTP & Industrie</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="bg-gradient-to-br from-[#78350f] to-[#d97706] text-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-3xl">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="text-5xl">🏗️</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">BTP & Industrie</span>
+      </div>
+      <h1 class="text-4xl lg:text-5xl font-extrabold mb-5 leading-tight">SECRETIS pour le BTP et l'Industrie</h1>
+      <p class="text-xl text-orange-100 mb-8 leading-relaxed max-w-2xl">
+        Centralisez l'administration de vos chantiers, usines et projets. Appels d'offres, gestion de flotte, RH terrain, facturation et suivi de projet — tout en temps réel depuis le terrain.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="/register" class="bg-primary text-white px-7 py-3.5 rounded-xl font-bold hover:bg-secondary shadow-lg">Démo gratuite</a>
+        <a href="../index.html#pricing" class="border-2 border-white text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10">Voir les tarifs</a>
+      </div>
+      <div class="flex flex-wrap gap-6 mt-8 pt-8 border-t border-white/20">
+        <span class="text-orange-100 text-sm">✓ Accessible hors ligne sur chantier</span>
+        <span class="text-orange-100 text-sm">✓ Géolocalisation des véhicules</span>
+        <span class="text-orange-100 text-sm">✓ Gestion multi-chantiers</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAS D'USAGE -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="text-sm font-bold text-secondary uppercase tracking-wider">Cas d'usage</span>
+      <h2 class="text-3xl font-extrabold text-primary mt-2 mb-4">Du bureau au chantier, tout est connecté</h2>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📋</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion des appels d'offres</h3>
+        <p class="text-gray-500 text-sm">Suivi des AO publics et privés, constitution des dossiers de candidature, workflow de validation interne, calendrier des soumissions et suivi des résultats.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🚛</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion de flotte et logistique</h3>
+        <p class="text-gray-500 text-sm">Suivi GPS des engins et véhicules, planning d'entretien préventif, carnet de bord numérique, consommation carburant, alertes maintenance.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">👷</div>
+        <h3 class="font-bold text-gray-900 mb-2">RH terrain et pointage</h3>
+        <p class="text-gray-500 text-sm">Gestion des équipes sur site, pointage par QR code, suivi des heures supplémentaires, dossiers des ouvriers, CNAME et CNPS, notes de frais terrain.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📊</div>
+        <h3 class="font-bold text-gray-900 mb-2">Suivi de projet Gantt</h3>
+        <p class="text-gray-500 text-sm">Planification des phases de chantier, assignation des tâches aux équipes, suivi de l'avancement en temps réel, rapports de progression pour les maîtres d'ouvrage.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">💰</div>
+        <h3 class="font-bold text-gray-900 mb-2">Facturation et situations de travaux</h3>
+        <p class="text-gray-500 text-sm">Situations de travaux mensuelles, décomptes provisoires/définitifs, facturation SYSCOHADA, suivi des paiements maîtres d'ouvrage et relances automatiques.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📦</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion des approvisionnements</h3>
+        <p class="text-gray-500 text-sm">Bons de commande matériaux, réception chantier, stock de fournitures, gestion fournisseurs, valorisation des consommations par chantier.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVANTAGES -->
+<section class="py-20 bg-orange-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <h2 class="text-3xl font-extrabold text-primary mb-6">Taillé pour les contraintes du terrain</h2>
+        <div class="space-y-4">
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">📡</span><div><div class="font-semibold text-gray-800">Mode offline pour les zones isolées</div><div class="text-gray-500 text-sm">Vos équipes terrain saisissent les données même sans réseau. Synchronisation dès la connexion.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">📱</span><div><div class="font-semibold text-gray-800">Application mobile robuste</div><div class="text-gray-500 text-sm">Interface optimisée pour les tablettes et smartphones résistants utilisés sur chantier.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">🗺️</span><div><div class="font-semibold text-gray-800">Dashboard multi-chantiers</div><div class="text-gray-500 text-sm">Vue consolidée de tous vos chantiers : avancement, budget consommé, alertes, équipes.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">⚠️</span><div><div class="font-semibold text-gray-800">Alertes incidents et sécurité</div><div class="text-gray-500 text-sm">Signalement d'incidents, registre HSE, rapports accidents, suivi des habilitations sécurité.</div></div></div>
+        </div>
+      </div>
+      <div class="bg-[#78350f] text-white rounded-3xl p-8">
+        <h3 class="text-xl font-bold mb-6">Résultats observés</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">-35%</div><div class="text-orange-200 text-xs mt-1">Délais administratifs</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">+25%</div><div class="text-orange-200 text-xs mt-1">Respect des délais chantier</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">-40%</div><div class="text-orange-200 text-xs mt-1">Litiges fournisseurs</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">2x</div><div class="text-orange-200 text-xs mt-1">Vitesse de facturation</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-extrabold text-primary text-center mb-14">Ce qu'ils disent</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Nous gérons 8 chantiers simultanément. SECRETIS nous donne une vision temps réel de chaque site depuis notre siège. La coordination est devenue fluide et nos délais respectés."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[#78350f] rounded-full flex items-center justify-center text-white font-bold text-sm">MC</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Mamadou Coulibaly</div><div class="text-gray-400 text-xs">PDG — BTP Sahel Construction, Bamako, ML</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"La gestion de notre flotte de 45 engins est désormais zéro papier. Les maintenances sont anticipées, les coûts réduits de 30%. Un outil indispensable pour une entreprise moderne."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">AB</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Awa Bamba</div><div class="text-gray-400 text-xs">DAF — Génie Civil Ivoirien SA, Abidjan, CI</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Les situations de travaux se génèrent automatiquement. Nos clients reçoivent leurs documents en temps et en heure. Nos délais d'encaissement ont diminué de 3 semaines en moyenne."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">KD</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Kofi Dotse</div><div class="text-gray-400 text-xs">Directeur — TransBuild Ghana, Accra, GH</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-gradient-to-r from-[#78350f] to-[#d97706] text-white">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-extrabold mb-4">Pilotez vos chantiers depuis votre bureau</h2>
+    <p class="text-orange-100 text-lg mb-8">Démo adaptée au secteur BTP. Essai gratuit avec vos données réelles.</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="/register" class="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:bg-secondary shadow-lg">Essai gratuit — 30 jours</a>
+      <a href="mailto:commercial@ibig-secretis.com" class="border-2 border-white text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/10">Parler à un expert BTP</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-10">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xs">IS</span></div><span class="text-white font-bold" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></span></div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="administration-publique.html" class="hover:text-white">Administration</a>
+      <a href="sante.html" class="hover:text-white">Santé</a>
+      <a href="education.html" class="hover:text-white">Éducation</a>
+      <a href="finance-assurance.html" class="hover:text-white">Finance</a>
+      <a href="btp-industrie.html" class="text-white font-medium">BTP</a>
+      <a href="commerce-distribution.html" class="hover:text-white">Commerce</a>
+    </div>
+    <div class="text-xs">© 2026 IBIG Soft</div>
+  </div>
+</footer>
+</body>
+</html>

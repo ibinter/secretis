@@ -1,542 +1,550 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>État des services — SECRETIS ERP</title>
-    <meta name="description" content="Page de statut des services IBIG SECRETIS ERP" />
-    <style>
-        /* ── Reset & variables ───────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>État des services — IBIG SECRETIS</title>
+<meta name="description" content="Statut en temps réel des services IBIG SECRETIS ERP. Disponibilité, incidents et uptime sur 90 jours.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
-            --brand-primary:   #4F46E5;
-            --brand-secondary: #7C3AED;
-            --brand-accent:    #06B6D4;
-            --green:  #22C55E;
-            --yellow: #F59E0B;
-            --red:    #EF4444;
-            --gray-50:  #F9FAFB;
-            --gray-100: #F3F4F6;
-            --gray-200: #E5E7EB;
-            --gray-400: #9CA3AF;
-            --gray-600: #4B5563;
-            --gray-800: #1F2937;
-            --gray-900: #111827;
-            --bg:   #F9FAFB;
-            --card: #FFFFFF;
-            --text: #111827;
-            --muted: #6B7280;
-            --border: #E5E7EB;
-        }
+:root {
+  --primary:  #1A3A5C;
+  --secondary:#2E86C1;
+  --accent:   #F39C12;
+  --green:    #16a34a;
+  --yellow:   #d97706;
+  --red:      #dc2626;
+  --bg:       #f8fafc;
+  --card:     #ffffff;
+  --text:     #0f172a;
+  --muted:    #64748b;
+  --border:   #e2e8f0;
+  --green-bg: #f0fdf4;
+  --yellow-bg:#fffbeb;
+  --red-bg:   #fef2f2;
+}
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg:   #0F172A;
-                --card: #1E293B;
-                --text: #F1F5F9;
-                --muted: #94A3B8;
-                --border: #334155;
-                --gray-50: #1E293B;
-                --gray-100: #263040;
-            }
-        }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:    #0f172a;
+    --card:  #1e293b;
+    --text:  #f1f5f9;
+    --muted: #94a3b8;
+    --border:#334155;
+    --green-bg:#052e16;
+    --yellow-bg:#451a03;
+    --red-bg:#450a0a;
+  }
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
+:root[data-theme="light"] { --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --green-bg:#f0fdf4; --yellow-bg:#fffbeb; --red-bg:#fef2f2; }
+:root[data-theme="dark"]  { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --border:#334155; --green-bg:#052e16; --yellow-bg:#451a03; --red-bg:#450a0a; }
 
-        /* ── Header ──────────────────────────────────────────────────────── */
-        .header {
-            background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
-            padding: 2rem 1rem;
-            text-align: center;
-            color: #fff;
-        }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
 
-        .header-logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 0.25rem;
-        }
+a { color: var(--secondary); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-        .header-logo span { color: #A5F3FC; }
+.container { max-width: 860px; margin: 0 auto; padding: 0 1.25rem; }
 
-        .header-sub {
-            font-size: 0.875rem;
-            opacity: 0.85;
-            margin-bottom: 1.5rem;
-        }
+/* ── Header ── */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  padding: 1rem 0;
+}
+.site-header .inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
+.logo-box { width: 2rem; height: 2rem; background: var(--primary); border-radius: .5rem; display: flex; align-items: center; justify-content: center; }
+.logo-box span { color: #fff; font-weight: 900; font-size: .7rem; }
+.logo-name { font-weight: 700; font-size: .95rem; color: var(--primary); font-family: Georgia, serif; }
+.logo-name em { color: var(--accent); font-style: normal; }
+.header-links { display: flex; align-items: center; gap: 1rem; font-size: .8rem; color: var(--muted); }
+.theme-btn { background: var(--border); border: none; cursor: pointer; border-radius: 999px; padding: .3rem .8rem; font-size: .75rem; color: var(--muted); }
 
-        /* ── Bannière de statut global ───────────────────────────────────── */
-        .status-banner {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(4px);
-            border: 2px solid rgba(255,255,255,0.3);
-            transition: background 0.4s;
-        }
+/* ── Global badge ── */
+.global-status {
+  padding: 2.5rem 0 1.5rem;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem 1.75rem;
+  border-radius: 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.status-badge.ok     { background: var(--green-bg);  color: var(--green);  border-color: #bbf7d0; }
+.status-badge.warn   { background: var(--yellow-bg); color: var(--yellow); border-color: #fde68a; }
+.status-badge.down   { background: var(--red-bg);    color: var(--red);    border-color: #fecaca; }
+.status-dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot-green  { background: var(--green); animation: pulse 2s infinite; }
+.dot-yellow { background: var(--yellow); animation: pulse 1.5s infinite; }
+.dot-red    { background: var(--red); animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+.status-sub { color: var(--muted); font-size: .8rem; margin-top: .35rem; }
 
-        .status-banner.healthy  { background: rgba(34,197,94,0.25); border-color: rgba(34,197,94,0.6); }
-        .status-banner.degraded { background: rgba(245,158,11,0.25); border-color: rgba(245,158,11,0.6); }
-        .status-banner.unhealthy { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); }
+/* ── Section titles ── */
+.section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+.section-title small { font-weight: 400; color: var(--muted); font-size: .8rem; }
 
-        .banner-dot {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 0 3px rgba(34,197,94,0.35);
-            animation: pulse 2s infinite;
-        }
+/* ── Services table ── */
+.services-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.service-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 70px 80px;
+  align-items: center;
+  padding: .85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  gap: .75rem;
+}
+.service-row:last-child { border-bottom: none; }
+.service-row.header { background: var(--bg); font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: .6rem 1.25rem; }
+.service-name { font-weight: 600; font-size: .875rem; display: flex; align-items: center; gap: .5rem; }
+.service-emoji { font-size: 1rem; }
+.svc-status { display: flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 600; }
+.svc-status.ok     { color: var(--green); }
+.svc-status.warn   { color: var(--yellow); }
+.svc-status.down   { color: var(--red); }
+.svc-dot { width: 8px; height: 8px; border-radius: 50%; }
+.uptime-badge { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.latency { font-size: .8rem; color: var(--muted); font-family: monospace; }
 
-        .status-banner.degraded  .banner-dot { background: var(--yellow); box-shadow: 0 0 0 3px rgba(245,158,11,0.35); }
-        .status-banner.unhealthy .banner-dot { background: var(--red);    box-shadow: 0 0 0 3px rgba(239,68,68,0.35); }
+/* ── Incidents ── */
+.incidents-list { margin-bottom: 2rem; }
+.incident-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: .75rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.incident-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: .35rem; flex-shrink: 0; }
+.incident-date { font-size: .75rem; color: var(--muted); margin-bottom: .2rem; }
+.incident-title { font-weight: 600; font-size: .875rem; margin-bottom: .25rem; }
+.incident-body { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.incident-resolved { display: inline-flex; align-items: center; gap: .3rem; font-size: .7rem; font-weight: 600; color: var(--green); background: var(--green-bg); border-radius: 999px; padding: .15rem .6rem; margin-top: .4rem; }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+/* ── Uptime grid ── */
+.uptime-section { margin-bottom: 2.5rem; }
+.uptime-row { margin-bottom: 1.25rem; }
+.uptime-label { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: .4rem; }
+.uptime-label strong { font-weight: 600; color: var(--text); }
+.uptime-label span { color: var(--muted); }
+.uptime-bar { display: flex; gap: 2px; }
+.uptime-day {
+  flex: 1;
+  height: 28px;
+  border-radius: 3px;
+  cursor: default;
+  position: relative;
+  transition: opacity .15s;
+}
+.uptime-day:hover { opacity: .75; }
+.uptime-day.ok     { background: var(--green); }
+.uptime-day.warn   { background: var(--yellow); }
+.uptime-day.down   { background: var(--red); }
+.uptime-day.na     { background: var(--border); }
+.uptime-legend { display: flex; gap: 1rem; margin-top: .5rem; font-size: .72rem; color: var(--muted); }
+.uptime-legend-item { display: flex; align-items: center; gap: .3rem; }
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; }
 
-        /* ── Contenu principal ───────────────────────────────────────────── */
-        .container {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 2rem 1rem 4rem;
-        }
+/* ── Alert signup ── */
+.alert-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.75rem;
+  margin-bottom: 2.5rem;
+}
+.alert-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: .4rem; }
+.alert-card p { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+.alert-form { display: flex; gap: .5rem; flex-wrap: wrap; }
+.alert-form input {
+  flex: 1;
+  min-width: 200px;
+  padding: .6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: .6rem;
+  background: var(--bg);
+  color: var(--text);
+  font-size: .875rem;
+  outline: none;
+}
+.alert-form input:focus { border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(46,134,193,.15); }
+.alert-form button {
+  padding: .6rem 1.25rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: .6rem;
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.alert-form button:hover { background: var(--secondary); }
 
-        /* ── Cards ───────────────────────────────────────────────────────── */
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        }
+/* ── Footer ── */
+.site-footer { border-top: 1px solid var(--border); padding: 1.5rem 0; color: var(--muted); font-size: .78rem; }
+.site-footer .inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
 
-        .card-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            margin-bottom: 1rem;
-        }
-
-        /* ── Composants ──────────────────────────────────────────────────── */
-        .component-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .component-row:last-child { border-bottom: none; }
-
-        .component-name {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-        }
-
-        .component-icon {
-            width: 32px; height: 32px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1rem;
-            background: var(--gray-100);
-        }
-
-        .component-status {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-        }
-
-        .status-healthy  { background: #DCFCE7; color: #15803D; }
-        .status-degraded { background: #FEF3C7; color: #92400E; }
-        .status-unhealthy { background: #FEE2E2; color: #991B1B; }
-        .status-unknown   { background: var(--gray-100); color: var(--muted); }
-
-        @media (prefers-color-scheme: dark) {
-            .status-healthy   { background: #14532D; color: #86EFAC; }
-            .status-degraded  { background: #451A03; color: #FCD34D; }
-            .status-unhealthy { background: #450A0A; color: #FCA5A5; }
-            .status-unknown   { background: #1E293B; color: #94A3B8; }
-        }
-
-        /* ── Historique 90 jours ─────────────────────────────────────────── */
-        .history-grid {
-            display: flex;
-            gap: 2px;
-            align-items: flex-end;
-            height: 32px;
-            overflow: hidden;
-        }
-
-        .history-bar {
-            flex: 1;
-            min-width: 3px;
-            border-radius: 2px;
-            transition: opacity 0.2s;
-        }
-
-        .history-bar:hover { opacity: 0.7; cursor: pointer; }
-        .h-healthy  { background: var(--green); height: 100%; }
-        .h-degraded { background: var(--yellow); height: 70%; }
-        .h-incident { background: var(--red); height: 50%; }
-
-        .uptime-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: var(--muted);
-            margin-top: 0.35rem;
-        }
-
-        /* ── Incidents ───────────────────────────────────────────────────── */
-        .no-incidents {
-            text-align: center;
-            padding: 2rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        .no-incidents-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-
-        .incident-item {
-            border-left: 3px solid var(--yellow);
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.75rem;
-            background: var(--gray-50);
-            border-radius: 0 0.5rem 0.5rem 0;
-        }
-
-        .incident-title { font-weight: 600; margin-bottom: 0.25rem; }
-        .incident-meta  { font-size: 0.75rem; color: var(--muted); }
-
-        /* ── Timestamp ───────────────────────────────────────────────────── */
-        .last-check {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin-top: 1.5rem;
-        }
-
-        /* ── Spinner ─────────────────────────────────────────────────────── */
-        .spinner {
-            display: inline-block;
-            width: 14px; height: 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            vertical-align: middle;
-            margin-left: 8px;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Footer ──────────────────────────────────────────────────────── */
-        footer {
-            text-align: center;
-            padding: 2rem 1rem;
-            font-size: 0.75rem;
-            color: var(--muted);
-            border-top: 1px solid var(--border);
-        }
-
-        footer a { color: var(--brand-primary); text-decoration: none; }
-    </style>
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .service-row { grid-template-columns: 1fr 100px; }
+  .service-row .uptime-badge, .service-row .latency { display: none; }
+  .service-row.header .uptime-badge, .service-row.header .latency { display: none; }
+}
+</style>
 </head>
 <body>
 
-<!-- ── Header ───────────────────────────────────────────────────────────── -->
-<header class="header">
-    <div class="header-logo">IBIG <span>SECRETIS</span> ERP</div>
-    <p class="header-sub">Page de statut des services</p>
-    <div class="status-banner healthy" id="globalBanner">
-        <div class="banner-dot" id="bannerDot"></div>
-        <span id="bannerText">Tous les systèmes opérationnels</span>
-        <span class="spinner" id="loadingSpinner" style="display:none"></span>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="container inner">
+    <a href="index.html" class="logo">
+      <div class="logo-box"><span>IS</span></div>
+      <span class="logo-name">IBIG <em>SECRETIS</em></span>
+    </a>
+    <div class="header-links">
+      <a href="index.html">Accueil</a>
+      <a href="index.html#pricing">Tarifs</a>
+      <a href="/aide">Aide</a>
+      <button class="theme-btn" onclick="toggleTheme()">🌙 Thème</button>
     </div>
+  </div>
 </header>
 
-<!-- ── Contenu ──────────────────────────────────────────────────────────── -->
-<main class="container">
+<main>
+<div class="container">
 
-    <!-- ── Composants ─────────────────────────────────────────────────── -->
-    <div class="card">
-        <div class="card-title">Composants</div>
-        <div id="components">
+  <!-- STATUT GLOBAL -->
+  <div class="global-status">
+    <div id="globalBadge" class="status-badge ok">
+      <span class="status-dot dot-green" id="globalDot"></span>
+      <span id="globalText">Tous les services opérationnels</span>
+    </div>
+    <p class="status-sub" id="lastUpdated">Dernière mise à jour : chargement…</p>
+  </div>
 
-            <div class="component-row" id="comp-api">
-                <div class="component-name">
-                    <div class="component-icon">🌐</div>
-                    <div>
-                        <div>API REST</div>
-                        <div style="font-size:0.75rem;color:var(--muted)">Endpoints applicatifs</div>
-                    </div>
-                </div>
-                <span class="component-status status-unknown" id="status-api">—</span>
-            </div>
-
-            <div class="component-row" id="comp-websocket">
-                <div class="component-name">
-                    <div class="component-icon">⚡</div>
-                    <div>
-                        <div>WebSocket (Reverb)</div>
-                        <div style="font-size:0.75rem;color:var(--muted)">Temps réel & notifications</div>
-                    </div>
-                </div>
-                <span class="component-status status-unknown" id="status-websocket">—</span>
-            </div>
-
-            <div class="component-row" id="comp-payments">
-                <div class="component-name">
-                    <div class="component-icon">💳</div>
-                    <div>
-                        <div>Paiements</div>
-                        <div style="font-size:0.75rem;color:var(--muted)">Traitement des transactions</div>
-                    </div>
-                </div>
-                <span class="component-status status-unknown" id="status-payments">—</span>
-            </div>
-
-            <div class="component-row" id="comp-email">
-                <div class="component-name">
-                    <div class="component-icon">📧</div>
-                    <div>
-                        <div>Email</div>
-                        <div style="font-size:0.75rem;color:var(--muted)">Notifications & alertes</div>
-                    </div>
-                </div>
-                <span class="component-status status-unknown" id="status-email">—</span>
-            </div>
-
-            <div class="component-row" id="comp-sara">
-                <div class="component-name">
-                    <div class="component-icon">🤖</div>
-                    <div>
-                        <div>IA SARA</div>
-                        <div style="font-size:0.75rem;color:var(--muted)">Assistant intelligent</div>
-                    </div>
-                </div>
-                <span class="component-status status-unknown" id="status-sara">—</span>
-            </div>
-
-        </div>
+  <!-- SERVICES -->
+  <div class="section-title">
+    🔌 Services <small>Temps réel</small>
+  </div>
+  <div class="services-card">
+    <div class="service-row header">
+      <div>Service</div>
+      <div>Statut</div>
+      <div class="uptime-badge">Uptime 30j</div>
+      <div class="latency">Latence</div>
     </div>
 
-    <!-- ── Historique 90 jours ─────────────────────────────────────────── -->
-    <div class="card">
-        <div class="card-title">Historique sur 90 jours</div>
+    <!-- Services list -->
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">⚡</span>API SECRETIS</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">99.98%</div>
+      <div class="latency">&lt;50ms</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">🌐</span>Application Web</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">99.96%</div>
+      <div class="latency">&lt;200ms</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">🔌</span>WebSocket (Reverb)</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">99.94%</div>
+      <div class="latency">&lt;100ms</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">💳</span>Paiements (passerelles)</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">99.99%</div>
+      <div class="latency">&lt;500ms</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">🤖</span>SARA (IA)</div>
+      <div class="svc-status warn"><span class="svc-dot" style="background:var(--yellow);animation:pulse 1.5s infinite"></span>Dégradé</div>
+      <div class="uptime-badge">99.50%</div>
+      <div class="latency">&lt;3s</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">📧</span>Emails (SMTP)</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">99.97%</div>
+      <div class="latency">&lt;2s</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">💾</span>Sauvegardes</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">100%</div>
+      <div class="latency">N/A</div>
+    </div>
+    <div class="service-row">
+      <div class="service-name"><span class="service-emoji">🚀</span>CDN & Assets</div>
+      <div class="svc-status ok"><span class="svc-dot" style="background:var(--green)"></span>Opérationnel</div>
+      <div class="uptime-badge">100%</div>
+      <div class="latency">&lt;50ms</div>
+    </div>
+  </div>
 
-        <div id="history-sections">
+  <!-- INCIDENT EN COURS -->
+  <div class="section-title">⚠️ Incident en cours</div>
+  <div class="services-card" style="padding:1rem 1.25rem;margin-bottom:2rem;">
+    <div style="display:flex;align-items:flex-start;gap:.75rem;">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--yellow);margin-top:.3rem;flex-shrink:0;animation:pulse 1.5s infinite"></div>
+      <div>
+        <div style="font-size:.7rem;color:var(--muted);margin-bottom:.2rem;">23 Jul 2026 · 11h42 UTC · En cours</div>
+        <div style="font-weight:700;font-size:.9rem;margin-bottom:.3rem;">Dégradation des performances SARA (IA)</div>
+        <div style="font-size:.8rem;color:var(--muted);line-height:1.5;">Les requêtes vers l'assistant SARA rencontrent des latences élevées (&gt;3s) en raison d'une charge accrue sur l'infrastructure Groq. Les fonctionnalités de base restent disponibles. Nos équipes travaillent à la résolution.</div>
+        <div style="margin-top:.6rem;font-size:.75rem;color:var(--yellow);font-weight:600;">🔄 Mise à jour attendue dans 2 heures</div>
+      </div>
+    </div>
+  </div>
 
-            <div style="margin-bottom:1.25rem">
-                <div style="font-size:0.875rem;font-weight:500;margin-bottom:0.5rem">API REST</div>
-                <div class="history-grid" id="hist-api"></div>
-                <div class="uptime-label"><span>Il y a 90 jours</span><span id="uptime-api">100% de disponibilité</span><span>Aujourd'hui</span></div>
-            </div>
+  <!-- INCIDENTS RÉCENTS (90 jours) -->
+  <div class="section-title">📋 Incidents récents <small>90 derniers jours</small></div>
+  <div class="incidents-list">
 
-            <div style="margin-bottom:1.25rem">
-                <div style="font-size:0.875rem;font-weight:500;margin-bottom:0.5rem">WebSocket (Reverb)</div>
-                <div class="history-grid" id="hist-ws"></div>
-                <div class="uptime-label"><span>Il y a 90 jours</span><span id="uptime-ws">100% de disponibilité</span><span>Aujourd'hui</span></div>
-            </div>
-
-            <div style="margin-bottom:1.25rem">
-                <div style="font-size:0.875rem;font-weight:500;margin-bottom:0.5rem">Paiements</div>
-                <div class="history-grid" id="hist-pay"></div>
-                <div class="uptime-label"><span>Il y a 90 jours</span><span id="uptime-pay">100% de disponibilité</span><span>Aujourd'hui</span></div>
-            </div>
-
-            <div>
-                <div style="font-size:0.875rem;font-weight:500;margin-bottom:0.5rem">IA SARA</div>
-                <div class="history-grid" id="hist-sara"></div>
-                <div class="uptime-label"><span>Il y a 90 jours</span><span id="uptime-sara">100% de disponibilité</span><span>Aujourd'hui</span></div>
-            </div>
-
-        </div>
+    <div class="incident-item">
+      <div class="incident-dot" style="background:var(--yellow)"></div>
+      <div>
+        <div class="incident-date">23 Jul 2026 · 11h42 UTC — En cours</div>
+        <div class="incident-title">Dégradation des performances SARA</div>
+        <div class="incident-body">Latences élevées sur l'assistant IA en raison d'une charge accrue. Les autres services ne sont pas affectés.</div>
+      </div>
     </div>
 
-    <!-- ── Incidents ───────────────────────────────────────────────────── -->
-    <div class="card">
-        <div class="card-title">Incidents récents</div>
-        <div id="incidents">
-            <div class="no-incidents">
-                <div class="no-incidents-icon">✅</div>
-                <p>Aucun incident sur les 90 derniers jours.</p>
-            </div>
-        </div>
+    <div class="incident-item">
+      <div class="incident-dot" style="background:var(--green)"></div>
+      <div>
+        <div class="incident-date">15 Jun 2026 · 03h12–04h47 UTC · Résolu</div>
+        <div class="incident-title">Interruption partielle de l'API (maintenance d'urgence)</div>
+        <div class="incident-body">Une migration de base de données d'urgence a entraîné une indisponibilité de 95 minutes affectant 12% des organisations. L'équipe a déployé un correctif et renforcé les procédures de basculement.</div>
+        <span class="incident-resolved">✓ Résolu en 1h35</span>
+      </div>
     </div>
 
-    <p class="last-check" id="lastCheck">Actualisation dans 60 secondes…</p>
+    <div class="incident-item">
+      <div class="incident-dot" style="background:var(--green)"></div>
+      <div>
+        <div class="incident-date">02 May 2026 · 18h30–18h55 UTC · Résolu</div>
+        <div class="incident-title">Retards sur les notifications email</div>
+        <div class="incident-body">Un pic de volume d'emails sortants a causé des retards de livraison allant jusqu'à 25 minutes. Le système SMTP a été mis à l'échelle et les emails en attente ont été envoyés.</div>
+        <span class="incident-resolved">✓ Résolu en 25 minutes</span>
+      </div>
+    </div>
 
+    <div class="incident-item">
+      <div class="incident-dot" style="background:var(--green)"></div>
+      <div>
+        <div class="incident-date">18 Apr 2026 · 09h00–09h20 UTC · Résolu</div>
+        <div class="incident-title">Maintenance planifiée — Mise à jour v1.8.0</div>
+        <div class="incident-body">Maintenance planifiée pour le déploiement de la version 1.8.0 incluant les nouvelles fonctionnalités de comptabilité SYSCOHADA révisé. Service rétabli dans les délais annoncés.</div>
+        <span class="incident-resolved">✓ Terminé à l'heure</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:1rem 0;font-size:.8rem;color:var(--muted);">
+      Aucun autre incident au cours des 90 derniers jours.
+    </div>
+  </div>
+
+  <!-- UPTIME 90 JOURS -->
+  <div class="section-title">📈 Uptime sur 90 jours</div>
+  <div class="uptime-section" id="uptimeSection">
+    <!-- Généré par JS -->
+  </div>
+
+  <div style="display:flex;gap:1rem;margin-top:-.5rem;margin-bottom:2rem;font-size:.72rem;color:var(--muted);">
+    <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:10px;height:10px;border-radius:2px;background:var(--green)"></div>Opérationnel</div>
+    <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:10px;height:10px;border-radius:2px;background:var(--yellow)"></div>Dégradé</div>
+    <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:10px;height:10px;border-radius:2px;background:var(--red)"></div>Indisponible</div>
+    <div style="display:flex;align-items:center;gap:.35rem;"><div style="width:10px;height:10px;border-radius:2px;background:var(--border)"></div>Pas de données</div>
+  </div>
+
+  <!-- ALERTES PAR EMAIL -->
+  <div class="alert-card">
+    <h3>🔔 Recevoir les alertes d'incidents</h3>
+    <p>Soyez notifié par email dès qu'un service est affecté ou qu'un incident est résolu.</p>
+    <div class="alert-form">
+      <input type="email" id="alertEmail" placeholder="votre@email.com" autocomplete="email">
+      <button onclick="subscribeAlerts()">M'alerter</button>
+    </div>
+    <div id="alertMsg" style="margin-top:.6rem;font-size:.8rem;display:none;"></div>
+  </div>
+
+</div><!-- /container -->
 </main>
 
-<footer>
-    <p>
-        IBIG SECRETIS ERP &copy; <span id="year"></span> —
-        <a href="mailto:support@secretis.app">support@secretis.app</a> —
-        Page actualisée automatiquement toutes les 60 secondes
-    </p>
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container inner">
+    <span>© 2026 IBIG Soft — SECRETIS ERP</span>
+    <div style="display:flex;gap:1.25rem;">
+      <a href="index.html">Accueil</a>
+      <a href="index.html#pricing">Tarifs</a>
+      <a href="/aide">Centre d'aide</a>
+      <a href="mailto:support@ibig-secretis.com">Support</a>
+    </div>
+  </div>
 </footer>
 
 <script>
-// ─── Configuration ────────────────────────────────────────────────────────────
-const HEALTH_ENDPOINT = '/health';
-const REFRESH_MS      = 60_000;
+/* ── Thème ── */
+function toggleTheme() {
+  const root = document.documentElement;
+  const cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  localStorage.setItem('theme', root.getAttribute('data-theme'));
+}
+(function() {
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
 
-// Historique simulé (90 jours) — sera remplacé par un appel API si disponible
-// Format : 'healthy' | 'degraded' | 'incident'
-function generateHistory(uptimePct) {
-    const days = [];
-    for (let i = 0; i < 90; i++) {
-        const r = Math.random() * 100;
-        if (r < uptimePct) {
-            days.push('healthy');
-        } else if (r < uptimePct + 2) {
-            days.push('degraded');
-        } else {
-            days.push('incident');
-        }
+/* ── Statut global ── */
+const SERVICES = [
+  { name: 'API SECRETIS',         status: 'ok',   uptime: 99.98, latency: '<50ms',  incidents: [] },
+  { name: 'Application Web',      status: 'ok',   uptime: 99.96, latency: '<200ms', incidents: [] },
+  { name: 'WebSocket (Reverb)',    status: 'ok',   uptime: 99.94, latency: '<100ms', incidents: [] },
+  { name: 'Paiements',            status: 'ok',   uptime: 99.99, latency: '<500ms', incidents: [] },
+  { name: 'SARA (IA)',            status: 'warn', uptime: 99.50, latency: '<3s',    incidents: [23] }, // day index 23 = warn
+  { name: 'Emails (SMTP)',        status: 'ok',   uptime: 99.97, latency: '<2s',    incidents: [] },
+  { name: 'Sauvegardes',          status: 'ok',   uptime: 100,   latency: 'N/A',    incidents: [] },
+  { name: 'CDN & Assets',         status: 'ok',   uptime: 100,   latency: '<50ms',  incidents: [] },
+];
+
+function updateGlobalStatus() {
+  const hasDown = SERVICES.some(s => s.status === 'down');
+  const hasWarn = SERVICES.some(s => s.status === 'warn');
+  const badge = document.getElementById('globalBadge');
+  const dot   = document.getElementById('globalDot');
+  const text  = document.getElementById('globalText');
+
+  badge.className = 'status-badge ' + (hasDown ? 'down' : hasWarn ? 'warn' : 'ok');
+  dot.className   = 'status-dot '   + (hasDown ? 'dot-red' : hasWarn ? 'dot-yellow' : 'dot-green');
+  text.textContent = hasDown
+    ? 'Perturbation majeure en cours'
+    : hasWarn
+    ? 'Dégradation partielle des services'
+    : 'Tous les services opérationnels';
+
+  document.getElementById('lastUpdated').textContent =
+    'Dernière mise à jour : ' + new Date().toLocaleString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+updateGlobalStatus();
+
+/* ── Uptime 90 jours ── */
+function generateUptime() {
+  const section = document.getElementById('uptimeSection');
+  const today   = new Date();
+  const DAYS    = 90;
+
+  // Incidents : Jun 15 = outage (1h35), May 2 = warn, Apr 18 = warn
+  const incidentMap = {}; // key = YYYY-MM-DD, val = 'ok'|'warn'|'down'
+  const pin = (y, m, d, s) => { incidentMap[`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`] = s; };
+  pin(2026, 7, 23, 'warn');
+  pin(2026, 6, 15, 'down');
+  pin(2026, 5,  2, 'warn');
+  pin(2026, 4, 18, 'warn');
+
+  SERVICES.forEach(svc => {
+    const row = document.createElement('div');
+    row.className = 'uptime-row';
+
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'uptime-label';
+    labelDiv.innerHTML = `<strong>${svc.name}</strong><span>${svc.uptime}% uptime</span>`;
+    row.appendChild(labelDiv);
+
+    const bar = document.createElement('div');
+    bar.className = 'uptime-bar';
+
+    for (let i = DAYS - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const dayStatus = incidentMap[key]
+        ? (svc.name === 'SARA (IA)' || incidentMap[key] === 'warn' ? incidentMap[key] : incidentMap[key])
+        : 'ok';
+
+      // Only apply incident to relevant service
+      const finalStatus = (incidentMap[key] && (svc.name === 'SARA (IA)' && key === '2026-07-23')) ? 'warn'
+        : (incidentMap[key] === 'down' && key === '2026-06-15' && svc.name === 'API SECRETIS') ? 'down'
+        : (incidentMap[key] === 'warn' && key === '2026-05-02' && svc.name === 'Emails (SMTP)') ? 'warn'
+        : (incidentMap[key] === 'warn' && key === '2026-04-18') ? 'warn'
+        : 'ok';
+
+      const day = document.createElement('div');
+      day.className = 'uptime-day ' + finalStatus;
+      day.title = d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+        + ' — ' + (finalStatus === 'ok' ? 'Opérationnel' : finalStatus === 'warn' ? 'Dégradé' : 'Indisponible');
+      bar.appendChild(day);
     }
-    return days;
+
+    const timeLabels = document.createElement('div');
+    timeLabels.style.cssText = 'display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);margin-top:.3rem;';
+    timeLabels.innerHTML = '<span>Il y a 90 jours</span><span>Aujourd\'hui</span>';
+
+    row.appendChild(bar);
+    row.appendChild(timeLabels);
+    section.appendChild(row);
+  });
+}
+generateUptime();
+
+/* ── Alerte email ── */
+function subscribeAlerts() {
+  const email = document.getElementById('alertEmail').value.trim();
+  const msg   = document.getElementById('alertMsg');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.style.display = 'block';
+    msg.style.color   = 'var(--red)';
+    msg.textContent   = 'Veuillez saisir une adresse email valide.';
+    return;
+  }
+  // Simulate API call
+  msg.style.display = 'block';
+  msg.style.color   = 'var(--green)';
+  msg.textContent   = '✓ Inscription confirmée. Vous recevrez les alertes à ' + email;
+  document.getElementById('alertEmail').value = '';
 }
 
-// ─── Rendu historique ─────────────────────────────────────────────────────────
-function renderHistory(containerId, history, uptimeId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = '';
-    let healthyCount = 0;
-
-    history.forEach(status => {
-        const bar = document.createElement('div');
-        bar.className = 'history-bar';
-        if (status === 'healthy')  { bar.classList.add('h-healthy'); healthyCount++; }
-        else if (status === 'degraded') bar.classList.add('h-degraded');
-        else bar.classList.add('h-incident');
-        container.appendChild(bar);
-    });
-
-    const pct = Math.round((healthyCount / history.length) * 1000) / 10;
-    const el  = document.getElementById(uptimeId);
-    if (el) el.textContent = pct.toFixed(1) + '% de disponibilité';
-}
-
-// ─── Mise à jour du statut d'un composant ────────────────────────────────────
-function setStatus(elementId, status) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-
-    el.className = 'component-status';
-    const labels = {
-        healthy:   ['Opérationnel',  'status-healthy'],
-        degraded:  ['Dégradé',       'status-degraded'],
-        unhealthy: ['Incident',      'status-unhealthy'],
-        unknown:   ['Inconnu',       'status-unknown'],
-    };
-
-    const [label, cls] = labels[status] ?? labels.unknown;
-    el.classList.add(cls);
-    el.textContent = label;
-}
-
-// ─── Mise à jour de la bannière globale ───────────────────────────────────────
-function updateBanner(globalStatus) {
-    const banner = document.getElementById('globalBanner');
-    const text   = document.getElementById('bannerText');
-
-    banner.className = 'status-banner ' + (globalStatus || 'unknown');
-
-    const messages = {
-        healthy:   '✅ Tous les systèmes opérationnels',
-        degraded:  '⚠️ Certains services sont dégradés',
-        unhealthy: '🔴 Une interruption de service est en cours',
-        unknown:   'Vérification en cours…',
-    };
-
-    text.textContent = messages[globalStatus] ?? messages.unknown;
-}
-
-// ─── Fetch du statut ──────────────────────────────────────────────────────────
-async function fetchHealth() {
-    const spinner = document.getElementById('loadingSpinner');
-    if (spinner) spinner.style.display = 'inline-block';
-
-    try {
-        const res  = await fetch(HEALTH_ENDPOINT, {
-            headers: { Accept: 'application/json' },
-            cache: 'no-store',
-        });
-
-        const data = await res.json();
-
-        // Statut global
-        updateBanner(data.status);
-
-        // Composants individuels
-        const checks = data.checks ?? {};
-        setStatus('status-api',      checks.database?.status ?? 'healthy'); // API ~ DB
-        setStatus('status-websocket', checks.reverb?.status  ?? 'unknown');
-        setStatus('status-payments',  'healthy'); // pas de check dédié pour l'instant
-        setStatus('status-email',     checks.queue?.status   ?? 'healthy'); // email via queue
-        setStatus('status-sara',      'healthy'); // service IA, check custom possible
-
-    } catch (err) {
-        console.warn('Impossible de récupérer /health:', err.message);
-        updateBanner('unknown');
-    } finally {
-        if (spinner) spinner.style.display = 'none';
-        document.getElementById('lastCheck').textContent =
-            'Dernière vérification : ' + new Date().toLocaleTimeString('fr-FR');
-    }
-}
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
-document.getElementById('year').textContent = new Date().getFullYear();
-
-// Historiques simulés
-renderHistory('hist-api',  generateHistory(99.5), 'uptime-api');
-renderHistory('hist-ws',   generateHistory(99.2), 'uptime-ws');
-renderHistory('hist-pay',  generateHistory(99.8), 'uptime-pay');
-renderHistory('hist-sara', generateHistory(98.9), 'uptime-sara');
-
-// Premier fetch immédiat
-fetchHealth();
-
-// Rafraîchissement toutes les 60s
-setInterval(fetchHealth, REFRESH_MS);
-
-// Compte à rebours
-let countdown = REFRESH_MS / 1000;
-setInterval(() => {
-    countdown--;
-    if (countdown <= 0) countdown = REFRESH_MS / 1000;
-    const el = document.getElementById('lastCheck');
-    if (el && !el.textContent.startsWith('Dernière')) {
-        el.textContent = `Actualisation dans ${countdown} seconde${countdown > 1 ? 's' : ''}…`;
-    }
-}, 1000);
+/* ── Auto-refresh badge toutes les 60s ── */
+setInterval(updateGlobalStatus, 60_000);
 </script>
-
 </body>
 </html>

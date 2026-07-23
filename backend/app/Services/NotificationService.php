@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Events\NotificationCreated;
+use App\Jobs\SendPushNotificationJob;
 use App\Models\AppNotification;
+use App\Models\Device;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -66,6 +68,19 @@ class NotificationService
         // 4. SMS — si configuré et activé pour ce type
         if ($this->userWantsSms($user, $type) && $user->phone) {
             $this->sendSms($user->phone, "{$title}\n{$body}");
+        }
+
+        // 5. Push notification mobile (Expo) — si l'utilisateur possède un appareil actif
+        $hasDevice = Device::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->whereNotNull('push_token')
+            ->exists();
+
+        if ($hasDevice) {
+            dispatch(new SendPushNotificationJob($user, $type, array_merge($data, [
+                'title' => $title,
+                'body'  => $body,
+            ])));
         }
     }
 

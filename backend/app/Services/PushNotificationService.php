@@ -1,209 +1,85 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Models\Device;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Minishlink\WebPush\Subscription;
-use Minishlink\WebPush\WebPush;
 
 /**
- * PushNotificationService — Notifications Web Push via VAPID (RFC 8292).
+ * PushNotificationService — Notifications push mobiles via Expo Push API.
  *
- * Basé sur minishlink/web-push.
- * Configuration (.env) :
- *   VAPID_PUBLIC_KEY   → clé publique Base64URL (partagée avec le frontend)
- *   VAPID_PRIVATE_KEY  → clé privée Base64URL (secrète)
- *   VAPID_SUBJECT      → mailto: ou URL de l'application
+ * Prend en charge iOS, Android et web (Expo SDK).
+ * Chaque appareil enregistre son token Expo (Device.push_token).
+ * Les tokens invalides sont automatiquement désactivés (DeviceNotRegistered).
  *
- * Pour générer les clés VAPID :
- *   php artisan webpush:vapid
- *
- * Stockage des abonnements :
- *   Table push_subscriptions (voir migration associée si besoin)
- *   Ou colonne JSON push_subscription sur users pour usage simple
+ * Référence : https://docs.expo.dev/push-notifications/sending-notifications/
  */
 class PushNotificationService
 {
-    private WebPush $webPush;
+    private const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 
-    public function __construct()
-    {
-        $auth = [
-            'VAPID' => [
-                'subject'    => config('webpush.vapid.subject', 'mailto:' . config('mail.from.address')),
-                'publicKey'  => config('webpush.vapid.public_key'),
-                'privateKey' => config('webpush.vapid.private_key'),
-            ],
-        ];
-
-        $this->webPush = new WebPush($auth, [
-            'TTL'     => 86400,  // 24h
-            'urgency' => 'normal',
-        ]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Gestion des abonnements
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // API publique
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Enregistre un abonnement Push pour un utilisateur.
+     * Envoyer une notification à un utilisateur (tous ses appareils actifs).
      *
-     * @param User  $user         Utilisateur
-     * @param array $subscription {endpoint, keys: {p256dh, auth}}
+     * @param  User   $user  Destinataire
+     * @param  string $type  Type de notification (event_reminder, task_assigned…)
+     * @param  array  $data  Données contextuelles (titres, IDs, montants…)
      */
-    public function subscribe(User $user, array $subscription): void
+    public function sendToUser(User $user, string $type, array $data): void
     {
-        // Validation minimale de la structure
-        if (empty($subscription['endpoint']) || empty($subscription['keys']['p256dh']) || empty($subscription['keys']['auth'])) {
-            throw new \InvalidArgumentException('Structure d\'abonnement Push invalide.');
-        }
-
-        // Stocker l'abonnement en JSON sur l'utilisateur
-        // Pour un usage multi-device, utiliser une table dédiée push_subscriptions
-        $subscriptions = $user->push_subscriptions ?? [];
-
-        // Déduplication par endpoint
-        $subscriptions = array_filter(
-            $subscriptions,
-            fn($s) => ($s['endpoint'] ?? '') !== $subscription['endpoint']
-        );
-
-        $subscriptions[] = [
-            'endpoint' => $subscription['endpoint'],
-            'keys'     => [
-                'p256dh' => $subscription['keys']['p256dh'],
-                'auth'   => $subscription['keys']['auth'],
-            ],
-            'subscribed_at' => now()->toIso8601String(),
-        ];
-
-        $user->update(['push_subscriptions' => array_values($subscriptions)]);
-
-        Log::info('Push subscription enregistrée', ['user_id' => $user->id]);
-    }
-
-    /**
-     * Supprime l'abonnement Push d'un utilisateur (par endpoint).
-     */
-    public function unsubscribe(User $user, string $endpoint = null): void
-    {
-        if ($endpoint) {
-            $subscriptions = array_filter(
-                $user->push_subscriptions ?? [],
-                fn($s) => ($s['endpoint'] ?? '') !== $endpoint
-            );
-            $user->update(['push_subscriptions' => array_values($subscriptions)]);
-        } else {
-            // Supprimer tous les abonnements
-            $user->update(['push_subscriptions' => []]);
-        }
-
-        Log::info('Push subscription supprimée', ['user_id' => $user->id]);
-    }
-
-    // -------------------------------------------------------------------------
-    // Envoi de notifications
-    // -------------------------------------------------------------------------
-
-    /**
-     * Envoie une notification push à un utilisateur spécifique.
-     *
-     * @param User   $user    Destinataire
-     * @param string $title   Titre de la notification
-     * @param string $body    Corps de la notification
-     * @param array  $options Options supplémentaires :
-     *                        - icon : URL de l'icône
-     *                        - badge : URL du badge
-     *                        - url : URL de redirection au clic
-     *                        - actions : [{action: string, title: string}]
-     *                        - tag : identifiant pour regroupement/remplacement
-     *                        - requireInteraction : bool
-     */
-    public function push(User $user, string $title, string $body, array $options = []): void
-    {
-        $subscriptions = $user->push_subscriptions ?? [];
-
-        if (empty($subscriptions)) {
+        // 1. Vérifier les préférences push de l'utilisateur
+        if (!$this->userWantsPush($user, $type)) {
             return;
         }
 
-        $payload = json_encode(array_merge([
-            'title' => $title,
-            'body'  => mb_substr($body, 0, 200),
-            'icon'  => $options['icon']  ?? '/icons/icon-192x192.png',
-            'badge' => $options['badge'] ?? '/icons/badge-72x72.png',
-            'url'   => $options['url']   ?? '/',
-            'tag'   => $options['tag']   ?? null,
-            'requireInteraction' => $options['requireInteraction'] ?? false,
-            'actions' => $options['actions'] ?? [],
-            'data'    => $options['data']    ?? [],
-        ], array_diff_key($options, array_flip(['icon', 'badge', 'url', 'tag', 'requireInteraction', 'actions', 'data']))));
+        // 2. Récupérer les appareils actifs avec token valide
+        $devices = Device::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->whereNotNull('push_token')
+            ->get();
 
-        $failedEndpoints = [];
-
-        foreach ($subscriptions as $subscriptionData) {
-            try {
-                $subscription = Subscription::create([
-                    'endpoint'        => $subscriptionData['endpoint'],
-                    'publicKey'       => $subscriptionData['keys']['p256dh'],
-                    'authToken'       => $subscriptionData['keys']['auth'],
-                    'contentEncoding' => 'aesgcm',
-                ]);
-
-                $this->webPush->queueNotification($subscription, $payload);
-            } catch (\Exception $e) {
-                Log::warning('Push : abonnement invalide', [
-                    'user_id'  => $user->id,
-                    'endpoint' => $subscriptionData['endpoint'] ?? 'unknown',
-                    'error'    => $e->getMessage(),
-                ]);
-                $failedEndpoints[] = $subscriptionData['endpoint'] ?? null;
-            }
+        if ($devices->isEmpty()) {
+            return;
         }
 
-        // Flush et vérifier les résultats
-        foreach ($this->webPush->flush() as $report) {
-            if (! $report->isSuccess()) {
-                $endpoint = $report->getRequest()->getUri()->__toString();
+        // 3. Construire les messages Expo
+        $messages = $devices
+            ->map(fn (Device $device) => $this->buildMessage($device, $type, $data))
+            ->toArray();
 
-                Log::warning('Push notification échouée', [
-                    'user_id'  => $user->id,
-                    'endpoint' => $endpoint,
-                    'reason'   => $report->getReason(),
-                ]);
-
-                // Supprimer l'abonnement expiré ou invalide
-                if ($report->isSubscriptionExpired()) {
-                    $this->removeSubscriptionByEndpoint($user, $endpoint);
-                }
-            }
-        }
+        // 4. Envoyer par lots de 100 (limite Expo)
+        collect($messages)
+            ->chunk(100)
+            ->each(fn ($batch) => $this->sendBatch($batch->toArray()));
     }
 
     /**
-     * Envoie une notification push à tous les utilisateurs d'une organisation.
+     * Envoyer une notification à tous les utilisateurs actifs d'une organisation.
      *
-     * @param int    $orgId ID de l'organisation
-     * @param string $title Titre
-     * @param string $body  Corps
-     * @param array  $options Options
+     * @param  int    $orgId  Identifiant de l'organisation
+     * @param  string $type   Type de notification
+     * @param  array  $data   Données contextuelles
      */
-    public function pushToOrganization(int $orgId, string $title, string $body, array $options = []): void
+    public function sendToOrganization(int $orgId, string $type, array $data): void
     {
-        // Traitement par batch pour éviter de charger tous les utilisateurs en mémoire
         User::where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->whereNotNull('push_subscriptions')
-            ->chunkById(50, function ($users) use ($title, $body, $options) {
+            ->where('is_active', true)
+            ->chunk(100, function ($users) use ($type, $data): void {
                 foreach ($users as $user) {
                     try {
-                        $this->push($user, $title, $body, $options);
-                    } catch (\Exception $e) {
-                        Log::error('Push to org : erreur utilisateur', [
+                        $this->sendToUser($user, $type, $data);
+                    } catch (\Throwable $e) {
+                        Log::error('PushNotificationService: sendToOrganization error', [
                             'user_id' => $user->id,
+                            'type'    => $type,
                             'error'   => $e->getMessage(),
                         ]);
                     }
@@ -211,30 +87,191 @@ class PushNotificationService
             });
     }
 
-    // -------------------------------------------------------------------------
-    // Clé publique VAPID
-    // -------------------------------------------------------------------------
-
     /**
-     * Retourne la clé publique VAPID à fournir au frontend.
-     * Le frontend en a besoin pour appeler PushManager.subscribe().
+     * Diffusion globale — Annonce plateforme SuperAdmin vers TOUS les appareils actifs.
+     *
+     * @param  string $title  Titre de la notification
+     * @param  string $body   Corps du message
+     * @param  array  $data   Données supplémentaires (type, url, etc.)
      */
-    public function getPublicVapidKey(): string
+    public function sendBroadcast(string $title, string $body, array $data = []): void
     {
-        return config('webpush.vapid.public_key', '');
+        Device::where('is_active', true)
+            ->whereNotNull('push_token')
+            ->chunk(100, function ($devices) use ($title, $body, $data): void {
+                $messages = $devices->map(fn (Device $d) => [
+                    'to'        => $d->push_token,
+                    'title'     => $title,
+                    'body'      => $body,
+                    'data'      => array_merge($data, ['platform' => $d->platform]),
+                    'sound'     => 'default',
+                    'badge'     => 1,
+                    'channelId' => 'system',
+                    'priority'  => 'normal',
+                ])->toArray();
+
+                $this->sendBatch($messages);
+            });
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers privés
-    // -------------------------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // Construction du message
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private function removeSubscriptionByEndpoint(User $user, string $endpoint): void
+    /**
+     * Construit le payload Expo pour un appareil et un type de notification.
+     */
+    private function buildMessage(Device $device, string $type, array $data): array
     {
-        $subscriptions = array_filter(
-            $user->push_subscriptions ?? [],
-            fn($s) => ($s['endpoint'] ?? '') !== $endpoint
-        );
+        $templates = [
+            'event_reminder' => [
+                'title' => '📅 Rappel : ' . ($data['event_title'] ?? 'Événement'),
+                'body'  => 'Commence dans ' . ($data['minutes'] ?? '30') . ' min',
+            ],
+            'task_assigned' => [
+                'title' => '✅ Nouvelle tâche assignée',
+                'body'  => $data['task_title'] ?? 'Une tâche vous a été assignée',
+            ],
+            'visitor_arrived' => [
+                'title' => '🧑 Visiteur arrivé',
+                'body'  => ($data['visitor_name'] ?? 'Un visiteur') . " vous attend à l'accueil",
+            ],
+            'document_validated' => [
+                'title' => '📄 Document validé',
+                'body'  => $data['document_name'] ?? 'Un document a été validé',
+            ],
+            'message_received' => [
+                'title' => '💬 Nouveau message',
+                'body'  => $data['sender_name'] ?? 'Vous avez un nouveau message',
+            ],
+            'license_expiring' => [
+                'title' => '⚠️ Abonnement bientôt expiré',
+                'body'  => 'Votre abonnement expire dans ' . ($data['days'] ?? 7) . ' jours',
+            ],
+            'payment_received' => [
+                'title' => '✅ Paiement confirmé',
+                'body'  => 'Votre paiement de ' . ($data['amount'] ?? '') . ' a été confirmé',
+            ],
+            'system_announcement' => [
+                'title' => $data['announcement_title'] ?? '📢 Annonce SECRETIS',
+                'body'  => $data['announcement_body'] ?? '',
+            ],
+        ];
 
-        $user->update(['push_subscriptions' => array_values($subscriptions)]);
+        $template = $templates[$type] ?? [
+            'title' => 'SECRETIS',
+            'body'  => $data['message'] ?? '',
+        ];
+
+        return [
+            'to'        => $device->push_token,
+            'title'     => $template['title'],
+            'body'      => $template['body'],
+            'data'      => array_merge($data, [
+                'type'     => $type,
+                'platform' => $device->platform,
+            ]),
+            'sound'     => 'default',
+            'badge'     => 1,
+            'channelId' => $this->getChannelId($type),  // Canal Android
+            'priority'  => $this->getPriority($type),
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Envoi HTTP vers Expo
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Envoie un lot de messages à l'API Expo Push et traite les erreurs de token.
+     *
+     * @param  array $messages  Tableau de payloads Expo (max 100)
+     * @return array            Résultats renvoyés par Expo
+     */
+    private function sendBatch(array $messages): array
+    {
+        try {
+            $response = Http::withHeaders(['Accept-Encoding' => 'gzip'])
+                ->timeout(30)
+                ->retry(3, 1000)
+                ->post(self::EXPO_PUSH_URL, $messages);
+
+            if ($response->failed()) {
+                Log::error('Expo Push API — requête échouée', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return [];
+            }
+
+            $results = $response->json('data') ?? [];
+
+            // Désactiver les appareils dont le token est invalide
+            foreach ($results as $i => $result) {
+                if (($result['status'] ?? '') === 'error') {
+                    $details = $result['details'] ?? [];
+                    if (($details['error'] ?? '') === 'DeviceNotRegistered') {
+                        $token = $messages[$i]['to'] ?? null;
+                        if ($token) {
+                            Device::where('push_token', $token)
+                                ->update(['is_active' => false]);
+
+                            Log::info('Expo Push — token invalide désactivé', [
+                                'token_prefix' => substr($token, 0, 20) . '…',
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            return $results;
+
+        } catch (\Throwable $e) {
+            Log::error('PushNotificationService: sendBatch exception', [
+                'error' => $e->getMessage(),
+                'count' => count($messages),
+            ]);
+            return [];
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Retourne l'identifiant du canal Android selon le type de notification.
+     * Les canaux doivent être déclarés dans l'app Expo (app.json → notifications).
+     */
+    private function getChannelId(string $type): string
+    {
+        return match (true) {
+            in_array($type, ['visitor_arrived', 'message_received'])    => 'urgent',
+            in_array($type, ['license_expiring', 'system_announcement']) => 'system',
+            default                                                       => 'default',
+        };
+    }
+
+    /**
+     * Retourne la priorité d'envoi Expo selon le type de notification.
+     * 'high' = FCM/APNs high priority (réveil de l'écran possible).
+     */
+    private function getPriority(string $type): string
+    {
+        return in_array($type, ['visitor_arrived', 'message_received']) ? 'high' : 'normal';
+    }
+
+    /**
+     * Vérifie si l'utilisateur a activé les push pour ce type de notification.
+     * Priorité : préférence spécifique > préférence globale push > true par défaut.
+     */
+    private function userWantsPush(User $user, string $type): bool
+    {
+        $specific = $user->getPreference("notifications.{$type}.push");
+        if ($specific !== null) {
+            return (bool) $specific;
+        }
+
+        return (bool) $user->getPreference('notifications.push_enabled', true);
     }
 }

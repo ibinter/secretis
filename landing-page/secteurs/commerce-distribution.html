@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SECRETIS pour Commerce & Distribution — Négoces, Grossistes, Retail | IBIG Soft</title>
+<meta name="description" content="IBIG SECRETIS : gestion administrative et commerciale pour les entreprises de commerce et distribution africaines. Clients, fournisseurs, stocks, facturation et RH.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { theme: { extend: { colors: { primary: '#1A3A5C', secondary: '#2E86C1', accent: '#F39C12', success: '#1E8449' }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }</script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="font-sans bg-white">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+    <a href="../index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-extrabold text-sm">IS</span></div>
+      <div class="text-primary font-bold leading-tight" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></div>
+    </a>
+    <nav class="hidden lg:flex items-center gap-1">
+      <a href="../index.html#features" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Fonctionnalités</a>
+      <a href="../index.html#pricing" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Tarifs</a>
+      <a href="#" class="text-sm font-semibold text-secondary px-3 py-2">Secteurs</a>
+    </nav>
+    <a href="/register" class="hidden lg:inline-flex bg-primary text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-secondary transition-colors">Essai gratuit</a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="pt-16 bg-gray-50 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-sm text-gray-500">
+    <a href="../index.html" class="hover:text-primary">Accueil</a>
+    <span class="text-gray-300">/</span><span>Secteurs</span>
+    <span class="text-gray-300">/</span>
+    <span class="text-primary font-medium">Commerce & Distribution</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="bg-gradient-to-br from-[#065f46] to-[#059669] text-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-3xl">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="text-5xl">🛒</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">Commerce & Distribution</span>
+      </div>
+      <h1 class="text-4xl lg:text-5xl font-extrabold mb-5 leading-tight">SECRETIS pour le Commerce et la Distribution</h1>
+      <p class="text-xl text-emerald-100 mb-8 leading-relaxed max-w-2xl">
+        Pilotez votre activité commerciale de bout en bout. Gestion clients, fournisseurs, commandes, stocks, facturation SYSCOHADA et RH — tout centralisé pour mieux vendre et mieux gérer.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="/register" class="bg-accent text-white px-7 py-3.5 rounded-xl font-bold hover:opacity-90 shadow-lg">Démo gratuite</a>
+        <a href="../index.html#pricing" class="border-2 border-white text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10">Voir les tarifs</a>
+      </div>
+      <div class="flex flex-wrap gap-6 mt-8 pt-8 border-t border-white/20">
+        <span class="text-emerald-100 text-sm">✓ Paiement Mobile Money intégré</span>
+        <span class="text-emerald-100 text-sm">✓ Multi-boutiques et multi-dépôts</span>
+        <span class="text-emerald-100 text-sm">✓ Compatible SYSCOHADA révisé</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAS D'USAGE -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="text-sm font-bold text-secondary uppercase tracking-wider">Fonctionnalités clés</span>
+      <h2 class="text-3xl font-extrabold text-primary mt-2 mb-4">Tout ce dont votre commerce a besoin</h2>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🧾</div>
+        <h3 class="font-bold text-gray-900 mb-2">Facturation et devis clients</h3>
+        <p class="text-gray-500 text-sm">Factures proforma et définitives aux normes SYSCOHADA, devis professionnels, bons de livraison, suivi des paiements et relances automatiques par WhatsApp.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📦</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion des stocks et approvisionnements</h3>
+        <p class="text-gray-500 text-sm">Suivi en temps réel des niveaux de stock, alertes de rupture, bons de commande fournisseurs, réception marchandises, valorisation FIFO/LIFO/CMUP.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">👥</div>
+        <h3 class="font-bold text-gray-900 mb-2">CRM clients et portefeuille</h3>
+        <p class="text-gray-500 text-sm">Fiche client complète, historique des achats, relances commerciales, gestion des retours et réclamations, portail client en ligne pour les commandes B2B.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🚚</div>
+        <h3 class="font-bold text-gray-900 mb-2">Logistique et livraisons</h3>
+        <p class="text-gray-500 text-sm">Planification des tournées de livraison, affectation des chauffeurs, suivi GPS, bons de livraison numériques, confirmation de réception par signature électronique.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📊</div>
+        <h3 class="font-bold text-gray-900 mb-2">Business Intelligence commerciale</h3>
+        <p class="text-gray-500 text-sm">Tableaux de bord des ventes par produit/client/commercial, analyse des marges, prévisions de CA, identification des clients à risque de churn.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">👩‍💼</div>
+        <h3 class="font-bold text-gray-900 mb-2">RH et gestion des équipes commerciales</h3>
+        <p class="text-gray-500 text-sm">Dossiers employés, commissions commerciales, objectifs et suivi de performance, planning des représentants, notes de frais déplacements.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVANTAGES -->
+<section class="py-20 bg-emerald-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="bg-[#065f46] text-white rounded-3xl p-8">
+        <h3 class="text-xl font-bold mb-6">Ils utilisent SECRETIS pour vendre mieux</h3>
+        <div class="space-y-3 mb-6">
+          <div class="bg-white/10 rounded-xl px-4 py-3"><div class="font-semibold text-sm">Société de Négoce Abidjan</div><div class="text-emerald-200 text-xs">35% de hausse du taux de recouvrement</div></div>
+          <div class="bg-white/10 rounded-xl px-4 py-3"><div class="font-semibold text-sm">Grossiste Alimentaire Dakar</div><div class="text-emerald-200 text-xs">Zéro rupture de stock depuis 6 mois</div></div>
+          <div class="bg-white/10 rounded-xl px-4 py-3"><div class="font-semibold text-sm">Chaîne Pharmacies Lomé</div><div class="text-emerald-200 text-xs">Consolidation de 12 points de vente</div></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white/10 rounded-xl p-3 text-center"><div class="text-xl font-extrabold">+40%</div><div class="text-emerald-200 text-xs">Vitesse de facturation</div></div>
+          <div class="bg-white/10 rounded-xl p-3 text-center"><div class="text-xl font-extrabold">-50%</div><div class="text-emerald-200 text-xs">Créances impayées</div></div>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-3xl font-extrabold text-primary mb-6">Conçu pour le commerce africain</h2>
+        <div class="space-y-4">
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Orange Money, MTN MoMo, Wave, CinetPay</div><div class="text-gray-500 text-sm">Encaissez en Mobile Money directement depuis vos factures. Réconciliation automatique.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Multi-devises (FCFA, GHS, NGN, USD, EUR)</div><div class="text-gray-500 text-sm">Gérez vos transactions transfrontalières avec conversion automatique des devises.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Portail B2B pour vos clients grossistes</div><div class="text-gray-500 text-sm">Vos clients passent leurs commandes en ligne, suivent leurs livraisons et téléchargent leurs factures.</div></div></div>
+          <div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-success flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-xs">✓</span></div><div><div class="font-semibold text-gray-800">Gestion multi-points de vente et entrepôts</div><div class="text-gray-500 text-sm">Vue consolidée de tous vos magasins et dépôts sur une seule plateforme.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-extrabold text-primary text-center mb-14">Ce qu'ils disent</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Mes clients reçoivent leurs factures par WhatsApp et peuvent payer en Orange Money. Mon taux de recouvrement est passé de 65% à 94% en 4 mois. SECRETIS a transformé ma trésorerie."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[#065f46] rounded-full flex items-center justify-center text-white font-bold text-sm">OD</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Oumar Diallo</div><div class="text-gray-400 text-xs">PDG — Négoce Import-Export Dakar, SN</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Nous gérons 3 entrepôts et 120 références produits. Grâce aux alertes de stock automatiques, nous n'avons plus eu de rupture. Nos ventes ont augmenté de 28% cette année."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">FN</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Fatima N'Dri</div><div class="text-gray-400 text-xs">DAF — Grossiste Alimentaire CI, Abidjan, CI</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Le portail B2B pour nos clients pharmacies est exceptionnel. Ils commandent en ligne, nous validons, livrons et facturons — tout automatiquement. Un gain de temps énorme pour tout le monde."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">KA</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Kokou Agbénou</div><div class="text-gray-400 text-xs">DG — Pharma Distribution Togo, Lomé, TG</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-gradient-to-r from-[#065f46] to-[#059669] text-white">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-extrabold mb-4">Boostez votre chiffre d'affaires dès ce mois-ci</h2>
+    <p class="text-emerald-100 text-lg mb-8">Essai gratuit 30 jours. Configuration en moins d'une journée. Aucune compétence technique requise.</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="/register" class="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:opacity-90 shadow-lg">Essai gratuit — 30 jours</a>
+      <a href="mailto:commercial@ibig-secretis.com" class="border-2 border-white text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/10">Parler à un conseiller</a>
+    </div>
+    <p class="text-emerald-200 text-xs mt-6">Sans carte bancaire · Paiement Mobile Money accepté · Support en français, anglais, arabe</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-10">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xs">IS</span></div><span class="text-white font-bold" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></span></div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="administration-publique.html" class="hover:text-white">Administration</a>
+      <a href="sante.html" class="hover:text-white">Santé</a>
+      <a href="education.html" class="hover:text-white">Éducation</a>
+      <a href="finance-assurance.html" class="hover:text-white">Finance</a>
+      <a href="btp-industrie.html" class="hover:text-white">BTP</a>
+      <a href="commerce-distribution.html" class="text-white font-medium">Commerce</a>
+    </div>
+    <div class="text-xs">© 2026 IBIG Soft</div>
+  </div>
+</footer>
+</body>
+</html>

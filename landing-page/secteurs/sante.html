@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SECRETIS pour la Santé — Cliniques, Hôpitaux, Pharmacies | IBIG Soft</title>
+<meta name="description" content="IBIG SECRETIS : gestion administrative numérique pour les structures de santé africaines. Dossiers patients, planning médical, accueil et facturation SYSCOHADA.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { theme: { extend: { colors: { primary: '#1A3A5C', secondary: '#2E86C1', accent: '#F39C12', success: '#1E8449' }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } } }</script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="font-sans bg-white">
+
+<!-- NAVBAR -->
+<header x-data="{ open: false }" class="fixed top-0 w-full z-50 bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+    <a href="../index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center"><span class="text-white font-extrabold text-sm">IS</span></div>
+      <div class="text-primary font-bold leading-tight" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></div>
+    </a>
+    <nav class="hidden lg:flex items-center gap-1">
+      <a href="../index.html#features" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Fonctionnalités</a>
+      <a href="../index.html#pricing" class="text-sm text-gray-600 hover:text-primary px-3 py-2 rounded-lg hover:bg-gray-50">Tarifs</a>
+      <a href="#" class="text-sm font-semibold text-secondary px-3 py-2">Secteurs</a>
+    </nav>
+    <a href="/register" class="hidden lg:inline-flex bg-primary text-white text-sm font-semibold px-5 py-2 rounded-xl hover:bg-secondary transition-colors">Essai gratuit</a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="pt-16 bg-gray-50 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-sm text-gray-500">
+    <a href="../index.html" class="hover:text-primary">Accueil</a>
+    <span class="text-gray-300">/</span>
+    <span>Secteurs</span>
+    <span class="text-gray-300">/</span>
+    <span class="text-primary font-medium">Santé</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="bg-gradient-to-br from-[#0d5c3a] to-[#1E8449] text-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="max-w-3xl">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="text-5xl">🏥</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-medium">Secteur Santé</span>
+      </div>
+      <h1 class="text-4xl lg:text-5xl font-extrabold mb-5 leading-tight">SECRETIS pour les Structures de Santé</h1>
+      <p class="text-xl text-green-100 mb-8 leading-relaxed max-w-2xl">
+        Centralisez l'administration de votre clinique, hôpital ou pharmacie. Accueil patients, planning médical, facturation et conformité réglementaire — tout en un.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="/register" class="bg-accent text-white px-7 py-3.5 rounded-xl font-bold hover:opacity-90 shadow-lg">Démo gratuite</a>
+        <a href="../index.html#pricing" class="border-2 border-white text-white px-7 py-3.5 rounded-xl font-semibold hover:bg-white/10">Voir les tarifs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAS D'USAGE -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-14">
+      <span class="text-sm font-bold text-secondary uppercase tracking-wider">Cas d'usage</span>
+      <h2 class="text-3xl font-extrabold text-primary mt-2 mb-4">Conçu pour la réalité médicale africaine</h2>
+      <p class="text-gray-500 max-w-2xl mx-auto">Des fonctionnalités qui répondent aux défis spécifiques de l'administration sanitaire.</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📋</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion administrative des dossiers</h3>
+        <p class="text-gray-500 text-sm">Enregistrement des patients, suivi des consultations, archivage numérique des ordonnances et résultats. Accès sécurisé multi-praticiens.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📅</div>
+        <h3 class="font-bold text-gray-900 mb-2">Planning médical et agenda</h3>
+        <p class="text-gray-500 text-sm">Planification des consultations, gardes, blocs opératoires. Rappels automatiques aux patients par SMS et WhatsApp. Évite les doubles réservations.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">🏷️</div>
+        <h3 class="font-bold text-gray-900 mb-2">Accueil et gestion des visiteurs</h3>
+        <p class="text-gray-500 text-sm">Check-in numérique à l'accueil, badge visiteur, gestion des accompagnants et des heures de visite. File d'attente intelligente.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">💰</div>
+        <h3 class="font-bold text-gray-900 mb-2">Facturation et prise en charge</h3>
+        <p class="text-gray-500 text-sm">Facturation SYSCOHADA, prise en charge assurance maladie, bordereau d'hospitalisation, quittances et reçus. Paiement Mobile Money accepté.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">💊</div>
+        <h3 class="font-bold text-gray-900 mb-2">Gestion de la pharmacie interne</h3>
+        <p class="text-gray-500 text-sm">Suivi des stocks de médicaments, alertes de péremption, bons de commande fournisseurs, traçabilité des dispensations.</p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-4">📊</div>
+        <h3 class="font-bold text-gray-900 mb-2">Rapports sanitaires et tableaux de bord</h3>
+        <p class="text-gray-500 text-sm">Statistiques de consultations, taux d'occupation, rapport épidémiologique, indicateurs pour les autorités sanitaires. Export automatisé.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVANTAGES -->
+<section class="py-20 bg-green-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <h2 class="text-3xl font-extrabold text-primary mb-6">Pourquoi les structures de santé adoptent SECRETIS</h2>
+        <div class="space-y-4">
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">🔒</span><div><div class="font-semibold text-gray-800">Confidentialité des données patients</div><div class="text-gray-500 text-sm">Chiffrement bout en bout, accès basé sur les rôles, conformité RGPD.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">📱</span><div><div class="font-semibold text-gray-800">Accessible sur mobile et tablette</div><div class="text-gray-500 text-sm">Interface responsive pour les soignants en déplacement dans les couloirs.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">⚡</span><div><div class="font-semibold text-gray-800">Zéro interruption de service</div><div class="text-gray-500 text-sm">Mode offline, SLA 99.9%, sauvegardes automatiques toutes les heures.</div></div></div>
+          <div class="flex gap-3 bg-white rounded-xl p-4 shadow-sm"><span class="text-2xl">🤖</span><div><div class="font-semibold text-gray-800">SARA — Assistant IA intégré</div><div class="text-gray-500 text-sm">Suggestions intelligentes pour la planification, détection des conflits, résumé de dossiers.</div></div></div>
+        </div>
+      </div>
+      <div class="bg-[#0d5c3a] text-white rounded-3xl p-8">
+        <h3 class="text-xl font-bold mb-6">Impact mesurable</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">-45%</div><div class="text-green-200 text-xs mt-1">Temps administratif</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">+30%</div><div class="text-green-200 text-xs mt-1">Satisfaction patients</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">0</div><div class="text-green-200 text-xs mt-1">Dossier perdu</div></div>
+          <div class="bg-white/10 rounded-xl p-4 text-center"><div class="text-3xl font-extrabold">2j</div><div class="text-green-200 text-xs mt-1">Déploiement moyen</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section class="py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-extrabold text-primary text-center mb-14">Témoignages</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Notre accueil est devenu un modèle d'efficacité. Les patients patientent moins longtemps, les dossiers sont toujours à jour. SECRETIS a changé notre quotidien."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-[#0d5c3a] rounded-full flex items-center justify-center text-white font-bold text-sm">FK</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Dr. Fatou Kourouma</div><div class="text-gray-400 text-xs">Directrice — Clinique Sainte-Marie, Conakry, GN</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"La gestion des stocks de médicaments et les alertes de péremption nous ont évité des pertes considérables. L'investissement a été rentabilisé en 3 mois."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-bold text-sm">AT</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Aminata Touré</div><div class="text-gray-400 text-xs">Pharmacienne-chef — Hôpital Général de Bamako, ML</div></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <div class="text-accent mb-4">★★★★★</div>
+        <p class="text-gray-700 text-sm leading-relaxed mb-6">"Les rapports pour le Ministère de la Santé se génèrent automatiquement. Ce qui prenait 3 jours de travail se fait maintenant en 5 minutes. Extraordinaire."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">JN</div>
+          <div><div class="font-semibold text-gray-800 text-sm">Jean-Pierre Nkosi</div><div class="text-gray-400 text-xs">Directeur Administratif — Centre Hospitalier Kinshasa, CD</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 bg-gradient-to-r from-[#0d5c3a] to-[#1E8449] text-white">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-3xl font-extrabold mb-4">Améliorez l'administration de votre structure de santé</h2>
+    <p class="text-green-100 text-lg mb-8">Démo gratuite adaptée au secteur médical. Formation et accompagnement inclus.</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="/register" class="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:opacity-90 shadow-lg">Essai gratuit — 30 jours</a>
+      <a href="mailto:commercial@ibig-secretis.com" class="border-2 border-white text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/10">Contacter un expert santé</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-gray-900 text-gray-400 py-10">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2"><div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xs">IS</span></div><span class="text-white font-bold" style="font-family:Georgia,serif;">IBIG <span class="text-accent">SECRETIS</span></span></div>
+    <div class="flex flex-wrap gap-6 text-sm justify-center">
+      <a href="administration-publique.html" class="hover:text-white">Administration Publique</a>
+      <a href="sante.html" class="text-white font-medium">Santé</a>
+      <a href="education.html" class="hover:text-white">Éducation</a>
+      <a href="finance-assurance.html" class="hover:text-white">Finance</a>
+      <a href="btp-industrie.html" class="hover:text-white">BTP</a>
+      <a href="commerce-distribution.html" class="hover:text-white">Commerce</a>
+    </div>
+    <div class="text-xs">© 2026 IBIG Soft</div>
+  </div>
+</footer>
+</body>
+</html>

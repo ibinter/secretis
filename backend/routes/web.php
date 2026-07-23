@@ -67,6 +67,7 @@ use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Public\VisitorPortalController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\PaymentReturnController;
 use Illuminate\Support\Facades\Route;
 
 // =============================================================================
@@ -354,6 +355,23 @@ Route::middleware([
         Route::get('/{id}/export', [ReportController::class, 'export'])->name('export');
     });
 
+    // -------------------------------------------------------------------------
+    // Report Builder drag-and-drop (Vague 13 — custom reports)
+    // -------------------------------------------------------------------------
+    Route::prefix('report-builder')->name('report-builder.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ReportBuilderController::class, 'index'])->name('index');
+        Route::get('/new', [\App\Http\Controllers\ReportBuilderController::class, 'builder'])->name('new');
+        Route::get('/{id}/edit', [\App\Http\Controllers\ReportBuilderController::class, 'builder'])->name('edit');
+    });
+
+    // -------------------------------------------------------------------------
+    // Import/Export universel (Vague 13 — wizard CSV/XLSX)
+    // -------------------------------------------------------------------------
+    Route::prefix('import')->name('import.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ImportController::class, 'wizard'])->name('wizard');
+        Route::get('/history', [\App\Http\Controllers\ImportController::class, 'history'])->name('history');
+    });
+
     Route::prefix('bi')->name('bi.')->group(function () {
         Route::get('/dashboard', [BiController::class, 'index'])->name('dashboard');
         Route::get('/kpis', [BiController::class, 'kpis'])->name('kpis');
@@ -487,6 +505,13 @@ Route::middleware([
     // -------------------------------------------------------------------------
     // MODULES TRANSVERSAUX
     // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // RETOUR PAIEMENT EXTERNE (Stripe / CinetPay / Paystack / Mobile Money)
+    // -------------------------------------------------------------------------
+    Route::get('/payment/success', [PaymentReturnController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel',  [PaymentReturnController::class, 'cancel'])->name('payment.cancel');
+
     // -------------------------------------------------------------------------
     // ABONNEMENT (Vague 10/12 — pages Inertia)
     // -------------------------------------------------------------------------
