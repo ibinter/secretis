@@ -608,3 +608,42 @@ Schedule::command('notifications:clean-old')
     ->at('03:00')
     ->name('notifications-clean')
     ->description('Nettoyage notifications lues anciennes');
+
+// -------------------------------------------------------------------------
+// EMAILS AUTOMATIQUES — Cycle de vie licence (vague transversale)
+// -------------------------------------------------------------------------
+
+// Rappels expiration J-7 (08:00)
+Schedule::command('secretis:remind-expiration --days=7')
+    ->dailyAt('08:00')
+    ->withoutOverlapping()
+    ->name('secretis-remind-expiration-7')
+    ->description('Rappel expiration licence J-7');
+
+// Rappels expiration J-3 (08:05)
+Schedule::command('secretis:remind-expiration --days=3')
+    ->dailyAt('08:05')
+    ->withoutOverlapping()
+    ->name('secretis-remind-expiration-3')
+    ->description('Rappel expiration licence J-3');
+
+// Rappels expiration J-1 (08:10)
+Schedule::command('secretis:remind-expiration --days=1')
+    ->dailyAt('08:10')
+    ->withoutOverlapping()
+    ->name('secretis-remind-expiration-1')
+    ->description('Rappel expiration licence J-1');
+
+// Traitement licences expirées (minuit 30) — passage en grâce / expiration / email
+Schedule::command('secretis:process-expired-licenses')
+    ->dailyAt('00:30')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->name('secretis-process-expired-licenses')
+    ->description('Traitement licences expirées et notifications');
+
+// Nettoyage logs emails (hebdo dimanche 03:00, rétention 90 jours)
+Schedule::command('secretis:clean-email-logs --days=90 --no-interaction')
+    ->weeklyOn(0, '03:00')
+    ->name('secretis-clean-email-logs')
+    ->description('Nettoyage logs emails anciens (RGPD)');

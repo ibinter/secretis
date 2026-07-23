@@ -1,0 +1,1011 @@
+{
+  "meta": {
+    "total": 100,
+    "version": "1.0",
+    "lang": "fr",
+    "updated_at": "2026-07-01",
+    "organization": "IBIG Soft"
+  },
+  "faqs": [
+    {
+      "id": 1,
+      "category": "general",
+      "question": "Qu'est-ce qu'IBIG SECRETIS ?",
+      "answer": "IBIG SECRETIS est un ERP de secrétariat général et de gestion administrative édité par IBIG Soft. Il centralise dans une seule plateforme cloud l'ensemble des processus administratifs d'une organisation : courrier, agenda, réunions, GED (Gestion Électronique de Documents), tâches, RH légère, accueil des visiteurs, ressources, parc auto et comptabilité SYSCOHADA. Il est conçu spécifiquement pour les organisations africaines et francophones.",
+      "keywords": ["secretis", "logiciel", "erp", "ibig", "présentation"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 2,
+      "category": "general",
+      "question": "Qui est IBIG Soft ?",
+      "answer": "IBIG Soft est une société de développement de logiciels de gestion spécialisée dans les solutions ERP pour les entreprises et organisations africaines. IBIG Soft conçoit des logiciels conformes aux normes comptables SYSCOHADA, aux réglementations OHADA et aux exigences locales des marchés africains. Le siège est en Côte d'Ivoire.",
+      "keywords": ["ibig soft", "éditeur", "société", "entreprise"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 3,
+      "category": "general",
+      "question": "Dans quels secteurs IBIG SECRETIS est-il utilisé ?",
+      "answer": "IBIG SECRETIS est utilisé dans de nombreux secteurs : administrations publiques, collectivités territoriales, établissements financiers et bancaires, ONG et organisations internationales, groupes industriels, cabinets d'avocats et d'expertise comptable, hôpitaux et structures de santé, établissements d'enseignement, compagnies d'assurance, et toute entreprise ayant besoin de gérer ses processus administratifs de façon centralisée.",
+      "keywords": ["secteurs", "industries", "organisations", "administrations"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 4,
+      "category": "general",
+      "question": "Quelles langues sont supportées par IBIG SECRETIS ?",
+      "answer": "IBIG SECRETIS est disponible en Français et en Anglais. L'interface peut être changée au niveau de l'organisation (langue par défaut) et individuellement par chaque utilisateur depuis ses préférences de profil. D'autres langues sont prévues dans les prochaines versions (Arabe, Portugais).",
+      "keywords": ["langues", "français", "anglais", "multilingue", "i18n"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 5,
+      "category": "general",
+      "question": "IBIG SECRETIS fonctionne-t-il hors connexion ?",
+      "answer": "IBIG SECRETIS est une application web cloud qui nécessite une connexion Internet pour fonctionner pleinement. Cependant, certaines fonctionnalités de consultation sont disponibles en mode hors connexion limité grâce au cache du navigateur. L'application mobile (Android/iOS) dispose d'un mode hors connexion plus étendu pour la consultation des documents et des tâches.",
+      "keywords": ["hors connexion", "offline", "internet", "mobile"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 6,
+      "category": "general",
+      "question": "IBIG SECRETIS est-il disponible en version mobile ?",
+      "answer": "Oui. IBIG SECRETIS dispose d'une application mobile native pour Android (Google Play Store) et iOS (Apple App Store). L'application web est également responsive et s'adapte aux smartphones et tablettes. Les fonctionnalités principales (agenda, tâches, messagerie, notifications) sont disponibles sur mobile.",
+      "keywords": ["mobile", "android", "ios", "smartphone", "tablette", "application"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 7,
+      "category": "general",
+      "question": "Quelle est la différence entre les plans Starter, Pro et Enterprise ?",
+      "answer": "Le plan Starter convient aux petites structures (jusqu'à 20 utilisateurs, modules de base). Le plan Pro est destiné aux PME et organisations moyennes (jusqu'à 100 utilisateurs, modules avancés, intégrations). Le plan Enterprise est conçu pour les grandes organisations (utilisateurs illimités, tous les modules, personnalisation avancée, support dédié, déploiement on-premise possible). Consultez la page Tarifs sur notre site pour les détails.",
+      "keywords": ["plans", "starter", "pro", "enterprise", "tarifs", "abonnement"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 8,
+      "category": "general",
+      "question": "IBIG SECRETIS peut-il être installé sur nos propres serveurs (on-premise) ?",
+      "answer": "Oui. IBIG SECRETIS est disponible en mode SaaS (cloud hébergé par IBIG Soft) et en mode On-Premise (installation sur vos propres serveurs). Le déploiement on-premise est disponible sur les plans Enterprise. Il nécessite un serveur Linux avec Docker. Consultez le guide d'installation on-premise dans la documentation.",
+      "keywords": ["on-premise", "serveur", "hébergement", "installation", "docker"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 9,
+      "category": "general",
+      "question": "IBIG SECRETIS est-il conforme au RGPD ?",
+      "answer": "Oui. IBIG SECRETIS est conçu dans le respect du Règlement Général sur la Protection des Données (RGPD). Il intègre les droits des personnes (accès, rectification, effacement, portabilité), les journaux d'audit, les durées de conservation configurables et le registre des traitements. Pour les organisations hors UE, SECRETIS respecte également les réglementations locales de protection des données personnelles.",
+      "keywords": ["rgpd", "données personnelles", "conformité", "privacy", "protection"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 10,
+      "category": "general",
+      "question": "Comment contacter le support IBIG Soft ?",
+      "answer": "Vous pouvez contacter le support IBIG Soft via plusieurs canaux : (1) Centre d'aide → Ouvrir un ticket depuis SECRETIS, (2) Email : support@ibigsoft.com, (3) WhatsApp et téléphone : +225 27 20 XX XX XX (lun-ven 8h-18h GMT), (4) Chat en ligne : support.ibigsoft.com. Les délais de réponse varient selon votre plan : 48h (Starter), 8h (Pro), 1h (Enterprise critique).",
+      "keywords": ["support", "contact", "aide", "ticket", "téléphone", "email"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 11,
+      "category": "connexion_securite",
+      "question": "J'ai oublié mon mot de passe, comment le réinitialiser ?",
+      "answer": "Sur la page de connexion, cliquez sur 'Mot de passe oublié ?' sous le formulaire. Saisissez votre adresse email et cliquez sur 'Envoyer'. Vous recevrez un email avec un lien de réinitialisation valable 1 heure. Cliquez sur le lien, saisissez votre nouveau mot de passe (minimum 8 caractères, une majuscule, un chiffre, un caractère spécial) et confirmez. Si vous ne recevez pas l'email, vérifiez vos spams ou contactez votre administrateur.",
+      "keywords": ["mot de passe", "oublié", "réinitialisation", "reset", "connexion"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 12,
+      "category": "connexion_securite",
+      "question": "Comment activer l'authentification à deux facteurs (MFA) ?",
+      "answer": "Accédez à Profil → Sécurité → Authentification à deux facteurs. Cliquez sur 'Activer'. Installez Google Authenticator, Authy ou Microsoft Authenticator sur votre smartphone. Scannez le QR code affiché. Saisissez le code à 6 chiffres généré pour valider. Conservez précieusement les 8 codes de secours affichés — ils vous permettent de vous connecter si vous perdez votre téléphone. Cliquez sur 'Activer le MFA'.",
+      "keywords": ["mfa", "2fa", "authentification", "deux facteurs", "sécurité", "google authenticator"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 13,
+      "category": "connexion_securite",
+      "question": "Mon code MFA ne fonctionne pas, que faire ?",
+      "answer": "Si votre code MFA est rejeté : (1) Vérifiez que l'heure de votre smartphone est synchronisée automatiquement (Paramètres → Date et heure → Automatique). Les codes TOTP sont sensibles à la synchronisation temporelle. (2) Utilisez un code de secours si disponible. (3) Contactez votre administrateur pour réinitialiser le MFA de votre compte. (4) En dernier recours, contactez le support IBIG Soft avec une preuve d'identité.",
+      "keywords": ["mfa", "code", "invalide", "totp", "temps", "synchronisation"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 14,
+      "category": "connexion_securite",
+      "question": "Comment configurer le SSO (Single Sign-On) pour mon organisation ?",
+      "answer": "Le SSO est disponible pour les plans Pro et Enterprise. Accédez à Paramètres → Sécurité → SSO. Sélectionnez votre fournisseur d'identité : SAML 2.0 (Active Directory, Okta, Ping Identity) ou OAuth 2.0/OpenID Connect (Google, Azure AD, Keycloak). Saisissez les URL et certificats fournis par votre IdP. Testez la connexion avec un compte test. Activez le SSO pour toute l'organisation. Les utilisateurs pourront ensuite se connecter avec leurs identifiants d'entreprise.",
+      "keywords": ["sso", "single sign-on", "saml", "oauth", "azure ad", "okta", "active directory"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 15,
+      "category": "connexion_securite",
+      "question": "Mon compte a été verrouillé après plusieurs tentatives incorrectes, que faire ?",
+      "answer": "Pour des raisons de sécurité, un compte est temporairement verrouillé après 5 tentatives de connexion incorrectes consécutives. Le déverrouillage automatique intervient après 15 minutes. Pour un déverrouillage immédiat : (1) Utilisez 'Mot de passe oublié' pour réinitialiser votre mot de passe. (2) Demandez à votre administrateur de déverrouiller votre compte depuis Paramètres → Utilisateurs → [votre compte] → Déverrouiller.",
+      "keywords": ["verrouillé", "bloqué", "tentatives", "connexion", "déverrouiller"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 16,
+      "category": "connexion_securite",
+      "question": "Comment gérer et révoquer mes sessions actives ?",
+      "answer": "Accédez à Profil → Sécurité → Sessions actives. Vous voyez la liste de toutes vos connexions actives : appareil, navigateur, adresse IP et dernière activité. Cliquez sur 'Révoquer' pour déconnecter un appareil spécifique. Cliquez sur 'Révoquer toutes les autres sessions' pour déconnecter tous vos autres appareils en une seule action. Recommandé si vous suspectez un accès non autorisé à votre compte.",
+      "keywords": ["sessions", "révoquer", "déconnecter", "appareils", "sécurité"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 17,
+      "category": "connexion_securite",
+      "question": "Comment changer mon mot de passe ?",
+      "answer": "Accédez à Profil → Sécurité → Changer le mot de passe. Saisissez votre mot de passe actuel, puis votre nouveau mot de passe (minimum 8 caractères, au moins une majuscule, un chiffre et un caractère spécial). Confirmez le nouveau mot de passe et cliquez sur 'Mettre à jour'. Si le MFA est activé, un code vous sera demandé. Les autres sessions actives sont automatiquement révoquées pour des raisons de sécurité.",
+      "keywords": ["mot de passe", "changer", "modifier", "sécurité"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 18,
+      "category": "connexion_securite",
+      "question": "La durée de session SECRETIS est-elle configurable ?",
+      "answer": "Oui. Les administrateurs peuvent configurer la durée de session depuis Paramètres → Sécurité → Politique de session. Options disponibles : 30 minutes, 1 heure, 4 heures, 8 heures (journée de travail), 24 heures, 7 jours. Il est recommandé de choisir 8 heures pour les environnements bureautiques et 1 heure pour les postes partagés. Le MFA peut être requis à chaque nouvelle session.",
+      "keywords": ["session", "expiration", "durée", "timeout", "déconnexion automatique"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 19,
+      "category": "connexion_securite",
+      "question": "Comment consulter le journal d'audit de sécurité ?",
+      "answer": "Accédez à Paramètres → Audit → Journal d'audit (réservé aux Admins). Chaque entrée indique : date/heure, utilisateur, action effectuée, module, objet concerné (avant/après pour les modifications) et adresse IP. Filtrez par utilisateur, action, module ou période. Exportez en CSV pour vos audits de conformité. Le journal est conservé 12 mois (configurable pour les plans Enterprise).",
+      "keywords": ["audit", "journal", "logs", "traçabilité", "historique"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 20,
+      "category": "connexion_securite",
+      "question": "Est-ce que IBIG SECRETIS chiffre les données ?",
+      "answer": "Oui. IBIG SECRETIS chiffre toutes les communications avec TLS 1.3. Les données au repos sont chiffrées avec AES-256. Les mots de passe sont hashés avec bcrypt (cost factor 12). Les documents confidentiels bénéficient d'un chiffrement de bout en bout supplémentaire. Les clés de chiffrement sont gérées par un KMS (Key Management Service) dédié et ne sont jamais stockées avec les données.",
+      "keywords": ["chiffrement", "sécurité", "tls", "aes", "encryption", "données"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 21,
+      "category": "utilisateurs_permissions",
+      "question": "Comment inviter un nouvel utilisateur dans mon organisation ?",
+      "answer": "Accédez à Paramètres → Utilisateurs → Inviter. Saisissez l'adresse email de la personne, sélectionnez son rôle (Admin, Manager, Employé, etc.) et son département. Ajoutez un message personnalisé optionnel. Cliquez sur 'Envoyer l'invitation'. L'utilisateur reçoit un email avec un lien d'activation valable 72 heures. Vous pouvez suivre le statut de l'invitation dans la liste Utilisateurs (colonne 'Statut').",
+      "keywords": ["inviter", "utilisateur", "invitation", "email", "nouveau"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 22,
+      "category": "utilisateurs_permissions",
+      "question": "Comment modifier le rôle d'un utilisateur existant ?",
+      "answer": "Accédez à Paramètres → Utilisateurs. Cliquez sur l'utilisateur concerné. Dans la section 'Rôle et permissions', sélectionnez le nouveau rôle dans la liste déroulante. Cliquez sur 'Enregistrer'. Le changement est immédiat — si l'utilisateur est connecté, ses permissions sont mises à jour lors du prochain rechargement de page. Un email de notification lui est envoyé automatiquement.",
+      "keywords": ["rôle", "modifier", "permissions", "changer", "utilisateur"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 23,
+      "category": "utilisateurs_permissions",
+      "question": "Comment désactiver un utilisateur qui quitte l'organisation ?",
+      "answer": "Accédez à Paramètres → Utilisateurs. Cliquez sur l'utilisateur. Cliquez sur 'Désactiver le compte'. Vous pouvez choisir de transférer ses données (tâches, documents, réunions) à un autre utilisateur avant désactivation. Le compte désactivé ne peut plus se connecter, mais ses données sont conservées et ses actions passées restent dans l'audit. Pour une suppression définitive (conformité RGPD), utilisez 'Supprimer et anonymiser'.",
+      "keywords": ["désactiver", "quitter", "départ", "compte", "utilisateur"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 24,
+      "category": "utilisateurs_permissions",
+      "question": "Quels sont les rôles disponibles dans IBIG SECRETIS ?",
+      "answer": "Les rôles prédéfinis sont : (1) Super Admin — accès complet, gestion des licences, (2) Admin — administration de l'organisation, (3) Manager — gestion des équipes et projets, (4) Employé — accès aux modules quotidiens, (5) Réceptionniste — module accueil visiteurs uniquement, (6) Comptable — modules comptabilité et finance, (7) DRH — module RH complet, (8) Lecteur — consultation uniquement. Des rôles personnalisés peuvent être créés par les Super Admins.",
+      "keywords": ["rôles", "permissions", "super admin", "manager", "employé", "comptable"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 25,
+      "category": "utilisateurs_permissions",
+      "question": "Comment créer un rôle personnalisé avec des permissions spécifiques ?",
+      "answer": "Accédez à Paramètres → Rôles → Nouveau rôle (Super Admin uniquement). Donnez un nom au rôle. Sur la page de permissions, activez ou désactivez chaque permission par module (créer, lire, modifier, supprimer, exporter, valider…). Vous pouvez copier les permissions d'un rôle existant comme base. Cliquez sur 'Créer le rôle'. Assignez ensuite ce rôle aux utilisateurs depuis leur fiche.",
+      "keywords": ["rôle personnalisé", "permissions", "créer", "configuration"],
+      "module": null,
+      "roles": ["super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 26,
+      "category": "utilisateurs_permissions",
+      "question": "Combien d'utilisateurs peut-on avoir dans IBIG SECRETIS ?",
+      "answer": "Le nombre d'utilisateurs dépend de votre plan : Starter (jusqu'à 20 utilisateurs), Pro (jusqu'à 100 utilisateurs), Enterprise (utilisateurs illimités). Des licences supplémentaires peuvent être ajoutées sur les plans Starter et Pro. Les utilisateurs invités externes (visiteurs, fournisseurs via portail) ne comptent pas dans le quota d'utilisateurs.",
+      "keywords": ["utilisateurs", "limite", "quota", "nombre", "licences"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 27,
+      "category": "utilisateurs_permissions",
+      "question": "Comment inviter des utilisateurs en masse via un fichier CSV ?",
+      "answer": "Accédez à Paramètres → Utilisateurs → Importer des utilisateurs. Téléchargez le modèle CSV fourni. Remplissez le fichier avec les colonnes : email, prénom, nom, rôle, département (optionnel), téléphone (optionnel). Importez le fichier. Un aperçu s'affiche avec les erreurs détectées (emails invalides, rôles incorrects). Corrigez si nécessaire et confirmez l'import. Les invitations sont envoyées automatiquement.",
+      "keywords": ["csv", "import", "masse", "inviter", "plusieurs utilisateurs"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 28,
+      "category": "utilisateurs_permissions",
+      "question": "Peut-on avoir des utilisateurs dans plusieurs départements ?",
+      "answer": "Oui. Un utilisateur peut être rattaché à plusieurs départements. Accédez à la fiche de l'utilisateur (Paramètres → Utilisateurs) → Section 'Départements' → Ajoutez les départements souhaités. Définissez le département 'principal'. L'utilisateur aura accès aux données et aux équipes des départements auxquels il est rattaché, selon ses permissions.",
+      "keywords": ["départements", "plusieurs", "rattachement", "structure"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 29,
+      "category": "utilisateurs_permissions",
+      "question": "Un utilisateur peut-il avoir des permissions différentes selon le module ?",
+      "answer": "Oui. Les permissions sont granulaires par module. Un utilisateur peut avoir accès en lecture seule à la GED, en création/modification sur l'Agenda, et aucun accès au module Comptabilité. Ces permissions sont définies au niveau du rôle (rôle personnalisé) et peuvent être surchargées au niveau individuel pour des cas particuliers via les permissions exceptionnelles.",
+      "keywords": ["permissions", "granulaires", "modules", "accès", "droits"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 30,
+      "category": "utilisateurs_permissions",
+      "question": "Comment voir l'historique des connexions d'un utilisateur ?",
+      "answer": "Accédez à Paramètres → Utilisateurs → [cliquez sur l'utilisateur] → onglet 'Activité'. Vous y trouvez : l'historique des connexions avec date, heure, IP et appareil, les actions récentes dans l'application et les modifications de compte. Pour une vue consolidée de tous les utilisateurs, consultez Paramètres → Audit → Journal d'audit et filtrez par utilisateur.",
+      "keywords": ["historique", "connexions", "activité", "journal", "utilisateur"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 31,
+      "category": "parametres",
+      "question": "Comment configurer le logo et les couleurs de mon organisation ?",
+      "answer": "Accédez à Paramètres → Organisation → Identité visuelle. Téléversez votre logo (PNG ou SVG, fond transparent recommandé, max 2 MB, dimensions idéales 300×100px). Téléversez le favicon (32×32px). Saisissez vos codes couleur HEX pour la couleur principale et secondaire. Ajoutez le texte de pied de page des documents. Cliquez sur 'Aperçu' pour visualiser le résultat avant de sauvegarder. Le logo s'affichera sur tous les documents PDF générés.",
+      "keywords": ["logo", "couleurs", "identité visuelle", "charte graphique", "personnalisation"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 32,
+      "category": "parametres",
+      "question": "Comment configurer l'envoi d'emails depuis mon domaine ?",
+      "answer": "Accédez à Paramètres → Intégrations → Email → SMTP personnalisé. Saisissez les paramètres de votre serveur SMTP : hôte, port (465 pour SSL ou 587 pour TLS), nom d'utilisateur, mot de passe, email d'expédition et nom d'expéditeur. Cliquez sur 'Tester la connexion' pour vérifier. Une fois validé, tous les emails de SECRETIS (invitations, notifications, courriers) seront envoyés depuis votre domaine.",
+      "keywords": ["smtp", "email", "domaine", "envoi", "configuration"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 33,
+      "category": "parametres",
+      "question": "Comment configurer le fuseau horaire de l'organisation ?",
+      "answer": "Accédez à Paramètres → Organisation → Préférences. Dans la section 'Fuseau horaire', sélectionnez votre zone dans la liste (ex : Africa/Abidjan UTC+0, Africa/Douala UTC+1, Africa/Nairobi UTC+3, Africa/Cairo UTC+2). Le fuseau affecte tous les horodatages : rappels d'événements, emails de notification, exports de rapports et journaux d'audit. Chaque utilisateur peut aussi définir son fuseau personnel dans ses préférences de profil.",
+      "keywords": ["fuseau horaire", "timezone", "heure", "configuration", "afrique"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 34,
+      "category": "parametres",
+      "question": "Comment configurer les workflows de validation de documents ?",
+      "answer": "Accédez à Paramètres → Workflows → Nouveau workflow. Nommez le workflow. Ajoutez les étapes de validation dans l'ordre : sélectionnez le validateur (personne ou rôle), le délai maximum et l'action en cas de dépassement (rappel, escalade). Définissez les conditions de déclenchement (type de document, montant, département). Activez le workflow. Il sera disponible lors de la soumission de documents dans la GED ou les courriers sortants.",
+      "keywords": ["workflow", "validation", "circuit", "approbation", "document"],
+      "module": "ged",
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 35,
+      "category": "parametres",
+      "question": "Comment configurer les rappels et notifications globaux de l'organisation ?",
+      "answer": "Accédez à Paramètres → Notifications. Configurez les notifications système pour chaque événement (nouvelle tâche assignée, réunion imminente, courrier reçu, congé approuvé…). Choisissez les canaux : in-app, email, push navigateur, SMS. Définissez les heures calmes (ex : pas de notifications entre 20h et 7h). Personnalisez les templates d'emails (logo, couleurs, pied de page). Les utilisateurs peuvent affiner ces paramètres depuis leurs préférences personnelles.",
+      "keywords": ["notifications", "rappels", "alertes", "configuration", "heures calmes"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 36,
+      "category": "parametres",
+      "question": "Comment connecter IBIG SECRETIS à Microsoft 365 ?",
+      "answer": "Accédez à Paramètres → Intégrations → Microsoft 365. Cliquez sur 'Connecter'. Authentifiez-vous avec un compte Administrateur Microsoft 365. Accordez les permissions requises. Choisissez les services à synchroniser : Outlook (calendrier et contacts), OneDrive (GED), Teams (messagerie et réunions). Activez l'intégration. Les utilisateurs peuvent ensuite connecter leurs comptes personnels Microsoft depuis Profil → Intégrations.",
+      "keywords": ["microsoft 365", "outlook", "teams", "onedrive", "intégration"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 37,
+      "category": "parametres",
+      "question": "Comment configurer la numérotation automatique des courriers ?",
+      "answer": "Accédez à Paramètres → Courrier → Plan de classement. Définissez le format du numéro : vous pouvez utiliser des variables comme {YEAR} pour l'année, {MONTH} pour le mois, {SEQ} pour le numéro séquentiel, {DEPT} pour le département. Exemple : 'SECR/{YEAR}/{SEQ:04d}' génère 'SECR/2026/0001'. Définissez des séquences séparées pour les courriers entrants et sortants, et optionnellement par département.",
+      "keywords": ["numérotation", "référence", "courrier", "séquence", "classement"],
+      "module": "courrier",
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 38,
+      "category": "parametres",
+      "question": "Quelles intégrations de paiement sont disponibles dans IBIG SECRETIS ?",
+      "answer": "IBIG SECRETIS intègre plusieurs solutions de paiement pour les abonnements et les transactions : CinetPay (Côte d'Ivoire, Sénégal, Burkina Faso, Mali), Wave (Côte d'Ivoire, Sénégal), MTN Mobile Money, Orange Money, Stripe (cartes Visa/Mastercard), et virement bancaire. La configuration se fait dans Paramètres → Intégrations → Paiements. Chaque organisation peut configurer les modes de paiement qu'elle accepte.",
+      "keywords": ["paiement", "cinetpay", "wave", "mobile money", "stripe", "intégration"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 39,
+      "category": "parametres",
+      "question": "Comment configurer le kiosque de réception sur une tablette ?",
+      "answer": "Accédez à Paramètres → Réception → Mode Kiosque. Cliquez sur 'Générer un code d'activation'. Sur la tablette (Android ou iPad), ouvrez le navigateur et accédez à l'URL de SECRETIS. Naviguez vers la page kiosque et saisissez le code d'activation. Le mode kiosque s'active en plein écran avec navigation limitée à la réception. Connectez l'imprimante badges en Bluetooth ou réseau local. Configurez le texte de bienvenue et le logo affiché.",
+      "keywords": ["kiosque", "tablette", "réception", "configuration", "iPad", "android"],
+      "module": "reception",
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 40,
+      "category": "parametres",
+      "question": "Comment activer ou désactiver un module dans IBIG SECRETIS ?",
+      "answer": "Accédez à Paramètres → Organisation → Modules. Vous voyez la liste de tous les modules disponibles selon votre plan. Activez ou désactivez chaque module avec le bouton bascule. Un module désactivé disparaît du menu latéral pour tous les utilisateurs. Les données du module sont conservées et restent accessibles si vous réactivez le module ultérieurement. Certains modules sont interdépendants (ex : Réunions requiert Agenda).",
+      "keywords": ["modules", "activer", "désactiver", "configuration", "plan"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 41,
+      "category": "modules_metier",
+      "question": "Comment créer un événement récurrent dans l'Agenda ?",
+      "answer": "Dans le formulaire de création d'événement (Agenda → + Nouvel événement), activez l'option 'Récurrence'. Choisissez le type : quotidien, hebdomadaire (sélectionnez les jours), mensuel (même date chaque mois ou même jour de la semaine), ou annuel. Définissez la date de fin de la récurrence ou le nombre d'occurrences. Pour modifier un événement récurrent ultérieurement, vous pourrez choisir de modifier 'uniquement cet événement', 'cet événement et les suivants' ou 'tous les événements'.",
+      "keywords": ["récurrent", "agenda", "répétition", "hebdomadaire", "mensuel"],
+      "module": "agenda",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 42,
+      "category": "modules_metier",
+      "question": "Comment synchroniser l'Agenda SECRETIS avec Google Calendar ?",
+      "answer": "Accédez à Paramètres → Intégrations → Google Calendar (l'Admin doit avoir activé l'intégration Google au niveau de l'organisation). Cliquez sur 'Connecter mon Google Calendar'. Authentifiez-vous avec votre compte Google et accordez les permissions. Choisissez le sens de synchronisation : SECRETIS vers Google, Google vers SECRETIS, ou bidirectionnel. Les événements se synchronisent dans les 2 minutes. Notez que seuls vos propres événements sont synchronisés, pas ceux des autres utilisateurs.",
+      "keywords": ["google calendar", "synchronisation", "agenda", "intégration"],
+      "module": "agenda",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 43,
+      "category": "modules_metier",
+      "question": "Comment vérifier la disponibilité des participants avant de créer un événement ?",
+      "answer": "Dans le formulaire de création d'événement, après avoir sélectionné la date et l'heure, ajoutez les participants souhaités. Un indicateur de disponibilité apparaît sous chaque participant (vert = disponible, orange = peut-être disponible, rouge = occupé). Cliquez sur 'Trouver un créneau libre' pour afficher automatiquement les créneaux où tous les participants obligatoires sont disponibles. Cette fonctionnalité nécessite que les agendas des participants soient dans SECRETIS ou synchronisés.",
+      "keywords": ["disponibilité", "participants", "créneau", "agenda", "réunion"],
+      "module": "agenda",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 44,
+      "category": "modules_metier",
+      "question": "Comment classer automatiquement les documents dans la GED grâce à l'IA ?",
+      "answer": "Lors de l'import d'un document dans la GED, l'IA de SARA analyse automatiquement le contenu et propose : une catégorie de classement, des tags pertinents, un dossier de destination suggéré, et extrait les métadonnées clés (dates, montants, parties prenantes). Vous pouvez accepter les suggestions ou les modifier manuellement. Pour les imports en masse, SARA peut classifier automatiquement tous les documents sans intervention manuelle (activez 'Classification automatique' dans Paramètres → GED).",
+      "keywords": ["ia", "classification", "automatique", "ged", "sara", "intelligence artificielle"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 45,
+      "category": "modules_metier",
+      "question": "Quels formats de fichiers sont supportés dans la GED ?",
+      "answer": "La GED SECRETIS supporte les formats suivants : Documents texte (PDF, DOCX, DOC, ODT, TXT, RTF), Tableurs (XLSX, XLS, ODS, CSV), Présentations (PPTX, PPT, ODP), Images (JPG, PNG, GIF, BMP, TIFF, WEBP), Archives (ZIP, 7Z, RAR), Emails (EML, MSG). La taille maximale par fichier est 50 MB. L'aperçu en ligne est disponible pour PDF, images, DOCX et XLSX. Les fichiers EXE, BAT et scripts malveillants sont bloqués.",
+      "keywords": ["formats", "fichiers", "ged", "pdf", "docx", "xlsx", "supports"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 46,
+      "category": "modules_metier",
+      "question": "Comment rechercher dans le contenu des documents (recherche plein texte) ?",
+      "answer": "Utilisez la recherche globale (Ctrl+K) ou la recherche avancée dans la GED. Activez l'option 'Rechercher dans le contenu des documents'. La recherche plein texte fonctionne pour les PDF (texte sélectionnable), DOCX, TXT et XLSX. Pour les PDF scannés, SECRETIS utilise l'OCR (reconnaissance optique de caractères) — l'indexation prend quelques minutes après l'import. La recherche supporte les opérateurs : guillemets pour une phrase exacte, '-' pour exclure un mot, 'AND'/'OR'.",
+      "keywords": ["recherche", "plein texte", "ocr", "ged", "contenu", "indexation"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 47,
+      "category": "modules_metier",
+      "question": "Comment configurer une durée de conservation légale pour les documents OHADA ?",
+      "answer": "Accédez à Paramètres → GED → Politique de conservation. Définissez les durées par catégorie de document, en conformité avec le droit OHADA : Documents comptables (10 ans), Contrats commerciaux (5 ans à partir de la fin), Documents fiscaux (10 ans), Bulletins de paie (5 ans), Statuts et PV d'AG (permanents). SECRETIS notifie automatiquement avant l'échéance et peut archiver ou supprimer automatiquement selon votre politique.",
+      "keywords": ["conservation", "ohada", "légal", "archivage", "durée", "conformité"],
+      "module": "ged",
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 48,
+      "category": "modules_metier",
+      "question": "Comment générer un compte-rendu de réunion avec l'IA ?",
+      "answer": "Pendant ou après la réunion, dans l'onglet 'Notes de séance', saisissez les discussions, décisions et actions. En fin de réunion, cliquez sur 'Générer le compte-rendu'. SARA (l'IA) analyse les notes et produit un compte-rendu structuré : en-tête complet, résumé exécutif, développement par point de l'ordre du jour, décisions prises et actions à suivre avec responsables et échéances. Plus les notes sont structurées, meilleur est le résultat. Vérifiez et ajustez avant validation.",
+      "keywords": ["compte-rendu", "ia", "réunion", "sara", "génération", "automatique"],
+      "module": "reunions",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 49,
+      "category": "modules_metier",
+      "question": "Comment partager un compte-rendu de réunion avec les participants ?",
+      "answer": "Une fois le compte-rendu validé par le Président de séance, cliquez sur 'Distribuer'. Sélectionnez les destinataires : participants présents, participants absents, et éventuellement d'autres parties prenantes. Le CR est envoyé par email (PDF en pièce jointe) et une notification in-app. Il est automatiquement classé dans la GED dans le dossier Réunions/[Année]/[Titre]. Les destinataires externes à l'organisation reçoivent le PDF par email uniquement.",
+      "keywords": ["compte-rendu", "distribuer", "partager", "réunion", "email"],
+      "module": "reunions",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 50,
+      "category": "modules_metier",
+      "question": "Comment utiliser la vue Kanban pour gérer mes tâches ?",
+      "answer": "Accédez à Tâches et cliquez sur l'icône Kanban (tableau de colonnes). Les colonnes représentent les statuts : À faire, En cours, En révision, Terminé. Chaque carte correspond à une tâche (affiche le titre, l'assigné, la priorité et la date limite). Pour changer le statut d'une tâche, faites-la glisser d'une colonne à l'autre. Cliquez sur une carte pour voir les détails et modifier la tâche. Filtrez par assigné, priorité ou projet via la barre de filtres.",
+      "keywords": ["kanban", "tâches", "colonnes", "tableau", "glisser"],
+      "module": "taches",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 51,
+      "category": "modules_metier",
+      "question": "Comment créer un diagramme de Gantt pour mon projet ?",
+      "answer": "Dans un projet (Projets → [votre projet]), cliquez sur l'onglet 'Gantt'. Les tâches du projet s'affichent sous forme de barres temporelles. Pour créer des dépendances entre tâches, faites glisser une connexion de la fin d'une tâche vers le début d'une autre (liaison Fin-Début). Déplacez les barres pour ajuster les dates. Le chemin critique est automatiquement calculé et affiché en rouge. Les jalons s'affichent en losange. Exportez le Gantt en PDF ou PNG.",
+      "keywords": ["gantt", "projet", "dépendances", "chemin critique", "planification"],
+      "module": "projets",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 52,
+      "category": "modules_metier",
+      "question": "Comment créer et envoyer une circulaire à tous les employés ?",
+      "answer": "Accédez à Communication → Circulaires → + Nouvelle circulaire. Renseignez l'objet et sélectionnez les destinataires : 'Tous les utilisateurs' ou un département/groupe spécifique. Rédigez le contenu dans l'éditeur riche (images, mises en forme, pièces jointes possibles). Définissez la priorité (Normale ou Urgente). Cliquez sur 'Aperçu' pour vérifier le rendu. Publiez immédiatement ou programmez l'envoi à une date ultérieure. Les destinataires reçoivent une notification in-app et par email.",
+      "keywords": ["circulaire", "communication", "diffusion", "employés", "annonce"],
+      "module": "communication",
+      "roles": ["manager", "admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 53,
+      "category": "modules_metier",
+      "question": "Comment utiliser la messagerie interne pour communiquer avec mon équipe ?",
+      "answer": "Accédez à Communication → Messages. Pour une conversation individuelle : cliquez sur '+', recherchez et sélectionnez un utilisateur. Pour un groupe : cliquez sur '+', sélectionnez plusieurs utilisateurs, nommez le groupe. Tapez votre message dans la zone de saisie. Fonctionnalités disponibles : pièces jointes (max 25 MB), mentions @nom pour notifier, réactions emoji, réponse à un message spécifique (thread), recherche dans l'historique, appel vidéo depuis la conversation (si intégration visio active).",
+      "keywords": ["messagerie", "communication", "messages", "équipe", "groupe", "chat"],
+      "module": "communication",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 54,
+      "category": "modules_metier",
+      "question": "Comment pré-enregistrer un visiteur et lui envoyer une invitation QR ?",
+      "answer": "Accédez à Réception → Invitations → + Nouvelle invitation. Renseignez le nom et l'email du visiteur, la date et l'heure prévues de sa visite, l'hôte interne (la personne visitée) et le motif. Cliquez sur 'Envoyer l'invitation'. Le visiteur reçoit un email avec un QR code unique. Le jour J, il présente ce QR code au kiosque de réception pour un check-in instantané (ses informations sont déjà pré-remplies). L'hôte est notifié automatiquement à l'arrivée.",
+      "keywords": ["visiteur", "invitation", "qr code", "pré-enregistrement", "réception"],
+      "module": "reception",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 55,
+      "category": "modules_metier",
+      "question": "Comment imprimer un badge visiteur ?",
+      "answer": "Lors du check-in d'un visiteur (manuel via la réception ou automatique via le kiosque), le badge est généré automatiquement en PDF. Si une imprimante badges est connectée (Zebra, Dymo, ou imprimante standard), l'impression est déclenchée automatiquement. Pour une impression manuelle, cliquez sur 'Imprimer le badge' dans la fiche du visiteur. Le badge inclut : nom, organisation, photo (si prise via kiosque), QR code d'identification, hôte, heure d'arrivée et date de validité.",
+      "keywords": ["badge", "visiteur", "impression", "imprimante", "réception"],
+      "module": "reception",
+      "roles": ["receptionniste", "admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 56,
+      "category": "modules_metier",
+      "question": "Comment consulter les statistiques de fréquentation des visiteurs ?",
+      "answer": "Accédez à Réception → Statistiques (ou Rapports → Réception). Vous trouvez : nombre de visiteurs par jour/semaine/mois, heures de pointe, motifs de visite les plus fréquents, durées moyennes de visite, hôtes les plus sollicités, et tendances. Filtrez par période, hôte ou motif. Exportez en PDF, XLSX ou CSV. Ces données sont utiles pour optimiser les ressources de réception et prévoir les renforcements d'effectif.",
+      "keywords": ["statistiques", "visiteurs", "réception", "fréquentation", "rapports"],
+      "module": "reception",
+      "roles": ["manager", "admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 57,
+      "category": "modules_metier",
+      "question": "Comment réserver une salle de réunion dans SECRETIS ?",
+      "answer": "Accédez à Ressources → Salles (ou directement depuis Agenda lors de la création d'un événement → 'Réserver une salle'). La vue calendrier affiche les disponibilités de toutes les salles. Cliquez sur un créneau disponible sur la ligne de la salle souhaitée. Remplissez le titre, la durée et les équipements nécessaires. Confirmez la réservation. Vous recevrez une confirmation et la salle sera bloquée pour les autres utilisateurs pendant votre créneau.",
+      "keywords": ["salle", "réservation", "ressources", "réunion", "disponibilité"],
+      "module": "ressources",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 58,
+      "category": "modules_metier",
+      "question": "Comment gérer les demandes de prêt de matériel ?",
+      "answer": "Pour demander un prêt : Ressources → Matériel → Demande de prêt. Sélectionnez l'équipement, les dates de prêt (début et retour prévu) et le motif. Soumettez la demande. Le responsable du matériel reçoit une notification et approuve ou refuse. Pour gérer les demandes (responsable) : Ressources → Matériel → Demandes en attente. Approuvez, refusez ou proposez des alternatives. Enregistrez le retour du matériel pour libérer l'équipement.",
+      "keywords": ["matériel", "prêt", "ressources", "équipement", "demande"],
+      "module": "ressources",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 59,
+      "category": "modules_metier",
+      "question": "Comment suivre le kilométrage et l'entretien du parc auto ?",
+      "answer": "Accédez à Ressources → Parc Auto → [véhicule]. Depuis la fiche véhicule : enregistrez le kilométrage après chaque utilisation dans le 'Carnet de bord'. Les alertes d'entretien sont déclenchées automatiquement selon les seuils configurés (ex : vidange tous les 10 000 km, contrôle technique tous les 2 ans). Pour planifier un entretien : Ressources → Maintenance → + Nouvelle intervention, sélectionnez le véhicule et définissez le type, la date et le prestataire.",
+      "keywords": ["parc auto", "kilométrage", "entretien", "maintenance", "véhicule"],
+      "module": "ressources",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 60,
+      "category": "modules_metier",
+      "question": "Comment soumettre et faire valider une demande de congé ?",
+      "answer": "Pour soumettre : Accédez à RH → Mes congés → + Nouvelle demande. Sélectionnez le type de congé (annuel, maladie, maternité/paternité, exceptionnel), les dates de début et fin, et ajoutez un commentaire. Cliquez sur 'Soumettre'. Votre solde de congés disponible est affiché. Pour validation : le responsable reçoit une notification, consulte la demande dans RH → Validations en attente, vérifie les conflits d'absences et approuve ou refuse avec un motif. L'employé est notifié du résultat.",
+      "keywords": ["congé", "demande", "validation", "rh", "solde", "approbation"],
+      "module": "rh",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 61,
+      "category": "modules_metier",
+      "question": "Comment ajouter un employé dans le module RH ?",
+      "answer": "Accédez à RH → Personnel → + Ajouter un employé. Renseignez les informations personnelles (nom, prénom, date de naissance, nationalité), les informations contractuelles (poste, département, type de contrat, date d'embauche, salaire), le responsable hiérarchique et le contact d'urgence. Téléversez les documents RH (contrat de travail, CV, diplômes, pièce d'identité). Cliquez sur 'Créer le dossier'. Optionnellement, créez un compte utilisateur SECRETIS lié au dossier RH.",
+      "keywords": ["employé", "rh", "dossier", "personnel", "embauche"],
+      "module": "rh",
+      "roles": ["drh", "admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 62,
+      "category": "modules_metier",
+      "question": "Comment soumettre une note de frais avec justificatifs ?",
+      "answer": "Accédez à RH → Notes de frais → + Nouvelle note. Ajoutez les lignes de dépenses une par une : date, description, catégorie (transport, hébergement, restauration, communication…), montant et devise. Pour chaque ligne, photographiez ou téléversez le justificatif (ticket, facture). Le total est calculé automatiquement. Soumettez la note pour validation. Le responsable reçoit une notification, examine les justificatifs et approuve ou refuse chaque ligne.",
+      "keywords": ["note de frais", "remboursement", "justificatifs", "dépenses", "rh"],
+      "module": "rh",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 63,
+      "category": "modules_metier",
+      "question": "Comment visualiser l'organigramme de mon organisation ?",
+      "answer": "Accédez à RH → Organigramme. L'arborescence hiérarchique s'affiche interactivement. Utilisez la molette de la souris pour zoomer/dézoomer et faites glisser pour naviguer. Cliquez sur une fiche pour voir les détails du poste (nom, titre, contact, département). Filtrez par département via la barre latérale. Exportez en PNG (haute résolution) ou PDF. L'organigramme se met à jour automatiquement quand les dossiers du personnel sont modifiés.",
+      "keywords": ["organigramme", "hiérarchie", "organisation", "rh", "structure"],
+      "module": "rh",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 64,
+      "category": "modules_metier",
+      "question": "Comment consulter le planning de présence et d'absence de l'équipe ?",
+      "answer": "Accédez à RH → Planning. La vue mensuelle ou hebdomadaire affiche les présences et absences de toute l'équipe (ou filtré par département). Les codes couleur indiquent : présent (vert), congé approuvé (bleu), formation (violet), maladie (orange), absent non justifié (rouge). Les responsables peuvent modifier le planning manuellement. Exportez en CSV pour intégration avec un logiciel de paie ou en PDF pour affichage.",
+      "keywords": ["planning", "présence", "absence", "rh", "congé", "équipe"],
+      "module": "rh",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 65,
+      "category": "imports_exports",
+      "question": "Quels formats d'export sont disponibles dans IBIG SECRETIS ?",
+      "answer": "IBIG SECRETIS propose les formats d'export suivants : PDF (avec mise en page et branding de l'organisation), XLSX (Microsoft Excel, compatible Google Sheets), CSV (données brutes universelles, UTF-8 avec BOM), JSON (pour intégration technique), XML (pour certains modules réglementaires). Le format disponible dépend du module : les rapports BI supportent tous les formats, le journal d'audit exporte en CSV, les comptes-rendus en PDF.",
+      "keywords": ["export", "pdf", "xlsx", "csv", "formats", "téléchargement"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 66,
+      "category": "imports_exports",
+      "question": "Comment importer un fichier CSV de tâches ou de contacts ?",
+      "answer": "Accédez au module concerné (Tâches → Importer, ou Annuaire → Importer). Téléchargez le modèle CSV fourni — il contient les colonnes exactes et des exemples. Remplissez votre fichier en respectant les formats de colonnes (dates au format AAAA-MM-JJ, emails valides, valeurs de listes limitées aux options listées). Importez le fichier. Un aperçu valide les données et signale les erreurs ligne par ligne. Corrigez si nécessaire et confirmez l'import.",
+      "keywords": ["import", "csv", "tâches", "contacts", "modèle"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 67,
+      "category": "imports_exports",
+      "question": "Pourquoi mon fichier d'import est-il rejeté avec une erreur ?",
+      "answer": "Les causes les plus fréquentes d'erreur d'import : (1) Encodage incorrect — sauvegardez votre CSV en UTF-8 (dans Excel : Fichier → Enregistrer sous → CSV UTF-8 avec BOM), (2) Colonnes manquantes ou renommées — utilisez strictement le modèle téléchargé, (3) Format de date incorrect — utilisez AAAA-MM-JJ, (4) Valeur de liste invalide — vérifiez les valeurs autorisées pour les champs à liste (rôle, statut, priorité), (5) Email invalide ou déjà existant. L'aperçu d'import indique les lignes en erreur.",
+      "keywords": ["import", "erreur", "csv", "encodage", "utf-8", "rejeté"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 68,
+      "category": "imports_exports",
+      "question": "Comment exporter tous les documents GED d'un dossier ?",
+      "answer": "Dans la GED, sélectionnez le dossier à exporter. Cliquez sur '...' (menu contextuel) → 'Exporter le dossier'. Choisissez le format : (1) ZIP avec les fichiers originaux + métadonnées CSV, (2) PDF compilé (tous les documents dans un seul PDF). Définissez le périmètre : dossier uniquement ou dossier + sous-dossiers. Lancez l'export. Pour les gros volumes, l'export est préparé en arrière-plan et vous recevez une notification quand le téléchargement est prêt.",
+      "keywords": ["ged", "export", "dossier", "zip", "téléchargement", "documents"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 69,
+      "category": "imports_exports",
+      "question": "Comment exporter les données de mes contacts au format vCard ?",
+      "answer": "Dans l'Annuaire (Communication → Annuaire), sélectionnez les contacts à exporter (cases à cocher) ou cliquez sur 'Tout sélectionner'. Cliquez sur 'Exporter' → sélectionnez le format vCard (.vcf). Vous pouvez aussi exporter en CSV pour import dans Excel ou en JSON pour intégration. Pour un seul contact, ouvrez sa fiche et cliquez sur 'Exporter en vCard'. Le fichier vCard est compatible avec Outlook, Gmail Contacts, Apple Contacts.",
+      "keywords": ["contacts", "export", "vcard", "vcf", "annuaire"],
+      "module": "communication",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 70,
+      "category": "imports_exports",
+      "question": "Comment programmer un rapport automatique en XLSX chaque lundi matin ?",
+      "answer": "Créez ou ouvrez le rapport souhaité dans Rapports. Cliquez sur 'Programmer'. Choisissez la fréquence : Hebdomadaire → cochez Lundi. Définissez l'heure d'envoi (ex : 8h00). Sélectionnez le format XLSX. Ajoutez les destinataires (emails internes ou externes). Activez la programmation. Cliquez sur 'Enregistrer'. Le rapport sera généré et envoyé automatiquement chaque lundi à 8h. Vous pouvez modifier ou désactiver la programmation à tout moment.",
+      "keywords": ["rapport", "automatique", "programmation", "schedule", "xlsx", "email"],
+      "module": "rapports",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 71,
+      "category": "imports_exports",
+      "question": "Comment migrer mes données depuis un autre système vers IBIG SECRETIS ?",
+      "answer": "IBIG Soft propose un service d'accompagnement à la migration. Pour les données structurées (contacts, utilisateurs, tâches), des modèles d'import CSV sont disponibles. Pour la GED, les documents peuvent être importés en masse via ZIP structuré. Pour des données comptables SYSCOHADA ou des historiques complexes, l'équipe technique IBIG Soft réalise la migration sur devis. Contactez migration@ibigsoft.com pour un audit gratuit de vos données.",
+      "keywords": ["migration", "import", "données", "transfert", "ancien système"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 72,
+      "category": "imports_exports",
+      "question": "Comment télécharger un modèle de fichier d'import vide ?",
+      "answer": "Dans chaque module qui supporte l'import (Utilisateurs, Tâches, Contacts, Personnel RH…), accédez à la fonction d'import et cliquez sur 'Télécharger le modèle'. Le fichier CSV ou XLSX téléchargé contient les en-têtes de colonnes correctes, les formats attendus dans les commentaires de cellule, et quelques lignes d'exemple à supprimer avant votre import réel. Utilisez toujours le modèle le plus récent pour éviter les incompatibilités.",
+      "keywords": ["modèle", "template", "import", "csv", "télécharger"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 73,
+      "category": "imports_exports",
+      "question": "L'export PDF inclut-il le logo de mon organisation ?",
+      "answer": "Oui. Tous les exports PDF générés par SECRETIS (courriers, comptes-rendus, rapports, badges visiteurs, feuilles de présence…) incluent automatiquement le logo de votre organisation, vos couleurs de charte, le nom de l'organisation, et le texte de pied de page configuré. Le logo doit être téléversé dans Paramètres → Organisation → Identité visuelle. Pour les rapports BI, vous pouvez activer/désactiver le logo dans les options d'export.",
+      "keywords": ["logo", "pdf", "export", "branding", "organisation"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 74,
+      "category": "imports_exports",
+      "question": "Comment exporter le journal d'audit pour une inspection ou un audit externe ?",
+      "answer": "Accédez à Paramètres → Audit → Journal d'audit. Appliquez les filtres souhaités (période, utilisateur, module, type d'action). Cliquez sur 'Exporter'. Le journal est exporté en CSV ou PDF. Le fichier inclut : horodatage UTC, utilisateur (nom et email), action, module, objet concerné, valeur avant modification, valeur après modification, adresse IP. Ce format est accepté par les cabinets d'audit et les autorités de contrôle.",
+      "keywords": ["audit", "export", "journal", "inspection", "conformité", "csv"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 75,
+      "category": "documents_impressions",
+      "question": "Comment personnaliser un modèle de courrier sortant ?",
+      "answer": "Accédez à Paramètres → Courrier → Modèles de courrier → + Nouveau modèle. Donnez un nom au modèle. Dans l'éditeur, utilisez des variables dynamiques : {{organisation.nom}}, {{date}}, {{destinataire.nom}}, {{expediteur.nom}}, {{reference}}. Ajoutez le logo, l'en-tête et le pied de page dans les zones dédiées. Définissez la mise en page (marges, police, taille). Prévisualisez avec des données réelles. Activez le modèle. Il sera disponible lors de la rédaction de courriers sortants.",
+      "keywords": ["modèle", "courrier", "personnalisation", "template", "variables"],
+      "module": "courrier",
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 76,
+      "category": "documents_impressions",
+      "question": "Comment générer un QR code pour un document important ?",
+      "answer": "Dans la GED, ouvrez le document. Cliquez sur '...' → 'Générer un QR code'. Un QR code est généré et pointe vers l'URL de visualisation du document dans SECRETIS. Options : QR code avec accès public (lien de partage externe) ou accès authentifié uniquement. Téléchargez le QR code en PNG pour l'imprimer sur des supports physiques. Le QR code peut aussi être intégré directement dans le PDF du document (Paramètres → GED → QR code automatique).",
+      "keywords": ["qr code", "document", "ged", "lien", "partage"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 77,
+      "category": "documents_impressions",
+      "question": "Comment apposer une signature électronique sur un document PDF ?",
+      "answer": "Ouvrez le document PDF dans la GED. Cliquez sur 'Signer électroniquement'. Dans l'interface de signature, positionnez le bloc de signature à l'endroit souhaité (glisser-déposer sur le document). Vous pouvez choisir : (1) Signature dessinée (tracez avec la souris ou l'écran tactile), (2) Signature d'image (téléversez une image de votre signature), (3) Signature certificat (si un certificat numérique est configuré). Confirmez avec votre code MFA. Le PDF est signé, horodaté et scellé.",
+      "keywords": ["signature", "électronique", "pdf", "signer", "document"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 78,
+      "category": "documents_impressions",
+      "question": "Comment imprimer directement depuis SECRETIS ?",
+      "answer": "Dans n'importe quel document, rapport ou fiche, cliquez sur l'icône d'impression (ou Ctrl+P). SECRETIS génère d'abord un aperçu PDF optimisé pour l'impression, puis ouvre la boîte de dialogue d'impression de votre navigateur. Sélectionnez votre imprimante, le format de papier (A4 recommandé), l'orientation et le nombre de copies. Pour les documents avec mise en page spéciale (courriers avec en-tête), utilisez 'Générer le PDF' puis imprimez depuis votre lecteur PDF pour une meilleure fidélité.",
+      "keywords": ["imprimer", "impression", "pdf", "document", "navigateur"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 79,
+      "category": "documents_impressions",
+      "question": "Comment fusionner plusieurs documents PDF dans la GED ?",
+      "answer": "Dans la GED, sélectionnez les documents PDF à fusionner (cases à cocher dans la liste). Cliquez sur '...' → 'Fusionner les PDF'. Définissez l'ordre des documents dans le PDF final (glisser-déposer). Donnez un nom au document fusionné. Choisissez le dossier de destination. Cliquez sur 'Fusionner'. Le nouveau PDF est créé et ajouté à la GED. Les documents originaux sont conservés intacts.",
+      "keywords": ["fusionner", "pdf", "combiner", "ged", "documents"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 80,
+      "category": "documents_impressions",
+      "question": "Comment protéger un document par un mot de passe avant de le partager ?",
+      "answer": "Dans la GED, ouvrez le document. Cliquez sur '...' → 'Protéger par mot de passe'. Saisissez et confirmez le mot de passe. Définissez les droits accordés aux destinataires : lecture seule, impression autorisée, copie de texte autorisée. Cliquez sur 'Appliquer'. Le document PDF est réencrypté avec le mot de passe. Lors du partage, communiquez le mot de passe séparément au destinataire (ne pas inclure dans le même email que le document).",
+      "keywords": ["mot de passe", "document", "protection", "sécurité", "partage"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 81,
+      "category": "documents_impressions",
+      "question": "Comment utiliser l'OCR pour rendre un PDF scanné consultable ?",
+      "answer": "Lors de l'import d'un PDF scanné dans la GED, SECRETIS détecte automatiquement qu'il s'agit d'un document image et lance l'OCR en arrière-plan. L'indexation prend 1 à 5 minutes selon la taille du document. Une fois terminée, une icône indique que le document est consultable. Le texte reconnu est indexé dans le moteur de recherche. Pour relancer l'OCR manuellement sur un document existant : ouvrez-le → '...' → 'Relancer l'OCR'. Langues supportées : français, anglais, arabe.",
+      "keywords": ["ocr", "scanné", "pdf", "reconnaissance", "texte", "recherche"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 82,
+      "category": "documents_impressions",
+      "question": "Comment générer un rapport de présence pour une réunion ?",
+      "answer": "Dans une réunion terminée (Réunions → [votre réunion] → onglet 'Participants'), cliquez sur 'Générer la feuille de présence'. Un document PDF est créé avec : titre de la réunion, date et lieu, liste des participants avec leurs fonctions, colonne signature (pour les réunions physiques), et les statuts de présence enregistrés dans SECRETIS. Ce document peut être imprimé avant la réunion pour recueil manuel de signatures, ou généré en fin de réunion avec les présences numériques.",
+      "keywords": ["feuille de présence", "réunion", "participants", "pdf", "signature"],
+      "module": "reunions",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 83,
+      "category": "documents_impressions",
+      "question": "Comment versionner les documents dans la GED ?",
+      "answer": "La GED SECRETIS gère automatiquement les versions de vos documents. Quand vous modifiez un document (depuis SECRETIS ou en téléversant une nouvelle version), une nouvelle version est créée. Pour voir l'historique des versions : ouvrez le document → onglet 'Versions'. Chaque version indique : numéro de version, auteur, date, taille, et commentaire de version. Vous pouvez télécharger, prévisualiser ou restaurer n'importe quelle version antérieure. Seule la version active est affichée par défaut.",
+      "keywords": ["versions", "historique", "ged", "document", "révision"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 84,
+      "category": "documents_impressions",
+      "question": "Comment ajouter un filigrane (watermark) sur les documents confidentiels ?",
+      "answer": "Dans la GED, ouvrez le document. Cliquez sur '...' → 'Ajouter un filigrane'. Options : texte personnalisé (ex : 'CONFIDENTIEL', 'COPIE', votre organisation), image (logo en transparence), ou filigrane dynamique (nom de l'utilisateur + date d'accès, dissuasif pour les fuites). Choisissez la position (centré diagonal, bas de page) et l'opacité. Le filigrane est ajouté à la volée lors de la visualisation ou du téléchargement, sans modifier le fichier original.",
+      "keywords": ["filigrane", "watermark", "confidentiel", "document", "sécurité"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 85,
+      "category": "abonnements_licences",
+      "question": "Comment démarrer un essai gratuit d'IBIG SECRETIS ?",
+      "answer": "Rendez-vous sur ibigsoft.com/secretis et cliquez sur 'Essai gratuit'. Renseignez votre nom, email professionnel, nom de l'organisation et secteur d'activité. Confirmez votre email. Votre espace SECRETIS est créé immédiatement. L'essai dure 14 jours, sans carte bancaire requise, avec accès à tous les modules du plan Pro (jusqu'à 5 utilisateurs). À la fin de l'essai, choisissez un plan payant ou vos données sont conservées 30 jours supplémentaires avant suppression.",
+      "keywords": ["essai", "trial", "gratuit", "démarrer", "test"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 86,
+      "category": "abonnements_licences",
+      "question": "Comment renouveler ou changer mon abonnement IBIG SECRETIS ?",
+      "answer": "Accédez à Paramètres → Abonnement. Pour renouveler : cliquez sur 'Renouveler l'abonnement', choisissez la durée (mensuel ou annuel — 20% de réduction) et procédez au paiement. Pour changer de plan : cliquez sur 'Changer de plan', sélectionnez le nouveau plan. La différence de tarif est calculée au prorata pour le reste de la période. Le changement est effectif immédiatement. Nous recommandons d'activer le renouvellement automatique pour éviter les interruptions.",
+      "keywords": ["renouvellement", "abonnement", "plan", "changer", "upgrade"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 87,
+      "category": "abonnements_licences",
+      "question": "Que se passe-t-il si mon abonnement expire ?",
+      "answer": "Si l'abonnement expire : (1) J+0 à J+7 : l'accès est en mode lecture seule (consultation possible, création et modification bloquées). Des rappels de renouvellement sont envoyés. (2) J+8 à J+30 : accès limité aux seules fonctions de renouvellement et d'export de données. (3) J+31 : les données sont archivées (non supprimées). Contactez le support pour les récupérer. (4) J+90 : suppression définitive des données. Renouvelez avant J+30 pour ne pas perdre l'accès.",
+      "keywords": ["expiration", "abonnement", "suspension", "données", "accès"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 88,
+      "category": "abonnements_licences",
+      "question": "Comment obtenir une facture de mon abonnement IBIG SECRETIS ?",
+      "answer": "Accédez à Paramètres → Abonnement → Historique des paiements. Cliquez sur la ligne du paiement souhaité. Cliquez sur 'Télécharger la facture'. La facture PDF inclut : vos informations d'organisation, le détail de l'abonnement, la période couverte, le montant TTC et la ventilation des taxes. Pour configurer les informations de facturation (numéro fiscal, adresse) : Paramètres → Abonnement → Informations de facturation.",
+      "keywords": ["facture", "paiement", "abonnement", "télécharger", "comptabilité"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 89,
+      "category": "abonnements_licences",
+      "question": "Est-il possible d'avoir un devis pour une organisation avec des besoins spécifiques ?",
+      "answer": "Oui. Pour les organisations ayant des besoins spécifiques (grand nombre d'utilisateurs, modules personnalisés, déploiement on-premise, intégrations sur mesure, formation et accompagnement), IBIG Soft propose des devis sur mesure. Contactez l'équipe commerciale : commercial@ibigsoft.com ou via le formulaire de contact sur ibigsoft.com. Un account manager vous contactera sous 24h ouvrées pour un appel de découverte.",
+      "keywords": ["devis", "commercial", "sur mesure", "personnalisé", "enterprise"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 90,
+      "category": "sauvegardes_restauration",
+      "question": "À quelle fréquence mes données sont-elles sauvegardées ?",
+      "answer": "IBIG SECRETIS réalise des sauvegardes automatiques selon le calendrier suivant : sauvegardes incrémentales toutes les 6 heures, sauvegarde complète quotidienne à 2h du matin (heure du serveur), sauvegarde hebdomadaire conservée 4 semaines, sauvegarde mensuelle conservée 12 mois. Les sauvegardes sont chiffrées avec AES-256 et stockées sur un site géographique distinct. Pour les plans Enterprise, une sauvegarde continue (RPO < 1h) est disponible.",
+      "keywords": ["sauvegarde", "backup", "fréquence", "automatique", "données"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 91,
+      "category": "sauvegardes_restauration",
+      "question": "Comment réaliser une sauvegarde manuelle de mes données ?",
+      "answer": "Accédez à Paramètres → Sauvegardes → Lancer une sauvegarde (Super Admin uniquement). Choisissez le périmètre : données uniquement (base de données, configuration) ou données + fichiers GED. Cliquez sur 'Lancer'. La sauvegarde est préparée en arrière-plan (quelques minutes selon le volume). Vous recevez une notification quand elle est prête. Téléchargez l'archive chiffrée si vous souhaitez en garder une copie locale. Les sauvegardes manuelles sont conservées 30 jours.",
+      "keywords": ["sauvegarde", "manuelle", "export", "données", "backup"],
+      "module": null,
+      "roles": ["super_admin"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 92,
+      "category": "sauvegardes_restauration",
+      "question": "Comment restaurer un document supprimé par erreur ?",
+      "answer": "Dans la GED, accédez à la Corbeille (icône corbeille en bas du menu latéral GED). Les documents supprimés sont conservés 30 jours dans la corbeille. Trouvez le document (filtrez par nom, date de suppression, auteur). Cliquez sur 'Restaurer' pour remettre le document dans son dossier d'origine. Pour une restauration complète après une suppression massive ou une corruption, contactez le support IBIG Soft qui peut restaurer depuis une sauvegarde automatique.",
+      "keywords": ["restaurer", "corbeille", "supprimé", "récupérer", "document"],
+      "module": "ged",
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 93,
+      "category": "sauvegardes_restauration",
+      "question": "Que faire si des données ont été corrompues ou supprimées accidentellement ?",
+      "answer": "Contactez immédiatement le support IBIG Soft : support@ibigsoft.com ou via le ticket support (urgence). Précisez : la nature des données affectées, la date estimée de la corruption ou suppression, le périmètre (un document, un dossier, des données d'un module). L'équipe technique évaluera la dernière sauvegarde disponible et réalisera la restauration. Les données de la journée en cours (non encore sauvegardées) peuvent ne pas être récupérables.",
+      "keywords": ["corruption", "suppression accidentelle", "restauration", "support", "données"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 94,
+      "category": "sauvegardes_restauration",
+      "question": "Comment exporter toutes mes données pour quitter SECRETIS (portabilité) ?",
+      "answer": "Accédez à Paramètres → RGPD → Exporter mes données (ou les données de l'organisation pour les Admins). Sélectionnez les modules à inclure. Cliquez sur 'Demander l'export'. L'archive est préparée en 24 à 48h et un lien de téléchargement sécurisé vous est envoyé par email. L'archive ZIP inclut : tous les documents GED, les données structurées en CSV/JSON, les configurations, et un fichier README d'explication. Ce droit de portabilité est garanti par le RGPD.",
+      "keywords": ["portabilité", "export", "données", "rgpd", "quitter"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 95,
+      "category": "sauvegardes_restauration",
+      "question": "Où sont hébergées les données IBIG SECRETIS ?",
+      "answer": "Les données SaaS de IBIG SECRETIS sont hébergées sur des serveurs situés en Europe (datacenters OVHcloud en France et en Allemagne) et en Afrique de l'Ouest (datacenters partenaires en Côte d'Ivoire). La localisation des données peut être choisie selon votre région lors de l'inscription. Pour les plans Enterprise, un hébergement dans un datacenter de votre choix est possible. Les données ne quittent jamais la région d'hébergement choisie.",
+      "keywords": ["hébergement", "serveurs", "données", "localisation", "datacenters"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 96,
+      "category": "assistant_sara",
+      "question": "Qu'est-ce que SARA et que peut-elle faire pour moi ?",
+      "answer": "SARA (Secrétaire Automatisée et Responsive Assistante) est l'assistante IA intégrée à IBIG SECRETIS. Elle peut vous aider à : naviguer dans l'application (expliquer où se trouve une fonctionnalité), répondre à vos questions sur les procédures, générer des comptes-rendus de réunion depuis vos notes, classifier automatiquement les documents importés dans la GED, proposer des réponses aux emails entrants, résumer des documents longs, créer des tâches depuis un compte-rendu, et ouvrir des tickets support.",
+      "keywords": ["sara", "ia", "assistante", "intelligence artificielle", "aide"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 97,
+      "category": "assistant_sara",
+      "question": "SARA a-t-elle accès à toutes mes données SECRETIS ?",
+      "answer": "SARA accède uniquement aux données auxquelles vous avez vous-même accès dans SECRETIS — vos permissions définissent ce que SARA peut voir et utiliser. SARA n'a pas accès aux données d'autres organisations. Les conversations avec SARA sont chiffrées et ne sont pas utilisées pour entraîner des modèles tiers. SARA utilise un modèle de langage sécurisé déployé en infrastructure privée IBIG Soft. Vous pouvez consulter la politique de confidentialité de SARA dans Paramètres → RGPD.",
+      "keywords": ["sara", "données", "accès", "confidentialité", "permissions", "ia"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 98,
+      "category": "assistant_sara",
+      "question": "Pourquoi SARA ne comprend-elle pas ma question ?",
+      "answer": "Si SARA ne comprend pas votre question : (1) Reformulez en termes simples et spécifiques (ex : 'Comment créer une tâche ?' plutôt que 'je veux faire un truc'). (2) Précisez le module concerné (ex : 'Dans la GED, comment...?'). (3) Posez une seule question à la fois. (4) Si SARA affiche 'Je ne suis pas sûre de comprendre', cliquez sur 'Reformuler' ou choisissez parmi les suggestions proposées. (5) En dernier recours, utilisez le Centre d'aide ou ouvrez un ticket support.",
+      "keywords": ["sara", "comprend pas", "reformuler", "aide", "ia"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 99,
+      "category": "assistant_sara",
+      "question": "Comment demander à SARA de créer un ticket support à ma place ?",
+      "answer": "Ouvrez SARA (bouton en bas à droite ou Ctrl+Shift+S). Tapez : 'Je veux ouvrir un ticket support' ou 'J'ai un problème avec [module]' ou 'Ça ne fonctionne pas'. SARA vous posera quelques questions de qualification (module concerné, description du problème) et lancera automatiquement le formulaire de ticket pré-rempli avec le contexte de votre conversation. Elle ajoutera aussi automatiquement les informations techniques (navigateur, OS, version SECRETIS). Validez et soumettez.",
+      "keywords": ["sara", "ticket", "support", "créer", "problème"],
+      "module": null,
+      "roles": ["all"],
+      "updated_at": "2026-07-01"
+    },
+    {
+      "id": 100,
+      "category": "assistant_sara",
+      "question": "Peut-on désactiver SARA pour certains utilisateurs ou pour toute l'organisation ?",
+      "answer": "Oui. Les administrateurs peuvent configurer l'accès à SARA depuis Paramètres → SARA → Accès. Options disponibles : (1) Activer SARA pour tous les utilisateurs (défaut), (2) Activer uniquement pour certains rôles, (3) Désactiver SARA complètement. Il est également possible de limiter les capacités de SARA (ex : désactiver la génération de comptes-rendus mais conserver l'aide à la navigation). Les restrictions s'appliquent immédiatement sans rechargement.",
+      "keywords": ["sara", "désactiver", "accès", "configuration", "rôles", "admin"],
+      "module": null,
+      "roles": ["admin", "super_admin"],
+      "updated_at": "2026-07-01"
+    }
+  ]
+}
