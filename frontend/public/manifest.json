@@ -1,111 +1,135 @@
 {
-  "name": "IBIG SECRETIS",
+  "name": "IBIG SECRETIS — ERP Secrétariat",
   "short_name": "SECRETIS",
-  "description": "ERP SaaS de gestion documentaire et administrative pour entreprises africaines",
-  "theme_color": "#1A3A5C",
-  "background_color": "#1A3A5C",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "start_url": "/dashboard",
+  "description": "Système de gestion de secrétariat et d'administration pour l'Afrique",
+  "start_url": "/dashboard?source=pwa",
   "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#1A3A5C",
+  "background_color": "#F8FAFC",
   "lang": "fr",
+  "dir": "ltr",
   "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-384x384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Agenda",
-      "short_name": "Agenda",
-      "description": "Accéder à mon agenda",
-      "url": "/agenda",
-      "icons": [{ "src": "/icons/shortcut-agenda.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Courrier",
-      "short_name": "Courrier",
-      "description": "Consulter mon courrier",
-      "url": "/courrier",
-      "icons": [{ "src": "/icons/shortcut-courrier.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Tâches",
-      "short_name": "Tâches",
-      "description": "Mes tâches en cours",
-      "url": "/taches",
-      "icons": [{ "src": "/icons/shortcut-taches.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Nouveau courrier",
-      "short_name": "Nouveau",
-      "description": "Rédiger un nouveau courrier",
-      "url": "/courrier/nouveau",
-      "icons": [{ "src": "/icons/shortcut-nouveau.png", "sizes": "96x96" }]
+      "purpose": "any"
     }
   ],
   "screenshots": [
     {
-      "src": "/screenshots/dashboard.png",
-      "sizes": "1280x720",
+      "src": "/screenshots/desktop-dashboard.png",
+      "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Tableau de bord SECRETIS"
     },
     {
-      "src": "/screenshots/mobile.png",
-      "sizes": "390x844",
+      "src": "/screenshots/mobile-agenda.png",
+      "sizes": "375x812",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "SECRETIS sur mobile"
+      "label": "Agenda mobile"
     }
   ],
-  "prefer_related_applications": false,
-  "related_applications": []
+  "shortcuts": [
+    {
+      "name": "Nouvel événement",
+      "short_name": "Événement",
+      "description": "Créer un événement dans l'agenda",
+      "url": "/agenda/create",
+      "icons": [{ "src": "/icons/shortcut-agenda.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Mes tâches",
+      "short_name": "Tâches",
+      "description": "Consulter et gérer mes tâches",
+      "url": "/taches",
+      "icons": [{ "src": "/icons/shortcut-taches.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Visiteurs",
+      "short_name": "Visiteurs",
+      "description": "Accueil et gestion des visiteurs",
+      "url": "/accueil/visiteurs",
+      "icons": [{ "src": "/icons/shortcut-nouveau.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "SARA",
+      "short_name": "SARA",
+      "description": "Parler à l'assistant IA SARA",
+      "url": "/sara/chat",
+      "icons": [{ "src": "/icons/shortcut-courrier.png", "sizes": "96x96" }]
+    }
+  ],
+  "share_target": {
+    "action": "/ged/upload",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "document",
+          "accept": ["application/pdf", "image/*", ".docx", ".xlsx", ".doc", ".xls"]
+        }
+      ]
+    }
+  },
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.ibigsoft.secretis"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/ibig-secretis/id0000000000"
+    }
+  ],
+  "prefer_related_applications": false
 }

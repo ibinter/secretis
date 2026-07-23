@@ -38,6 +38,25 @@ Artisan::command('secretis:version', function (): void {
 // =============================================================================
 
 // -------------------------------------------------------------------------
+// CACHE — Préchauffage Redis quotidien
+// -------------------------------------------------------------------------
+
+// Préchauffage du cache Redis à 02:00 — avant l'afflux des utilisateurs matinaux.
+// Pré-charge : permissions Spatie, événements agenda 6 mois, KPIs dashboard,
+// articles du centre d'aide et FAQ (100 entrées).
+Schedule::command('secretis:cache:warmup')
+    ->daily()
+    ->at('02:00')
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->name('secretis-cache-warmup')
+    ->description('Préchauffage du cache Redis pour toutes les organisations')
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::channel('performance')
+            ->error('[CRON] secretis:cache:warmup a échoué — vérifier Redis et les organisations actives.');
+    });
+
+// -------------------------------------------------------------------------
 // SANTÉ & MONITORING (transversal)
 // -------------------------------------------------------------------------
 

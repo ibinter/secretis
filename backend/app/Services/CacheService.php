@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use Closure;
+use Illuminate\Cache\TaggedCache;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -32,11 +34,135 @@ use Illuminate\Support\Facades\Log;
  */
 class CacheService
 {
+    // =========================================================================
+    // Constantes TTL (secondes) — partagées avec les contrôleurs et observers
+    // =========================================================================
+
+    /** KPIs et widgets du tableau de bord — 5 minutes */
+    public const DASHBOARD_TTL = 300;
+
+    /** Rapports et exports BI — 30 minutes */
+    public const REPORTS_TTL = 1800;
+
+    /** Données statiques (FAQ, catégories aide, pays, devises) — 24 heures */
+    public const STATIC_DATA_TTL = 86400;
+
+    /** Permissions et rôles Spatie par utilisateur — 10 minutes */
+    public const USER_PERMISSIONS_TTL = 600;
+
+    /** Données analytiques agrégées — 1 heure */
+    public const ANALYTICS_TTL = 3600;
+
+    // =========================================================================
+    // Attributs d'instance
+    // =========================================================================
+
     /** L1 : cache mémoire valide pour la request courante */
     private array $l1Cache = [];
 
     /** Préfixe global pour tous les caches SECRETIS (évite les collisions) */
     private const KEY_PREFIX = 'secretis:';
+
+    // =========================================================================
+    // API taggée publique — utilisée par les contrôleurs et observers
+    // =========================================================================
+
+    /**
+     * Retourne l'objet TaggedCache pour une organisation et un module.
+     *
+     * Permet d'utiliser directement l'API Cache::tags() depuis les contrôleurs :
+     *   $this->cache->tags($orgId, 'agenda')->remember($key, $ttl, fn() => …)
+     *
+     * Tags appliqués : ['org:{id}', 'module:{name}']
+     */
+    public function tags(int $orgId, string $module): TaggedCache
+    {
+        return Cache::tags(["org:{$orgId}", "module:{$module}"]);
+    }
+
+    /**
+     * Méthode principale de cache taggué par organisation + module.
+     *
+     * Équivalent de Cache::tags()->remember() avec L1 intégré et
+     * une clé normalisée : secretis:org:{id}:{module}:{key}
+     *
+     * @param  int     $orgId  Identifiant du tenant
+     * @param  string  $module Nom du module (agenda, tasks, ged, dashboard…)
+     * @param  string  $key    Sous-clé descriptive
+     * @param  int     $ttl    Durée de vie en secondes
+     * @param  Closure $callback Générateur de la valeur en cas de miss
+     */
+    public function remember(int $orgId, string $module, string $key, int $ttl, Closure $callback): mixed
+    {
+        $fullKey = $this->moduleKey($orgId, $module, $key);
+
+        // L1 — mémoire PHP, valide pour la request courante
+        if (array_key_exists($fullKey, $this->l1Cache)) {
+            return $this->l1Cache[$fullKey];
+        }
+
+        // L2 — Redis avec double tag pour invalidation granulaire
+        try {
+            $value = Cache::tags(["org:{$orgId}", "module:{$module}"])->remember($fullKey, $ttl, $callback);
+        } catch (\Exception $e) {
+            Log::warning("[CacheService::remember] Tags non supportés, fallback: {$e->getMessage()}");
+            $value = Cache::remember($fullKey, $ttl, $callback);
+        }
+
+        $this->l1Cache[$fullKey] = $value;
+
+        return $value;
+    }
+
+    /**
+     * Invalide une clé précise pour un module et une organisation.
+     */
+    public function forget(int $orgId, string $module, string $key): void
+    {
+        $fullKey = $this->moduleKey($orgId, $module, $key);
+
+        try {
+            Cache::tags(["org:{$orgId}", "module:{$module}"])->forget($fullKey);
+            Cache::forget($fullKey); // fallback sans tags
+        } catch (\Exception $e) {
+            Log::warning("[CacheService::forget] {$e->getMessage()}");
+        }
+
+        unset($this->l1Cache[$fullKey]);
+    }
+
+    /**
+     * Vide TOUT le cache d'une organisation (tous modules confondus).
+     *
+     * Alias public de invalidateOrganizationCache() avec le tag 'org:{id}'.
+     * Utilisé lors d'imports massifs ou de changements de paramètres globaux.
+     */
+    public function flushOrganization(int $orgId): void
+    {
+        $this->invalidateOrganizationCache($orgId);
+    }
+
+    /**
+     * Vide un module entier pour TOUTES les organisations.
+     *
+     * Tag ciblé : 'module:{name}'
+     * Usage : après un déploiement qui change le schéma d'un module.
+     */
+    public function flushModule(string $module): void
+    {
+        try {
+            Cache::tags(["module:{$module}"])->flush();
+            // L1 : supprimer les clés dont le segment module correspond
+            foreach (array_keys($this->l1Cache) as $k) {
+                if (str_contains((string) $k, ":{$module}:")) {
+                    unset($this->l1Cache[$k]);
+                }
+            }
+            Log::debug("[CacheService] Module '{$module}' vidé (toutes orgs).");
+        } catch (\Exception $e) {
+            Log::error("[CacheService::flushModule] {$e->getMessage()}");
+        }
+    }
 
     // =========================================================================
     // Cache de données d'organisation
@@ -270,6 +396,15 @@ class CacheService
             Log::warning("[CacheService] Tags non supportés, fallback sans tags: " . $e->getMessage());
             return Cache::remember($key, $ttl, $callback);
         }
+    }
+
+    /**
+     * Construit la clé Redis pour une organisation + module.
+     * Format : secretis:org:42:agenda:events.2026-07
+     */
+    private function moduleKey(int $orgId, string $module, string $subKey): string
+    {
+        return self::KEY_PREFIX . "org:{$orgId}:{$module}:{$subKey}";
     }
 
     /**

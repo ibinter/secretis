@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Document;
+use App\Models\Event;
+use App\Models\Task;
+use App\Models\Visitor;
+use App\Services\CacheService;
 use App\Services\StatisticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
@@ -15,6 +21,7 @@ use Inertia\Response as InertiaResponse;
  * DashboardController — Tableaux de bord SECRETIS ERP
  *
  * Routes :
+ *  GET /dashboard               → index()               [optimisé, Inertia defer]
  *  GET /dashboard/executive     → executiveDashboard()
  *  GET /dashboard/secretariat   → secretariatDashboard()
  *  GET /api/dashboard/kpis      → apiKpis()
@@ -23,6 +30,139 @@ use Inertia\Response as InertiaResponse;
 class DashboardController extends Controller
 {
     public function __construct(private StatisticsService $stats) {}
+
+    // =========================================================================
+    // POINT D'ENTRÉE UNIQUE — dashboard optimisé avec Inertia Deferred Props
+    // =========================================================================
+
+    /**
+     * Dashboard principal — chaque propriété est chargée de façon différée
+     * (Inertia::defer) pour éviter de bloquer le rendu initial de la page.
+     *
+     * Le navigateur affiche immédiatement la coquille React, puis chaque
+     * bloc de données arrive indépendamment dès que le serveur l'a calculé.
+     *
+     * Chaque helper privé lit d'abord depuis Redis (cache taggué), puis
+     * exécute les requêtes SQL uniquement en cas de miss.
+     *
+     * GET /dashboard
+     */
+    public function index(): InertiaResponse
+    {
+        $user  = Auth::user();
+        $orgId = $user->organization_id;
+
+        return Inertia::render('Dashboard/Index', [
+            'stats'           => Inertia::defer(fn () => $this->getStats($orgId)),
+            'recentEvents'    => Inertia::defer(fn () => $this->getRecentEvents($orgId)),
+            'pendingTasks'    => Inertia::defer(fn () => $this->getPendingTasks($orgId, $user->id)),
+            'recentDocuments' => Inertia::defer(fn () => $this->getRecentDocuments($orgId)),
+        ]);
+    }
+
+    // ─── Helpers privés pour index() ─────────────────────────────────────────
+
+    /**
+     * Compteurs KPI du dashboard.
+     * Cache : ['org:{id}', 'module:dashboard'] — TTL 5 min
+     */
+    private function getStats(int $orgId): array
+    {
+        return Cache::tags(["org:{$orgId}", 'module:dashboard'])
+            ->remember(
+                "stats_{$orgId}",
+                CacheService::DASHBOARD_TTL,
+                function () use ($orgId) {
+                    $week  = [now()->startOfWeek(), now()->endOfWeek()];
+                    $month = now()->startOfMonth();
+
+                    return [
+                        'events_this_week'     => Event::where('organization_id', $orgId)
+                            ->whereBetween('start_at', $week)
+                            ->count(),
+
+                        'pending_tasks'        => Task::where('organization_id', $orgId)
+                            ->whereNotIn('status', ['done', 'cancelled'])
+                            ->count(),
+
+                        'documents_this_month' => Document::where('organization_id', $orgId)
+                            ->where('created_at', '>=', $month)
+                            ->count(),
+
+                        'visitors_today'       => Visitor::where('organization_id', $orgId)
+                            ->whereDate('check_in_at', today())
+                            ->count(),
+                    ];
+                }
+            );
+    }
+
+    /**
+     * 10 prochains événements de l'agenda (triés par date de début).
+     * Cache : ['org:{id}', 'module:agenda'] — TTL 5 min
+     */
+    private function getRecentEvents(int $orgId): array
+    {
+        return Cache::tags(["org:{$orgId}", 'module:agenda'])
+            ->remember(
+                "recent_events_{$orgId}",
+                CacheService::DASHBOARD_TTL,
+                function () use ($orgId) {
+                    return Event::with(['participants:id,name,avatar'])
+                        ->where('organization_id', $orgId)
+                        ->where('start_at', '>=', now())
+                        ->orderBy('start_at')
+                        ->limit(10)
+                        ->get(['id', 'title', 'start_at', 'end_at', 'location', 'color', 'type'])
+                        ->toArray();
+                }
+            );
+    }
+
+    /**
+     * Tâches en cours assignées à l'utilisateur courant (priorité haute en tête).
+     * Cache court (1 min) car très personnalisé — pas mis en cache org-wide.
+     */
+    private function getPendingTasks(int $orgId, int $userId): array
+    {
+        return Cache::tags(["org:{$orgId}", 'module:tasks'])
+            ->remember(
+                "pending_tasks_{$orgId}_user_{$userId}",
+                60, // 1 minute — données très personnelles
+                function () use ($orgId, $userId) {
+                    return Task::with(['project:id,name', 'assignees:id,name,avatar'])
+                        ->where('organization_id', $orgId)
+                        ->whereHas('assignees', fn ($q) => $q->where('users.id', $userId))
+                        ->whereNotIn('status', ['done', 'cancelled'])
+                        ->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END")
+                        ->orderBy('due_date')
+                        ->limit(10)
+                        ->get(['id', 'title', 'status', 'priority', 'due_date', 'project_id'])
+                        ->toArray();
+                }
+            );
+    }
+
+    /**
+     * 8 documents récemment modifiés.
+     * Cache : ['org:{id}', 'module:ged'] — TTL 5 min
+     */
+    private function getRecentDocuments(int $orgId): array
+    {
+        return Cache::tags(["org:{$orgId}", 'module:ged'])
+            ->remember(
+                "recent_docs_{$orgId}",
+                CacheService::DASHBOARD_TTL,
+                function () use ($orgId) {
+                    return Document::with(['updatedBy:id,name,avatar', 'folder:id,name'])
+                        ->where('organization_id', $orgId)
+                        ->orderByDesc('updated_at')
+                        ->limit(8)
+                        ->get(['id', 'title', 'file_type', 'updated_at', 'updated_by_id', 'folder_id'])
+                        ->toArray();
+                }
+            );
+    }
 
     // =========================================================================
     // PAGE DIRIGEANT

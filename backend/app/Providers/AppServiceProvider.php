@@ -57,8 +57,13 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\WebhookEndpoint;
 
-// Observer
+// Observers
+use App\Models\Document;
 use App\Observers\CacheInvalidationObserver;
+use App\Observers\DocumentObserver;
+use App\Observers\EventObserver;
+use App\Observers\TaskObserver;
+use App\Observers\UserObserver;
 
 // Services
 use App\Services\AccountingService;
@@ -288,6 +293,14 @@ class AppServiceProvider extends ServiceProvider
         foreach ($modelsWithCacheInvalidation as $model) {
             $model::observe(CacheInvalidationObserver::class);
         }
+
+        // ── Observers granulaires par module ────────────────────────────────
+        // Ces observers complètent le CacheInvalidationObserver en ciblant
+        // précisément les tags Redis de chaque module pour limiter les cold-starts.
+        CalendarEvent::observe(EventObserver::class);
+        Task::observe(TaskObserver::class);
+        Document::observe(DocumentObserver::class);
+        User::observe(UserObserver::class);
     }
 
     // =========================================================================

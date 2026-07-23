@@ -18,6 +18,9 @@ module.exports = {
   // Réutiliser la config de base du design system
   ...baseConfig,
 
+  // Hérité de design-system mais déclaré explicitement pour garantie
+  darkMode: 'class',
+
   content: [
     './resources/**/*.{js,jsx,ts,tsx,vue,blade.php}',
     './resources/js/**/*.{js,jsx,ts,tsx}',

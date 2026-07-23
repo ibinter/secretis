@@ -52,6 +52,11 @@ class SecurityHeaders
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Générer un nonce unique par requête et le stocker dans le conteneur IoC
+        // pour usage dans les vues Blade : <script nonce="{{ app('csp-nonce') }}">
+        $nonce = base64_encode(random_bytes(16));
+        app()->instance('csp-nonce', $nonce);
+
         $response = $next($request);
 
         // Ne pas ajouter sur les réponses de téléchargement (binary)
@@ -59,12 +64,12 @@ class SecurityHeaders
             return $response;
         }
 
-        $this->addSecurityHeaders($response);
+        $this->addSecurityHeaders($response, $nonce);
 
         return $response;
     }
 
-    private function addSecurityHeaders(Response $response): void
+    private function addSecurityHeaders(Response $response, string $nonce = ''): void
     {
         // Empêche le clickjacking
         $response->headers->set('X-Frame-Options', 'DENY');
@@ -93,8 +98,8 @@ class SecurityHeaders
             );
         }
 
-        // Content Security Policy — politique stricte SECRETIS
-        $response->headers->set('Content-Security-Policy', $this->buildCsp());
+        // Content Security Policy — politique stricte SECRETIS avec nonce
+        $response->headers->set('Content-Security-Policy', $this->buildCsp($nonce));
 
         // Empêche les informations sur le serveur web
         $response->headers->remove('X-Powered-By');
@@ -107,9 +112,10 @@ class SecurityHeaders
      * Principe du moindre privilège : tout est bloqué par défaut,
      * on whiteliste uniquement ce qui est nécessaire.
      */
-    private function buildCsp(): string
+    private function buildCsp(string $nonce = ''): string
     {
-        $scriptSrc  = implode(' ', self::ALLOWED_SCRIPT_SOURCES);
+        $noncePart  = $nonce ? " 'nonce-{$nonce}'" : '';
+        $scriptSrc  = implode(' ', self::ALLOWED_SCRIPT_SOURCES) . $noncePart;
         $styleSrc   = implode(' ', self::ALLOWED_STYLE_SOURCES);
         $fontSrc    = implode(' ', self::ALLOWED_FONT_SOURCES);
         $imgSrc     = implode(' ', self::ALLOWED_IMG_SOURCES);

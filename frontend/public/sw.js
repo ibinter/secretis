@@ -1,104 +1,111 @@
 /**
- * SECRETIS ERP — Service Worker
- * Cache stratégies : Cache First / Network First / Stale While Revalidate
+ * SECRETIS ERP — Service Worker v2
+ * Stratégies de cache avancées, Background Sync unifié, Push Notifications
  */
 
-const CACHE_NAME = 'SECRETIS_CACHE_V1';
-const STATIC_CACHE = 'SECRETIS_STATIC_V1';
-const API_CACHE = 'SECRETIS_API_V1';
-const SYNC_QUEUE = 'SECRETIS_SYNC_QUEUE';
+const CACHE_VERSION  = 'secretis-v2';
+const STATIC_CACHE   = `${CACHE_VERSION}-static`;
+const DYNAMIC_CACHE  = `${CACHE_VERSION}-dynamic`;
+const API_CACHE      = `${CACHE_VERSION}-api`;
+const ALL_CACHES     = [STATIC_CACHE, DYNAMIC_CACHE, API_CACHE];
 
-// Assets statiques à pré-cacher au premier chargement
-const PRE_CACHE_ASSETS = [
+// Assets pré-cachés à l'installation (shell applicatif)
+const PRECACHE_URLS = [
   '/',
-  '/dashboard',
-  '/agenda',
-  '/courrier',
-  '/taches',
   '/offline',
   '/manifest.json',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
 ];
 
-// Extensions d'assets statiques (Cache First)
-const STATIC_EXTENSIONS = ['.js', '.css', '.woff', '.woff2', '.ttf', '.eot', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif', '.webp'];
+// Extensions considérées comme assets statiques → Cache First
+const STATIC_EXTS = new Set([
+  '.js', '.css', '.woff', '.woff2', '.ttf', '.eot',
+  '.png', '.jpg', '.jpeg', '.svg', '.ico', '.gif', '.webp', '.avif',
+]);
 
-// Préfixes des routes API (Network First)
-const API_PREFIXES = ['/api/', '/sanctum/'];
+// Routes API → Network First
+const API_PREFIXES = ['/api/', '/sanctum/', '/push/'];
 
-// ─────────────────────────────────────────────
-// INSTALL — pré-cache des assets critiques
-// ─────────────────────────────────────────────
+// Durée max du cache API (ms)
+const API_CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INSTALL — pré-cache du shell statique
+// ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installation — SECRETIS_CACHE_V1');
+  console.log('[SW v2] Installation');
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll(PRE_CACHE_ASSETS).catch((err) => {
-        console.warn('[SW] Pré-cache partiel :', err);
-      });
-    })
-  );
-  self.skipWaiting();
-});
-
-// ─────────────────────────────────────────────
-// ACTIVATE — nettoyage des anciens caches
-// ─────────────────────────────────────────────
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activation — nettoyage des anciens caches');
-  const validCaches = [CACHE_NAME, STATIC_CACHE, API_CACHE];
-  event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames
-          .filter((name) => !validCaches.includes(name))
-          .map((name) => {
-            console.log('[SW] Suppression du cache obsolète :', name);
-            return caches.delete(name);
-          })
+    caches.open(STATIC_CACHE).then((cache) =>
+      cache.addAll(PRECACHE_URLS).catch((err) =>
+        console.warn('[SW v2] Pré-cache partiel :', err)
       )
     )
   );
-  self.clients.claim();
+  // Ne pas skipWaiting ici — attendre que l'app décide via SKIP_WAITING
 });
 
-// ─────────────────────────────────────────────
-// FETCH — routage des requêtes
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTIVATE — nettoyage des anciens caches
+// ─────────────────────────────────────────────────────────────────────────────
+self.addEventListener('activate', (event) => {
+  console.log('[SW v2] Activation — nettoyage caches obsolètes');
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => !ALL_CACHES.includes(k))
+          .map((k) => {
+            console.log('[SW v2] Suppression :', k);
+            return caches.delete(k);
+          })
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FETCH — routage intelligent des requêtes
+// ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event;
+  const url = new URL(request.url);
 
-  // Ignorer les requêtes non-GET et les extensions de dev
-  if (event.request.method !== 'GET') return;
+  // Ignorer : non-GET, chrome-extension, hot-reload webpack
+  if (request.method !== 'GET') return;
   if (url.protocol === 'chrome-extension:') return;
+  if (url.pathname.includes('__webpack_hmr')) return;
+  if (url.hostname !== self.location.hostname) return;
 
-  // API → Network First
-  if (API_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))) {
-    event.respondWith(networkFirst(event.request));
+  // Routes API → Network First (données sensibles : pas de cache si auth header)
+  if (API_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+    const hasAuth = request.headers.get('Authorization');
+    event.respondWith(hasAuth ? networkOnly(request) : networkFirstWithTTL(request));
     return;
   }
 
-  // Assets statiques → Cache First
-  const ext = '.' + url.pathname.split('.').pop();
-  if (STATIC_EXTENSIONS.includes(ext)) {
-    event.respondWith(cacheFirst(event.request));
+  // Assets statiques → Cache First, mise à jour background
+  const ext = '.' + url.pathname.split('.').pop().split('?')[0];
+  if (STATIC_EXTS.has(ext)) {
+    event.respondWith(cacheFirst(request));
     return;
   }
 
-  // Pages HTML → Stale While Revalidate
-  event.respondWith(staleWhileRevalidate(event.request));
+  // Pages Inertia / HTML → Stale While Revalidate
+  event.respondWith(staleWhileRevalidate(request));
 });
 
-// ─────────────────────────────────────────────
-// Stratégie : Cache First (assets statiques)
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Stratégies
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Cache First — pour assets statiques (JS, CSS, images) */
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
   try {
-    const response = await fetch(request);
+    const response = await fetch(request.clone());
     if (response.ok) {
       const cache = await caches.open(STATIC_CACHE);
       cache.put(request, response.clone());
@@ -109,294 +116,359 @@ async function cacheFirst(request) {
   }
 }
 
-// ─────────────────────────────────────────────
-// Stratégie : Network First (API)
-// ─────────────────────────────────────────────
-async function networkFirst(request) {
+/** Network First avec TTL — pour API publiques (5 min) */
+async function networkFirstWithTTL(request) {
   try {
-    const response = await fetch(request);
+    const response = await fetchWithTimeout(request.clone(), 8000);
     if (response.ok) {
       const cache = await caches.open(API_CACHE);
-      cache.put(request, response.clone());
+      // Stocker avec timestamp dans un header custom (via Response wrapper)
+      const body   = await response.clone().text();
+      const stamped = new Response(body, {
+        status:  response.status,
+        headers: {
+          ...Object.fromEntries(response.headers.entries()),
+          'sw-cached-at': String(Date.now()),
+        },
+      });
+      cache.put(request, stamped);
+      return response;
     }
     return response;
   } catch {
     const cached = await caches.match(request);
-    if (cached) return cached;
+    if (cached) {
+      const cachedAt = Number(cached.headers.get('sw-cached-at') || 0);
+      if (Date.now() - cachedAt < API_CACHE_MAX_AGE) return cached;
+    }
     return new Response(
-      JSON.stringify({
-        error: 'offline',
-        message: 'Vous êtes hors ligne. Les données affichées sont en cache.'
-      }),
-      {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ error: 'offline', message: 'Données hors ligne. Reconnectez-vous pour actualiser.' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// Stratégie : Stale While Revalidate (pages HTML)
-// ─────────────────────────────────────────────
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
+/** Network Only — pour routes API avec authentification */
+async function networkOnly(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    return new Response(
+      JSON.stringify({ error: 'offline', message: 'Connexion requise pour cette action.' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
 
-  const fetchPromise = fetch(request)
+/** Stale While Revalidate — pour pages HTML / Inertia */
+async function staleWhileRevalidate(request) {
+  const cache       = await caches.open(DYNAMIC_CACHE);
+  const cached      = await cache.match(request);
+
+  const fetchPromise = fetchWithTimeout(request.clone(), 10000)
     .then((response) => {
       if (response.ok) cache.put(request, response.clone());
       return response;
     })
     .catch(() => null);
 
-  return cached || fetchPromise || offlineFallback(request);
+  return cached ?? (await fetchPromise) ?? offlineFallback(request);
 }
 
-// ─────────────────────────────────────────────
-// Page de fallback offline
-// ─────────────────────────────────────────────
-async function offlineFallback(request) {
-  const url = new URL(request.url);
-  const isHtml = request.headers.get('accept')?.includes('text/html');
+/** fetch avec timeout */
+async function fetchWithTimeout(request, ms) {
+  const controller = new AbortController();
+  const timer      = setTimeout(() => controller.abort(), ms);
+  try {
+    const response = await fetch(request, { signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
+/** Fallback page hors ligne */
+async function offlineFallback(request) {
+  const isHtml = request.headers.get('accept')?.includes('text/html');
   if (isHtml) {
     const cached = await caches.match('/offline');
     if (cached) return cached;
-
     return new Response(
-      `<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SECRETIS — Hors ligne</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           background: #1A3A5C; color: #fff; min-height: 100vh;
-           display: flex; align-items: center; justify-content: center; }
-    .container { text-align: center; padding: 2rem; max-width: 480px; }
-    .logo { font-size: 2rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 1.5rem; }
-    .logo span { color: #F39C12; }
-    h1 { font-size: 1.4rem; margin-bottom: 1rem; }
-    p { color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 1.5rem; }
-    .badge { display: inline-block; background: rgba(255,255,255,0.1);
-             padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; }
-    button { margin-top: 2rem; background: #F39C12; color: #fff; border: none;
-             padding: 0.75rem 2rem; border-radius: 6px; cursor: pointer;
-             font-size: 1rem; font-weight: 600; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="logo">IS <span>SECRETIS</span></div>
-    <h1>Vous êtes hors ligne</h1>
-    <p>Les données sont disponibles en cache.<br>Reconnectez-vous pour accéder aux informations en temps réel.</p>
-    <div class="badge">Mode hors ligne actif</div>
-    <br>
-    <button onclick="window.location.reload()">Réessayer la connexion</button>
-  </div>
-</body>
-</html>`,
-      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+      `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>SECRETIS — Hors ligne</title>
+      <style>body{font-family:system-ui,sans-serif;background:#1A3A5C;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0}
+      .box{text-align:center;padding:2rem;max-width:400px}.logo{font-size:1.5rem;font-weight:900;letter-spacing:2px;margin-bottom:1rem}
+      .logo span{color:#F39C12}p{color:rgba(255,255,255,.75);line-height:1.6;margin:.75rem 0}
+      button{background:#F39C12;color:#fff;border:none;padding:.75rem 1.5rem;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:600;margin-top:1rem}</style>
+      </head><body><div class="box"><div class="logo">IBIG <span>SECRETIS</span></div>
+      <p>Vous êtes hors ligne. Les données disponibles en cache restent accessibles.</p>
+      <button onclick="location.reload()">Réessayer</button></div></body></html>`,
+      { status: 200, headers: { 'Content-Type': 'text/html;charset=utf-8' } }
     );
   }
-
-  return new Response('Ressource non disponible hors ligne', { status: 503 });
+  return new Response('Ressource non disponible hors ligne.', { status: 503 });
 }
 
-// ─────────────────────────────────────────────
-// BACKGROUND SYNC — actions offline en attente
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// BACKGROUND SYNC — actions en attente (tag unifié)
+// ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync :', event.tag);
+  console.log('[SW v2] Background sync :', event.tag);
 
-  if (event.tag === 'sync-tasks') {
-    event.waitUntil(syncPendingTasks());
+  if (event.tag === 'sync-pending-actions') {
+    event.waitUntil(syncPendingActions());
   }
-
-  if (event.tag === 'sync-messages') {
-    event.waitUntil(syncPendingMessages());
-  }
+  // Rétrocompatibilité avec les anciens tags
+  if (event.tag === 'sync-tasks')    event.waitUntil(syncPendingActions('pending-tasks'));
+  if (event.tag === 'sync-messages') event.waitUntil(syncPendingActions('pending-messages'));
 });
 
-async function syncPendingTasks() {
-  try {
-    const db = await openSyncDB();
-    const pending = await db.getAll('pending-tasks');
+async function syncPendingActions(specificStore = null) {
+  const db     = await openSyncDB();
+  const stores = specificStore
+    ? [specificStore]
+    : ['pending-tasks', 'pending-messages', 'pending-forms'];
 
-    for (const task of pending) {
-      const response = await fetch('/api/taches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(task.data)
-      });
+  const results = { synced: 0, failed: 0 };
 
-      if (response.ok) {
-        await db.delete('pending-tasks', task.id);
-        notifyClients('task-synced', { id: task.id });
+  for (const store of stores) {
+    let items = [];
+    try { items = await db.getAll(store); } catch { continue; }
+
+    for (const item of items) {
+      try {
+        const response = await fetch(item.url || '/api/sync', {
+          method:  item.method || 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept':       'application/json',
+            'X-CSRF-TOKEN': item.csrf || '',
+          },
+          body: JSON.stringify(item.data),
+        });
+
+        if (response.ok) {
+          await db.delete(store, item.id);
+          results.synced++;
+          notifyClients('action-synced', { store, id: item.id });
+        } else {
+          results.failed++;
+          // Incrémenter le compteur de tentatives
+          await db.update(store, item.id, { ...item, attempts: (item.attempts || 0) + 1 });
+        }
+      } catch {
+        results.failed++;
       }
     }
-  } catch (err) {
-    console.error('[SW] Erreur sync tâches :', err);
   }
+
+  notifyClients('sync-complete', results);
+  console.log('[SW v2] Sync terminé :', results);
 }
 
-async function syncPendingMessages() {
-  try {
-    const db = await openSyncDB();
-    const pending = await db.getAll('pending-messages');
-
-    for (const msg of pending) {
-      const response = await fetch('/api/courrier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(msg.data)
-      });
-
-      if (response.ok) {
-        await db.delete('pending-messages', msg.id);
-        notifyClients('message-synced', { id: msg.id });
-      }
-    }
-  } catch (err) {
-    console.error('[SW] Erreur sync messages :', err);
-  }
-}
-
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // PUSH NOTIFICATIONS
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  let payload;
-  try {
-    payload = event.data.json();
-  } catch {
-    payload = { title: 'SECRETIS', body: event.data.text(), icon: '/icons/icon-192x192.png' };
-  }
-
-  const options = {
-    body: payload.body || '',
-    icon: payload.icon || '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
-    image: payload.image || null,
-    vibrate: [200, 100, 200],
-    tag: payload.tag || 'secretis-notification',
-    renotify: true,
-    requireInteraction: payload.requireInteraction || false,
-    data: {
-      url: payload.url || '/dashboard',
-      timestamp: Date.now()
-    },
-    actions: payload.actions || [
-      { action: 'open', title: 'Ouvrir' },
-      { action: 'dismiss', title: 'Ignorer' }
-    ]
-  };
+  let data = {};
+  try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
 
   event.waitUntil(
-    self.registration.showNotification(payload.title || 'IBIG SECRETIS', options)
+    self.registration.showNotification(data.title ?? 'IBIG SECRETIS', {
+      body:               data.body ?? '',
+      icon:               data.icon ?? '/icons/icon-192x192.png',
+      badge:              '/icons/icon-72x72.png',
+      image:              data.image ?? undefined,
+      vibrate:            [200, 100, 200],
+      tag:                data.tag ?? 'secretis-notif',
+      renotify:           true,
+      requireInteraction: data.requireInteraction ?? false,
+      silent:             data.silent ?? false,
+      data:               { url: data.url ?? '/dashboard', timestamp: Date.now(), ...data.meta },
+      actions:            data.actions ?? [
+        { action: 'open',    title: 'Ouvrir' },
+        { action: 'dismiss', title: 'Ignorer' },
+      ],
+    })
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   if (event.action === 'dismiss') return;
 
-  const targetUrl = event.notification.data?.url || '/dashboard';
+  const targetUrl = event.notification.data?.url ?? '/dashboard';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(self.registration.scope) && 'focus' in client) {
-          client.navigate(targetUrl);
-          return client.focus();
+    clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.startsWith(self.registration.scope) && 'focus' in client) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
         }
-      }
-      if (clients.openWindow) return clients.openWindow(targetUrl);
-    })
+        return clients.openWindow(targetUrl);
+      })
   );
 });
 
-// ─────────────────────────────────────────────
-// MESSAGE — communication avec l'app principale
-// ─────────────────────────────────────────────
-self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-
-  if (event.data?.type === 'QUEUE_TASK') {
-    queueOfflineAction('pending-tasks', event.data.payload);
-  }
-
-  if (event.data?.type === 'QUEUE_MESSAGE') {
-    queueOfflineAction('pending-messages', event.data.payload);
-  }
-
-  if (event.data?.type === 'GET_VERSION') {
-    event.ports[0]?.postMessage({ version: CACHE_NAME });
+self.addEventListener('notificationclose', (event) => {
+  // Télémétrie optionnelle (fire-and-forget)
+  const { url, timestamp } = event.notification.data ?? {};
+  if (url) {
+    fetch('/api/notifications/dismissed', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ url, timestamp, dismissed_at: Date.now() }),
+    }).catch(() => {});
   }
 });
 
-// ─────────────────────────────────────────────
-// Utilitaires IndexedDB simple
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// MESSAGE — communication bidirectionnelle avec l'app
+// ─────────────────────────────────────────────────────────────────────────────
+self.addEventListener('message', (event) => {
+  const { type, payload } = event.data ?? {};
+
+  switch (type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+
+    case 'QUEUE_ACTION':
+      queueOfflineAction(payload.store ?? 'pending-forms', payload);
+      break;
+
+    case 'QUEUE_TASK':
+      queueOfflineAction('pending-tasks', payload);
+      break;
+
+    case 'QUEUE_MESSAGE':
+      queueOfflineAction('pending-messages', payload);
+      break;
+
+    case 'SYNC_NOW':
+      syncPendingActions().then((r) => {
+        event.ports[0]?.postMessage({ type: 'SYNC_RESULT', payload: r });
+      });
+      break;
+
+    case 'GET_PENDING_COUNT':
+      countPendingActions().then((count) => {
+        event.ports[0]?.postMessage({ type: 'PENDING_COUNT', count });
+      });
+      break;
+
+    case 'GET_VERSION':
+      event.ports[0]?.postMessage({ version: CACHE_VERSION });
+      break;
+
+    case 'CLEAR_CACHE':
+      caches.keys().then((keys) =>
+        Promise.all(keys.map((k) => caches.delete(k)))
+      ).then(() => event.ports[0]?.postMessage({ type: 'CACHE_CLEARED' }));
+      break;
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IndexedDB — utilitaires
+// ─────────────────────────────────────────────────────────────────────────────
 function openSyncDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('secretis-sync', 1);
-    request.onupgradeneeded = (e) => {
+    const req = indexedDB.open('secretis-sync-v2', 2);
+
+    req.onupgradeneeded = (e) => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains('pending-tasks')) {
-        db.createObjectStore('pending-tasks', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains('pending-messages')) {
-        db.createObjectStore('pending-messages', { keyPath: 'id', autoIncrement: true });
+      const stores = ['pending-tasks', 'pending-messages', 'pending-forms'];
+      for (const name of stores) {
+        if (!db.objectStoreNames.contains(name)) {
+          db.createObjectStore(name, { keyPath: 'id', autoIncrement: true });
+        }
       }
     };
-    request.onsuccess = (e) => {
+
+    req.onsuccess = (e) => {
       const db = e.target.result;
-      // Wrap avec des méthodes async simples
       resolve({
         getAll: (store) => new Promise((res, rej) => {
-          const tx = db.transaction(store, 'readonly');
-          const req = tx.objectStore(store).getAll();
-          req.onsuccess = () => res(req.result);
-          req.onerror = () => rej(req.error);
+          try {
+            const tx  = db.transaction(store, 'readonly');
+            const r   = tx.objectStore(store).getAll();
+            r.onsuccess = () => res(r.result);
+            r.onerror   = () => rej(r.error);
+          } catch (err) { rej(err); }
         }),
         delete: (store, id) => new Promise((res, rej) => {
-          const tx = db.transaction(store, 'readwrite');
-          const req = tx.objectStore(store).delete(id);
-          req.onsuccess = () => res();
-          req.onerror = () => rej(req.error);
+          try {
+            const tx  = db.transaction(store, 'readwrite');
+            const r   = tx.objectStore(store).delete(id);
+            r.onsuccess = () => res();
+            r.onerror   = () => rej(r.error);
+          } catch (err) { rej(err); }
+        }),
+        update: (store, id, data) => new Promise((res, rej) => {
+          try {
+            const tx  = db.transaction(store, 'readwrite');
+            const r   = tx.objectStore(store).put({ ...data, id });
+            r.onsuccess = () => res();
+            r.onerror   = () => rej(r.error);
+          } catch (err) { rej(err); }
         }),
         add: (store, data) => new Promise((res, rej) => {
-          const tx = db.transaction(store, 'readwrite');
-          const req = tx.objectStore(store).add(data);
-          req.onsuccess = () => res(req.result);
-          req.onerror = () => rej(req.error);
-        })
+          try {
+            const tx  = db.transaction(store, 'readwrite');
+            const r   = tx.objectStore(store).add(data);
+            r.onsuccess = () => res(r.result);
+            r.onerror   = () => rej(r.error);
+          } catch (err) { rej(err); }
+        }),
+        count: (store) => new Promise((res, rej) => {
+          try {
+            const tx  = db.transaction(store, 'readonly');
+            const r   = tx.objectStore(store).count();
+            r.onsuccess = () => res(r.result);
+            r.onerror   = () => rej(r.error);
+          } catch (err) { rej(err); }
+        }),
       });
     };
-    request.onerror = () => reject(request.error);
+
+    req.onerror = () => reject(req.error);
   });
 }
 
 async function queueOfflineAction(store, payload) {
   try {
     const db = await openSyncDB();
-    await db.add(store, { data: payload, queuedAt: Date.now() });
+    await db.add(store, {
+      ...payload,
+      queuedAt: Date.now(),
+      attempts: 0,
+    });
+    notifyClients('action-queued', { store });
   } catch (err) {
-    console.error('[SW] Erreur mise en file :', err);
+    console.error('[SW v2] Erreur file d\'attente :', err);
+  }
+}
+
+async function countPendingActions() {
+  try {
+    const db = await openSyncDB();
+    const counts = await Promise.all([
+      db.count('pending-tasks'),
+      db.count('pending-messages'),
+      db.count('pending-forms'),
+    ]);
+    return counts.reduce((a, b) => a + b, 0);
+  } catch {
+    return 0;
   }
 }
 
 function notifyClients(type, data) {
-  self.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => client.postMessage({ type, data }));
-  });
+  self.clients
+    .matchAll({ includeUncontrolled: true })
+    .then((list) => list.forEach((c) => c.postMessage({ type, data })));
 }

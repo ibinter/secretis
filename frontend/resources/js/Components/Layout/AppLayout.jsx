@@ -1,5 +1,8 @@
 import React, { useState, useEffect, createContext, useContext } from 'react'
 import { Link, usePage } from '@inertiajs/react'
+import OfflineIndicator from './OfflineIndicator'
+import InstallBanner    from '@/Components/PWA/InstallBanner'
+import UpdatePrompt     from '@/Components/PWA/UpdatePrompt'
 import {
   Menu, X, Search, Bell, Sun, Moon, ChevronDown, ChevronRight,
   Briefcase, Home, Archive, Users2, DollarSign, Award, GraduationCap,
@@ -316,6 +319,9 @@ export default function AppLayout({ children, announcement, trial }) {
 
         {/* Right: header + content */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+          {/* Indicateur hors-ligne — full width, avant le header */}
+          <OfflineIndicator />
+
           <Header
             onMenuToggle={() => setMobileOpen(v => !v)}
             collapsed={collapsed}
@@ -343,6 +349,10 @@ export default function AppLayout({ children, announcement, trial }) {
         </button>
 
         <ToastContainer />
+
+        {/* PWA : bannière installation + prompt mise à jour */}
+        <InstallBanner />
+        <UpdatePrompt />
       </div>
     </ThemeCtx.Provider>
   )

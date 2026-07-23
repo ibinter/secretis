@@ -16,11 +16,13 @@
 
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\ContentLanguage;
+use App\Http\Middleware\EnforceOrganizationScope;
 use App\Http\Middleware\EnforceSsoOnly;
 use App\Http\Middleware\EnsureValidLicense;
 use App\Http\Middleware\LocalizeForRegion;
 use App\Http\Middleware\OptimizeResponse;
 use App\Http\Middleware\PreventCrossTenantAccess;
+use App\Http\Middleware\RateLimitByRole;
 use App\Http\Middleware\RequestMetrics;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
@@ -92,8 +94,15 @@ return Application::configure(basePath: dirname(__DIR__))
             // Validation de l'intégrité du tenant
             ValidateTenantIntegrity::class,
 
-            // Prévention des accès cross-tenant
+            // Prévention des accès cross-tenant (couche réseau / route binding)
             PreventCrossTenantAccess::class,
+
+            // Vérification stricte du périmètre organisation (couche applicative)
+            // — vérifie organization_id dans body/query, et sur les modèles bindés
+            EnforceOrganizationScope::class,
+
+            // Rate limiting différencié selon le rôle Spatie
+            RateLimitByRole::class,
 
             // Validation de la licence
             EnsureValidLicense::class,
@@ -123,6 +132,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Validation de licence (pour les features on-premise)
             'license' => EnsureValidLicense::class,
+
+            // Rate limiting par rôle (alias pour usage dans les routes spécifiques)
+            'rate.role' => RateLimitByRole::class,
+
+            // Scope organisation strict (alias pour routes API individuelles)
+            'org.scope' => EnforceOrganizationScope::class,
         ]);
 
         // =====================================================================
@@ -135,6 +150,8 @@ return Application::configure(basePath: dirname(__DIR__))
             ResolveTenant::class,
             ValidateTenantIntegrity::class,
             PreventCrossTenantAccess::class,
+            EnforceOrganizationScope::class,
+            RateLimitByRole::class,
             EnsureValidLicense::class,
             EnforceSsoOnly::class,
             CheckPermission::class,

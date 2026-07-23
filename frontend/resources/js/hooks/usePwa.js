@@ -1,237 +1,290 @@
+/**
+ * SECRETIS ERP — usePwa.js (v2)
+ * Hook unifié pour toutes les fonctionnalités PWA :
+ *   - Installation (beforeinstallprompt + iOS Safari)
+ *   - Mise à jour du Service Worker
+ *   - État hors-ligne / en ligne
+ *   - Compteur d'actions en attente (IndexedDB via SW)
+ *   - Permissions et abonnement push VAPID
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-/**
- * Hook usePwa — gestion complète de la PWA SECRETIS.
- * Expose : isInstalled, isPwaSupported, isOffline, promptInstall,
- *           requestPushPermission, subscribeToPush,
- *           updateAvailable, pendingSync, updateApp.
- */
+// ─── Communication avec le Service Worker ─────────────────────────────────────
+function swMessage(type, payload = {}) {
+  if (!navigator.serviceWorker?.controller) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const { port1, port2 } = new MessageChannel();
+    port1.onmessage = (e) => resolve(e.data);
+    navigator.serviceWorker.controller.postMessage({ type, payload }, [port2]);
+    setTimeout(() => resolve(null), 3000);
+  });
+}
+
+// ─── Clé VAPID Base64URL → Uint8Array ────────────────────────────────────────
+function urlBase64ToUint8Array(base64) {
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+  const b64     = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(b64);
+  const out     = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+// ─── Détecter iOS Safari (pas de beforeinstallprompt) ────────────────────────
+function detectIosSafari() {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(ua) && !window.MSStream && !ua.includes('crios');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 export function usePwa() {
-  const [offline, setOffline] = useState(!navigator.onLine);
-  const deferredPromptRef = useRef(null);
-  const [installable, setInstallable] = useState(false);
+  // ── Installation ─────────────────────────────────────────────────────────
+  const [installPrompt,  setInstallPrompt]  = useState(null);
+  const [isInstalled,    setIsInstalled]    = useState(false);
+  const [isInstallable,  setIsInstallable]  = useState(false);
+  const [isIos,          setIsIos]          = useState(false);
+
+  // ── Mise à jour SW ───────────────────────────────────────────────────────
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [pendingSync, setPendingSync] = useState(0);
-  const waitingWorkerRef = useRef(null);
+  const [registration,    setRegistration]    = useState(null);
+  const waitingWorkerRef                       = useRef(null);
 
-  // ── Écoute online / offline ──────────────────────────────────────────
+  // ── Réseau ───────────────────────────────────────────────────────────────
+  const [isOnline,         setIsOnline]        = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+
+  // ── Push ─────────────────────────────────────────────────────────────────
+  const [pushPermission, setPushPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+  );
+
+  // ── Détection installation ────────────────────────────────────────────────
   useEffect(() => {
-    const goOffline = () => setOffline(true);
-    const goOnline  = () => setOffline(false);
+    const ios        = detectIosSafari();
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || navigator.standalone === true
+      || document.referrer.startsWith('android-app://');
 
-    window.addEventListener('offline', goOffline);
-    window.addEventListener('online', goOnline);
+    setIsIos(ios);
+    setIsInstalled(standalone);
+    if (ios && !standalone) setIsInstallable(true);
 
-    return () => {
-      window.removeEventListener('offline', goOffline);
-      window.removeEventListener('online', goOnline);
-    };
-  }, []);
-
-  // ── Capturer l'événement d'installation ─────────────────────────────
-  useEffect(() => {
-    const handler = (e) => {
+    const onBeforeInstall = (e) => {
       e.preventDefault();
-      deferredPromptRef.current = e;
-      setInstallable(true);
+      setInstallPrompt(e);
+      setIsInstallable(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
+    const onAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setInstallPrompt(null);
+    };
 
-    // Signaler quand l'app est installée
-    window.addEventListener('appinstalled', () => {
-      deferredPromptRef.current = null;
-      setInstallable(false);
-    });
-
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
+    window.addEventListener('appinstalled', onAppInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+      window.removeEventListener('appinstalled', onAppInstalled);
+    };
   }, []);
 
-  // ── Détection mise à jour SW disponible ─────────────────────────────
+  // ── Service Worker : enregistrement et mises à jour ───────────────────────
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    const handleControllerChange = () => {
-      // Un nouveau SW a pris le contrôle → recharger la page
-      window.location.reload();
+    let reloading = false;
+    const onControllerChange = () => {
+      if (!reloading) { reloading = true; window.location.reload(); }
+    };
+    const onSwMessage = ({ data }) => {
+      const { type, data: payload, count } = data ?? {};
+      if (type === 'PENDING_COUNT')   setPendingSyncCount(count ?? 0);
+      if (type === 'action-queued')   refreshPendingCount();
+      if (type === 'action-synced')   refreshPendingCount();
+      if (type === 'sync-complete')   refreshPendingCount();
     };
 
-    const handleMessage = (event) => {
-      if (event.data?.type === 'SW_UPDATE_AVAILABLE') {
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+    navigator.serviceWorker.addEventListener('message', onSwMessage);
+
+    navigator.serviceWorker.ready.then((reg) => {
+      setRegistration(reg);
+
+      if (reg.waiting) {
+        waitingWorkerRef.current = reg.waiting;
         setUpdateAvailable(true);
       }
-      if (event.data?.type === 'SYNC_COUNT') {
-        setPendingSync(event.data.count ?? 0);
-      }
-    };
 
-    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-    navigator.serviceWorker.addEventListener('message', handleMessage);
-
-    // Surveiller les mises à jour SW dès qu'un registration est actif
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (!newWorker) return;
-
-        newWorker.addEventListener('statechange', () => {
-          if (
-            newWorker.state === 'installed' &&
-            navigator.serviceWorker.controller
-          ) {
-            // Un nouveau SW est installé et prêt → notifier l'utilisateur
-            waitingWorkerRef.current = newWorker;
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            waitingWorkerRef.current = nw;
             setUpdateAvailable(true);
           }
         });
       });
+
+      // Vérification périodique
+      const interval = setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
+      return () => clearInterval(interval);
     }).catch(() => {});
 
     return () => {
-      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-      navigator.serviceWorker.removeEventListener('message', handleMessage);
+      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+      navigator.serviceWorker.removeEventListener('message', onSwMessage);
     };
   }, []);
 
-  // ── isInstalled ──────────────────────────────────────────────────────
-  const isInstalled = useCallback(() => {
-    if (typeof window === 'undefined') return false;
-    return (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true ||
-      document.referrer.includes('android-app://')
-    );
+  // ── Réseau ────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const goOnline  = () => { setIsOnline(true);  refreshPendingCount(); };
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener('online',  goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online',  goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
   }, []);
 
-  // ── isPwaSupported ───────────────────────────────────────────────────
-  const isPwaSupported = useCallback(() => {
-    return (
-      'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      'Notification' in window
-    );
+  // ── Compteur actions en attente ───────────────────────────────────────────
+  const refreshPendingCount = useCallback(async () => {
+    const res = await swMessage('GET_PENDING_COUNT');
+    if (res?.count !== undefined) setPendingSyncCount(res.count);
   }, []);
 
-  // ── isOffline ────────────────────────────────────────────────────────
-  const isOffline = useCallback(() => offline, [offline]);
+  useEffect(() => { refreshPendingCount(); }, [refreshPendingCount]);
 
-  // ── promptInstall ────────────────────────────────────────────────────
-  /**
-   * Affiche la dialogue d'installation native.
-   * @returns {Promise<'accepted'|'dismissed'|'not-available'>}
-   */
-  const promptInstall = useCallback(async () => {
-    if (!deferredPromptRef.current) return 'not-available';
+  // ─────────────────────────────────────────────────────────────────────────
+  // API publique
+  // ─────────────────────────────────────────────────────────────────────────
 
-    deferredPromptRef.current.prompt();
-    const { outcome } = await deferredPromptRef.current.userChoice;
-
-    if (outcome === 'accepted') {
-      deferredPromptRef.current = null;
-      setInstallable(false);
+  /** Déclencher le prompt d'installation natif */
+  const install = useCallback(async () => {
+    if (!installPrompt) return false;
+    try {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        setIsInstallable(false);
+        setInstallPrompt(null);
+      }
+      return outcome === 'accepted';
+    } catch (err) {
+      console.error('[usePwa] install:', err);
+      return false;
     }
+  }, [installPrompt]);
 
-    return outcome;
-  }, []);
-
-  // ── updateApp ────────────────────────────────────────────────────────
-  /**
-   * Déclenche la mise à jour immédiate du service worker.
-   * Envoie SKIP_WAITING au SW en attente puis recharge la page.
-   */
+  /** Appliquer la mise à jour SW + recharger */
   const updateApp = useCallback(() => {
-    if (waitingWorkerRef.current) {
-      waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' });
-    } else if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-    } else {
-      window.location.reload();
-    }
+    const worker = waitingWorkerRef.current ?? navigator.serviceWorker?.controller;
+    if (worker) worker.postMessage({ type: 'SKIP_WAITING' });
+    else        window.location.reload();
   }, []);
 
-  // ── requestPushPermission ────────────────────────────────────────────
-  /**
-   * Demande la permission pour les notifications push.
-   * @returns {Promise<NotificationPermission>} 'granted' | 'denied' | 'default'
-   */
+  /** Demander permission push + s'abonner via VAPID */
   const requestPushPermission = useCallback(async () => {
-    if (!('Notification' in window)) return 'denied';
+    if (!('Notification' in window) || !('PushManager' in window)) return 'unsupported';
 
-    if (Notification.permission === 'granted') return 'granted';
-
-    const permission = await Notification.requestPermission();
-    return permission;
-  }, []);
-
-  // ── subscribeToPush ──────────────────────────────────────────────────
-  /**
-   * Abonne l'utilisateur aux notifications push via VAPID.
-   * @param {string} vapidPublicKey — clé VAPID base64 URL-safe
-   * @returns {Promise<PushSubscription|null>}
-   */
-  const subscribeToPush = useCallback(async (vapidPublicKey) => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.warn('[usePwa] Push non supporté sur ce navigateur');
-      return null;
-    }
-
-    const permission = await requestPushPermission();
-    if (permission !== 'granted') {
-      console.warn('[usePwa] Permission push refusée');
-      return null;
-    }
+    const perm = await Notification.requestPermission();
+    setPushPermission(perm);
+    if (perm !== 'granted') return perm;
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const reg      = await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      if (existing) return 'granted';
 
-      // Vérifier si déjà abonné
-      const existing = await registration.pushManager.getSubscription();
-      if (existing) return existing;
+      const vapidRes = await fetch('/push/vapid-key', { headers: { Accept: 'application/json' } });
+      const vapid    = await vapidRes.json();
+      if (!vapid?.public_key) throw new Error('VAPID key missing');
 
-      // Convertir la clé VAPID en Uint8Array
-      const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly:      true,
+        applicationServerKey: urlBase64ToUint8Array(vapid.public_key),
       });
 
-      return subscription;
-    } catch (err) {
-      console.error('[usePwa] Erreur abonnement push :', err);
-      return null;
-    }
-  }, [requestPushPermission]);
+      const subJson = sub.toJSON();
+      await fetch('/push/subscribe', {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+          Accept:         'application/json',
+        },
+        body: JSON.stringify({
+          endpoint: subJson.endpoint,
+          keys:     { p256dh: subJson.keys.p256dh, auth: subJson.keys.auth },
+        }),
+      });
 
-  // ── Utilitaire VAPID ─────────────────────────────────────────────────
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-  }
+      return 'granted';
+    } catch (err) {
+      console.error('[usePwa] push subscribe:', err);
+      return 'error';
+    }
+  }, []);
+
+  /** Déclencher une synchronisation manuelle */
+  const syncNow = useCallback(async () => {
+    if (!isOnline) return { offline: true };
+    if (registration?.sync) {
+      try {
+        await registration.sync.register('sync-pending-actions');
+        setTimeout(refreshPendingCount, 2000);
+        return { queued: true };
+      } catch { /* fallback */ }
+    }
+    const result = await swMessage('SYNC_NOW');
+    await refreshPendingCount();
+    return result ?? {};
+  }, [isOnline, registration, refreshPendingCount]);
+
+  /** Mettre en file d'attente une action offline */
+  const queueAction = useCallback(async (store, data) => {
+    await swMessage('QUEUE_ACTION', { store, ...data });
+    await refreshPendingCount();
+  }, [refreshPendingCount]);
 
   return {
-    /** true si l'app tourne en mode installé (standalone) */
+    // Installation
     isInstalled,
-    /** true si le navigateur supporte les PWA (SW + Push + Notification) */
-    isPwaSupported,
-    /** true si la connexion réseau est absente */
-    isOffline,
-    /** true si le prompt d'installation est disponible */
-    installable,
-    /** true si une mise à jour du SW est prête à être appliquée */
+    isInstallable,
+    isIos,
+    install,
+
+    // Mise à jour
     updateAvailable,
-    /** Nombre de requêtes en attente de synchronisation (mode offline) */
-    pendingSync,
-    /** Déclenche le prompt natif d'installation → Promise<'accepted'|'dismissed'|'not-available'> */
-    promptInstall,
-    /** Active le nouveau service worker et recharge la page */
+    registration,
     updateApp,
-    /** Demande la permission de notifications → Promise<NotificationPermission> */
+
+    // Réseau
+    isOnline,
+    pendingSyncCount,
+    syncNow,
+    queueAction,
+    refreshPendingCount,
+
+    // Push
+    pushPermission,
     requestPushPermission,
-    /** Abonne aux push VAPID → Promise<PushSubscription|null> */
-    subscribeToPush
+
+    // Compatibilité ancienne API
+    installable:    isInstallable,
+    promptInstall:  install,
+    isOffline:      !isOnline,
+    pendingSync:    pendingSyncCount,
+    isInstalled,
+    isPwaSupported: 'serviceWorker' in navigator && 'PushManager' in window,
   };
 }
 
