@@ -16,7 +16,7 @@ function InviteRow({ inv, index, onChange, onRemove }) {
           value={inv.email}
           onChange={e => onChange(index, 'email', e.target.value)}
           placeholder="prenom.nom@organisation.com"
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-400 transition-colors"
+          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-400 transition-colors"
         />
         <div className="flex gap-1 flex-wrap">
           {ROLES.map(r => (
@@ -27,7 +27,7 @@ function InviteRow({ inv, index, onChange, onRemove }) {
               title={r.desc}
               className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all
                 ${inv.role === r.value
-                  ? 'bg-blue-600 border-blue-500 text-white'
+                  ? 'bg-purple-600 border-purple-500 text-white'
                   : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/30'}`}
             >
               {r.label}
@@ -132,7 +132,7 @@ export default function InviteUsers({ step, onComplete, onSkip, saving }) {
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
         >
           {saving ? '⏳ Envoi...' : '✉️ Envoyer les invitations →'}
         </button>
@@ -145,3 +145,4 @@ export default function InviteUsers({ step, onComplete, onSkip, saving }) {
     </form>
   );
 }
+export { InviteUsers };

@@ -127,14 +127,14 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                             <button
                                 onClick={() => step > n && setStep(n)}
                                 className={`w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center transition-colors
-                                    ${step === n ? 'bg-blue-600 text-white' :
+                                    ${step === n ? 'bg-purple-600 text-white' :
                                       step > n  ? 'bg-green-500 text-white cursor-pointer' :
                                       'bg-gray-100 text-gray-400 cursor-default'}`}
                             >
                                 {step > n ? '✓' : n}
                             </button>
                             <span className={`text-sm font-medium hidden sm:block
-                                ${step === n ? 'text-blue-600' : step > n ? 'text-green-600' : 'text-gray-400'}`}>
+                                ${step === n ? 'text-purple-600' : step > n ? 'text-green-600' : 'text-gray-400'}`}>
                                 {label}
                             </span>
                             {n < 3 && <div className="w-8 h-px bg-gray-200 hidden sm:block" />}
@@ -153,7 +153,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                             {/* Sélection du document */}
                             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                                 <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <DocumentIcon className="w-5 h-5 text-blue-500" />
+                                    <DocumentIcon className="w-5 h-5 text-purple-500" />
                                     Document à signer
                                 </h2>
 
@@ -171,8 +171,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                                 }}
                                                 className={`text-left p-3 rounded-xl border-2 transition-all
                                                     ${data.document_id === doc.id
-                                                        ? 'border-blue-500 bg-blue-50'
-                                                        : 'border-gray-100 hover:border-blue-200 bg-gray-50'
+                                                        ? 'border-purple-500 bg-purple-50'
+                                                        : 'border-gray-100 hover:border-purple-200 bg-gray-50'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2">
@@ -201,8 +201,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         onChange={e => setData('title', e.target.value)}
                                         placeholder="Ex : Contrat de prestation — Société ACME"
                                         maxLength={255}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                   focus:ring-2 focus:ring-blue-100 outline-none text-sm transition-colors"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                   focus:ring-2 focus:ring-purple-100 outline-none text-sm transition-colors"
                                     />
                                     {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
                                 </div>
@@ -218,8 +218,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         rows={3}
                                         placeholder="Instructions ou contexte pour les signataires..."
                                         maxLength={2000}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                   focus:ring-2 focus:ring-blue-100 outline-none text-sm resize-none transition-colors"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                   focus:ring-2 focus:ring-purple-100 outline-none text-sm resize-none transition-colors"
                                     />
                                 </div>
 
@@ -232,8 +232,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         <select
                                             value={data.signing_order}
                                             onChange={e => setData('signing_order', e.target.value)}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                       focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                       focus:ring-2 focus:ring-purple-100 outline-none text-sm"
                                         >
                                             <option value="parallel">Parallèle — tous signent en même temps</option>
                                             <option value="sequential">Séquentiel — dans l'ordre défini</option>
@@ -251,8 +251,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                             value={data.expires_at}
                                             onChange={e => setData('expires_at', e.target.value)}
                                             min={new Date().toISOString().slice(0, 16)}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                       focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                       focus:ring-2 focus:ring-purple-100 outline-none text-sm"
                                         />
                                     </div>
                                 </div>
@@ -263,8 +263,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                     type="button"
                                     disabled={!step1Valid}
                                     onClick={() => setStep(2)}
-                                    className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm
-                                               hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-6 py-2.5 bg-purple-600 text-white rounded-xl font-medium text-sm
+                                               hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Suivant : Signataires →
                                 </button>
@@ -281,7 +281,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                             {/* Signataires internes */}
                             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                                 <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                    <UserPlusIcon className="w-5 h-5 text-blue-500" />
+                                    <UserPlusIcon className="w-5 h-5 text-purple-500" />
                                     Signataires internes (annuaire)
                                 </h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1">
@@ -296,11 +296,11 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                                 className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all text-sm
                                                     ${added
                                                         ? 'border-green-200 bg-green-50 text-green-700 cursor-default'
-                                                        : 'border-gray-100 hover:border-blue-200 bg-gray-50 text-gray-700'
+                                                        : 'border-gray-100 hover:border-purple-200 bg-gray-50 text-gray-700'
                                                     }`}
                                             >
                                                 <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
-                                                    ${added ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-700'}`}>
+                                                    ${added ? 'bg-green-500 text-white' : 'bg-purple-100 text-purple-700'}`}>
                                                     {added ? '✓' : user.name?.[0]?.toUpperCase()}
                                                 </span>
                                                 <div className="min-w-0">
@@ -322,16 +322,16 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         value={externalSigner.name}
                                         onChange={e => setExternalSigner(prev => ({ ...prev, name: e.target.value }))}
                                         placeholder="Nom complet"
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                   focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                   focus:ring-2 focus:ring-purple-100 outline-none text-sm"
                                     />
                                     <input
                                         type="email"
                                         value={externalSigner.email}
                                         onChange={e => setExternalSigner(prev => ({ ...prev, email: e.target.value }))}
                                         placeholder="Email"
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-400
-                                                   focus:ring-2 focus:ring-blue-100 outline-none text-sm"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 focus:border-purple-400
+                                                   focus:ring-2 focus:ring-purple-100 outline-none text-sm"
                                     />
                                     <button
                                         type="button"
@@ -352,7 +352,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         <ArrowsUpDownIcon className="w-5 h-5 text-gray-400" />
                                         Ordre de signature
                                         {data.signing_order === 'sequential' && (
-                                            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
                                                 Séquentiel — glissez pour réordonner
                                             </span>
                                         )}
@@ -363,7 +363,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                                 key={`${signer.email}-${i}`}
                                                 className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
                                             >
-                                                <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold
+                                                <span className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs font-bold
                                                                  flex items-center justify-center flex-shrink-0">
                                                     {signer.order}
                                                 </span>
@@ -374,11 +374,11 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                                 {data.signing_order === 'sequential' && (
                                                     <div className="flex flex-col gap-0.5">
                                                         <button type="button" onClick={() => moveSigner(i, -1)} disabled={i === 0}
-                                                            className="p-0.5 text-gray-400 hover:text-blue-600 disabled:opacity-30">
+                                                            className="p-0.5 text-gray-400 hover:text-purple-600 disabled:opacity-30">
                                                             <ChevronUpIcon className="w-3.5 h-3.5" />
                                                         </button>
                                                         <button type="button" onClick={() => moveSigner(i, 1)} disabled={i === data.signers.length - 1}
-                                                            className="p-0.5 text-gray-400 hover:text-blue-600 disabled:opacity-30">
+                                                            className="p-0.5 text-gray-400 hover:text-purple-600 disabled:opacity-30">
                                                             <ChevronDownIcon className="w-3.5 h-3.5" />
                                                         </button>
                                                     </div>
@@ -401,8 +401,8 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                     ← Retour
                                 </button>
                                 <button type="button" disabled={!step2Valid} onClick={() => setStep(3)}
-                                    className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium text-sm
-                                               hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                                    className="px-6 py-2.5 bg-purple-600 text-white rounded-xl font-medium text-sm
+                                               hover:bg-purple-700 disabled:opacity-50 transition-colors">
                                     Suivant : Confirmer →
                                 </button>
                             </div>
@@ -441,7 +441,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                 </div>
 
                                 {data.message && (
-                                    <div className="bg-blue-50 rounded-xl p-3 text-sm text-blue-800 border border-blue-100">
+                                    <div className="bg-purple-50 rounded-xl p-3 text-sm text-purple-800 border border-purple-100">
                                         {data.message}
                                     </div>
                                 )}
@@ -454,7 +454,7 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
                                         {data.signers.map((s, i) => (
                                             <span key={i}
                                                 className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                                                <span className="w-4 h-4 bg-blue-600 text-white rounded-full text-xs flex items-center justify-center font-bold">
+                                                <span className="w-4 h-4 bg-purple-600 text-white rounded-full text-xs flex items-center justify-center font-bold">
                                                     {s.order}
                                                 </span>
                                                 {s.name}
@@ -495,3 +495,4 @@ export default function SignatureRequestForm({ documents = [], users = [] }) {
         </AppLayout>
     );
 }
+export { SignatureRequestForm };

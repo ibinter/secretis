@@ -37,7 +37,7 @@ function TrendBadge({ trend }) {
 
 function StatCard({ label, value, sub, color = 'blue' }) {
     const colors = {
-        blue:  'border-blue-200 bg-blue-50 text-blue-700',
+        blue:  'border-purple-200 bg-purple-50 text-purple-700',
         green: 'border-green-200 bg-green-50 text-green-700',
         amber: 'border-amber-200 bg-amber-50 text-amber-700',
         red:   'border-red-200 bg-red-50 text-red-700',
@@ -93,7 +93,7 @@ export default function SupplierScorecard({
                     <div className="flex items-start justify-between gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                                <a href="/procurement/suppliers" className="text-blue-600 text-sm hover:underline">← Base fournisseurs</a>
+                                <a href="/procurement/suppliers" className="text-purple-600 text-sm hover:underline">← Base fournisseurs</a>
                                 <span className="text-gray-300">/</span>
                                 <span className="text-sm text-gray-500">{supplier?.supplier_number}</span>
                             </div>
@@ -112,7 +112,7 @@ export default function SupplierScorecard({
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-3xl font-black text-blue-600">{averages?.overall?.toFixed(1)}</p>
+                            <p className="text-3xl font-black text-purple-600">{averages?.overall?.toFixed(1)}</p>
                             <p className="text-xs text-gray-400">Score moyen / 5</p>
                         </div>
                     </div>
@@ -177,11 +177,11 @@ export default function SupplierScorecard({
                                         <span className="text-sm w-28 text-gray-600">{c.icon} {c.label}</span>
                                         <div className="flex-1 bg-gray-100 rounded-full h-2">
                                             <div
-                                                className="h-2 rounded-full bg-blue-500 transition-all"
+                                                className="h-2 rounded-full bg-purple-500 transition-all"
                                                 style={{ width: `${(val / 5) * 100}%` }}
                                             />
                                         </div>
-                                        <span className="text-sm font-bold text-blue-600 w-8 text-right">
+                                        <span className="text-sm font-bold text-purple-600 w-8 text-right">
                                             {val?.toFixed(1)}
                                         </span>
                                     </div>
@@ -267,7 +267,7 @@ export default function SupplierScorecard({
                                         <td className="py-3 px-4 text-center">
                                             <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold ${
                                                 parseFloat(e.overall_score) >= 4 ? 'bg-green-100 text-green-700' :
-                                                parseFloat(e.overall_score) >= 3 ? 'bg-blue-100 text-blue-700' :
+                                                parseFloat(e.overall_score) >= 3 ? 'bg-purple-100 text-purple-700' :
                                                                                    'bg-red-100 text-red-600'
                                             }`}>
                                                 {parseFloat(e.overall_score).toFixed(1)}/5
@@ -290,3 +290,4 @@ export default function SupplierScorecard({
         </AuthenticatedLayout>
     );
 }
+export { SupplierScorecard };

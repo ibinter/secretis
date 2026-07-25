@@ -162,7 +162,7 @@ export default function HelpArticle() {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-16 flex justify-center">
-        <svg className="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10"
             stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
@@ -175,7 +175,7 @@ export default function HelpArticle() {
     return (
       <div className="max-w-5xl mx-auto px-4 py-16 text-center">
         <p className="text-gray-500 mb-4">{error ?? 'Article introuvable.'}</p>
-        <Link to="/help" className="text-blue-600 hover:underline">
+        <Link to="/help" className="text-purple-600 hover:underline">
           Retour au Centre d'aide
         </Link>
       </div>
@@ -190,11 +190,11 @@ export default function HelpArticle() {
       {/* Fil d'Ariane */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-1.5 text-sm text-gray-500">
-          <Link to="/help" className="hover:text-blue-600">Centre d'aide</Link>
+          <Link to="/help" className="hover:text-purple-600">Centre d'aide</Link>
           <Icon.ChevronRight />
           {article.category && (
             <>
-              <Link to={`/help/categories/${article.category}`} className="hover:text-blue-600">
+              <Link to={`/help/categories/${article.category}`} className="hover:text-purple-600">
                 {article.category}
               </Link>
               <Icon.ChevronRight />
@@ -214,7 +214,7 @@ export default function HelpArticle() {
               {/* Badges */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {article.module && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
                     Module : {article.module}
                   </span>
                 )}
@@ -249,7 +249,7 @@ export default function HelpArticle() {
               className="bg-white rounded-xl border border-gray-200 p-8 mb-6
                          prose prose-blue max-w-none
                          prose-headings:scroll-mt-20
-                         prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                         prose-a:text-purple-600 prose-a:no-underline hover:prose-a:underline
                          prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded
                          prose-pre:bg-gray-900 prose-pre:text-gray-100"
               dangerouslySetInnerHTML={{ __html: content }}
@@ -330,9 +330,9 @@ export default function HelpArticle() {
                       key={rel.slug}
                       to={`/help/articles/${rel.slug}`}
                       className="flex items-center gap-3 p-4 bg-white border border-gray-200
-                                 rounded-lg hover:shadow-sm hover:border-blue-300 transition-all group"
+                                 rounded-lg hover:shadow-sm hover:border-purple-300 transition-all group"
                     >
-                      <span className="flex-1 text-sm text-gray-700 group-hover:text-blue-700">
+                      <span className="flex-1 text-sm text-gray-700 group-hover:text-purple-700">
                         {rel.title?.fr ?? rel.title}
                       </span>
                       <Icon.ChevronRight />
@@ -359,7 +359,7 @@ export default function HelpArticle() {
                       className={`block text-xs py-1 transition-colors truncate
                                   ${level === 'H3' ? 'pl-3' : ''}
                                   ${activeSection === id
-                                    ? 'text-blue-600 font-medium'
+                                    ? 'text-purple-600 font-medium'
                                     : 'text-gray-500 hover:text-gray-900'}`}
                     >
                       {text}
@@ -374,3 +374,4 @@ export default function HelpArticle() {
     </div>
   );
 }
+export { HelpArticle };

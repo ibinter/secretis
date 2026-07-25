@@ -43,7 +43,7 @@ const CONTRACT_LABELS = {
 };
 
 const CONTRACT_COLORS = {
-  cdi:        'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  cdi:        'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   cdd:        'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
   internship: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   freelance:  'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
@@ -64,7 +64,7 @@ function Avatar({ name, avatar, size = 'md' }) {
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-lg' : 'w-10 h-10 text-sm';
   const initials  = name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '?';
 
-  const colors = ['bg-blue-500','bg-purple-500','bg-green-500','bg-orange-500','bg-pink-500','bg-teal-500'];
+  const colors = ['bg-purple-500','bg-purple-500','bg-green-500','bg-orange-500','bg-pink-500','bg-teal-500'];
   const color  = colors[name?.charCodeAt(0) % colors.length] || 'bg-gray-500';
 
   if (avatar) {
@@ -93,7 +93,7 @@ function EmployeeCard({ employee }) {
   const contract = CONTRACT_LABELS[employee.contract_type] || 'N/A';
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all group">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md hover:border-purple-300 dark:hover:border-purple-600 transition-all group">
       <div className="flex items-start gap-4">
         <Avatar name={`${employee.first_name} ${employee.last_name}`} avatar={employee.avatar} size="lg" />
         <div className="min-w-0 flex-1">
@@ -105,7 +105,7 @@ function EmployeeCard({ employee }) {
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{employee.position}</p>
           {employee.department && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1">
               <Building2 className="w-3 h-3" />
               {employee.department.name}
             </p>
@@ -121,7 +121,7 @@ function EmployeeCard({ employee }) {
       <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
         <Link
           href={route('rh.employes.show', employee.id)}
-          className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
         >
           <Eye className="w-3.5 h-3.5" /> Voir fiche
         </Link>
@@ -187,7 +187,7 @@ function EmployeeRow({ employee }) {
       <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{hireDate}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <Link href={route('rh.employes.show', employee.id)} className="text-blue-600 dark:text-blue-400 hover:underline text-xs">
+          <Link href={route('rh.employes.show', employee.id)} className="text-purple-600 dark:text-purple-400 hover:underline text-xs">
             Voir
           </Link>
           <Link href={route('rh.employes.show', employee.id) + '?edit=1'} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs">
@@ -267,7 +267,7 @@ function ImportModal({ onClose }) {
           {/* Zone upload */}
           <div
             onClick={() => fileRef.current?.click()}
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center cursor-pointer hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
           >
             <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -280,7 +280,7 @@ function ImportModal({ onClose }) {
           {/* Prévisualisation */}
           {loading && (
             <div className="flex items-center justify-center py-4">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
             </div>
           )}
 
@@ -328,7 +328,7 @@ function ImportModal({ onClose }) {
             <button
               onClick={handleConfirm}
               disabled={loading}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
             >
               {loading ? 'Import en cours…' : `Importer ${preview.count} employés`}
             </button>
@@ -363,7 +363,7 @@ function Pagination({ data }) {
             preserveScroll
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               link.active
-                ? 'bg-blue-600 text-white'
+                ? 'bg-purple-600 text-white'
                 : link.url
                   ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                   : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
@@ -457,7 +457,7 @@ export default function EmployeesIndex({ employees, departments, filters }) {
             </button>
             <Link
               href={route('rh.employes.store')}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
             >
               <PlusCircle className="w-4 h-4" />
               Nouvel employé
@@ -476,7 +476,7 @@ export default function EmployeesIndex({ employees, departments, filters }) {
                 placeholder="Rechercher un employé…"
                 defaultValue={filters.search || ''}
                 onChange={handleSearch}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
               />
             </div>
 
@@ -484,7 +484,7 @@ export default function EmployeesIndex({ employees, departments, filters }) {
             <select
               defaultValue={filters.department || ''}
               onChange={handleDept}
-              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500 outline-none"
             >
               <option value="">Tous les départements</option>
               {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -494,7 +494,7 @@ export default function EmployeesIndex({ employees, departments, filters }) {
             <select
               defaultValue={filters.contract || ''}
               onChange={handleContract}
-              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500 outline-none"
             >
               <option value="">Tous les contrats</option>
               {Object.entries(CONTRACT_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -504,7 +504,7 @@ export default function EmployeesIndex({ employees, departments, filters }) {
             <select
               defaultValue={filters.status || ''}
               onChange={handleStatus}
-              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="py-2 px-3 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500 outline-none"
             >
               <option value="">Tous les statuts</option>
               {Object.entries(STATUS_CONFIG).map(([v, c]) => <option key={v} value={v}>{c.label}</option>)}
@@ -514,13 +514,13 @@ export default function EmployeesIndex({ employees, departments, filters }) {
             <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1 ml-auto">
               <button
                 onClick={() => switchView('cards')}
-                className={`p-1.5 rounded-md transition-colors ${view === 'cards' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                className={`p-1.5 rounded-md transition-colors ${view === 'cards' ? 'bg-white dark:bg-gray-600 shadow-sm text-purple-600 dark:text-purple-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => switchView('list')}
-                className={`p-1.5 rounded-md transition-colors ${view === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
+                className={`p-1.5 rounded-md transition-colors ${view === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-purple-600 dark:text-purple-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -590,3 +590,4 @@ EmployeesIndex.propTypes = {
   departments: PropTypes.array.isRequired,
   filters:     PropTypes.object.isRequired,
 };
+export { EmployeesIndex };

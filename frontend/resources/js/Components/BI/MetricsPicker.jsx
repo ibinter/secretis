@@ -134,7 +134,7 @@ export default function MetricsPicker({ onDragStart, onMetricClick, className = 
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Rechercher…"
-                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400"
                     />
                 </div>
             </div>
@@ -169,10 +169,10 @@ export default function MetricsPicker({ onDragStart, onMetricClick, className = 
                                     onDragStart?.({ module, metric });
                                 }}
                                 onClick={() => onMetricClick?.({ module, metric })}
-                                className="flex items-center gap-2 mx-2 mb-0.5 px-2 py-1.5 rounded-lg cursor-grab hover:bg-blue-50 group active:cursor-grabbing"
+                                className="flex items-center gap-2 mx-2 mb-0.5 px-2 py-1.5 rounded-lg cursor-grab hover:bg-purple-50 group active:cursor-grabbing"
                             >
                                 {/* Indicateur de type */}
-                                <span className="text-xs px-1.5 py-0.5 rounded font-mono bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-700 shrink-0">
+                                <span className="text-xs px-1.5 py-0.5 rounded font-mono bg-slate-100 text-slate-500 group-hover:bg-purple-100 group-hover:text-purple-700 shrink-0">
                                     {metric.type}
                                 </span>
                                 <span className="text-xs text-slate-600 group-hover:text-slate-900 flex-1 truncate">
@@ -198,3 +198,4 @@ export default function MetricsPicker({ onDragStart, onMetricClick, className = 
 }
 
 export { METRICS_CATALOG };
+export { MetricsPicker };

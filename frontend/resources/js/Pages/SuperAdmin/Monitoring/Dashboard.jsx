@@ -74,7 +74,7 @@ function ServiceCard({ serviceKey, data }) {
 }
 
 function MetricCard({ label, value, unit = '', icon: Icon, warn = false, danger = false }) {
-  const color = danger ? 'text-red-500' : warn ? 'text-orange-500' : 'text-[#1A3A5C] dark:text-blue-300'
+  const color = danger ? 'text-red-500' : warn ? 'text-orange-500' : 'text-[#9333EA] dark:text-purple-300'
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -221,7 +221,7 @@ export default function MonitoringDashboard({
           <button
             onClick={fetchHealth}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 text-sm rounded-xl bg-[#1A3A5C] text-white hover:bg-[#162f4a] disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-xl bg-[#9333EA] text-white hover:bg-[#162f4a] disabled:opacity-50 transition"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             Actualiser
@@ -293,7 +293,7 @@ export default function MonitoringDashboard({
           {/* ── Tâches CRON ─────────────────────────────────────────────────── */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
             <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-              <Calendar size={16} className="text-[#1A3A5C] dark:text-blue-400" />
+              <Calendar size={16} className="text-[#9333EA] dark:text-purple-400" />
               <h2 className="font-semibold text-gray-800 dark:text-white text-sm">Tâches planifiées</h2>
             </div>
             <div className="px-5 py-1">
@@ -311,7 +311,7 @@ export default function MonitoringDashboard({
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Save size={16} className="text-[#1A3A5C] dark:text-blue-400" />
+              <Save size={16} className="text-[#9333EA] dark:text-purple-400" />
               <h2 className="font-semibold text-gray-800 dark:text-white text-sm">Sauvegardes</h2>
             </div>
             <button
@@ -340,3 +340,4 @@ export default function MonitoringDashboard({
     </>
   )
 }
+export { MonitoringDashboard };

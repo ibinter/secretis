@@ -96,7 +96,7 @@ function DeliveryRow({ delivery }) {
                     <button
                         type="button"
                         onClick={() => setShowPayload(!showPayload)}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
                     >
                         {showPayload ? 'Masquer' : 'Payload'}
                     </button>
@@ -176,7 +176,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                             value={data.url}
                             onChange={e => setData('url', e.target.value)}
                             placeholder="https://hooks.zapier.com/hooks/catch/..."
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             required
                         />
                         {errors.url && <p className="text-xs text-red-600 dark:text-red-400">{errors.url}</p>}
@@ -191,7 +191,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                                 type="text"
                                 value={data.secret}
                                 onChange={e => setData('secret', e.target.value)}
-                                className="flex-1 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="flex-1 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 font-mono focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                             <button
                                 type="button"
@@ -214,7 +214,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                             value={data.description}
                             onChange={e => setData('description', e.target.value)}
                             placeholder="Ex: Zapier — Création de tâche ClickUp"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         />
                     </div>
 
@@ -242,7 +242,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                                                 checked={allSelected}
                                                 onChange={() => toggleGroup(group)}
                                                 onClick={e => e.stopPropagation()}
-                                                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                                                className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
                                             />
                                         </div>
                                         <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -256,7 +256,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                                                         type="checkbox"
                                                         checked={data.events.includes(ev.id)}
                                                         onChange={() => toggleEvent(ev.id)}
-                                                        className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                                                        className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500"
                                                     />
                                                 </label>
                                             ))}
@@ -276,7 +276,7 @@ function EndpointModal({ onClose, onSave, endpoint = null }) {
                         <button
                             type="submit"
                             disabled={processing || data.events.length === 0 || !data.url}
-                            className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {processing && (
                                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -343,7 +343,7 @@ export default function Webhooks({ endpoints = [], recentDeliveries = [], flash 
                     <button
                         type="button"
                         onClick={() => { setEditEndpoint(null); setShowModal(true); }}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -360,11 +360,11 @@ export default function Webhooks({ endpoints = [], recentDeliveries = [], flash 
                 )}
 
                 {/* Info box */}
-                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
                     <div className="flex items-start gap-3">
                         <span className="text-xl">ℹ️</span>
-                        <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                            <p><strong>Sécurité :</strong> Chaque requête inclut un header <code className="font-mono bg-blue-100 dark:bg-blue-800 px-1 rounded">X-Secretis-Signature: sha256=&lt;hmac&gt;</code> pour vérifier l'authenticité.</p>
+                        <div className="text-xs text-purple-700 dark:text-purple-300 space-y-1">
+                            <p><strong>Sécurité :</strong> Chaque requête inclut un header <code className="font-mono bg-purple-100 dark:bg-purple-800 px-1 rounded">X-Secretis-Signature: sha256=&lt;hmac&gt;</code> pour vérifier l'authenticité.</p>
                             <p><strong>Retry :</strong> En cas d'échec (non-2xx ou timeout), les livraisons sont retentées automatiquement : 1min → 5min → 30min → 2h → 24h (max 5 tentatives).</p>
                             <p><strong>Désactivation auto :</strong> Un endpoint est désactivé automatiquement après 10 échecs consécutifs.</p>
                         </div>
@@ -499,7 +499,7 @@ export default function Webhooks({ endpoints = [], recentDeliveries = [], flash 
                                     <button
                                         type="button"
                                         onClick={() => setSelectedEndpoint(null)}
-                                        className="ml-3 text-xs text-blue-600 dark:text-blue-400 font-normal hover:underline"
+                                        className="ml-3 text-xs text-purple-600 dark:text-purple-400 font-normal hover:underline"
                                     >
                                         Afficher tout
                                     </button>
@@ -543,3 +543,4 @@ export default function Webhooks({ endpoints = [], recentDeliveries = [], flash 
         </AppLayout>
     );
 }
+export { Webhooks };

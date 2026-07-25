@@ -38,8 +38,8 @@ const TAB_FILTERS = [
 const TYPE_CONFIG = {
   event:                { icon: Calendar,      bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' },
   event_created:        { icon: Calendar,      bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' },
-  meeting:              { icon: Calendar,      bg: 'bg-blue-100 dark:bg-blue-900/30',   fg: 'text-blue-600 dark:text-blue-400' },
-  meeting_reminder:     { icon: Calendar,      bg: 'bg-blue-100 dark:bg-blue-900/30',   fg: 'text-blue-600 dark:text-blue-400' },
+  meeting:              { icon: Calendar,      bg: 'bg-purple-100 dark:bg-purple-900/30',   fg: 'text-purple-600 dark:text-purple-400' },
+  meeting_reminder:     { icon: Calendar,      bg: 'bg-purple-100 dark:bg-purple-900/30',   fg: 'text-purple-600 dark:text-purple-400' },
   task_assigned:        { icon: CheckSquare,   bg: 'bg-orange-100 dark:bg-orange-900/30', fg: 'text-orange-600 dark:text-orange-400' },
   task_overdue:         { icon: AlertTriangle, bg: 'bg-red-100 dark:bg-red-900/30',     fg: 'text-red-600 dark:text-red-400' },
   task_comment:         { icon: MessageSquare, bg: 'bg-indigo-100 dark:bg-indigo-900/30', fg: 'text-indigo-600 dark:text-indigo-400' },
@@ -48,11 +48,11 @@ const TYPE_CONFIG = {
   document_validation:  { icon: FileText,      bg: 'bg-yellow-100 dark:bg-yellow-900/30', fg: 'text-yellow-600 dark:text-yellow-400' },
   document_approved:    { icon: FileText,      bg: 'bg-green-100 dark:bg-green-900/30', fg: 'text-green-600 dark:text-green-400' },
   document_rejected:    { icon: FileText,      bg: 'bg-red-100 dark:bg-red-900/30',     fg: 'text-red-600 dark:text-red-400' },
-  mail_received:        { icon: FileText,      bg: 'bg-blue-100 dark:bg-blue-900/30',   fg: 'text-blue-600 dark:text-blue-400' },
+  mail_received:        { icon: FileText,      bg: 'bg-purple-100 dark:bg-purple-900/30',   fg: 'text-purple-600 dark:text-purple-400' },
   mail_urgent:          { icon: AlertTriangle, bg: 'bg-red-100 dark:bg-red-900/30',     fg: 'text-red-600 dark:text-red-400' },
   security:             { icon: AlertTriangle, bg: 'bg-red-100 dark:bg-red-900/30',     fg: 'text-red-600 dark:text-red-400' },
   maintenance:          { icon: Settings,      bg: 'bg-gray-100 dark:bg-gray-700',      fg: 'text-gray-600 dark:text-gray-400' },
-  announcement:         { icon: Bell,          bg: 'bg-blue-100 dark:bg-blue-900/30',   fg: 'text-blue-600 dark:text-blue-400' },
+  announcement:         { icon: Bell,          bg: 'bg-purple-100 dark:bg-purple-900/30',   fg: 'text-purple-600 dark:text-purple-400' },
   system:               { icon: Settings,      bg: 'bg-gray-100 dark:bg-gray-700',      fg: 'text-gray-600 dark:text-gray-400' },
   default:              { icon: Bell,          bg: 'bg-gray-100 dark:bg-gray-700',      fg: 'text-gray-500 dark:text-gray-400' },
 }
@@ -166,8 +166,8 @@ export default function NotificationsIndex({ unreadCount: initialUnread = 0 }) {
         {/* ── En-tête ───────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#2E86C1]/10 flex items-center justify-center">
-              <Bell size={20} className="text-[#2E86C1]" />
+            <div className="w-10 h-10 rounded-xl bg-[#7e22ce]/10 flex items-center justify-center">
+              <Bell size={20} className="text-[#7e22ce]" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -198,7 +198,7 @@ export default function NotificationsIndex({ unreadCount: initialUnread = 0 }) {
               <button
                 onClick={() => mutMarkAll.mutate()}
                 disabled={mutMarkAll.isLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#2E86C1] text-white rounded-lg hover:bg-[#1A3A5C] disabled:opacity-60 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#7e22ce] text-white rounded-lg hover:bg-[#9333EA] disabled:opacity-60 transition-colors"
               >
                 <CheckCheck size={13} />
                 {mutMarkAll.isLoading ? 'En cours…' : 'Tout marquer lu'}
@@ -216,7 +216,7 @@ export default function NotificationsIndex({ unreadCount: initialUnread = 0 }) {
               className={[
                 'flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap',
                 activeTab === tab.key
-                  ? 'bg-[#2E86C1] text-white shadow-sm'
+                  ? 'bg-[#7e22ce] text-white shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5',
               ].join(' ')}
             >
@@ -260,7 +260,7 @@ export default function NotificationsIndex({ unreadCount: initialUnread = 0 }) {
             <button
               onClick={handleLoadMore}
               disabled={isFetching}
-              className="flex items-center gap-2 px-5 py-2 text-sm text-[#2E86C1] border border-[#2E86C1]/30 rounded-xl hover:bg-[#2E86C1]/5 disabled:opacity-60 transition-colors"
+              className="flex items-center gap-2 px-5 py-2 text-sm text-[#7e22ce] border border-[#7e22ce]/30 rounded-xl hover:bg-[#7e22ce]/5 disabled:opacity-60 transition-colors"
             >
               {isFetching
                 ? <><RefreshCw size={14} className="animate-spin" /> Chargement…</>
@@ -289,7 +289,7 @@ function NotifItem({ notif, menuOpen, onMenuToggle, onMenuClose, onClick, onMark
       className={[
         'relative flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors',
         'hover:bg-gray-50/70 dark:hover:bg-white/[0.03]',
-        !isRead ? 'bg-[#2E86C1]/[0.04] dark:bg-[#2E86C1]/[0.06]' : '',
+        !isRead ? 'bg-[#7e22ce]/[0.04] dark:bg-[#7e22ce]/[0.06]' : '',
       ].join(' ')}
       onClick={onClick}
       role="button"
@@ -298,7 +298,7 @@ function NotifItem({ notif, menuOpen, onMenuToggle, onMenuClose, onClick, onMark
     >
       {/* Indicateur non lu */}
       {!isRead && (
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#2E86C1]" />
+        <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#7e22ce]" />
       )}
 
       {/* Icône type */}
@@ -322,7 +322,7 @@ function NotifItem({ notif, menuOpen, onMenuToggle, onMenuClose, onClick, onMark
               {relativeTime(notif.created_at)}
             </span>
             {!isRead && (
-              <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#2E86C1]/10 text-[#2E86C1] rounded-full uppercase tracking-wide">
+              <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#7e22ce]/10 text-[#7e22ce] rounded-full uppercase tracking-wide">
                 Non lu
               </span>
             )}
@@ -415,10 +415,11 @@ function EmptyState({ tab }) {
       <p className="text-sm text-gray-400 mt-1 max-w-xs">{msg.sub}</p>
       <Link
         href="/notifications/preferences"
-        className="mt-5 text-xs text-[#2E86C1] hover:underline"
+        className="mt-5 text-xs text-[#7e22ce] hover:underline"
       >
         Gérer les préférences →
       </Link>
     </div>
   )
 }
+export { NotificationsIndex };

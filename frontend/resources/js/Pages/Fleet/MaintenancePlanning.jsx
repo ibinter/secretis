@@ -68,11 +68,11 @@ export default function MaintenancePlanning({ planningRows }) {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setView('table')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'table' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'table' ? 'bg-purple-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border'}`}
                         >Tableau</button>
                         <button
                             onClick={() => setView('by_type')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'by_type' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'by_type' ? 'bg-purple-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border'}`}
                         >Par type</button>
                     </div>
                 </div>
@@ -84,7 +84,7 @@ export default function MaintenancePlanning({ planningRows }) {
                             key={status}
                             onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}
                             className={`rounded-xl p-4 text-center transition hover:shadow-md ${
-                                filterStatus === status ? 'ring-2 ring-blue-500' : ''
+                                filterStatus === status ? 'ring-2 ring-purple-500' : ''
                             } ${STATUS_CONFIG[status]?.bg}`}
                         >
                             <div className={`text-2xl font-bold ${STATUS_CONFIG[status]?.text}`}>{count}</div>
@@ -144,7 +144,7 @@ export default function MaintenancePlanning({ planningRows }) {
                                                 <td className="px-4 py-3">
                                                     <button
                                                         onClick={() => router.visit(`/fleet/vehicles/${row.vehicle_id}`)}
-                                                        className="font-medium text-blue-600 hover:underline"
+                                                        className="font-medium text-purple-600 hover:underline"
                                                     >{row.plate_number}</button>
                                                     <div className="text-xs text-gray-400">{row.brand_model}</div>
                                                 </td>
@@ -190,7 +190,7 @@ export default function MaintenancePlanning({ planningRows }) {
                                                 <td className="px-4 py-3">
                                                     <button
                                                         onClick={() => setModalRow(row)}
-                                                        className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
+                                                        className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition"
                                                     >
                                                         Planifier
                                                     </button>
@@ -227,7 +227,7 @@ export default function MaintenancePlanning({ planningRows }) {
                                                 <div key={i} className="flex items-center gap-4 px-5 py-3">
                                                     <button
                                                         onClick={() => router.visit(`/fleet/vehicles/${row.vehicle_id}`)}
-                                                        className="font-medium text-blue-600 hover:underline text-sm w-28 flex-shrink-0"
+                                                        className="font-medium text-purple-600 hover:underline text-sm w-28 flex-shrink-0"
                                                     >{row.plate_number}</button>
                                                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
                                                         {cfg.label}
@@ -247,7 +247,7 @@ export default function MaintenancePlanning({ planningRows }) {
                                                     <span className="text-xs text-gray-400 w-8">{row.wear_pct}%</span>
                                                     <button
                                                         onClick={() => setModalRow(row)}
-                                                        className="text-xs text-blue-600 hover:underline ml-2"
+                                                        className="text-xs text-purple-600 hover:underline ml-2"
                                                     >Planifier</button>
                                                 </div>
                                             );
@@ -349,7 +349,7 @@ function PlanificationModal({ row, onClose, onSuccess }) {
                             Annuler
                         </button>
                         <button type="submit" disabled={processing}
-                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition disabled:opacity-50">
+                            className="flex-1 bg-purple-600 text-white py-2 rounded-lg text-sm hover:bg-purple-700 transition disabled:opacity-50">
                             {processing ? 'Enregistrement...' : 'Enregistrer'}
                         </button>
                     </div>
@@ -358,3 +358,4 @@ function PlanificationModal({ row, onClose, onSuccess }) {
         </div>
     );
 }
+export { MaintenancePlanning };

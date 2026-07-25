@@ -496,3 +496,4 @@ export default function LangueRegion() {
     </div>
   );
 }
+export { LangueRegion };

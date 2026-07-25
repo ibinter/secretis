@@ -216,3 +216,4 @@ const AVATAR_COLORS = [
   '#F97316', // orange
   '#84CC16', // lime
 ];
+export { LazyImage };

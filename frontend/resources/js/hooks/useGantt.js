@@ -175,3 +175,4 @@ export default function useGantt({ projectId, initialData }) {
     xToDate,
   };
 }
+export { useGantt };

@@ -35,7 +35,7 @@ function ArticleContent({ content }) {
     const html = content?.html ?? '';
     return (
         <div
-            className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-blue-600"
+            className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-purple-600"
             dangerouslySetInnerHTML={{ __html: html }}
         />
     );
@@ -122,8 +122,8 @@ function QuizContent({ lesson, onQuizComplete }) {
 
     return (
         <div className="space-y-6">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
-                <p className="text-sm font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
+                <p className="text-sm font-semibold text-purple-800 dark:text-purple-300 flex items-center gap-2">
                     <ClipboardDocumentCheckIcon className="w-5 h-5" />
                     Quiz de validation — {quizzes.length} question{quizzes.length > 1 ? 's' : ''} · Score minimum : 70%
                 </p>
@@ -152,7 +152,7 @@ function QuizContent({ lesson, onQuizComplete }) {
                                         cls = 'border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500';
                                     }
                                 } else if (userAnswer === idx) {
-                                    cls = 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+                                    cls = 'border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200';
                                 }
 
                                 return (
@@ -160,7 +160,7 @@ function QuizContent({ lesson, onQuizComplete }) {
                                         key={idx}
                                         onClick={() => handleAnswer(q.id, idx)}
                                         disabled={!!result}
-                                        className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all ${cls} ${!result ? 'hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20' : ''}`}
+                                        className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all ${cls} ${!result ? 'hover:border-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20' : ''}`}
                                     >
                                         {opt.text}
                                     </button>
@@ -184,7 +184,7 @@ function QuizContent({ lesson, onQuizComplete }) {
                 <button
                     onClick={handleSubmit}
                     disabled={submitting || Object.keys(answers).length < quizzes.length}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
                 >
                     {submitting ? 'Vérification…' : 'Valider mes réponses'}
                 </button>
@@ -234,7 +234,7 @@ function CourseSidebar({ lessons, currentIndex, onSelect, isCompleted }) {
                                 onClick={() => onSelect(idx)}
                                 className={`w-full text-left px-5 py-3 flex items-start gap-3 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 ${
                                     active
-                                        ? 'bg-blue-50 dark:bg-blue-900/30'
+                                        ? 'bg-purple-50 dark:bg-purple-900/30'
                                         : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                                 }`}
                             >
@@ -242,7 +242,7 @@ function CourseSidebar({ lessons, currentIndex, onSelect, isCompleted }) {
                                     {lesson.is_completed ? (
                                         <CheckCircleSolid className="w-5 h-5 text-emerald-500" />
                                     ) : active ? (
-                                        <PlayCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                        <PlayCircleIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     ) : (
                                         <div className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center">
                                             <span className="text-[9px] font-bold text-gray-400">{idx + 1}</span>
@@ -250,7 +250,7 @@ function CourseSidebar({ lessons, currentIndex, onSelect, isCompleted }) {
                                     )}
                                 </div>
                                 <div>
-                                    <p className={`text-xs font-medium leading-snug ${active ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                                    <p className={`text-xs font-medium leading-snug ${active ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}`}>
                                         {title}
                                     </p>
                                     {lesson.duration_minutes && (
@@ -343,9 +343,9 @@ export default function AcademieCourse({ course, lessons, progress_percent, is_c
 
                 {/* Fil d'Ariane */}
                 <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6 flex items-center gap-2 flex-wrap">
-                    <Link href={route('academie.index')} className="hover:text-blue-600">Académie</Link>
+                    <Link href={route('academie.index')} className="hover:text-purple-600">Académie</Link>
                     <ChevronRightIcon className="w-3.5 h-3.5" />
-                    <Link href={route('academie.catalogue')} className="hover:text-blue-600">Catalogue</Link>
+                    <Link href={route('academie.catalogue')} className="hover:text-purple-600">Catalogue</Link>
                     <ChevronRightIcon className="w-3.5 h-3.5" />
                     <span className="text-gray-800 dark:text-gray-200 font-medium truncate max-w-xs">{courseTitle}</span>
                 </nav>
@@ -393,7 +393,7 @@ export default function AcademieCourse({ course, lessons, progress_percent, is_c
                     {/* Objectifs */}
                     {course.objectives?.length > 0 && (
                         <details className="mt-4 group">
-                            <summary className="cursor-pointer text-sm font-semibold text-blue-600 dark:text-blue-400 select-none list-none flex items-center gap-1.5">
+                            <summary className="cursor-pointer text-sm font-semibold text-purple-600 dark:text-purple-400 select-none list-none flex items-center gap-1.5">
                                 <BookOpenIcon className="w-4 h-4" />
                                 Ce que vous apprendrez ({course.objectives.length} objectifs)
                             </summary>
@@ -451,7 +451,7 @@ export default function AcademieCourse({ course, lessons, progress_percent, is_c
                                         {lesson.resource_file && (
                                             <a
                                                 href={route('api.academy.resources.download', { id: lesson.id })}
-                                                className="inline-flex items-center gap-2 bg-blue-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors"
+                                                className="inline-flex items-center gap-2 bg-purple-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-purple-700 transition-colors"
                                             >
                                                 <DocumentArrowDownIcon className="w-4 h-4" />
                                                 Télécharger
@@ -466,7 +466,7 @@ export default function AcademieCourse({ course, lessons, progress_percent, is_c
                                 {lesson.type === 'article' && lesson.quizzes?.length > 0 && (
                                     <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700">
                                         <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                            <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-600" />
+                                            <ClipboardDocumentCheckIcon className="w-5 h-5 text-purple-600" />
                                             Quiz de cette leçon
                                         </h3>
                                         <QuizContent lesson={lesson} onQuizComplete={() => {}} />
@@ -540,3 +540,4 @@ export default function AcademieCourse({ course, lessons, progress_percent, is_c
         </AppLayout>
     );
 }
+export { AcademieCourse };

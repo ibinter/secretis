@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-const colors = require('tailwindcss/colors');
+const colors = require('/var/www/secretis/frontend/node_modules/tailwindcss/colors');
 
 module.exports = {
   // ── Dark mode via classe CSS sur <html> ─────────────────────────────────────
@@ -46,17 +46,17 @@ module.exports = {
       colors: {
         // Bleu marine (couleur primaire)
         primary: {
-          50:  '#EAF0F7',
-          100: '#C6D8EC',
-          200: '#9FBFE0',
-          300: '#78A5D3',
-          400: '#5190C8',
-          500: '#2A7BBE',
-          600: '#2166A3',
-          700: '#1A3A5C', // ← couleur principale
-          800: '#142D47',
-          900: '#0D1F32',
-          DEFAULT: '#1A3A5C',
+          50:  '#faf5ff',
+          100: '#f3e8ff',
+          200: '#e9d5ff',
+          300: '#d8b4fe',
+          400: '#c084fc',
+          500: '#a855f7',
+          600: '#9333ea',
+          700: '#7e22ce', // ← couleur principale SECRETIS
+          800: '#6b21a8',
+          900: '#581c87',
+          DEFAULT: '#9333ea',
         },
         // Bleu vif (couleur secondaire)
         secondary: {
@@ -352,11 +352,11 @@ module.exports = {
 
   // ─── Plugins ────────────────────────────────────────────────────────────────
   plugins: [
-    require('@tailwindcss/forms')({
+    require('/var/www/secretis/frontend/node_modules/@tailwindcss/forms')({
       strategy: 'class', // .form-input, .form-select, etc.
     }),
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/aspect-ratio'),
+    require('/var/www/secretis/frontend/node_modules/@tailwindcss/typography'),
+    require('/var/www/secretis/frontend/node_modules/@tailwindcss/aspect-ratio'),
 
     // Plugin utilitaires personnalisés SECRETIS
     function({ addComponents, addUtilities, theme }) {

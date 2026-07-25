@@ -147,9 +147,9 @@ export default function SmartScheduler({
     return (
         <div className={`bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden ${className}`}>
             {/* ── En-tête ────────────────────────────────────────────────────── */}
-            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
                 <div className="flex items-center gap-2">
-                    <SparklesIcon className="h-5 w-5 text-blue-600" />
+                    <SparklesIcon className="h-5 w-5 text-purple-600" />
                     <h3 className="font-semibold text-gray-900 dark:text-white">Planification intelligente</h3>
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">
@@ -174,7 +174,7 @@ export default function SmartScheduler({
                                     placeholder="Ex: Réunion CODIR jeudi prochain 2h"
                                     className="w-full pl-4 pr-12 py-3 text-sm border border-gray-200 dark:border-gray-600 rounded-xl
                                         bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white
-                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                     autoFocus
                                 />
                                 {nlInput && (
@@ -200,7 +200,7 @@ export default function SmartScheduler({
                                     key={example}
                                     type="button"
                                     onClick={() => setNlInput(example)}
-                                    className="text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                                    className="text-xs px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors"
                                 >
                                     {example}
                                 </button>
@@ -210,7 +210,7 @@ export default function SmartScheduler({
                         <button
                             type="submit"
                             disabled={!nlInput.trim() || slotsMutation.isPending}
-                            className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 transition-colors"
                         >
                             {slotsMutation.isPending ? (
                                 <><div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Analyse en cours…</>
@@ -226,9 +226,9 @@ export default function SmartScheduler({
                     <div className="space-y-4">
                         {/* Récapitulatif du parsing */}
                         {parsed && (
-                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm">
-                                <p className="font-medium text-blue-700 dark:text-blue-300">{parsed.title || nlInput}</p>
-                                <p className="text-blue-600 dark:text-blue-400 text-xs mt-0.5">
+                            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-sm">
+                                <p className="font-medium text-purple-700 dark:text-purple-300">{parsed.title || nlInput}</p>
+                                <p className="text-purple-600 dark:text-purple-400 text-xs mt-0.5">
                                     Durée : {parsed.duration} min
                                     {parsed.participants?.length > 0 && ` · Avec : ${parsed.participants.join(', ')}`}
                                 </p>
@@ -306,7 +306,7 @@ export default function SmartScheduler({
                             <button
                                 onClick={handleCreate}
                                 disabled={createMutation.isPending}
-                                className="flex-1 py-2.5 text-sm bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                className="flex-1 py-2.5 text-sm bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 disabled:opacity-50 transition-colors"
                             >
                                 {createMutation.isPending ? 'Création…' : 'Confirmer et créer'}
                             </button>
@@ -337,8 +337,8 @@ function SlotCard({ slot, rank, selected, onSelect }) {
             onClick={onSelect}
             className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left
                 ${selected
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 bg-white dark:bg-gray-700/30'
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                    : 'border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 bg-white dark:bg-gray-700/30'
                 }`}
         >
             {/* Rang */}
@@ -360,13 +360,14 @@ function SlotCard({ slot, rank, selected, onSelect }) {
 
             {/* Score */}
             <div className="text-right">
-                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
                     {rankLabels[rank - 1] ?? ''}
                 </span>
                 <div className="mt-1 w-16 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 rounded-full" style={{ width: `${slot.score ?? 70}%` }} />
+                    <div className="h-full bg-purple-500 rounded-full" style={{ width: `${slot.score ?? 70}%` }} />
                 </div>
             </div>
         </button>
     );
 }
+export { SmartScheduler };

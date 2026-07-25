@@ -93,7 +93,7 @@ function PortalSidebar({ activeSection, onSelect, unreadMessages, pendingInvoice
 
 function KpiWidget({ icon: Icon, label, value, color, onClick }) {
     const bgColors = {
-        blue:   'bg-blue-50 text-blue-600',
+        blue:   'bg-purple-50 text-purple-600',
         green:  'bg-green-50 text-green-600',
         orange: 'bg-orange-50 text-orange-600',
         indigo: 'bg-indigo-50 text-indigo-600',
@@ -176,7 +176,7 @@ export default function ClientDashboard({
                         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
                             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                                 <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                                    <DocumentTextIcon className="w-4 h-4 text-blue-500"/>
+                                    <DocumentTextIcon className="w-4 h-4 text-purple-500"/>
                                     Documents récents
                                 </h2>
                                 <button onClick={() => goTo('/portal/documents')}
@@ -193,8 +193,8 @@ export default function ClientDashboard({
                                 <div className="divide-y divide-gray-50">
                                     {recent_docs?.map(doc => (
                                         <div key={doc.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 transition-colors">
-                                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                <DocumentTextIcon className="w-4 h-4 text-blue-600"/>
+                                            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <DocumentTextIcon className="w-4 h-4 text-purple-600"/>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-gray-800 truncate">{doc.title}</p>
@@ -232,3 +232,4 @@ export default function ClientDashboard({
         </>
     );
 }
+export { ClientDashboard };

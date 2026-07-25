@@ -69,7 +69,7 @@ function ConnectorCard({ connector, plan }) {
             {/* Badges en haut à droite */}
             <div className="absolute top-3 right-3 flex flex-wrap gap-1 justify-end">
                 {connector.is_official && (
-                    <span className="flex items-center gap-1 text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 text-xs font-medium bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">
                         <ShieldCheckIcon className="w-3 h-3" /> Officiel
                     </span>
                 )}
@@ -154,7 +154,7 @@ function ConnectorCard({ connector, plan }) {
                             ? installStatus === 'error'
                                 ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
                                 : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
-                            : 'bg-blue-600 text-white hover:bg-blue-700',
+                            : 'bg-purple-600 text-white hover:bg-purple-700',
                 ].join(' ')}
             >
                 {loading
@@ -216,17 +216,17 @@ function NewConnectors({ connectors }) {
     if (!recent.length) return null;
 
     return (
-        <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
+        <div className="mb-8 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl border border-purple-100 dark:border-purple-800">
             <div className="flex items-center gap-2 mb-3">
-                <SparklesIcon className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-blue-900 dark:text-blue-200">Nouvelles intégrations</span>
+                <SparklesIcon className="w-5 h-5 text-purple-600" />
+                <span className="font-semibold text-purple-900 dark:text-purple-200">Nouvelles intégrations</span>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-blue-200">
                 {recent.map(c => (
                     <button
                         key={c.id}
                         onClick={() => router.visit(`/integrations/${c.id}`)}
-                        className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-700 rounded-lg px-3 py-2 shrink-0 hover:shadow-sm transition-all"
+                        className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-700 rounded-lg px-3 py-2 shrink-0 hover:shadow-sm transition-all"
                     >
                         {c.icon_url
                             ? <img src={c.icon_url} alt={c.name} className="w-5 h-5 object-contain" />
@@ -287,7 +287,7 @@ export default function Marketplace({ connectors = [], byCategory = {}, plan = '
                         </button>
                         <button
                             onClick={() => router.visit('/integrations/api-keys')}
-                            className="text-sm px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                            className="text-sm px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors flex items-center gap-1.5"
                         >
                             <PlusIcon className="w-4 h-4" /> Clés API
                         </button>
@@ -306,7 +306,7 @@ export default function Marketplace({ connectors = [], byCategory = {}, plan = '
                         placeholder="Rechercher une intégration…"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                     />
                 </div>
 
@@ -319,7 +319,7 @@ export default function Marketplace({ connectors = [], byCategory = {}, plan = '
                             className={[
                                 'shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all',
                                 activeTab === tab.key
-                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    ? 'bg-purple-600 text-white shadow-sm'
                                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
                             ].join(' ')}
                         >
@@ -351,11 +351,11 @@ export default function Marketplace({ connectors = [], byCategory = {}, plan = '
                 <div className="mt-12 text-center">
                     <p className="text-sm text-gray-500">
                         Vous ne trouvez pas votre intégration ?{' '}
-                        <a href="mailto:integrations@ibig.ci" className="text-blue-600 hover:underline font-medium">
+                        <a href="mailto:integrations@ibig.ci" className="text-purple-600 hover:underline font-medium">
                             Contactez notre équipe
                         </a>
                         {' '}ou{' '}
-                        <a href="/docs/integrations#custom-connector" className="text-blue-600 hover:underline font-medium" target="_blank">
+                        <a href="/docs/integrations#custom-connector" className="text-purple-600 hover:underline font-medium" target="_blank">
                             créez un connecteur custom
                         </a>.
                     </p>
@@ -364,3 +364,4 @@ export default function Marketplace({ connectors = [], byCategory = {}, plan = '
         </AppLayout>
     );
 }
+export { Marketplace };

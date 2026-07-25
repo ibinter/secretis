@@ -20,8 +20,8 @@ import clsx from 'clsx';
 
 // Palette SECRETIS
 const COLORS = {
-    navy:  { bg: 'bg-[#1A3A5C]',  text: 'text-[#1A3A5C]',  border: 'border-[#1A3A5C]',  light: 'bg-blue-50',  spark: '#1A3A5C' },
-    blue:  { bg: 'bg-[#2E86C1]',  text: 'text-[#2E86C1]',  border: 'border-[#2E86C1]',  light: 'bg-blue-50',  spark: '#2E86C1' },
+    navy:  { bg: 'bg-[#9333EA]',  text: 'text-[#9333EA]',  border: 'border-[#9333EA]',  light: 'bg-purple-50',  spark: '#9333EA' },
+    blue:  { bg: 'bg-[#7e22ce]',  text: 'text-[#7e22ce]',  border: 'border-[#7e22ce]',  light: 'bg-purple-50',  spark: '#7e22ce' },
     amber: { bg: 'bg-[#F39C12]',  text: 'text-[#F39C12]',  border: 'border-[#F39C12]',  light: 'bg-amber-50', spark: '#F39C12' },
     red:   { bg: 'bg-red-600',    text: 'text-red-600',    border: 'border-red-600',    light: 'bg-red-50',   spark: '#dc2626' },
     green: { bg: 'bg-emerald-600',text: 'text-emerald-600',border: 'border-emerald-600',light: 'bg-emerald-50',spark: '#059669'},
@@ -92,7 +92,7 @@ export default function KpiTile({
                 'bg-white rounded-xl border shadow-sm p-5 transition-all duration-200',
                 isCritical
                     ? 'border-red-200 ring-1 ring-red-200'
-                    : 'border-gray-100 hover:border-blue-100',
+                    : 'border-gray-100 hover:border-purple-100',
                 onClick && 'cursor-pointer hover:shadow-md active:scale-[0.98]',
             )}
         >
@@ -157,3 +157,4 @@ export default function KpiTile({
         </div>
     );
 }
+export { KpiTile };

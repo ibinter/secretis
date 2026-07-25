@@ -39,7 +39,7 @@ function LogoDropZone({ value, onChange }) {
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
       className={`relative w-full h-36 rounded-xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-2 transition-all duration-200
-        ${dragging ? 'border-blue-400 bg-blue-500/10' : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'}`}
+        ${dragging ? 'border-purple-400 bg-purple-500/10' : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'}`}
     >
       {value ? (
         <img src={value} alt="Logo" className="h-24 object-contain rounded-lg" />
@@ -102,7 +102,7 @@ export default function OrganizationProfile({ step, onComplete, saving }) {
           value={form.name}
           onChange={e => set('name', e.target.value)}
           placeholder="Ex : Ministère de la Santé Publique"
-          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 transition-colors"
+          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
         />
         {errors.name && <p className="mt-1 text-red-400 text-xs">{errors.name}</p>}
       </div>
@@ -114,7 +114,7 @@ export default function OrganizationProfile({ step, onComplete, saving }) {
           <select
             value={form.sector}
             onChange={e => set('sector', e.target.value)}
-            className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400 transition-colors"
+            className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 transition-colors"
           >
             <option value="">-- Choisir --</option>
             {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -127,7 +127,7 @@ export default function OrganizationProfile({ step, onComplete, saving }) {
           <select
             value={form.country}
             onChange={e => set('country', e.target.value)}
-            className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400 transition-colors"
+            className="w-full bg-slate-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400 transition-colors"
           >
             <option value="">-- Choisir --</option>
             {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -146,7 +146,7 @@ export default function OrganizationProfile({ step, onComplete, saving }) {
               onClick={() => set('currency', c)}
               className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all
                 ${form.currency === c
-                  ? 'bg-blue-600 border-blue-500 text-white'
+                  ? 'bg-purple-600 border-purple-500 text-white'
                   : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40 hover:text-white'}`}
             >
               {c}
@@ -158,10 +158,11 @@ export default function OrganizationProfile({ step, onComplete, saving }) {
       <button
         type="submit"
         disabled={saving}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+        className="w-full bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
       >
         {saving ? <><span className="animate-spin">⏳</span> Enregistrement...</> : 'Continuer →'}
       </button>
     </form>
   );
 }
+export { OrganizationProfile };

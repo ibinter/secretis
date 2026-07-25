@@ -91,7 +91,7 @@ function AccountAutocomplete({ value, onChange, onSelect }) {
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="N° compte"
-        className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#1A3A5C]"
+        className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#9333EA]"
       />
       {open && filtered.length > 0 && (
         <div className="absolute z-30 top-full left-0 mt-0.5 w-72 bg-white border border-gray-200 rounded-lg shadow-lg text-xs max-h-48 overflow-y-auto">
@@ -102,7 +102,7 @@ function AccountAutocomplete({ value, onChange, onSelect }) {
               onMouseDown={() => { onSelect(a); setOpen(false); }}
               className="w-full text-left px-3 py-2 hover:bg-gray-50 flex gap-2"
             >
-              <span className="font-mono font-semibold text-[#1A3A5C] w-10 shrink-0">{a.number}</span>
+              <span className="font-mono font-semibold text-[#9333EA] w-10 shrink-0">{a.number}</span>
               <span className="text-gray-600 truncate">{a.name}</span>
             </button>
           ))}
@@ -247,7 +247,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Ex : Budget opérationnel 2026"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]"
             />
           </div>
 
@@ -256,7 +256,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
             <select
               value={form.fiscal_year_id}
               onChange={(e) => setForm({ ...form, fiscal_year_id: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]"
             >
               <option value="">— Sélectionner —</option>
               {fiscalYears.map((fy) => <option key={fy.id} value={fy.id}>{fy.name}</option>)}
@@ -269,7 +269,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
               required
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]"
             >
               <option value="operationnel">Opérationnel</option>
               <option value="investissement">Investissement</option>
@@ -285,60 +285,60 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="Contexte, hypothèses de construction du budget..."
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C] resize-none"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA] resize-none"
             />
           </div>
         </div>
 
         {/* ===== Import depuis budget précédent ===== */}
         {!editMode && (
-          <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="bg-purple-50 rounded-xl border border-purple-100 p-4 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="text-xs font-medium text-blue-700 mb-1 block">
+              <label className="text-xs font-medium text-purple-700 mb-1 block">
                 <DocumentDuplicateIcon className="h-4 w-4 inline mr-1" />
                 Importer depuis un budget précédent
               </label>
               <select
                 value={prevBudget}
                 onChange={(e) => setPrevBudget(e.target.value)}
-                className="w-full rounded-lg border border-blue-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
               >
                 <option value="">— Choisir un budget source —</option>
                 {previousBudgets?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
             </div>
             <div className="w-36">
-              <label className="text-xs font-medium text-blue-700 mb-1 block">Ajustement (%)</label>
+              <label className="text-xs font-medium text-purple-700 mb-1 block">Ajustement (%)</label>
               <input
                 type="number"
                 value={importPct}
                 onChange={(e) => setImportPct(parseFloat(e.target.value) || 0)}
                 placeholder="+/- %"
-                className="w-full rounded-lg border border-blue-200 px-3 py-2 text-sm focus:outline-none bg-white"
+                className="w-full rounded-lg border border-purple-200 px-3 py-2 text-sm focus:outline-none bg-white"
               />
             </div>
             <button
               type="button"
               onClick={importFromPrevious}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition whitespace-nowrap"
+              className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition whitespace-nowrap"
             >
               Importer les lignes
             </button>
 
             {/* Import CSV */}
-            <div className="border-l border-blue-200 pl-3 flex items-end gap-2">
+            <div className="border-l border-purple-200 pl-3 flex items-end gap-2">
               <input ref={fileRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleCsvImport} />
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-blue-200 text-blue-700 text-sm rounded-lg hover:bg-blue-50 transition"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-purple-200 text-purple-700 text-sm rounded-lg hover:bg-purple-50 transition"
               >
                 <ArrowUpTrayIcon className="h-4 w-4" />
                 Import CSV
               </button>
               <a
                 href="/budget/template.csv"
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-blue-200 text-blue-700 text-sm rounded-lg hover:bg-blue-50 transition"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-purple-200 text-purple-700 text-sm rounded-lg hover:bg-purple-50 transition"
               >
                 <ArrowDownTrayIcon className="h-4 w-4" />
                 Modèle
@@ -356,7 +356,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
             <button
               type="button"
               onClick={addLine}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1A3A5C] text-white text-xs rounded-lg hover:bg-[#16324e] transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#9333EA] text-white text-xs rounded-lg hover:bg-[#16324e] transition"
             >
               <PlusIcon className="h-3.5 w-3.5" /> Ajouter une ligne
             </button>
@@ -402,7 +402,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
                           value={line.account_name}
                           onChange={(e) => updateLine(line._key, 'account_name', e.target.value)}
                           placeholder="Libellé"
-                          className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#1A3A5C]"
+                          className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#9333EA]"
                         />
                       </td>
                       <td className="px-3 py-1.5">
@@ -432,7 +432,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
                             step="1000"
                             value={line[q]}
                             onChange={(e) => updateLine(line._key, q, e.target.value)}
-                            className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#1A3A5C]"
+                            className="w-full rounded border border-gray-200 px-2 py-1.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[#9333EA]"
                           />
                         </td>
                       ))}
@@ -444,7 +444,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
                           type="checkbox"
                           checked={Boolean(line.is_income)}
                           onChange={(e) => updateLine(line._key, 'is_income', e.target.checked)}
-                          className="h-4 w-4 text-[#1A3A5C] rounded"
+                          className="h-4 w-4 text-[#9333EA] rounded"
                           title="Ligne de produit (revenu)"
                         />
                       </td>
@@ -494,7 +494,7 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
           <button
             type="submit"
             disabled={submitting || lines.length === 0}
-            className="px-6 py-2 bg-[#1A3A5C] text-white text-sm rounded-lg hover:bg-[#16324e] disabled:opacity-50 transition font-medium"
+            className="px-6 py-2 bg-[#9333EA] text-white text-sm rounded-lg hover:bg-[#16324e] disabled:opacity-50 transition font-medium"
           >
             {submitting ? 'Enregistrement...' : editMode ? 'Mettre à jour' : 'Créer le budget'}
           </button>
@@ -504,3 +504,4 @@ export default function BudgetForm({ budget, departments, fiscalYears, previousB
     </AuthLayout>
   );
 }
+export { BudgetForm };

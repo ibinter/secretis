@@ -24,7 +24,7 @@ const fcfa = (v) =>
 
 const STATUS_CONFIG = {
   draft:    { label: 'Brouillon', classes: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Envoyé',    classes: 'bg-blue-100 text-blue-700' },
+  sent:     { label: 'Envoyé',    classes: 'bg-purple-100 text-purple-700' },
   accepted: { label: 'Accepté',   classes: 'bg-emerald-100 text-emerald-700' },
   rejected: { label: 'Refusé',    classes: 'bg-red-100 text-red-700' },
   expired:  { label: 'Expiré',    classes: 'bg-orange-100 text-orange-700' },
@@ -80,7 +80,7 @@ export default function Quotes({ quotes, clients, filters }) {
           <h1 className="text-2xl font-bold text-gray-900">Devis</h1>
           <button
             onClick={() => router.visit('/comptabilite/quotes/create')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
           >
             <PlusIcon className="h-4 w-4" />
             Nouveau devis
@@ -92,7 +92,7 @@ export default function Quotes({ quotes, clients, filters }) {
           <select
             defaultValue={filters.status}
             onChange={(e) => applyFilter('status', e.target.value)}
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
           >
             <option value="">Tous les statuts</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -102,7 +102,7 @@ export default function Quotes({ quotes, clients, filters }) {
           <select
             defaultValue={filters.client_id}
             onChange={(e) => applyFilter('client_id', e.target.value)}
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
           >
             <option value="">Tous les clients</option>
             {clients.map((c) => (
@@ -139,7 +139,7 @@ export default function Quotes({ quotes, clients, filters }) {
                   const statusCfg = STATUS_CONFIG[quote.status] ?? { label: quote.status, classes: '' };
                   return (
                     <tr key={quote.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 font-mono font-semibold text-[#1A3A5C] text-xs">
+                      <td className="px-4 py-3 font-mono font-semibold text-[#9333EA] text-xs">
                         {quote.quote_number}
                       </td>
                       <td className="px-4 py-3">
@@ -170,7 +170,7 @@ export default function Quotes({ quotes, clients, filters }) {
                           <button
                             onClick={() => window.open(`/comptabilite/quotes/${quote.id}/pdf`, '_blank')}
                             title="Télécharger PDF"
-                            className="p-1.5 text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 rounded-lg transition"
+                            className="p-1.5 text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 rounded-lg transition"
                           >
                             <DocumentArrowDownIcon className="h-4 w-4" />
                           </button>
@@ -181,7 +181,7 @@ export default function Quotes({ quotes, clients, filters }) {
                               onClick={() => handleSend(quote.id, quote.quote_number)}
                               disabled={loading[`send-${quote.id}`]}
                               title="Envoyer par email"
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:opacity-40"
+                              className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition disabled:opacity-40"
                             >
                               <EnvelopeIcon className="h-4 w-4" />
                             </button>
@@ -216,7 +216,7 @@ export default function Quotes({ quotes, clients, filters }) {
                   onClick={() => link.url && router.get(link.url)}
                   dangerouslySetInnerHTML={{ __html: link.label }}
                   className={`px-3 py-1 rounded-lg text-xs transition ${
-                    link.active ? 'bg-[#1A3A5C] text-white'
+                    link.active ? 'bg-[#9333EA] text-white'
                     : link.url ? 'bg-white border border-gray-200 hover:bg-gray-50'
                     : 'opacity-40 cursor-not-allowed'
                   }`}
@@ -229,3 +229,4 @@ export default function Quotes({ quotes, clients, filters }) {
     </AuthLayout>
   );
 }
+export { Quotes };

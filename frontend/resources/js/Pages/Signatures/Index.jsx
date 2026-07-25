@@ -22,7 +22,7 @@ import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 const STATUS_CONFIG = {
     draft:            { label: 'Brouillon',         color: 'bg-gray-100 text-gray-600',   icon: DocumentCheckIcon },
     pending:          { label: 'En attente',         color: 'bg-yellow-100 text-yellow-700', icon: ClockIcon },
-    partially_signed: { label: 'Partiellement signé', color: 'bg-blue-100 text-blue-700', icon: DocumentCheckIcon },
+    partially_signed: { label: 'Partiellement signé', color: 'bg-purple-100 text-purple-700', icon: DocumentCheckIcon },
     completed:        { label: 'Complété',           color: 'bg-green-100 text-green-700', icon: CheckCircleIcon },
     cancelled:        { label: 'Annulé',             color: 'bg-red-100 text-red-700',    icon: XCircleIcon },
     expired:          { label: 'Expiré',             color: 'bg-orange-100 text-orange-700', icon: ExclamationCircleIcon },
@@ -89,8 +89,8 @@ export default function SignaturesIndex({ requests, auth }) {
                     </div>
                     <button
                         onClick={() => router.visit('/signatures/requests/create')}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl
-                                   hover:bg-blue-700 font-medium text-sm transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl
+                                   hover:bg-purple-700 font-medium text-sm transition-colors"
                     >
                         <PlusIcon className="w-4 h-4" />
                         Nouvelle demande
@@ -105,8 +105,8 @@ export default function SignaturesIndex({ requests, auth }) {
                             onClick={() => applyFilter(f.value)}
                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border
                                 ${filter === f.value
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                                    ? 'bg-purple-600 text-white border-purple-600'
+                                    : 'bg-white text-gray-600 border-gray-200 hover:border-purple-300 hover:text-purple-600'
                                 }`}
                         >
                             {f.label}
@@ -143,8 +143,8 @@ export default function SignaturesIndex({ requests, auth }) {
                                 onClick={() => router.get('/signatures/requests', { filter, page }, { preserveScroll: true })}
                                 className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors
                                     ${meta.current_page === page
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300'
+                                        ? 'bg-purple-600 text-white'
+                                        : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300'
                                     }`}
                             >
                                 {page}
@@ -205,7 +205,7 @@ function RequestCard({ request, myUserId, loading, onView, onRemind, onCancel, o
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                    request.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                                    request.status === 'completed' ? 'bg-green-500' : 'bg-purple-500'
                                 }`}
                                 style={{ width: `${progress}%` }}
                             />
@@ -244,7 +244,7 @@ function RequestCard({ request, myUserId, loading, onView, onRemind, onCancel, o
                 <div className="flex flex-col gap-2 flex-shrink-0">
                     <button
                         onClick={onView}
-                        className="p-2 rounded-xl border border-gray-200 hover:border-blue-300 hover:text-blue-600
+                        className="p-2 rounded-xl border border-gray-200 hover:border-purple-300 hover:text-purple-600
                                    text-gray-400 transition-colors"
                         title="Voir le détail"
                     >
@@ -309,14 +309,14 @@ function EmptyState({ filter, onNew }) {
     };
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
-                <DocumentCheckIcon className="w-8 h-8 text-blue-400" />
+            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mb-4">
+                <DocumentCheckIcon className="w-8 h-8 text-purple-400" />
             </div>
             <p className="text-gray-500 mb-6">{messages[filter]}</p>
             <button
                 onClick={onNew}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl
-                           hover:bg-blue-700 font-medium text-sm transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl
+                           hover:bg-purple-700 font-medium text-sm transition-colors"
             >
                 <PlusIcon className="w-4 h-4" />
                 Créer une demande
@@ -324,3 +324,4 @@ function EmptyState({ filter, onNew }) {
         </div>
     );
 }
+export { SignaturesIndex };

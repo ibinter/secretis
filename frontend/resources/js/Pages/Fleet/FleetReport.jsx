@@ -57,7 +57,7 @@ export default function FleetReport({ report, currentMonth }) {
                         />
                         <button
                             onClick={applyMonth}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+                            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition"
                         >
                             Appliquer
                         </button>
@@ -105,7 +105,7 @@ export default function FleetReport({ report, currentMonth }) {
                 <div className="grid grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 text-center">
                         <div className="text-xs text-gray-400 mb-1">Carburant (mois)</div>
-                        <div className="text-xl font-bold text-blue-600">{Number(total_fuel_cost).toLocaleString('fr-FR')} F</div>
+                        <div className="text-xl font-bold text-purple-600">{Number(total_fuel_cost).toLocaleString('fr-FR')} F</div>
                     </div>
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 text-center">
                         <div className="text-xs text-gray-400 mb-1">Maintenance (mois)</div>
@@ -195,14 +195,14 @@ export default function FleetReport({ report, currentMonth }) {
                                         <td className="px-4 py-3">
                                             <button
                                                 onClick={() => router.visit(`/fleet/vehicles/${v.vehicle_id}`)}
-                                                className="font-medium text-blue-600 hover:underline"
+                                                className="font-medium text-purple-600 hover:underline"
                                             >{v.plate_number}</button>
                                             <div className="text-xs text-gray-400">{v.brand_model}</div>
                                         </td>
                                         <td className="px-4 py-3 text-right">{v.km?.toLocaleString('fr-FR')} km</td>
                                         <td className="px-4 py-3 text-right">{v.trips}</td>
                                         <td className="px-4 py-3 text-right">{v.fuel_liters} L</td>
-                                        <td className="px-4 py-3 text-right text-blue-600 font-medium">
+                                        <td className="px-4 py-3 text-right text-purple-600 font-medium">
                                             {Number(v.fuel_cost).toLocaleString('fr-FR')} F
                                         </td>
                                         <td className="px-4 py-3 text-right text-orange-500 font-medium">
@@ -248,7 +248,7 @@ export default function FleetReport({ report, currentMonth }) {
                                             <td className="px-4 py-3 text-right">{d.total_km} km</td>
                                             <td className="px-4 py-3 text-right">{d.trip_count}</td>
                                             <td className="px-4 py-3 text-right">{d.fuel_liters} L</td>
-                                            <td className="px-4 py-3 text-right font-medium text-blue-600">
+                                            <td className="px-4 py-3 text-right font-medium text-purple-600">
                                                 {Number(d.fuel_cost).toLocaleString('fr-FR')} F
                                             </td>
                                         </tr>
@@ -268,7 +268,7 @@ export default function FleetReport({ report, currentMonth }) {
 // ---------------------------------------------------------------------------
 function KpiCard({ label, value, icon, sub, color = 'blue' }) {
     const colorMap = {
-        blue   : 'from-blue-500 to-blue-600',
+        blue   : 'from-purple-500 to-purple-600',
         green  : 'from-green-500 to-green-600',
         emerald: 'from-emerald-500 to-emerald-600',
         red    : 'from-red-500 to-red-600',
@@ -292,3 +292,4 @@ function EmptyState({ message }) {
         </div>
     );
 }
+export { FleetReport };

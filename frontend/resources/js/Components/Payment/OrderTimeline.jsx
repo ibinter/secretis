@@ -116,3 +116,4 @@ export default function OrderTimeline({ steps = [], currentStatus, failed = fals
     </div>
   );
 }
+export { OrderTimeline };

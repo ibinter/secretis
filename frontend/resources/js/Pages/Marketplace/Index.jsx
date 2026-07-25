@@ -77,7 +77,7 @@ function AppCard({ app, isInstalled, onInstall }) {
                         <img src={app.icon_url} alt={app.name}
                              className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-gray-100"/>
                     ) : (
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center flex-shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center flex-shrink-0">
                             <ShoppingBagIcon className="w-6 h-6 text-white"/>
                         </div>
                     )}
@@ -273,3 +273,4 @@ export default function MarketplaceIndex({ apps, installations }) {
         </AppLayout>
     );
 }
+export { MarketplaceIndex };

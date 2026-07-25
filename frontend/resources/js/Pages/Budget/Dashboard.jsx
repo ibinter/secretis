@@ -63,7 +63,7 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
             <select
               value={fyId}
               onChange={handleFyChange}
-              className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]"
+              className="rounded-lg border border-gray-200 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9333EA]"
             >
               <option value="">Tous les exercices</option>
               {fiscalYears.map((fy) => (
@@ -73,7 +73,7 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
 
             <a
               href="/budget/create"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
             >
               + Nouveau budget
             </a>
@@ -137,8 +137,8 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
                 <AreaChart data={monthly} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#1A3A5C" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#1A3A5C" stopOpacity={0} />
+                      <stop offset="5%"  stopColor="#9333EA" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#9333EA" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor="#27AE60" stopOpacity={0.2} />
@@ -157,7 +157,7 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
                     contentStyle={{ fontSize: 12 }}
                   />
                   <Legend iconType="circle" iconSize={8} formatter={(v) => v === 'budget' ? 'Budget' : 'Réel'} />
-                  <Area type="monotone" dataKey="budget" stroke="#1A3A5C" strokeWidth={2} fill="url(#budgetGrad)" strokeDasharray="5 3" />
+                  <Area type="monotone" dataKey="budget" stroke="#9333EA" strokeWidth={2} fill="url(#budgetGrad)" strokeDasharray="5 3" />
                   <Area type="monotone" dataKey="actual" stroke="#27AE60" strokeWidth={2} fill="url(#actualGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -201,7 +201,7 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
                 <Bar
                   dataKey="pct"
                   radius={[0, 4, 4, 0]}
-                  fill="#1A3A5C"
+                  fill="#9333EA"
                   label={{ position: 'right', fontSize: 11, formatter: (v) => v.toFixed(0) + '%' }}
                 />
               </BarChart>
@@ -221,13 +221,13 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
               <h2 className="text-sm font-semibold text-gray-800">
                 Alertes budgétaires ({kpis.active_alerts_count})
               </h2>
-              <a href="/budget/alerts" className="ml-auto text-xs text-[#1A3A5C] hover:underline">
+              <a href="/budget/alerts" className="ml-auto text-xs text-[#9333EA] hover:underline">
                 Configurer les alertes →
               </a>
             </div>
             <div className="px-5 py-4 text-sm text-gray-600">
               {kpis.active_alerts_count} ligne(s) budgétaire(s) ont atteint ou dépassé leurs seuils d'alerte.
-              <a href="/budget" className="ml-2 text-[#1A3A5C] font-medium hover:underline">
+              <a href="/budget" className="ml-2 text-[#9333EA] font-medium hover:underline">
                 Voir l'analyse des écarts →
               </a>
             </div>
@@ -251,7 +251,7 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
                     <span className="text-sm font-semibold text-gray-700">{fcfa(b.total_amount)}</span>
                     <a
                       href={`/budget/${b.id}/variance`}
-                      className="text-xs text-[#1A3A5C] hover:underline"
+                      className="text-xs text-[#9333EA] hover:underline"
                     >
                       Analyse →
                     </a>
@@ -266,3 +266,4 @@ export default function BudgetDashboard({ kpis, fiscalYears, activeBudgets, filt
     </AuthLayout>
   );
 }
+export { BudgetDashboard };

@@ -72,7 +72,11 @@ class ResolveTenant
         $slug = $this->extractSlugFromHost($request->getHost());
 
         if ($slug && $slug !== 'www' && $slug !== 'app') {
-            return Organization::bySlug($slug)->active()->first();
+            $bySlug = Organization::bySlug($slug)->active()->first();
+            if ($bySlug) {
+                return $bySlug;
+            }
+            // Domaine produit (ex: secretis.ibigsoft.com) — pas un slug tenant : continuer
         }
 
         // --- 2. Résolution par session ---
@@ -91,6 +95,11 @@ class ResolveTenant
 
         if (is_string($routeOrg) || is_int($routeOrg)) {
             return Organization::active()->find($routeOrg);
+        }
+
+        // --- 4. Fallback : organisation de l'utilisateur connecté ---
+        if (Auth::check() && Auth::user()->organization_id) {
+            return Organization::active()->find(Auth::user()->organization_id);
         }
 
         return null;

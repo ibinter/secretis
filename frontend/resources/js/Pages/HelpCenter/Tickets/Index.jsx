@@ -9,7 +9,7 @@ import axios from 'axios';
 
 // ─── Configuration statuts ────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  open:              { label: 'Ouvert',          color: 'bg-blue-100 text-blue-700' },
+  open:              { label: 'Ouvert',          color: 'bg-purple-100 text-purple-700' },
   waiting_customer:  { label: 'En attente',       color: 'bg-yellow-100 text-yellow-700' },
   waiting_support:   { label: 'En cours',          color: 'bg-orange-100 text-orange-700' },
   in_progress:       { label: 'En traitement',     color: 'bg-purple-100 text-purple-700' },
@@ -19,7 +19,7 @@ const STATUS_CONFIG = {
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Basse',    color: 'text-gray-400', dot: 'bg-gray-300' },
-  normal: { label: 'Normale',  color: 'text-blue-500', dot: 'bg-blue-400' },
+  normal: { label: 'Normale',  color: 'text-purple-500', dot: 'bg-purple-400' },
   high:   { label: 'Haute',    color: 'text-orange-500', dot: 'bg-orange-400' },
   urgent: { label: 'Urgente',  color: 'text-red-500',  dot: 'bg-red-500' },
 };
@@ -99,7 +99,7 @@ export default function TicketsIndex() {
           </div>
           <Link
             to="/help/tickets/create"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700
                        text-white rounded-lg text-sm font-medium transition-colors"
           >
             <Icon.Plus />
@@ -115,7 +115,7 @@ export default function TicketsIndex() {
             value={filters.status}
             onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
             className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">Tous les statuts</option>
             {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -127,7 +127,7 @@ export default function TicketsIndex() {
             value={filters.priority}
             onChange={e => setFilters(f => ({ ...f, priority: e.target.value }))}
             className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">Toutes les priorités</option>
             {Object.entries(PRIORITY_CONFIG).map(([k, v]) => (
@@ -139,7 +139,7 @@ export default function TicketsIndex() {
             value={filters.period}
             onChange={e => setFilters(f => ({ ...f, period: e.target.value }))}
             className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="30">30 derniers jours</option>
             <option value="90">90 derniers jours</option>
@@ -165,8 +165,8 @@ export default function TicketsIndex() {
               </p>
               <Link
                 to="/help/tickets/create"
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm
-                           hover:bg-blue-700 transition-colors"
+                className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm
+                           hover:bg-purple-700 transition-colors"
               >
                 Ouvrir un ticket
               </Link>
@@ -261,7 +261,7 @@ export default function TicketsIndex() {
                 onClick={() => fetchTickets(i + 1)}
                 className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors
                             ${pagination.current === i + 1
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-purple-600 text-white'
                               : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 {i + 1}
@@ -273,3 +273,4 @@ export default function TicketsIndex() {
     </div>
   );
 }
+export { TicketsIndex };

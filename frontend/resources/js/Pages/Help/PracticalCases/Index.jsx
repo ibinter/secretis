@@ -41,7 +41,7 @@ const DIFFICULTY_CONFIG = {
 };
 
 const CATEGORY_COLORS = {
-  agenda:     'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
+  agenda:     'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
   ged:        'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
   tasks:      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
   visitors:   'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
@@ -82,7 +82,7 @@ function CaseCard({ practicalCase }) {
         <div className="flex items-start gap-3 mb-3">
           <span className="text-2xl">{catIcon}</span>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight group-hover:text-[#2E86C1] transition-colors">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight group-hover:text-[#7e22ce] transition-colors">
               {practicalCase.title}
             </h3>
           </div>
@@ -98,7 +98,7 @@ function CaseCard({ practicalCase }) {
           <ul className="space-y-1 mb-3">
             {practicalCase.objectives.slice(0, 2).map((obj, i) => (
               <li key={i} className="flex items-start gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-                <span className="text-[#2E86C1] mt-0.5 flex-shrink-0">•</span>
+                <span className="text-[#7e22ce] mt-0.5 flex-shrink-0">•</span>
                 <span>{obj}</span>
               </li>
             ))}
@@ -124,7 +124,7 @@ function CaseCard({ practicalCase }) {
           className={`w-full text-center text-xs font-semibold py-2.5 rounded-xl transition-colors ${
             practicalCase.completed
               ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300'
-              : 'bg-[#1A3A5C] hover:bg-[#2E86C1] text-white'
+              : 'bg-[#9333EA] hover:bg-[#7e22ce] text-white'
           }`}
         >
           {practicalCase.completed ? '✓ Revoir le cas' : 'Commencer →'}
@@ -146,7 +146,7 @@ function ProgressCircle({ percent, size = 80 }) {
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="currentColor" strokeWidth="4" className="text-gray-200 dark:text-gray-700" />
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="currentColor" strokeWidth="4"
         strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-        className="text-[#2E86C1] transition-all duration-700" />
+        className="text-[#7e22ce] transition-all duration-700" />
     </svg>
   );
 }
@@ -177,7 +177,7 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
       <div className="min-h-screen bg-[#F8FAFC] dark:bg-gray-950 pb-16">
 
         {/* ── Hero ── */}
-        <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] text-white">
+        <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white">
           <div className="max-w-6xl mx-auto px-6 py-12">
             <div className="flex items-center justify-between">
               <div>
@@ -232,7 +232,7 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                     activeCategory === cat.key
-                      ? 'bg-[#1A3A5C] text-white'
+                      ? 'bg-[#9333EA] text-white'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -250,7 +250,7 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
                   <button key={d.key} onClick={() => setActiveDifficulty(d.key)}
                     className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
                       activeDifficulty === d.key
-                        ? 'bg-[#2E86C1] text-white'
+                        ? 'bg-[#7e22ce] text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}>
                     {d.label}
@@ -265,7 +265,7 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
                   <button key={s.key} onClick={() => setActiveStatus(s.key)}
                     className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
                       activeStatus === s.key
-                        ? 'bg-[#2E86C1] text-white'
+                        ? 'bg-[#7e22ce] text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}>
                     {s.label}
@@ -283,7 +283,7 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
               <p className="text-4xl mb-3">🔍</p>
               <p className="text-gray-500">Aucun cas pratique ne correspond à vos filtres.</p>
               <button onClick={() => { setActiveCategory('all'); setActiveDifficulty('all'); setActiveStatus('all'); }}
-                className="mt-3 text-sm text-[#2E86C1] hover:underline">
+                className="mt-3 text-sm text-[#7e22ce] hover:underline">
                 Réinitialiser les filtres
               </button>
             </div>
@@ -297,3 +297,4 @@ export default function PracticalCasesIndex({ cases = [], progress = { completed
     </AppLayout>
   );
 }
+export { PracticalCasesIndex };

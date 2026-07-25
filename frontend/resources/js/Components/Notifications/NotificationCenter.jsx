@@ -56,7 +56,7 @@ const NOTIFICATION_CONFIG = {
     },
     visitor: {
         icon: UserPlusIcon,
-        color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30',
+        color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',
         label: 'Visiteur',
     },
     circular: {
@@ -235,7 +235,7 @@ export default function NotificationCenter() {
                     setIsOpen(!isOpen);
                     if (!isOpen && notifications.length === 0) fetchNotifications();
                 }}
-                className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
                 aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
             >
                 {unreadCount > 0 ? (
@@ -269,7 +269,7 @@ export default function NotificationCenter() {
                                 Notifications
                             </h3>
                             {unreadCount > 0 && (
-                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">
+                                <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-semibold rounded-full">
                                     {unreadCount} nouvelle{unreadCount > 1 ? 's' : ''}
                                 </span>
                             )}
@@ -281,7 +281,7 @@ export default function NotificationCenter() {
                                 <button
                                     onClick={markAllAsRead}
                                     disabled={markingAll}
-                                    className="text-xs text-blue-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+                                    className="text-xs text-purple-600 hover:underline disabled:opacity-50 flex items-center gap-1"
                                 >
                                     <CheckIcon className="h-3 w-3" />
                                     {markingAll ? 'En cours…' : 'Tout marquer lu'}
@@ -300,7 +300,7 @@ export default function NotificationCenter() {
                     <div className="overflow-y-auto" style={{ maxHeight: 'calc(80vh - 120px)' }}>
                         {loading ? (
                             <div className="flex items-center justify-center py-12">
-                                <svg className="animate-spin h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                 </svg>
@@ -359,7 +359,7 @@ export default function NotificationCenter() {
                     <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
                         <Link
                             href="/notifications"
-                            className="flex items-center justify-center gap-2 w-full text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                            className="flex items-center justify-center gap-2 w-full text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                             onClick={() => setIsOpen(false)}
                         >
                             Voir toutes les notifications
@@ -389,7 +389,7 @@ function NotificationItem({ notification, onClick, onMarkRead, isRead = false })
     return (
         <div
             className={`group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-700/50 ${
-                !isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                !isRead ? 'bg-purple-50/50 dark:bg-purple-900/10' : ''
             }`}
             onClick={onClick}
             role="button"
@@ -409,7 +409,7 @@ function NotificationItem({ notification, onClick, onMarkRead, isRead = false })
                     </p>
                     {/* Indicateur non lu */}
                     {!isRead && (
-                        <span className="flex-shrink-0 w-2 h-2 mt-1.5 bg-blue-500 rounded-full" />
+                        <span className="flex-shrink-0 w-2 h-2 mt-1.5 bg-purple-500 rounded-full" />
                     )}
                 </div>
 
@@ -480,3 +480,4 @@ export function useNotificationCount() {
 
     return { unreadCount };
 }
+export { NotificationCenter };

@@ -55,7 +55,7 @@ export default function FuelManagement({ vehicles, recentFuels: initialFuels }) 
                     </div>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2"
+                        className="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition flex items-center gap-2"
                     >
                         <span>+</span> Enregistrer un plein
                     </button>
@@ -298,15 +298,15 @@ function FuelEntryModal({ vehicles, onClose, onSuccess }) {
                     <div className="flex items-center gap-2">
                         <input type="checkbox" id="full_tank" checked={data.full_tank}
                             onChange={e => setData('full_tank', e.target.checked)}
-                            className="w-4 h-4 rounded text-blue-600" />
+                            className="w-4 h-4 rounded text-purple-600" />
                         <label htmlFor="full_tank" className="text-sm text-gray-700 dark:text-gray-300">
                             Plein complet (pour calcul L/100km)
                         </label>
                     </div>
 
                     {estimatedCost && (
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-sm">
-                            <span className="text-blue-700 dark:text-blue-300 font-medium">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 text-sm">
+                            <span className="text-purple-700 dark:text-purple-300 font-medium">
                                 Montant estimé : {estimatedCost} F CFA
                             </span>
                         </div>
@@ -318,7 +318,7 @@ function FuelEntryModal({ vehicles, onClose, onSuccess }) {
                             Annuler
                         </button>
                         <button type="submit" disabled={processing}
-                            className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50">
+                            className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition disabled:opacity-50">
                             {processing ? 'Enregistrement...' : 'Enregistrer'}
                         </button>
                     </div>
@@ -340,3 +340,4 @@ function KpiCard({ icon, label, value }) {
         </div>
     );
 }
+export { FuelManagement };

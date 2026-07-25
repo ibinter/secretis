@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('code')->nullable();
             $table->string('description')->nullable();
-            $table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('manager_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->integer('position')->default(0);
             $table->timestamps();

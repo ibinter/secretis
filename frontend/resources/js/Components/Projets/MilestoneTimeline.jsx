@@ -118,9 +118,9 @@ export default function MilestoneTimeline({ milestones = [], projectStart, proje
 
         {/* Ligne "Aujourd'hui" */}
         <div
-          className="absolute top-0 bottom-0 w-px bg-blue-400 opacity-70"
+          className="absolute top-0 bottom-0 w-px bg-purple-400 opacity-70"
           style={{ left: `${todayPct}%` }}>
-          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-blue-500 font-medium whitespace-nowrap">
+          <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs text-purple-500 font-medium whitespace-nowrap">
             Auj.
           </span>
         </div>
@@ -175,3 +175,4 @@ export default function MilestoneTimeline({ milestones = [], projectStart, proje
     </div>
   );
 }
+export { MilestoneTimeline };

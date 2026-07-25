@@ -14,7 +14,7 @@ const Ic = {
 
 const STATUS_MAP = {
   draft:    { label: 'Brouillon',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-  sent:     { label: 'Envoyée',    cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  sent:     { label: 'Envoyée',    cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   viewed:   { label: 'Vue',        cls: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
   accepted: { label: 'Acceptée',   cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
   refused:  { label: 'Refusée',    cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
@@ -61,9 +61,9 @@ export default function OffersIndex({ offers: propOffers }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Brouillons', value: total_draft, color: 'text-gray-600', bg: 'bg-gray-50 dark:bg-gray-700/50' },
-          { label: 'En cours', value: total_sent, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { label: 'En cours', value: total_sent, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
           { label: 'Acceptées', value: total_accepted, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
-          { label: 'Pipeline total', value: fmtAmount(revenue_pipeline), color: 'text-[#1A3A5C]', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+          { label: 'Pipeline total', value: fmtAmount(revenue_pipeline), color: 'text-[#9333EA]', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
         ].map(k => (
           <div key={k.label} className={`rounded-xl p-4 ${k.bg}`}>
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{k.label}</p>
@@ -74,7 +74,7 @@ export default function OffersIndex({ offers: propOffers }) {
 
       {/* Actions */}
       <div className="flex justify-end mb-4">
-        <Link href="/superadmin/crm/offers/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+        <Link href="/superadmin/crm/offers/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
           <Ic.Plus /> Nouvelle offre
         </Link>
       </div>
@@ -96,7 +96,7 @@ export default function OffersIndex({ offers: propOffers }) {
                 const isExpiringSoon = new Date(o.valid_until) - Date.now() < 86400000 * 5 && !['accepted', 'refused', 'expired'].includes(o.status)
                 return (
                   <tr key={o.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-[#1A3A5C] dark:text-blue-400">{o.number}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-[#9333EA] dark:text-purple-400">{o.number}</td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-900 dark:text-white">{o.prospect_name}</p>
                       <p className="text-xs text-gray-400">{o.company}</p>
@@ -115,7 +115,7 @@ export default function OffersIndex({ offers: propOffers }) {
                     <td className="px-4 py-3"><span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${stat.cls}`}>{stat.label}</span></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <a href={`/superadmin/crm/offers/${o.id}/pdf`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Voir PDF"><Ic.FileText /></a>
+                        <a href={`/superadmin/crm/offers/${o.id}/pdf`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" title="Voir PDF"><Ic.FileText /></a>
                         {['draft', 'sent', 'viewed'].includes(o.status) && (
                           <button onClick={() => sendOffer(o.id)} className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" title="Renvoyer"><Ic.Mail /></button>
                         )}
@@ -135,3 +135,4 @@ export default function OffersIndex({ offers: propOffers }) {
     </SuperAdminLayout>
   )
 }
+export { OffersIndex };

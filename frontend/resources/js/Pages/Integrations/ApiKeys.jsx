@@ -64,7 +64,7 @@ function CopyButton({ value }) {
         setTimeout(() => setCopied(false), 2000);
     }
     return (
-        <button onClick={copy} className="flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors p-1 rounded hover:bg-blue-50">
+        <button onClick={copy} className="flex items-center gap-1 text-xs text-gray-400 hover:text-purple-600 transition-colors p-1 rounded hover:bg-purple-50">
             {copied ? <CheckSolid className="w-4 h-4 text-green-500" /> : <ClipboardDocumentIcon className="w-4 h-4" />}
         </button>
     );
@@ -121,7 +121,7 @@ function KeyCard({ apiKey, onRevoke }) {
             {/* Scopes */}
             <div className="flex flex-wrap gap-1 mb-3">
                 {(apiKey.scopes ?? []).map(scope => (
-                    <span key={scope} className="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-mono">
+                    <span key={scope} className="text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded font-mono">
                         {scope}
                     </span>
                 ))}
@@ -201,9 +201,9 @@ function NewKeyForm({ onCreated, onCancel }) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-2xl p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-2xl p-6 space-y-4">
             <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <KeyIcon className="w-5 h-5 text-blue-600" /> Générer une nouvelle clé API
+                <KeyIcon className="w-5 h-5 text-purple-600" /> Générer une nouvelle clé API
             </h3>
 
             {error && (
@@ -219,7 +219,7 @@ function NewKeyForm({ onCreated, onCancel }) {
                     value={form.name}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     placeholder="Ex : Intégration CRM, Mobile App…"
-                    className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                 />
             </div>
 
@@ -228,7 +228,7 @@ function NewKeyForm({ onCreated, onCancel }) {
                 <select
                     value={form.expires_in}
                     onChange={e => setForm(f => ({ ...f, expires_in: parseInt(e.target.value) }))}
-                    className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                 >
                     {EXPIRY_OPTIONS.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -245,9 +245,9 @@ function NewKeyForm({ onCreated, onCancel }) {
                                 type="checkbox"
                                 checked={form.scopes.includes(scope.key)}
                                 onChange={() => toggleScope(scope.key)}
-                                className="rounded text-blue-600 focus:ring-blue-500"
+                                className="rounded text-purple-600 focus:ring-purple-500"
                             />
-                            <code className="text-xs text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded">{scope.key}</code>
+                            <code className="text-xs text-purple-600 bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded">{scope.key}</code>
                             <span className="text-xs text-gray-500">{scope.label}</span>
                         </label>
                     ))}
@@ -255,14 +255,14 @@ function NewKeyForm({ onCreated, onCancel }) {
                 <button
                     type="button"
                     onClick={() => setForm(f => ({ ...f, scopes: ALL_SCOPES.map(s => s.key) }))}
-                    className="text-xs text-blue-600 hover:underline mt-2"
+                    className="text-xs text-purple-600 hover:underline mt-2"
                 >
                     Tout sélectionner
                 </button>
             </div>
 
             <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl font-semibold text-sm hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                     {loading && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
                     Générer la clé
                 </button>
@@ -311,14 +311,14 @@ export default function ApiKeys({ apiKeys: initialKeys = [] }) {
                                 <ArrowLeftIcon className="w-5 h-5" />
                             </button>
                             <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <KeyIcon className="w-6 h-6 text-blue-600" /> Clés API SECRETIS
+                                <KeyIcon className="w-6 h-6 text-purple-600" /> Clés API SECRETIS
                             </h1>
                         </div>
                         <p className="text-sm text-gray-500 ml-8">{keys.length} clé{keys.length !== 1 ? 's' : ''} · {keys.filter(k => { const d = daysUntilExpiry(k.expires_at); return d === null || d > 0; }).length} active{keys.length !== 1 ? 's' : ''}</p>
                     </div>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-colors"
                     >
                         <PlusIcon className="w-4 h-4" /> Nouvelle clé
                     </button>
@@ -372,7 +372,7 @@ export default function ApiKeys({ apiKeys: initialKeys = [] }) {
                         <KeyIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
                         <p className="font-medium">Aucune clé API</p>
                         <p className="text-sm mt-1">Générez une clé pour accéder à l'API SECRETIS depuis vos applications.</p>
-                        <button onClick={() => setShowForm(true)} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+                        <button onClick={() => setShowForm(true)} className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
                             Créer ma première clé
                         </button>
                     </div>
@@ -387,7 +387,7 @@ export default function ApiKeys({ apiKeys: initialKeys = [] }) {
                 {/* Best practices */}
                 <div className="mt-10 p-5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
-                        <ShieldCheckIcon className="w-4 h-4 text-blue-600" /> Bonnes pratiques de sécurité
+                        <ShieldCheckIcon className="w-4 h-4 text-purple-600" /> Bonnes pratiques de sécurité
                     </h3>
                     <ul className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
                         <li>• Ne jamais stocker une clé API dans le code source (utilisez des variables d'environnement).</li>
@@ -401,3 +401,4 @@ export default function ApiKeys({ apiKeys: initialKeys = [] }) {
         </AppLayout>
     );
 }
+export { ApiKeys };

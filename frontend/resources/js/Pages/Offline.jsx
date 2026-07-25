@@ -23,16 +23,16 @@ function OfflineIllustration() {
       <line x1="68" y1="60" x2="172" y2="140" stroke="#C0392B" strokeWidth="6" strokeLinecap="round" />
 
       {/* Antenne / signal barré */}
-      <path d="M100 75 Q120 55 140 75" stroke="#2E86C1" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.4" />
-      <path d="M90 65 Q120 40 150 65" stroke="#2E86C1" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.2" />
+      <path d="M100 75 Q120 55 140 75" stroke="#7e22ce" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.4" />
+      <path d="M90 65 Q120 40 150 65" stroke="#7e22ce" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.2" />
 
       {/* Point central */}
-      <circle cx="120" cy="82" r="5" fill="#1A3A5C" className="dark:fill-[#A8C0D6]" />
+      <circle cx="120" cy="82" r="5" fill="#9333EA" className="dark:fill-[#A8C0D6]" />
 
       {/* Gouttes de pluie */}
-      <rect x="100" y="135" width="4" height="12" rx="2" fill="#2E86C1" opacity="0.5" />
-      <rect x="118" y="140" width="4" height="10" rx="2" fill="#2E86C1" opacity="0.4" />
-      <rect x="136" y="133" width="4" height="14" rx="2" fill="#2E86C1" opacity="0.5" />
+      <rect x="100" y="135" width="4" height="12" rx="2" fill="#7e22ce" opacity="0.5" />
+      <rect x="118" y="140" width="4" height="10" rx="2" fill="#7e22ce" opacity="0.4" />
+      <rect x="136" y="133" width="4" height="14" rx="2" fill="#7e22ce" opacity="0.5" />
     </svg>
   );
 }
@@ -99,7 +99,7 @@ export default function Offline() {
         <OfflineIllustration />
 
         {/* Titre */}
-        <h1 className="text-2xl font-bold text-[#1A3A5C] dark:text-white text-balance mb-3">
+        <h1 className="text-2xl font-bold text-[#9333EA] dark:text-white text-balance mb-3">
           {retrying ? 'Reconnexion en cours…' : 'Vous êtes hors ligne'}
         </h1>
 
@@ -155,7 +155,7 @@ export default function Offline() {
         <button
           onClick={handleRetry}
           disabled={retrying}
-          className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-[#1A3A5C] dark:bg-secondary hover:bg-[#142D47] dark:hover:bg-secondary/90 disabled:opacity-70 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 dark:focus:ring-secondary/30"
+          className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-[#9333EA] dark:bg-secondary hover:bg-[#142D47] dark:hover:bg-secondary/90 disabled:opacity-70 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 dark:focus:ring-secondary/30"
         >
           {retrying ? (
             <>
@@ -183,3 +183,4 @@ export default function Offline() {
     </div>
   );
 }
+export { Offline };

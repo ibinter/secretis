@@ -244,26 +244,26 @@ class Kernel extends ConsoleKernel
 
         // ── Rappels essai gratuit ─────────────────────────────────────────────
         // Emails aux organisations dont l'essai expire dans 7j / 3j / 1j
-        $schedule->command('secretis:trials:remind --days=7')
+        $schedule->command('secretis:trial-reminders')
             ->dailyAt('03:00')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/scheduler-trials.log'));
 
-        $schedule->command('secretis:trials:remind --days=3')
+        $schedule->command('secretis:remind-expiration')
             ->dailyAt('03:05')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/scheduler-trials.log'));
 
-        $schedule->command('secretis:trials:remind --days=1')
+        $schedule->command('secretis:process-license-grace')
             ->dailyAt('03:10')
             ->withoutOverlapping()
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/scheduler-trials.log'));
 
         // Désactiver les comptes avec essai expiré
-        $schedule->command('secretis:trials:expire')
+        $schedule->command('secretis:process-expired-licenses')
             ->dailyAt('03:30')
             ->withoutOverlapping()
             ->runInBackground()

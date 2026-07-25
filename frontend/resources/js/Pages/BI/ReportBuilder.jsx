@@ -96,7 +96,7 @@ function ScheduleModal({ open, onClose, onSave }) {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     {PRESETS.map(p => (
                         <button key={p.value} onClick={() => setCron(p.value)}
-                            className={`text-xs px-3 py-2 rounded-lg border text-left ${cron === p.value ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold' : 'border-slate-200 hover:border-slate-300'}`}>
+                            className={`text-xs px-3 py-2 rounded-lg border text-left ${cron === p.value ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold' : 'border-slate-200 hover:border-slate-300'}`}>
                             {p.label}
                         </button>
                     ))}
@@ -104,12 +104,12 @@ function ScheduleModal({ open, onClose, onSave }) {
 
                 <label className="block text-xs font-medium text-slate-600 mb-1">Expression CRON personnalisée</label>
                 <input value={cron} onChange={e => setCron(e.target.value)}
-                    className="w-full font-mono text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-1" />
+                    className="w-full font-mono text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 mb-1" />
                 <p className="text-[10px] text-slate-400 mb-5">Format : min heure jour mois jour-semaine</p>
 
                 <div className="flex gap-2 justify-end">
                     <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border border-slate-200 hover:bg-slate-50">Annuler</button>
-                    <button onClick={() => { onSave(cron); onClose(); }} className="px-4 py-2 text-sm rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                    <button onClick={() => { onSave(cron); onClose(); }} className="px-4 py-2 text-sm rounded-lg bg-purple-700 text-white hover:bg-purple-800">
                         Enregistrer la planification
                     </button>
                 </div>
@@ -183,17 +183,17 @@ export default function ReportBuilder() {
             {/* Header */}
             <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10">
                 <Link href="/bi" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><ArrowLeft size={16} /></Link>
-                <LayoutGrid size={16} className="text-blue-700" />
+                <LayoutGrid size={16} className="text-purple-700" />
 
                 <input
                     value={reportName}
                     onChange={e => setReportName(e.target.value)}
-                    className="font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:outline-none px-1 py-0.5 text-sm w-64"
+                    className="font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-200 focus:border-purple-500 focus:outline-none px-1 py-0.5 text-sm w-64"
                 />
 
                 <div className="ml-auto flex items-center gap-2">
                     <button onClick={() => setPreview(p => !p)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${preview ? 'border-blue-600 text-blue-700 bg-blue-50' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border ${preview ? 'border-purple-600 text-purple-700 bg-purple-50' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                         <Eye size={13} /> {preview ? 'Éditer' : 'Prévisualiser'}
                     </button>
 
@@ -203,7 +203,7 @@ export default function ReportBuilder() {
                     </button>
 
                     <button onClick={handleSave} disabled={saving || blocks.length === 0}
-                        className="flex items-center gap-1.5 px-4 py-1.5 text-xs rounded-lg bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-60">
+                        className="flex items-center gap-1.5 px-4 py-1.5 text-xs rounded-lg bg-purple-700 text-white hover:bg-purple-800 disabled:opacity-60">
                         <Save size={13} /> {saving ? 'Enregistrement…' : saved ? '✓ Enregistré' : 'Sauvegarder'}
                     </button>
                 </div>
@@ -231,7 +231,7 @@ export default function ReportBuilder() {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className={`flex-1 overflow-y-auto p-6 transition-colors ${isDraggingOver ? 'bg-blue-50 ring-2 ring-inset ring-blue-300' : ''}`}
+                    className={`flex-1 overflow-y-auto p-6 transition-colors ${isDraggingOver ? 'bg-purple-50 ring-2 ring-inset ring-purple-300' : ''}`}
                 >
                     {blocks.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center text-slate-400 py-24">
@@ -256,7 +256,7 @@ export default function ReportBuilder() {
 
                             {/* Zone d'ajout */}
                             {!preview && (
-                                <div className="border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center h-64 text-slate-300 hover:border-blue-300 hover:text-blue-400 transition-colors cursor-pointer"
+                                <div className="border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center h-64 text-slate-300 hover:border-purple-300 hover:text-purple-400 transition-colors cursor-pointer"
                                     onClick={() => {}}>
                                     <div className="text-center">
                                         <Plus size={24} className="mx-auto mb-2" />
@@ -272,7 +272,7 @@ export default function ReportBuilder() {
             {/* Barre de statut */}
             <div className="bg-white border-t border-slate-200 px-6 py-2 flex items-center gap-4 text-xs text-slate-500">
                 <span>{blocks.length} bloc{blocks.length > 1 ? 's' : ''}</span>
-                {scheduleCron && <span className="text-blue-600 font-medium">⏰ Planifié : {scheduleCron}</span>}
+                {scheduleCron && <span className="text-purple-600 font-medium">⏰ Planifié : {scheduleCron}</span>}
                 {saved && <span className="text-green-600 font-medium">✓ Rapport sauvegardé</span>}
             </div>
 
@@ -285,3 +285,4 @@ export default function ReportBuilder() {
         </div>
     );
 }
+export { ReportBuilder };

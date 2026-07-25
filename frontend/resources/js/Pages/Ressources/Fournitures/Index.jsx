@@ -99,7 +99,7 @@ function MovementModal({ supply, onClose, onSuccess }) {
                 onClick={() => setForm(f => ({ ...f, type: value }))}
                 className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-colors ${
                   form.type === value
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                     : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
@@ -129,7 +129,7 @@ function MovementModal({ supply, onClose, onSuccess }) {
               min={1}
               max={form.type === 'out' ? maxOut : undefined}
               required
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             {form.type === 'out' && form.quantity > maxOut && (
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">
@@ -149,7 +149,7 @@ function MovementModal({ supply, onClose, onSuccess }) {
               onChange={(e) => setForm(f => ({ ...f, reason: e.target.value }))}
               required
               placeholder={form.type === 'in' ? 'Réapprovisionnement commande n°...' : 'Utilisé pour le service...'}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
             />
           </div>
 
@@ -208,7 +208,7 @@ function HistoryModal({ supply, onClose }) {
         <div className="overflow-y-auto flex-1 p-4">
           {loading ? (
             <div className="flex items-center justify-center h-24">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
             </div>
           ) : movements?.length > 0 ? (
             <div className="space-y-2">
@@ -291,7 +291,7 @@ export default function FournituresIndex({ supplies: initialData, lowStock }) {
             </button>
             {isAdmin && (
               <button
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
               >
                 <PlusCircle className="w-4 h-4" />
                 Nouvelle fourniture
@@ -370,7 +370,7 @@ export default function FournituresIndex({ supplies: initialData, lowStock }) {
                           <button
                             onClick={() => setMovTarget(supply)}
                             title="Mouvement"
-                            className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            className="p-1.5 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
                           >
                             <ArrowUpCircle className="w-4 h-4" />
                           </button>
@@ -405,7 +405,7 @@ export default function FournituresIndex({ supplies: initialData, lowStock }) {
                   onClick={() => router.get(route('resources.fournitures.index'), { page }, { preserveState: true, replace: true })}
                   className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                     initialData.current_page === page
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -433,3 +433,4 @@ export default function FournituresIndex({ supplies: initialData, lowStock }) {
     </AuthLayout>
   );
 }
+export { FournituresIndex };

@@ -63,7 +63,7 @@ export default function Invitations({ invitations }) {
     const field = (key) => ({
         value:    form[key],
         onChange: (e) => setForm(p => ({ ...p, [key]: e.target.value })),
-        className:`w-full border ${errors[key] ? 'border-red-400' : 'border-gray-200'} rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#1A3A5C]`,
+        className:`w-full border ${errors[key] ? 'border-red-400' : 'border-gray-200'} rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#9333EA]`,
     });
 
     return (
@@ -79,7 +79,7 @@ export default function Invitations({ invitations }) {
                     </div>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="bg-[#1A3A5C] text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-blue-900"
+                        className="bg-[#9333EA] text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-purple-900"
                     >
                         + Inviter un visiteur
                     </button>
@@ -91,7 +91,7 @@ export default function Invitations({ invitations }) {
                         <div className="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-12 text-center text-gray-400">
                             <div className="text-5xl mb-3">📨</div>
                             <div className="text-lg font-medium">Aucune invitation créée</div>
-                            <button onClick={() => setShowForm(true)} className="mt-4 text-[#1A3A5C] underline font-semibold text-sm">
+                            <button onClick={() => setShowForm(true)} className="mt-4 text-[#9333EA] underline font-semibold text-sm">
                                 Créer ma première invitation →
                             </button>
                         </div>
@@ -188,7 +188,7 @@ export default function Invitations({ invitations }) {
                                     Annuler
                                 </button>
                                 <button type="submit" disabled={loading}
-                                    className="flex-1 bg-[#1A3A5C] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
+                                    className="flex-1 bg-[#9333EA] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50">
                                     {loading ? 'Envoi…' : 'Envoyer l\'invitation'}
                                 </button>
                             </div>
@@ -203,7 +203,7 @@ export default function Invitations({ invitations }) {
                     <div className="bg-white rounded-2xl p-8 w-full max-w-sm text-center">
                         <h3 className="text-xl font-black text-gray-900 mb-1">QR Code d'accès</h3>
                         <p className="text-gray-400 text-sm mb-5">{qrModal.invitation.visitor_name}</p>
-                        <img src={qrModal.qrDataUrl} alt="QR Code" className="mx-auto mb-4 rounded-xl border-4 border-[#1A3A5C]" />
+                        <img src={qrModal.qrDataUrl} alt="QR Code" className="mx-auto mb-4 rounded-xl border-4 border-[#9333EA]" />
                         <div className="bg-gray-50 rounded-xl p-3 font-mono text-sm text-gray-600 mb-5 break-all">
                             {qrModal.invitation.access_code?.substring(0,8).toUpperCase()}
                         </div>
@@ -233,3 +233,4 @@ function Fld({ label, children, error }) {
         </div>
     );
 }
+export { Invitations };

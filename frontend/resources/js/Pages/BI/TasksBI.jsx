@@ -223,3 +223,4 @@ export default function TasksBI() {
         </div>
     );
 }
+export { TasksBI };

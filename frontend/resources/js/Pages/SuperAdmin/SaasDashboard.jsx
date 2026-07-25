@@ -68,7 +68,7 @@ function CustomTooltip({ active, payload, label }) {
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, sub, trend, accent = 'blue', icon }) {
   const acc = {
-    blue:   { bg: 'bg-blue-50',   text: 'text-blue-900',   icon: 'bg-blue-100' },
+    blue:   { bg: 'bg-purple-50',   text: 'text-purple-900',   icon: 'bg-purple-100' },
     green:  { bg: 'bg-green-50',  text: 'text-green-800',  icon: 'bg-green-100' },
     purple: { bg: 'bg-purple-50', text: 'text-purple-900', icon: 'bg-purple-100' },
     amber:  { bg: 'bg-amber-50',  text: 'text-amber-800',  icon: 'bg-amber-100' },
@@ -103,7 +103,7 @@ function NavLink({ label, href, active }) {
       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         active
           ? 'bg-white/20 text-white'
-          : 'text-blue-200 hover:text-white hover:bg-white/10'
+          : 'text-purple-200 hover:text-white hover:bg-white/10'
       }`}
     >
       {label}
@@ -129,7 +129,7 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
       <div className="min-h-screen bg-gray-50">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
-        <header className="bg-blue-900 text-white shadow-xl">
+        <header className="bg-purple-900 text-white shadow-xl">
           <div className="max-w-screen-2xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -143,7 +143,7 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
                       SUPER ADMIN
                     </span>
                   </div>
-                  <p className="text-blue-200 text-xs">{today}</p>
+                  <p className="text-purple-200 text-xs">{today}</p>
                 </div>
               </div>
 
@@ -181,7 +181,7 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
                 value={fmtCompact(kpis.arr)}
                 sub="Revenu annuel récurrent"
                 accent="blue"
-                icon={<svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>}
+                icon={<svg className="w-5 h-5 text-purple-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>}
               />
               <KpiCard
                 label="Croissance MRR"
@@ -314,7 +314,7 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
           <section className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Top clients par MRR</h3>
-              <button onClick={() => router.visit('/superadmin/metrics/mrr')} className="text-sm text-blue-700 font-semibold hover:underline">
+              <button onClick={() => router.visit('/superadmin/metrics/mrr')} className="text-sm text-purple-700 font-semibold hover:underline">
                 Analyse MRR complète →
               </button>
             </div>
@@ -337,7 +337,7 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
+                            <div className="w-8 h-8 bg-purple-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
                             <span className="font-medium text-gray-900 text-sm">{org.name}</span>
                           </div>
                         </td>
@@ -368,3 +368,4 @@ export default function SaasDashboard({ kpis: propKpis, monthly_trend: propTrend
     </>
   );
 }
+export { SaasDashboard };

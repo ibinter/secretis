@@ -49,7 +49,7 @@ function CopyButton({ value, label = 'Copier' }) {
     return (
         <button
             onClick={copy}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-purple-600 transition-colors"
         >
             {copied
                 ? <><CheckSolid className="w-3.5 h-3.5 text-green-500" /> Copié !</>
@@ -173,17 +173,17 @@ function NewAppForm({ onCreated, onCancel }) {
 
             <div>
                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Nom de l'application <span className="text-red-500">*</span></label>
-                <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Mon Application CRM" />
+                <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Mon Application CRM" />
             </div>
 
             <div>
                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Email du partenaire <span className="text-red-500">*</span></label>
-                <input type="email" value={form.partner_email} onChange={e => setForm(f => ({ ...f, partner_email: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="dev@monapp.com" />
+                <input type="email" value={form.partner_email} onChange={e => setForm(f => ({ ...f, partner_email: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="dev@monapp.com" />
             </div>
 
             <div>
                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">URL de callback <span className="text-red-500">*</span></label>
-                <input type="url" value={form.callback_url} onChange={e => setForm(f => ({ ...f, callback_url: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="https://monapp.com/secretis/callback" />
+                <input type="url" value={form.callback_url} onChange={e => setForm(f => ({ ...f, callback_url: e.target.value }))} className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="https://monapp.com/secretis/callback" />
             </div>
 
             {/* Scopes */}
@@ -199,9 +199,9 @@ function NewAppForm({ onCreated, onCancel }) {
                                         type="checkbox"
                                         checked={form.scopes.includes(scope.key)}
                                         onChange={() => toggleScope(scope.key)}
-                                        className="rounded text-blue-600 focus:ring-blue-500"
+                                        className="rounded text-purple-600 focus:ring-purple-500"
                                     />
-                                    <code className="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">{scope.key}</code>
+                                    <code className="text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">{scope.key}</code>
                                     <span className="text-xs text-gray-500">{scope.label}</span>
                                 </label>
                             ))}
@@ -211,7 +211,7 @@ function NewAppForm({ onCreated, onCancel }) {
             </div>
 
             <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl font-semibold text-sm hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                     {loading && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
                     Créer l'application
                 </button>
@@ -282,7 +282,7 @@ export default function WebhooksIn({ partnerApps: initialApps = [], logs: initia
                     </div>
                     <button
                         onClick={() => setShowNewForm(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-colors"
                     >
                         <PlusIcon className="w-4 h-4" /> Nouvelle app
                     </button>
@@ -355,7 +355,7 @@ export default function WebhooksIn({ partnerApps: initialApps = [], logs: initia
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-semibold text-gray-900 dark:text-white">Appels API entrants</h3>
-                            <button onClick={refreshLogs} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                            <button onClick={refreshLogs} className="text-sm text-purple-600 hover:underline flex items-center gap-1">
                                 <ArrowPathIcon className="w-4 h-4" /> Actualiser
                             </button>
                         </div>
@@ -380,14 +380,14 @@ export default function WebhooksIn({ partnerApps: initialApps = [], logs: initia
                 {/* Documentation */}
                 {activeTab === 'docs' && (
                     <div className="space-y-6">
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl">
-                            <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">Base URL</p>
-                            <code className="text-xs text-blue-700 dark:text-blue-300">{BASE_URL}</code>
+                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-2xl">
+                            <p className="text-sm font-semibold text-purple-800 dark:text-purple-200 mb-1">Base URL</p>
+                            <code className="text-xs text-purple-700 dark:text-purple-300">{BASE_URL}</code>
                         </div>
 
                         {/* Auth */}
                         <section>
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><CodeBracketIcon className="w-4 h-4 text-blue-600" /> Authentification</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2"><CodeBracketIcon className="w-4 h-4 text-purple-600" /> Authentification</h3>
                             <div className="p-4 bg-gray-900 rounded-xl text-xs text-green-400 font-mono overflow-x-auto">
                                 {`POST ${BASE_URL.replace('/partner/v1', '')}/partner/oauth/token\n\n{\n  "grant_type": "client_credentials",\n  "client_id": "secretis_xxx",\n  "client_secret": "votre_secret"\n}\n\n# Réponse\n{\n  "access_token": "...",\n  "token_type": "Bearer",\n  "expires_in": 3600\n}`}
                             </div>
@@ -403,7 +403,7 @@ export default function WebhooksIn({ partnerApps: initialApps = [], logs: initia
                             { method: 'POST', path: '/webhooks',            scope: 'webhooks:manage', desc: 'Créer un webhook entrant' },
                         ].map(ep => (
                             <div key={ep.path} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs">
-                                <span className={`w-12 text-center font-bold px-1.5 py-0.5 rounded ${ep.method === 'GET' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>{ep.method}</span>
+                                <span className={`w-12 text-center font-bold px-1.5 py-0.5 rounded ${ep.method === 'GET' ? 'bg-purple-50 text-purple-700' : 'bg-green-50 text-green-700'}`}>{ep.method}</span>
                                 <code className="text-gray-700 dark:text-gray-300 flex-1">{ep.path}</code>
                                 <code className="text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">{ep.scope}</code>
                                 <span className="text-gray-400 hidden sm:block">{ep.desc}</span>
@@ -424,3 +424,4 @@ export default function WebhooksIn({ partnerApps: initialApps = [], logs: initia
         </AppLayout>
     );
 }
+export { WebhooksIn };

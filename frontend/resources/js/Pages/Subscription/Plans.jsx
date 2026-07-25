@@ -424,3 +424,4 @@ export default function Plans({ currentPlan, trialExpiresAt, remainingDays }) {
     </div>
   );
 }
+export { Plans };

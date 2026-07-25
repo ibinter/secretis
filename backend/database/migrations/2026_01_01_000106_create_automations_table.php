@@ -21,7 +21,7 @@ return new class extends Migration
         // ─────────────────────────────────────────────────────────────────────
         Schema::create('automation_rules', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('organization_id')
+            $table->foreignId('organization_id')
                   ->constrained('organizations')
                   ->cascadeOnDelete();
 

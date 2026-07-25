@@ -163,3 +163,4 @@ export default function ClientLogin({ organization, errors: serverErrors }) {
         </>
     );
 }
+export { ClientLogin };

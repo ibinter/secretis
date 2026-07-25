@@ -222,7 +222,7 @@ export default function IshikawaDiagram({ value = {}, onChange, problem = 'Probl
                                 {!readOnly && (
                                     <button
                                         onClick={() => addCause(branch.key)}
-                                        className="text-blue-600 text-xs hover:underline"
+                                        className="text-purple-600 text-xs hover:underline"
                                     >
                                         + Cause
                                     </button>
@@ -241,7 +241,7 @@ export default function IshikawaDiagram({ value = {}, onChange, problem = 'Probl
                                                 value={cause}
                                                 onChange={e => updateCause(branch.key, idx, e.target.value)}
                                                 placeholder="Saisir une cause..."
-                                                className="flex-1 text-xs border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                                className="flex-1 text-xs border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-purple-400"
                                             />
                                             <button
                                                 onClick={() => removeCause(branch.key, idx)}
@@ -260,3 +260,4 @@ export default function IshikawaDiagram({ value = {}, onChange, problem = 'Probl
         </div>
     );
 }
+export { IshikawaDiagram };

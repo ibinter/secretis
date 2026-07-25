@@ -80,7 +80,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
         return (
             <BriefContainer embedded={embedded} onClose={onClose}>
                 <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full" />
+                    <div className="animate-spin h-8 w-8 border-2 border-purple-500 border-t-transparent rounded-full" />
                 </div>
             </BriefContainer>
         );
@@ -102,11 +102,11 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
             <div className={`px-6 py-5 border-b border-gray-100 dark:border-gray-700 ${
                 minutes_until <= 15
                     ? 'bg-red-50 dark:bg-red-900/20'
-                    : 'bg-blue-50 dark:bg-blue-900/20'
+                    : 'bg-purple-50 dark:bg-purple-900/20'
             }`}>
                 <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">
                             Brief pré-réunion
                         </p>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
@@ -129,7 +129,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                     </div>
 
                     {/* Compte à rebours */}
-                    <div className={`text-right ml-4 ${minutes_until <= 15 ? 'text-red-600' : 'text-blue-600'}`}>
+                    <div className={`text-right ml-4 ${minutes_until <= 15 ? 'text-red-600' : 'text-purple-600'}`}>
                         <p className="text-2xl font-bold font-mono">{countdown}</p>
                         <p className="text-xs opacity-70">avant le début</p>
                     </div>
@@ -141,7 +141,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                         href={conference_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-purple-600 text-white text-sm rounded-xl font-medium hover:bg-purple-700 transition-colors"
                     >
                         <LinkIcon className="h-4 w-4" />
                         Rejoindre la réunion
@@ -170,7 +170,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                         <ol className="space-y-2">
                             {agenda_items.map((item, i) => (
                                 <li key={i} className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center mt-0.5">
+                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold flex items-center justify-center mt-0.5">
                                         {i + 1}
                                     </span>
                                     <p className="text-sm text-gray-700 dark:text-gray-300">{item.text}</p>
@@ -188,16 +188,16 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                                 <a
                                     key={doc.id}
                                     href={`/ged/documents/${doc.id}`}
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+                                    className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/30 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors group"
                                 >
-                                    <DocumentTextIcon className="h-5 w-5 text-gray-400 group-hover:text-blue-500 flex-shrink-0" />
+                                    <DocumentTextIcon className="h-5 w-5 text-gray-400 group-hover:text-purple-500 flex-shrink-0" />
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{doc.name}</p>
                                         <p className="text-xs text-gray-400">
                                             Modifié {new Date(doc.updated_at).toLocaleDateString('fr-FR')}
                                         </p>
                                     </div>
-                                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-300 group-hover:text-blue-500 flex-shrink-0" />
+                                    <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-300 group-hover:text-purple-500 flex-shrink-0" />
                                 </a>
                             ))}
                         </div>
@@ -209,7 +209,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                     <Section icon={ClockIcon} title="Dernière réunion similaire">
                         <a
                             href={`/reunions/${last_similar.id}`}
-                            className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/30 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+                            className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/30 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors group"
                         >
                             <div>
                                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{last_similar.title}</p>
@@ -219,7 +219,7 @@ export default function MeetingBrief({ meetingId, onClose, embedded = false }) {
                                     })}
                                 </p>
                             </div>
-                            <span className="text-xs text-blue-600 dark:text-blue-400 group-hover:underline flex items-center gap-1">
+                            <span className="text-xs text-purple-600 dark:text-purple-400 group-hover:underline flex items-center gap-1">
                                 Voir le compte rendu
                                 <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
                             </span>
@@ -294,14 +294,14 @@ function ParticipantChip({ participant }) {
                 <img src={participant.avatar} alt={participant.name}
                     className={`w-7 h-7 rounded-full object-cover ring-2 ${statusColor}`} />
             ) : (
-                <div className={`w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center ring-2 ${statusColor}`}>
+                <div className={`w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs font-bold flex items-center justify-center ring-2 ${statusColor}`}>
                     {initials}
                 </div>
             )}
             <div>
                 <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{participant.name}</p>
                 {participant.role === 'organizer' && (
-                    <p className="text-[10px] text-blue-500 flex items-center gap-0.5">
+                    <p className="text-[10px] text-purple-500 flex items-center gap-0.5">
                         <CheckBadgeIcon className="h-3 w-3" /> Organisateur
                     </p>
                 )}
@@ -309,3 +309,4 @@ function ParticipantChip({ participant }) {
         </div>
     );
 }
+export { MeetingBrief };

@@ -183,7 +183,7 @@ export default function ScormPlayer({ package: pkg, session, scormData, launchUr
 
     const statusConfig = {
         'not attempted': { label: 'Non démarré',  color: 'text-gray-500',  bg: 'bg-gray-100 dark:bg-gray-700' },
-        'incomplete':    { label: 'En cours',       color: 'text-blue-600',  bg: 'bg-blue-100 dark:bg-blue-900/40' },
+        'incomplete':    { label: 'En cours',       color: 'text-purple-600',  bg: 'bg-purple-100 dark:bg-purple-900/40' },
         'completed':     { label: 'Terminé',        color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/40' },
         'passed':        { label: 'Réussi',         color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-900/40' },
         'failed':        { label: 'Échoué',         color: 'text-red-600',   bg: 'bg-red-100 dark:bg-red-900/40' },
@@ -312,3 +312,4 @@ export default function ScormPlayer({ package: pkg, session, scormData, launchUr
         </div>
     );
 }
+export { ScormPlayer };

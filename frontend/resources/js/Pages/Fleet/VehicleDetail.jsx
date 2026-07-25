@@ -89,7 +89,7 @@ export default function VehicleDetail({ vehicle, maintenance, fuelSummary }) {
                     <div className="flex flex-col gap-2">
                         <button
                             onClick={() => router.visit('/fleet/map')}
-                            className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                            className="text-sm bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
                         >
                             🗺️ Carte
                         </button>
@@ -134,7 +134,7 @@ export default function VehicleDetail({ vehicle, maintenance, fuelSummary }) {
                                 onClick={() => setTab(t.key)}
                                 className={`px-5 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 ${
                                     tab === t.key
-                                        ? 'border-blue-600 text-blue-600'
+                                        ? 'border-purple-600 text-purple-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                                 }`}
                             >
@@ -167,7 +167,7 @@ function MaintenanceTab({ maintenance, vehicleId }) {
                 <h2 className="font-semibold text-gray-900 dark:text-white">Planning maintenance</h2>
                 <button
                     onClick={() => router.visit('/fleet/maintenance')}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-purple-600 hover:underline"
                 >
                     Voir le planning complet →
                 </button>
@@ -325,7 +325,7 @@ function TripsTab({ vehicleId }) {
                                     </span>
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                                         t.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                        t.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                                        t.status === 'in_progress' ? 'bg-purple-100 text-purple-700' :
                                         'bg-gray-100 text-gray-500'
                                     }`}>{t.status}</span>
                                 </div>
@@ -356,7 +356,7 @@ function AssignmentsTab({ vehicle }) {
             <p className="text-gray-400 text-sm">Gérez les affectations via le module dédié.</p>
             <button
                 onClick={() => router.visit('/fleet/assignments')}
-                className="mt-3 text-sm text-blue-600 hover:underline"
+                className="mt-3 text-sm text-purple-600 hover:underline"
             >
                 Voir les affectations →
             </button>
@@ -389,7 +389,7 @@ function KpiCard({ label, value, icon }) {
 function StatusBadge({ status }) {
     const config = {
         available   : 'bg-green-100 text-green-700',
-        in_use      : 'bg-blue-100 text-blue-700',
+        in_use      : 'bg-purple-100 text-purple-700',
         maintenance : 'bg-orange-100 text-orange-700',
         retired     : 'bg-gray-100 text-gray-500',
     };
@@ -407,3 +407,4 @@ function StatusBadge({ status }) {
 // import axios because TripsTab uses it
 import axios from 'axios';
 import { useEffect } from 'react';
+export { VehicleDetail };

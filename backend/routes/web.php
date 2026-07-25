@@ -101,8 +101,8 @@ Route::middleware(['throttle:web'])->group(function () {
     Route::prefix('aide')->name('help.')->group(function () {
         Route::get('/', [HelpCenterController::class, 'index'])->name('index');
         Route::get('/search', [HelpCenterController::class, 'search'])->name('search');
-        Route::get('/{category:slug}', [HelpCenterController::class, 'category'])->name('category');
-        Route::get('/{category:slug}/{article:slug}', [HelpCenterController::class, 'article'])->name('article');
+        Route::get('/{category:slug}', [HelpCenterController::class, 'category'])->name('category')->where('category', '^(?!tickets$|cas-pratiques$).*$');
+        Route::get('/{category:slug}/{article:slug}', [HelpCenterController::class, 'article'])->name('article')->where('category', '^(?!tickets$|cas-pratiques$).*$');
     });
 
     // Santé & API Docs
@@ -311,7 +311,7 @@ Route::middleware([
         Route::post('/visits/{id}/check-out', [VisitorController::class, 'checkOut'])->name('check-out');
         Route::get('/log', [VisitorController::class, 'log'])->name('log');
         Route::get('/reports', [VisitorController::class, 'reports'])->name('reports');
-        Route::get('/blacklist', [VisitorController::class, 'blacklist'])->name('blacklist');
+        Route::get('/blacklist', [VisitorController::class, 'blacklistPage'])->name('blacklist');
         Route::post('/visitors/{id}/blacklist', [VisitorController::class, 'addToBlacklist'])->name('visitors.blacklist');
 
         Route::prefix('invitations')->name('invitations.')->group(function () {
@@ -758,3 +758,68 @@ Route::middleware(['auth', 'role:super-admin'])
         Route::post('/{partner}/suspend', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'suspend'])->name('suspend');
         Route::post('/commissions/{commission}/pay', [\App\Http\Controllers\SuperAdmin\PartnersController::class, 'payCommission'])->name('commission.pay');
     });
+
+
+// Page licence expirée (cible du middleware CheckLicense)
+Route::middleware(['auth'])->get('/subscription/expired', function () {
+    return \Inertia\Inertia::render('Subscription/Expired');
+})->name('subscription.expired');
+
+Route::get('/account/suspended', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'account.suspended']);
+})->name('account.suspended');
+
+Route::get('/license/expired', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'license.expired']);
+})->name('license.expired');
+
+Route::get('/license/renew', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'license.renew']);
+})->name('license.renew');
+
+Route::get('/onboarding/index', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'onboarding.index']);
+})->name('onboarding.index');
+
+Route::get('/organization', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'organization']);
+})->name('organization');
+
+Route::get('/subscription/upgrade', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'subscription.upgrade']);
+})->name('subscription.upgrade');
+
+Route::get('/support/contact', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'support.contact']);
+})->name('support.contact');
+
+Route::get('/tenant/not-found', function () {
+    return \Inertia\Inertia::render('Errors/Generic', ['code' => 'tenant.not-found']);
+})->name('tenant.not-found');
+
+
+// ── Pages publiques : légales + démonstration (landing) ──
+Route::get('/mentions-legales',  [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'mentions-legales');
+Route::get('/cgu',               [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'cgu');
+Route::get('/confidentialite',   [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'confidentialite');
+Route::get('/cookies',           [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'cookies');
+Route::get('/contrat-licence',   [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'contrat-licence');
+Route::get('/demander-demonstration',  [\App\Http\Controllers\LegalPagesController::class, 'demoForm']);
+Route::post('/demander-demonstration', [\App\Http\Controllers\LegalPagesController::class, 'demoSubmit']);
+Route::get('/aide/tickets', fn () => redirect('/aide'));
+
+
+// Inscription publique (essai gratuit 14 jours)
+Route::post('/register', [\App\Http\Controllers\Auth\AuthController::class, 'register'])
+    ->middleware(['guest', 'throttle:10,1'])->name('register.store');
+
+
+// ── Flux mot de passe (alias FR + endpoints POST) ──
+Route::middleware('guest')->group(function () {
+    Route::get('/mot-de-passe-oublie', [\App\Http\Controllers\Auth\AuthController::class, 'showForgotPassword']);
+    Route::get('/reinitialiser-mot-de-passe/{token}', [\App\Http\Controllers\Auth\AuthController::class, 'showResetPassword']);
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:10,1')->name('password.email');
+    Route::post('/reset-password', [\App\Http\Controllers\Auth\AuthController::class, 'resetPassword'])
+        ->middleware('throttle:10,1')->name('password.update');
+});

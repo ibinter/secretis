@@ -118,11 +118,11 @@ export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm flex items-center gap-1">← Dashboard SaaS</button>
-              <span className="text-blue-400">/</span>
+              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm flex items-center gap-1">← Dashboard SaaS</button>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Analyse MRR</h1>
               <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
             </div>
@@ -134,10 +134,10 @@ export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_
           {/* KPIs MRR */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
             {[
-              { label: 'MRR',            value: fmtM(breakdown.mrr) + ' XOF',            color: 'text-blue-900 bg-blue-50' },
+              { label: 'MRR',            value: fmtM(breakdown.mrr) + ' XOF',            color: 'text-purple-900 bg-purple-50' },
               { label: 'ARR',            value: fmtM(breakdown.arr) + ' XOF',            color: 'text-teal-800 bg-teal-50' },
               { label: 'New MRR',        value: '+' + fmtM(breakdown.new_mrr) + ' XOF',  color: 'text-green-800 bg-green-50' },
-              { label: 'Expansion MRR',  value: '+' + fmtM(breakdown.expansion_mrr) + ' XOF', color: 'text-blue-700 bg-blue-50' },
+              { label: 'Expansion MRR',  value: '+' + fmtM(breakdown.expansion_mrr) + ' XOF', color: 'text-purple-700 bg-purple-50' },
               { label: 'Churned MRR',    value: '-' + fmtM(breakdown.churned_mrr) + ' XOF',  color: 'text-red-700 bg-red-50' },
               { label: 'Net New MRR',    value: (breakdown.net_new_mrr >= 0 ? '+' : '') + fmtM(breakdown.net_new_mrr) + ' XOF', color: breakdown.net_new_mrr >= 0 ? 'text-green-800 bg-green-50' : 'text-red-700 bg-red-50' },
             ].map(k => (
@@ -201,7 +201,7 @@ export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_
                     key={s}
                     onClick={() => setScenario(s)}
                     className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      scenario === s ? 'bg-white shadow text-blue-900' : 'text-gray-500 hover:text-gray-700'
+                      scenario === s ? 'bg-white shadow text-purple-900' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     {s === 'bear' ? 'Pessimiste' : s === 'base' ? 'Réaliste' : 'Optimiste'}
@@ -255,7 +255,7 @@ export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_
                         <td className="px-6 py-3 text-sm text-gray-400 font-medium">{i + 1}</td>
                         <td className="px-6 py-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
+                            <div className="w-8 h-8 bg-purple-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
                             <span className="font-medium text-gray-900 text-sm">{org.name}</span>
                           </div>
                         </td>
@@ -282,3 +282,4 @@ export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_
     </>
   );
 }
+export { MrrAnalysis };

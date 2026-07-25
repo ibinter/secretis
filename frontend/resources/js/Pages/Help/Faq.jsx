@@ -143,7 +143,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
                 {/* ── Hero ──────────────────────────────────────────────── */}
-                <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] text-white py-16 px-4">
+                <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white py-16 px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6">
                             <Icon.MessageCircle />
@@ -156,7 +156,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                         <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                             {locale === 'fr' ? 'Questions fréquentes' : 'Frequently asked questions'}
                         </h1>
-                        <p className="text-blue-100 text-lg mb-8">
+                        <p className="text-purple-100 text-lg mb-8">
                             {locale === 'fr'
                                 ? 'Trouvez rapidement la réponse à vos questions sur IBIG SECRETIS.'
                                 : 'Quickly find answers to your questions about IBIG SECRETIS.'}
@@ -191,7 +191,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                                 onClick={() => setLocale('fr')}
                                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                                     locale === 'fr'
-                                        ? 'bg-white text-[#1A3A5C]'
+                                        ? 'bg-white text-[#9333EA]'
                                         : 'bg-white/20 hover:bg-white/30 text-white'
                                 }`}
                             >
@@ -201,7 +201,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                                 onClick={() => setLocale('en')}
                                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                                     locale === 'en'
-                                        ? 'bg-white text-[#1A3A5C]'
+                                        ? 'bg-white text-[#9333EA]'
                                         : 'bg-white/20 hover:bg-white/30 text-white'
                                 }`}
                             >
@@ -220,8 +220,8 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                             onClick={() => setActiveCategory('all')}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                 activeCategory === 'all'
-                                    ? 'bg-[#1A3A5C] text-white'
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-[#2E86C1] hover:text-[#2E86C1]'
+                                    ? 'bg-[#9333EA] text-white'
+                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-[#7e22ce] hover:text-[#7e22ce]'
                             }`}
                         >
                             {locale === 'fr' ? 'Toutes' : 'All'}
@@ -235,8 +235,8 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                                     onClick={() => setActiveCategory(key)}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                         activeCategory === key
-                                            ? 'bg-[#1A3A5C] text-white'
-                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-[#2E86C1] hover:text-[#2E86C1]'
+                                            ? 'bg-[#9333EA] text-white'
+                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-[#7e22ce] hover:text-[#7e22ce]'
                                     }`}
                                 >
                                     {getCatLabel(key)}
@@ -282,7 +282,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                             Object.entries(grouped).map(([cat, items]) => (
                                 <section key={cat} className="mb-10">
                                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                                        <span className="w-1 h-6 rounded-full bg-[#2E86C1] inline-block" />
+                                        <span className="w-1 h-6 rounded-full bg-[#7e22ce] inline-block" />
                                         {getCatLabel(cat)}
                                         <span className="text-sm font-normal text-gray-400 ml-1">({items.length})</span>
                                     </h2>
@@ -307,13 +307,13 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                     )}
 
                     {/* CTA support */}
-                    <div className="mt-12 rounded-2xl bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] text-white p-8 text-center">
+                    <div className="mt-12 rounded-2xl bg-gradient-to-r from-[#9333EA] to-[#7e22ce] text-white p-8 text-center">
                         <h3 className="text-xl font-bold mb-2">
                             {locale === 'fr'
                                 ? 'Vous n\'avez pas trouvé votre réponse ?'
                                 : 'Didn\'t find your answer?'}
                         </h3>
-                        <p className="text-blue-100 mb-6">
+                        <p className="text-purple-100 mb-6">
                             {locale === 'fr'
                                 ? 'Notre équipe de support est disponible pour vous aider.'
                                 : 'Our support team is available to help you.'}
@@ -321,7 +321,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Link
                                 href="/aide/ticket"
-                                className="inline-flex items-center justify-center gap-2 bg-white text-[#1A3A5C] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+                                className="inline-flex items-center justify-center gap-2 bg-white text-[#9333EA] px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-colors"
                             >
                                 {locale === 'fr' ? 'Ouvrir un ticket support' : 'Open a support ticket'}
                             </Link>
@@ -338,3 +338,4 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
         </>
     );
 }
+export { Faq };

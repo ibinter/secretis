@@ -33,7 +33,7 @@ import { CheckCircleIcon as CheckCircleSolid, ExclamationCircleIcon } from '@her
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const MODULE_ICONS = {
-    events:     { icon: CalendarDaysIcon,         color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    events:     { icon: CalendarDaysIcon,         color: 'text-purple-500',   bg: 'bg-purple-50 dark:bg-purple-900/20' },
     tasks:      { icon: ClipboardDocumentListIcon, color: 'text-emerald-500',bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     visitors:   { icon: UsersIcon,                 color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20' },
     hr:         { icon: IdentificationIcon,         color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
@@ -58,14 +58,14 @@ function StepIndicator({ current }) {
                     <div className="flex flex-col items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
                             step.id < current  ? 'bg-green-500 text-white' :
-                            step.id === current ? 'bg-[#2E86C1] text-white ring-4 ring-[#2E86C1]/20' :
+                            step.id === current ? 'bg-[#7e22ce] text-white ring-4 ring-[#7e22ce]/20' :
                             'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         }`}>
                             {step.id < current ? <CheckCircleSolid className="w-4 h-4" /> : step.id}
                         </div>
                         <span className={`mt-1 text-xs font-medium ${
                             step.id === current
-                                ? 'text-[#2E86C1]'
+                                ? 'text-[#7e22ce]'
                                 : 'text-gray-400 dark:text-gray-500'
                         }`}>{step.label}</span>
                     </div>
@@ -87,21 +87,21 @@ function ModuleCard({ moduleKey, config, label, selected, onSelect }) {
             onClick={() => onSelect(moduleKey)}
             className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
                 selected
-                    ? 'border-[#2E86C1] bg-blue-50 dark:bg-blue-900/20'
+                    ? 'border-[#7e22ce] bg-purple-50 dark:bg-purple-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
             }`}
         >
             <span className={`p-2 rounded-lg ${config.bg}`}>
                 <Icon className={`w-5 h-5 ${config.color}`} />
             </span>
-            <span className={`text-sm font-semibold ${selected ? 'text-[#2E86C1]' : 'text-gray-700 dark:text-gray-300'}`}>
+            <span className={`text-sm font-semibold ${selected ? 'text-[#7e22ce]' : 'text-gray-700 dark:text-gray-300'}`}>
                 {label}
             </span>
         </button>
     );
 }
 
-function ProgressBar({ value, color = 'bg-[#2E86C1]' }) {
+function ProgressBar({ value, color = 'bg-[#7e22ce]' }) {
     return (
         <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
             <div
@@ -193,13 +193,13 @@ function StepUpload({ modules, onNext }) {
 
             {/* Télécharger le template */}
             {selectedModule && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 border border-blue-100 dark:border-blue-800">
-                    <ArrowDownTrayIcon className="w-4 h-4 text-[#2E86C1] flex-shrink-0" />
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 border border-purple-100 dark:border-purple-800">
+                    <ArrowDownTrayIcon className="w-4 h-4 text-[#7e22ce] flex-shrink-0" />
                     <span>Téléchargez le fichier modèle pour éviter les erreurs de format.</span>
-                    <button onClick={() => downloadTemplate('xlsx')} className="ml-auto text-[#2E86C1] font-semibold hover:underline whitespace-nowrap">
+                    <button onClick={() => downloadTemplate('xlsx')} className="ml-auto text-[#7e22ce] font-semibold hover:underline whitespace-nowrap">
                         Modèle Excel
                     </button>
-                    <button onClick={() => downloadTemplate('csv')} className="text-[#2E86C1] font-semibold hover:underline whitespace-nowrap">
+                    <button onClick={() => downloadTemplate('csv')} className="text-[#7e22ce] font-semibold hover:underline whitespace-nowrap">
                         Modèle CSV
                     </button>
                 </div>
@@ -215,10 +215,10 @@ function StepUpload({ modules, onNext }) {
                     onClick={() => inputRef.current?.click()}
                     className={`relative flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
                         dragging
-                            ? 'border-[#2E86C1] bg-blue-50 dark:bg-blue-900/20'
+                            ? 'border-[#7e22ce] bg-purple-50 dark:bg-purple-900/20'
                             : file
                             ? 'border-green-400 bg-green-50 dark:bg-green-900/10'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-[#2E86C1] bg-white dark:bg-gray-800 hover:bg-blue-50/30'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-[#7e22ce] bg-white dark:bg-gray-800 hover:bg-purple-50/30'
                     }`}
                 >
                     <input
@@ -246,7 +246,7 @@ function StepUpload({ modules, onNext }) {
                         <div className="text-center">
                             <CloudArrowUpIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                             <p className="text-gray-600 dark:text-gray-400 font-medium">
-                                Glissez un fichier ici ou <span className="text-[#2E86C1] font-semibold">parcourir</span>
+                                Glissez un fichier ici ou <span className="text-[#7e22ce] font-semibold">parcourir</span>
                             </p>
                             <p className="text-xs text-gray-400 mt-1">CSV, XLSX — max 10 MB — max 10 000 lignes</p>
                         </div>
@@ -263,7 +263,7 @@ function StepUpload({ modules, onNext }) {
             <button
                 onClick={handleUpload}
                 disabled={! file || ! selectedModule || uploading}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white font-semibold transition-colors disabled:opacity-50 shadow-sm"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white font-semibold transition-colors disabled:opacity-50 shadow-sm"
             >
                 {uploading ? <><ArrowPathIcon className="w-5 h-5 animate-spin" /> Analyse en cours...</> : <><ArrowRightIcon className="w-5 h-5" /> Analyser le fichier</>}
             </button>
@@ -313,7 +313,7 @@ function StepMapping({ uploadData, onNext, onBack }) {
         <div className="space-y-6">
             {/* Infos fichier */}
             <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 flex items-center gap-4 text-sm">
-                <DocumentArrowDownIcon className="w-8 h-8 text-[#2E86C1]" />
+                <DocumentArrowDownIcon className="w-8 h-8 text-[#7e22ce]" />
                 <div>
                     <p className="font-semibold text-gray-800 dark:text-gray-200">{uploadData.total_rows?.toLocaleString('fr-FR')} lignes détectées</p>
                     <p className="text-gray-400">
@@ -375,7 +375,7 @@ function StepMapping({ uploadData, onNext, onBack }) {
                                                 <select
                                                     value={mapped || ''}
                                                     onChange={e => updateMapping(col, e.target.value)}
-                                                    className="flex-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                                    className="flex-1 text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                                                 >
                                                     <option value="">— Ignorer —</option>
                                                     {available_fields.map(f => (
@@ -412,7 +412,7 @@ function StepMapping({ uploadData, onNext, onBack }) {
                         type="checkbox"
                         checked={skipHeader}
                         onChange={e => setSkipHeader(e.target.checked)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-[#2E86C1]"
+                        className="rounded border-gray-300 dark:border-gray-600 text-[#7e22ce]"
                     />
                     Ignorer la première ligne (en-tête)
                 </label>
@@ -421,7 +421,7 @@ function StepMapping({ uploadData, onNext, onBack }) {
                         type="checkbox"
                         checked={updateExisting}
                         onChange={e => setUpdateExisting(e.target.checked)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-[#2E86C1]"
+                        className="rounded border-gray-300 dark:border-gray-600 text-[#7e22ce]"
                     />
                     Mettre à jour les enregistrements existants
                 </label>
@@ -440,7 +440,7 @@ function StepMapping({ uploadData, onNext, onBack }) {
                 <button
                     onClick={handleValidate}
                     disabled={validating}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white font-semibold text-sm transition-colors disabled:opacity-60"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white font-semibold text-sm transition-colors disabled:opacity-60"
                 >
                     {validating ? <><ArrowPathIcon className="w-4 h-4 animate-spin" /> Validation...</> : <><ArrowRightIcon className="w-4 h-4" /> Valider le mapping</>}
                 </button>
@@ -491,7 +491,7 @@ function StepValidation({ validationData, uploadData, onNext, onBack }) {
                         <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                             Erreurs détectées ({errors.length} affichées)
                         </p>
-                        <button onClick={downloadErrors} className="flex items-center gap-1.5 text-xs text-[#2E86C1] hover:underline">
+                        <button onClick={downloadErrors} className="flex items-center gap-1.5 text-xs text-[#7e22ce] hover:underline">
                             <ArrowDownTrayIcon className="w-3.5 h-3.5" /> Exporter les erreurs
                         </button>
                     </div>
@@ -526,7 +526,7 @@ function StepValidation({ validationData, uploadData, onNext, onBack }) {
                 {can_import && (
                     <button
                         onClick={onNext}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white font-semibold text-sm transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white font-semibold text-sm transition-colors"
                     >
                         <ArrowRightIcon className="w-4 h-4" />
                         Importer {valid_rows?.toLocaleString('fr-FR')} lignes valides
@@ -577,14 +577,14 @@ function StepImport({ uploadData }) {
     if (status === 'idle') {
         return (
             <div className="text-center py-8">
-                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <ArrowRightIcon className="w-8 h-8 text-[#2E86C1]" />
+                <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ArrowRightIcon className="w-8 h-8 text-[#7e22ce]" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Prêt à importer</h3>
                 <p className="text-gray-500 dark:text-gray-400 mb-6">Cliquez sur le bouton pour démarrer l'importation.</p>
                 <button
                     onClick={startImport}
-                    className="px-8 py-3 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white font-semibold transition-colors shadow-sm"
+                    className="px-8 py-3 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white font-semibold transition-colors shadow-sm"
                 >
                     Démarrer l'import
                 </button>
@@ -595,7 +595,7 @@ function StepImport({ uploadData }) {
     if (status === 'running') {
         return (
             <div className="text-center py-8 space-y-4">
-                <ArrowPathIcon className="w-12 h-12 text-[#2E86C1] mx-auto animate-spin" />
+                <ArrowPathIcon className="w-12 h-12 text-[#7e22ce] mx-auto animate-spin" />
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Importation en cours...</h3>
                 <div className="max-w-xs mx-auto">
                     <ProgressBar value={progress} />
@@ -611,7 +611,7 @@ function StepImport({ uploadData }) {
                 <XCircleIcon className="w-12 h-12 text-red-500 mx-auto" />
                 <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Import échoué</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
-                <button onClick={startImport} className="px-6 py-2.5 rounded-xl bg-[#2E86C1] text-white font-semibold">
+                <button onClick={startImport} className="px-6 py-2.5 rounded-xl bg-[#7e22ce] text-white font-semibold">
                     Réessayer
                 </button>
             </div>
@@ -734,3 +734,4 @@ export default function ImportWizard({ modules = {} }) {
         </AppLayout>
     );
 }
+export { ImportWizard };

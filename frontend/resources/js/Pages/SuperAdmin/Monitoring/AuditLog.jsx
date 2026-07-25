@@ -26,7 +26,7 @@ function Badge({ label, className }) {
   )
 }
 
-function SectionCard({ title, icon: Icon, iconColor = 'text-[#1A3A5C]', children, count }) {
+function SectionCard({ title, icon: Icon, iconColor = 'text-[#9333EA]', children, count }) {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
       <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
@@ -178,7 +178,7 @@ function LogTable({ logs, onSelect, extraColumns = [] }) {
               </td>
               <td className="px-4 py-3">
                 <button onClick={e => { e.stopPropagation(); onSelect(log) }}
-                  className="text-gray-300 hover:text-[#1A3A5C] dark:hover:text-blue-400 transition"
+                  className="text-gray-300 hover:text-[#9333EA] dark:hover:text-purple-400 transition"
                 >
                   <Eye size={15} />
                 </button>
@@ -244,7 +244,7 @@ export default function SuperAdminAuditLog({
     { id: 'sensitive', label: 'Données sensibles',      icon: Lock },
   ]
 
-  const selectClass = 'text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]'
+  const selectClass = 'text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#9333EA]'
 
   return (
     <>
@@ -255,7 +255,7 @@ export default function SuperAdminAuditLog({
         {/* ── En-tête ─────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A3A5C] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#9333EA] flex items-center justify-center">
               <Shield size={20} className="text-white" />
             </div>
             <div>
@@ -269,7 +269,7 @@ export default function SuperAdminAuditLog({
               <RefreshCw size={14} /> Actualiser
             </button>
             <button onClick={exportCsv}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-[#1A3A5C] text-white hover:bg-[#162f4a] transition">
+              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-[#9333EA] text-white hover:bg-[#162f4a] transition">
               <Download size={14} /> Exporter CSV
             </button>
           </div>
@@ -307,7 +307,7 @@ export default function SuperAdminAuditLog({
               onChange={e => setFilters(f => ({ ...f, date_to: e.target.value }))} />
 
             <button onClick={applyFilters}
-              className="px-3 py-2 text-sm rounded-lg bg-[#1A3A5C] text-white hover:bg-[#162f4a] transition">
+              className="px-3 py-2 text-sm rounded-lg bg-[#9333EA] text-white hover:bg-[#162f4a] transition">
               Filtrer
             </button>
           </div>
@@ -324,7 +324,7 @@ export default function SuperAdminAuditLog({
                 className={[
                   'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition',
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-gray-900 text-[#1A3A5C] dark:text-white shadow-sm'
+                    ? 'bg-white dark:bg-gray-900 text-[#9333EA] dark:text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
                 ].join(' ')}
               >
@@ -375,3 +375,4 @@ export default function SuperAdminAuditLog({
     </>
   )
 }
+export { SuperAdminAuditLog };

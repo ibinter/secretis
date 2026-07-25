@@ -66,7 +66,7 @@ function FormField({ label, error, required, children, hint }) {
 function Input({ className = '', ...props }) {
     return (
         <input
-            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition ${className}`}
+            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition ${className}`}
             {...props}
         />
     );
@@ -75,7 +75,7 @@ function Input({ className = '', ...props }) {
 function Select({ children, className = '', ...props }) {
     return (
         <select
-            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition ${className}`}
+            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition ${className}`}
             {...props}
         >
             {children}
@@ -88,7 +88,7 @@ function SaveButton({ processing, dirty }) {
         <button
             type="submit"
             disabled={processing || !dirty}
-            className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition flex items-center gap-2"
+            className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition flex items-center gap-2"
         >
             {processing && (
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -133,7 +133,7 @@ function LogoUploader({ logoUrl, onFileChange, onRemove }) {
         <div className="flex items-start gap-6">
             <div
                 className={`relative flex-shrink-0 w-32 h-20 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer transition
-                    ${dragging ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'}`}
+                    ${dragging ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'}`}
                 onClick={() => inputRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
@@ -195,10 +195,10 @@ function DepartementsManager({ value, onChange }) {
         <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
                 {value.map((dep) => (
-                    <span key={dep} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-800">
+                    <span key={dep} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm border border-purple-200 dark:border-purple-800">
                         {dep}
                         <button type="button" onClick={() => remove(dep)}
-                            className="text-blue-400 hover:text-red-500 transition text-xs leading-none">
+                            className="text-purple-400 hover:text-red-500 transition text-xs leading-none">
                             ✕
                         </button>
                     </span>
@@ -385,7 +385,7 @@ export default function Organisation({ organisation, flash }) {
                                     onChange={(e) => setData('adresse', e.target.value)}
                                     rows={2}
                                     placeholder="Rue, Quartier, Ville, Pays"
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition resize-none"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition resize-none"
                                 />
                             </FormField>
                         </div>
@@ -505,3 +505,4 @@ export default function Organisation({ organisation, flash }) {
         </AppLayout>
     );
 }
+export { Organisation };

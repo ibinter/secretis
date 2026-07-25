@@ -119,7 +119,7 @@ export default function BudgetRevision({ budget }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Décrivez les raisons de cette révision budgétaire (ex : hausse imprévue des coûts de matières premières, nouvel appel d'offres...)"
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C] resize-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA] resize-none"
           />
         </div>
 
@@ -138,11 +138,11 @@ export default function BudgetRevision({ budget }) {
                   <th className="px-4 py-2.5 font-medium">Compte</th>
                   <th className="px-4 py-2.5 font-medium">Libellé</th>
                   {/* Actuel */}
-                  <th className="px-3 py-2.5 font-medium text-right bg-blue-50">Q1 Act.</th>
-                  <th className="px-3 py-2.5 font-medium text-right bg-blue-50">Q2 Act.</th>
-                  <th className="px-3 py-2.5 font-medium text-right bg-blue-50">Q3 Act.</th>
-                  <th className="px-3 py-2.5 font-medium text-right bg-blue-50">Q4 Act.</th>
-                  <th className="px-3 py-2.5 font-medium text-right bg-blue-50 border-r border-gray-200">Total Act.</th>
+                  <th className="px-3 py-2.5 font-medium text-right bg-purple-50">Q1 Act.</th>
+                  <th className="px-3 py-2.5 font-medium text-right bg-purple-50">Q2 Act.</th>
+                  <th className="px-3 py-2.5 font-medium text-right bg-purple-50">Q3 Act.</th>
+                  <th className="px-3 py-2.5 font-medium text-right bg-purple-50">Q4 Act.</th>
+                  <th className="px-3 py-2.5 font-medium text-right bg-purple-50 border-r border-gray-200">Total Act.</th>
                   {/* Révisé */}
                   <th className="px-3 py-2.5 font-medium text-right bg-amber-50">Q1 Rév.</th>
                   <th className="px-3 py-2.5 font-medium text-right bg-amber-50">Q2 Rév.</th>
@@ -168,11 +168,11 @@ export default function BudgetRevision({ budget }) {
 
                       {/* Actuel (lecture seule) */}
                       {['q1_amount', 'q2_amount', 'q3_amount', 'q4_amount'].map((q) => (
-                        <td key={q} className="px-3 py-2 text-right text-gray-500 bg-blue-50/40">
+                        <td key={q} className="px-3 py-2 text-right text-gray-500 bg-purple-50/40">
                           {fcfa(line[q])}
                         </td>
                       ))}
-                      <td className="px-3 py-2 text-right font-semibold text-gray-700 bg-blue-50/40 border-r border-gray-200">
+                      <td className="px-3 py-2 text-right font-semibold text-gray-700 bg-purple-50/40 border-r border-gray-200">
                         {fcfa(origAnnual)}
                       </td>
 
@@ -228,7 +228,7 @@ export default function BudgetRevision({ budget }) {
             <div className="space-y-2">
               {budget.revisions.map((rev) => (
                 <div key={rev.id} className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#1A3A5C] text-white text-xs flex items-center justify-center font-bold">
+                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-[#9333EA] text-white text-xs flex items-center justify-center font-bold">
                     {rev.revision_number}
                   </div>
                   <div className="flex-1">
@@ -251,7 +251,7 @@ export default function BudgetRevision({ budget }) {
           <button
             type="submit"
             disabled={submitting}
-            className="px-6 py-2 bg-[#1A3A5C] text-white text-sm rounded-lg hover:bg-[#16324e] disabled:opacity-50 transition font-medium"
+            className="px-6 py-2 bg-[#9333EA] text-white text-sm rounded-lg hover:bg-[#16324e] disabled:opacity-50 transition font-medium"
           >
             {submitting ? 'Enregistrement...' : needsApproval ? 'Soumettre pour approbation' : 'Enregistrer la révision'}
           </button>
@@ -261,3 +261,4 @@ export default function BudgetRevision({ budget }) {
     </AuthLayout>
   );
 }
+export { BudgetRevision };

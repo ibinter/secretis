@@ -43,7 +43,7 @@ const TABS = [
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Faible',  color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'      },
-  normal: { label: 'Normal',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'   },
+  normal: { label: 'Normal',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'   },
   high:   { label: 'Haute',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
   urgent: { label: 'Urgente', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'       },
 };
@@ -68,7 +68,7 @@ function TipTapToolbar({ editor }) {
       className={`
         px-2 py-1 rounded text-sm font-medium transition-colors
         ${active
-          ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
         }
       `}
@@ -135,7 +135,7 @@ function AgendaTab({ meeting, canEdit }) {
           key={idx}
           className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-700"
         >
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center mt-0.5">
+          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center mt-0.5">
             {item.order + 1}
           </span>
           <div className="flex-1">
@@ -164,12 +164,12 @@ function AgendaTab({ meeting, canEdit }) {
             onKeyDown={(e) => e.key === 'Enter' && addItem()}
             className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                        bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <button
             onClick={addItem}
             disabled={saving || !newTitle.trim()}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700
                        disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
@@ -286,7 +286,7 @@ function MinutesTab({ meeting, canEdit, canApprove, onDecisionsExtracted }) {
           <button
             onClick={saveMinutes}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700
+            className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700
                        disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
@@ -417,9 +417,9 @@ function DecisionsTab({ meeting, decisions, onDecisionsChange }) {
                 onClick={() => convertToTask(decision)}
                 disabled={converting === decision.id}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs font-medium
-                           text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30
-                           border border-blue-200 dark:border-blue-700 rounded-lg
-                           hover:bg-blue-100 dark:hover:bg-blue-900/50 disabled:opacity-50 transition-colors"
+                           text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30
+                           border border-purple-200 dark:border-purple-700 rounded-lg
+                           hover:bg-purple-100 dark:hover:bg-purple-900/50 disabled:opacity-50 transition-colors"
               >
                 {converting === decision.id
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -471,7 +471,7 @@ function ParticipantsTab({ meeting }) {
                 </span>
               )}
               {p.id === meeting.organizer_id && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
                   Organisateur
                 </span>
               )}
@@ -530,7 +530,7 @@ export default function ReunionDetail({ meeting: initialMeeting, canEdit, canApp
   }, []);
 
   const STATUS_BADGE = {
-    planned:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    planned:   'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
     ongoing:   'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
     completed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
     cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
@@ -587,7 +587,7 @@ export default function ReunionDetail({ meeting: initialMeeting, canEdit, canApp
                   <button
                     onClick={startMeeting}
                     disabled={!!processing}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700
+                    className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700
                                disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
                   >
                     {processing === 'start' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -697,3 +697,4 @@ export default function ReunionDetail({ meeting: initialMeeting, canEdit, canApp
     </AuthLayout>
   );
 }
+export { ReunionDetail };

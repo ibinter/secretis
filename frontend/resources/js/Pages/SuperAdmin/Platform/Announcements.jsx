@@ -16,7 +16,7 @@ const Ic = {
 }
 
 const TYPE_CONFIG = {
-  info:        { icon: <Ic.Info />, label: 'Information', bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400', banner: 'bg-blue-600' },
+  info:        { icon: <Ic.Info />, label: 'Information', bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400', banner: 'bg-purple-600' },
   warning:     { icon: <Ic.AlertTriangle />, label: 'Avertissement', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400', banner: 'bg-amber-500' },
   success:     { icon: <Ic.CheckCircle />, label: 'Succès', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-400', banner: 'bg-green-600' },
   maintenance: { icon: <Ic.Wrench />, label: 'Maintenance', bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', banner: 'bg-red-600' },
@@ -106,7 +106,7 @@ export default function AnnouncementsPage({ announcements: propAnnouncements }) 
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Annonces plateforme</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">{announcements.length} annonce(s) configurée(s)</p>
         </div>
-        <button onClick={() => { setShowForm(true); setForm(EMPTY_FORM); setEditId(null) }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+        <button onClick={() => { setShowForm(true); setForm(EMPTY_FORM); setEditId(null) }} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
           <Ic.Plus /> Nouvelle annonce
         </button>
       </div>
@@ -160,7 +160,7 @@ export default function AnnouncementsPage({ announcements: propAnnouncements }) 
 
           <div className="flex justify-end gap-2 mt-5">
             <button onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setEditId(null) }} className="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Annuler</button>
-            <button disabled={saving} onClick={save} className="px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
+            <button disabled={saving} onClick={save} className="px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
               {saving ? 'Sauvegarde…' : 'Enregistrer'}
             </button>
           </div>
@@ -195,13 +195,13 @@ export default function AnnouncementsPage({ announcements: propAnnouncements }) 
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{ann.target === 'all' ? 'Tous' : ann.target}</td>
                     <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{ann.starts_at} → {ann.ends_at}</td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleActive(ann)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${ann.active ? 'bg-[#1A3A5C]' : 'bg-gray-200 dark:bg-gray-600'}`}>
+                      <button onClick={() => toggleActive(ann)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${ann.active ? 'bg-[#9333EA]' : 'bg-gray-200 dark:bg-gray-600'}`}>
                         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${ann.active ? 'translate-x-4' : 'translate-x-1'}`} />
                       </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => startEdit(ann)} className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"><Ic.Edit /></button>
+                        <button onClick={() => startEdit(ann)} className="p-1.5 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"><Ic.Edit /></button>
                         <button onClick={() => del(ann.id)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"><Ic.Trash /></button>
                       </div>
                     </td>
@@ -217,7 +217,7 @@ export default function AnnouncementsPage({ announcements: propAnnouncements }) 
 }
 
 function Field({ label, children, className = '' }) {
-  const INPUT_CLS = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none resize-none'
+  const INPUT_CLS = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none resize-none'
   return (
     <div className={className}>
       <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{label}</label>
@@ -225,3 +225,4 @@ function Field({ label, children, className = '' }) {
     </div>
   )
 }
+export { AnnouncementsPage };

@@ -233,7 +233,7 @@ export default function CheckIn({ presentVisitors: initialVisitors = [], hosts: 
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                            <UserPlusIcon className="h-7 w-7 text-blue-600" />
+                            <UserPlusIcon className="h-7 w-7 text-purple-600" />
                             Accueil Visiteurs
                         </h1>
                         <p className="text-sm text-gray-500 mt-1">
@@ -273,7 +273,7 @@ export default function CheckIn({ presentVisitors: initialVisitors = [], hosts: 
                     ═══════════════════════════════════════════════════════ */}
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                            <UserPlusIcon className="h-5 w-5 text-blue-600" />
+                            <UserPlusIcon className="h-5 w-5 text-purple-600" />
                             Nouvelle arrivée
                         </h2>
 
@@ -401,8 +401,8 @@ export default function CheckIn({ presentVisitors: initialVisitors = [], hosts: 
                                 disabled={submitting}
                                 className={`w-full py-4 rounded-xl font-semibold text-white text-lg transition-all flex items-center justify-center gap-3 ${
                                     submitting
-                                        ? 'bg-blue-400 cursor-not-allowed'
-                                        : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900'
+                                        ? 'bg-purple-400 cursor-not-allowed'
+                                        : 'bg-purple-600 hover:bg-purple-700 shadow-lg hover:shadow-blue-200 dark:hover:shadow-blue-900'
                                 }`}
                             >
                                 {submitting ? (
@@ -566,7 +566,7 @@ function OptionalFields({ form, errors, onChange }) {
             <button
                 type="button"
                 onClick={() => setExpanded(!expanded)}
-                className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                className="text-sm text-purple-600 hover:underline flex items-center gap-1"
             >
                 {expanded ? '− Masquer' : '+ Informations complémentaires'}
                 <span className="text-xs text-gray-400">(optionnel)</span>
@@ -681,7 +681,7 @@ const fieldClass = (error) =>
     `w-full px-3 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-colors dark:bg-gray-700 dark:text-white ${
         error
             ? 'border-red-300 focus:ring-red-500 bg-red-50'
-            : 'border-gray-200 dark:border-gray-600 focus:ring-blue-500'
+            : 'border-gray-200 dark:border-gray-600 focus:ring-purple-500'
     }`;
 
 const defaultForm = () => ({
@@ -697,3 +697,4 @@ const defaultForm = () => ({
     id_number:     '',
     vehicle_plate: '',
 });
+export { CheckIn };

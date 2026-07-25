@@ -345,3 +345,4 @@ export default function LicenseInfo({ license: initialLicense }) {
         </AdminLayout>
     );
 }
+export { LicenseInfo };

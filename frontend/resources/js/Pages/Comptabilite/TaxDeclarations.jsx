@@ -34,7 +34,7 @@ const fcfa = (v) =>
 const statusBadge = (status) => {
   const map = {
     draft:     'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-    submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+    submitted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
     paid:      'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400',
   };
   const label = { draft: 'Brouillon', submitted: 'Soumis', paid: 'Payé' };
@@ -61,7 +61,7 @@ function TvaPreview({ data }) {
         ))}
       </div>
       {data.credit_report > 0 && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-400">
+        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3 text-sm text-purple-700 dark:text-purple-400">
           Crédit de TVA à reporter : <strong>{fcfa(data.credit_report)}</strong>
         </div>
       )}
@@ -227,10 +227,10 @@ export default function TaxDeclarations({ preview, history, fiscalYears, filters
               onClick={() => { setType(t.value); }}
               className={`px-4 py-3 rounded-xl border-2 text-left transition-colors ${
                 type === t.value
-                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-500'
                   : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300'
               }`}>
-              <p className={`font-bold text-sm ${type === t.value ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+              <p className={`font-bold text-sm ${type === t.value ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'}`}>
                 {t.label}
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{t.desc}</p>
@@ -244,7 +244,7 @@ export default function TaxDeclarations({ preview, history, fiscalYears, filters
           <div className="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <DocumentTextIcon className="w-5 h-5 text-blue-600" />
+                <DocumentTextIcon className="w-5 h-5 text-purple-600" />
                 Calcul {activeType?.desc}
               </h2>
               <div className="flex items-center gap-2">
@@ -304,7 +304,7 @@ export default function TaxDeclarations({ preview, history, fiscalYears, filters
                     </p>
                     {decl.status === 'draft' && (
                       <button onClick={() => handleSubmit(decl.id)}
-                        className="mt-2 text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                        className="mt-2 text-xs text-purple-600 dark:text-purple-400 hover:underline">
                         Soumettre →
                       </button>
                     )}
@@ -318,3 +318,4 @@ export default function TaxDeclarations({ preview, history, fiscalYears, filters
     </AuthLayout>
   );
 }
+export { TaxDeclarations };

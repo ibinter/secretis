@@ -296,7 +296,7 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
                         <button
                             type="button"
                             onClick={() => setModalState({ isOpen: true, event: null, initialDate: null })}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors"
                         >
                             <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd"

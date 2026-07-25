@@ -156,7 +156,7 @@ export default function AccueilDashboard({
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <ChartBarIcon className="h-7 w-7 text-blue-600" />
+                            <ChartBarIcon className="h-7 w-7 text-purple-600" />
                             Tableau de bord Accueil
                         </h1>
                         <p className="text-sm text-gray-500 mt-0.5">
@@ -175,7 +175,7 @@ export default function AccueilDashboard({
                             value={selectedDate}
                             onChange={e => { setSelectedDate(e.target.value); refresh(); }}
                             max={new Date().toISOString().split('T')[0]}
-                            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
 
                         {/* Rafraîchir */}
@@ -191,7 +191,7 @@ export default function AccueilDashboard({
                         {/* Exporter PDF */}
                         <button
                             onClick={exportPdf}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
                         >
                             <DocumentArrowDownIcon className="h-4 w-4" />
                             Rapport PDF
@@ -297,7 +297,7 @@ export default function AccueilDashboard({
                                         onClick={() => setFilter(f.key)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                                             filter === f.key
-                                                ? 'bg-blue-600 text-white'
+                                                ? 'bg-purple-600 text-white'
                                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                                         }`}
                                     >
@@ -314,7 +314,7 @@ export default function AccueilDashboard({
                                     placeholder="Rechercher..."
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
-                                    className="pl-8 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-44"
+                                    className="pl-8 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-44"
                                 />
                             </div>
                         </div>
@@ -356,7 +356,7 @@ export default function AccueilDashboard({
                         {/* Prochains RDV */}
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
                             <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-                                <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
+                                <CalendarDaysIcon className="h-5 w-5 text-purple-600" />
                                 Prochains RDV
                             </h2>
 
@@ -417,7 +417,7 @@ export default function AccueilDashboard({
 
 function StatCard({ label, value, icon, color, subtitle, pulse = false }) {
     const colorMap = {
-        blue:   'bg-blue-50 dark:bg-blue-900/20 text-blue-600',
+        blue:   'bg-purple-50 dark:bg-purple-900/20 text-purple-600',
         green:  'bg-green-50 dark:bg-green-900/20 text-green-600',
         orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600',
         purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600',
@@ -463,7 +463,7 @@ function VisitorRow({ visitor }) {
             <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${
-                        visitor.is_blacklisted ? 'bg-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-600'
+                        visitor.is_blacklisted ? 'bg-red-500' : 'bg-gradient-to-br from-purple-500 to-indigo-600'
                     }`}>
                         {visitor.first_name?.charAt(0)}{visitor.last_name?.charAt(0)}
                     </div>
@@ -557,7 +557,7 @@ function AppointmentItem({ appointment }) {
     return (
         <div className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${
             isNow
-                ? 'border-blue-300 bg-blue-50 dark:bg-blue-900/20'
+                ? 'border-purple-300 bg-purple-50 dark:bg-purple-900/20'
                 : 'border-gray-100 dark:border-gray-700'
         }`}>
             {/* Heure */}
@@ -566,7 +566,7 @@ function AppointmentItem({ appointment }) {
                     {time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                 </p>
                 {isNow && (
-                    <span className="text-[10px] text-blue-600 font-medium">Bientôt</span>
+                    <span className="text-[10px] text-purple-600 font-medium">Bientôt</span>
                 )}
             </div>
 
@@ -608,11 +608,11 @@ function HourlyChart({ distribution }) {
                 return (
                     <div key={hour} className="flex-1 flex flex-col items-center gap-1">
                         <div
-                            className="w-full bg-blue-200 dark:bg-blue-800 rounded-t-sm transition-all duration-500 relative group"
+                            className="w-full bg-purple-200 dark:bg-purple-800 rounded-t-sm transition-all duration-500 relative group"
                             style={{ height: `${Math.max(height, count > 0 ? 8 : 2)}%` }}
                         >
                             {count > 0 && (
-                                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-blue-700 dark:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-purple-700 dark:text-purple-300 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {count}
                                 </span>
                             )}
@@ -624,3 +624,4 @@ function HourlyChart({ distribution }) {
         </div>
     );
 }
+export { AccueilDashboard };

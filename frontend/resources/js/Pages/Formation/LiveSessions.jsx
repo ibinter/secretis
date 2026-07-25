@@ -21,14 +21,14 @@ import { SignalIcon as SignalSolid } from '@heroicons/react/24/solid';
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const PLATFORM_CONFIG = {
-    zoom:          { label: 'Zoom',          color: 'bg-blue-500' },
+    zoom:          { label: 'Zoom',          color: 'bg-purple-500' },
     teams:         { label: 'Teams',         color: 'bg-purple-500' },
     meet:          { label: 'Google Meet',   color: 'bg-green-500' },
     secretis_video:{ label: 'Secretis Live', color: 'bg-indigo-500' },
 };
 
 const STATUS_CONFIG = {
-    scheduled:  { label: 'Planifiée',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+    scheduled:  { label: 'Planifiée',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
     live:       { label: 'En direct',  color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400', live: true },
     completed:  { label: 'Terminée',   color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
     cancelled:  { label: 'Annulée',    color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
@@ -387,3 +387,4 @@ export default function LiveSessions({ sessions = [], filters = {} }) {
         </AppLayout>
     );
 }
+export { LiveSessions };

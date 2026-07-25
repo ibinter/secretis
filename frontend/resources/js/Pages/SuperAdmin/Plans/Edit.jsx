@@ -27,7 +27,7 @@ function Input({ className = '', ...props }) {
     <input
       className={`w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600
         bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400
-        focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+        focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400
         transition-colors ${className}`}
       {...props}
     />
@@ -162,7 +162,7 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
             Modifier — {plan.name}
           </h1>
           {active_licenses > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-medium">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 font-medium">
               {active_licenses} abonné{active_licenses > 1 ? 's' : ''} actif{active_licenses > 1 ? 's' : ''}
             </span>
           )}
@@ -196,7 +196,7 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
                     placeholder="Description courte affichée dans le catalogue…"
                     className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-600
                       bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400
-                      focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400
+                      focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400
                       transition-colors resize-none"
                   />
                 </Field>
@@ -279,7 +279,7 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
                     <label key={mod.slug}
                       className={`flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer border transition-all text-sm ${
                         isModuleEnabled(mod.slug)
-                          ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-600 text-blue-800 dark:text-blue-300'
+                          ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-600 text-purple-800 dark:text-purple-300'
                           : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}>
                       <input
@@ -290,7 +290,7 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
                       />
                       <span className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${
                         isModuleEnabled(mod.slug)
-                          ? 'bg-blue-500 border-blue-500 text-white'
+                          ? 'bg-purple-500 border-purple-500 text-white'
                           : 'border-slate-300 dark:border-slate-600'
                       }`}>
                         {isModuleEnabled(mod.slug) && (
@@ -370,7 +370,7 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
                   type="submit"
                   disabled={processing}
                   className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-white transition-opacity disabled:opacity-60"
-                  style={{ background: '#1A3A5C' }}
+                  style={{ background: '#9333EA' }}
                 >
                   <Ic.Save />
                   {processing ? 'Enregistrement…' : 'Enregistrer les modifications'}
@@ -387,3 +387,4 @@ export default function PlansEdit({ plan, active_licenses = 0, all_modules = [] 
     </SuperAdminLayout>
   )
 }
+export { PlansEdit };

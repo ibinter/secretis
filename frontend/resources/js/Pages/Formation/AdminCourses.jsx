@@ -40,7 +40,7 @@ function KpiCard({ icon: Icon, label, value, color = 'indigo' }) {
         indigo: 'bg-indigo-50 text-indigo-600',
         green:  'bg-green-50 text-green-600',
         yellow: 'bg-yellow-50 text-yellow-600',
-        blue:   'bg-blue-50 text-blue-600',
+        blue:   'bg-purple-50 text-purple-600',
     };
     return (
         <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4">
@@ -199,7 +199,7 @@ function CourseRow({ course, onEdit, onDelete }) {
                         <EyeIcon className="w-4 h-4"/>
                     </button>
                     <button onClick={() => onEdit(course)}
-                            className="p-1.5 hover:bg-blue-50 rounded-lg text-blue-600" title="Modifier">
+                            className="p-1.5 hover:bg-purple-50 rounded-lg text-purple-600" title="Modifier">
                         <PencilIcon className="w-4 h-4"/>
                     </button>
                     <button onClick={() => onDelete(course)}
@@ -406,3 +406,4 @@ export default function AdminCourses({ courses, stats }) {
         </AppLayout>
     );
 }
+export { AdminCourses };

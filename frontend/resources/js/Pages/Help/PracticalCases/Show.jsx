@@ -30,7 +30,7 @@ const CATEGORY_LABELS = {
 // ─── Confetti animation ────────────────────────────────────────────────────────
 
 function Confetti() {
-  const colors = ['#F39C12', '#1A3A5C', '#2E86C1', '#1E8449', '#C0392B'];
+  const colors = ['#F39C12', '#9333EA', '#7e22ce', '#1E8449', '#C0392B'];
   return (
     <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
       {Array.from({ length: 40 }).map((_, i) => (
@@ -72,7 +72,7 @@ function CompletionModal({ onClose, title }) {
         <div className="space-y-3">
           <Link
             href="/aide/guide"
-            className="block w-full bg-[#1A3A5C] hover:bg-[#2E86C1] text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+            className="block w-full bg-[#9333EA] hover:bg-[#7e22ce] text-white font-semibold py-3 rounded-xl transition-colors text-sm"
           >
             📖 Explorer le guide SECRETIS
           </Link>
@@ -147,9 +147,9 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
         {/* ── Breadcrumb ── */}
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-2 text-xs text-gray-500">
-            <Link href="/aide" className="hover:text-[#2E86C1]">Aide</Link>
+            <Link href="/aide" className="hover:text-[#7e22ce]">Aide</Link>
             <span>/</span>
-            <Link href="/aide/cas-pratiques" className="hover:text-[#2E86C1]">Cas pratiques</Link>
+            <Link href="/aide/cas-pratiques" className="hover:text-[#7e22ce]">Cas pratiques</Link>
             <span>/</span>
             <span className="text-gray-700 dark:text-gray-300 truncate">{practicalCase.title}</span>
           </div>
@@ -188,7 +188,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                 <div className="flex flex-wrap gap-1">
                   {practicalCase.prerequisites.map((slug, i) => (
                     <Link key={i} href={`/aide/cas-pratiques/${slug}`}
-                      className="text-xs bg-gray-100 dark:bg-gray-800 text-[#2E86C1] px-2 py-0.5 rounded hover:underline">
+                      className="text-xs bg-gray-100 dark:bg-gray-800 text-[#7e22ce] px-2 py-0.5 rounded hover:underline">
                       {slug}
                     </Link>
                   ))}
@@ -211,7 +211,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                   <ul className="space-y-2">
                     {practicalCase.learning_objectives.map((obj, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <span className="w-5 h-5 rounded-full bg-[#2E86C1]/10 text-[#2E86C1] flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                        <span className="w-5 h-5 rounded-full bg-[#7e22ce]/10 text-[#7e22ce] flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
                           {i + 1}
                         </span>
                         {obj}
@@ -245,7 +245,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                 {/* Progress bar */}
                 <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mb-5">
                   <div
-                    className="bg-[#2E86C1] h-1.5 rounded-full transition-all duration-500"
+                    className="bg-[#7e22ce] h-1.5 rounded-full transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -289,7 +289,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                           value={notes[i] || ''}
                           onChange={e => setNotes(prev => ({ ...prev, [i]: e.target.value }))}
                           placeholder="Ajouter une note…"
-                          className="w-full text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2E86C1] text-gray-600 dark:text-gray-400 placeholder-gray-400"
+                          className="w-full text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#7e22ce] text-gray-600 dark:text-gray-400 placeholder-gray-400"
                         />
                       </div>
                     </div>
@@ -353,9 +353,9 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
               {/* Progression */}
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Ma progression</h3>
-                <div className="text-3xl font-bold text-[#2E86C1] mb-1">{progressPercent}%</div>
+                <div className="text-3xl font-bold text-[#7e22ce] mb-1">{progressPercent}%</div>
                 <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-2">
-                  <div className="bg-[#2E86C1] h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+                  <div className="bg-[#7e22ce] h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
                 </div>
                 <p className="text-xs text-gray-500">{checkedCount} sur {totalSteps} étapes cochées</p>
               </div>
@@ -367,7 +367,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                   <div className="space-y-2">
                     {prev && (
                       <Link href={`/aide/cas-pratiques/${prev.slug}`}
-                        className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-[#2E86C1] transition-colors">
+                        className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-[#7e22ce] transition-colors">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
@@ -376,7 +376,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
                     )}
                     {next && (
                       <Link href={`/aide/cas-pratiques/${next.slug}`}
-                        className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-[#2E86C1] transition-colors">
+                        className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-[#7e22ce] transition-colors">
                         <span className="truncate">{next.title}</span>
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -406,7 +406,7 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
 
               {/* Retour catalogue */}
               <Link href="/aide/cas-pratiques"
-                className="flex items-center justify-center gap-2 w-full text-xs text-gray-500 hover:text-[#2E86C1] transition-colors py-2">
+                className="flex items-center justify-center gap-2 w-full text-xs text-gray-500 hover:text-[#7e22ce] transition-colors py-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -419,3 +419,4 @@ export default function PracticalCasesShow({ practicalCase, completed: initialCo
     </AppLayout>
   );
 }
+export { PracticalCasesShow };

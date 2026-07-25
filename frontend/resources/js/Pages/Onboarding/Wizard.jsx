@@ -34,7 +34,7 @@ function CompletionScreen({ onGoToDashboard }) {
       </p>
       <button
         onClick={onGoToDashboard}
-        className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-10 py-4 rounded-xl text-lg shadow-xl shadow-blue-600/30 transition-all active:scale-95"
+        className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-10 py-4 rounded-xl text-lg shadow-xl shadow-blue-600/30 transition-all active:scale-95"
       >
         Accéder au tableau de bord →
       </button>
@@ -149,12 +149,12 @@ export default function Wizard({ progress: initialProgress, remainingDays, trial
   const StepComponent = currentStepKey ? STEP_COMPONENTS[currentStepKey] : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-white/10">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-black text-white text-sm">S</div>
+            <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center font-black text-white text-sm">S</div>
             <span className="font-bold text-white text-sm">IBIG SECRETIS</span>
           </div>
           <div className="flex items-center gap-4">
@@ -186,7 +186,7 @@ export default function Wizard({ progress: initialProgress, remainingDays, trial
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
             {/* Step header */}
             <div className="mb-6">
-              <div className="flex items-center gap-2 text-xs text-blue-400 font-semibold uppercase tracking-wider mb-2">
+              <div className="flex items-center gap-2 text-xs text-purple-400 font-semibold uppercase tracking-wider mb-2">
                 Étape {currentIndex + 1} sur {stepsList.length}
               </div>
             </div>
@@ -228,3 +228,4 @@ export default function Wizard({ progress: initialProgress, remainingDays, trial
     </div>
   );
 }
+export { Wizard };

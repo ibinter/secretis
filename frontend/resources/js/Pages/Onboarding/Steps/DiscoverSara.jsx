@@ -12,7 +12,7 @@ function TypingIndicator() {
   return (
     <div className="flex items-center gap-1 p-3 bg-slate-800 rounded-2xl rounded-tl-sm w-16">
       {[0, 1, 2].map(i => (
-        <div key={i} className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+        <div key={i} className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
       ))}
     </div>
   );
@@ -23,13 +23,13 @@ function Message({ msg }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} gap-3`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-black text-white flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-sm font-black text-white flex-shrink-0">
           S
         </div>
       )}
       <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
         isUser
-          ? 'bg-blue-600 text-white rounded-tr-sm'
+          ? 'bg-purple-600 text-white rounded-tr-sm'
           : 'bg-slate-800 text-slate-200 rounded-tl-sm'
       }`}>
         {msg.content}
@@ -96,7 +96,7 @@ export default function DiscoverSara({ step, onComplete, onSkip, saving }) {
           {messages.map((msg, i) => <Message key={i} msg={msg} />)}
           {loading && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-black text-white flex-shrink-0">S</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-sm font-black text-white flex-shrink-0">S</div>
               <TypingIndicator />
             </div>
           )}
@@ -111,12 +111,12 @@ export default function DiscoverSara({ step, onComplete, onSkip, saving }) {
             onKeyDown={handleKeyDown}
             placeholder="Posez une question à SARA..."
             disabled={loading}
-            className="flex-1 bg-slate-800 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-blue-400 disabled:opacity-50"
+            className="flex-1 bg-slate-800 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-purple-400 disabled:opacity-50"
           />
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
-            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
+            className="bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
           >
             ↑
           </button>
@@ -144,7 +144,7 @@ export default function DiscoverSara({ step, onComplete, onSkip, saving }) {
         <button
           onClick={() => onComplete({ questionsAsked: messages.filter(m => m.role === 'user').length })}
           disabled={!hasAsked || saving}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all active:scale-95"
         >
           {saving ? '⏳...' : hasAsked ? 'Terminer la configuration 🎉' : 'Posez d\'abord une question →'}
         </button>
@@ -157,3 +157,4 @@ export default function DiscoverSara({ step, onComplete, onSkip, saving }) {
     </div>
   );
 }
+export { DiscoverSara };

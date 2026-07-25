@@ -20,7 +20,7 @@ const fmtXOF = v => new Intl.NumberFormat('fr-FR', { style: 'currency', currency
 function StatusBadge({ status }) {
   const map = {
     active:    { label: 'Actif',     cls: 'bg-green-100 text-green-700' },
-    trial:     { label: 'Essai',     cls: 'bg-blue-100 text-blue-700' },
+    trial:     { label: 'Essai',     cls: 'bg-purple-100 text-purple-700' },
     suspended: { label: 'Suspendu',  cls: 'bg-red-100 text-red-700' },
     expired:   { label: 'Expiré',    cls: 'bg-gray-100 text-gray-500' },
   };
@@ -44,7 +44,7 @@ function OrgDetailModal({ org, onClose, onAction, impersonating }) {
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-900 text-white rounded-xl flex items-center justify-center font-bold text-xl">
+            <div className="w-12 h-12 bg-purple-900 text-white rounded-xl flex items-center justify-center font-bold text-xl">
               {org.name.charAt(0)}
             </div>
             <div>
@@ -99,7 +99,7 @@ function OrgDetailModal({ org, onClose, onAction, impersonating }) {
             <p className="text-sm font-medium text-gray-700 mb-2">Modules activés ({(org.modules_enabled || []).length})</p>
             <div className="flex flex-wrap gap-1.5">
               {(org.modules_enabled || []).map(m => (
-                <span key={m} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs font-medium">{m}</span>
+                <span key={m} className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs font-medium">{m}</span>
               ))}
             </div>
           </div>
@@ -116,7 +116,7 @@ function OrgDetailModal({ org, onClose, onAction, impersonating }) {
                 Réactiver
               </button>
             )}
-            <button onClick={() => onAction(org, 'change_plan')} className="py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800">
+            <button onClick={() => onAction(org, 'change_plan')} className="py-2.5 bg-purple-900 text-white text-sm font-medium rounded-lg hover:bg-purple-800">
               Changer de plan
             </button>
             <button
@@ -213,7 +213,7 @@ export default function OrganizationManager({ organizations: propOrgs }) {
 
   const SortIcon = ({ col }) => {
     if (sortConfig.key !== col) return <span className="text-gray-300 ml-1">↕</span>;
-    return <span className="text-blue-900 ml-1">{sortConfig.dir === 'asc' ? '↑' : '↓'}</span>;
+    return <span className="text-purple-900 ml-1">{sortConfig.dir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   const stats = {
@@ -237,17 +237,17 @@ export default function OrganizationManager({ organizations: propOrgs }) {
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-              <span className="text-blue-400">/</span>
+              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Gestionnaire des organisations</h1>
               <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
             </div>
             <button
               onClick={() => router.visit('/superadmin/organizations/new')}
-              className="px-4 py-2 bg-white text-blue-900 text-sm font-bold rounded-lg hover:bg-blue-50"
+              className="px-4 py-2 bg-white text-purple-900 text-sm font-bold rounded-lg hover:bg-purple-50"
             >
               + Nouvelle organisation
             </button>
@@ -258,9 +258,9 @@ export default function OrganizationManager({ organizations: propOrgs }) {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-blue-900">{stats.total}</div><p className="text-xs text-gray-500 mt-0.5">Total</p></div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-purple-900">{stats.total}</div><p className="text-xs text-gray-500 mt-0.5">Total</p></div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-green-700">{stats.active}</div><p className="text-xs text-gray-500 mt-0.5">Actives</p></div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-blue-700">{stats.trial}</div><p className="text-xs text-gray-500 mt-0.5">Essais</p></div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-purple-700">{stats.trial}</div><p className="text-xs text-gray-500 mt-0.5">Essais</p></div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-2xl font-black text-red-700">{stats.suspended}</div><p className="text-xs text-gray-500 mt-0.5">Suspendues</p></div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center"><div className="text-sm font-black text-teal-800">{fmtXOF(stats.totalMrr)}</div><p className="text-xs text-gray-500 mt-0.5">MRR total</p></div>
           </div>
@@ -270,12 +270,12 @@ export default function OrganizationManager({ organizations: propOrgs }) {
             <div className="flex items-center gap-3 flex-wrap">
               <input type="text" placeholder="Rechercher (nom, slug, email)..." value={filters.search}
                 onChange={e => setFilters(p => ({ ...p, search: e.target.value }))}
-                className="flex-1 min-w-[220px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900" />
-              <select value={filters.plan} onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))} className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900">
+                className="flex-1 min-w-[220px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900" />
+              <select value={filters.plan} onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))} className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900">
                 <option value="">Tous les plans</option>
                 <option value="starter">Starter</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option>
               </select>
-              <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900">
+              <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900">
                 <option value="">Tous les statuts</option>
                 <option value="active">Actif</option><option value="trial">Essai</option><option value="suspended">Suspendu</option><option value="expired">Expiré</option>
               </select>
@@ -316,7 +316,7 @@ export default function OrganizationManager({ organizations: propOrgs }) {
                       <tr key={org.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
+                            <div className="w-8 h-8 bg-purple-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
                             <div>
                               <p className="font-medium text-gray-900 text-sm">{org.name}</p>
                               <p className="text-xs text-gray-400">{org.slug}</p>
@@ -368,3 +368,4 @@ export default function OrganizationManager({ organizations: propOrgs }) {
     </>
   );
 }
+export { OrganizationManager };

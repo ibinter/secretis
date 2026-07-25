@@ -375,3 +375,4 @@ export default function LegalIndex() {
     </div>
   );
 }
+export { LegalIndex };

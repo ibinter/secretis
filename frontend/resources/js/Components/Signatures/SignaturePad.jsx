@@ -152,8 +152,8 @@ export default function SignaturePad({
                     ${disabled
                         ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
                         : isEmpty
-                            ? 'border-dashed border-gray-300 bg-gray-50 cursor-crosshair hover:border-blue-400'
-                            : 'border-solid border-blue-400 bg-white cursor-crosshair'
+                            ? 'border-dashed border-gray-300 bg-gray-50 cursor-crosshair hover:border-purple-400'
+                            : 'border-solid border-purple-400 bg-white cursor-crosshair'
                     }
                     transition-colors duration-200
                 `}
@@ -213,3 +213,4 @@ export default function SignaturePad({
         </div>
     );
 }
+export { SignaturePad };

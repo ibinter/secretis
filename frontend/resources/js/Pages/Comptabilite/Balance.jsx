@@ -84,7 +84,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
   };
 
   const typeColor = (type) => ({
-    actif:    'text-blue-600 dark:text-blue-400',
+    actif:    'text-purple-600 dark:text-purple-400',
     passif:   'text-orange-600 dark:text-orange-400',
     capitaux: 'text-purple-600 dark:text-purple-400',
     charge:   'text-red-600 dark:text-red-400',
@@ -133,7 +133,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
         {/* Résumé KPI */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {[
-            { label: 'Total Débit',      value: totals.debit_total,     color: 'text-blue-600' },
+            { label: 'Total Débit',      value: totals.debit_total,     color: 'text-purple-600' },
             { label: 'Total Crédit',     value: totals.credit_total,    color: 'text-orange-600' },
             { label: 'Soldes débiteurs', value: totals.solde_debiteur,  color: 'text-green-600' },
             { label: 'Soldes créditeurs',value: totals.solde_crediteur, color: 'text-red-600' },
@@ -156,7 +156,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
                   <th className="px-4 py-3 text-center w-24">Classe</th>
                   <th className="px-4 py-3 text-right">Débit cumulé</th>
                   <th className="px-4 py-3 text-right">Crédit cumulé</th>
-                  <th className="px-4 py-3 text-right bg-blue-50 dark:bg-blue-900/10">Solde D</th>
+                  <th className="px-4 py-3 text-right bg-purple-50 dark:bg-purple-900/10">Solde D</th>
                   <th className="px-4 py-3 text-right bg-orange-50 dark:bg-orange-900/10">Solde C</th>
                 </tr>
               </thead>
@@ -173,7 +173,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
                     onClick={() => openLedger(acc.account_number)}
                     title={`Ouvrir le grand livre du compte ${acc.account_number}`}
                   >
-                    <td className="px-4 py-2.5 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                    <td className="px-4 py-2.5 font-mono font-semibold text-purple-700 dark:text-purple-400">
                       {acc.account_number}
                     </td>
                     <td className="px-4 py-2.5">
@@ -190,7 +190,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700 dark:text-gray-300">
                       {fcfa(acc.credit_total)}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono font-semibold text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/5">
+                    <td className="px-4 py-2.5 text-right font-mono font-semibold text-purple-700 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-900/5">
                       {acc.solde_debiteur > 0 ? fcfa(acc.solde_debiteur) : '—'}
                     </td>
                     <td className="px-4 py-2.5 text-right font-mono font-semibold text-orange-700 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-900/5">
@@ -213,7 +213,7 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
                     <td className="px-4 py-3 text-right font-mono">
                       {fcfa(filtered.reduce((s, a) => s + a.credit_total, 0))}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-blue-700 dark:text-blue-400">
+                    <td className="px-4 py-3 text-right font-mono text-purple-700 dark:text-purple-400">
                       {fcfa(filtered.reduce((s, a) => s + a.solde_debiteur, 0))}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-orange-700 dark:text-orange-400">
@@ -233,3 +233,4 @@ export default function Balance({ balance, fiscalYears, dateRange }) {
     </AuthLayout>
   );
 }
+export { Balance };

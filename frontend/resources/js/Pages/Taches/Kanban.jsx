@@ -56,9 +56,9 @@ const COLUMNS = [
     id:    'in_progress',
     label: 'En cours',
     icon:  RefreshCw,
-    color: 'text-blue-600 dark:text-blue-400',
-    headerBg: 'bg-blue-50 dark:bg-blue-900/20',
-    accent: 'border-blue-300 dark:border-blue-700',
+    color: 'text-purple-600 dark:text-purple-400',
+    headerBg: 'bg-purple-50 dark:bg-purple-900/20',
+    accent: 'border-purple-300 dark:border-purple-700',
   },
   {
     id:    'review',
@@ -88,7 +88,7 @@ const COLUMNS = [
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Faible',  color: 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200' },
-  normal: { label: 'Normal',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  normal: { label: 'Normal',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
   high:   { label: 'Haute',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
   urgent: { label: 'Urgente', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
 };
@@ -125,7 +125,7 @@ function TaskCard({ task, isDragging = false, onEdit }) {
         transition-all duration-150 cursor-pointer select-none
         ${isOverdue
           ? 'border-red-300 dark:border-red-700'
-          : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
+          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600'
         }
         ${isDragging ? 'shadow-xl rotate-1 scale-105' : 'hover:shadow-md'}
       `}
@@ -183,7 +183,7 @@ function TaskCard({ task, isDragging = false, onEdit }) {
             </div>
             <div className="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all"
+                className="h-full bg-purple-500 rounded-full transition-all"
                 style={{ width: `${task.subtasks_progress}%` }}
               />
             </div>
@@ -437,7 +437,7 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
                   value={searchValue}
                   onChange={handleSearchChange}
                   className="pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
-                             text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
+                             text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 w-52"
                 />
               </div>
 
@@ -447,7 +447,7 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
                 className={`
                   flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-colors
                   ${showFilters
-                    ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+                    ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300'
                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                   }
                 `}
@@ -474,7 +474,7 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
               <select
                 defaultValue={filters.priority ?? ''}
                 onChange={(e) => router.get(route('taches.index'), { ...filters, view: 'kanban', priority: e.target.value }, { preserveState: true, replace: true })}
-                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Toutes priorités</option>
                 <option value="urgent">Urgente</option>
@@ -488,7 +488,7 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
                 type="date"
                 defaultValue={filters.due_from ?? ''}
                 onChange={(e) => router.get(route('taches.index'), { ...filters, view: 'kanban', due_from: e.target.value }, { preserveState: true, replace: true })}
-                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
 
               {/* Échéance jusqu'à */}
@@ -496,7 +496,7 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
                 type="date"
                 defaultValue={filters.due_to ?? ''}
                 onChange={(e) => router.get(route('taches.index'), { ...filters, view: 'kanban', due_to: e.target.value }, { preserveState: true, replace: true })}
-                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
 
               <button
@@ -552,3 +552,4 @@ export default function KanbanPage({ tasksByStatus: initialTasksByStatus, filter
     </AuthLayout>
   );
 }
+export { KanbanPage };

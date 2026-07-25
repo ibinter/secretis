@@ -120,7 +120,7 @@ export default function TripLogger({ vehicles, myTrips: initialTrips, monthKm })
                 <div className="text-center py-12 text-gray-400">
                     <div className="text-4xl mb-3">✅</div>
                     <p>Aucun trajet en cours</p>
-                    <button onClick={() => setView('start')} className="mt-3 text-blue-600 hover:underline text-sm">
+                    <button onClick={() => setView('start')} className="mt-3 text-purple-600 hover:underline text-sm">
                         Démarrer un trajet →
                     </button>
                 </div>
@@ -197,7 +197,7 @@ export default function TripLogger({ vehicles, myTrips: initialTrips, monthKm })
                 {/* Stats du mois */}
                 <div className="grid grid-cols-3 gap-3">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-600">{monthTotal.toFixed(0)} km</div>
+                        <div className="text-2xl font-bold text-purple-600">{monthTotal.toFixed(0)} km</div>
                         <div className="text-xs text-gray-500 mt-1">Ce mois</div>
                     </div>
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow p-4 text-center">
@@ -319,3 +319,4 @@ export default function TripLogger({ vehicles, myTrips: initialTrips, monthKm })
         </AppLayout>
     );
 }
+export { TripLogger };

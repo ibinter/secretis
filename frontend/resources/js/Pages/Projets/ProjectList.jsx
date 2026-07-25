@@ -103,7 +103,7 @@ function ProjectCard({ project }) {
         {/* Titre + santé */}
         <div className="flex items-start justify-between gap-2 mb-2">
           <Link href={`/projets/${project.id}`}
-            className="text-base font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate flex-1">
+            className="text-base font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 truncate flex-1">
             {project.name}
           </Link>
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${cfg.bg} ${cfg.text}`}>
@@ -128,7 +128,7 @@ function ProjectCard({ project }) {
             <span>{project.completed_tasks_count || 0} / {project.tasks_count || 0}</span>
           </div>
           <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all bg-blue-500"
+            <div className="h-full rounded-full transition-all bg-purple-500"
               style={{ width: `${project.completion_percent || 0}%` }} />
           </div>
         </div>
@@ -154,7 +154,7 @@ function ProjectCard({ project }) {
             Dashboard
           </Link>
           <Link href={`/projets/${project.id}/gantt`}
-            className="flex-1 text-center text-xs py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-blue-600 dark:text-blue-400 transition-colors">
+            className="flex-1 text-center text-xs py-1.5 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg text-purple-600 dark:text-purple-400 transition-colors">
             Gantt
           </Link>
         </div>
@@ -175,7 +175,7 @@ function ProjectRow({ project }) {
         <div className="flex items-center gap-2">
           <HealthDot health={project.health} />
           <Link href={`/projets/${project.id}`}
-            className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 text-sm">
+            className="font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 text-sm">
             {project.name}
           </Link>
         </div>
@@ -185,7 +185,7 @@ function ProjectRow({ project }) {
       <td className="py-3 px-4">
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden max-w-24">
-            <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
+            <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pct}%` }} />
           </div>
           <span className="text-xs text-gray-600 dark:text-gray-300 w-8">{pct}%</span>
         </div>
@@ -203,7 +203,7 @@ function ProjectRow({ project }) {
             Dashboard
           </Link>
           <Link href={`/projets/${project.id}/gantt`}
-            className="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-100 dark:hover:bg-blue-800/50">
+            className="px-2 py-1 text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-100 dark:hover:bg-purple-800/50">
             Gantt
           </Link>
         </div>
@@ -252,7 +252,7 @@ export default function ProjectList() {
             <p className="text-sm text-gray-500 mt-0.5">{(projects || []).length} projet(s) au total</p>
           </div>
           <Link href="/projets/creer"
-            className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+            className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
             + Nouveau projet
           </Link>
         </div>
@@ -285,11 +285,11 @@ export default function ProjectList() {
           <input
             type="text" placeholder="Rechercher…" value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-56"
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 w-56"
           />
 
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="all">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="paused">En pause</option>
@@ -304,7 +304,7 @@ export default function ProjectList() {
             ].map((v) => (
               <button key={v.key} onClick={() => setViewMode(v.key)}
                 className={`px-3 py-2 transition-colors ${viewMode === v.key
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                 {v.icon}
               </button>
@@ -347,3 +347,4 @@ export default function ProjectList() {
     </AppLayout>
   );
 }
+export { ProjectList };

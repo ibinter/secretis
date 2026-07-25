@@ -82,7 +82,7 @@ export default function Table({
         <div className="flex justify-end px-0 pb-3">
           <button
             onClick={handleExport}
-            className="inline-flex items-center gap-1.5 text-sm text-[#1A3A5C] dark:text-blue-300 hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm text-[#9333EA] dark:text-purple-300 hover:underline"
           >
             <Download size={15} /> Exporter CSV
           </button>
@@ -108,7 +108,7 @@ export default function Table({
                     checked={selected.size === data.length && data.length > 0}
                     onChange={toggleAll}
                     aria-label="Tout sélectionner"
-                    className="rounded border-gray-300 focus:ring-2 focus:ring-[#1A3A5C]"
+                    className="rounded border-gray-300 focus:ring-2 focus:ring-[#9333EA]"
                   />
                 </th>
               )}
@@ -125,7 +125,7 @@ export default function Table({
                   }
                   className={[
                     'px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap',
-                    col.sortable ? 'cursor-pointer hover:text-[#1A3A5C] dark:hover:text-white select-none' : '',
+                    col.sortable ? 'cursor-pointer hover:text-[#9333EA] dark:hover:text-white select-none' : '',
                     col.className ?? '',
                   ].join(' ')}
                   onClick={() => handleSort(col)}
@@ -185,9 +185,9 @@ export default function Table({
                     role={onRowClick ? 'row' : undefined}
                     aria-selected={selectable ? selected.has(key) : undefined}
                     className={[
-                      'bg-white dark:bg-[#162032] hover:bg-blue-50/40 dark:hover:bg-white/5 transition-colors',
-                      onRowClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#1A3A5C]' : '',
-                      selected.has(key) ? 'bg-blue-50 dark:bg-[#1A3A5C]/20' : '',
+                      'bg-white dark:bg-[#162032] hover:bg-purple-50/40 dark:hover:bg-white/5 transition-colors',
+                      onRowClick ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#9333EA]' : '',
+                      selected.has(key) ? 'bg-purple-50 dark:bg-[#9333EA]/20' : '',
                     ].join(' ')}
                   >
                     {selectable && (
@@ -197,7 +197,7 @@ export default function Table({
                           checked={selected.has(key)}
                           onChange={() => toggleRow(key)}
                           aria-label={`Sélectionner la ligne ${key}`}
-                          className="rounded border-gray-300 focus:ring-2 focus:ring-[#1A3A5C]"
+                          className="rounded border-gray-300 focus:ring-2 focus:ring-[#9333EA]"
                         />
                       </td>
                     )}
@@ -227,7 +227,7 @@ export default function Table({
                 className={[
                   'w-8 h-8 rounded-lg text-sm font-medium transition-colors',
                   page === pagination.currentPage
-                    ? 'bg-[#1A3A5C] text-white'
+                    ? 'bg-[#9333EA] text-white'
                     : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10',
                 ].join(' ')}
               >
@@ -240,3 +240,4 @@ export default function Table({
     </div>
   )
 }
+export { Table };

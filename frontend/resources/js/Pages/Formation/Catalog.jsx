@@ -355,3 +355,4 @@ export default function Catalog({ courses, filters = {}, userRole }) {
         </AppLayout>
     );
 }
+export { Catalog };

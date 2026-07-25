@@ -69,7 +69,7 @@ function OrgDetailModal({ org, onClose }) {
         <div className="p-6 border-b border-gray-100 flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-900 text-white rounded-xl flex items-center justify-center font-bold text-lg">
+              <div className="w-10 h-10 bg-purple-900 text-white rounded-xl flex items-center justify-center font-bold text-lg">
                 {org.organization_name.charAt(0)}
               </div>
               <div>
@@ -163,7 +163,7 @@ function OrgDetailModal({ org, onClose }) {
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={() => { onClose(); router.visit(`/superadmin/organizations/${org.organization_id}`); }}
-              className="flex-1 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800"
+              className="flex-1 py-2.5 bg-purple-900 text-white text-sm font-medium rounded-lg hover:bg-purple-800"
             >
               Voir le profil complet
             </button>
@@ -203,10 +203,10 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center gap-3">
-            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-            <span className="text-blue-400">/</span>
+            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+            <span className="text-purple-400">/</span>
             <h1 className="text-lg font-bold">Santé des organisations</h1>
             <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
           </div>
@@ -228,8 +228,8 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
               <div className="text-3xl font-black text-green-700">{summary.low_risk}</div>
               <p className="text-xs text-gray-500 mt-1">Risque faible</p>
             </div>
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-blue-900">{summary.avg_score}</div>
+            <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 text-center">
+              <div className="text-3xl font-black text-purple-900">{summary.avg_score}</div>
               <p className="text-xs text-gray-500 mt-1">Score moyen</p>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
               <select
                 value={filters.risk}
                 onChange={e => setFilters(p => ({ ...p, risk: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 <option value="">Tous les risques</option>
                 <option value="high">Risque élevé</option>
@@ -250,7 +250,7 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
               <select
                 value={filters.plan}
                 onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 <option value="">Tous les plans</option>
                 <option value="starter">Starter</option>
@@ -324,7 +324,7 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
                             </button>
                             <button
                               onClick={() => router.visit(`/superadmin/support/tickets/new?org=${s.organization_id}`)}
-                              className="text-xs px-3 py-1.5 rounded-lg bg-blue-900 text-white hover:bg-blue-800 font-medium"
+                              className="text-xs px-3 py-1.5 rounded-lg bg-purple-900 text-white hover:bg-purple-800 font-medium"
                             >
                               Contacter
                             </button>
@@ -345,3 +345,4 @@ export default function OrganizationHealth({ scores: propScores, summary: propSu
     </>
   );
 }
+export { OrganizationHealth };

@@ -156,7 +156,7 @@ export default function VirtualTable({
                     type="checkbox"
                     checked={selected.size === data.length && data.length > 0}
                     onChange={toggleAll}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600"
+                    className="rounded border-gray-300 dark:border-gray-600 text-purple-600"
                     aria-label="Sélectionner tout"
                   />
                 </th>
@@ -211,7 +211,7 @@ export default function VirtualTable({
                     'absolute w-full flex items-center',
                     'border-b border-gray-100 dark:border-gray-800',
                     isSkeleton ? '' : 'transition-colors duration-100',
-                    isSelected  ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900',
+                    isSelected  ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-white dark:bg-gray-900',
                     onRowClick && ! isSkeleton ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : '',
                   ].join(' ')}
                   style={{ top: virtualRow.start, height: rowHeight }}
@@ -228,7 +228,7 @@ export default function VirtualTable({
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleRow(row[rowKey])}
-                            className="rounded border-gray-300 dark:border-gray-600 text-blue-600"
+                            className="rounded border-gray-300 dark:border-gray-600 text-purple-600"
                           />
                         )
                       }
@@ -281,7 +281,7 @@ export default function VirtualTable({
 function SortIcon({ active, direction }) {
   return (
     <svg
-      className={`w-3 h-3 flex-shrink-0 transition-colors ${active ? 'text-blue-500' : 'text-gray-300'}`}
+      className={`w-3 h-3 flex-shrink-0 transition-colors ${active ? 'text-purple-500' : 'text-gray-300'}`}
       viewBox="0 0 12 12"
       fill="currentColor"
       aria-hidden="true"
@@ -302,3 +302,4 @@ function SkeletonCell({ width = '70%' }) {
     />
   );
 }
+export { VirtualTable };

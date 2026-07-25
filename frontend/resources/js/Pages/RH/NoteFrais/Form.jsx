@@ -30,7 +30,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const CATEGORIES = [
-  { value: 'transport',     label: 'Transport',    icon: Car,              color: 'text-blue-500'  },
+  { value: 'transport',     label: 'Transport',    icon: Car,              color: 'text-purple-500'  },
   { value: 'accommodation', label: 'Hébergement',  icon: Hotel,            color: 'text-purple-500' },
   { value: 'meals',         label: 'Repas',        icon: UtensilsCrossed,  color: 'text-orange-500' },
   { value: 'other',         label: 'Divers',       icon: MoreHorizontal,   color: 'text-gray-500'  },
@@ -95,7 +95,7 @@ function ReceiptUpload({ item, index, onChange }) {
         item.receipt
           ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/10'
           : dragging
-            ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+            ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20'
             : 'border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-gray-50 dark:bg-gray-700'
       }`}
     >
@@ -162,7 +162,7 @@ function ExpenseItemRow({ item, index, onUpdate, onRemove, isOnly }) {
         <select
           value={item.category}
           onChange={e => update('category', e.target.value)}
-          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
         >
           {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
@@ -177,7 +177,7 @@ function ExpenseItemRow({ item, index, onUpdate, onRemove, isOnly }) {
           onChange={e => update('description', e.target.value)}
           placeholder="Taxi aéroport, Hôtel Ibis…"
           required
-          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none"
         />
       </div>
 
@@ -189,7 +189,7 @@ function ExpenseItemRow({ item, index, onUpdate, onRemove, isOnly }) {
           value={item.expense_date}
           onChange={e => update('expense_date', e.target.value)}
           required
-          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
         />
       </div>
 
@@ -204,7 +204,7 @@ function ExpenseItemRow({ item, index, onUpdate, onRemove, isOnly }) {
           min="0"
           step="1"
           required
-          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none text-right font-mono"
+          className="w-full px-2 py-2 text-xs bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none text-right font-mono"
         />
       </div>
 
@@ -303,7 +303,7 @@ function PreviewPanel({ title, period, items, onClose, onSubmit, submitting }) {
             <tfoot>
               <tr className="border-t-2 border-gray-200 dark:border-gray-700 font-bold">
                 <td colSpan={4} className="pt-3 text-gray-900 dark:text-white">Total</td>
-                <td className="pt-3 text-right font-mono text-lg text-blue-600 dark:text-blue-400">{fmtAmount(total)}</td>
+                <td className="pt-3 text-right font-mono text-lg text-purple-600 dark:text-purple-400">{fmtAmount(total)}</td>
                 <td />
               </tr>
             </tfoot>
@@ -323,7 +323,7 @@ function PreviewPanel({ title, period, items, onClose, onSubmit, submitting }) {
             <button
               onClick={onSubmit}
               disabled={submitting}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors disabled:opacity-50"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Soumettre
@@ -505,7 +505,7 @@ export default function NoteFraisForm({ employee }) {
             {/* En-tête de la note */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
               <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-blue-500" /> Informations générales
+                <FileText className="w-4 h-4 text-purple-500" /> Informations générales
               </h2>
 
               <div>
@@ -517,7 +517,7 @@ export default function NoteFraisForm({ employee }) {
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="Ex : Déplacement client Abidjan — Juin 2025"
-                  className={`w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                  className={`w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none transition ${
                     errors.title ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                 />
@@ -532,7 +532,7 @@ export default function NoteFraisForm({ employee }) {
                   type="month"
                   value={period}
                   onChange={e => setPeriod(e.target.value)}
-                  className={`w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition ${
+                  className={`w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none transition ${
                     errors.period ? 'border-red-400 dark:border-red-500' : 'border-gray-200 dark:border-gray-600'
                   }`}
                 />
@@ -548,7 +548,7 @@ export default function NoteFraisForm({ employee }) {
                   onChange={e => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Contexte du déplacement, informations complémentaires…"
-                  className="w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                  className="w-full px-3.5 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none resize-none"
                 />
               </div>
             </div>
@@ -557,7 +557,7 @@ export default function NoteFraisForm({ employee }) {
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-blue-500" /> Dépenses
+                  <Receipt className="w-4 h-4 text-purple-500" /> Dépenses
                   <span className="text-xs font-normal text-gray-400">({items.length} ligne{items.length > 1 ? 's' : ''})</span>
                 </h2>
               </div>
@@ -596,7 +596,7 @@ export default function NoteFraisForm({ employee }) {
               <button
                 type="button"
                 onClick={addItem}
-                className="mt-4 flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                className="mt-4 flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium transition-colors"
               >
                 <Plus className="w-4 h-4" /> Ajouter une dépense
               </button>
@@ -618,7 +618,7 @@ export default function NoteFraisForm({ employee }) {
             {/* Total */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-blue-500" /> Récapitulatif
+                <BarChart2 className="w-4 h-4 text-purple-500" /> Récapitulatif
               </h3>
 
               <div className="space-y-2 mb-4">
@@ -642,7 +642,7 @@ export default function NoteFraisForm({ employee }) {
               <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-gray-900 dark:text-white">Total</span>
-                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400 font-mono">
+                  <span className="text-xl font-bold text-purple-600 dark:text-purple-400 font-mono">
                     {fmtAmount(total)}
                   </span>
                 </div>
@@ -656,7 +656,7 @@ export default function NoteFraisForm({ employee }) {
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3">
               <button
                 onClick={handlePreviewOpen}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
               >
                 <Eye className="w-4 h-4" /> Prévisualiser & Soumettre
               </button>
@@ -677,9 +677,9 @@ export default function NoteFraisForm({ employee }) {
             </div>
 
             {/* Aide */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-4">
-              <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">Formats acceptés</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
+              <p className="text-xs text-purple-700 dark:text-purple-300 font-medium mb-1">Formats acceptés</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400">
                 Justificatifs : PDF, JPG, PNG (max 5 Mo par fichier).
                 Conservez les originaux pour contrôle comptable.
               </p>
@@ -713,3 +713,4 @@ NoteFraisForm.propTypes = {
     last_name:  PropTypes.string,
   }),
 };
+export { NoteFraisForm };

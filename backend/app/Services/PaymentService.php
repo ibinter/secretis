@@ -551,4 +551,31 @@ class PaymentService
             ]);
         }
     }
+
+    /**
+     * Passerelles de paiement disponibles pour le checkout (spec §19.1).
+     */
+    public function availableGateways(): array
+    {
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('payment_gateways')) {
+                $rows = \Illuminate\Support\Facades\DB::table('payment_gateways')
+                    ->where('is_active', true)->orderBy('sort_order')->get();
+                if ($rows->isNotEmpty()) {
+                    return $rows->toArray();
+                }
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        // Fallback : familles manuelles toujours disponibles
+        return [
+            ['code' => 'orange_money', 'name' => 'Orange Money',      'type' => 'mobile_money', 'validation' => 'manual'],
+            ['code' => 'mtn_momo',     'name' => 'MTN Mobile Money',  'type' => 'mobile_money', 'validation' => 'manual'],
+            ['code' => 'wave',         'name' => 'Wave',              'type' => 'mobile_money', 'validation' => 'manual'],
+            ['code' => 'moov_money',   'name' => 'Moov Money',        'type' => 'mobile_money', 'validation' => 'manual'],
+            ['code' => 'bank_transfer','name' => 'Virement bancaire', 'type' => 'bank',         'validation' => 'manual'],
+        ];
+    }
 }

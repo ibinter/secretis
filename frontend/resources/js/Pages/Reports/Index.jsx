@@ -33,7 +33,7 @@ import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/soli
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const MODULE_ICONS = {
-    events:     { icon: CalendarDaysIcon,          color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20'   },
+    events:     { icon: CalendarDaysIcon,          color: 'text-purple-500',   bg: 'bg-purple-50 dark:bg-purple-900/20'   },
     tasks:      { icon: ClipboardDocumentListIcon,  color: 'text-emerald-500',bg: 'bg-emerald-50 dark:bg-emerald-900/20'},
     visitors:   { icon: UsersIcon,                  color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20'},
     hr:         { icon: IdentificationIcon,          color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20'},
@@ -45,7 +45,7 @@ const MODULE_ICONS = {
 
 const STATUS_CONFIG = {
     pending:    { label: 'En attente',  color: 'text-gray-500',   bg: 'bg-gray-100 dark:bg-gray-700' },
-    processing: { label: 'En cours',    color: 'text-blue-600',   bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    processing: { label: 'En cours',    color: 'text-purple-600',   bg: 'bg-purple-100 dark:bg-purple-900/30' },
     completed:  { label: 'Terminé',     color: 'text-green-600',  bg: 'bg-green-100 dark:bg-green-900/30' },
     failed:     { label: 'Échec',       color: 'text-red-600',    bg: 'bg-red-100 dark:bg-red-900/30' },
 };
@@ -113,7 +113,7 @@ function ReportCard({ report, onRun, onDelete }) {
             {/* Badges */}
             <div className="flex flex-wrap gap-1.5">
                 {report.is_shared && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
                         <ShareIcon className="w-3 h-3" /> Partagé
                     </span>
                 )}
@@ -142,7 +142,7 @@ function ReportCard({ report, onRun, onDelete }) {
                 <select
                     value={format}
                     onChange={e => setFormat(e.target.value)}
-                    className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                    className="text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                 >
                     {Object.entries(FORMAT_LABELS).map(([k, v]) => (
                         <option key={k} value={k}>{v}</option>
@@ -152,7 +152,7 @@ function ReportCard({ report, onRun, onDelete }) {
                 <button
                     onClick={handleRun}
                     disabled={running}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#2E86C1] hover:bg-[#2574a9] text-white text-xs font-medium transition-colors disabled:opacity-60"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#7e22ce] hover:bg-[#2574a9] text-white text-xs font-medium transition-colors disabled:opacity-60"
                 >
                     {running
                         ? <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
@@ -164,7 +164,7 @@ function ReportCard({ report, onRun, onDelete }) {
                 {report.is_owner && (
                     <Link
                         href={`/report-builder/${report.id}/edit`}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#2E86C1] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#7e22ce] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
                         title="Modifier"
                     >
                         <PencilSquareIcon className="w-4 h-4" />
@@ -270,7 +270,7 @@ export default function ReportsIndex({ reports = [], recentRuns = [] }) {
                     </div>
                     <Link
                         href="/report-builder/new"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors shadow-sm"
                     >
                         <PlusIcon className="w-4 h-4" />
                         Créer un rapport
@@ -285,7 +285,7 @@ export default function ReportsIndex({ reports = [], recentRuns = [] }) {
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                                 activeTab === tab.id
-                                    ? 'border-[#2E86C1] text-[#2E86C1] dark:text-blue-400'
+                                    ? 'border-[#7e22ce] text-[#7e22ce] dark:text-purple-400'
                                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                         >
@@ -306,7 +306,7 @@ export default function ReportsIndex({ reports = [], recentRuns = [] }) {
                         <DocumentIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
                         <p className="text-lg font-medium">Aucun rapport dans cet onglet</p>
                         <p className="text-sm mt-1">Créez votre premier rapport personnalisé.</p>
-                        <Link href="/report-builder/new" className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#2E86C1] text-white text-sm">
+                        <Link href="/report-builder/new" className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#7e22ce] text-white text-sm">
                             <PlusIcon className="w-4 h-4" /> Créer un rapport
                         </Link>
                     </div>
@@ -366,7 +366,7 @@ export default function ReportsIndex({ reports = [], recentRuns = [] }) {
                                                     {run.can_download && (
                                                         <button
                                                             onClick={() => handleDownload(run.id)}
-                                                            className="p-1.5 rounded-lg text-[#2E86C1] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                                            className="p-1.5 rounded-lg text-[#7e22ce] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
                                                             title="Télécharger"
                                                         >
                                                             <ArrowDownTrayIcon className="w-4 h-4" />
@@ -385,3 +385,4 @@ export default function ReportsIndex({ reports = [], recentRuns = [] }) {
         </AppLayout>
     );
 }
+export { ReportsIndex };

@@ -128,7 +128,7 @@ export default function ContextualHelp({ topic, className = '' }) {
         aria-expanded={open}
         aria-controls={helpId}
         aria-describedby={open ? helpId : undefined}
-        className="w-5 h-5 rounded-full bg-gray-100 hover:bg-[#2E86C1] hover:text-white text-gray-400 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#2E86C1] focus:ring-offset-1"
+        className="w-5 h-5 rounded-full bg-gray-100 hover:bg-[#7e22ce] hover:text-white text-gray-400 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-[#7e22ce] focus:ring-offset-1"
       >
         <QuestionIcon />
       </button>
@@ -151,7 +151,7 @@ export default function ContextualHelp({ topic, className = '' }) {
 
           {/* Header */}
           <div className="flex items-start justify-between mb-2">
-            <h4 className="font-semibold text-[#1A3A5C] dark:text-white text-sm pr-2">{data.title}</h4>
+            <h4 className="font-semibold text-[#9333EA] dark:text-white text-sm pr-2">{data.title}</h4>
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -171,7 +171,7 @@ export default function ContextualHelp({ topic, className = '' }) {
               href={data.guide_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 mt-3 text-xs font-medium text-[#2E86C1] hover:text-[#1A3A5C] dark:hover:text-blue-300 transition-colors"
+              className="flex items-center gap-1.5 mt-3 text-xs font-medium text-[#7e22ce] hover:text-[#9333EA] dark:hover:text-purple-300 transition-colors"
             >
               <ExternalLinkIcon />
               En savoir plus dans le guide
@@ -182,3 +182,4 @@ export default function ContextualHelp({ topic, className = '' }) {
     </div>
   )
 }
+export { ContextualHelp };

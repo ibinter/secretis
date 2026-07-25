@@ -16,7 +16,7 @@ const Ic = {
 
 const STATUS_MAP = {
   requested:  { label: 'Demandée',   cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-  scheduled:  { label: 'Planifiée',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  scheduled:  { label: 'Planifiée',  cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   confirmed:  { label: 'Confirmée',  cls: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
   done:       { label: 'Réalisée',   cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
   cancelled:  { label: 'Annulée',    cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
@@ -70,10 +70,10 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
                 return (
                   <div key={d.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
                     <div className="w-16 text-center shrink-0">
-                      <p className="text-lg font-bold text-[#1A3A5C] dark:text-blue-400 tabular-nums">{new Date(d.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                      <p className="text-lg font-bold text-[#9333EA] dark:text-purple-400 tabular-nums">{new Date(d.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
                       <p className="text-xs text-gray-400">{d.duration_min}min</p>
                     </div>
-                    <div className="w-0.5 h-10 bg-[#1A3A5C]/20 shrink-0" />
+                    <div className="w-0.5 h-10 bg-[#9333EA]/20 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 dark:text-white">{d.prospect_name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{d.company} · {d.software}</p>
@@ -83,7 +83,7 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
                       {d.mode === 'visio' ? <Ic.Video /> : <Ic.Globe />} {d.mode}
                     </div>
                     {d.link && (
-                      <a href={d.link} target="_blank" rel="noopener noreferrer" className="text-[#1A3A5C] dark:text-blue-400 hover:underline flex items-center gap-1 text-xs">
+                      <a href={d.link} target="_blank" rel="noopener noreferrer" className="text-[#9333EA] dark:text-purple-400 hover:underline flex items-center gap-1 text-xs">
                         Rejoindre <Ic.ExternalLink />
                       </a>
                     )}
@@ -107,15 +107,15 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
           <p className="text-sm text-gray-500 dark:text-gray-400">{demos.length} démo(s) au total</p>
         </div>
         <div className="flex gap-2">
-          <select value={filterStatus} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+          <select value={filterStatus} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
             <option value="">Tous les statuts</option>
             {Object.entries(STATUS_MAP).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
           <div className="flex border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button onClick={() => setView('calendar')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'calendar' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Calendar /> Calendrier</button>
-            <button onClick={() => setView('list')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'list' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /> Liste</button>
+            <button onClick={() => setView('calendar')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'calendar' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Calendar /> Calendrier</button>
+            <button onClick={() => setView('list')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'list' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /> Liste</button>
           </div>
-          <Link href="/superadmin/crm/demonstrations/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+          <Link href="/superadmin/crm/demonstrations/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
             <Ic.Plus /> Planifier
           </Link>
         </div>
@@ -138,7 +138,7 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
                   return (
                     <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                       <td className="px-4 py-3">
-                        <Link href={`/superadmin/crm/prospects/${d.prospect_id}`} className="font-medium text-[#1A3A5C] dark:text-blue-400 hover:underline">{d.prospect_name}</Link>
+                        <Link href={`/superadmin/crm/prospects/${d.prospect_id}`} className="font-medium text-[#9333EA] dark:text-purple-400 hover:underline">{d.prospect_name}</Link>
                       </td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">{d.company}</td>
                       <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{d.software}</td>
@@ -152,7 +152,7 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={() => sendReminder(d.id)} className="p-1.5 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Envoyer rappel"><Ic.Mail /></button>
+                          <button onClick={() => sendReminder(d.id)} className="p-1.5 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" title="Envoyer rappel"><Ic.Mail /></button>
                           {d.link && (
                             <a href={d.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" title="Lien visio">
                               <Ic.ExternalLink />
@@ -174,3 +174,4 @@ export default function DemonstrationsIndex({ demos: propDemos }) {
     </SuperAdminLayout>
   )
 }
+export { DemonstrationsIndex };

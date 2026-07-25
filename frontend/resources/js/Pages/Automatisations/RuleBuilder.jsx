@@ -52,7 +52,7 @@ function Input({ label, required, ...props }) {
       <input
         className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                   focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                   focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all"
         {...props}
       />
     </div>
@@ -66,7 +66,7 @@ function Select({ label, required, options, ...props }) {
       <select
         className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-white cursor-pointer
-                   focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                   focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all"
         {...props}
       >
         {options.map(opt => (
@@ -84,7 +84,7 @@ function IconButton({ icon, label, active, onClick }) {
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all
         ${active
-          ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+          ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-sm'
           : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
     >
       <span className="text-xl">{icon}</span>
@@ -98,7 +98,7 @@ function TriggerSection({ value, onChange }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-sm font-bold">1</div>
+        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 text-sm font-bold">1</div>
         <h2 className="font-semibold text-gray-900 dark:text-white">Déclencheur</h2>
         <span className="text-xs text-gray-400">Quand est-ce que la règle se déclenche ?</span>
       </div>
@@ -116,10 +116,10 @@ function TriggerSection({ value, onChange }) {
       </div>
 
       {value && TRIGGERS[value] && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-blue-700 dark:text-blue-300">
+        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-sm text-purple-700 dark:text-purple-300">
           <span className="font-medium">Champs disponibles : </span>
           {TRIGGERS[value].fields.map(f => (
-            <code key={f} className="mx-1 bg-blue-100 dark:bg-blue-800 px-1.5 py-0.5 rounded text-xs">{f}</code>
+            <code key={f} className="mx-1 bg-purple-100 dark:bg-purple-800 px-1.5 py-0.5 rounded text-xs">{f}</code>
           ))}
         </div>
       )}
@@ -158,7 +158,7 @@ function ConditionsSection({ conditions, triggerType, onChange }) {
         <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
           <p className="text-sm text-gray-400 mb-3">Aucune condition — la règle s'exécute toujours</p>
           <button type="button" onClick={addCondition}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            className="text-sm text-purple-600 hover:text-purple-800 font-medium">
             + Ajouter une condition
           </button>
         </div>
@@ -172,14 +172,14 @@ function ConditionsSection({ conditions, triggerType, onChange }) {
               <select
                 value={cond.field}
                 onChange={e => updateCondition(i, 'field', e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-purple-400"
               >
                 {fieldOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
               </select>
               <select
                 value={cond.operator}
                 onChange={e => updateCondition(i, 'operator', e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-purple-400"
               >
                 {OPERATORS.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
               </select>
@@ -189,7 +189,7 @@ function ConditionsSection({ conditions, triggerType, onChange }) {
                   value={cond.value}
                   onChange={e => updateCondition(i, 'value', e.target.value)}
                   placeholder="valeur"
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400"
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-purple-400"
                 />
               )}
               <button type="button" onClick={() => removeCondition(i)}
@@ -201,7 +201,7 @@ function ConditionsSection({ conditions, triggerType, onChange }) {
             </div>
           ))}
           <button type="button" onClick={addCondition}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            className="text-sm text-purple-600 hover:text-purple-800 font-medium">
             + Ajouter une condition
           </button>
         </div>
@@ -217,7 +217,7 @@ function ActionParams({ actionType, params, onChange }) {
   const update = (key, val) => onChange({ ...params, [key]: val });
 
   return (
-    <div className="mt-3 grid grid-cols-2 gap-3 pl-4 border-l-2 border-blue-200">
+    <div className="mt-3 grid grid-cols-2 gap-3 pl-4 border-l-2 border-purple-200">
       {actionType === 'assign_user' && (
         <Input label="ID Utilisateur" value={params.user_id || ''} onChange={e => update('user_id', e.target.value)} placeholder="UUID utilisateur"/>
       )}
@@ -237,7 +237,7 @@ function ActionParams({ actionType, params, onChange }) {
               onChange={e => update('body', e.target.value)}
               rows={2}
               placeholder="Corps de la notification. Utilisez {{field}} pour les variables."
-              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:border-blue-400"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:border-purple-400"
             />
           </div>
           <div className="col-span-2">
@@ -349,7 +349,7 @@ function ActionsSection({ actions, onChange }) {
               <select
                 value={action.type}
                 onChange={e => updateActionType(i, e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-blue-400"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-purple-400"
               >
                 {Object.entries(ACTIONS).map(([key, act]) => (
                   <option key={key} value={key}>{act.icon} {act.label}</option>
@@ -371,8 +371,8 @@ function ActionsSection({ actions, onChange }) {
         ))}
 
         <button type="button" onClick={addAction}
-          className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-blue-600
-                     hover:border-blue-300 hover:bg-blue-50 transition-colors font-medium">
+          className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-purple-600
+                     hover:border-purple-300 hover:bg-purple-50 transition-colors font-medium">
           + Ajouter une action
         </button>
       </div>
@@ -389,15 +389,15 @@ function RulePreview({ name, triggerType, conditions, actions }) {
   const acts    = actions.filter(a => a.type);
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950
-                    border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-3">
+    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950 dark:to-indigo-950
+                    border border-purple-200 dark:border-purple-800 rounded-xl p-4">
+      <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-3">
         Aperçu de la règle
       </p>
 
       <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
         <span className="font-bold">Si</span>{' '}
-        <span className="bg-blue-100 dark:bg-blue-800 px-2 py-0.5 rounded text-blue-800 dark:text-blue-200">
+        <span className="bg-purple-100 dark:bg-purple-800 px-2 py-0.5 rounded text-purple-800 dark:text-purple-200">
           {trigger?.icon} {trigger?.label}
         </span>
 
@@ -426,7 +426,7 @@ function RulePreview({ name, triggerType, conditions, actions }) {
       </p>
 
       {name && (
-        <p className="text-xs text-gray-400 mt-2 border-t border-blue-200 dark:border-blue-700 pt-2">
+        <p className="text-xs text-gray-400 mt-2 border-t border-purple-200 dark:border-purple-700 pt-2">
           Règle : <span className="font-medium text-gray-600 dark:text-gray-300">{name}</span>
         </p>
       )}
@@ -548,7 +548,7 @@ export default function RuleBuilder({ ruleId = null }) {
                 placeholder="Décrivez ce que fait cette règle…"
                 className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm
                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none
-                           focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                           focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all"
               />
             </div>
           </div>
@@ -594,7 +594,7 @@ export default function RuleBuilder({ ruleId = null }) {
                 aria-checked={form.is_active}
                 onClick={() => update('is_active', !form.is_active)}
                 className={`relative inline-flex h-6 w-11 cursor-pointer rounded-full border-2 border-transparent
-                            transition-colors duration-200 ${form.is_active ? 'bg-blue-600' : 'bg-gray-200'}`}
+                            transition-colors duration-200 ${form.is_active ? 'bg-purple-600' : 'bg-gray-200'}`}
               >
                 <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition duration-200
                                   ${form.is_active ? 'translate-x-5' : 'translate-x-0'}`}/>
@@ -627,8 +627,8 @@ export default function RuleBuilder({ ruleId = null }) {
             <button
               type="submit"
               disabled={saving || success}
-              className="flex-1 py-2.5 bg-blue-900 text-white rounded-xl text-sm font-medium
-                         hover:bg-blue-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 bg-purple-900 text-white rounded-xl text-sm font-medium
+                         hover:bg-purple-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>
@@ -648,3 +648,4 @@ export default function RuleBuilder({ ruleId = null }) {
     </div>
   );
 }
+export { RuleBuilder };

@@ -71,3 +71,4 @@ export default function Dropdown({
     </div>
   )
 }
+export { Dropdown };

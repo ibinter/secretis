@@ -201,3 +201,4 @@ export function useDemoBannerOffset() {
     || import.meta.env.VITE_DEMO_MODE === 'true';
   return isDemoMode ? 40 : 0;
 }
+export { DemoBanner };

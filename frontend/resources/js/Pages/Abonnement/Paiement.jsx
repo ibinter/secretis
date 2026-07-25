@@ -266,25 +266,25 @@ export default function Paiement() {
                 onClick={() => setSelectedPlan(plan)}
                 className={`relative flex flex-col rounded-2xl border-2 p-5 text-left transition-all ${
                     selected
-                        ? 'border-blue-600 bg-blue-50 shadow-lg shadow-blue-100'
+                        ? 'border-purple-600 bg-purple-50 shadow-lg shadow-blue-100'
                         : plan.highlighted
-                        ? 'border-blue-200 bg-white shadow-md'
+                        ? 'border-purple-200 bg-white shadow-md'
                         : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                 }`}
             >
                 {plan.badge && (
-                    <span className="absolute -top-3 right-4 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-bold text-white">
+                    <span className="absolute -top-3 right-4 rounded-full bg-purple-600 px-3 py-0.5 text-xs font-bold text-white">
                         {plan.badge}
                     </span>
                 )}
                 {selected && (
-                    <span className="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
+                    <span className="absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-xs text-white">
                         ✓
                     </span>
                 )}
                 <h3 className="mb-1 text-lg font-bold text-gray-900">{plan.name}</h3>
                 <p className="mb-3 text-xs text-gray-500">{plan.description}</p>
-                <p className="mb-4 text-2xl font-extrabold text-blue-600">
+                <p className="mb-4 text-2xl font-extrabold text-purple-600">
                     {new Intl.NumberFormat('fr-FR').format(price)}
                     <span className="ml-1 text-sm font-normal text-gray-500">{currency}/mois</span>
                 </p>
@@ -307,7 +307,7 @@ export default function Paiement() {
                 onClick={() => setSelectedMethod(method)}
                 className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 transition-all ${
                     selected
-                        ? 'border-blue-600 bg-blue-50 shadow'
+                        ? 'border-purple-600 bg-purple-50 shadow'
                         : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                 }`}
             >
@@ -322,12 +322,12 @@ export default function Paiement() {
         if (!instructions) return null;
 
         return (
-            <div className="rounded-xl border border-blue-100 bg-blue-50 p-5 space-y-3">
-                <h3 className="font-semibold text-blue-900">{instructions.title}</h3>
+            <div className="rounded-xl border border-purple-100 bg-purple-50 p-5 space-y-3">
+                <h3 className="font-semibold text-purple-900">{instructions.title}</h3>
 
                 <ol className="list-decimal list-inside space-y-2">
                     {instructions.steps?.map((step, i) => (
-                        <li key={i} className="text-sm text-blue-800">{step}</li>
+                        <li key={i} className="text-sm text-purple-800">{step}</li>
                     ))}
                 </ol>
 
@@ -335,17 +335,17 @@ export default function Paiement() {
                 {instructions.type === 'mobile_money' && (
                     <div className="mt-3 grid grid-cols-2 gap-3">
                         {instructions.merchant_number && (
-                            <div className="rounded-lg border border-blue-200 bg-white p-3">
+                            <div className="rounded-lg border border-purple-200 bg-white p-3">
                                 <p className="text-xs text-gray-500">Numéro marchand</p>
-                                <p className="text-lg font-bold tracking-widest text-blue-700">
+                                <p className="text-lg font-bold tracking-widest text-purple-700">
                                     {instructions.merchant_number}
                                 </p>
                             </div>
                         )}
                         {instructions.ussd_code && (
-                            <div className="rounded-lg border border-blue-200 bg-white p-3">
+                            <div className="rounded-lg border border-purple-200 bg-white p-3">
                                 <p className="text-xs text-gray-500">Code USSD</p>
-                                <p className="text-lg font-bold tracking-widest text-blue-700">
+                                <p className="text-lg font-bold tracking-widest text-purple-700">
                                     {instructions.ussd_code}
                                 </p>
                             </div>
@@ -356,7 +356,7 @@ export default function Paiement() {
                 {/* Virement : RIB */}
                 {instructions.type === 'bank_transfer' && (
                     <div className="mt-3 space-y-2">
-                        <div className="rounded-lg border border-blue-200 bg-white p-3 text-sm">
+                        <div className="rounded-lg border border-purple-200 bg-white p-3 text-sm">
                             <p className="font-medium text-gray-700">{instructions.bank_name}</p>
                             {instructions.iban && (
                                 <p className="font-mono text-gray-900 mt-1">{instructions.iban}</p>
@@ -386,7 +386,7 @@ export default function Paiement() {
                 )}
 
                 {/* Référence de paiement (toujours affichée) */}
-                <div className="rounded-lg border border-blue-200 bg-white p-3 mt-2">
+                <div className="rounded-lg border border-purple-200 bg-white p-3 mt-2">
                     <p className="text-xs text-gray-500 mb-0.5">Votre référence de paiement</p>
                     <p className="font-mono text-sm font-bold text-gray-800">
                         {payment?.idempotency_key}
@@ -407,7 +407,7 @@ export default function Paiement() {
                 onDrop={handleDrop}
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all cursor-pointer ${
                     dragging
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-purple-500 bg-purple-50'
                         : proofFile
                         ? 'border-green-400 bg-green-50'
                         : 'border-gray-300 bg-gray-50 hover:border-gray-400'
@@ -444,7 +444,7 @@ export default function Paiement() {
                 <button
                     onClick={uploadProof}
                     disabled={loading}
-                    className="w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition"
+                    className="w-full rounded-xl bg-purple-600 py-3 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition"
                 >
                     {loading ? 'Upload en cours...' : '📤 Envoyer la preuve de paiement'}
                 </button>
@@ -503,7 +503,7 @@ export default function Paiement() {
                 </p>
                 <button
                     onClick={() => router.visit('/abonnement')}
-                    className="rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                    className="rounded-xl bg-purple-600 px-8 py-3 text-sm font-semibold text-white hover:bg-purple-700 transition"
                 >
                     Voir mon abonnement
                 </button>
@@ -522,12 +522,12 @@ export default function Paiement() {
                         <div key={i} className="flex items-center gap-2">
                             <div className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
                                 step > i + 1 ? 'bg-green-500 text-white'
-                                : step === i + 1 ? 'bg-blue-600 text-white'
+                                : step === i + 1 ? 'bg-purple-600 text-white'
                                 : 'bg-gray-200 text-gray-500'
                             }`}>
                                 {step > i + 1 ? '✓' : i + 1}
                             </div>
-                            <span className={`text-sm ${step === i + 1 ? 'font-semibold text-blue-600' : 'text-gray-400'}`}>
+                            <span className={`text-sm ${step === i + 1 ? 'font-semibold text-purple-600' : 'text-gray-400'}`}>
                                 {label}
                             </span>
                             {i < 2 && <div className="mx-2 h-px w-8 bg-gray-200" />}
@@ -556,7 +556,7 @@ export default function Paiement() {
                                     onClick={() => setSelectedDuration(opt.months)}
                                     className={`rounded-lg px-3 py-1.5 text-sm transition ${
                                         selectedDuration === opt.months
-                                            ? 'bg-blue-600 text-white'
+                                            ? 'bg-purple-600 text-white'
                                             : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                                     }`}
                                 >
@@ -588,22 +588,22 @@ export default function Paiement() {
                     </div>
 
                     {selectedPlan && (
-                        <div className="flex items-center justify-between rounded-xl bg-blue-50 border border-blue-100 px-5 py-4">
+                        <div className="flex items-center justify-between rounded-xl bg-purple-50 border border-purple-100 px-5 py-4">
                             <div>
-                                <p className="font-semibold text-blue-900">
+                                <p className="font-semibold text-purple-900">
                                     {selectedPlan.name} — {selectedDuration} mois
                                 </p>
-                                <p className="text-xs text-blue-600 mt-0.5">
+                                <p className="text-xs text-purple-600 mt-0.5">
                                     {DURATION_OPTIONS.find(d => d.months === selectedDuration)?.discount > 0 &&
                                         `Économie de ${DURATION_OPTIONS.find(d => d.months === selectedDuration).discount}% appliquée`
                                     }
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-2xl font-extrabold text-blue-700">
+                                <p className="text-2xl font-extrabold text-purple-700">
                                     {new Intl.NumberFormat('fr-FR').format(getPrice())} {currency}
                                 </p>
-                                <p className="text-xs text-blue-500">
+                                <p className="text-xs text-purple-500">
                                     ≈ {new Intl.NumberFormat('fr-FR').format(Math.round(getPrice() / selectedDuration))} {currency}/mois
                                 </p>
                             </div>
@@ -613,7 +613,7 @@ export default function Paiement() {
                     <button
                         onClick={() => setStep(2)}
                         disabled={!selectedPlan}
-                        className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 transition"
+                        className="w-full rounded-xl bg-purple-600 py-3.5 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-40 transition"
                     >
                         Continuer → Choisir le mode de paiement
                     </button>
@@ -632,7 +632,7 @@ export default function Paiement() {
                     </div>
 
                     {selectedMethod && (
-                        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                        <div className="rounded-xl border border-purple-100 bg-purple-50 px-4 py-3 text-sm text-purple-800">
                             Méthode sélectionnée : <strong>{selectedMethod.label}</strong>
                         </div>
                     )}
@@ -647,7 +647,7 @@ export default function Paiement() {
                         <button
                             onClick={initiatePayment}
                             disabled={!selectedMethod || loading}
-                            className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 transition"
+                            className="flex-1 rounded-xl bg-purple-600 py-3 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-40 transition"
                         >
                             {loading ? 'Création du paiement...' : 'Initier le paiement →'}
                         </button>
@@ -673,7 +673,7 @@ export default function Paiement() {
                         </div>
                         <div className="flex justify-between text-sm mt-1">
                             <span className="text-gray-500">Montant</span>
-                            <span className="font-bold text-blue-700">
+                            <span className="font-bold text-purple-700">
                                 {new Intl.NumberFormat('fr-FR').format(payment?.amount ?? getPrice())} {currency}
                             </span>
                         </div>
@@ -705,3 +705,4 @@ export default function Paiement() {
         </div>
     );
 }
+export { Paiement };

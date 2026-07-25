@@ -497,3 +497,4 @@ function TemplateCard({ template, onEdit, onDelete, deleting }) {
         </div>
     );
 }
+export { WorkflowTemplates };

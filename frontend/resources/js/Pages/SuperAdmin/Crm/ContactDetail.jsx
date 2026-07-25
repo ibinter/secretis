@@ -17,7 +17,7 @@ const Icon = {
 
 // ─── Icônes activité ──────────────────────────────────────────────────────────
 const ACTIVITY_ICONS = {
-  call:      { icon: '📞', color: 'bg-blue-100 text-blue-700' },
+  call:      { icon: '📞', color: 'bg-purple-100 text-purple-700' },
   email:     { icon: '📧', color: 'bg-indigo-100 text-indigo-700' },
   meeting:   { icon: '🤝', color: 'bg-purple-100 text-purple-700' },
   demo:      { icon: '🖥️', color: 'bg-teal-100 text-teal-700' },
@@ -37,7 +37,7 @@ const fmtDateTime = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2
 const BANT_COLOR = (s) => s >= 75 ? 'bg-green-500' : s >= 50 ? 'bg-amber-400' : s >= 25 ? 'bg-orange-400' : 'bg-red-400';
 
 const STATUS_MAP = {
-  new:         { label: 'Nouveau',      cls: 'bg-blue-100 text-blue-700' },
+  new:         { label: 'Nouveau',      cls: 'bg-purple-100 text-purple-700' },
   contacted:   { label: 'Contacté',     cls: 'bg-indigo-100 text-indigo-700' },
   qualified:   { label: 'Qualifié',     cls: 'bg-purple-100 text-purple-700' },
   demo:        { label: 'Démo',         cls: 'bg-teal-100 text-teal-700' },
@@ -49,7 +49,7 @@ const STATUS_MAP = {
 };
 
 const EMAIL_STATUS = {
-  sent:    { label: 'Envoyé',  cls: 'bg-blue-100 text-blue-700' },
+  sent:    { label: 'Envoyé',  cls: 'bg-purple-100 text-purple-700' },
   opened:  { label: 'Ouvert', cls: 'bg-green-100 text-green-700' },
   clicked: { label: 'Cliqué', cls: 'bg-purple-100 text-purple-700' },
   bounced: { label: 'Rejeté', cls: 'bg-red-100 text-red-700' },
@@ -90,7 +90,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
               <select
                 value={form.type}
                 onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 {Object.entries(ACTIVITY_ICONS).map(([k]) => (
                   <option key={k} value={k}>{k.replace('_', ' ')}</option>
@@ -102,7 +102,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
               <select
                 value={form.deal_id}
                 onChange={e => setForm(f => ({ ...f, deal_id: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 <option value="">Aucun</option>
                 {deals?.map(d => (
@@ -117,7 +117,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
               type="text"
               value={form.subject}
               onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               placeholder="Appel de découverte..."
             />
           </div>
@@ -127,7 +127,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
               type="datetime-local"
               value={form.scheduled_at}
               onChange={e => setForm(f => ({ ...f, scheduled_at: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
             />
           </div>
           <div>
@@ -136,7 +136,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
               rows={3}
               value={form.notes}
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 resize-none"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 resize-none"
             />
           </div>
         </div>
@@ -147,7 +147,7 @@ function ActivityModal({ contactId, deals, onClose, onSaved }) {
           <button
             onClick={save}
             disabled={saving || !form.subject}
-            className="px-4 py-2 text-sm font-bold text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-bold text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50"
           >
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>
@@ -185,7 +185,7 @@ function SendEmailModal({ contactId, templates, onClose, onSent }) {
             <select
               value={templateId}
               onChange={e => setTemplateId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
             >
               <option value="">Choisir un template...</option>
               {templates?.map(t => (
@@ -194,7 +194,7 @@ function SendEmailModal({ contactId, templates, onClose, onSent }) {
             </select>
           </div>
           {templateId && (
-            <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-800">
+            <div className="bg-purple-50 rounded-lg p-3 text-sm text-purple-800">
               <strong>Sujet :</strong> {templates.find(t => t.id == templateId)?.subject}
             </div>
           )}
@@ -204,7 +204,7 @@ function SendEmailModal({ contactId, templates, onClose, onSent }) {
           <button
             onClick={send}
             disabled={sending || !templateId}
-            className="px-4 py-2 text-sm font-bold text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-bold text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50"
           >
             {sending ? 'Envoi...' : 'Envoyer'}
           </button>
@@ -276,7 +276,7 @@ export default function ContactDetail({ contactId: propId }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-900 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-purple-900 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -299,11 +299,11 @@ export default function ContactDetail({ contactId: propId }) {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white">
+        <header className="bg-purple-900 text-white">
           <div className="max-w-6xl mx-auto px-6 py-4">
             <button
               onClick={() => router.visit('/superadmin/crm/contacts')}
-              className="flex items-center gap-2 text-blue-200 hover:text-white text-sm mb-4 transition-colors"
+              className="flex items-center gap-2 text-purple-200 hover:text-white text-sm mb-4 transition-colors"
             >
               <Icon.ArrowLeft /> Retour aux contacts
             </button>
@@ -315,18 +315,18 @@ export default function ContactDetail({ contactId: propId }) {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold">{contact.company_name}</h1>
-                  <p className="text-blue-200 text-sm mt-0.5">{contact.contact_name}</p>
+                  <p className="text-purple-200 text-sm mt-0.5">{contact.contact_name}</p>
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${statusInfo.cls}`}>
                       {statusInfo.label}
                     </span>
                     {contact.country && (
-                      <span className="flex items-center gap-1 text-xs text-blue-200">
+                      <span className="flex items-center gap-1 text-xs text-purple-200">
                         <Icon.MapPin />{contact.city ? `${contact.city}, ` : ''}{contact.country}
                       </span>
                     )}
                     {contact.sector && (
-                      <span className="text-xs text-blue-200">{contact.sector}</span>
+                      <span className="text-xs text-purple-200">{contact.sector}</span>
                     )}
                   </div>
                 </div>
@@ -335,7 +335,7 @@ export default function ContactDetail({ contactId: propId }) {
               {/* BANT score */}
               <div className="flex-shrink-0 bg-white/10 rounded-xl p-4 text-center">
                 <div className="text-3xl font-black">{contact.bant_score ?? '—'}</div>
-                <div className="text-xs text-blue-200 mt-1">Score BANT</div>
+                <div className="text-xs text-purple-200 mt-1">Score BANT</div>
                 {contact.bant_score != null && (
                   <div className={`h-1.5 rounded-full mt-2 ${BANT_COLOR(contact.bant_score)}`} style={{ width: `${contact.bant_score}%`, minWidth: 8 }} />
                 )}
@@ -348,11 +348,11 @@ export default function ContactDetail({ contactId: propId }) {
         <div className="max-w-6xl mx-auto px-6 -mt-4">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center gap-4 justify-between">
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-              <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-blue-900">
+              <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 hover:text-purple-900">
                 <Icon.Mail /> {contact.email}
               </a>
               {contact.phone && (
-                <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 hover:text-blue-900">
+                <a href={`tel:${contact.phone}`} className="flex items-center gap-1.5 hover:text-purple-900">
                   <Icon.Phone /> {contact.phone}
                 </a>
               )}
@@ -370,13 +370,13 @@ export default function ContactDetail({ contactId: propId }) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowEmail(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-900 bg-blue-50 rounded-lg hover:bg-blue-100"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-900 bg-purple-50 rounded-lg hover:bg-purple-100"
               >
                 <Icon.Mail /> Email
               </button>
               <button
                 onClick={() => setShowActivity(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-900 rounded-lg hover:bg-purple-800"
               >
                 <Icon.Plus /> Activité
               </button>
@@ -472,12 +472,12 @@ export default function ContactDetail({ contactId: propId }) {
                   onChange={e => setNotes(e.target.value)}
                   rows={6}
                   placeholder="Notes libres sur ce contact..."
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900 resize-none"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900 resize-none"
                 />
                 <div className="flex justify-end mt-3">
                   <button
                     onClick={saveNotes}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800"
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-900 rounded-lg hover:bg-purple-800"
                   >
                     Sauvegarder les notes
                   </button>
@@ -510,14 +510,14 @@ export default function ContactDetail({ contactId: propId }) {
                         </span>
                       )}
                     </div>
-                    <p className="text-base font-bold text-blue-900">{fmtXOF(deal.value)}</p>
+                    <p className="text-base font-bold text-purple-900">{fmtXOF(deal.value)}</p>
                     <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
                       <span>{deal.plan?.toUpperCase()}</span>
                       {deal.close_date_expected && <span>{fmtDate(deal.close_date_expected)}</span>}
                     </div>
                     <div className="mt-2 bg-gray-100 rounded-full h-1.5">
                       <div
-                        className="bg-blue-600 h-1.5 rounded-full"
+                        className="bg-purple-600 h-1.5 rounded-full"
                         style={{ width: `${deal.probability ?? 0}%` }}
                       />
                     </div>
@@ -577,3 +577,4 @@ export default function ContactDetail({ contactId: propId }) {
     </>
   );
 }
+export { ContactDetail };

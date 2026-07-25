@@ -7,9 +7,9 @@ import axios from 'axios';
 
 const TYPE_CONFIG = {
   info: {
-    banner : 'bg-blue-50  border-blue-200  text-blue-900',
-    modal  : 'bg-blue-600',
-    badge  : 'bg-blue-100  text-blue-800',
+    banner : 'bg-purple-50  border-purple-200  text-purple-900',
+    modal  : 'bg-purple-600',
+    badge  : 'bg-purple-100  text-purple-800',
     icon   : InfoIcon,
     label  : 'Information',
   },
@@ -197,7 +197,7 @@ function AnnouncementModal({ announcement, onDismiss, onClose }) {
               href={announcement.cta_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 transition-colors"
             >
               {announcement.cta_label}
             </a>
@@ -345,3 +345,4 @@ export default function AnnouncementBanner() {
     </>
   );
 }
+export { AnnouncementBanner };

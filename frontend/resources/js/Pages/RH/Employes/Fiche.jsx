@@ -38,7 +38,7 @@ const CONTRACT_LABELS = {
 };
 
 const LEAVE_TYPES = {
-  annual:    { label: 'Congé annuel',      color: '#3b82f6', bg: 'bg-blue-500' },
+  annual:    { label: 'Congé annuel',      color: '#3b82f6', bg: 'bg-purple-500' },
   sick:      { label: 'Congé maladie',     color: '#f59e0b', bg: 'bg-amber-500' },
   maternity: { label: 'Maternité/Paternité', color: '#8b5cf6', bg: 'bg-purple-500' },
   unpaid:    { label: 'Sans solde',        color: '#6b7280', bg: 'bg-gray-500' },
@@ -47,14 +47,14 @@ const LEAVE_TYPES = {
 
 const LEAVE_STATUS = {
   pending:     { label: 'En attente',   icon: Clock,         color: 'text-amber-600 dark:text-amber-400',  bg: 'bg-amber-50 dark:bg-amber-900/20'  },
-  approved_n1: { label: 'Approuvé N+1', icon: CheckCircle2,  color: 'text-blue-600 dark:text-blue-400',    bg: 'bg-blue-50 dark:bg-blue-900/20'    },
+  approved_n1: { label: 'Approuvé N+1', icon: CheckCircle2,  color: 'text-purple-600 dark:text-purple-400',    bg: 'bg-purple-50 dark:bg-purple-900/20'    },
   approved_hr: { label: 'Approuvé RH',  icon: CheckCircle2,  color: 'text-green-600 dark:text-green-400',  bg: 'bg-green-50 dark:bg-green-900/20'  },
   rejected:    { label: 'Refusé',       icon: XCircle,       color: 'text-red-600 dark:text-red-400',      bg: 'bg-red-50 dark:bg-red-900/20'      },
 };
 
 const EXPENSE_STATUS = {
   draft:     { label: 'Brouillon',  color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
-  submitted: { label: 'Soumise',   color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  submitted: { label: 'Soumise',   color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
   approved:  { label: 'Approuvée', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
   rejected:  { label: 'Refusée',   color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
   paid:      { label: 'Payée',     color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
@@ -152,7 +152,7 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
             <select
               value={data.leave_type}
               onChange={e => setData('leave_type', e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
             >
               {Object.entries(LEAVE_TYPES).map(([v, t]) => (
                 <option key={v} value={v}>{t.label} ({availableDays[v] ?? 0} j dispo.)</option>
@@ -169,7 +169,7 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
                 type="date"
                 value={data.start_date}
                 onChange={e => { setData('start_date', e.target.value); recalcDays(e.target.value, data.end_date); }}
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
               />
               {errors.start_date && <p className="text-xs text-red-500 mt-1">{errors.start_date}</p>}
             </div>
@@ -180,7 +180,7 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
                 value={data.end_date}
                 min={data.start_date}
                 onChange={e => { setData('end_date', e.target.value); recalcDays(data.start_date, e.target.value); }}
-                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
               />
               {errors.end_date && <p className="text-xs text-red-500 mt-1">{errors.end_date}</p>}
             </div>
@@ -188,9 +188,9 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
 
           {/* Calcul jours */}
           {daysCount > 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <Calendar className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+            <div className="flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+              <Calendar className="w-4 h-4 text-purple-500" />
+              <span className="text-sm text-purple-700 dark:text-purple-300 font-medium">
                 {daysCount} jour{daysCount > 1 ? 's' : ''} ouvré{daysCount > 1 ? 's' : ''}
               </span>
               {availableDays[data.leave_type] < daysCount && (
@@ -209,7 +209,7 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
               onChange={e => setData('reason', e.target.value)}
               rows={3}
               placeholder="Précisez le motif de votre absence…"
-              className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+              className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 outline-none resize-none"
             />
           </div>
 
@@ -220,7 +220,7 @@ function LeaveRequestModal({ employee, availableDays, onClose }) {
             <button
               type="submit"
               disabled={processing || ! data.start_date || ! data.end_date}
-              className="flex-1 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex-1 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors disabled:opacity-50"
             >
               {processing ? 'Envoi…' : 'Envoyer la demande'}
             </button>
@@ -250,7 +250,7 @@ function TabInfos({ employee }) {
       {/* Informations personnelles */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <User className="w-4 h-4 text-blue-500" /> Informations personnelles
+          <User className="w-4 h-4 text-purple-500" /> Informations personnelles
         </h3>
         <dl className="space-y-3">
           {[
@@ -269,7 +269,7 @@ function TabInfos({ employee }) {
       {/* Poste et contrat */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Briefcase className="w-4 h-4 text-blue-500" /> Poste et contrat
+          <Briefcase className="w-4 h-4 text-purple-500" /> Poste et contrat
         </h3>
         <dl className="space-y-3">
           {[
@@ -343,7 +343,7 @@ function TabConges({ employee, leaveBalance, availableDays, recentLeaves }) {
           <h3 className="font-semibold text-gray-900 dark:text-white">Soldes de congés</h3>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
           >
             <PlusCircle className="w-4 h-4" /> Nouvelle demande
           </button>
@@ -426,7 +426,7 @@ function TabFrais({ employee, expenseReports }) {
         <h3 className="font-semibold text-gray-900 dark:text-white">Notes de frais</h3>
         <Link
           href={route('rh.frais.store')}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
         >
           <PlusCircle className="w-4 h-4" /> Nouvelle note
         </Link>
@@ -468,7 +468,7 @@ function TabFrais({ employee, expenseReports }) {
                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${st.color}`}>{st.label}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <Link href={route('rh.frais.show', report.id)} className="text-blue-600 dark:text-blue-400 hover:underline text-xs">
+                        <Link href={route('rh.frais.show', report.id)} className="text-purple-600 dark:text-purple-400 hover:underline text-xs">
                           Voir
                         </Link>
                       </td>
@@ -523,7 +523,7 @@ export default function EmployeeFiche({ employee, leaveBalance, availableDays, r
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             {/* Avatar grande taille */}
-            <div className="w-20 h-20 rounded-2xl bg-blue-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 overflow-hidden">
+            <div className="w-20 h-20 rounded-2xl bg-purple-500 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 overflow-hidden">
               {employee.avatar
                 ? <img src={employee.avatar} alt="" className="w-full h-full object-cover" />
                 : `${employee.first_name[0]}${employee.last_name[0]}`
@@ -567,7 +567,7 @@ export default function EmployeeFiche({ employee, leaveBalance, availableDays, r
               onClick={() => setActiveTab(id)}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
                 activeTab === id
-                  ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
@@ -593,7 +593,7 @@ export default function EmployeeFiche({ employee, leaveBalance, availableDays, r
             <Folder className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 font-medium">Gestion documentaire</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Module GED — accéder aux documents de {employee.first_name}</p>
-            <Link href={route('ged.index')} className="mt-4 inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href={route('ged.index')} className="mt-4 inline-flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:underline">
               Ouvrir la GED <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -610,3 +610,4 @@ EmployeeFiche.propTypes = {
   recentLeaves:   PropTypes.array.isRequired,
   expenseReports: PropTypes.array.isRequired,
 };
+export { EmployeeFiche };

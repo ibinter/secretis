@@ -76,7 +76,7 @@ function ResourceCard({ resource }) {
                 </div>
                 <a
                     href={route('api.academy.resources.download', { id: resource.id })}
-                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
                 >
                     <DocumentArrowDownIcon className="w-3.5 h-3.5" />
                     Télécharger
@@ -116,7 +116,7 @@ export default function AcademieResources({ resources, categories }) {
                 {/* En-tête */}
                 <div className="mb-8">
                     <nav className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        <Link href={route('academie.index')} className="hover:text-blue-600">Académie</Link>
+                        <Link href={route('academie.index')} className="hover:text-purple-600">Académie</Link>
                         <span className="mx-2">/</span>
                         <span>Ressources</span>
                     </nav>
@@ -137,7 +137,7 @@ export default function AcademieResources({ resources, categories }) {
                             onClick={() => setFilterType(opt.value === filterType ? '' : opt.value)}
                             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all ${
                                 filterType === opt.value
-                                    ? 'bg-blue-600 border-blue-600 text-white'
+                                    ? 'bg-purple-600 border-purple-600 text-white'
                                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-gray-300'
                             }`}
                         >
@@ -155,13 +155,13 @@ export default function AcademieResources({ resources, categories }) {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Rechercher une ressource…"
-                            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                     </div>
                     <select
                         value={filterCat}
                         onChange={e => setFilterCat(e.target.value)}
-                        className="text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
                         <option value="">Toutes les catégories</option>
                         {categories.map(cat => (
@@ -200,3 +200,4 @@ export default function AcademieResources({ resources, categories }) {
         </AppLayout>
     );
 }
+export { AcademieResources };

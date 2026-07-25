@@ -11,7 +11,7 @@ const fmtDate = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-dig
 // ─── KpiCard ──────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, sub, color = 'blue', trend }) {
   const colors = {
-    blue:   { bg: 'bg-blue-50',   icon: 'bg-blue-100',   text: 'text-blue-700' },
+    blue:   { bg: 'bg-purple-50',   icon: 'bg-purple-100',   text: 'text-purple-700' },
     green:  { bg: 'bg-green-50',  icon: 'bg-green-100',  text: 'text-green-700' },
     amber:  { bg: 'bg-amber-50',  icon: 'bg-amber-100',  text: 'text-amber-700' },
     purple: { bg: 'bg-purple-50', icon: 'bg-purple-100', text: 'text-purple-700' },
@@ -260,11 +260,11 @@ export default function CrmAnalytics() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white px-6 py-4">
+        <header className="bg-purple-900 text-white px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div>
               <h1 className="text-lg font-bold">Analytiques CRM — IBIG Soft</h1>
-              <p className="text-blue-200 text-xs mt-0.5">Vue commerciale consolidée</p>
+              <p className="text-purple-200 text-xs mt-0.5">Vue commerciale consolidée</p>
             </div>
             <div className="flex items-center gap-3">
               {loading && <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full" />}
@@ -369,11 +369,11 @@ export default function CrmAnalytics() {
                           {deal.stage?.name}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right font-bold text-blue-900">{fmtXOF(deal.value)}</td>
+                      <td className="px-6 py-4 text-right font-bold text-purple-900">{fmtXOF(deal.value)}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <div className="w-16 bg-gray-100 rounded-full h-1.5">
-                            <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${deal.probability || 0}%` }} />
+                            <div className="bg-purple-600 h-1.5 rounded-full" style={{ width: `${deal.probability || 0}%` }} />
                           </div>
                           <span className="text-xs text-gray-600">{deal.probability}%</span>
                         </div>
@@ -391,3 +391,4 @@ export default function CrmAnalytics() {
     </>
   );
 }
+export { CrmAnalytics };

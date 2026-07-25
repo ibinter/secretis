@@ -159,7 +159,7 @@ export default function Kiosk({ organization, hosts }) {
     // ── ECRAN DE VEILLE ────────────────────────────────────────────────────────
     if (step === 'idle') return (
         <div
-            className="fixed inset-0 bg-[#1A3A5C] flex flex-col items-center justify-center cursor-pointer select-none"
+            className="fixed inset-0 bg-[#9333EA] flex flex-col items-center justify-center cursor-pointer select-none"
             onClick={reset}
         >
             <div className="text-white text-center">
@@ -193,7 +193,7 @@ export default function Kiosk({ organization, hosts }) {
 
     // ── ACCUEIL ────────────────────────────────────────────────────────────────
     if (step === 'welcome') return (
-        <div className="fixed inset-0 bg-[#1A3A5C] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 bg-[#9333EA] flex flex-col overflow-hidden">
             {/* Barre du haut */}
             <div className="flex items-center justify-between px-10 pt-8 pb-4">
                 <div className="text-white">
@@ -225,7 +225,7 @@ export default function Kiosk({ organization, hosts }) {
 
                     <button
                         onClick={() => { setFlow('walkin'); setStep('register'); }}
-                        className="flex-1 bg-white hover:bg-gray-50 text-[#1A3A5C] rounded-3xl p-10 flex flex-col items-center gap-5 shadow-2xl transition-all active:scale-95"
+                        className="flex-1 bg-white hover:bg-gray-50 text-[#9333EA] rounded-3xl p-10 flex flex-col items-center gap-5 shadow-2xl transition-all active:scale-95"
                     >
                         <span className="text-8xl">📝</span>
                         <span className="text-3xl font-black text-center">Je n'ai pas d'invitation</span>
@@ -242,7 +242,7 @@ export default function Kiosk({ organization, hosts }) {
 
     // ── SCAN CODE INVITATION ───────────────────────────────────────────────────
     if (step === 'scan') return (
-        <div className="fixed inset-0 bg-[#1A3A5C] flex flex-col items-center justify-center p-12">
+        <div className="fixed inset-0 bg-[#9333EA] flex flex-col items-center justify-center p-12">
             <button onClick={reset} className="absolute top-8 left-8 text-white text-4xl opacity-60 hover:opacity-100">←</button>
             <div className="text-white text-center mb-10">
                 <div className="text-6xl mb-4">📱</div>
@@ -258,7 +258,7 @@ export default function Kiosk({ organization, hosts }) {
                     onChange={e => setCodeInput(e.target.value.toUpperCase())}
                     onKeyDown={e => e.key === 'Enter' && handleCodeSubmit()}
                     placeholder="Ex: A1B2C3D4"
-                    className="w-full border-2 border-gray-200 rounded-2xl px-6 py-5 text-3xl font-mono text-center tracking-widest focus:outline-none focus:border-[#1A3A5C] mb-6"
+                    className="w-full border-2 border-gray-200 rounded-2xl px-6 py-5 text-3xl font-mono text-center tracking-widest focus:outline-none focus:border-[#9333EA] mb-6"
                     autoFocus
                 />
                 <button
@@ -274,13 +274,13 @@ export default function Kiosk({ organization, hosts }) {
 
     // ── CONFIRMATION INVITATION ────────────────────────────────────────────────
     if (step === 'confirm' && invitation) return (
-        <div className="fixed inset-0 bg-[#1A3A5C] flex flex-col items-center justify-center p-12">
+        <div className="fixed inset-0 bg-[#9333EA] flex flex-col items-center justify-center p-12">
             <button onClick={() => setStep('scan')} className="absolute top-8 left-8 text-white text-4xl opacity-60 hover:opacity-100">←</button>
 
             <div className="bg-white rounded-3xl p-10 w-full max-w-2xl shadow-2xl">
                 <div className="text-center mb-8">
                     <div className="text-6xl mb-3">🎟️</div>
-                    <div className="text-3xl font-black text-[#1A3A5C]">Invitation trouvée</div>
+                    <div className="text-3xl font-black text-[#9333EA]">Invitation trouvée</div>
                 </div>
 
                 {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-3 text-xl mb-5 text-center">{error}</div>}
@@ -312,7 +312,7 @@ export default function Kiosk({ organization, hosts }) {
 
     // ── FORMULAIRE WALK-IN ────────────────────────────────────────────────────
     if (step === 'register') return (
-        <div className="fixed inset-0 bg-[#1A3A5C] overflow-y-auto flex flex-col items-center py-8 px-6">
+        <div className="fixed inset-0 bg-[#9333EA] overflow-y-auto flex flex-col items-center py-8 px-6">
             <button onClick={reset} className="self-start text-white text-4xl opacity-60 hover:opacity-100 mb-4">←</button>
 
             <div className="text-white text-center mb-6">
@@ -327,7 +327,7 @@ export default function Kiosk({ organization, hosts }) {
                 <div className="flex flex-col items-center mb-6">
                     {photoSrc ? (
                         <div className="relative">
-                            <img src={photoSrc} alt="Photo" className="w-32 h-32 rounded-full object-cover border-4 border-[#1A3A5C]" />
+                            <img src={photoSrc} alt="Photo" className="w-32 h-32 rounded-full object-cover border-4 border-[#9333EA]" />
                             <button onClick={() => { setPhotoSrc(null); startCamera(); }} className="absolute -bottom-2 -right-2 bg-gray-100 rounded-full p-1 text-sm">🔄</button>
                         </div>
                     ) : (
@@ -381,7 +381,7 @@ export default function Kiosk({ organization, hosts }) {
                 <button
                     onClick={handleWalkInCheckIn}
                     disabled={loading}
-                    className="w-full bg-[#1A3A5C] text-white font-black text-2xl py-5 rounded-2xl mt-6 disabled:opacity-50"
+                    className="w-full bg-[#9333EA] text-white font-black text-2xl py-5 rounded-2xl mt-6 disabled:opacity-50"
                 >
                     {loading ? 'Enregistrement en cours…' : 'Enregistrer mon arrivée →'}
                 </button>
@@ -389,7 +389,7 @@ export default function Kiosk({ organization, hosts }) {
 
             <style>{`
                 .kiosk-input { width:100%; border:2px solid #e5e7eb; border-radius:0.75rem; padding:0.875rem 1rem; font-size:1.125rem; }
-                .kiosk-input:focus { outline:none; border-color:#1A3A5C; }
+                .kiosk-input:focus { outline:none; border-color:#9333EA; }
             `}</style>
         </div>
     );
@@ -414,3 +414,4 @@ function Field({ label, children, span = 1 }) {
         </div>
     );
 }
+export { Kiosk };

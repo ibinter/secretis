@@ -72,4 +72,11 @@ class Calendar extends Model
             // TODO : ajouter les calendriers partagés via une table pivot si nécessaire
         });
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('is_active')->orWhere('is_active', true);
+        });
+    }
 }

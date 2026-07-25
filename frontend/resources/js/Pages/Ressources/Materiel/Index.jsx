@@ -41,7 +41,7 @@ const STATUSES = [
 
 const STATUS_CONFIG = {
   available:   { label: 'Disponible',     color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'   },
-  assigned:    { label: 'Assigné',        color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'       },
+  assigned:    { label: 'Assigné',        color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'       },
   maintenance: { label: 'Maintenance',    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'   },
   retired:     { label: 'Retiré',         color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'          },
 };
@@ -118,7 +118,7 @@ function AssignModal({ equipment, onClose, onSuccess }) {
               onChange={(e) => setUserId(e.target.value)}
               required
               placeholder="Ex: 42"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <p className="text-xs text-gray-400 mt-1">Saisissez l'ID de l'utilisateur cible.</p>
           </div>
@@ -129,7 +129,7 @@ function AssignModal({ equipment, onClose, onSuccess }) {
               Annuler
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2">
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Assigner
             </button>
@@ -182,7 +182,7 @@ function MaintenanceModal({ equipment, onClose, onSuccess }) {
               onChange={(e) => setReason(e.target.value)}
               required
               placeholder="Décrivez le problème..."
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
             />
           </div>
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
@@ -259,7 +259,7 @@ export default function MaterielIndex({ equipment: initialData, warrantyAlerts, 
           {isAdmin && (
             <button
               onClick={() => router.visit(route('resources.materiel.index'))}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
             >
               <PlusCircle className="w-4 h-4" />
               Ajouter
@@ -273,14 +273,14 @@ export default function MaterielIndex({ equipment: initialData, warrantyAlerts, 
             <select
               value={filters_.category ?? ''}
               onChange={(e) => applyFilters({ category: e.target.value || undefined })}
-              className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
             <select
               value={filters_.status ?? ''}
               onChange={(e) => applyFilters({ status: e.target.value || undefined })}
-              className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
@@ -350,7 +350,7 @@ export default function MaterielIndex({ equipment: initialData, warrantyAlerts, 
                           <button
                             onClick={() => setAssignTarget(item)}
                             title="Assigner"
-                            className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            className="p-1.5 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
                           >
                             <UserCheck className="w-4 h-4" />
                           </button>
@@ -395,7 +395,7 @@ export default function MaterielIndex({ equipment: initialData, warrantyAlerts, 
                   onClick={() => applyFilters({ page })}
                   className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
                     initialData.current_page === page
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -424,3 +424,4 @@ export default function MaterielIndex({ equipment: initialData, warrantyAlerts, 
     </AuthLayout>
   );
 }
+export { MaterielIndex };

@@ -315,11 +315,11 @@ export default function GuidedTour({ isOpen: isOpenProp, onClose, forceShow = fa
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[380px]">
 
           {/* En-tête */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-5 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{step.icon}</span>
               <div>
-                <p className="text-xs text-blue-200 font-medium uppercase tracking-wider">
+                <p className="text-xs text-purple-200 font-medium uppercase tracking-wider">
                   Étape {currentStep + 1} / {TOUR_STEPS.length}
                 </p>
                 <h3 className="text-white font-bold text-base leading-tight">{step.title}</h3>
@@ -327,7 +327,7 @@ export default function GuidedTour({ isOpen: isOpenProp, onClose, forceShow = fa
             </div>
             <button
               onClick={skipTour}
-              className="text-blue-200 hover:text-white transition-colors p-1 rounded-md hover:bg-blue-500/40"
+              className="text-purple-200 hover:text-white transition-colors p-1 rounded-md hover:bg-purple-500/40"
               aria-label="Ignorer la visite guidée"
             >
               <X size={18} />
@@ -337,7 +337,7 @@ export default function GuidedTour({ isOpen: isOpenProp, onClose, forceShow = fa
           {/* Barre de progression */}
           <div className="h-1.5 bg-gray-100 dark:bg-gray-800">
             <div
-              className="h-full bg-blue-500 transition-all duration-500"
+              className="h-full bg-purple-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -357,9 +357,9 @@ export default function GuidedTour({ isOpen: isOpenProp, onClose, forceShow = fa
                 onClick={() => setCurrentStep(i)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === currentStep
-                    ? 'w-6 bg-blue-600'
+                    ? 'w-6 bg-purple-600'
                     : i < currentStep
-                    ? 'w-2 bg-blue-300'
+                    ? 'w-2 bg-purple-300'
                     : 'w-2 bg-gray-200 dark:bg-gray-700'
                 }`}
                 aria-label={`Aller à l'étape ${i + 1}`}
@@ -389,7 +389,7 @@ export default function GuidedTour({ isOpen: isOpenProp, onClose, forceShow = fa
 
               <button
                 onClick={goNext}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors shadow-sm"
                 aria-label={isLast ? 'Terminer la visite guidée' : 'Étape suivante'}
               >
                 {isLast ? (
@@ -445,7 +445,7 @@ export function GuidedTourLauncher() {
         onClick={openTour}
         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
       >
-        <Map size={16} className="text-blue-500" />
+        <Map size={16} className="text-purple-500" />
         Visite guidée interactive
       </button>
       <TourComponent />

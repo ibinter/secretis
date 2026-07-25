@@ -46,3 +46,4 @@ export default function SkipLinks() {
     </nav>
   )
 }
+export { SkipLinks };

@@ -468,3 +468,4 @@ OrgChart.propTypes = {
     children:   PropTypes.array,
   })).isRequired,
 };
+export { OrgChart };

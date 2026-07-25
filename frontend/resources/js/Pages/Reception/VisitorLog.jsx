@@ -12,7 +12,7 @@ export default function VisitorLog({ visits, filters, hosts }) {
         checked_out: 'bg-gray-100 text-gray-600',
         no_show:     'bg-red-100 text-red-700',
         cancelled:   'bg-orange-100 text-orange-700',
-        scheduled:   'bg-blue-100 text-blue-700',
+        scheduled:   'bg-purple-100 text-purple-700',
     };
     const STATUS_LABELS = {
         checked_in:  'Présent',
@@ -136,7 +136,7 @@ export default function VisitorLog({ visits, filters, hosts }) {
                                     {visit.visitor?.photo_path ? (
                                         <img src={`/storage/${visit.visitor.photo_path}`} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt="" />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-[#1A3A5C] text-white flex items-center justify-center font-bold flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-full bg-[#9333EA] text-white flex items-center justify-center font-bold flex-shrink-0">
                                             {visit.visitor?.full_name?.[0]}
                                         </div>
                                     )}
@@ -191,7 +191,7 @@ export default function VisitorLog({ visits, filters, hosts }) {
                             <button
                                 key={page}
                                 onClick={() => router.get('/reception/log', { ...filters, page })}
-                                className={`w-9 h-9 rounded-lg text-sm font-bold ${page === visits.current_page ? 'bg-[#1A3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                className={`w-9 h-9 rounded-lg text-sm font-bold ${page === visits.current_page ? 'bg-[#9333EA] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 {page}
                             </button>
@@ -236,3 +236,4 @@ export default function VisitorLog({ visits, filters, hosts }) {
         </AppLayout>
     );
 }
+export { VisitorLog };

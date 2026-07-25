@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
                             </p>
                         </div>
                     </div>
-                    <div className="rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 px-5 py-4 text-sm text-blue-800 dark:text-blue-300">
+                    <div className="rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 px-5 py-4 text-sm text-purple-800 dark:text-purple-300">
                         Cette politique est conforme au <strong>Règlement (UE) 2016/679</strong> (RGPD),
                         à la loi française Informatique et Libertés n° 78-17 du 6 janvier 1978 modifiée,
                         ainsi qu'aux réglementations applicables en Côte d'Ivoire.
@@ -142,7 +142,7 @@ export default function PrivacyPolicy() {
                         </div>
                         <p>
                             Pour exercer vos droits, connectez-vous à SECRETIS → <strong>Mon profil → Mes données</strong>,
-                            ou contactez notre DPO à <a href="mailto:dpo@ibig.ci" className="text-blue-600 dark:text-blue-400">dpo@ibig.ci</a>.
+                            ou contactez notre DPO à <a href="mailto:dpo@ibig.ci" className="text-purple-600 dark:text-purple-400">dpo@ibig.ci</a>.
                         </p>
                         <p className="text-sm">
                             Nous répondons dans un délai de <strong>30 jours</strong> (art. 12 RGPD),
@@ -150,7 +150,7 @@ export default function PrivacyPolicy() {
                         </p>
                         <p className="text-sm mt-2">
                             En cas de réponse insatisfaisante, vous pouvez introduire une réclamation
-                            auprès de la <strong>CNIL</strong> (<a href="https://www.cnil.fr" className="text-blue-600 dark:text-blue-400" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>)
+                            auprès de la <strong>CNIL</strong> (<a href="https://www.cnil.fr" className="text-purple-600 dark:text-purple-400" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>)
                             ou de l'autorité de protection des données compétente dans votre pays.
                         </p>
                     </Section>
@@ -277,3 +277,4 @@ function DataTable({ headers = ['Catégorie', 'Données', 'Source'], rows }) {
         </div>
     );
 }
+export { PrivacyPolicy };

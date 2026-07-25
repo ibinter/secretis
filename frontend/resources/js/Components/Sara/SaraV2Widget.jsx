@@ -49,7 +49,7 @@ const icons = {
     </svg>
   ),
   calendar: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-blue-600">
+    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-purple-600">
       <path d="M19 4h-1V2h-2v2H8V2H6v2H5C3.89 4 3 4.9 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V9h14v11z"/>
     </svg>
   ),
@@ -90,7 +90,7 @@ const icons = {
 function TypingIndicator() {
   return (
     <div className="flex items-start gap-2 mb-3">
-      <div className="w-7 h-7 rounded-full bg-blue-900 flex items-center justify-center text-white text-xs font-bold shrink-0">S</div>
+      <div className="w-7 h-7 rounded-full bg-purple-900 flex items-center justify-center text-white text-xs font-bold shrink-0">S</div>
       <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm px-4 py-3">
         <div className="flex items-center gap-1">
           {[0,1,2].map(i => (
@@ -106,7 +106,7 @@ function TypingIndicator() {
 // ─── Action en cours ──────────────────────────────────────────────────────────
 function ActionInProgress({ summary }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 text-xs text-blue-700 dark:text-blue-300">
+    <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border-t border-purple-100 text-xs text-purple-700 dark:text-purple-300">
       {icons.spinner()}
       <span>Exécution en cours : {summary}</span>
     </div>
@@ -121,7 +121,7 @@ function ConfirmActionModal({ action, onConfirm, onCancel, loading }) {
     <div className="absolute inset-0 bg-black/40 flex items-end z-10 rounded-2xl overflow-hidden">
       <div className="bg-white dark:bg-gray-800 w-full p-5 sara-slide-up rounded-t-2xl shadow-xl">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center shrink-0">
             {icons.warning()}
           </div>
           <div>
@@ -155,8 +155,8 @@ function ConfirmActionModal({ action, onConfirm, onCancel, loading }) {
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-xl bg-blue-900 text-white text-sm font-medium
-                       hover:bg-blue-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-xl bg-purple-900 text-white text-sm font-medium
+                       hover:bg-purple-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? icons.spinner() : icons.check()}
             Confirmer
@@ -170,7 +170,7 @@ function ConfirmActionModal({ action, onConfirm, onCancel, loading }) {
 // ─── Bulle suggestion proactive ───────────────────────────────────────────────
 function SuggestionBubble({ suggestion, onDismiss, onAction }) {
   return (
-    <div className="bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700 rounded-xl shadow-lg p-3 mb-2
+    <div className="bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-xl shadow-lg p-3 mb-2
                     flex items-start gap-2 sara-slide-up text-sm max-w-[320px]">
       <span className="text-lg shrink-0 leading-none mt-0.5">{suggestion.icon || '💡'}</span>
       <div className="flex-1 min-w-0">
@@ -179,7 +179,7 @@ function SuggestionBubble({ suggestion, onDismiss, onAction }) {
         {suggestion.action_type && (
           <button
             onClick={() => onAction(suggestion)}
-            className="mt-1.5 text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            className="mt-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium hover:underline"
           >
             Voir →
           </button>
@@ -230,14 +230,14 @@ function MessageBubble({ msg, userInitial }) {
   return (
     <div className={`flex items-start gap-2 mb-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold
-          ${isUser ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : 'bg-blue-900 text-white'}`}>
+          ${isUser ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : 'bg-purple-900 text-white'}`}>
         {isUser ? (userInitial || 'V') : 'S'}
       </div>
       <div className={`max-w-[78%] flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-1`}>
         <div
           className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed
             ${isUser
-              ? 'bg-blue-900 text-white rounded-tr-sm'
+              ? 'bg-purple-900 text-white rounded-tr-sm'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-sm'}`}
           dangerouslySetInnerHTML={isUser ? undefined : { __html: renderMarkdown(msg.content) }}
         >
@@ -589,8 +589,8 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
         <button
           onClick={() => { setIsOpen(true); setIsMinimized(false); setUnreadCount(0); }}
           aria-label="Ouvrir SARA v2"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-900 text-white shadow-2xl
-                     hover:bg-blue-800 hover:scale-105 active:scale-95 transition-all duration-200
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-purple-900 text-white shadow-2xl
+                     hover:bg-purple-800 hover:scale-105 active:scale-95 transition-all duration-200
                      flex items-center justify-center"
         >
           {icons.robot()}
@@ -613,7 +613,7 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
           style={{ height: 560 }}
         >
           {/* ── Header ──────────────────────────────────────────────────── */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-blue-900 text-white shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3 bg-purple-900 text-white shrink-0">
             <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0">
               {icons.robot()}
             </div>
@@ -626,7 +626,7 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
                   En ligne
                 </span>
               </div>
-              <p className="text-xs text-blue-200 truncate">Assistante agentique IBIG SECRETIS</p>
+              <p className="text-xs text-purple-200 truncate">Assistante agentique IBIG SECRETIS</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <button onClick={() => setIsMinimized(true)}
@@ -681,7 +681,7 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
           <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-3 shrink-0">
             <div className="flex items-end gap-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2
                             border border-gray-200 dark:border-gray-600
-                            focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                            focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
               {/* Bouton vocal */}
               <button
                 onClick={toggleRecording}
@@ -715,8 +715,8 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || sending || confirmLoading}
                 aria-label="Envoyer"
-                className="shrink-0 w-8 h-8 rounded-lg bg-blue-900 text-white flex items-center justify-center
-                           hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed mb-0.5"
+                className="shrink-0 w-8 h-8 rounded-lg bg-purple-900 text-white flex items-center justify-center
+                           hover:bg-purple-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed mb-0.5"
               >
                 {sending ? icons.spinner() : icons.send()}
               </button>
@@ -731,3 +731,4 @@ export default function SaraV2Widget({ mode = 'internal', user = null, apiBase =
     </>
   );
 }
+export { SaraV2Widget };

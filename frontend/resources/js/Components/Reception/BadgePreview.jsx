@@ -176,12 +176,12 @@ export default function BadgePreview({ visit, visitor, host, org, qrCodeBase64, 
                 .qr-hint { font-size: 8px; color: #888; }
                 .validity { font-size: 8px; color: #666; margin-top: 2px; }
                 .badge-footer {
-                    background: #1A3A5C; color: rgba(255,255,255,.6);
+                    background: #9333EA; color: rgba(255,255,255,.6);
                     font-size: 7px; text-align: center; padding: 5px;
                 }
                 .badge-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px; }
                 .btn-print {
-                    background: #1A3A5C; color: #fff; border: none; border-radius: 10px;
+                    background: #9333EA; color: #fff; border: none; border-radius: 10px;
                     padding: 10px 28px; font-size: 14px; font-weight: 700; cursor: pointer;
                 }
                 .btn-print:hover { background: #0f2640; }
@@ -207,3 +207,4 @@ function InfoRow({ label, value }) {
         </div>
     );
 }
+export { BadgePreview };

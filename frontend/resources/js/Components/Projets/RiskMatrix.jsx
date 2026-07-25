@@ -86,7 +86,7 @@ function RiskDrawer({ risk, onClose }) {
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Responsable</p>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
                   {risk.owner.name?.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm text-gray-800 dark:text-gray-200">{risk.owner.name}</span>
@@ -205,3 +205,4 @@ export default function RiskMatrix({ risks = [] }) {
     </div>
   );
 }
+export { RiskMatrix };

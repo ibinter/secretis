@@ -27,7 +27,7 @@ export default function HelpCategory({ category, articles, allCategories = [] })
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <Link href={route('help.index')} className="hover:text-[#2E86C1]">Centre d'aide</Link>
+          <Link href={route('help.index')} className="hover:text-[#7e22ce]">Centre d'aide</Link>
           <ChevronRight />
           <span className="text-gray-900 dark:text-white font-medium">{category.name}</span>
         </nav>
@@ -54,10 +54,10 @@ export default function HelpCategory({ category, articles, allCategories = [] })
                     key={article.id}
                     href={route('help.article', { category: category.slug, article: article.slug })}
                     className="flex items-start gap-4 p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-100
-                      dark:border-gray-700 hover:border-[#2E86C1] hover:shadow-md transition-all duration-200 group"
+                      dark:border-gray-700 hover:border-[#7e22ce] hover:shadow-md transition-all duration-200 group"
                   >
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E86C1] transition-colors line-clamp-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#7e22ce] transition-colors line-clamp-1">
                         {article.title}
                       </h3>
                       {article.excerpt && (
@@ -86,7 +86,7 @@ export default function HelpCategory({ category, articles, allCategories = [] })
                 {articles.links.map((link, i) => (
                   <Link key={i} href={link.url || '#'}
                     className={`px-3 py-2 rounded-lg text-sm ${link.active
-                      ? 'bg-[#2E86C1] text-white'
+                      ? 'bg-[#7e22ce] text-white'
                       : link.url ? 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
                       : 'text-gray-300 cursor-not-allowed'}`}
                     dangerouslySetInnerHTML={{ __html: link.label }}
@@ -105,8 +105,8 @@ export default function HelpCategory({ category, articles, allCategories = [] })
                   <input name="q" type="text" placeholder="Rechercher…"
                     className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-gray-600
                       bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm outline-none
-                      focus:border-[#2E86C1] focus:ring-1 focus:ring-[#2E86C1]" />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#2E86C1]">
+                      focus:border-[#7e22ce] focus:ring-1 focus:ring-[#7e22ce]" />
+                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#7e22ce]">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -125,7 +125,7 @@ export default function HelpCategory({ category, articles, allCategories = [] })
                       href={route('help.category', cat.slug)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                         cat.is_current
-                          ? 'bg-[#2E86C1]/10 text-[#2E86C1] font-medium'
+                          ? 'bg-[#7e22ce]/10 text-[#7e22ce] font-medium'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
                     >
@@ -139,9 +139,9 @@ export default function HelpCategory({ category, articles, allCategories = [] })
             </div>
 
             {/* CTA Ticket */}
-            <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] rounded-xl p-4 text-white">
               <p className="text-sm font-medium mb-1">Besoin d'aide ?</p>
-              <p className="text-xs text-blue-200 mb-3">Notre équipe est là pour vous.</p>
+              <p className="text-xs text-purple-200 mb-3">Notre équipe est là pour vous.</p>
               <Link href={route('support.tickets.create')}
                 className="block text-center bg-[#F39C12] hover:bg-amber-500 text-white text-sm font-semibold
                   px-4 py-2 rounded-lg transition-colors">
@@ -154,3 +154,4 @@ export default function HelpCategory({ category, articles, allCategories = [] })
     </AppLayout>
   );
 }
+export { HelpCategory };

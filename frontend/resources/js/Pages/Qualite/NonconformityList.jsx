@@ -10,7 +10,7 @@ const SEVERITY_BADGE = {
 
 const STATUS_BADGE = {
     ouvert:             'bg-gray-100 text-gray-700',
-    analyse:            'bg-blue-100 text-blue-700',
+    analyse:            'bg-purple-100 text-purple-700',
     action_corrective:  'bg-indigo-100 text-indigo-700',
     verification:       'bg-purple-100 text-purple-700',
     clos:               'bg-green-100 text-green-700',
@@ -89,7 +89,7 @@ export default function NonconformityList() {
                         </button>
                         <Link
                             href="/qualite/nc/create"
-                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                            className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                         >
                             + Nouvelle NC
                         </Link>
@@ -104,12 +104,12 @@ export default function NonconformityList() {
                             placeholder="Recherche..."
                             value={localFilters.search}
                             onChange={e => handleFilterChange('search', e.target.value)}
-                            className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="col-span-2 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                         <select
                             value={localFilters.status}
                             onChange={e => handleFilterChange('status', e.target.value)}
-                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
                             <option value="">Tous statuts</option>
                             {Object.entries(STATUS_LABELS).map(([k, v]) => (
@@ -151,7 +151,7 @@ export default function NonconformityList() {
                         <div className="flex gap-2">
                             <button
                                 onClick={applyFilters}
-                                className="flex-1 bg-blue-600 text-white text-sm rounded-lg px-3 py-2 hover:bg-blue-700 transition"
+                                className="flex-1 bg-purple-600 text-white text-sm rounded-lg px-3 py-2 hover:bg-purple-700 transition"
                             >
                                 Filtrer
                             </button>
@@ -243,7 +243,7 @@ export default function NonconformityList() {
                                             <Link
                                                 href={`/qualite/nc/${nc.id}`}
                                                 onClick={e => e.stopPropagation()}
-                                                className="text-blue-600 hover:underline text-xs"
+                                                className="text-purple-600 hover:underline text-xs"
                                             >
                                                 Voir →
                                             </Link>
@@ -267,7 +267,7 @@ export default function NonconformityList() {
                                         disabled={!link.url}
                                         onClick={() => link.url && router.visit(link.url)}
                                         className={`px-3 py-1 text-xs rounded border transition
-                                            ${link.active ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'}
+                                            ${link.active ? 'bg-purple-600 text-white border-purple-600' : 'hover:bg-gray-50'}
                                             ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}
                                         `}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
@@ -281,3 +281,4 @@ export default function NonconformityList() {
         </AppLayout>
     );
 }
+export { NonconformityList };

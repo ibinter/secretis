@@ -59,9 +59,9 @@ export default function HelpArticle({ category, article, related = [] }) {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6 flex-wrap">
-          <Link href={route('help.index')} className="hover:text-[#2E86C1]">Centre d'aide</Link>
+          <Link href={route('help.index')} className="hover:text-[#7e22ce]">Centre d'aide</Link>
           <ChevronRight />
-          <Link href={route('help.category', category.slug)} className="hover:text-[#2E86C1]">{category.name}</Link>
+          <Link href={route('help.category', category.slug)} className="hover:text-[#7e22ce]">{category.name}</Link>
           <ChevronRight />
           <span className="text-gray-900 dark:text-white font-medium line-clamp-1">{article.title}</span>
         </nav>
@@ -74,7 +74,7 @@ export default function HelpArticle({ category, article, related = [] }) {
               <div className="mb-6">
                 <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
                   <span>{category.icon}</span>
-                  <Link href={route('help.category', category.slug)} className="hover:text-[#2E86C1]">{category.name}</Link>
+                  <Link href={route('help.category', category.slug)} className="hover:text-[#7e22ce]">{category.name}</Link>
                   {article.published_at && (
                     <><span>·</span><span>{formatDate(article.published_at)}</span></>
                   )}
@@ -110,7 +110,7 @@ export default function HelpArticle({ category, article, related = [] }) {
                   prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed
                   prose-li:text-gray-700 dark:prose-li:text-gray-300
                   prose-strong:text-gray-900 dark:prose-strong:text-white
-                  prose-a:text-[#2E86C1] prose-a:no-underline hover:prose-a:underline
+                  prose-a:text-[#7e22ce] prose-a:no-underline hover:prose-a:underline
                   prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm"
                 dangerouslySetInnerHTML={{ __html: content }}
               />
@@ -136,7 +136,7 @@ export default function HelpArticle({ category, article, related = [] }) {
                     </button>
                   </div>
                   <Link href={route('support.tickets.create')}
-                    className="text-sm text-[#2E86C1] hover:underline font-medium">
+                    className="text-sm text-[#7e22ce] hover:underline font-medium">
                     Besoin d'aide supplémentaire ? →
                   </Link>
                 </div>
@@ -164,7 +164,7 @@ export default function HelpArticle({ category, article, related = [] }) {
                   {headings.map(h => (
                     <li key={h.id}>
                       <a href={`#${h.id}`}
-                        className={`block text-xs py-1 text-gray-600 dark:text-gray-400 hover:text-[#2E86C1] transition-colors
+                        className={`block text-xs py-1 text-gray-600 dark:text-gray-400 hover:text-[#7e22ce] transition-colors
                           ${h.level === 'h3' ? 'pl-3' : ''}`}>
                         {h.text}
                       </a>
@@ -182,7 +182,7 @@ export default function HelpArticle({ category, article, related = [] }) {
                   {related.map(r => (
                     <li key={r.id}>
                       <Link href={route('help.article', { category: category.slug, article: r.slug })}
-                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2E86C1] line-clamp-2 block transition-colors">
+                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#7e22ce] line-clamp-2 block transition-colors">
                         {r.title}
                       </Link>
                     </li>
@@ -192,9 +192,9 @@ export default function HelpArticle({ category, article, related = [] }) {
             )}
 
             {/* CTA Ticket */}
-            <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] rounded-xl p-4 text-white">
+            <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] rounded-xl p-4 text-white">
               <p className="text-sm font-medium mb-1">📩 Besoin d'aide ?</p>
-              <p className="text-xs text-blue-200 mb-3">Cette documentation ne répond pas à votre question ?</p>
+              <p className="text-xs text-purple-200 mb-3">Cette documentation ne répond pas à votre question ?</p>
               <Link href={route('support.tickets.create')}
                 className="block text-center bg-[#F39C12] hover:bg-amber-500 text-white text-sm font-semibold
                   px-4 py-2 rounded-lg transition-colors">
@@ -207,3 +207,4 @@ export default function HelpArticle({ category, article, related = [] }) {
     </AppLayout>
   );
 }
+export { HelpArticle };

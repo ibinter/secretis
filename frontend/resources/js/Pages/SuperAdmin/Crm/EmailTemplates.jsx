@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CATEGORIES = {
-  outreach:         { label: 'Prospection',       cls: 'bg-blue-100 text-blue-700' },
+  outreach:         { label: 'Prospection',       cls: 'bg-purple-100 text-purple-700' },
   follow_up:        { label: 'Suivi',             cls: 'bg-indigo-100 text-indigo-700' },
   demo:             { label: 'Démo',              cls: 'bg-teal-100 text-teal-700' },
   proposal:         { label: 'Proposition',       cls: 'bg-amber-100 text-amber-700' },
@@ -37,7 +37,7 @@ function HtmlEditor({ value, onChange }) {
           type="button"
           onClick={() => setTab('code')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
-            tab === 'code' ? 'text-blue-900 border-b-2 border-blue-900 bg-white' : 'text-gray-600 hover:text-gray-900'
+            tab === 'code' ? 'text-purple-900 border-b-2 border-purple-900 bg-white' : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           HTML
@@ -46,7 +46,7 @@ function HtmlEditor({ value, onChange }) {
           type="button"
           onClick={() => setTab('preview')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
-            tab === 'preview' ? 'text-blue-900 border-b-2 border-blue-900 bg-white' : 'text-gray-600 hover:text-gray-900'
+            tab === 'preview' ? 'text-purple-900 border-b-2 border-purple-900 bg-white' : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           Prévisualisation
@@ -139,7 +139,7 @@ function TemplateModal({ template, onClose, onSaved }) {
                 type="text"
                 value={form.name}
                 onChange={e => f('name', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
                 placeholder="Prospection initiale..."
               />
             </div>
@@ -148,7 +148,7 @@ function TemplateModal({ template, onClose, onSaved }) {
               <select
                 value={form.category}
                 onChange={e => f('category', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 {Object.entries(CATEGORIES).map(([k, v]) => (
                   <option key={k} value={k}>{v.label}</option>
@@ -164,7 +164,7 @@ function TemplateModal({ template, onClose, onSaved }) {
               type="text"
               value={form.subject}
               onChange={e => f('subject', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               placeholder="Découvrez SECRETIS ERP — La solution pour {{company}}"
             />
           </div>
@@ -178,7 +178,7 @@ function TemplateModal({ template, onClose, onSaved }) {
                   key={v.key}
                   type="button"
                   onClick={() => insertVar(v.key)}
-                  className="text-xs px-3 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-mono font-medium transition-colors"
+                  className="text-xs px-3 py-1 rounded-full bg-purple-50 text-purple-700 hover:bg-purple-100 font-mono font-medium transition-colors"
                   title={v.desc}
                 >
                   {v.key}
@@ -201,7 +201,7 @@ function TemplateModal({ template, onClose, onSaved }) {
                 type="email"
                 value={testEmail}
                 onChange={e => setTestEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
                 placeholder="patriceky@gmail.com"
               />
             </div>
@@ -209,7 +209,7 @@ function TemplateModal({ template, onClose, onSaved }) {
               type="button"
               onClick={sendTest}
               disabled={testing}
-              className="px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 rounded-lg hover:bg-blue-200 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-purple-900 bg-purple-100 rounded-lg hover:bg-purple-200 disabled:opacity-50"
             >
               {testing ? 'Envoi...' : 'Tester'}
             </button>
@@ -223,7 +223,7 @@ function TemplateModal({ template, onClose, onSaved }) {
           <button
             onClick={save}
             disabled={saving || !form.name || !form.subject || !form.body_html}
-            className="px-4 py-2 text-sm font-bold text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-bold text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50"
           >
             {saving ? 'Sauvegarde...' : isEdit ? 'Mettre à jour' : 'Créer le template'}
           </button>
@@ -286,15 +286,15 @@ export default function EmailTemplates() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white px-6 py-4">
+        <header className="bg-purple-900 text-white px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div>
               <h1 className="text-lg font-bold">Templates Email CRM</h1>
-              <p className="text-blue-200 text-xs mt-0.5">{templates.length} templates disponibles</p>
+              <p className="text-purple-200 text-xs mt-0.5">{templates.length} templates disponibles</p>
             </div>
             <button
               onClick={() => setEditTemplate({})}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-blue-900 rounded-lg text-sm font-bold hover:bg-blue-50"
+              className="flex items-center gap-2 px-4 py-2 bg-white text-purple-900 rounded-lg text-sm font-bold hover:bg-purple-50"
             >
               + Nouveau template
             </button>
@@ -306,7 +306,7 @@ export default function EmailTemplates() {
           <div className="flex items-center gap-2 mb-6 flex-wrap">
             <button
               onClick={() => setFilterCat('')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!filterCat ? 'bg-blue-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!filterCat ? 'bg-purple-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
             >
               Tous
             </button>
@@ -314,7 +314,7 @@ export default function EmailTemplates() {
               <button
                 key={k}
                 onClick={() => setFilterCat(k)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterCat === k ? 'bg-blue-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterCat === k ? 'bg-purple-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
               >
                 {v.label}
               </button>
@@ -323,7 +323,7 @@ export default function EmailTemplates() {
 
           {loading ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-900 border-t-transparent rounded-full" />
+              <div className="animate-spin w-8 h-8 border-4 border-purple-900 border-t-transparent rounded-full" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -378,7 +378,7 @@ export default function EmailTemplates() {
                       </button>
                       <button
                         onClick={() => setEditTemplate(t)}
-                        className="flex-1 text-xs text-center py-1.5 rounded-lg bg-blue-900 text-white hover:bg-blue-800 font-medium transition-colors"
+                        className="flex-1 text-xs text-center py-1.5 rounded-lg bg-purple-900 text-white hover:bg-purple-800 font-medium transition-colors"
                       >
                         Modifier
                       </button>
@@ -392,7 +392,7 @@ export default function EmailTemplates() {
                   <p className="text-lg">Aucun template pour cette catégorie.</p>
                   <button
                     onClick={() => setEditTemplate({})}
-                    className="mt-4 text-sm text-blue-700 font-semibold hover:underline"
+                    className="mt-4 text-sm text-purple-700 font-semibold hover:underline"
                   >
                     Créer le premier template →
                   </button>
@@ -430,7 +430,7 @@ export default function EmailTemplates() {
             <div className="p-4 flex justify-end">
               <button
                 onClick={() => { setPreview(null); setEditTemplate(preview); }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800"
+                className="px-4 py-2 text-sm font-medium text-white bg-purple-900 rounded-lg hover:bg-purple-800"
               >
                 Modifier ce template
               </button>
@@ -441,3 +441,4 @@ export default function EmailTemplates() {
     </>
   );
 }
+export { EmailTemplates };

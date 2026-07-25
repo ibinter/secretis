@@ -72,7 +72,7 @@ export default function DatePicker({
       <div
         id={id}
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0F1923] cursor-pointer hover:border-[#2E86C1] transition-colors"
+        className="flex items-center gap-2 h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0F1923] cursor-pointer hover:border-[#7e22ce] transition-colors"
       >
         <Calendar size={15} className="text-gray-400 shrink-0" />
         <span className={`flex-1 text-sm ${value ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>
@@ -122,7 +122,7 @@ export default function DatePicker({
                   'h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-sm transition-colors',
                   !day ? 'pointer-events-none' : '',
                   isSelected(day)
-                    ? 'bg-[#1A3A5C] text-white font-semibold'
+                    ? 'bg-[#9333EA] text-white font-semibold'
                     : day && !isDisabled(day)
                     ? 'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-200'
                     : 'text-gray-300 dark:text-gray-600 cursor-not-allowed',
@@ -137,3 +137,4 @@ export default function DatePicker({
     </div>
   )
 }
+export { DatePicker };

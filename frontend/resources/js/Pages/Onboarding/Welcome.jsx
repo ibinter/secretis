@@ -67,23 +67,23 @@ export default function Welcome({ organization, steps: stepsMeta }) {
   const handleStart = () => router.get('/onboarding');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 flex flex-col items-center justify-center px-4 py-12">
       <Confetti />
 
       {/* Hero */}
       <div className="text-center mb-12 relative z-10">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-600 mb-6 shadow-2xl shadow-blue-500/40">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-600 mb-6 shadow-2xl shadow-blue-500/40">
           <span className="text-4xl">🎉</span>
         </div>
         <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-          Bienvenue chez <span className="text-blue-400">IBIG SECRETIS</span> !
+          Bienvenue chez <span className="text-purple-400">IBIG SECRETIS</span> !
         </h1>
         <p className="text-xl text-slate-300 max-w-lg mx-auto">
           Votre espace{' '}
           <span className="font-bold text-white">{organization?.name}</span> est prêt.
           Configurons-le en quelques minutes.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-sm font-semibold px-4 py-2 rounded-full border border-blue-500/30">
+        <div className="mt-4 inline-flex items-center gap-2 bg-purple-500/20 text-purple-300 text-sm font-semibold px-4 py-2 rounded-full border border-purple-500/30">
           <span>⏱️</span> Estimation : 15 minutes pour bien démarrer
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function Welcome({ organization, steps: stepsMeta }) {
             className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-200"
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-600/30 flex items-center justify-center text-lg">
+              <div className="w-8 h-8 rounded-lg bg-purple-600/30 flex items-center justify-center text-lg">
                 {step.icon}
               </div>
               <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
@@ -105,7 +105,7 @@ export default function Welcome({ organization, steps: stepsMeta }) {
             </div>
             <h3 className="text-white font-bold text-sm mb-1">{step.label}</h3>
             <p className="text-slate-400 text-xs">{step.desc}</p>
-            <div className="mt-3 text-xs text-blue-400 font-medium">{step.time}</div>
+            <div className="mt-3 text-xs text-purple-400 font-medium">{step.time}</div>
           </div>
         ))}
       </div>
@@ -114,7 +114,7 @@ export default function Welcome({ organization, steps: stepsMeta }) {
       <div className="relative z-10 flex flex-col items-center gap-3">
         <button
           onClick={handleStart}
-          className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-lg px-10 py-4 rounded-xl shadow-xl shadow-blue-600/40 transition-all duration-200"
+          className="inline-flex items-center gap-3 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-lg px-10 py-4 rounded-xl shadow-xl shadow-blue-600/40 transition-all duration-200"
         >
           Commencer maintenant
           <span className="text-xl">→</span>
@@ -129,3 +129,4 @@ export default function Welcome({ organization, steps: stepsMeta }) {
     </div>
   );
 }
+export { Welcome };

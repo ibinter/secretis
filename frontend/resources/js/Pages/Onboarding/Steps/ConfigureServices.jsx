@@ -34,7 +34,7 @@ export default function ConfigureServices({ step, onComplete, onSkip, saving }) 
       <div className="flex items-center justify-between text-xs text-slate-400">
         <span>{enabled.length}/{MODULES.length} modules activés</span>
         <div className="flex gap-3">
-          <button onClick={() => setEnabled(MODULES.map(m => m.key))} className="text-blue-400 hover:text-blue-300 transition-colors">
+          <button onClick={() => setEnabled(MODULES.map(m => m.key))} className="text-purple-400 hover:text-purple-300 transition-colors">
             Tout activer
           </button>
           <button onClick={() => setEnabled([])} className="text-slate-500 hover:text-slate-400 transition-colors">
@@ -53,7 +53,7 @@ export default function ConfigureServices({ step, onComplete, onSkip, saving }) 
               onClick={() => toggle(mod.key)}
               className={`relative text-left p-4 rounded-xl border transition-all duration-200 ${
                 active
-                  ? 'bg-blue-600/20 border-blue-500/50 shadow-lg shadow-blue-600/10'
+                  ? 'bg-purple-600/20 border-purple-500/50 shadow-lg shadow-blue-600/10'
                   : 'bg-white/5 border-white/10 hover:border-white/30'
               }`}
             >
@@ -66,14 +66,14 @@ export default function ConfigureServices({ step, onComplete, onSkip, saving }) 
                 <span className="text-2xl">{mod.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className={`text-sm font-bold truncate ${active ? 'text-blue-300' : 'text-white'}`}>
+                    <h3 className={`text-sm font-bold truncate ${active ? 'text-purple-300' : 'text-white'}`}>
                       {mod.name}
                     </h3>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{mod.desc}</p>
                 </div>
                 <div className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  active ? 'bg-blue-500 border-blue-500' : 'border-white/30'
+                  active ? 'bg-purple-500 border-purple-500' : 'border-white/30'
                 }`}>
                   {active && <span className="text-white text-xs font-black">✓</span>}
                 </div>
@@ -87,7 +87,7 @@ export default function ConfigureServices({ step, onComplete, onSkip, saving }) 
         <button
           onClick={() => onComplete({ enabled })}
           disabled={saving || enabled.length === 0}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
         >
           {saving ? '⏳ Enregistrement...' : `Activer ${enabled.length} module${enabled.length > 1 ? 's' : ''} →`}
         </button>
@@ -100,3 +100,4 @@ export default function ConfigureServices({ step, onComplete, onSkip, saving }) 
     </div>
   );
 }
+export { ConfigureServices };

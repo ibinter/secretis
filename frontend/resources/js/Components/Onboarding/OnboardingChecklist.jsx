@@ -17,7 +17,7 @@ import { router } from '@inertiajs/react'
 // ─── Niveaux de badges ────────────────────────────────────────────────────────
 const LEVELS = [
   { label: 'Débutant', min: 0,   bg: 'bg-gray-100 dark:bg-gray-700',           text: 'text-gray-600 dark:text-gray-300',     icon: '🌱' },
-  { label: 'Initié',   min: 201, bg: 'bg-blue-100 dark:bg-blue-900/30',         text: 'text-blue-700 dark:text-blue-300',     icon: '⚡' },
+  { label: 'Initié',   min: 201, bg: 'bg-purple-100 dark:bg-purple-900/30',         text: 'text-purple-700 dark:text-purple-300',     icon: '⚡' },
   { label: 'Expert',   min: 401, bg: 'bg-orange-100 dark:bg-orange-900/30',     text: 'text-orange-700 dark:text-orange-300', icon: '🏆' },
   { label: 'Master',   min: 601, bg: 'bg-green-100 dark:bg-green-900/30',       text: 'text-green-700 dark:text-green-300',   icon: '👑' },
 ]
@@ -33,7 +33,7 @@ function Confetti({ active }) {
   if (!active) return null
   const particles = Array.from({ length: 24 }, (_, i) => ({
     key: i,
-    color: ['#1A3A5C', '#2E86C1', '#F39C12', '#1E8449', '#C0392B', '#9B59B6'][i % 6],
+    color: ['#9333EA', '#7e22ce', '#F39C12', '#1E8449', '#C0392B', '#9B59B6'][i % 6],
     left: `${(i / 24) * 100}%`,
     delay: `${(i % 8) * 0.12}s`,
     size: `${6 + (i % 4) * 2}px`,
@@ -123,10 +123,10 @@ export default function OnboardingChecklist() {
           <div className="relative w-10 h-10 flex-shrink-0">
             <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E5E7EB" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#2E86C1" strokeWidth="3"
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#7e22ce" strokeWidth="3"
                 strokeDasharray={`${progress.percent} 100`} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#1A3A5C] dark:text-white">
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#9333EA] dark:text-white">
               {progress.percent}%
             </span>
           </div>
@@ -147,17 +147,17 @@ export default function OnboardingChecklist() {
         <Confetti active={celebrating} />
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] px-5 py-4 flex-shrink-0">
+        <div className="bg-gradient-to-r from-[#9333EA] to-[#7e22ce] px-5 py-4 flex-shrink-0">
           <div className="flex items-start justify-between mb-3">
             <div>
               <h3 className="font-bold text-white text-base">
                 {progress.percent === 100 ? '🎉 Félicitations !' : 'Premiers pas'}
               </h3>
-              <p className="text-blue-200 text-xs mt-0.5">
+              <p className="text-purple-200 text-xs mt-0.5">
                 {progress.percent === 100 ? 'Tous les défis complétés !' : `${progress.total - progress.completed} étape(s) restante(s)`}
               </p>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Réduire" className="text-blue-200 hover:text-white transition-colors mt-0.5">
+            <button onClick={() => setOpen(false)} aria-label="Réduire" className="text-purple-200 hover:text-white transition-colors mt-0.5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
               </svg>
@@ -167,10 +167,10 @@ export default function OnboardingChecklist() {
           {/* Barre de progression */}
           <div>
             <div className="flex justify-between mb-1.5">
-              <span className="text-xs text-blue-100">{progress.percent}% complété</span>
-              <span className="text-xs text-blue-100 font-semibold">{progress.points_earned} pts</span>
+              <span className="text-xs text-purple-100">{progress.percent}% complété</span>
+              <span className="text-xs text-purple-100 font-semibold">{progress.points_earned} pts</span>
             </div>
-            <div className="h-2 bg-blue-800/40 rounded-full overflow-hidden">
+            <div className="h-2 bg-purple-800/40 rounded-full overflow-hidden">
               <div className="h-full bg-[#F39C12] rounded-full transition-all duration-700" style={{ width: `${progress.percent}%` }} />
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function OnboardingChecklist() {
             <span className="text-xl" aria-hidden="true">{level.icon}</span>
             <span className={`px-2.5 py-0.5 ${level.bg} ${level.text} rounded-full text-xs font-semibold`}>{level.label}</span>
             {nextLevel && nextLevel !== level && (
-              <span className="text-xs text-blue-200 ml-auto">→ {nextLevel.label} à {nextLevel.min} pts</span>
+              <span className="text-xs text-purple-200 ml-auto">→ {nextLevel.label} à {nextLevel.min} pts</span>
             )}
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function OnboardingChecklist() {
               <button
                 onClick={() => handleComplete(step.key, step.route_name)}
                 disabled={completing === step.key}
-                className="flex-shrink-0 px-2.5 py-1.5 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                className="flex-shrink-0 px-2.5 py-1.5 bg-[#7e22ce] hover:bg-[#9333EA] text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
               >
                 {completing === step.key ? '...' : (step.action_label || 'Faire')}
               </button>
@@ -236,3 +236,4 @@ export default function OnboardingChecklist() {
     </div>
   )
 }
+export { OnboardingChecklist };

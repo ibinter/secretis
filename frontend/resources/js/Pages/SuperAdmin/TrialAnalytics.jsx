@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 function StatCard({ label, value, sub, color = 'blue', icon }) {
   const colors = {
-    blue  : 'from-blue-600/20 to-blue-700/20 border-blue-500/30 text-blue-300',
+    blue  : 'from-purple-600/20 to-purple-700/20 border-purple-500/30 text-purple-300',
     green : 'from-green-600/20 to-green-700/20 border-green-500/30 text-green-300',
     amber : 'from-amber-600/20 to-amber-700/20 border-amber-500/30 text-amber-300',
     red   : 'from-red-600/20 to-red-700/20 border-red-500/30 text-red-300',
@@ -22,7 +22,7 @@ function StatCard({ label, value, sub, color = 'blue', icon }) {
 
 function FunnelBar({ label, value, max, color }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  const colors = { blue: 'bg-blue-500', green: 'bg-green-500', amber: 'bg-amber-500', red: 'bg-red-500' };
+  const colors = { blue: 'bg-purple-500', green: 'bg-green-500', amber: 'bg-amber-500', red: 'bg-red-500' };
   return (
     <div className="flex items-center gap-4">
       <span className="w-28 text-sm text-slate-400 text-right flex-shrink-0">{label}</span>
@@ -106,7 +106,7 @@ export default function TrialAnalytics() {
             {['7d', '30d', '90d', '1y'].map(p => (
               <button key={p} onClick={() => setPeriod(p)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all
-                  ${period === p ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
+                  ${period === p ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
                 {p}
               </button>
             ))}
@@ -193,7 +193,7 @@ export default function TrialAnalytics() {
                       <span className="text-slate-400 font-semibold">{feat.usage_count.toLocaleString()}</span>
                     </div>
                     <div className="bg-slate-800 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-700"
+                      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-700"
                         style={{ width: `${pct}%` }} />
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export default function TrialAnalytics() {
                     <p className="text-white font-semibold text-sm truncate">{org.organization}</p>
                     <p className="text-slate-400 text-xs">Plan {org.plan} · Expire le {org.expiresAt}</p>
                   </div>
-                  <button className="text-xs bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg hover:bg-blue-600/40 transition-colors flex-shrink-0">
+                  <button className="text-xs bg-purple-600/20 text-purple-400 px-3 py-1 rounded-lg hover:bg-purple-600/40 transition-colors flex-shrink-0">
                     Relancer
                   </button>
                 </div>
@@ -237,3 +237,4 @@ export default function TrialAnalytics() {
     </div>
   );
 }
+export { TrialAnalytics };

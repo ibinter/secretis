@@ -86,7 +86,7 @@ export default function Modal({
             {onClose && (
               <button
                 onClick={onClose}
-                className="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-[#1A3A5C] focus:ring-offset-1"
+                className="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-[#9333EA] focus:ring-offset-1"
                 aria-label="Fermer la boîte de dialogue"
               >
                 <X size={18} aria-hidden="true" />
@@ -117,3 +117,4 @@ export default function Modal({
 
   return createPortal(content, document.body)
 }
+export { Modal };

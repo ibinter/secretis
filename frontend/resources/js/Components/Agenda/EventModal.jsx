@@ -165,12 +165,12 @@ function ParticipantSelector({ users, selected, onChange }) {
                     {selectedUsers.map((u) => (
                         <span
                             key={u.id}
-                            className="inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs"
+                            className="inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs"
                         >
                             {u.avatar ? (
                                 <img src={u.avatar} alt="" className="w-4 h-4 rounded-full" />
                             ) : (
-                                <span className="w-4 h-4 rounded-full bg-blue-300 flex items-center justify-center text-blue-800 font-bold text-[10px]">
+                                <span className="w-4 h-4 rounded-full bg-purple-300 flex items-center justify-center text-purple-800 font-bold text-[10px]">
                                     {u.name[0]}
                                 </span>
                             )}
@@ -178,7 +178,7 @@ function ParticipantSelector({ users, selected, onChange }) {
                             <button
                                 type="button"
                                 onClick={() => toggle(u.id)}
-                                className="ml-0.5 hover:text-blue-900"
+                                className="ml-0.5 hover:text-purple-900"
                                 aria-label={`Retirer ${u.name}`}
                             >
                                 ×
@@ -195,7 +195,7 @@ function ParticipantSelector({ users, selected, onChange }) {
                 placeholder="Rechercher un participant..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
 
             {/* Liste des résultats */}
@@ -210,7 +210,7 @@ function ParticipantSelector({ users, selected, onChange }) {
                                 type="checkbox"
                                 checked={isSelected(user.id)}
                                 onChange={() => toggle(user.id)}
-                                className="w-4 h-4 text-blue-500 rounded"
+                                className="w-4 h-4 text-purple-500 rounded"
                             />
                             {user.avatar ? (
                                 <img src={user.avatar} alt="" className="w-6 h-6 rounded-full" />
@@ -482,7 +482,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                 className={[
                                     'py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                                     activeTab === tab.key
-                                        ? 'border-blue-500 text-blue-600'
+                                        ? 'border-purple-500 text-purple-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700',
                                 ].join(' ')}
                             >
@@ -517,7 +517,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         type="text"
                                         placeholder="Titre de l'événement"
                                         autoFocus
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                 </FormField>
 
@@ -526,7 +526,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                     <FormField label="Type">
                                         <select
                                             {...register('type')}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         >
                                             {EVENT_TYPES.map((t) => (
                                                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -554,7 +554,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                     <input
                                         {...register('is_all_day')}
                                         type="checkbox"
-                                        className="w-4 h-4 text-blue-500 rounded"
+                                        className="w-4 h-4 text-purple-500 rounded"
                                     />
                                     <span className="text-sm text-gray-700">Toute la journée</span>
                                 </label>
@@ -569,7 +569,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         <input
                                             {...register('start_at', { required: 'La date de début est obligatoire.' })}
                                             type={watchIsAllDay ? 'date' : 'datetime-local'}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                             onChange={(e) => {
                                                 setValue('start_at', e.target.value);
                                                 // Auto-calculer end_at = start + 1h si end est vide
@@ -595,7 +595,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                             })}
                                             type={watchIsAllDay ? 'date' : 'datetime-local'}
                                             min={watchStartAt}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         />
                                     </FormField>
                                 </div>
@@ -621,7 +621,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         {...register('location')}
                                         type="text"
                                         placeholder="Salle de réunion, adresse, lien..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                 </FormField>
 
@@ -636,7 +636,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         })}
                                         type="url"
                                         placeholder="https://meet.google.com/..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                 </FormField>
 
@@ -646,7 +646,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         {...register('description')}
                                         rows={3}
                                         placeholder="Détails, ordre du jour, notes..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
                                     />
                                 </FormField>
                             </div>
@@ -687,7 +687,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                 >
                                     <select
                                         {...register('recurrence_rule')}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     >
                                         {RECURRENCE_OPTIONS.map((o) => (
                                             <option key={o.value} value={o.value}>{o.label}</option>
@@ -716,7 +716,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                                     { minutes: 15, channel: 'app' },
                                                 ]);
                                             }}
-                                            className="text-xs text-blue-600 hover:underline"
+                                            className="text-xs text-purple-600 hover:underline"
                                         >
                                             + Ajouter un rappel
                                         </button>
@@ -736,7 +736,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                                         updated[index] = { ...updated[index], minutes: parseInt(e.target.value) };
                                                         setValue('reminders', updated);
                                                     }}
-                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                 >
                                                     {REMINDER_MINUTES.map((m) => (
                                                         <option key={m.value} value={m.value}>{m.label}</option>
@@ -749,7 +749,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                                         updated[index] = { ...updated[index], channel: e.target.value };
                                                         setValue('reminders', updated);
                                                     }}
-                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                                 >
                                                     {REMINDER_CHANNELS.map((c) => (
                                                         <option key={c.value} value={c.value}>{c.label}</option>
@@ -816,7 +816,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                             <button
                                 type="submit"
                                 disabled={isBusy}
-                                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2"
+                                className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2"
                             >
                                 {isBusy && (
                                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">

@@ -95,7 +95,7 @@ const FORMAT_COLORS = {
     pdf:   'bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 border-red-200 dark:border-red-700',
     excel: 'bg-green-50 hover:bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 border-green-200 dark:border-green-700',
     csv:   'bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border-amber-200 dark:border-amber-700',
-    json:  'bg-blue-50 hover:bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-700',
+    json:  'bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 dark:border-purple-700',
 };
 
 // ─── Draggable depuis la liste des disponibles ────────────────────────────────
@@ -104,7 +104,7 @@ function AvailableColumnItem({ col, onAdd }) {
     return (
         <button
             onClick={() => onAdd(col)}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-[#2E86C1]/10 hover:text-[#2E86C1] transition-colors group border border-transparent hover:border-[#2E86C1]/20"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-[#7e22ce]/10 hover:text-[#7e22ce] transition-colors group border border-transparent hover:border-[#7e22ce]/20"
         >
             <span className="text-base leading-none">{TYPE_ICONS[col.type] || '💬'}</span>
             <span className="flex-1 font-medium">{col.label}</span>
@@ -157,7 +157,7 @@ function SortableColumn({ col, onToggleVisible, onLabelChange, onWidthChange, on
                 type="number"
                 value={col.width || 150}
                 onChange={e => onWidthChange(col.field, parseInt(e.target.value) || 150)}
-                className="w-16 text-xs text-center bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#2E86C1]"
+                className="w-16 text-xs text-center bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#7e22ce]"
                 min={60}
                 max={500}
             />
@@ -168,7 +168,7 @@ function SortableColumn({ col, onToggleVisible, onLabelChange, onWidthChange, on
                 onClick={() => onToggleVisible(col.field)}
                 className={`p-1 rounded transition-colors ${
                     col.visible !== false
-                        ? 'text-[#2E86C1] hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                        ? 'text-[#7e22ce] hover:bg-purple-50 dark:hover:bg-purple-900/20'
                         : 'text-gray-300 hover:text-gray-500'
                 }`}
                 title={col.visible !== false ? 'Masquer' : 'Afficher'}
@@ -196,7 +196,7 @@ function FilterRow({ filter, availableColumns, index, onChange, onRemove }) {
             <select
                 value={filter.field}
                 onChange={e => onChange(index, 'field', e.target.value)}
-                className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
             >
                 <option value="">Colonne...</option>
                 {availableColumns.map(c => (
@@ -207,7 +207,7 @@ function FilterRow({ filter, availableColumns, index, onChange, onRemove }) {
             <select
                 value={filter.operator}
                 onChange={e => onChange(index, 'operator', e.target.value)}
-                className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
             >
                 {OPERATORS.map(op => (
                     <option key={op.value} value={op.value}>{op.label}</option>
@@ -220,7 +220,7 @@ function FilterRow({ filter, availableColumns, index, onChange, onRemove }) {
                     value={filter.value || ''}
                     onChange={e => onChange(index, 'value', e.target.value)}
                     placeholder="Valeur..."
-                    className="flex-1 min-w-[120px] text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                    className="flex-1 min-w-[120px] text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                 />
             )}
 
@@ -507,7 +507,7 @@ export default function Builder({ report = null, modules = {} }) {
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors disabled:opacity-60 shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors disabled:opacity-60 shadow-sm"
                         >
                             {saving ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <BookmarkIcon className="w-4 h-4" />}
                             {saving ? 'Enregistrement...' : 'Enregistrer'}
@@ -527,7 +527,7 @@ export default function Builder({ report = null, modules = {} }) {
                             <select
                                 value={module}
                                 onChange={e => { setModule(e.target.value); setColumns([]); setFilters([]); }}
-                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                             >
                                 {Object.entries(modules).map(([key, mod]) => {
                                     const Icon = MODULE_ICONS[key];
@@ -603,7 +603,7 @@ export default function Builder({ report = null, modules = {} }) {
 
                                 <DragOverlay>
                                     {activeColumn && (
-                                        <div className="flex items-center gap-2 bg-white dark:bg-gray-700 border-2 border-[#2E86C1] rounded-lg px-3 py-2 shadow-xl">
+                                        <div className="flex items-center gap-2 bg-white dark:bg-gray-700 border-2 border-[#7e22ce] rounded-lg px-3 py-2 shadow-xl">
                                             <Bars3Icon className="w-4 h-4 text-gray-400" />
                                             <span className="text-sm">{TYPE_ICONS[activeColumn.type]}</span>
                                             <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{activeColumn.label}</span>
@@ -619,7 +619,7 @@ export default function Builder({ report = null, modules = {} }) {
                                 <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filtres</h2>
                                 <button
                                     onClick={addFilter}
-                                    className="flex items-center gap-1 text-xs text-[#2E86C1] hover:underline"
+                                    className="flex items-center gap-1 text-xs text-[#7e22ce] hover:underline"
                                 >
                                     <PlusIcon className="w-3.5 h-3.5" /> Ajouter un filtre
                                 </button>
@@ -648,7 +648,7 @@ export default function Builder({ report = null, modules = {} }) {
                                 <select
                                     value={sort[0]?.field || ''}
                                     onChange={e => setSort([{ field: e.target.value, direction: sort[0]?.direction || 'desc' }])}
-                                    className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                    className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                                 >
                                     <option value="">Aucun tri</option>
                                     {availableModuleColumns.filter(c => c.sortable).map(c => (
@@ -659,7 +659,7 @@ export default function Builder({ report = null, modules = {} }) {
                                     value={sort[0]?.direction || 'desc'}
                                     onChange={e => setSort(prev => [{ ...prev[0], direction: e.target.value }])}
                                     disabled={! sort[0]?.field}
-                                    className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] disabled:opacity-40"
+                                    className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] disabled:opacity-40"
                                 >
                                     <option value="asc">Croissant (A→Z)</option>
                                     <option value="desc">Décroissant (Z→A)</option>
@@ -684,7 +684,7 @@ export default function Builder({ report = null, modules = {} }) {
                                         value={name}
                                         onChange={e => setName(e.target.value)}
                                         placeholder="Ex : Tâches urgentes par assigné"
-                                        className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                        className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                                     />
                                 </div>
                                 <div>
@@ -696,7 +696,7 @@ export default function Builder({ report = null, modules = {} }) {
                                         onChange={e => setDesc(e.target.value)}
                                         rows={2}
                                         placeholder="Description optionnelle..."
-                                        className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] resize-none"
+                                        className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] resize-none"
                                     />
                                 </div>
                             </div>
@@ -704,7 +704,7 @@ export default function Builder({ report = null, modules = {} }) {
                             {/* Toggles */}
                             <div className="space-y-2">
                                 <label className="flex items-center gap-3 cursor-pointer">
-                                    <div className={`relative w-9 h-5 rounded-full transition-colors ${isShared ? 'bg-[#2E86C1]' : 'bg-gray-200 dark:bg-gray-600'}`}
+                                    <div className={`relative w-9 h-5 rounded-full transition-colors ${isShared ? 'bg-[#7e22ce]' : 'bg-gray-200 dark:bg-gray-600'}`}
                                          onClick={() => setIsShared(!isShared)}>
                                         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${isShared ? 'translate-x-4' : 'translate-x-0.5'}`} />
                                     </div>
@@ -729,7 +729,7 @@ export default function Builder({ report = null, modules = {} }) {
                                 <button
                                     onClick={handlePreview}
                                     disabled={previewLoading}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#2E86C1] text-[#2E86C1] hover:bg-blue-50 dark:hover:bg-blue-900/10 text-sm font-semibold transition-colors disabled:opacity-60"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#7e22ce] text-[#7e22ce] hover:bg-purple-50 dark:hover:bg-purple-900/10 text-sm font-semibold transition-colors disabled:opacity-60"
                                 >
                                     {previewLoading
                                         ? <><ArrowPathIcon className="w-4 h-4 animate-spin" /> Chargement...</>
@@ -778,7 +778,7 @@ export default function Builder({ report = null, modules = {} }) {
                                             <select
                                                 value={schedule?.frequency || 'weekly'}
                                                 onChange={e => setSchedule(s => ({ ...(s || {}), frequency: e.target.value }))}
-                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                                             >
                                                 <option value="daily">Quotidien</option>
                                                 <option value="weekly">Hebdomadaire</option>
@@ -791,7 +791,7 @@ export default function Builder({ report = null, modules = {} }) {
                                                 type="time"
                                                 value={schedule?.time || '08:00'}
                                                 onChange={e => setSchedule(s => ({ ...(s || {}), time: e.target.value }))}
-                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                                             />
                                         </div>
                                         <div>
@@ -804,7 +804,7 @@ export default function Builder({ report = null, modules = {} }) {
                                                     recipients: e.target.value.split(',').map(v => v.trim()).filter(Boolean),
                                                 }))}
                                                 rows={2}
-                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] resize-none"
+                                                className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] resize-none"
                                             />
                                         </div>
                                     </div>
@@ -836,3 +836,4 @@ export default function Builder({ report = null, modules = {} }) {
         </AppLayout>
     );
 }
+export { Builder };

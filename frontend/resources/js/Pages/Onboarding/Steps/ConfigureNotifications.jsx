@@ -56,7 +56,7 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
             key={c.key} type="button"
             onClick={() => { setChannel(c.key); setTestResult(null); }}
             className={`p-4 rounded-xl border text-left transition-all
-              ${channel === c.key ? 'bg-blue-600/20 border-blue-500/50' : 'bg-white/5 border-white/10 hover:border-white/30'}`}
+              ${channel === c.key ? 'bg-purple-600/20 border-purple-500/50' : 'bg-white/5 border-white/10 hover:border-white/30'}`}
           >
             <div className="text-2xl mb-2">{c.icon}</div>
             <div className="font-bold text-white text-sm">{c.label}</div>
@@ -73,12 +73,12 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
               <label className="block text-sm font-semibold text-slate-300 mb-2">Hôte SMTP</label>
               <input type="text" value={form.host ?? ''} onChange={e => set('host', e.target.value)}
                 placeholder="smtp.gmail.com"
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Port</label>
               <input type="number" value={form.port ?? 587} onChange={e => set('port', e.target.value)}
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400" />
+                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -86,20 +86,20 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
               <label className="block text-sm font-semibold text-slate-300 mb-2">Identifiant</label>
               <input type="text" value={form.username ?? ''} onChange={e => set('username', e.target.value)}
                 placeholder="user@exemple.com"
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-300 mb-2">Mot de passe</label>
               <input type="password" value={form.password ?? ''} onChange={e => set('password', e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Adresse d'expédition</label>
             <input type="email" value={form.fromAddress ?? ''} onChange={e => set('fromAddress', e.target.value)}
               placeholder="noreply@mon-organisation.com"
-              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Chiffrement</label>
@@ -107,7 +107,7 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
               {['TLS', 'SSL', 'Aucun'].map(enc => (
                 <button key={enc} type="button" onClick={() => set('encryption', enc)}
                   className={`px-4 py-2 rounded-lg text-sm border transition-all
-                    ${form.encryption === enc ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}>
+                    ${form.encryption === enc ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}>
                   {enc}
                 </button>
               ))}
@@ -123,19 +123,19 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
             <label className="block text-sm font-semibold text-slate-300 mb-2">Numéro WhatsApp Business</label>
             <input type="tel" value={form.phone ?? ''} onChange={e => set('phone', e.target.value)}
               placeholder="+225 07 XX XX XX XX"
-              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">API Token (Meta / 360dialog)</label>
             <input type="text" value={form.apiToken ?? ''} onChange={e => set('apiToken', e.target.value)}
               placeholder="EAAxxxxxxxxxxxxxxx"
-              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-sm" />
+              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-sm" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">ID du compte WhatsApp Business</label>
             <input type="text" value={form.wabaid ?? ''} onChange={e => set('wabaid', e.target.value)}
               placeholder="123456789012345"
-              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-sm" />
+              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-sm" />
           </div>
         </div>
       )}
@@ -157,7 +157,7 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
           {testing ? '⏳ Test...' : '🔌 Tester la connexion'}
         </button>
         <button type="submit" disabled={saving}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
           {saving ? '⏳...' : 'Enregistrer →'}
         </button>
         {onSkip && (
@@ -169,3 +169,4 @@ export default function ConfigureNotifications({ step, onComplete, onSkip, savin
     </form>
   );
 }
+export { ConfigureNotifications };

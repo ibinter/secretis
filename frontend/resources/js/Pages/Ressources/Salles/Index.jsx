@@ -102,7 +102,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
                 value={form.start_at}
                 onChange={(e) => { setForm(f => ({ ...f, start_at: e.target.value })); setAvailable(null); }}
                 required
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
             <div>
@@ -115,7 +115,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
                 onChange={(e) => { setForm(f => ({ ...f, end_at: e.target.value })); setAvailable(null); }}
                 required
                 min={form.start_at}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
                 type="button"
                 onClick={handleCheck}
                 disabled={checking}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
               >
                 {checking && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Vérifier la disponibilité
@@ -154,7 +154,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
               value={form.notes}
               onChange={(e) => setForm(f => ({ ...f, notes: e.target.value }))}
               placeholder="Objet de la réunion..."
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
             />
           </div>
 
@@ -171,7 +171,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
             <button
               type="submit"
               disabled={saving || available === false}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Réserver
@@ -244,7 +244,7 @@ function ScheduleModal({ room, onClose }) {
         <div className="overflow-auto flex-1 p-4">
           {loading ? (
             <div className="flex items-center justify-center h-48">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             </div>
           ) : schedule ? (
             <div className="grid gap-1" style={{ gridTemplateColumns: `64px repeat(${days.length}, 1fr)` }}>
@@ -273,7 +273,7 @@ function ScheduleModal({ room, onClose }) {
                           status === 'free'
                             ? 'bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30'
                             : status === 'approved'
-                              ? 'bg-blue-200 dark:bg-blue-800/50 border border-blue-300 dark:border-blue-700'
+                              ? 'bg-purple-200 dark:bg-purple-800/50 border border-purple-300 dark:border-purple-700'
                               : 'bg-amber-200 dark:bg-amber-800/50 border border-amber-300 dark:border-amber-700'
                         }`}
                       />
@@ -287,7 +287,7 @@ function ScheduleModal({ room, onClose }) {
           {/* Légende */}
           <div className="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-green-100 dark:bg-green-900/30" /> Libre</div>
-            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-blue-200 dark:bg-blue-800/50" /> Confirmée</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-purple-200 dark:bg-purple-800/50" /> Confirmée</div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-200 dark:bg-amber-800/50" /> En attente</div>
           </div>
         </div>
@@ -308,12 +308,12 @@ function RoomCard({ room, onReserve, onSchedule }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
       {/* Photo ou placeholder */}
-      <div className="h-40 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 relative">
+      <div className="h-40 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 relative">
         {photo ? (
           <img src={photo} alt={room.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <DoorOpen className="w-16 h-16 text-blue-200 dark:text-blue-900/50" />
+            <DoorOpen className="w-16 h-16 text-purple-200 dark:text-purple-900/50" />
           </div>
         )}
         {/* Badge statut */}
@@ -372,7 +372,7 @@ function RoomCard({ room, onReserve, onSchedule }) {
             onClick={() => onReserve(room)}
             disabled={status === 'occupied'}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium
-                       text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
+                       text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed
                        rounded-lg transition-colors"
           >
             <Clock className="w-4 h-4" />
@@ -440,7 +440,7 @@ function AddRoomModal({ onClose, onSuccess }) {
               onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
               required
               placeholder="Salle de conférence A"
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -452,7 +452,7 @@ function AddRoomModal({ onClose, onSuccess }) {
                 value={form.location}
                 onChange={(e) => setForm(f => ({ ...f, location: e.target.value }))}
                 placeholder="2ème étage"
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
             <div>
@@ -463,7 +463,7 @@ function AddRoomModal({ onClose, onSuccess }) {
                 onChange={(e) => setForm(f => ({ ...f, capacity: parseInt(e.target.value) || 1 }))}
                 min={1}
                 required
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
           </div>
@@ -478,12 +478,12 @@ function AddRoomModal({ onClose, onSuccess }) {
                 onChange={(e) => setEquipInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addEquipment())}
                 placeholder="Projecteur, Tableau blanc..."
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <button
                 type="button"
                 onClick={addEquipment}
-                className="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
               >
                 Ajouter
               </button>
@@ -491,7 +491,7 @@ function AddRoomModal({ onClose, onSuccess }) {
             {form.equipment.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {form.equipment.map((eq, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                  <span key={i} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
                     {eq.name}
                     <button type="button" onClick={() => removeEquipment(i)} className="hover:text-red-500">
                       <X className="w-3 h-3" />
@@ -510,7 +510,7 @@ function AddRoomModal({ onClose, onSuccess }) {
               Annuler
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2">
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Créer la salle
             </button>
@@ -563,7 +563,7 @@ export default function SallesIndex({ rooms: initialRooms }) {
           {isAdmin && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
             >
               <PlusCircle className="w-4 h-4" />
               Nouvelle salle
@@ -579,7 +579,7 @@ export default function SallesIndex({ rooms: initialRooms }) {
             placeholder="Rechercher une salle..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-sm pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full max-w-sm pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
           />
         </div>
 
@@ -636,3 +636,4 @@ export default function SallesIndex({ rooms: initialRooms }) {
     </AuthLayout>
   );
 }
+export { SallesIndex };

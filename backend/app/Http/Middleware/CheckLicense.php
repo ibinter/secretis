@@ -41,6 +41,11 @@ class CheckLicense
             return $next($request);
         }
 
+        // SuperAdmin IBIG Soft : jamais soumis à la licence
+        if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['super_admin', 'superadmin'])) {
+            return $next($request);
+        }
+
         $org = $user->organization;
 
         // Pas d'organisation → laisser passer (onboarding)

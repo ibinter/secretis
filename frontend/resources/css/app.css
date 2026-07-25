@@ -9,8 +9,8 @@
 /* ─── CSS Variables ──────────────────────────────────────────────────────────── */
 :root {
   /* Palette IBIG */
-  --color-primary:   #1A3A5C;
-  --color-secondary: #2E86C1;
+  --color-primary:   #9333EA;
+  --color-secondary: #7e22ce;
   --color-accent:    #F39C12;
   --color-success:   #1E8449;
   --color-danger:    #C0392B;
@@ -108,9 +108,9 @@ body {
   .secretis-badge-success { @apply secretis-badge bg-[#1E8449]/15 text-[#1E8449]; }
   .secretis-badge-warning { @apply secretis-badge bg-[#F39C12]/15 text-[#d68910]; }
   .secretis-badge-danger  { @apply secretis-badge bg-[#C0392B]/15 text-[#C0392B]; }
-  .secretis-badge-info    { @apply secretis-badge bg-[#2E86C1]/15 text-[#2E86C1]; }
+  .secretis-badge-info    { @apply secretis-badge bg-[#7e22ce]/15 text-[#7e22ce]; }
   .secretis-badge-gray    { @apply secretis-badge bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300; }
-  .secretis-badge-primary { @apply secretis-badge bg-[#1A3A5C]/15 text-[#1A3A5C] dark:bg-[#1A3A5C]/30 dark:text-blue-300; }
+  .secretis-badge-primary { @apply secretis-badge bg-[#9333EA]/15 text-[#9333EA] dark:bg-[#9333EA]/30 dark:text-blue-300; }
 
   /* Page heading */
   .secretis-page-title {
@@ -180,7 +180,7 @@ body {
 .tiptap-editor .ProseMirror ul { @apply list-disc ml-5 mb-2; }
 .tiptap-editor .ProseMirror ol { @apply list-decimal ml-5 mb-2; }
 .tiptap-editor .ProseMirror blockquote {
-  @apply border-l-4 border-[#2E86C1] pl-4 italic text-gray-500 my-3;
+  @apply border-l-4 border-[#7e22ce] pl-4 italic text-gray-500 my-3;
 }
 .tiptap-editor .ProseMirror code {
   @apply bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono;
@@ -188,7 +188,7 @@ body {
 .tiptap-editor .ProseMirror pre {
   @apply bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono my-3;
 }
-.tiptap-editor .ProseMirror a { @apply text-[#2E86C1] underline; }
+.tiptap-editor .ProseMirror a { @apply text-[#7e22ce] underline; }
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -215,7 +215,7 @@ body {
     display: block;
     font-size: 18pt;
     font-weight: 900;
-    color: #1A3A5C;
+    color: #9333EA;
     margin-bottom: 16pt;
   }
 

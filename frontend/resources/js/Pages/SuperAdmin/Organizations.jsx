@@ -18,7 +18,7 @@ const MOCK_ORGANIZATIONS = [
 function StatusBadge({ status }) {
   const map = {
     active:    { label: 'Actif',     cls: 'bg-green-100 text-green-700' },
-    trial:     { label: 'Essai',     cls: 'bg-blue-100 text-blue-700' },
+    trial:     { label: 'Essai',     cls: 'bg-purple-100 text-purple-700' },
     suspended: { label: 'Suspendu',  cls: 'bg-red-100 text-red-700' },
     expired:   { label: 'Expiré',    cls: 'bg-gray-100 text-gray-600' },
     cancelled: { label: 'Annulé',    cls: 'bg-gray-100 text-gray-600' },
@@ -92,7 +92,7 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
                   onClick={() => setAction(opt.value)}
                   className={`py-3 px-2 rounded-lg border-2 text-sm font-medium transition-all text-center
                     ${action === opt.value
-                      ? 'border-blue-900 bg-blue-50 text-blue-900'
+                      ? 'border-purple-900 bg-purple-50 text-purple-900'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
                 >
                   <div className="text-lg">{opt.icon}</div>
@@ -109,7 +109,7 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
                 <select
                   value={plan}
                   onChange={e => setPlan(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900"
                 >
                   <option value="Starter">Starter — 25 000 XOF / mois (5 utilisateurs)</option>
                   <option value="Pro">Pro — 75 000 XOF / mois (50 utilisateurs)</option>
@@ -127,7 +127,7 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
                       onClick={() => setMonths(m)}
                       className={`py-2 rounded-lg border-2 text-sm font-medium transition-all
                         ${months === m
-                          ? 'border-blue-900 bg-blue-50 text-blue-900'
+                          ? 'border-purple-900 bg-purple-50 text-purple-900'
                           : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
                     >
                       {m === 1 ? '1 mois' : m === 12 ? '1 an' : m === 24 ? '2 ans' : `${m} mois`}
@@ -137,10 +137,10 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
               </div>
 
               {/* Récapitulatif tarifaire */}
-              <div className="bg-blue-50 rounded-lg p-4 text-sm">
+              <div className="bg-purple-50 rounded-lg p-4 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Montant estimé :</span>
-                  <span className="font-bold text-blue-900">
+                  <span className="font-bold text-purple-900">
                     {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 })
                       .format({ Starter: 25000, Pro: 75000, Enterprise: 150000 }[plan] * months)}
                   </span>
@@ -165,7 +165,7 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
                 rows={3}
                 required
                 placeholder="Expliquez la raison de cette suspension..."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900 resize-none"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900 resize-none"
               />
             </div>
           )}
@@ -182,7 +182,7 @@ function LicenseModal({ org, onClose, onSubmit, loading }) {
               type="submit"
               disabled={loading || (action === 'suspend' && !reason.trim())}
               className={`px-5 py-2.5 text-sm font-medium text-white rounded-lg
-                ${action === 'suspend' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-900 hover:bg-blue-800'}
+                ${action === 'suspend' ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-900 hover:bg-purple-800'}
                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
             >
               {loading && (
@@ -239,7 +239,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
 
   const SortIcon = ({ colKey }) => {
     if (sortConfig.key !== colKey) return <span className="text-gray-300 ml-1">↕</span>;
-    return <span className="text-blue-900 ml-1">{sortConfig.dir === 'asc' ? '↑' : '↓'}</span>;
+    return <span className="text-purple-900 ml-1">{sortConfig.dir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   const handleLicenseAction = async (payload) => {
@@ -280,19 +280,19 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => router.visit('/superadmin/dashboard')}
-                className="text-blue-200 hover:text-white text-sm flex items-center gap-1"
+                className="text-purple-200 hover:text-white text-sm flex items-center gap-1"
               >
                 ← Tableau de bord
               </button>
-              <span className="text-blue-400">/</span>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Organisations</h1>
             </div>
-            <div className="text-sm text-blue-200">
+            <div className="text-sm text-purple-200">
               {stats.total} org · {stats.active} actives · {stats.trial} en essai
             </div>
           </div>
@@ -310,7 +310,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
             ].map(s => (
               <div key={s.label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
                 <div className={`text-3xl font-bold ${
-                  s.color === 'blue' ? 'text-blue-900' :
+                  s.color === 'blue' ? 'text-purple-900' :
                   s.color === 'green' ? 'text-green-600' :
                   s.color === 'amber' ? 'text-amber-600' :
                   'text-red-600'
@@ -334,12 +334,12 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
                 placeholder="Rechercher..."
                 value={filters.search}
                 onChange={e => setFilters(p => ({ ...p, search: e.target.value }))}
-                className="col-span-1 sm:col-span-2 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                className="col-span-1 sm:col-span-2 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900"
               />
               <select
                 value={filters.plan}
                 onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900"
               >
                 <option value="">Tous les plans</option>
                 <option value="Starter">Starter</option>
@@ -349,7 +349,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
               <select
                 value={filters.status}
                 onChange={e => setFilters(p => ({ ...p, status: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900"
               >
                 <option value="">Tous les statuts</option>
                 <option value="active">Actif</option>
@@ -372,7 +372,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
               <span className="text-sm text-gray-500">
                 <span className="font-semibold text-gray-900">{filtered.length}</span> organisation{filtered.length !== 1 ? 's' : ''} trouvée{filtered.length !== 1 ? 's' : ''}
               </span>
-              <button className="text-sm text-blue-700 font-semibold hover:underline flex items-center gap-1">
+              <button className="text-sm text-purple-700 font-semibold hover:underline flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
@@ -420,7 +420,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
                       <tr key={org.id} className={`hover:bg-gray-50 transition-colors ${isExpiringSoon && org.status === 'active' ? 'bg-amber-50/30' : ''}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 bg-blue-900 text-white rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">
+                            <div className="w-9 h-9 bg-purple-900 text-white rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0">
                               {org.name.charAt(0)}
                             </div>
                             <div>
@@ -456,7 +456,7 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
                             <button
                               onClick={() => setSelectedOrg(org)}
                               title="Gérer la licence"
-                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50"
+                              className="p-1.5 rounded-lg text-purple-600 hover:bg-purple-50"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -494,3 +494,4 @@ export default function SuperAdminOrganizations({ organizations: propOrgs }) {
     </>
   );
 }
+export { SuperAdminOrganizations };

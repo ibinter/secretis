@@ -53,11 +53,11 @@ export default function FileUpload({
         className={[
           'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
           dragging
-            ? 'border-[#2E86C1] bg-[#2E86C1]/5'
-            : 'border-gray-300 dark:border-gray-600 hover:border-[#2E86C1] dark:hover:border-[#2E86C1]',
+            ? 'border-[#7e22ce] bg-[#7e22ce]/5'
+            : 'border-gray-300 dark:border-gray-600 hover:border-[#7e22ce] dark:hover:border-[#7e22ce]',
         ].join(' ')}
       >
-        <Upload size={32} className={`mx-auto mb-3 ${dragging ? 'text-[#2E86C1]' : 'text-gray-300 dark:text-gray-600'}`} />
+        <Upload size={32} className={`mx-auto mb-3 ${dragging ? 'text-[#7e22ce]' : 'text-gray-300 dark:text-gray-600'}`} />
         <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</p>
         {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
         <p className="text-xs text-gray-400 mt-1">Max {formatFileSize(maxSize)}{accept ? ` · ${accept}` : ''}</p>
@@ -83,7 +83,7 @@ export default function FileUpload({
         <ul className="mt-3 space-y-2">
           {files.map((f, i) => (
             <li key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0F1923] rounded-lg border border-gray-200 dark:border-[#1E3048]">
-              <File size={16} className="text-[#2E86C1] shrink-0" />
+              <File size={16} className="text-[#7e22ce] shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{f.name}</p>
                 <p className="text-xs text-gray-400">{formatFileSize(f.size)}</p>
@@ -98,3 +98,4 @@ export default function FileUpload({
     </div>
   )
 }
+export { FileUpload };

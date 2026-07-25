@@ -102,7 +102,7 @@ function FormField({ label, error, required, children, hint }) {
 function Input({ className = '', ...props }) {
     return (
         <input
-            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition ${className}`}
+            className={`w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition ${className}`}
             {...props}
         />
     );
@@ -185,7 +185,7 @@ function SmtpModal({ open, onClose, config }) {
                     </FormField>
                     <FormField label="Port" required error={errors.port}>
                         <select value={data.port} onChange={(e) => setData('port', e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none">
                             <option value="587">587 (TLS recommandé)</option>
                             <option value="465">465 (SSL)</option>
                             <option value="25">25 (sans chiffrement)</option>
@@ -218,7 +218,7 @@ function SmtpModal({ open, onClose, config }) {
                     </button>
                     <div className="flex gap-3">
                         <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">Annuler</button>
-                        <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
+                        <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
                     </div>
                 </div>
             </form>
@@ -280,7 +280,7 @@ function S3Modal({ open, onClose, config }) {
             <form onSubmit={(e) => { e.preventDefault(); post(route('parametres.integrations.update', 's3'), { onSuccess: onClose }); }} className="space-y-4">
                 <FormField label="Fournisseur">
                     <select value={data.driver} onChange={(e) => setData('driver', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none">
                         <option value="s3">Amazon S3</option>
                         <option value="minio">MinIO (auto-hébergé)</option>
                         <option value="scaleway">Scaleway Object Storage</option>
@@ -310,7 +310,7 @@ function S3Modal({ open, onClose, config }) {
                 )}
                 <div className="flex justify-end gap-3 pt-2">
                     <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">Annuler</button>
-                    <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
+                    <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
                 </div>
             </form>
         </Modal>
@@ -360,9 +360,9 @@ function GoogleCalendarModal({ open, onClose, config }) {
                                 { value: 'to_google',     label: '→ SECRETIS vers Google seulement' },
                                 { value: 'from_google',   label: '← Google vers SECRETIS seulement' },
                             ].map(opt => (
-                                <label key={opt.value} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-400 transition">
+                                <label key={opt.value} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-purple-400 transition">
                                     <input type="radio" name="sync_direction" value={opt.value} defaultChecked={config.sync_direction === opt.value}
-                                        className="text-blue-600 focus:ring-blue-500" />
+                                        className="text-purple-600 focus:ring-purple-500" />
                                     <span className="text-sm text-gray-700 dark:text-gray-300">{opt.label}</span>
                                 </label>
                             ))}
@@ -441,7 +441,7 @@ function SaraModal({ open, onClose, config }) {
                                 onClick={() => handleProviderChange(p.value)}
                                 className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition
                                     ${data.provider === p.value
-                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
@@ -474,7 +474,7 @@ function SaraModal({ open, onClose, config }) {
                     <select
                         value={data.model}
                         onChange={(e) => setData('model', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none"
                     >
                         {selectedProvider?.models.map(m => (
                             <option key={m} value={m}>{m}</option>
@@ -492,7 +492,7 @@ function SaraModal({ open, onClose, config }) {
                     <FormField label="Max tokens" hint="Longueur maximale des réponses">
                         <input type="number" min="256" max="8192" step="256" value={data.max_tokens}
                             onChange={(e) => setData('max_tokens', parseInt(e.target.value))}
-                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none" />
+                            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none" />
                     </FormField>
                 </div>
 
@@ -507,7 +507,7 @@ function SaraModal({ open, onClose, config }) {
                     </button>
                     <div className="flex gap-3">
                         <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">Annuler</button>
-                        <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
+                        <button type="submit" disabled={processing} className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition">Enregistrer</button>
                     </div>
                 </div>
             </form>
@@ -614,7 +614,7 @@ export default function Integrations({ configs = {}, flash }) {
                 ))}
 
                 {/* Security notice */}
-                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-xs text-purple-700 dark:text-purple-300 space-y-1">
                     <p className="font-semibold">🔒 Sécurité des credentials</p>
                     <p>Toutes les clés API et mots de passe sont chiffrés avec AES-256 avant stockage. Ils ne sont jamais affichés en clair dans les logs, les exports ou les emails. Seul le système interne peut les déchiffrer au moment de leur utilisation.</p>
                 </div>
@@ -632,3 +632,4 @@ export default function Integrations({ configs = {}, flash }) {
         </AppLayout>
     );
 }
+export { Integrations };

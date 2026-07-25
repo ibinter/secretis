@@ -13,7 +13,7 @@ const REQUEST_TYPE_LABELS = {
 
 const STATUS_COLORS = {
     pending:    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-    processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+    processing: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
     completed:  'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
     rejected:   'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
 };
@@ -186,7 +186,7 @@ export default function GdprDashboard() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
                                     ${activeTab === tab.id
-                                        ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
+                                        ? 'border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
                                     }`}
                             >
@@ -257,7 +257,7 @@ export default function GdprDashboard() {
                                                         )}
                                                         {r.status === 'processing' && (
                                                             <button onClick={() => processRequest(r.id, 'complete')}
-                                                                className="text-xs text-blue-600 hover:underline font-medium">
+                                                                className="text-xs text-purple-600 hover:underline font-medium">
                                                                 Marquer terminée
                                                             </button>
                                                         )}
@@ -276,7 +276,7 @@ export default function GdprDashboard() {
                         <div className="space-y-4">
                             <div className="flex justify-end">
                                 <button onClick={() => setShowInventoryModal(true)}
-                                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+                                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700">
                                     + Nouveau traitement
                                 </button>
                             </div>
@@ -291,7 +291,7 @@ export default function GdprDashboard() {
                                                     <h3 className="font-semibold text-gray-900 dark:text-white">{rec.name}</h3>
                                                     <p className="text-sm text-gray-500 mt-1">{rec.purpose}</p>
                                                 </div>
-                                                <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                                <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 px-2.5 py-1 rounded-full whitespace-nowrap">
                                                     {LEGAL_BASIS_LABELS[rec.legal_basis] ?? rec.legal_basis}
                                                 </span>
                                             </div>
@@ -355,7 +355,7 @@ export default function GdprDashboard() {
                                                     <td className="px-4 py-3">
                                                         <button
                                                             onClick={() => toggleAutoDelete(p)}
-                                                            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${p.auto_delete ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                                                            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${p.auto_delete ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'}`}
                                                             aria-pressed={p.auto_delete}
                                                             aria-label={`Suppression auto ${p.data_type}`}
                                                         >
@@ -450,7 +450,7 @@ function KpiCard({ label, value, color, alert }) {
         yellow: 'text-yellow-600 dark:text-yellow-400',
         red:    'text-red-600 dark:text-red-400',
         orange: 'text-orange-600 dark:text-orange-400',
-        blue:   'text-blue-600 dark:text-blue-400',
+        blue:   'text-purple-600 dark:text-purple-400',
         green:  'text-green-600 dark:text-green-400',
     };
     return (
@@ -616,9 +616,10 @@ function ModalFooter({ onClose, onSave, saving, saveLabel = 'Enregistrer' }) {
                 Annuler
             </button>
             <button onClick={onSave} disabled={saving}
-                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                className="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50">
                 {saving ? 'Enregistrement…' : saveLabel}
             </button>
         </div>
     );
 }
+export { GdprDashboard };

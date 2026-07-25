@@ -447,3 +447,4 @@ export default function CoursePlayer({ course, modules, enrollment }) {
         </AppLayout>
     );
 }
+export { CoursePlayer };

@@ -395,3 +395,4 @@ export default function DocumentValidation() {
         </div>
     );
 }
+export { DocumentValidation };

@@ -44,16 +44,16 @@ export default function VerifyCertificate({ uuid, certificate, is_valid }) {
             <Head title="Vérification de certificat — IBIG SECRETIS" />
 
             {/* Page autonome sans AppLayout (publique) */}
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-blue-950 flex flex-col items-center justify-start px-4 py-16">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-gray-950 dark:to-purple-950 flex flex-col items-center justify-start px-4 py-16">
 
                 {/* Logo */}
                 <div className="mb-10 text-center">
                     <div className="flex items-center gap-3 justify-center">
-                        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
                             <ShieldCheckIcon className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <span className="text-2xl font-extrabold text-blue-800 dark:text-white">IBIG SECRETIS</span>
+                            <span className="text-2xl font-extrabold text-purple-800 dark:text-white">IBIG SECRETIS</span>
                             <p className="text-xs text-gray-400 dark:text-gray-500 text-left">Vérification de certificat</p>
                         </div>
                     </div>
@@ -76,13 +76,13 @@ export default function VerifyCertificate({ uuid, certificate, is_valid }) {
                                 value={inputUuid}
                                 onChange={e => setInputUuid(e.target.value)}
                                 placeholder="IBIG-XXXXXXXX ou UUID complet…"
-                                className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={checking || !inputUuid.trim()}
-                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors"
+                            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors"
                         >
                             {checking ? '…' : 'Vérifier'}
                         </button>
@@ -172,7 +172,7 @@ export default function VerifyCertificate({ uuid, certificate, is_valid }) {
                                     <p className="text-sm text-gray-500 dark:text-gray-400">
                                         Vérifiez le numéro figurant en bas du certificat (format : <strong>IBIG-XXXXXXXX</strong>) et recommencez.
                                         Si le problème persiste, contactez{' '}
-                                        <a href="mailto:support@ibigsoft.com" className="text-blue-600 dark:text-blue-400 underline">
+                                        <a href="mailto:support@ibigsoft.com" className="text-purple-600 dark:text-purple-400 underline">
                                             support@ibigsoft.com
                                         </a>.
                                     </p>
@@ -190,3 +190,4 @@ export default function VerifyCertificate({ uuid, certificate, is_valid }) {
         </>
     );
 }
+export { VerifyCertificate };

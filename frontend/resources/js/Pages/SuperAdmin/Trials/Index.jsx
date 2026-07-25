@@ -37,7 +37,7 @@ function DaysBar({ trialStart, trialEnd, total = 14 }) {
   const elapsed = Math.max(0, Math.min(total, Math.round((now - start) / 86400000)))
   const remaining = Math.max(0, Math.round((end - now) / 86400000))
   const pct = Math.min(100, Math.round((elapsed / total) * 100))
-  const color = remaining <= 2 ? 'bg-red-500' : remaining <= 5 ? 'bg-amber-400' : 'bg-[#1A3A5C]'
+  const color = remaining <= 2 ? 'bg-red-500' : remaining <= 5 ? 'bg-amber-400' : 'bg-[#9333EA]'
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -81,7 +81,7 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
   }
 
   const KPI_CARDS = [
-    { icon: <Ic.Clock />, label: 'Essais actifs', value: kpi.active, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { icon: <Ic.Clock />, label: 'Essais actifs', value: kpi.active, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
     { icon: <Ic.XCircle />, label: 'Expirent cette semaine', value: kpi.expiring_week, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20' },
     { icon: <Ic.TrendingUp />, label: 'Taux de conversion', value: `${kpi.conversion_rate}%`, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
     { icon: <Ic.CheckCircle />, label: 'Durée moy. (jours)', value: kpi.avg_days, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20' },
@@ -123,7 +123,7 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
               {trials.map(t => (
                 <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/superadmin/organisations/${t.org_id}`} className="font-medium text-[#1A3A5C] dark:text-blue-400 hover:underline">{t.org_name}</Link>
+                    <Link href={`/superadmin/organisations/${t.org_id}`} className="font-medium text-[#9333EA] dark:text-purple-400 hover:underline">{t.org_name}</Link>
                     <p className="text-xs text-gray-400">{t.admin_email}</p>
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{t.country}</td>
@@ -149,7 +149,7 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
                       <button
                         onClick={() => setExtending(t)}
                         title="Prolonger"
-                        className="px-2 py-1 text-xs font-medium rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                        className="px-2 py-1 text-xs font-medium rounded bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
                       >+jours</button>
                       <button
                         onClick={() => convertToPayant(t.org_id)}
@@ -159,7 +159,7 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
                       <button
                         onClick={() => sendRelance(t.org_id)}
                         title="Relancer"
-                        className="p-1.5 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-1.5 rounded text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                       ><Ic.Mail /></button>
                     </div>
                   </td>
@@ -177,12 +177,12 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Prolonger l'essai</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{extending.org_name}</p>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de jours supplémentaires</label>
-            <select value={days} onChange={e => setDays(+e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white mb-4 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+            <select value={days} onChange={e => setDays(+e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:text-white mb-4 focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
               {[3, 7, 14, 30].map(d => <option key={d} value={d}>{d} jours</option>)}
             </select>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setExtending(null)} className="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50">Annuler</button>
-              <button disabled={saving} onClick={() => extendTrial(extending.org_id)} className="px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
+              <button disabled={saving} onClick={() => extendTrial(extending.org_id)} className="px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
                 {saving ? 'Traitement…' : 'Prolonger'}
               </button>
             </div>
@@ -192,3 +192,4 @@ export default function TrialsIndex({ trials: propTrials, kpi: propKpi }) {
     </SuperAdminLayout>
   )
 }
+export { TrialsIndex };

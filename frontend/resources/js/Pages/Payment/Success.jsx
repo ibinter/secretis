@@ -28,7 +28,7 @@ const ConfettiStyle = () => (
   `}</style>
 );
 
-const CONFETTI_COLORS = ['#F39C12', '#1A3A5C', '#2E86C1', '#1E8449', '#C0392B', '#8E44AD'];
+const CONFETTI_COLORS = ['#F39C12', '#9333EA', '#7e22ce', '#1E8449', '#C0392B', '#8E44AD'];
 
 function Confetti() {
   const pieces = Array.from({ length: 40 }, (_, i) => ({
@@ -67,11 +67,11 @@ function ProcessingState() {
   return (
     <div className="text-center">
       <div className="w-20 h-20 mx-auto mb-6 relative">
-        <div className="w-20 h-20 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+        <div className="w-20 h-20 border-4 border-purple-100 border-t-blue-600 rounded-full animate-spin" />
       </div>
       <h1 className="text-2xl font-bold text-gray-800 mb-2">Vérification en cours…</h1>
       <p className="text-gray-500 mb-4">Le paiement est en cours de traitement. Cela peut prendre quelques instants.</p>
-      <div className="bg-blue-50 border border-blue-100 rounded-xl px-5 py-3 inline-block text-sm text-blue-700">
+      <div className="bg-purple-50 border border-purple-100 rounded-xl px-5 py-3 inline-block text-sm text-purple-700">
         Vous recevrez un email de confirmation.
       </div>
     </div>
@@ -95,7 +95,7 @@ function FailedState({ reason, orderRef }) {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => router.visit('/abonnement/checkout')}
-          className="px-6 py-3 bg-[#1A3A5C] text-white font-semibold rounded-xl hover:bg-[#2E86C1] transition-colors"
+          className="px-6 py-3 bg-[#9333EA] text-white font-semibold rounded-xl hover:bg-[#7e22ce] transition-colors"
         >
           Réessayer le paiement
         </button>
@@ -127,7 +127,7 @@ function TimeoutState({ orderRef }) {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => router.visit(`/abonnement/commandes/${orderRef}`)}
-          className="px-6 py-3 bg-[#1A3A5C] text-white font-semibold rounded-xl hover:bg-[#2E86C1] transition-colors"
+          className="px-6 py-3 bg-[#9333EA] text-white font-semibold rounded-xl hover:bg-[#7e22ce] transition-colors"
         >
           Voir le statut de ma commande
         </button>
@@ -155,7 +155,7 @@ function PaidState({ order }) {
 
       <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Paiement confirmé !</h1>
       <p className="text-lg text-gray-600 mb-2">
-        Votre abonnement <strong className="text-[#1A3A5C]">Plan {planLabel}</strong> est maintenant actif.
+        Votre abonnement <strong className="text-[#9333EA]">Plan {planLabel}</strong> est maintenant actif.
       </p>
 
       {order?.reference && (
@@ -168,7 +168,7 @@ function PaidState({ order }) {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={() => router.visit('/dashboard')}
-          className="px-8 py-3 bg-[#1A3A5C] text-white font-bold rounded-xl hover:bg-[#2E86C1] transition-colors text-base shadow-lg shadow-blue-900/20"
+          className="px-8 py-3 bg-[#9333EA] text-white font-bold rounded-xl hover:bg-[#7e22ce] transition-colors text-base shadow-lg shadow-blue-900/20"
         >
           Accéder à mon espace →
         </button>
@@ -245,15 +245,15 @@ export default function PaymentSuccess({ order: initialOrder }) {
 
       {status === 'paid' && <Confetti />}
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-lg">
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-[#1A3A5C] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#9333EA] flex items-center justify-center">
                 <span className="text-white font-black text-sm">IS</span>
               </div>
-              <span className="font-bold text-[#1A3A5C] text-lg" style={{ fontFamily: 'Georgia, serif' }}>
+              <span className="font-bold text-[#9333EA] text-lg" style={{ fontFamily: 'Georgia, serif' }}>
                 IBIG <span className="text-[#F39C12]">SECRETIS</span>
               </span>
             </div>
@@ -266,10 +266,11 @@ export default function PaymentSuccess({ order: initialOrder }) {
 
           {/* Footer */}
           <p className="text-center text-xs text-gray-400 mt-6">
-            Des questions ? <a href="/aide" className="text-blue-600 hover:underline">Centre d'aide</a> · <a href="mailto:support@ibig-secretis.com" className="text-blue-600 hover:underline">support@ibig-secretis.com</a>
+            Des questions ? <a href="/aide" className="text-purple-600 hover:underline">Centre d'aide</a> · <a href="mailto:support@ibig-secretis.com" className="text-purple-600 hover:underline">support@ibig-secretis.com</a>
           </p>
         </div>
       </div>
     </>
   );
 }
+export { PaymentSuccess };

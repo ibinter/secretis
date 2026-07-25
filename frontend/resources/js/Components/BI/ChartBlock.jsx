@@ -70,7 +70,7 @@ function DataTable({ data }) {
         <div className="overflow-auto h-full">
             <table className="w-full text-xs">
                 <thead>
-                    <tr className="bg-blue-700 text-white">
+                    <tr className="bg-purple-700 text-white">
                         {headers.map(h => <th key={h} className="px-3 py-2 text-left font-medium">{h.replace(/_/g, ' ')}</th>)}
                     </tr>
                 </thead>
@@ -267,7 +267,7 @@ export default function ChartBlock({
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-slate-50 select-none" style={draggable ? { cursor: 'grab' } : {}}>
                 <div className="flex items-center gap-2">
-                    <Icon size={14} className="text-blue-700" />
+                    <Icon size={14} className="text-purple-700" />
                     <span className="text-sm font-medium text-slate-700 truncate max-w-[200px]">{title}</span>
                     {period && <span className="text-xs text-slate-400 hidden sm:inline">({period})</span>}
                 </div>
@@ -290,7 +290,7 @@ export default function ChartBlock({
                                         <button
                                             key={t}
                                             onClick={() => handleChangeType(t)}
-                                            className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-blue-50 ${chartType === t ? 'text-blue-700 font-semibold' : 'text-slate-700'}`}
+                                            className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-purple-50 ${chartType === t ? 'text-purple-700 font-semibold' : 'text-slate-700'}`}
                                         >
                                             <I size={12} /> {t.charAt(0).toUpperCase() + t.slice(1)}
                                         </button>
@@ -326,3 +326,4 @@ export default function ChartBlock({
         </div>
     );
 }
+export { ChartBlock };

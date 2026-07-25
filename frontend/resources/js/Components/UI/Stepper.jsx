@@ -3,7 +3,7 @@ import { Check, AlertCircle } from 'lucide-react'
 
 const STATUS_STYLES = {
   completed: { circle: 'bg-[#1E8449] border-[#1E8449] text-white', label: 'text-[#1E8449] dark:text-green-400', line: 'bg-[#1E8449]' },
-  active:    { circle: 'bg-[#1A3A5C] border-[#1A3A5C] text-white ring-4 ring-[#1A3A5C]/20', label: 'text-[#1A3A5C] dark:text-blue-300 font-semibold', line: 'bg-gray-200 dark:bg-[#1E3048]' },
+  active:    { circle: 'bg-[#9333EA] border-[#9333EA] text-white ring-4 ring-[#9333EA]/20', label: 'text-[#9333EA] dark:text-purple-300 font-semibold', line: 'bg-gray-200 dark:bg-[#1E3048]' },
   error:     { circle: 'bg-[#C0392B] border-[#C0392B] text-white', label: 'text-[#C0392B] dark:text-red-400', line: 'bg-gray-200 dark:bg-[#1E3048]' },
   pending:   { circle: 'bg-white dark:bg-[#162032] border-gray-300 dark:border-gray-600 text-gray-400', label: 'text-gray-500 dark:text-gray-400', line: 'bg-gray-200 dark:bg-[#1E3048]' },
 }
@@ -76,3 +76,4 @@ export default function Stepper({
     </div>
   )
 }
+export { Stepper };

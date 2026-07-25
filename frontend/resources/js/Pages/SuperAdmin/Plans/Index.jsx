@@ -20,7 +20,7 @@ const fmtFcfa = n => fmt(n) + ' FCFA'
 
 const PLAN_STYLE = {
   starter:    { badge: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300', border: 'border-slate-200 dark:border-slate-700' },
-  pro:        { badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
+  pro:        { badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-700' },
   enterprise: { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-700' },
 }
 
@@ -125,7 +125,7 @@ function PlanCard({ plan, onToggle, toggling }) {
         <Link
           href={route('superadmin.plans.edit', { plan: plan.id })}
           className="flex items-center justify-center gap-2 w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-          style={{ background: 'rgba(46,134,193,0.12)', color: '#2E86C1' }}
+          style={{ background: 'rgba(46,134,193,0.12)', color: '#7e22ce' }}
         >
           <Ic.Edit />
           Modifier ce plan
@@ -221,7 +221,7 @@ export default function PlansIndex({ plans = [] }) {
         )}
 
         {/* Note de transparence */}
-        <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-sm text-blue-800 dark:text-blue-300">
+        <div className="mt-8 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4 text-sm text-purple-800 dark:text-purple-300">
           <strong>Important :</strong> La modification des prix s'applique uniquement aux nouvelles souscriptions.
           Les abonnements en cours ne sont pas rétroactivement affectés.
         </div>
@@ -229,3 +229,4 @@ export default function PlansIndex({ plans = [] }) {
     </SuperAdminLayout>
   )
 }
+export { PlansIndex };

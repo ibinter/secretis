@@ -2,208 +2,101 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SaraConversation;
-use App\Services\SaraService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 
 class SaraChatController extends Controller
 {
-    public function __construct(protected SaraService $sara) {}
+    private const SYSTEM_PROMPT = <<<'PROMPT'
+Tu es SARA, l'assistante IA officielle de SECRETIS ERP, la solution de gestion de secrétariat et de courrier de IBIG Soft (https://secretis.ibigsoft.com).
 
-    /**
-     * Page dédiée SARA Chat (Inertia).
-     */
-    public function index(): Response
-    {
-        $user = Auth::user();
+CONTEXTE PRODUIT :
+- SECRETIS ERP gère : courrier entrant/sortant, documents (GED), agenda/événements, réunions, visiteurs, tâches, notes de frais, RH, facturation, circulaires, annuaire de contacts.
+- Éditeur : IBIG Soft (Côte d'Ivoire), écosystème de 16 solutions métiers.
+- Essai gratuit disponible, plusieurs formules d'abonnement, support 7j/7.
+- Contact : secretis@ibigsoft.com — WhatsApp disponible sur le site.
 
-        $conversations = SaraConversation::forOrganization($user->organization_id)
-            ->forUser($user->id)
-            ->orderByDesc('updated_at')
-            ->limit(50)
-            ->get(['id', 'title', 'context_module', 'provider', 'feedback', 'created_at', 'updated_at'])
-            ->map(fn($c) => [
-                'id'             => $c->id,
-                'title'          => $c->title,
-                'context_module' => $c->context_module,
-                'provider'       => $c->provider,
-                'feedback'       => $c->feedback,
-                'created_at'     => $c->created_at->diffForHumans(),
-                'updated_at'     => $c->updated_at->diffForHumans(),
-            ]);
+RÈGLES STRICTES (à respecter absolument) :
+1. Réponds uniquement en français, sauf si l'utilisateur écrit dans une autre langue.
+2. Reste dans le périmètre SECRETIS ERP et IBIG Soft. Pour toute question hors sujet, redirige poliment vers le produit.
+3. Ne divulgue jamais d'informations techniques internes (serveurs, mots de passe, code, architecture).
+4. N'invente jamais de prix précis ni de fonctionnalités inexistantes — invite à contacter l'équipe commerciale pour un devis.
+5. Ne donne aucun conseil juridique, médical ou financier.
+6. Sois concise : 2 à 5 phrases maximum par réponse.
+7. Ton professionnel, chaleureux et orienté solution.
+8. Si l'utilisateur veut essayer le produit, oriente-le vers le bouton "Essai gratuit" ou la page /login.
+9. Ne traite jamais de données personnelles sensibles ; si l'utilisateur en partage, invite-le à ne pas le faire.
+10. En cas de problème technique client, oriente vers le support : secretis@ibigsoft.com.
+PROMPT;
 
-        $quickQuestions = $this->sara->getQuickQuestions('general');
-
-        return Inertia::render('Sara/Chat', [
-            'conversations'  => $conversations,
-            'quickQuestions' => $quickQuestions,
-        ]);
-    }
-
-    /**
-     * POST /api/sara/chat — envoyer un message, créer/continuer une conversation.
-     */
     public function chat(Request $request): JsonResponse
     {
-        $request->validate([
-            'message'         => 'required|string|max:2000',
-            'conversation_id' => 'nullable|integer|exists:sara_conversations,id',
-            'context_module'  => 'nullable|string|in:agenda,ged,tasks,visitors,hr,accounting,reporting,admin',
+        $validated = $request->validate([
+            'message' => 'required|string|max:2000',
+            'history' => 'sometimes|array|max:10',
+            'history.*.role' => 'required_with:history|in:user,assistant',
+            'history.*.content' => 'required_with:history|string|max:2000',
         ]);
 
-        $user    = Auth::user();
-        $orgId   = $user->organization_id;
-        $message = $request->string('message')->trim()->value();
+        $key = 'sara-chat:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            return response()->json([
+                'reply' => "Vous avez atteint la limite de messages. Merci de réessayer dans quelques minutes ou de nous contacter à secretis@ibigsoft.com.",
+                'rate_limited' => true,
+            ], 429);
+        }
+        RateLimiter::hit($key, 300);
 
-        // Charger ou créer la conversation
-        if ($request->conversation_id) {
-            $conversation = SaraConversation::where('id', $request->conversation_id)
-                ->where('organization_id', $orgId)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-        } else {
-            $conversation = new SaraConversation([
-                'organization_id' => $orgId,
-                'user_id'         => $user->id,
-                'title'           => $this->sara->generateTitle($message),
-                'context_module'  => $request->context_module,
-                'messages'        => [],
-                'tokens_used'     => 0,
-                'provider'        => config('sara.provider', config('secretis.ai.provider', 'groq')),
-            ]);
+        $apiKey = config('services.groq.key', env('GROQ_API_KEY'));
+        if (!$apiKey) {
+            return response()->json(['reply' => $this->fallback(), 'fallback' => true]);
         }
 
-        // Ajouter le message utilisateur
-        $conversation->addMessage('user', $message);
+        $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT]];
+        foreach ($validated['history'] ?? [] as $h) {
+            $messages[] = ['role' => $h['role'], 'content' => $h['content']];
+        }
+        $messages[] = ['role' => 'user', 'content' => $validated['message']];
 
-        // Obtenir la réponse de SARA
-        $result = $this->sara->chat(
-            $conversation->messages,
-            $user,
-            $conversation->context_module
-        );
+        try {
+            $response = Http::timeout(25)
+                ->withToken($apiKey)
+                ->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model' => env('SARA_AI_MODEL', 'llama-3.3-70b-versatile'),
+                    'messages' => $messages,
+                    'max_tokens' => 400,
+                    'temperature' => 0.5,
+                ]);
 
-        // Ajouter la réponse SARA à l'historique
-        $conversation->addMessage('assistant', $result['content']);
-        $conversation->tokens_used += $result['tokens_used'];
-        $conversation->provider    = $result['provider'];
-        $conversation->model_used  = $result['model'] ?? null;
-        $conversation->save();
+            if ($response->successful()) {
+                $reply = $response->json('choices.0.message.content');
+                if (is_string($reply) && trim($reply) !== '') {
+                    return response()->json(['reply' => trim($reply)]);
+                }
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
-        // Suggestions FAQ si pertinent
-        $faqSuggestions = $this->sara->suggestFromFaq($message);
+        return response()->json(['reply' => $this->fallback(), 'fallback' => true]);
+    }
 
-        return response()->json([
-            'conversation_id' => $conversation->id,
-            'response'        => $result['content'],
-            'provider'        => $result['provider'],
-            'model'           => $result['model'],
-            'faq_suggestions' => array_slice($faqSuggestions, 0, 2),
-        ]);
+    private function fallback(): string
+    {
+        return "Je rencontre un souci technique momentané. Vous pouvez nous écrire à secretis@ibigsoft.com ou via WhatsApp — notre équipe vous répondra rapidement !";
     }
 
     /**
-     * GET /api/sara/conversations — liste des conversations de l'utilisateur.
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */
-    public function conversations(): JsonResponse
+    public function __call($method, $parameters)
     {
-        $user = Auth::user();
-
-        $conversations = SaraConversation::forOrganization($user->organization_id)
-            ->forUser($user->id)
-            ->orderByDesc('updated_at')
-            ->limit(100)
-            ->get(['id', 'title', 'context_module', 'provider', 'feedback', 'tokens_used', 'created_at', 'updated_at'])
-            ->map(fn($c) => [
-                'id'             => $c->id,
-                'title'          => $c->title,
-                'context_module' => $c->context_module,
-                'provider'       => $c->provider,
-                'feedback'       => $c->feedback,
-                'tokens_used'    => $c->tokens_used,
-                'created_at'     => $c->created_at->toIso8601String(),
-                'updated_at'     => $c->updated_at->toIso8601String(),
-                'updated_human'  => $c->updated_at->diffForHumans(),
-            ]);
-
-        return response()->json(['conversations' => $conversations]);
-    }
-
-    /**
-     * GET /api/sara/conversations/{conversation} — détail d'une conversation.
-     */
-    public function conversation(SaraConversation $conversation): JsonResponse
-    {
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
-
-        return response()->json([
-            'conversation' => [
-                'id'             => $conversation->id,
-                'title'          => $conversation->title,
-                'context_module' => $conversation->context_module,
-                'messages'       => $conversation->messages,
-                'tokens_used'    => $conversation->tokens_used,
-                'provider'       => $conversation->provider,
-                'model_used'     => $conversation->model_used,
-                'feedback'       => $conversation->feedback,
-                'feedback_comment' => $conversation->feedback_comment,
-                'created_at'     => $conversation->created_at->toIso8601String(),
-                'updated_at'     => $conversation->updated_at->toIso8601String(),
-            ],
-        ]);
-    }
-
-    /**
-     * DELETE /api/sara/conversations/{conversation} — supprimer une conversation.
-     */
-    public function deleteConversation(SaraConversation $conversation): JsonResponse
-    {
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
-
-        $conversation->delete();
-
-        return response()->json(['message' => 'Conversation supprimée.']);
-    }
-
-    /**
-     * POST /api/sara/conversations/{conversation}/feedback — laisser un feedback.
-     */
-    public function feedback(Request $request, SaraConversation $conversation): JsonResponse
-    {
-        $request->validate([
-            'feedback'         => 'required|in:positive,negative',
-            'feedback_comment' => 'nullable|string|max:1000',
-        ]);
-
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
-
-        $conversation->update([
-            'feedback'         => $request->feedback,
-            'feedback_comment' => $request->feedback_comment,
-        ]);
-
-        return response()->json(['message' => 'Merci pour votre retour !']);
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

@@ -64,20 +64,20 @@ const AGENTS = ['Brice K.', 'Amenan D.', 'Koffi T.', 'Raissa M.']
 const PRIORITY_STYLE = {
   critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   haute:    'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  normale:  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  normale:  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   basse:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
 }
 
 const STATUS_STYLE = {
   open:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  resolved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  resolved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   closed:   'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
 }
 
 function Avatar({ name, size = 8, textSize = 'text-xs' }) {
   const initials = name ? name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase() : '?'
-  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500']
+  const colors = ['bg-purple-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500']
   const color = colors[name ? name.charCodeAt(0) % colors.length : 0]
   return (
     <span className={`inline-flex items-center justify-center w-${size} h-${size} rounded-full ${color} text-white ${textSize} font-bold flex-shrink-0`}>
@@ -137,12 +137,12 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
       <div className="p-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-6">
-          <Link href="/superadmin/support" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#2E86C1] dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
+          <Link href="/superadmin/support" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#7e22ce] dark:text-gray-400 dark:hover:text-purple-400 transition-colors">
             <Ic.Back />
             Tous les tickets
           </Link>
           <span className="text-gray-300 dark:text-gray-600">/</span>
-          <span className="text-sm font-mono font-semibold text-[#1A3A5C] dark:text-blue-300">{ticket.number}</span>
+          <span className="text-sm font-mono font-semibold text-[#9333EA] dark:text-purple-300">{ticket.number}</span>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -202,7 +202,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-semibold text-sm text-gray-900 dark:text-white">{msg.author}</span>
                           {msg.role === 'agent' && (
-                            <span className="px-1.5 py-0.5 bg-[#1A3A5C] text-white rounded text-xs">
+                            <span className="px-1.5 py-0.5 bg-[#9333EA] text-white rounded text-xs">
                               {auth?.user?.name === msg.author ? 'Vous' : 'Support'}
                             </span>
                           )}
@@ -242,14 +242,14 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                   onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sendReply() }}
                   rows={4}
                   placeholder={isInternal ? 'Note interne — non visible par le client...' : 'Répondre au client... (Ctrl+Entrée pour envoyer)'}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#2E86C1] focus:outline-none placeholder-gray-400"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-[#7e22ce] focus:outline-none placeholder-gray-400"
                 />
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xs text-gray-400">{reply.length} caractères</span>
                   <button
                     onClick={sendReply}
                     disabled={!reply.trim() || sending}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-[#7e22ce] hover:bg-[#9333EA] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Ic.Send />
                     {sending ? 'Envoi...' : isInternal ? 'Ajouter la note' : 'Envoyer la réponse'}
@@ -271,7 +271,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                 <select
                   value={agent}
                   onChange={e => { setAgent(e.target.value); updateTicket('agent', e.target.value) }}
-                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none"
+                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none"
                 >
                   <option value="">Non assigné</option>
                   {AGENTS.map(a => <option key={a} value={a}>{a}</option>)}
@@ -283,7 +283,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                 <select
                   value={priority}
                   onChange={e => { setPriority(e.target.value); updateTicket('priority', e.target.value) }}
-                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none"
+                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none"
                 >
                   <option value="basse">Basse</option>
                   <option value="normale">Normale</option>
@@ -297,7 +297,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                 <select
                   value={status}
                   onChange={e => { setStatus(e.target.value); updateTicket('status', e.target.value) }}
-                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none"
+                  className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none"
                 >
                   <option value="open">Ouvert</option>
                   <option value="pending">En attente</option>
@@ -321,7 +321,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Plan</span>
-                  <span className="px-2 py-0.5 bg-[#1A3A5C] text-white rounded text-xs font-medium">{ticket.organization.plan}</span>
+                  <span className="px-2 py-0.5 bg-[#9333EA] text-white rounded text-xs font-medium">{ticket.organization.plan}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500 dark:text-gray-400">Licence</span>
@@ -366,7 +366,7 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
                       className="block p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex items-center justify-between mb-0.5">
-                        <span className="font-mono text-xs text-[#2E86C1] dark:text-blue-400">{pt.number}</span>
+                        <span className="font-mono text-xs text-[#7e22ce] dark:text-purple-400">{pt.number}</span>
                         <span className="text-xs text-gray-400">{pt.created_at}</span>
                       </div>
                       <p className="text-xs text-gray-600 dark:text-gray-300 truncate">{pt.subject}</p>
@@ -381,3 +381,4 @@ export default function SupportShow({ ticket = MOCK_TICKET, auth }) {
     </SuperAdminLayout>
   )
 }
+export { SupportShow };

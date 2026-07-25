@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // ─── Sections de la landing page ─────────────────────────────────────────────
 const SECTIONS = [
-  { key: 'topbar',       label: 'Barre supérieure', icon: '📢', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { key: 'topbar',       label: 'Barre supérieure', icon: '📢', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   { key: 'hero',         label: 'Hero',             icon: '🚀', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   { key: 'pricing',      label: 'Tarifs',           icon: '💰', color: 'bg-green-50 text-green-700 border-green-200' },
   { key: 'testimonials', label: 'Témoignages',      icon: '⭐', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
@@ -379,7 +379,7 @@ export default function LandingEditor() {
                           <div className="flex items-center gap-1.5 ml-2 shrink-0">
                             <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${
                               zone.type === 'json' ? 'bg-purple-100 text-purple-600' :
-                              zone.type === 'number' ? 'bg-blue-100 text-blue-600' :
+                              zone.type === 'number' ? 'bg-purple-100 text-purple-600' :
                                                        'bg-gray-100 text-gray-500'
                             }`}>
                               {zone.type === 'json' ? 'JSON' : zone.type === 'number' ? '123' : 'txt'}
@@ -450,3 +450,4 @@ export default function LandingEditor() {
     </>
   );
 }
+export { LandingEditor };

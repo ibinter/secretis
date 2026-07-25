@@ -19,7 +19,7 @@ const Ic = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
   active:    { label: 'Actif',     cls: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' },
-  trial:     { label: 'Essai',     cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' },
+  trial:     { label: 'Essai',     cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' },
   suspended: { label: 'Suspendu',  cls: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
   expired:   { label: 'Expiré',    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
 }
@@ -89,9 +89,9 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
       {/* ── KPI Stats ───────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         {[
-          { label: 'Total', value: stats.total, cls: 'text-[#1A3A5C] dark:text-white' },
+          { label: 'Total', value: stats.total, cls: 'text-[#9333EA] dark:text-white' },
           { label: 'Actives', value: stats.active, cls: 'text-green-600' },
-          { label: 'En essai', value: stats.trial, cls: 'text-blue-600' },
+          { label: 'En essai', value: stats.trial, cls: 'text-purple-600' },
           { label: 'Suspendues', value: stats.suspended, cls: 'text-red-600' },
           { label: 'Expirées', value: stats.expired, cls: 'text-gray-500' },
         ].map(s => (
@@ -112,7 +112,7 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Nom, email ou slug..."
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 focus:border-[#1A3A5C] outline-none"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 focus:border-[#9333EA] outline-none"
             />
           </div>
 
@@ -120,7 +120,7 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
           <select
             value={status}
             onChange={e => { setStatus(e.target.value); router.get('/superadmin/organisations', { search, status: e.target.value, plan, country }, { preserveState: true }) }}
-            className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none"
+            className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#9333EA]/30 outline-none"
           >
             <option value="">Tous les statuts</option>
             <option value="active">Actif</option>
@@ -133,7 +133,7 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
           <select
             value={plan}
             onChange={e => { setPlan(e.target.value); router.get('/superadmin/organisations', { search, status, plan: e.target.value, country }, { preserveState: true }) }}
-            className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none"
+            className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#9333EA]/30 outline-none"
           >
             <option value="">Tous les plans</option>
             <option value="starter">Starter</option>
@@ -147,7 +147,7 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
             onChange={e => setCountry(e.target.value)}
             onBlur={applyFilters}
             placeholder="Pays (CI, SN…)"
-            className="w-32 text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none"
+            className="w-32 text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none"
           />
 
           <div className="ml-auto flex gap-2">
@@ -177,8 +177,8 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
                 <tr key={org.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-[#1A3A5C]/10 flex items-center justify-center shrink-0">
-                        <span className="text-[#1A3A5C] dark:text-blue-300 font-bold text-xs">{org.name[0]}</span>
+                      <div className="w-8 h-8 rounded-lg bg-[#9333EA]/10 flex items-center justify-center shrink-0">
+                        <span className="text-[#9333EA] dark:text-purple-300 font-bold text-xs">{org.name[0]}</span>
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white truncate max-w-[160px]">{org.name}</p>
@@ -196,7 +196,7 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
                     <div className="flex items-center gap-1">
                       <Link
                         href={`/superadmin/organisations/${org.id}`}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        className="p-1.5 rounded-md text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
                         title="Voir détails"
                       >
                         <Ic.Eye />
@@ -251,3 +251,4 @@ export default function OrganizationsIndex({ organizations: propOrgs, stats: pro
     </SuperAdminLayout>
   )
 }
+export { OrganizationsIndex };

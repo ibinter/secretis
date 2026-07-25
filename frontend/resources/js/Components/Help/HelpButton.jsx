@@ -137,9 +137,9 @@ export default function HelpButton({ onOpenSara }) {
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-60 animate-in fade-in slide-in-from-bottom-2 duration-150"
         >
           {/* Header */}
-          <div className="px-4 py-3 bg-[#1A3A5C] text-white">
+          <div className="px-4 py-3 bg-[#9333EA] text-white">
             <p className="font-semibold text-sm">Besoin d'aide ?</p>
-            <p className="text-xs text-blue-200 mt-0.5">Choisissez une option</p>
+            <p className="text-xs text-purple-200 mt-0.5">Choisissez une option</p>
           </div>
 
           {/* Items */}
@@ -184,10 +184,10 @@ export default function HelpButton({ onOpenSara }) {
         aria-haspopup="menu"
         className={`
           relative w-14 h-14 rounded-full shadow-lg flex items-center justify-center
-          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2E86C1]
+          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7e22ce]
           ${open
             ? 'bg-gray-700 dark:bg-gray-600 text-white rotate-0'
-            : 'bg-[#2E86C1] hover:bg-[#1A3A5C] text-white hover:scale-105'
+            : 'bg-[#7e22ce] hover:bg-[#9333EA] text-white hover:scale-105'
           }
         `}
       >
@@ -206,3 +206,4 @@ export default function HelpButton({ onOpenSara }) {
     </div>
   )
 }
+export { HelpButton };

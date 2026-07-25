@@ -16,7 +16,7 @@ export default function OfferAccepted({ offer = null }) {
                     {/* Logo */}
                     <div style={styles.logoWrap}>
                         <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="56" height="56" rx="16" fill="#1A3A5C"/>
+                            <rect width="56" height="56" rx="16" fill="#9333EA"/>
                             <path d="M14 28L22 36L42 16" stroke="#4CAF93" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </div>
@@ -73,7 +73,7 @@ export default function OfferAccepted({ offer = null }) {
 const styles = {
     page: {
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f2035 0%, #1A3A5C 60%, #1e4a7a 100%)',
+        background: 'linear-gradient(135deg, #0f2035 0%, #9333EA 60%, #1e4a7a 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -97,7 +97,7 @@ const styles = {
     title: {
         fontSize: '1.875rem',
         fontWeight: '700',
-        color: '#1A3A5C',
+        color: '#9333EA',
         margin: '0 0 0.75rem',
     },
     subtitle: {
@@ -148,7 +148,7 @@ const styles = {
         margin: '0 0 0.25rem',
     },
     contactLink: {
-        color: '#1A3A5C',
+        color: '#9333EA',
         fontWeight: '600',
         textDecoration: 'none',
         fontSize: '0.9375rem',
@@ -159,3 +159,4 @@ const styles = {
         margin: '0',
     },
 };
+export { OfferAccepted };

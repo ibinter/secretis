@@ -108,6 +108,14 @@ class AuthApiController extends ApiController
 
         $token = $user->createToken('api-token')->plainTextToken;
 
+        // Établit aussi la session web (SPA même domaine) pour les routes Inertia
+        try {
+            \Illuminate\Support\Facades\Auth::guard('web')->login($user, (bool) $request->boolean('remember'));
+            $request->session()->regenerate();
+        } catch (\Throwable $e) {
+            // Requête purement API (mobile) sans session — ignorer
+        }
+
         $this->audit->log(
             action: 'api_login_success',
             module: 'auth',

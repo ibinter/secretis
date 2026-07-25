@@ -449,3 +449,4 @@ export default function Vouchers() {
     </>
   );
 }
+export { Vouchers };

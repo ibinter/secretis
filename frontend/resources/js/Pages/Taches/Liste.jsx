@@ -33,14 +33,14 @@ import debounce from 'lodash/debounce';
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Faible',  dot: 'bg-gray-400',   text: 'text-gray-600 dark:text-gray-400'   },
-  normal: { label: 'Normal',  dot: 'bg-blue-500',   text: 'text-blue-700 dark:text-blue-400'   },
+  normal: { label: 'Normal',  dot: 'bg-purple-500',   text: 'text-purple-700 dark:text-purple-400'   },
   high:   { label: 'Haute',   dot: 'bg-orange-500', text: 'text-orange-700 dark:text-orange-400' },
   urgent: { label: 'Urgente', dot: 'bg-red-500',    text: 'text-red-700 dark:text-red-400'     },
 };
 
 const STATUS_CONFIG = {
   todo:        { label: 'À faire',      color: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'          },
-  in_progress: { label: 'En cours',     color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'       },
+  in_progress: { label: 'En cours',     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'       },
   review:      { label: 'En révision',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
   done:        { label: 'Terminé',      color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'   },
   cancelled:   { label: 'Annulé',       color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'           },
@@ -72,8 +72,8 @@ function SortHeader({ column, currentSort, currentDir, onSort }) {
       <div className="flex items-center gap-1">
         {column.label}
         <span className="flex flex-col">
-          <ChevronUp   className={`w-2.5 h-2.5 ${isActive && currentDir === 'asc'  ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600'}`} />
-          <ChevronDown className={`w-2.5 h-2.5 ${isActive && currentDir === 'desc' ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600'}`} />
+          <ChevronUp   className={`w-2.5 h-2.5 ${isActive && currentDir === 'asc'  ? 'text-purple-500' : 'text-gray-300 dark:text-gray-600'}`} />
+          <ChevronDown className={`w-2.5 h-2.5 ${isActive && currentDir === 'desc' ? 'text-purple-500' : 'text-gray-300 dark:text-gray-600'}`} />
         </span>
       </div>
     </th>
@@ -93,7 +93,7 @@ function TaskRow({ task, selected, onSelect, onEdit, onStatusChange }) {
       className={`
         group border-b border-gray-100 dark:border-gray-800 transition-colors
         ${selected
-          ? 'bg-blue-50 dark:bg-blue-900/20'
+          ? 'bg-purple-50 dark:bg-purple-900/20'
           : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }
       `}
@@ -104,7 +104,7 @@ function TaskRow({ task, selected, onSelect, onEdit, onStatusChange }) {
           type="checkbox"
           checked={selected}
           onChange={(e) => onSelect(task.id, e.target.checked)}
-          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500"
         />
       </td>
 
@@ -116,7 +116,7 @@ function TaskRow({ task, selected, onSelect, onEdit, onStatusChange }) {
             text-sm font-medium text-left leading-snug transition-colors
             ${task.status === 'done'
               ? 'text-gray-400 dark:text-gray-500 line-through'
-              : 'text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400'
+              : 'text-gray-800 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400'
             }
           `}
         >
@@ -126,7 +126,7 @@ function TaskRow({ task, selected, onSelect, onEdit, onStatusChange }) {
           <div className="flex items-center gap-1 mt-1">
             <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full"
+                className="h-full bg-purple-500 rounded-full"
                 style={{ width: `${task.subtasks_progress}%` }}
               />
             </div>
@@ -141,7 +141,7 @@ function TaskRow({ task, selected, onSelect, onEdit, onStatusChange }) {
           value={task.status}
           onChange={(e) => onStatusChange(task.id, e.target.value)}
           className={`
-            text-xs font-semibold px-2 py-1 rounded-lg border-0 cursor-pointer focus:ring-2 focus:ring-blue-500
+            text-xs font-semibold px-2 py-1 rounded-lg border-0 cursor-pointer focus:ring-2 focus:ring-purple-500
             ${STATUS_CONFIG[task.status]?.color ?? ''}
           `}
         >
@@ -338,7 +338,7 @@ export default function TachesListe({ tasks, filters }) {
                 <LayoutGrid className="w-4 h-4" />
                 Kanban
               </a>
-              <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30">
+              <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30">
                 <List className="w-4 h-4" />
                 Liste
               </span>
@@ -347,7 +347,7 @@ export default function TachesListe({ tasks, filters }) {
             {canCreate && (
               <button
                 onClick={openCreate}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700
+                className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700
                            text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
               >
                 <PlusCircle className="w-4 h-4" />
@@ -368,7 +368,7 @@ export default function TachesListe({ tasks, filters }) {
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                          bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -388,7 +388,7 @@ export default function TachesListe({ tasks, filters }) {
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors
               ${showFilters
-                ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
               }`}
           >
@@ -403,7 +403,7 @@ export default function TachesListe({ tasks, filters }) {
             <select
               defaultValue={filters.status ?? ''}
               onChange={(e) => router.get(route('taches.index'), { ...filters, status: e.target.value }, { preserveState: true, replace: true })}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Tous statuts</option>
               {Object.entries(STATUS_CONFIG).map(([val, { label }]) => (
@@ -414,7 +414,7 @@ export default function TachesListe({ tasks, filters }) {
             <select
               defaultValue={filters.priority ?? ''}
               onChange={(e) => router.get(route('taches.index'), { ...filters, priority: e.target.value }, { preserveState: true, replace: true })}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Toutes priorités</option>
               {Object.entries(PRIORITY_CONFIG).map(([val, { label }]) => (
@@ -426,7 +426,7 @@ export default function TachesListe({ tasks, filters }) {
               type="date"
               defaultValue={filters.due_from ?? ''}
               onChange={(e) => router.get(route('taches.index'), { ...filters, due_from: e.target.value }, { preserveState: true, replace: true })}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Échéance depuis"
             />
 
@@ -441,15 +441,15 @@ export default function TachesListe({ tasks, filters }) {
 
         {/* Barre actions groupées */}
         {selected.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-2.5 mb-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+          <div className="flex items-center gap-3 px-4 py-2.5 mb-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
               {selected.size} sélectionnée(s)
             </span>
             <div className="flex gap-2 ml-auto">
               <select
                 value={bulkAction}
                 onChange={(e) => setBulkAction(e.target.value)}
-                className="px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Action groupée…</option>
                 <option value="delete">Supprimer</option>
@@ -457,7 +457,7 @@ export default function TachesListe({ tasks, filters }) {
               <button
                 onClick={applyBulkAction}
                 disabled={!bulkAction}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Appliquer
               </button>
@@ -477,7 +477,7 @@ export default function TachesListe({ tasks, filters }) {
                       type="checkbox"
                       checked={allSelected}
                       onChange={(e) => toggleSelectAll(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500"
                     />
                   </th>
                   {COLUMNS.map((col) => (
@@ -530,7 +530,7 @@ export default function TachesListe({ tasks, filters }) {
                     className={`
                       w-8 h-8 rounded-lg text-sm font-medium transition-colors
                       ${tasks.current_page === page
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-purple-600 text-white'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }
                     `}
@@ -556,3 +556,4 @@ export default function TachesListe({ tasks, filters }) {
     </AuthLayout>
   );
 }
+export { TachesListe };

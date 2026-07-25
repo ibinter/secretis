@@ -130,7 +130,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
           </div>
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
           >
             <PlusIcon className="h-4 w-4" />
             Nouvelle dépense
@@ -197,7 +197,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
             <select
               defaultValue={filters.status}
               onChange={(e) => applyFilter('status', e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
             >
               <option value="">Tous les statuts</option>
               {Object.entries(STATUS_CONFIG).map(([k, v]) => (
@@ -207,7 +207,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
             <select
               defaultValue={filters.category_id}
               onChange={(e) => applyFilter('category_id', e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
             >
               <option value="">Toutes les catégories</option>
               {categories.map((c) => (
@@ -276,7 +276,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                             href={`/storage/${exp.receipt_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center p-1 text-blue-500 hover:text-blue-700"
+                            className="inline-flex items-center justify-center p-1 text-purple-500 hover:text-purple-700"
                             title="Voir le justificatif"
                           >
                             <PaperClipIcon className="h-4 w-4" />
@@ -331,7 +331,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                     dangerouslySetInnerHTML={{ __html: link.label }}
                     className={`px-3 py-1 rounded-lg text-xs transition ${
                       link.active
-                        ? 'bg-[#1A3A5C] text-white'
+                        ? 'bg-[#9333EA] text-white'
                         : link.url
                         ? 'bg-white border border-gray-200 hover:bg-gray-50'
                         : 'opacity-40 cursor-not-allowed'
@@ -359,7 +359,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                 <select
                   value={form.category_id}
                   onChange={(e) => setField('category_id', e.target.value)}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.category_id ? 'border-red-400' : 'border-gray-200'}`}
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.category_id ? 'border-red-400' : 'border-gray-200'}`}
                 >
                   <option value="">— Sélectionner une catégorie —</option>
                   {categories.map((c) => (
@@ -378,7 +378,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                   value={form.title}
                   onChange={(e) => setField('title', e.target.value)}
                   placeholder="Ex: Achat fournitures bureau"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
                 />
                 {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title[0]}</p>}
               </div>
@@ -393,7 +393,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                     min="1"
                     value={form.amount}
                     onChange={(e) => setField('amount', e.target.value)}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.amount ? 'border-red-400' : 'border-gray-200'}`}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.amount ? 'border-red-400' : 'border-gray-200'}`}
                   />
                   {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount[0]}</p>}
                 </div>
@@ -405,7 +405,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                     type="date"
                     value={form.expense_date}
                     onChange={(e) => setField('expense_date', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                   />
                 </div>
               </div>
@@ -417,7 +417,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                   value={form.vendor}
                   onChange={(e) => setField('vendor', e.target.value)}
                   placeholder="Nom du fournisseur / prestataire"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                 />
               </div>
 
@@ -427,7 +427,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
                   rows={2}
                   value={form.notes}
                   onChange={(e) => setField('notes', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 resize-none"
                 />
               </div>
 
@@ -464,7 +464,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
+                className="flex-1 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
               >
                 {saving ? 'Enregistrement...' : 'Créer la dépense'}
               </button>
@@ -476,3 +476,4 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
     </AuthLayout>
   );
 }
+export { Expenses };

@@ -4,10 +4,10 @@ import { formatRelativeTime } from '../../utils/helpers'
 
 const TYPE_META = {
   event_reminder:     { icon: CalendarDays,  color: 'text-[#F39C12]', bg: 'bg-[#F39C12]/10' },
-  task_assigned:      { icon: ClipboardCheck,color: 'text-[#2E86C1]', bg: 'bg-[#2E86C1]/10' },
+  task_assigned:      { icon: ClipboardCheck,color: 'text-[#7e22ce]', bg: 'bg-[#7e22ce]/10' },
   document_validated: { icon: FileCheck2,    color: 'text-[#1E8449]', bg: 'bg-[#1E8449]/10' },
   visitor_arrived:    { icon: UserCheck,     color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  message_received:   { icon: MessageSquare, color: 'text-[#1A3A5C]', bg: 'bg-[#1A3A5C]/10' },
+  message_received:   { icon: MessageSquare, color: 'text-[#9333EA]', bg: 'bg-[#9333EA]/10' },
   system_alert:       { icon: AlertCircle,   color: 'text-[#C0392B]', bg: 'bg-[#C0392B]/10' },
 }
 
@@ -20,7 +20,7 @@ function NotifItem({ notif, onRead, onNavigate }) {
       onClick={() => { onRead(notif.id); onNavigate?.(notif) }}
       className={[
         'flex gap-3 px-4 py-3.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-50 dark:border-[#1E3048]/50',
-        !notif.read_at ? 'bg-blue-50/30 dark:bg-[#1A3A5C]/10' : '',
+        !notif.read_at ? 'bg-purple-50/30 dark:bg-[#9333EA]/10' : '',
       ].join(' ')}
     >
       <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${meta.bg}`}>
@@ -36,7 +36,7 @@ function NotifItem({ notif, onRead, onNavigate }) {
         <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(notif.created_at)}</p>
       </div>
       {!notif.read_at && (
-        <span className="shrink-0 w-2 h-2 rounded-full bg-[#2E86C1] mt-2" />
+        <span className="shrink-0 w-2 h-2 rounded-full bg-[#7e22ce] mt-2" />
       )}
     </div>
   )
@@ -110,7 +110,7 @@ export default function NotificationCenter({ notifications: initialNotifs = [], 
               {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="text-xs text-[#2E86C1] hover:underline flex items-center gap-1"
+                  className="text-xs text-[#7e22ce] hover:underline flex items-center gap-1"
                   title="Marquer tout comme lu"
                 >
                   <CheckCheck size={13} /> Tout lire
@@ -145,7 +145,7 @@ export default function NotificationCenter({ notifications: initialNotifs = [], 
           <div className="shrink-0 px-4 py-2.5 border-t border-gray-100 dark:border-[#1E3048] text-center">
             <a
               href="/notifications"
-              className="text-sm text-[#2E86C1] hover:underline font-medium"
+              className="text-sm text-[#7e22ce] hover:underline font-medium"
               onClick={() => setOpen(false)}
             >
               Voir toutes les notifications
@@ -156,3 +156,4 @@ export default function NotificationCenter({ notifications: initialNotifs = [], 
     </div>
   )
 }
+export { NotificationCenter };

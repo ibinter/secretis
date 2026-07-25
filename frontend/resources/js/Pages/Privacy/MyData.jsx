@@ -13,7 +13,7 @@ const REQUEST_TYPES = {
 
 const STATUS_COLORS = {
     pending:    'bg-yellow-100 text-yellow-800',
-    processing: 'bg-blue-100 text-blue-800',
+    processing: 'bg-purple-100 text-purple-800',
     completed:  'bg-green-100 text-green-800',
     rejected:   'bg-red-100 text-red-800',
 };
@@ -144,7 +144,7 @@ export default function MyData() {
                     <button
                         onClick={downloadData}
                         disabled={downloading}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
                     >
                         {downloading ? (
                             <><span className="animate-spin">⏳</span> Préparation…</>
@@ -218,7 +218,7 @@ export default function MyData() {
                                 </h2>
                                 <button
                                     onClick={() => setShowRequestModal(true)}
-                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                                    className="text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                                 >
                                     + Nouvelle demande
                                 </button>
@@ -283,14 +283,14 @@ export default function MyData() {
                         <div className="space-y-2 mb-6">
                             {Object.entries(REQUEST_TYPES).map(([key, { label, icon }]) => (
                                 <label key={key} className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors
-                                    ${selectedType === key ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/50' : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'}`}>
+                                    ${selectedType === key ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/50' : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'}`}>
                                     <input
                                         type="radio"
                                         name="request_type"
                                         value={key}
                                         checked={selectedType === key}
                                         onChange={() => setSelectedType(key)}
-                                        className="text-blue-600"
+                                        className="text-purple-600"
                                     />
                                     <span className="text-base">{icon}</span>
                                     <span className="text-sm font-medium text-gray-900 dark:text-white">{label}</span>
@@ -310,7 +310,7 @@ export default function MyData() {
                             <button
                                 onClick={submitRequest}
                                 disabled={!selectedType || submitting}
-                                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                                className="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
                             >
                                 {submitting ? 'Envoi…' : 'Soumettre'}
                             </button>
@@ -325,7 +325,7 @@ export default function MyData() {
 function DataCard({ label, value }) {
     return (
         <div className="rounded-lg bg-gray-50 dark:bg-gray-700 px-4 py-3 text-center">
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {typeof value === 'boolean' ? (value ? '✓' : '—') : value}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{label}</p>
@@ -348,3 +348,4 @@ const CONSENT_LABELS = {
     marketing:  'Cookies marketing',
     newsletter: 'Newsletter',
 };
+export { MyData };

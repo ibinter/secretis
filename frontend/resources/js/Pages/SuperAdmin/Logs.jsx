@@ -7,7 +7,7 @@ const LEVELS = ['debug', 'info', 'warning', 'error', 'critical'];
 
 const LEVEL_STYLES = {
     debug:    { badge: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',    row: '' },
-    info:     { badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',    row: '' },
+    info:     { badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',    row: '' },
     warning:  { badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300', row: 'bg-yellow-50/30 dark:bg-yellow-900/10' },
     error:    { badge: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',        row: 'bg-red-50/50 dark:bg-red-900/10' },
     critical: { badge: 'bg-red-700 text-white',                                             row: 'bg-red-100 dark:bg-red-900/30' },
@@ -260,3 +260,4 @@ export default function Logs() {
         </>
     );
 }
+export { Logs };

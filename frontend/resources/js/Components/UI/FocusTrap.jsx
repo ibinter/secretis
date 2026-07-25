@@ -42,3 +42,4 @@ export default function FocusTrap({
     </div>
   )
 }
+export { FocusTrap };

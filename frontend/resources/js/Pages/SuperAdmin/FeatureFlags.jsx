@@ -77,7 +77,7 @@ function FlagModal({ flag, onClose, onSave }) {
                 value={form.slug}
                 onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') }))}
                 placeholder="ex: new_feature_xyz"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-900"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-purple-900"
               />
             </div>
           )}
@@ -85,20 +85,20 @@ function FlagModal({ flag, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom <span className="text-red-500">*</span></label>
             <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900" />
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
             <textarea value={form.description || ''} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 resize-none" />
+              rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 resize-none" />
           </div>
 
           {/* Activation globale */}
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-100">
+          <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border border-purple-100">
             <div>
-              <p className="text-sm font-semibold text-blue-900">Activation globale</p>
-              <p className="text-xs text-blue-600 mt-0.5">Active pour toutes les organisations</p>
+              <p className="text-sm font-semibold text-purple-900">Activation globale</p>
+              <p className="text-xs text-purple-600 mt-0.5">Active pour toutes les organisations</p>
             </div>
             <Toggle checked={form.is_global} onChange={v => setForm(f => ({ ...f, is_global: v }))} />
           </div>
@@ -115,7 +115,7 @@ function FlagModal({ flag, onClose, onSave }) {
                     onClick={() => togglePlan(plan)}
                     className={`px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all ${
                       form.target_plans.includes(plan)
-                        ? 'border-blue-900 bg-blue-50 text-blue-900'
+                        ? 'border-purple-900 bg-purple-50 text-purple-900'
                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                     }`}
                   >
@@ -130,7 +130,7 @@ function FlagModal({ flag, onClose, onSave }) {
           {!form.is_global && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rollout progressif : <span className="font-bold text-blue-900">{form.enabled_percent}%</span>
+                Rollout progressif : <span className="font-bold text-purple-900">{form.enabled_percent}%</span>
                 <span className="text-xs text-gray-400 ml-2">des organisations</span>
               </label>
               <input
@@ -162,7 +162,7 @@ function FlagModal({ flag, onClose, onSave }) {
           <button
             onClick={handleSave}
             disabled={!form.slug || !form.name || saving}
-            className="px-5 py-2.5 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 text-sm font-medium text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Enregistrement...' : isNew ? 'Créer' : 'Enregistrer'}
           </button>
@@ -243,17 +243,17 @@ export default function FeatureFlags({ flags: propFlags }) {
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-              <span className="text-blue-400">/</span>
+              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Feature Flags</h1>
               <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
             </div>
             <button
               onClick={() => setEditing({ slug: '', name: '', description: '', is_global: false, target_org_ids: [], target_plans: [], enabled_percent: 0, is_active: false })}
-              className="px-4 py-2 bg-white text-blue-900 text-sm font-bold rounded-lg hover:bg-blue-50"
+              className="px-4 py-2 bg-white text-purple-900 text-sm font-bold rounded-lg hover:bg-purple-50"
             >
               + Nouveau flag
             </button>
@@ -277,7 +277,7 @@ export default function FeatureFlags({ flags: propFlags }) {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-gray-900">{flag.name}</h3>
                         <code className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono">{flag.slug}</code>
-                        {flag.is_global && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">Global</span>}
+                        {flag.is_global && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-semibold">Global</span>}
                         {!flag.is_active && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Inactif</span>}
                       </div>
                       {flag.description && <p className="text-sm text-gray-500 mt-1">{flag.description}</p>}
@@ -355,3 +355,4 @@ export default function FeatureFlags({ flags: propFlags }) {
     </>
   );
 }
+export { FeatureFlags };

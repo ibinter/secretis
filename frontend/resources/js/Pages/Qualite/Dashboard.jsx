@@ -15,7 +15,7 @@ const STATUS_COLORS   = { green: '#10B981', orange: '#F59E0B', red: '#EF4444', g
 // ─── Composants utilitaires ───────────────────────────────────────────────────
 function KpiCard({ label, value, sub, color = 'blue', icon }) {
     const colors = {
-        blue:   'bg-blue-50 border-blue-200 text-blue-700',
+        blue:   'bg-purple-50 border-purple-200 text-purple-700',
         red:    'bg-red-50 border-red-200 text-red-700',
         green:  'bg-green-50 border-green-200 text-green-700',
         orange: 'bg-orange-50 border-orange-200 text-orange-700',
@@ -86,7 +86,7 @@ export default function QualityDashboard() {
                     <div className="flex gap-2">
                         <a
                             href="/qualite/nc"
-                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                            className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                         >
                             Nouvelle NC
                         </a>
@@ -284,3 +284,4 @@ export default function QualityDashboard() {
         </AppLayout>
     );
 }
+export { QualityDashboard };

@@ -403,3 +403,4 @@ export function useSupportSession() {
 
   return { supportSession, canEndSession };
 }
+export { SupportBanner };

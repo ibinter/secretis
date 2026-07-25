@@ -197,7 +197,7 @@ export default function AppointmentConfirmation() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-gray-500">Chargement…</p>
         </div>
       </div>
@@ -351,9 +351,9 @@ export default function AppointmentConfirmation() {
 
         {/* ── Instructions d'arrivée ── */}
         {org?.arrival_instructions && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">📍 Instructions d'arrivée</h3>
-            <p className="text-sm text-blue-700 whitespace-pre-line">{org.arrival_instructions}</p>
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-5">
+            <h3 className="text-sm font-semibold text-purple-800 mb-2">📍 Instructions d'arrivée</h3>
+            <p className="text-sm text-purple-700 whitespace-pre-line">{org.arrival_instructions}</p>
           </div>
         )}
 
@@ -392,3 +392,4 @@ export default function AppointmentConfirmation() {
     </div>
   );
 }
+export { AppointmentConfirmation };

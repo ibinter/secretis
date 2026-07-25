@@ -62,10 +62,10 @@ function CourseCard({ course, compact = false }) {
     return (
         <Link
             href={route('academie.cours', { slug: course.slug })}
-            className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200"
+            className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all duration-200"
         >
             {/* Thumbnail */}
-            <div className="h-36 bg-gradient-to-br from-blue-600 to-indigo-700 relative flex items-center justify-center">
+            <div className="h-36 bg-gradient-to-br from-purple-600 to-indigo-700 relative flex items-center justify-center">
                 {course.thumbnail ? (
                     <img src={course.thumbnail} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -88,7 +88,7 @@ function CourseCard({ course, compact = false }) {
 
             <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                         {title}
                     </h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${levelColor(course.level)}`}>
@@ -113,7 +113,7 @@ function CourseCard({ course, compact = false }) {
                             <CheckCircleIcon className="w-4 h-4" /> Terminé
                         </span>
                     ) : course.progress_percent > 0 ? (
-                        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1">
                             <PlayCircleIcon className="w-4 h-4" /> Continuer ({course.progress_percent}%)
                         </span>
                     ) : (
@@ -181,7 +181,7 @@ function ContinueLearningSection({ courses }) {
                 </h2>
                 <Link
                     href={route('academie.mon-espace')}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                 >
                     Voir tout <ArrowRightIcon className="w-3.5 h-3.5" />
                 </Link>
@@ -219,7 +219,7 @@ function ResourceRow({ resource }) {
             </div>
             <a
                 href={route('api.academy.resources.download', { id: resource.id })}
-                className="ml-4 flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                className="ml-4 flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:underline"
             >
                 <DocumentArrowDownIcon className="w-4 h-4" />
                 Télécharger
@@ -247,7 +247,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 {/* ── Hero ─────────────────────────────────────────────────────── */}
-                <div className="relative bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 rounded-3xl p-8 sm:p-10 mb-8 overflow-hidden">
+                <div className="relative bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 rounded-3xl p-8 sm:p-10 mb-8 overflow-hidden">
                     {/* Décoration */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full -translate-y-1/2 translate-x-1/3" />
@@ -258,14 +258,14 @@ export default function AcademieIndex({ dashboard, catalog }) {
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-3">
                                 <SparklesIcon className="w-5 h-5 text-yellow-300" />
-                                <span className="text-sm font-medium text-blue-200 uppercase tracking-widest">
+                                <span className="text-sm font-medium text-purple-200 uppercase tracking-widest">
                                     Académie IBIG SECRETIS
                                 </span>
                             </div>
                             <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3 text-balance">
                                 Maîtrisez SECRETIS avec l'Académie IBIG
                             </h1>
-                            <p className="text-blue-200 text-base max-w-xl">
+                            <p className="text-purple-200 text-base max-w-xl">
                                 Formations guidées, ressources téléchargeables et certificats reconnus.
                                 Progressez à votre rythme, partout et sur tous vos appareils.
                             </p>
@@ -273,7 +273,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                             <div className="flex flex-wrap gap-3 mt-6">
                                 <Link
                                     href={route('academie.catalogue')}
-                                    className="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-blue-50 transition-colors shadow-md"
+                                    className="inline-flex items-center gap-2 bg-white text-purple-700 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-purple-50 transition-colors shadow-md"
                                 >
                                     <BookOpenIcon className="w-4 h-4" />
                                     Explorer le catalogue
@@ -281,7 +281,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                                 {stats.courses_in_progress > 0 && (
                                     <Link
                                         href={route('academie.mon-espace')}
-                                        className="inline-flex items-center gap-2 bg-blue-500/30 hover:bg-blue-500/50 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors border border-white/20"
+                                        className="inline-flex items-center gap-2 bg-purple-500/30 hover:bg-purple-500/50 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors border border-white/20"
                                     >
                                         Mon espace
                                     </Link>
@@ -299,7 +299,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                             ].map(({ v, label }) => (
                                 <div key={label} className="bg-white/15 backdrop-blur rounded-xl p-3 text-center">
                                     <p className="text-xl font-bold text-white tabular-nums">{v}</p>
-                                    <p className="text-xs text-blue-200 mt-0.5">{label}</p>
+                                    <p className="text-xs text-purple-200 mt-0.5">{label}</p>
                                 </div>
                             ))}
                         </div>
@@ -318,7 +318,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                             </h2>
                             <Link
                                 href={route('academie.catalogue')}
-                                className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                             >
                                 Tout voir <ArrowRightIcon className="w-3.5 h-3.5" />
                             </Link>
@@ -355,7 +355,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                             </h2>
                             <Link
                                 href={route('academie.ressources')}
-                                className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                             >
                                 Voir tout <ArrowRightIcon className="w-3.5 h-3.5" />
                             </Link>
@@ -382,7 +382,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                             {certificates.length > 0 && (
                                 <Link
                                     href={route('academie.mon-espace', { tab: 'certificats' })}
-                                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                    className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                                 >
                                     Voir tout <ArrowRightIcon className="w-3.5 h-3.5" />
                                 </Link>
@@ -422,7 +422,7 @@ export default function AcademieIndex({ dashboard, catalog }) {
                                 </p>
                                 <Link
                                     href={route('academie.catalogue')}
-                                    className="mt-3 inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                                    className="mt-3 inline-block text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
                                 >
                                     Explorer le catalogue
                                 </Link>
@@ -434,3 +434,4 @@ export default function AcademieIndex({ dashboard, catalog }) {
         </AppLayout>
     );
 }
+export { AcademieIndex };

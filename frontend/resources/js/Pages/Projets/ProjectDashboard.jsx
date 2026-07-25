@@ -34,7 +34,7 @@ function HealthBadge({ health }) {
 
 function KpiCard({ title, value, subtitle, icon, color = 'blue' }) {
   const colors = {
-    blue:   'from-blue-500 to-blue-600',
+    blue:   'from-purple-500 to-purple-600',
     green:  'from-green-500 to-green-600',
     amber:  'from-amber-500 to-amber-600',
     purple: 'from-purple-500 to-purple-600',
@@ -128,7 +128,7 @@ function MilestoneItem({ milestone }) {
   const statusColors = {
     completed:   'text-green-600',
     missed:      'text-red-600',
-    in_progress: 'text-blue-600',
+    in_progress: 'text-purple-600',
     pending:     'text-gray-500',
   };
 
@@ -213,7 +213,7 @@ export default function ProjectDashboard() {
 
             <div className="flex items-center gap-2">
               <Link href={`/projets/${project.id}/gantt`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700 transition-colors">
+                className="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm hover:bg-purple-700 transition-colors">
                 📊 Gantt
               </Link>
               <Link href={`/projets/${project.id}/feuille-de-temps`}
@@ -271,7 +271,7 @@ export default function ProjectDashboard() {
             <h2 className="text-base font-semibold text-gray-800 dark:text-white mb-3">Courbe d'avancement</h2>
             <div className="flex gap-4 text-xs mb-3">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-blue-500 inline-block" /> Planifié
+                <span className="w-3 h-0.5 bg-purple-500 inline-block" /> Planifié
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-3 h-0.5 bg-green-500 inline-block" /> Réel
@@ -364,7 +364,7 @@ export default function ProjectDashboard() {
                 {m.avatar ? (
                   <img src={m.avatar} alt={m.name} className="w-7 h-7 rounded-full object-cover" />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold">
                     {m.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -380,3 +380,4 @@ export default function ProjectDashboard() {
     </AppLayout>
   );
 }
+export { ProjectDashboard };

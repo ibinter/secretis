@@ -26,10 +26,14 @@ use Illuminate\Support\Facades\Log;
  */
 class GoogleCalendarService
 {
-    private GoogleClient $client;
+    private ?GoogleClient $client = null;
 
-    public function __construct()
-    {
+    public function __construct(){
+        if (!class_exists(\Google\Client::class)) {
+            // SDK Google absent : service inactif (sync calendrier désactivée)
+            return;
+        }
+
         $this->client = new GoogleClient();
         $this->client->setClientId(config('services.google.client_id'));
         $this->client->setClientSecret(config('services.google.client_secret'));

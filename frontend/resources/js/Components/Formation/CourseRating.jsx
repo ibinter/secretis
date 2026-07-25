@@ -195,3 +195,4 @@ export default function CourseRating({
         </div>
     );
 }
+export { CourseRating };

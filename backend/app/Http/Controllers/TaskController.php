@@ -425,4 +425,12 @@ class TaskController extends Controller
             'created_at'          => $task->created_at,
         ];
     }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => []]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => 'Taches']);
+    }
 }

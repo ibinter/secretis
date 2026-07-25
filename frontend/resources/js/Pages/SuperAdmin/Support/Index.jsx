@@ -26,14 +26,14 @@ const Ic = {
 const PRIORITY_STYLE = {
   critique: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
   haute:    'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  normale:  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  normale:  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   basse:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
 }
 
 const STATUS_STYLE = {
   open:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  resolved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  resolved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   closed:   'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
   overdue:  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
@@ -59,7 +59,7 @@ function slaLabel(breachAt) {
 
 function Avatar({ name, size = 7 }) {
   const initials = name ? name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase() : '?'
-  const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500']
+  const colors = ['bg-purple-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500']
   const color = colors[name ? name.charCodeAt(0) % colors.length : 0]
   return (
     <span className={`inline-flex items-center justify-center w-${size} h-${size} rounded-full ${color} text-white text-xs font-semibold flex-shrink-0`}>
@@ -82,10 +82,10 @@ const MOCK_TICKETS = Array.from({ length: 22 }, (_, i) => ({
 }))
 
 const KPI = [
-  { label: 'Tickets ouverts',          value: 14,     icon: <Ic.Ticket />, color: 'text-[#2E86C1]',  bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  { label: 'Tickets ouverts',          value: 14,     icon: <Ic.Ticket />, color: 'text-[#7e22ce]',  bg: 'bg-purple-50 dark:bg-purple-900/20' },
   { label: 'Temps moyen 1ère réponse', value: '3h12', icon: <Ic.Clock />,  color: 'text-[#F39C12]',  bg: 'bg-orange-50 dark:bg-orange-900/20' },
   { label: 'CSAT moyen',               value: '4.6/5', icon: <Ic.Star />,   color: 'text-[#1E8449]', bg: 'bg-green-50 dark:bg-green-900/20' },
-  { label: 'Résolus ce mois',          value: 87,     icon: <Ic.Check />,  color: 'text-[#1A3A5C]',  bg: 'bg-slate-50 dark:bg-slate-800' },
+  { label: 'Résolus ce mois',          value: 87,     icon: <Ic.Check />,  color: 'text-[#9333EA]',  bg: 'bg-slate-50 dark:bg-slate-800' },
 ]
 
 // ─── Composant principal ──────────────────────────────────────────────────────
@@ -127,12 +127,12 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
         {/* En-tête */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[#1A3A5C] dark:text-white">Support Client</h1>
+            <h1 className="text-2xl font-bold text-[#9333EA] dark:text-white">Support Client</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestion des tickets de support — vue SuperAdmin</p>
           </div>
           <Link
             href="/superadmin/support/tickets/create"
-            className="px-4 py-2 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white rounded-lg text-sm font-medium transition-colors"
+            className="px-4 py-2 bg-[#7e22ce] hover:bg-[#9333EA] text-white rounded-lg text-sm font-medium transition-colors"
           >
             + Nouveau ticket
           </Link>
@@ -160,24 +160,24 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
                 placeholder="Rechercher par numéro, sujet, organisation..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#2E86C1] focus:outline-none"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#7e22ce] focus:outline-none"
               />
             </div>
 
             {/* Filtre organisation */}
-            <select value={filterOrg} onChange={e => setFilterOrg(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none">
+            <select value={filterOrg} onChange={e => setFilterOrg(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none">
               <option value="">Toutes les orgs</option>
               {orgs.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
 
             {/* Filtre statut */}
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none">
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none">
               <option value="">Tous statuts</option>
               {Object.entries(STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
 
             {/* Filtre priorité */}
-            <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none">
+            <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none">
               <option value="">Toutes priorités</option>
               <option value="critique">Critique</option>
               <option value="haute">Haute</option>
@@ -186,7 +186,7 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
             </select>
 
             {/* Filtre agent */}
-            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none">
+            <select value={filterAgent} onChange={e => setFilterAgent(e.target.value)} className="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none">
               <option value="">Tous agents</option>
               <option value="__unassigned">Non assignés</option>
               {agents.map(a => <option key={a} value={a}>{a}</option>)}
@@ -228,7 +228,7 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
                   <tr key={ticket.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     {/* Numéro */}
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-semibold text-[#1A3A5C] dark:text-blue-300">{ticket.number}</span>
+                      <span className="font-mono text-xs font-semibold text-[#9333EA] dark:text-purple-300">{ticket.number}</span>
                     </td>
 
                     {/* Org */}
@@ -266,7 +266,7 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
                         <button
                           onClick={() => assignToMe(ticket.id)}
                           disabled={assigning === ticket.id}
-                          className="flex items-center gap-1 text-xs text-[#2E86C1] hover:text-[#1A3A5C] dark:hover:text-blue-300 transition-colors"
+                          className="flex items-center gap-1 text-xs text-[#7e22ce] hover:text-[#9333EA] dark:hover:text-purple-300 transition-colors"
                         >
                           <Ic.UserPlus />
                           {assigning === ticket.id ? 'En cours...' : 'M\'assigner'}
@@ -286,7 +286,7 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/superadmin/support/tickets/${ticket.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#1A3A5C] hover:bg-[#2E86C1] text-white rounded-lg text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#9333EA] hover:bg-[#7e22ce] text-white rounded-lg text-xs font-medium transition-colors"
                       >
                         <Ic.Eye />
                         Voir
@@ -302,3 +302,4 @@ export default function SupportIndex({ tickets = MOCK_TICKETS, stats = null, aut
     </SuperAdminLayout>
   )
 }
+export { SupportIndex };

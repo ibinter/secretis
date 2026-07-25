@@ -54,7 +54,18 @@ class LicenseService
      *
      * @throws \RuntimeException si l'organisation ou le plan est introuvable
      */
-    public function activate(int $organizationId, int $planId, int $paymentId, int $durationMonths = 1): License
+    public function activate(int $organizationId, int|string $planId, int $paymentId, int $durationMonths = 1): License
+    {
+        // Accepte un slug de plan (spec §19) comme un id numérique
+        if (is_string($planId) && ! ctype_digit($planId)) {
+            $plan = \App\Models\Plan::where('slug', $planId)->first();
+            $planId = $plan?->id ?? 0;
+        }
+        $planId = (int) $planId;
+        return $this->doActivate($organizationId, $planId, $paymentId, $durationMonths);
+    }
+
+    private function doActivate(int $organizationId, int $planId, int $paymentId, int $durationMonths = 1): License
     {
         return DB::transaction(function () use ($organizationId, $planId, $paymentId, $durationMonths) {
             // IDEMPOTENCE CHECK — Verrou pessimiste pour éviter les race conditions
@@ -82,14 +93,23 @@ class LicenseService
                 ->where('status', self::STATUS_ACTIVE)
                 ->update(['status' => 'superseded', 'superseded_at' => now()]);
 
+            $plan = \App\Models\Plan::find($planId);
+
             $license = License::create([
                 'organization_id' => $organizationId,
-                'plan_id'         => $planId,
+                'plan_id'         => $plan?->slug ?? (string) $planId,
+                'plan_name'       => $plan?->name ?? 'Formule',
+                'price'           => (float) ($plan?->price_monthly ?? 0) * $durationMonths,
+                'billing_cycle'   => $durationMonths >= 12 ? 'yearly' : 'monthly',
+                'max_users'       => $plan?->max_users ?? 5,
+                'modules'         => $plan?->modules,
                 'payment_id'      => $paymentId,
                 'status'          => self::STATUS_ACTIVE,
                 'starts_at'       => $startsAt,
-                'expires_at'      => $expiresAt,
-                'grace_ends_at'   => $expiresAt->copy()->addDays(self::GRACE_PERIOD_DAYS),
+                'ends_at'         => $expiresAt,
+                'grace_until'     => $expiresAt->copy()->addDays(self::GRACE_PERIOD_DAYS),
+                'activated_at'    => now(),
+                'duration_months' => $durationMonths,
             ]);
 
             // Mettre à jour le statut de l'organisation

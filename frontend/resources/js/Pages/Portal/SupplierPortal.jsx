@@ -33,11 +33,11 @@ function LoginView() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Logo / En-tête */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-2xl mb-4">
                         <span className="text-3xl">🏢</span>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">Portail Fournisseurs</h1>
@@ -56,7 +56,7 @@ function LoginView() {
                                 value={data.email}
                                 onChange={e => setData('email', e.target.value)}
                                 placeholder="votre@email.com"
-                                className="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                                 autoComplete="email"
                             />
@@ -69,7 +69,7 @@ function LoginView() {
                                 value={data.password}
                                 onChange={e => setData('password', e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                                 autoComplete="current-password"
                             />
@@ -77,7 +77,7 @@ function LoginView() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition disabled:opacity-50"
+                            className="w-full py-3 bg-purple-600 text-white rounded-xl font-semibold text-sm hover:bg-purple-700 transition disabled:opacity-50"
                         >
                             {processing ? 'Connexion…' : 'Se connecter'}
                         </button>
@@ -107,7 +107,7 @@ function PortalNav({ activeView, setView, stats, supplier }) {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
                             P
                         </div>
                         <span className="font-semibold text-gray-800">Portail Fournisseurs</span>
@@ -119,7 +119,7 @@ function PortalNav({ activeView, setView, stats, supplier }) {
                                 onClick={() => setView(item.id)}
                                 className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
                                     activeView === item.id
-                                        ? 'bg-blue-600 text-white'
+                                        ? 'bg-purple-600 text-white'
                                         : 'text-gray-600 hover:bg-gray-100'
                                 }`}
                             >
@@ -151,7 +151,7 @@ function PortalNav({ activeView, setView, stats, supplier }) {
                     {navItems.map(item => (
                         <button key={item.id} onClick={() => setView(item.id)}
                             className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
-                                activeView === item.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                                activeView === item.id ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'
                             }`}>
                             {item.icon} {item.label}
                             {item.badge > 0 && (
@@ -173,9 +173,9 @@ function DashboardView({ supplier, stats, active_rfqs, pending_ack, pending_invo
     return (
         <div className="space-y-6">
             {/* Bienvenue */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-6 text-white">
                 <h2 className="text-xl font-bold">Bonjour, {supplier?.contact_name ?? supplier?.company_name} 👋</h2>
-                <p className="text-blue-100 mt-1 text-sm">Voici un résumé de votre activité avec nous.</p>
+                <p className="text-purple-100 mt-1 text-sm">Voici un résumé de votre activité avec nous.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
                     {[
                         { label: 'AO à répondre',  value: stats?.rfqs_pending ?? 0 },
@@ -185,7 +185,7 @@ function DashboardView({ supplier, stats, active_rfqs, pending_ack, pending_invo
                     ].map(s => (
                         <div key={s.label} className="bg-white/20 rounded-xl p-3 text-center backdrop-blur">
                             <p className="text-2xl font-bold">{s.value}</p>
-                            <p className="text-blue-100 text-xs mt-1">{s.label}</p>
+                            <p className="text-purple-100 text-xs mt-1">{s.label}</p>
                         </div>
                     ))}
                 </div>
@@ -318,7 +318,7 @@ function RfqsView({ rfqs }) {
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-mono text-sm text-blue-600">{rfq.rfq_number}</span>
+                                    <span className="font-mono text-sm text-purple-600">{rfq.rfq_number}</span>
                                     {rfq.has_responded && (
                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
                                             ✓ Offre soumise
@@ -338,7 +338,7 @@ function RfqsView({ rfqs }) {
                             </div>
                             {!rfq.has_responded && rfq.days_left > 0 && (
                                 <button onClick={() => openRespond(rfq)}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shrink-0">
+                                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 shrink-0">
                                     Soumettre une offre
                                 </button>
                             )}
@@ -390,7 +390,7 @@ function RfqsView({ rfqs }) {
                                                                 items[idx] = { ...items[idx], unit_price: parseFloat(e.target.value) || 0 };
                                                                 setData('items', items);
                                                             }}
-                                                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-right text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                                                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-right text-sm focus:ring-2 focus:ring-purple-400 outline-none"
                                                         />
                                                     </td>
                                                     <td className="px-3 py-2 text-right font-medium">
@@ -402,7 +402,7 @@ function RfqsView({ rfqs }) {
                                         <tfoot className="bg-gray-50">
                                             <tr>
                                                 <td colSpan={4} className="px-3 py-2 text-right font-bold text-gray-800">Total HT</td>
-                                                <td className="px-3 py-2 text-right font-bold text-blue-700">
+                                                <td className="px-3 py-2 text-right font-bold text-purple-700">
                                                     {fmt(data.items.reduce((s, i) => s + (i.qty || 0) * (i.unit_price || 0), 0))} XOF
                                                 </td>
                                             </tr>
@@ -415,31 +415,31 @@ function RfqsView({ rfqs }) {
                                     <label className="text-sm font-medium text-gray-700">Délai de livraison (jours)</label>
                                     <input type="number" min="1" value={data.delivery_days}
                                         onChange={e => setData('delivery_days', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Validité offre (jours)</label>
                                     <input type="number" min="1" value={data.validity_days}
                                         onChange={e => setData('validity_days', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Conditions de paiement</label>
                                     <input type="text" placeholder="ex: 30 jours net" value={data.payment_terms}
                                         onChange={e => setData('payment_terms', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Notes / Remarques</label>
                                 <textarea value={data.notes} onChange={e => setData('notes', e.target.value)} rows={2}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                     placeholder="Conditions particulières, garanties, références…" />
                             </div>
                             <div className="flex justify-end gap-3">
                                 <button type="button" onClick={() => setResponding(null)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Annuler</button>
                                 <button type="submit" disabled={processing}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+                                    className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
                                     {processing ? 'Envoi…' : 'Soumettre l\'offre'}
                                 </button>
                             </div>
@@ -531,12 +531,12 @@ function OrdersView({ orders }) {
                             <div>
                                 <label className="text-sm font-medium text-gray-700">N° de facture</label>
                                 <input type="text" name="invoice_number" placeholder="FAC-2026-001"
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Fichier PDF de la facture *</label>
                                 <input type="file" name="invoice_file" accept=".pdf" required
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 <p className="text-xs text-gray-400 mt-1">Format PDF uniquement, taille max : 10 Mo</p>
                             </div>
                             <div className="flex justify-end gap-3">
@@ -602,3 +602,4 @@ export default function SupplierPortal(props) {
         </>
     );
 }
+export { SupplierPortal };

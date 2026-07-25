@@ -247,7 +247,7 @@ function LogViewer({ logs, loading }) {
   const levelColor = {
     ERROR:   'text-red-600 bg-red-50',
     WARNING: 'text-yellow-700 bg-yellow-50',
-    INFO:    'text-blue-600 bg-blue-50',
+    INFO:    'text-purple-600 bg-purple-50',
     DEBUG:   'text-gray-500 bg-gray-50',
   };
 
@@ -543,3 +543,4 @@ export default function SystemHealth() {
     </>
   );
 }
+export { SystemHealth };

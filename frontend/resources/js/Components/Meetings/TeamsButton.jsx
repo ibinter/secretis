@@ -183,3 +183,4 @@ export function TeamsBadge({ joinUrl, className = '' }) {
         </span>
     );
 }
+export { TeamsButton };

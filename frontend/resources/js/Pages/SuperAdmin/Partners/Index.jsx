@@ -10,7 +10,7 @@ const STATUS_COLORS = {
 };
 
 const TYPE_COLORS = {
-  reseller:   'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  reseller:   'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   integrator: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   consultant: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
   trainer:    'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
@@ -65,7 +65,7 @@ export default function PartnersIndex({ partners, filters, stats }) {
           </div>
           <Link
             href={route('superadmin.partners.commissions')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white rounded-lg text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#7e22ce] hover:bg-[#9333EA] text-white rounded-lg text-sm font-medium transition-colors"
           >
             <span>💰</span> Commissions
           </Link>
@@ -107,7 +107,7 @@ export default function PartnersIndex({ partners, filters, stats }) {
             label="MRR généré"
             value={fmt(stats.total_mrr_generated)}
             sub={`${stats.active_referrals} clients référés actifs`}
-            color="text-[#2E86C1]"
+            color="text-[#7e22ce]"
           />
         </div>
 
@@ -126,7 +126,7 @@ export default function PartnersIndex({ partners, filters, stats }) {
                 }}
                 className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.key
-                    ? 'border-[#2E86C1] text-[#2E86C1]'
+                    ? 'border-[#7e22ce] text-[#7e22ce]'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
@@ -149,7 +149,7 @@ export default function PartnersIndex({ partners, filters, stats }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#2E86C1] focus:border-transparent"
+            className="flex-1 min-w-[200px] px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[#7e22ce] focus:border-transparent"
           />
           <select
             value={filters.type ?? ''}
@@ -276,3 +276,4 @@ export default function PartnersIndex({ partners, filters, stats }) {
     </SuperAdminLayout>
   );
 }
+export { PartnersIndex };

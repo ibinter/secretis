@@ -229,7 +229,9 @@ class VisitorController extends Controller
     public function kiosk(): Response
     {
         $orgSlug = request()->route('org');
-        $org     = Organization::where('slug', $orgSlug)->firstOrFail();
+        $org = $orgSlug
+            ? Organization::where('slug', $orgSlug)->firstOrFail()
+            : (auth()->user()?->organization ?? Organization::firstOrFail());
 
         $hosts = \App\Models\User::where('organization_id', $org->id)
             ->select('id', 'name', 'email', 'photo')
@@ -260,5 +262,17 @@ class VisitorController extends Controller
             'hosts'   => \App\Models\User::where('organization_id', auth()->user()->organization_id)
                 ->select('id', 'name')->orderBy('name')->get(),
         ]);
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

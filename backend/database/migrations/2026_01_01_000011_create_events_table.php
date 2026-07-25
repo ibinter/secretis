@@ -24,7 +24,7 @@ return new class extends Migration
             $table->json('recurrence_rule')->nullable();
             $table->foreignId('parent_event_id')->nullable()->constrained('events')->cascadeOnDelete();
             $table->boolean('is_cancelled')->default(false);
-            $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
+            $table->unsignedBigInteger('room_id')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
 

@@ -75,7 +75,7 @@ function NewDocumentModal({ processes, onClose, onSuccess }) {
                             required
                             value={form.title}
                             onChange={e => setForm({ ...form, title: e.target.value })}
-                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -109,7 +109,7 @@ function NewDocumentModal({ processes, onClose, onSuccess }) {
                     </div>
                     <div className="flex gap-2 justify-end pt-2">
                         <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Annuler</button>
-                        <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+                        <button type="submit" disabled={loading} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50">
                             {loading ? 'Création...' : 'Créer'}
                         </button>
                     </div>
@@ -151,7 +151,7 @@ export default function QualityDocuments() {
                     </div>
                     <button
                         onClick={() => setShowNew(true)}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                        className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                     >
                         + Nouveau document
                     </button>
@@ -175,7 +175,7 @@ export default function QualityDocuments() {
                             {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                         </select>
                     </div>
-                    <button onClick={applyFilters} className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                    <button onClick={applyFilters} className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition">
                         Filtrer
                     </button>
                 </div>
@@ -239,7 +239,7 @@ export default function QualityDocuments() {
                                                 <a
                                                     href={`/storage/${doc.file_path}`}
                                                     target="_blank"
-                                                    className="text-blue-600 hover:underline text-xs"
+                                                    className="text-purple-600 hover:underline text-xs"
                                                 >
                                                     ↓ Fichier
                                                 </a>
@@ -258,7 +258,7 @@ export default function QualityDocuments() {
                                 {documents.links.map((link, i) => (
                                     <button key={i} disabled={!link.url}
                                         onClick={() => link.url && router.visit(link.url)}
-                                        className={`px-3 py-1 text-xs rounded border ${link.active ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                        className={`px-3 py-1 text-xs rounded border ${link.active ? 'bg-purple-600 text-white border-purple-600' : 'hover:bg-gray-50'} ${!link.url ? 'opacity-40 cursor-not-allowed' : ''}`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
                                 ))}
@@ -278,3 +278,4 @@ export default function QualityDocuments() {
         </AppLayout>
     );
 }
+export { QualityDocuments };

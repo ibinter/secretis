@@ -120,7 +120,7 @@ function fmtXOFShort(v) {
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ icon: Icon, label, value, sub, color = 'blue', trend, badge }) {
   const colors = {
-    blue:   { bg: 'bg-blue-50',   icon: 'bg-blue-100 text-blue-700',    text: 'text-blue-800' },
+    blue:   { bg: 'bg-purple-50',   icon: 'bg-purple-100 text-purple-700',    text: 'text-purple-800' },
     green:  { bg: 'bg-green-50',  icon: 'bg-green-100 text-green-700',  text: 'text-green-800' },
     amber:  { bg: 'bg-amber-50',  icon: 'bg-amber-100 text-amber-700',  text: 'text-amber-800' },
     purple: { bg: 'bg-purple-50', icon: 'bg-purple-100 text-purple-700', text: 'text-purple-800' },
@@ -179,10 +179,10 @@ function FunnelStep({ label, n, total, next }) {
   const conv = next ? Math.round((next / n) * 100) : null;
   return (
     <div className="flex-1 text-center">
-      <div className="bg-blue-900 text-white rounded-xl px-3 py-4 mx-1">
+      <div className="bg-purple-900 text-white rounded-xl px-3 py-4 mx-1">
         <div className="text-2xl font-bold">{n.toLocaleString('fr-FR')}</div>
-        <div className="text-xs text-blue-200 mt-1">{label}</div>
-        <div className="text-xs text-blue-300 mt-0.5">{pct}% total</div>
+        <div className="text-xs text-purple-200 mt-1">{label}</div>
+        <div className="text-xs text-purple-300 mt-0.5">{pct}% total</div>
       </div>
       {conv !== null && (
         <div className="flex items-center justify-center mt-1">
@@ -199,7 +199,7 @@ const MrrTooltip = ({ active, payload, label }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-4 py-3">
       <p className="text-xs text-gray-500 font-medium mb-1">{label}</p>
-      <p className="text-sm font-bold text-blue-900">{fmtXOFShort(payload[0].value)}</p>
+      <p className="text-sm font-bold text-purple-900">{fmtXOFShort(payload[0].value)}</p>
     </div>
   );
 };
@@ -297,7 +297,7 @@ export default function SuperAdminDashboard({ data: propData }) {
       <div className="min-h-screen bg-gray-50">
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
-        <header className="bg-[#1A3A5C] text-white shadow-xl">
+        <header className="bg-[#9333EA] text-white shadow-xl">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center font-black text-lg">
@@ -305,7 +305,7 @@ export default function SuperAdminDashboard({ data: propData }) {
               </div>
               <div>
                 <div className="font-bold text-base leading-tight">IBIG SECRETIS — SuperAdmin</div>
-                <div className="text-blue-200 text-xs">Tableau de bord opérationnel global</div>
+                <div className="text-purple-200 text-xs">Tableau de bord opérationnel global</div>
               </div>
             </div>
             <div className="flex items-center gap-4 text-sm">
@@ -317,7 +317,7 @@ export default function SuperAdminDashboard({ data: propData }) {
               <button
                 onClick={fetchData}
                 disabled={refreshing}
-                className="flex items-center gap-1.5 text-blue-200 hover:text-white text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="flex items-center gap-1.5 text-purple-200 hover:text-white text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <span className={refreshing ? 'animate-spin' : ''}><Icons.Refresh /></span>
                 {refreshing ? 'Actualisation…' : `Actualisé à ${lastRefresh.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
@@ -417,7 +417,7 @@ export default function SuperAdminDashboard({ data: propData }) {
                   <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={v => `${(v / 1_000_000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
                   <Tooltip content={<MrrTooltip />} />
-                  <Line type="monotone" dataKey="mrr" stroke="#1A3A5C" strokeWidth={2.5} dot={{ r: 3, fill: '#1A3A5C' }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="mrr" stroke="#9333EA" strokeWidth={2.5} dot={{ r: 3, fill: '#9333EA' }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -465,7 +465,7 @@ export default function SuperAdminDashboard({ data: propData }) {
                 {health.map(h => <HealthRow key={h.label} label={h.label} status={h.status} />)}
               </div>
 
-              <a href="/superadmin/saas/health" className="mt-4 text-xs text-blue-700 font-semibold hover:underline flex items-center gap-1">
+              <a href="/superadmin/saas/health" className="mt-4 text-xs text-purple-700 font-semibold hover:underline flex items-center gap-1">
                 Monitoring détaillé →
               </a>
             </div>
@@ -488,7 +488,7 @@ export default function SuperAdminDashboard({ data: propData }) {
                         <td className="py-2 pr-4 font-medium text-gray-800 max-w-[140px] truncate">{c.org}</td>
                         <td className="py-2 pr-4 text-gray-600">{c.user}</td>
                         <td className="py-2 pr-4">
-                          <span className="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[0.65rem] font-semibold">{c.role}</span>
+                          <span className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[0.65rem] font-semibold">{c.role}</span>
                         </td>
                         <td className="py-2 pr-4 font-mono text-gray-500">{c.ip}</td>
                         <td className="py-2 pr-4">
@@ -544,7 +544,7 @@ export default function SuperAdminDashboard({ data: propData }) {
                   <tbody className="divide-y divide-gray-50">
                     {(data.paiements_pending || MOCK.paiements_pending).map(p => (
                       <tr key={p.ref} className="hover:bg-gray-50">
-                        <td className="py-2 pr-4 font-mono text-blue-700">{p.ref}</td>
+                        <td className="py-2 pr-4 font-mono text-purple-700">{p.ref}</td>
                         <td className="py-2 pr-4 font-medium text-gray-800">{p.org}</td>
                         <td className="py-2 pr-4">
                           <span className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[0.65rem] font-bold">{p.plan}</span>
@@ -575,7 +575,7 @@ export default function SuperAdminDashboard({ data: propData }) {
               </div>
               <button
                 onClick={() => router.visit('/superadmin/payments')}
-                className="mt-3 text-xs text-blue-700 font-semibold hover:underline"
+                className="mt-3 text-xs text-purple-700 font-semibold hover:underline"
               >
                 Voir tous les paiements →
               </button>
@@ -588,7 +588,7 @@ export default function SuperAdminDashboard({ data: propData }) {
               <h3 className="text-sm font-bold text-gray-800">Prospects prioritaires</h3>
               <button
                 onClick={() => router.visit('/superadmin/crm/prospects')}
-                className="text-xs text-blue-700 font-semibold hover:underline"
+                className="text-xs text-purple-700 font-semibold hover:underline"
               >
                 Pipeline complet →
               </button>
@@ -604,7 +604,7 @@ export default function SuperAdminDashboard({ data: propData }) {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {(data.prospects || MOCK.prospects).map(p => {
-                    const statMap = { demo: { cls: 'bg-purple-100 text-purple-700', label: 'Démo' }, offer: { cls: 'bg-blue-100 text-blue-700', label: 'Offre' }, contact: { cls: 'bg-amber-100 text-amber-700', label: 'Contact' }, lead: { cls: 'bg-gray-100 text-gray-700', label: 'Lead' } };
+                    const statMap = { demo: { cls: 'bg-purple-100 text-purple-700', label: 'Démo' }, offer: { cls: 'bg-purple-100 text-purple-700', label: 'Offre' }, contact: { cls: 'bg-amber-100 text-amber-700', label: 'Contact' }, lead: { cls: 'bg-gray-100 text-gray-700', label: 'Lead' } };
                     const s = statMap[p.statut] || statMap.lead;
                     return (
                       <tr key={p.nom} className="hover:bg-gray-50 transition-colors">
@@ -635,3 +635,4 @@ export default function SuperAdminDashboard({ data: propData }) {
     </>
   );
 }
+export { SuperAdminDashboard };

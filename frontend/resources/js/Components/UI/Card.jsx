@@ -2,8 +2,8 @@ import React from 'react'
 
 const VARIANTS = {
   default:  'bg-white dark:bg-[#162032] shadow-sm border border-gray-200 dark:border-[#1E3048]',
-  bordered: 'bg-white dark:bg-[#162032] border-2 border-[#1A3A5C]/30 dark:border-[#2E86C1]/30',
-  colored:  'bg-[#1A3A5C] text-white',
+  bordered: 'bg-white dark:bg-[#162032] border-2 border-[#9333EA]/30 dark:border-[#7e22ce]/30',
+  colored:  'bg-[#9333EA] text-white',
   flat:     'bg-gray-50 dark:bg-[#0F1923] border border-gray-100 dark:border-[#1E3048]',
 }
 
@@ -52,3 +52,4 @@ export default function Card({
     </div>
   )
 }
+export { Card };

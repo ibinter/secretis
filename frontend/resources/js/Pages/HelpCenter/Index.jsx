@@ -67,8 +67,8 @@ const CATEGORIES = [
     id: 'getting_started',
     label: 'Démarrage',
     emoji: '🚀',
-    color: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
-    textColor: 'text-blue-700',
+    color: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
+    textColor: 'text-purple-700',
     description: 'Première connexion, configuration, onboarding',
   },
   {
@@ -230,10 +230,10 @@ export default function HelpCenterIndex() {
     <div className="min-h-screen bg-gray-50">
 
       {/* ── En-tête héro ──────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+      <div className="bg-gradient-to-br from-purple-600 to-purple-800 text-white">
         <div className="max-w-5xl mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl font-bold mb-3">Centre d'aide IBIG SECRETIS</h1>
-          <p className="text-blue-100 text-lg mb-10">
+          <p className="text-purple-100 text-lg mb-10">
             Guides, FAQ et support — trouvez des réponses en quelques secondes
           </p>
 
@@ -251,7 +251,7 @@ export default function HelpCenterIndex() {
                   onFocus={() => query.length > 1 && setShowDropdown(true)}
                   placeholder="Rechercher dans le centre d'aide..."
                   className="w-full pl-12 pr-4 py-4 rounded-xl text-gray-900 text-lg
-                             shadow-lg border-0 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                             shadow-lg border-0 focus:ring-2 focus:ring-purple-300 focus:outline-none"
                   aria-label="Recherche dans le centre d'aide"
                 />
                 {isSearching && (
@@ -275,7 +275,7 @@ export default function HelpCenterIndex() {
                   <button
                     key={article.slug}
                     onClick={() => handleResultClick(article)}
-                    className="w-full px-4 py-3 flex items-start gap-3 hover:bg-blue-50
+                    className="w-full px-4 py-3 flex items-start gap-3 hover:bg-purple-50
                                border-b border-gray-100 last:border-0 transition-colors"
                   >
                     <span className="text-xl mt-0.5">
@@ -292,7 +292,7 @@ export default function HelpCenterIndex() {
                 ))}
                 <button
                   onClick={handleSearchSubmit}
-                  className="w-full px-4 py-3 text-sm text-blue-600 hover:bg-blue-50
+                  className="w-full px-4 py-3 text-sm text-purple-600 hover:bg-purple-50
                              font-medium flex items-center gap-2 justify-center"
                 >
                   <Icon.Search />
@@ -306,7 +306,7 @@ export default function HelpCenterIndex() {
                               shadow-2xl border border-gray-200 z-50 text-left p-6 text-center">
                 <p className="text-gray-500">Aucun résultat pour « {query} »</p>
                 <button onClick={openSara}
-                  className="mt-3 text-blue-600 text-sm hover:underline">
+                  className="mt-3 text-purple-600 text-sm hover:underline">
                   Poser la question à SARA
                 </button>
               </div>
@@ -354,7 +354,7 @@ export default function HelpCenterIndex() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
           <button
             onClick={openSara}
-            className="flex items-center gap-4 p-5 bg-blue-600 hover:bg-blue-700
+            className="flex items-center gap-4 p-5 bg-purple-600 hover:bg-purple-700
                        text-white rounded-xl shadow-md transition-colors group"
           >
             <div className="bg-white/20 rounded-lg p-2">
@@ -362,7 +362,7 @@ export default function HelpCenterIndex() {
             </div>
             <div className="text-left">
               <p className="font-semibold">Poser une question à SARA</p>
-              <p className="text-sm text-blue-200">Notre assistante IA répond en temps réel</p>
+              <p className="text-sm text-purple-200">Notre assistante IA répond en temps réel</p>
             </div>
             <span className="ml-auto opacity-70 group-hover:translate-x-1 transition-transform">
               <Icon.ChevronRight />
@@ -420,7 +420,7 @@ export default function HelpCenterIndex() {
                 key={article.slug}
                 to={`/help/articles/${article.slug}`}
                 className="flex items-center gap-3 p-4 bg-white border border-gray-200
-                           rounded-xl hover:shadow-md hover:border-blue-300 transition-all group"
+                           rounded-xl hover:shadow-md hover:border-purple-300 transition-all group"
               >
                 <span className="text-xl">
                   {CATEGORIES.find(c => c.id === article.category)?.emoji ?? '📄'}
@@ -433,7 +433,7 @@ export default function HelpCenterIndex() {
                     {CATEGORIES.find(c => c.id === article.category)?.label}
                   </p>
                 </div>
-                <span className="text-gray-300 group-hover:text-blue-500 transition-colors">
+                <span className="text-gray-300 group-hover:text-purple-500 transition-colors">
                   <Icon.ChevronRight />
                 </span>
               </Link>
@@ -469,17 +469,18 @@ export default function HelpCenterIndex() {
 
         {/* ── Liens supplémentaires ─────────────────────────────────────── */}
         <div className="flex flex-wrap gap-4 text-sm justify-center border-t border-gray-200 pt-8">
-          <Link to="/help/faq" className="text-blue-600 hover:underline">100 Questions fréquentes</Link>
+          <Link to="/help/faq" className="text-purple-600 hover:underline">100 Questions fréquentes</Link>
           <span className="text-gray-300">|</span>
-          <Link to="/help/tickets" className="text-blue-600 hover:underline">Mes tickets support</Link>
+          <Link to="/help/tickets" className="text-purple-600 hover:underline">Mes tickets support</Link>
           <span className="text-gray-300">|</span>
           <a href="https://ibigsoft.com/changelog" target="_blank" rel="noreferrer"
-            className="text-blue-600 hover:underline">Notes de version</a>
+            className="text-purple-600 hover:underline">Notes de version</a>
           <span className="text-gray-300">|</span>
           <a href="https://status.ibigsoft.com" target="_blank" rel="noreferrer"
-            className="text-blue-600 hover:underline">Statut des services</a>
+            className="text-purple-600 hover:underline">Statut des services</a>
         </div>
       </div>
     </div>
   );
 }
+export { HelpCenterIndex };

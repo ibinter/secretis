@@ -4,8 +4,8 @@ const COLOR_CLASSES = {
   success: 'bg-[#1E8449]/15 text-[#1E8449] dark:bg-[#1E8449]/25 dark:text-green-300',
   warning: 'bg-[#F39C12]/15 text-[#d68910] dark:bg-[#F39C12]/25 dark:text-yellow-300',
   danger:  'bg-[#C0392B]/15 text-[#C0392B] dark:bg-[#C0392B]/25 dark:text-red-300',
-  info:    'bg-[#2E86C1]/15 text-[#2E86C1] dark:bg-[#2E86C1]/25 dark:text-blue-300',
-  primary: 'bg-[#1A3A5C]/15 text-[#1A3A5C] dark:bg-[#1A3A5C]/30 dark:text-blue-200',
+  info:    'bg-[#7e22ce]/15 text-[#7e22ce] dark:bg-[#7e22ce]/25 dark:text-purple-300',
+  primary: 'bg-[#9333EA]/15 text-[#9333EA] dark:bg-[#9333EA]/30 dark:text-purple-200',
   gray:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
 }
 
@@ -13,8 +13,8 @@ const DOT_COLORS = {
   success: 'bg-[#1E8449]',
   warning: 'bg-[#F39C12]',
   danger:  'bg-[#C0392B]',
-  info:    'bg-[#2E86C1]',
-  primary: 'bg-[#1A3A5C]',
+  info:    'bg-[#7e22ce]',
+  primary: 'bg-[#9333EA]',
   gray:    'bg-gray-400',
 }
 
@@ -42,3 +42,4 @@ export default function Badge({
     </span>
   )
 }
+export { Badge };

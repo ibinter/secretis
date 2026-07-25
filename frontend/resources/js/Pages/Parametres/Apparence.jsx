@@ -22,7 +22,7 @@ const CheckIcon  = () => <svg className="w-4 h-4" fill="currentColor" viewBox="0
 
 // ─── Couleurs d'accent ────────────────────────────────────────────────────────
 const ACCENT_COLORS = [
-  { name: 'Bleu SECRETIS', value: '#2E86C1', dark: '#1565c0' },
+  { name: 'Bleu SECRETIS', value: '#7e22ce', dark: '#1565c0' },
   { name: 'Vert forêt',    value: '#1E8449', dark: '#1a7040' },
   { name: 'Or ambre',      value: '#F39C12', dark: '#D4880F' },
   { name: 'Violet',        value: '#7D3C98', dark: '#6c3483' },
@@ -104,7 +104,7 @@ function ThemePreview({ config, selected }) {
   const p = config.preview;
   return (
     <div className={`rounded-xl overflow-hidden border-2 transition-all duration-200
-      ${selected ? 'border-blue-500 dark:border-[#2E86C1] shadow-md' : 'border-gray-200 dark:border-[#2A3F55]'}
+      ${selected ? 'border-purple-500 dark:border-[#7e22ce] shadow-md' : 'border-gray-200 dark:border-[#2A3F55]'}
     `}>
       <div className={`h-20 flex ${p.bg}`}>
         {/* Sidebar simulée */}
@@ -130,7 +130,7 @@ export default function Apparence() {
   const { theme, setTheme, isDark } = useTheme();
 
   const [accentColor, setAccentColor]   = useState(() =>
-    localStorage.getItem('secretis_accent') || '#2E86C1'
+    localStorage.getItem('secretis_accent') || '#7e22ce'
   );
   const [customAccent, setCustomAccent] = useState('');
   const [fontSize, setFontSize]         = useState(() =>
@@ -210,7 +210,7 @@ export default function Apparence() {
                 <label
                   key={t.value}
                   className={`relative cursor-pointer rounded-xl p-1
-                    focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-[#2E86C1]`}
+                    focus-within:ring-2 focus-within:ring-purple-500 dark:focus-within:ring-[#7e22ce]`}
                 >
                   <input
                     type="radio"
@@ -229,14 +229,14 @@ export default function Apparence() {
                       <IconCmp />
                       <span className={`text-sm font-medium
                         ${isSelected
-                          ? 'text-blue-700 dark:text-blue-400'
+                          ? 'text-purple-700 dark:text-purple-400'
                           : 'text-gray-700 dark:text-[#A8C0D6]'}`}
                       >
                         {t.label}
                       </span>
                     </div>
                     {isSelected && (
-                      <span className="text-blue-600 dark:text-blue-400">
+                      <span className="text-purple-600 dark:text-purple-400">
                         <CheckIcon />
                       </span>
                     )}
@@ -338,9 +338,9 @@ export default function Apparence() {
                 <label
                   key={fs.value}
                   className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all
-                    focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-[#2E86C1]
+                    focus-within:ring-2 focus-within:ring-purple-500 dark:focus-within:ring-[#7e22ce]
                     ${isSelected
-                      ? 'border-blue-500 dark:border-[#2E86C1] bg-blue-50 dark:bg-[#0a1a2e]'
+                      ? 'border-purple-500 dark:border-[#7e22ce] bg-purple-50 dark:bg-[#0a1a2e]'
                       : 'border-gray-200 dark:border-[#2A3F55] hover:border-gray-300 dark:hover:border-[#3A5570]'}`}
                 >
                   <input
@@ -357,14 +357,14 @@ export default function Apparence() {
                   {/* Aperçu typographique */}
                   <div className="text-center mb-2">
                     <span
-                      className={`font-semibold ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
+                      className={`font-semibold ${isSelected ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
                       style={{ fontSize: fs.size }}
                     >
                       Aa
                     </span>
                   </div>
                   <div className={`text-sm font-medium text-center
-                    ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
+                    ${isSelected ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
                   >
                     {fs.label}
                   </div>
@@ -372,7 +372,7 @@ export default function Apparence() {
                     {fs.size}
                   </div>
                   {isSelected && (
-                    <div className="absolute top-2 right-2 text-blue-600 dark:text-blue-400">
+                    <div className="absolute top-2 right-2 text-purple-600 dark:text-purple-400">
                       <CheckIcon />
                     </div>
                   )}
@@ -397,9 +397,9 @@ export default function Apparence() {
                 <label
                   key={d.value}
                   className={`flex items-center gap-4 cursor-pointer rounded-xl border-2 p-4 transition-all
-                    focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-[#2E86C1]
+                    focus-within:ring-2 focus-within:ring-purple-500 dark:focus-within:ring-[#7e22ce]
                     ${isSelected
-                      ? 'border-blue-500 dark:border-[#2E86C1] bg-blue-50 dark:bg-[#0a1a2e]'
+                      ? 'border-purple-500 dark:border-[#7e22ce] bg-purple-50 dark:bg-[#0a1a2e]'
                       : 'border-gray-200 dark:border-[#2A3F55] hover:border-gray-300 dark:hover:border-[#3A5570]'}`}
                 >
                   <input
@@ -417,7 +417,7 @@ export default function Apparence() {
                   {/* Aperçu densité */}
                   <div className={`w-12 h-10 rounded border-2
                     ${isSelected
-                      ? 'border-blue-300 dark:border-blue-700'
+                      ? 'border-purple-300 dark:border-purple-700'
                       : 'border-gray-200 dark:border-[#2A3F55]'}
                     flex flex-col justify-center gap-0.5 flex-shrink-0 ${d.padding}`}
                     aria-hidden="true"
@@ -425,14 +425,14 @@ export default function Apparence() {
                     {[1,2,3].map(i => (
                       <div key={i}
                         className={`h-1 rounded-full
-                          ${isSelected ? 'bg-blue-300 dark:bg-blue-700' : 'bg-gray-200 dark:bg-[#2A3F55]'}`}
+                          ${isSelected ? 'bg-purple-300 dark:bg-purple-700' : 'bg-gray-200 dark:bg-[#2A3F55]'}`}
                       />
                     ))}
                   </div>
 
                   <div className="flex-1">
                     <div className={`font-medium text-sm
-                      ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
+                      ${isSelected ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-[#A8C0D6]'}`}
                     >
                       {d.label}
                     </div>
@@ -442,7 +442,7 @@ export default function Apparence() {
                   </div>
 
                   {isSelected && (
-                    <span className="text-blue-600 dark:text-blue-400 flex-shrink-0">
+                    <span className="text-purple-600 dark:text-purple-400 flex-shrink-0">
                       <CheckIcon />
                     </span>
                   )}
@@ -459,7 +459,7 @@ export default function Apparence() {
           type="button"
           onClick={() => {
             setTheme('system');
-            setAccentColor('#2E86C1');
+            setAccentColor('#7e22ce');
             setFontSize('normal');
             setDensity('comfortable');
             announceToScreenReader('Paramètres réinitialisés');
@@ -477,11 +477,11 @@ export default function Apparence() {
           type="button"
           onClick={handleSave}
           className={`px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all
-            focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#2E86C1]
+            focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-[#7e22ce]
             focus:ring-offset-2 dark:focus:ring-offset-[#0F1923]
             ${saved
               ? 'bg-green-600 dark:bg-[#1a7040]'
-              : 'bg-blue-600 hover:bg-blue-700 dark:bg-[#2E86C1] dark:hover:bg-blue-600'}`}
+              : 'bg-purple-600 hover:bg-purple-700 dark:bg-[#7e22ce] dark:hover:bg-purple-600'}`}
           aria-live="polite"
         >
           {saved ? '✓ Enregistré' : 'Enregistrer'}
@@ -490,3 +490,4 @@ export default function Apparence() {
     </div>
   );
 }
+export { Apparence };

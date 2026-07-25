@@ -71,9 +71,9 @@ const VARIANTS = {
   },
   primary: {
     icon:      <Icons.Check />,
-    iconBg:    'bg-blue-100 dark:bg-[#0a1a2e]',
-    iconColor: 'text-blue-600 dark:text-[#64b5f6]',
-    btn:       'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 focus:ring-blue-500',
+    iconBg:    'bg-purple-100 dark:bg-[#0a1a2e]',
+    iconColor: 'text-purple-600 dark:text-[#64b5f6]',
+    btn:       'bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 focus:ring-purple-500',
   },
   info: {
     icon:      <Icons.Info />,
@@ -203,7 +203,7 @@ export default function AccessibleModal({
             hover:bg-gray-100 dark:hover:bg-[#243447]
             rounded-lg transition-colors
             disabled:opacity-0
-            focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#2E86C1]"
+            focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-[#7e22ce]"
           aria-label="Fermer la fenêtre de dialogue"
         >
           <Icons.X />
@@ -334,3 +334,4 @@ export default function AccessibleModal({
 
 // ─── Hook utilitaire ──────────────────────────────────────────────────────────
 export { useConfirmModal } from '@/Components/UI/ConfirmModal';
+export { AccessibleModal };
