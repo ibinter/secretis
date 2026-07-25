@@ -40,7 +40,7 @@ const PARCOURS = [
     level: 'Intermédiaire',
     recommendedFor: ['agent', 'secretaire'],
     description:
-      'Ce parcours couvre l'ensemble des tâches d'une secrétaire de direction : courrier, agenda, réunions, GED et accueil. À l'issue, vous gérerez l'administration quotidienne de manière autonome.',
+      `Ce parcours couvre l'ensemble des tâches d'une secrétaire de direction : courrier, agenda, réunions, GED et accueil. À l'issue, vous gérerez l'administration quotidienne de manière autonome.`,
     modules: [
       { id: 1, title: 'Prise en main de SECRETIS', duration: '20 min', type: 'video' },
       { id: 2, title: 'Maîtriser l\'agenda', duration: '30 min', type: 'interactive' },
@@ -110,7 +110,7 @@ const PARCOURS = [
     level: 'Fondamental',
     recommendedFor: ['agent_accueil'],
     description:
-      'Parcours dédié aux agents d'accueil et standardistes. Maîtrisez l'enregistrement des visiteurs, la gestion de la file d'attente et la production du rapport journalier.',
+      `Parcours dédié aux agents d'accueil et standardistes. Maîtrisez l'enregistrement des visiteurs, la gestion de la file d'attente et la production du rapport journalier.`,
     modules: [
       { id: 1, title: 'Enregistrer l\'arrivée d\'un visiteur', duration: '20 min', type: 'interactive' },
       { id: 2, title: 'Gérer la file d\'attente virtuelle', duration: '20 min', type: 'interactive' },
@@ -128,7 +128,7 @@ const PARCOURS = [
     level: 'Expert',
     recommendedFor: ['super_admin', 'admin'],
     description:
-      'Parcours technique pour les administrateurs système. Couvre la configuration complète de l'organisation, la gestion des utilisateurs et des rôles, les intégrations, la sécurité et la conformité.',
+      `Parcours technique pour les administrateurs système. Couvre la configuration complète de l'organisation, la gestion des utilisateurs et des rôles, les intégrations, la sécurité et la conformité.`,
     modules: [
       { id: 1, title: 'Architecture et concepts SECRETIS', duration: '20 min', type: 'video' },
       { id: 2, title: 'Configuration initiale de l\'organisation', duration: '25 min', type: 'interactive' },

@@ -551,7 +551,7 @@ class ImportService
                 'date',
                 'datetime' => ! $this->isValidDate($value)
                                 ? $errors[] = ['row' => $rowIndex, 'field' => $field, 'value' => $value,
-                                               'message' => "Date invalide : « {$value} ». Format attendu : {$def['format'] ?? 'DD/MM/YYYY'}."]
+                                               'message' => "Date invalide : « {$value} ». Format attendu : " . ($def['format'] ?? 'DD/MM/YYYY') . "."]
                                 : null,
                 'enum'     => isset($def['values']) && ! in_array($value, $def['values'])
                                 ? $errors[] = ['row' => $rowIndex, 'field' => $field, 'value' => $value,

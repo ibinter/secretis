@@ -88,9 +88,9 @@ class VerifyInstallation extends Command
             DB::connection()->getPdo();
             $driver = DB::connection()->getDriverName();
             $db     = DB::connection()->getDatabaseName();
-            $this->pass("Connexion base de données ({$driver}:{$db})");
+            $this->passCheck("Connexion base de données ({$driver}:{$db})");
         } catch (\Exception $e) {
-            $this->fail('Connexion base de données', $e->getMessage());
+            $this->failCheck('Connexion base de données', $e->getMessage());
         }
     }
 
@@ -99,13 +99,13 @@ class VerifyInstallation extends Command
         try {
             $pending = $this->getPendingMigrations();
             if (empty($pending)) {
-                $this->pass('Toutes les migrations sont exécutées');
+                $this->passCheck('Toutes les migrations sont exécutées');
             } else {
                 $count = count($pending);
-                $this->fail("Migrations en attente ({$count})", implode(', ', array_slice($pending, 0, 3)) . '...');
+                $this->failCheck("Migrations en attente ({$count})", implode(', ', array_slice($pending, 0, 3)) . '...');
             }
         } catch (\Exception $e) {
-            $this->fail('Vérification migrations', $e->getMessage());
+            $this->failCheck('Vérification migrations', $e->getMessage());
         }
     }
 
@@ -114,12 +114,12 @@ class VerifyInstallation extends Command
         try {
             $planCount = DB::table('plans')->count();
             if ($planCount >= 3) {
-                $this->pass("Plans tarifaires en base ({$planCount} plans)");
+                $this->passCheck("Plans tarifaires en base ({$planCount} plans)");
             } else {
-                $this->warn("Plans tarifaires incomplets ({$planCount}/3)", 'Exécutez : php artisan db:seed --class=DemoPlanSeeder');
+                $this->warnCheck("Plans tarifaires incomplets ({$planCount}/3)", 'Exécutez : php artisan db:seed --class=DemoPlanSeeder');
             }
         } catch (\Exception $e) {
-            $this->fail('Plans tarifaires', $e->getMessage());
+            $this->failCheck('Plans tarifaires', $e->getMessage());
         }
     }
 
@@ -129,9 +129,9 @@ class VerifyInstallation extends Command
     {
         try {
             Redis::ping();
-            $this->pass('Connexion Redis');
+            $this->passCheck('Connexion Redis');
         } catch (\Exception $e) {
-            $this->fail('Connexion Redis', 'Redis inaccessible : ' . $e->getMessage());
+            $this->failCheck('Connexion Redis', 'Redis inaccessible : ' . $e->getMessage());
         }
     }
 
@@ -139,9 +139,9 @@ class VerifyInstallation extends Command
     {
         $driver = config('cache.default');
         if (in_array($driver, ['redis', 'memcached'])) {
-            $this->pass("Driver cache ({$driver})");
+            $this->passCheck("Driver cache ({$driver})");
         } else {
-            $this->warn("Driver cache ({$driver})", 'En production, utiliser redis ou memcached');
+            $this->warnCheck("Driver cache ({$driver})", 'En production, utiliser redis ou memcached');
         }
     }
 
@@ -149,9 +149,9 @@ class VerifyInstallation extends Command
     {
         $driver = config('queue.default');
         if (in_array($driver, ['redis', 'database', 'sqs'])) {
-            $this->pass("Driver queue ({$driver})");
+            $this->passCheck("Driver queue ({$driver})");
         } else {
-            $this->warn("Driver queue ({$driver})", 'En production, utiliser redis ou database');
+            $this->warnCheck("Driver queue ({$driver})", 'En production, utiliser redis ou database');
         }
     }
 
@@ -161,11 +161,11 @@ class VerifyInstallation extends Command
     {
         $env = app()->environment();
         if ($env === 'production') {
-            $this->pass('Environnement production (APP_ENV=production)');
+            $this->passCheck('Environnement production (APP_ENV=production)');
         } elseif ($env === 'staging') {
-            $this->warn("Environnement ({$env})", 'Vérifier que APP_ENV=production en production');
+            $this->warnCheck("Environnement ({$env})", 'Vérifier que APP_ENV=production en production');
         } else {
-            $this->fail("Environnement ({$env})", 'APP_ENV doit être "production"');
+            $this->failCheck("Environnement ({$env})", 'APP_ENV doit être "production"');
         }
     }
 
@@ -173,9 +173,9 @@ class VerifyInstallation extends Command
     {
         $key = config('app.key');
         if (! empty($key) && strlen($key) >= 32) {
-            $this->pass('APP_KEY défini et de longueur suffisante');
+            $this->passCheck('APP_KEY défini et de longueur suffisante');
         } else {
-            $this->fail('APP_KEY manquant ou trop court', 'Exécutez : php artisan key:generate');
+            $this->failCheck('APP_KEY manquant ou trop court', 'Exécutez : php artisan key:generate');
         }
     }
 
@@ -189,9 +189,9 @@ class VerifyInstallation extends Command
             }
         }
         if (empty($missing)) {
-            $this->pass('Variables base de données configurées');
+            $this->passCheck('Variables base de données configurées');
         } else {
-            $this->fail('Variables base de données manquantes', implode(', ', $missing));
+            $this->failCheck('Variables base de données manquantes', implode(', ', $missing));
         }
     }
 
@@ -205,9 +205,9 @@ class VerifyInstallation extends Command
             }
         }
         if (empty($missing)) {
-            $this->pass('Variables SMTP configurées');
+            $this->passCheck('Variables SMTP configurées');
         } else {
-            $this->warn('Variables SMTP incomplètes', 'Manquantes : ' . implode(', ', $missing));
+            $this->warnCheck('Variables SMTP incomplètes', 'Manquantes : ' . implode(', ', $missing));
         }
     }
 
@@ -215,11 +215,11 @@ class VerifyInstallation extends Command
     {
         $key = env('GROQ_API_KEY');
         if (! empty($key) && str_starts_with($key, 'gsk_')) {
-            $this->pass('Clé API Groq (SARA) configurée');
+            $this->passCheck('Clé API Groq (SARA) configurée');
         } elseif (! empty($key)) {
-            $this->warn('Clé API Groq présente', 'Format inhabituel — vérifier la clé');
+            $this->warnCheck('Clé API Groq présente', 'Format inhabituel — vérifier la clé');
         } else {
-            $this->warn('Clé API Groq manquante (GROQ_API_KEY)', 'SARA ne fonctionnera pas sans cette clé');
+            $this->warnCheck('Clé API Groq manquante (GROQ_API_KEY)', 'SARA ne fonctionnera pas sans cette clé');
         }
     }
 
@@ -227,9 +227,9 @@ class VerifyInstallation extends Command
     {
         $host = env('REVERB_APP_ID');
         if (! empty($host)) {
-            $this->pass('Laravel Reverb (WebSocket) configuré');
+            $this->passCheck('Laravel Reverb (WebSocket) configuré');
         } else {
-            $this->warn('Reverb non configuré (REVERB_APP_ID)', 'Les notifications temps réel seront désactivées');
+            $this->warnCheck('Reverb non configuré (REVERB_APP_ID)', 'Les notifications temps réel seront désactivées');
         }
     }
 
@@ -239,9 +239,9 @@ class VerifyInstallation extends Command
     {
         $publicPath = public_path('storage');
         if (is_link($publicPath) || is_dir($publicPath)) {
-            $this->pass('Lien symbolique storage (public/storage)');
+            $this->passCheck('Lien symbolique storage (public/storage)');
         } else {
-            $this->fail('Lien symbolique storage manquant', 'Exécutez : php artisan storage:link');
+            $this->failCheck('Lien symbolique storage manquant', 'Exécutez : php artisan storage:link');
         }
     }
 
@@ -265,9 +265,9 @@ class VerifyInstallation extends Command
         }
 
         if (empty($problematic)) {
-            $this->pass('Permissions dossiers storage (lecture/écriture)');
+            $this->passCheck('Permissions dossiers storage (lecture/écriture)');
         } else {
-            $this->fail('Permissions storage incorrectes', implode(', ', $problematic));
+            $this->failCheck('Permissions storage incorrectes', implode(', ', $problematic));
         }
     }
 
@@ -278,12 +278,12 @@ class VerifyInstallation extends Command
             $size = file_exists($logPath) ? round(filesize($logPath) / 1024 / 1024, 2) : 0;
             $msg  = "Logs accessibles ({$size} Mo)";
             if ($size > 100) {
-                $this->warn($msg, 'Fichier de log volumineux, envisager une rotation');
+                $this->warnCheck($msg, 'Fichier de log volumineux, envisager une rotation');
             } else {
-                $this->pass($msg);
+                $this->passCheck($msg);
             }
         } else {
-            $this->fail('Dossier logs non accessible', 'Vérifier les permissions de storage/logs/');
+            $this->failCheck('Dossier logs non accessible', 'Vérifier les permissions de storage/logs/');
         }
     }
 
@@ -295,7 +295,7 @@ class VerifyInstallation extends Command
         $port = env('MAIL_PORT', 587);
 
         if (empty($host)) {
-            $this->warn('SMTP non testé', 'MAIL_HOST non défini');
+            $this->warnCheck('SMTP non testé', 'MAIL_HOST non défini');
             return;
         }
 
@@ -303,12 +303,12 @@ class VerifyInstallation extends Command
             $connection = @fsockopen($host, $port, $errno, $errstr, 5);
             if ($connection) {
                 fclose($connection);
-                $this->pass("SMTP accessible ({$host}:{$port})");
+                $this->passCheck("SMTP accessible ({$host}:{$port})");
             } else {
-                $this->fail("SMTP inaccessible ({$host}:{$port})", $errstr);
+                $this->failCheck("SMTP inaccessible ({$host}:{$port})", $errstr);
             }
         } catch (\Exception $e) {
-            $this->warn('Test SMTP échoué', $e->getMessage());
+            $this->warnCheck('Test SMTP échoué', $e->getMessage());
         }
     }
 
@@ -316,7 +316,7 @@ class VerifyInstallation extends Command
     {
         $key = env('GROQ_API_KEY');
         if (empty($key)) {
-            $this->warn('Test Groq ignoré', 'GROQ_API_KEY non défini');
+            $this->warnCheck('Test Groq ignoré', 'GROQ_API_KEY non défini');
             return;
         }
 
@@ -326,12 +326,12 @@ class VerifyInstallation extends Command
             ])->get('https://api.groq.com/openai/v1/models');
 
             if ($response->successful()) {
-                $this->pass('Connexion API Groq (SARA) fonctionnelle');
+                $this->passCheck('Connexion API Groq (SARA) fonctionnelle');
             } else {
-                $this->fail('Connexion API Groq échouée', 'Code HTTP : ' . $response->status());
+                $this->failCheck('Connexion API Groq échouée', 'Code HTTP : ' . $response->status());
             }
         } catch (\Exception $e) {
-            $this->warn('Test Groq échoué', 'Vérifier la connectivité réseau : ' . $e->getMessage());
+            $this->warnCheck('Test Groq échoué', 'Vérifier la connectivité réseau : ' . $e->getMessage());
         }
     }
 
@@ -342,17 +342,17 @@ class VerifyInstallation extends Command
             $failed    = DB::table('failed_jobs')->count();
 
             if ($failed > 10) {
-                $this->warn("Queue : {$queueSize} jobs en attente, {$failed} jobs en échec", 'Vérifier les jobs échoués : php artisan queue:failed');
+                $this->warnCheck("Queue : {$queueSize} jobs en attente, {$failed} jobs en échec", 'Vérifier les jobs échoués : php artisan queue:failed');
             } else {
-                $this->pass("Queue fonctionnelle ({$queueSize} jobs, {$failed} échecs)");
+                $this->passCheck("Queue fonctionnelle ({$queueSize} jobs, {$failed} échecs)");
             }
         } catch (\Exception $e) {
             // La table jobs peut ne pas exister si queue=sync
             $driver = config('queue.default');
             if ($driver === 'sync') {
-                $this->warn('Queue en mode synchrone', 'Configurer redis ou database pour la production');
+                $this->warnCheck('Queue en mode synchrone', 'Configurer redis ou database pour la production');
             } else {
-                $this->warn('Impossible de vérifier la queue', $e->getMessage());
+                $this->warnCheck('Impossible de vérifier la queue', $e->getMessage());
             }
         }
     }
@@ -365,18 +365,18 @@ class VerifyInstallation extends Command
         $appUrl     = config('app.url');
 
         if (str_starts_with($appUrl, 'https://')) {
-            $this->pass('URL applicative en HTTPS');
+            $this->passCheck('URL applicative en HTTPS');
         } else {
-            $this->warn('URL applicative en HTTP', 'Configurer APP_URL avec https:// en production');
+            $this->warnCheck('URL applicative en HTTP', 'Configurer APP_URL avec https:// en production');
         }
     }
 
     private function checkDebugDisabled(): void
     {
         if (! config('app.debug')) {
-            $this->pass('Mode debug désactivé (APP_DEBUG=false)');
+            $this->passCheck('Mode debug désactivé (APP_DEBUG=false)');
         } else {
-            $this->fail('Mode debug ACTIVÉ', 'Définir APP_DEBUG=false en production — fuite d\'informations sensibles !');
+            $this->failCheck('Mode debug ACTIVÉ', 'Définir APP_DEBUG=false en production — fuite d\'informations sensibles !');
         }
     }
 
@@ -387,25 +387,25 @@ class VerifyInstallation extends Command
         if (str_starts_with($key, 'base64:')) {
             $decoded = base64_decode(substr($key, 7));
             if (strlen($decoded) === 32) {
-                $this->pass('APP_KEY de longueur correcte (256 bits)');
+                $this->passCheck('APP_KEY de longueur correcte (256 bits)');
             } else {
-                $this->fail('APP_KEY longueur incorrecte', 'Exécutez : php artisan key:generate');
+                $this->failCheck('APP_KEY longueur incorrecte', 'Exécutez : php artisan key:generate');
             }
         } else {
-            $this->warn('APP_KEY non base64', 'Utiliser le format base64 généré par artisan');
+            $this->warnCheck('APP_KEY non base64', 'Utiliser le format base64 généré par artisan');
         }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private function pass(string $message): void
+    private function passCheck(string $message): void
     {
         $this->line("    <fg=green>✓</> {$message}");
         $this->passed++;
         $this->results[] = ['status' => 'pass', 'message' => $message];
     }
 
-    private function fail(string $message, string $detail = ''): void
+    private function failCheck(string $message, string $detail = ''): void
     {
         $this->line("    <fg=red>✗</> <fg=red>{$message}</>");
         if ($detail) {
@@ -415,7 +415,7 @@ class VerifyInstallation extends Command
         $this->results[] = ['status' => 'fail', 'message' => $message, 'detail' => $detail];
     }
 
-    private function warn(string $message, string $detail = ''): void
+    private function warnCheck(string $message, string $detail = ''): void
     {
         $this->line("    <fg=yellow>⚠</> {$message}");
         if ($detail) {
