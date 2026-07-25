@@ -16,6 +16,8 @@ class LegalPagesController extends Controller
 <p><strong>IBIG Soft</strong><br>
 Éditeur de solutions logicielles métiers<br>
 Abidjan — République de Côte d'Ivoire<br>
+RCCM : N°CI-ABJ-03-2023-B13-05718<br>
+NCC (Numéro de Compte Contribuable) : 2302502 V<br>
 Email : <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a><br>
 Site : <a href="https://www.ibigsoft.com">www.ibigsoft.com</a></p>
 
