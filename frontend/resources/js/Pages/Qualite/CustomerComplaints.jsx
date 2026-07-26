@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const STATUS_BADGE = {
     recu:          'bg-gray-100 text-gray-700',
-    en_traitement: 'bg-blue-100 text-blue-700',
+    en_traitement: 'bg-purple-100 text-purple-700',
     resolu:        'bg-yellow-100 text-yellow-700',
     clos:          'bg-green-100 text-green-700',
 };
@@ -74,7 +74,7 @@ function NewComplaintModal({ onClose, onSuccess }) {
                                 value={form.customer_name}
                                 onChange={e => setForm({ ...form, customer_name: e.target.value })}
                                 placeholder="Nom du client"
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
                             />
                         </div>
                         <div>
@@ -142,7 +142,7 @@ function NewComplaintModal({ onClose, onSuccess }) {
                     </div>
                     <div className="flex gap-2 justify-end pt-2">
                         <button type="button" onClick={onClose} className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Annuler</button>
-                        <button type="submit" disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+                        <button type="submit" disabled={loading} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50">
                             {loading ? 'Enregistrement...' : 'Enregistrer'}
                         </button>
                     </div>
@@ -253,7 +253,7 @@ export default function CustomerComplaints() {
                     </div>
                     <button
                         onClick={() => setShowNew(true)}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                        className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                     >
                         + Nouvelle réclamation
                     </button>
@@ -317,7 +317,7 @@ export default function CustomerComplaints() {
                                         </td>
                                         <td className="px-4 py-3 text-xs">
                                             {c.nonconformity
-                                                ? <a href={`/qualite/nc/${c.nonconformity_id}`} className="text-blue-600 hover:underline font-mono">
+                                                ? <a href={`/qualite/nc/${c.nonconformity_id}`} className="text-purple-600 hover:underline font-mono">
                                                     {c.nonconformity.reference}
                                                   </a>
                                                 : <span className="text-gray-400">—</span>
@@ -355,3 +355,4 @@ export default function CustomerComplaints() {
         </AppLayout>
     );
 }
+export { CustomerComplaints };

@@ -53,7 +53,7 @@ const TYPE_ICONS = {
   note: <Ic.MessageSquare />,
 }
 const TYPE_COLORS = {
-  call: 'bg-blue-100 text-blue-700',
+  call: 'bg-purple-100 text-purple-700',
   email: 'bg-indigo-100 text-indigo-700',
   stage: 'bg-amber-100 text-amber-700',
   demo: 'bg-green-100 text-green-700',
@@ -132,7 +132,7 @@ export default function ProspectShow({ prospect: propP, timeline: propT }) {
         </div>
         <div className="flex gap-2 flex-wrap">
           {nextStage && (
-            <button disabled={saving} onClick={advance} className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors disabled:opacity-60">
+            <button disabled={saving} onClick={advance} className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors disabled:opacity-60">
               <Ic.ArrowRight /> {STAGE_LABELS[nextStage]}
             </button>
           )}
@@ -157,7 +157,7 @@ export default function ProspectShow({ prospect: propP, timeline: propT }) {
                 <div key={i} className="flex items-center gap-2.5 text-sm">
                   <span className="text-gray-400 shrink-0">{icon}</span>
                   {type ? (
-                    <a href={`${type}:${val}`} className="text-[#1A3A5C] dark:text-blue-400 hover:underline">{val}</a>
+                    <a href={`${type}:${val}`} className="text-[#9333EA] dark:text-purple-400 hover:underline">{val}</a>
                   ) : (
                     <span className="text-gray-700 dark:text-gray-300">{val}</span>
                   )}
@@ -229,17 +229,17 @@ export default function ProspectShow({ prospect: propP, timeline: propT }) {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Historique des interactions</h3>
-              <button onClick={() => setAddingNote(!addingNote)} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-[#1A3A5C]/10 text-[#1A3A5C] dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-[#1A3A5C]/20 transition-colors">
+              <button onClick={() => setAddingNote(!addingNote)} className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-[#9333EA]/10 text-[#9333EA] dark:bg-purple-900/30 dark:text-purple-400 rounded-lg hover:bg-[#9333EA]/20 transition-colors">
                 <Ic.Plus /> Ajouter
               </button>
             </div>
 
             {addingNote && (
               <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <textarea value={note} onChange={e => setNote(e.target.value)} rows={3} placeholder="Note, compte-rendu…" className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" />
+                <textarea value={note} onChange={e => setNote(e.target.value)} rows={3} placeholder="Note, compte-rendu…" className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg p-2.5 dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#9333EA]/30 outline-none" />
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={() => { setAddingNote(false); setNote('') }} className="px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">Annuler</button>
-                  <button disabled={saving} onClick={addNote} className="px-3 py-1.5 text-xs font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">Ajouter</button>
+                  <button disabled={saving} onClick={addNote} className="px-3 py-1.5 text-xs font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">Ajouter</button>
                 </div>
               </div>
             )}
@@ -266,3 +266,4 @@ export default function ProspectShow({ prospect: propP, timeline: propT }) {
     </SuperAdminLayout>
   )
 }
+export { ProspectShow };

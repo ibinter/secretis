@@ -21,7 +21,7 @@ import { CheckCircleIcon as CheckSolid } from '@heroicons/react/24/solid';
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const ROLE_COLORS = {
-    'Secrétaire': 'from-blue-500 to-cyan-500',
+    'Secrétaire': 'from-purple-500 to-cyan-500',
     'Manager':    'from-purple-500 to-indigo-500',
     'DAF':        'from-green-500 to-teal-500',
     'RH':         'from-pink-500 to-rose-500',
@@ -57,7 +57,7 @@ function PathStep({ item, index, isLast, onClick }) {
         in_progress: { cls: 'bg-indigo-500 text-white animate-pulse', ring: 'ring-indigo-300 dark:ring-indigo-700', line: 'bg-gray-200 dark:bg-gray-700' },
         available:   { cls: 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-400', ring: 'ring-indigo-200 dark:ring-indigo-800', line: 'bg-gray-200 dark:bg-gray-700' },
         locked:      { cls: 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500', ring: 'ring-gray-200 dark:ring-gray-700', line: 'bg-gray-200 dark:bg-gray-700' },
-        registered:  { cls: 'bg-blue-500 text-white', ring: 'ring-blue-300 dark:ring-blue-700', line: 'bg-blue-400' },
+        registered:  { cls: 'bg-purple-500 text-white', ring: 'ring-purple-300 dark:ring-purple-700', line: 'bg-purple-400' },
     };
     const s = statusMap[item.status] ?? statusMap.locked;
     const isLocked = item.status === 'locked';
@@ -420,3 +420,4 @@ export default function LearningPaths({ paths = [] }) {
         </AppLayout>
     );
 }
+export { LearningPaths };

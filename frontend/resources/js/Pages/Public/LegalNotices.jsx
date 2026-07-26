@@ -110,7 +110,7 @@ export default function LegalNotices() {
                         </ul>
                         <p className="mt-2">
                             Pour en savoir plus, consultez notre{' '}
-                            <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+                            <a href="/privacy" className="text-purple-600 dark:text-purple-400 hover:underline">
                                 politique de confidentialité complète
                             </a>.
                         </p>
@@ -170,3 +170,4 @@ function InfoGrid({ items }) {
         </div>
     );
 }
+export { LegalNotices };

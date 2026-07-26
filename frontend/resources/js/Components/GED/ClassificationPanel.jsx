@@ -28,14 +28,14 @@ const CATEGORIES = [
 
 const CONFIDENTIALITY_LEVELS = [
     { value: 'public',       label: 'Public',        color: 'bg-green-100 text-green-800' },
-    { value: 'internal',     label: 'Interne',       color: 'bg-blue-100 text-blue-800' },
+    { value: 'internal',     label: 'Interne',       color: 'bg-purple-100 text-purple-800' },
     { value: 'confidential', label: 'Confidentiel',  color: 'bg-yellow-100 text-yellow-800' },
     { value: 'secret',       label: 'Secret',        color: 'bg-red-100 text-red-800' },
 ];
 
 const CATEGORY_COLORS = {
     CONTRAT:      'bg-purple-100 text-purple-800',
-    FACTURE:      'bg-blue-100 text-blue-800',
+    FACTURE:      'bg-purple-100 text-purple-800',
     COURRIER:     'bg-teal-100 text-teal-800',
     RAPPORT:      'bg-indigo-100 text-indigo-800',
     PV_REUNION:   'bg-orange-100 text-orange-800',
@@ -331,3 +331,4 @@ export default function ClassificationPanel({
         </div>
     );
 }
+export { ClassificationPanel };

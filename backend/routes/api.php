@@ -1,6 +1,8 @@
 <?php
 
+
 declare(strict_types=1);
+use App\Http\Controllers\SaraChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -927,4 +929,19 @@ Route::post('/partners/register', [\App\Http\Controllers\PartnerController::clas
 // Authentifié — Rapport mensuel partenaire
 Route::middleware('auth:sanctum')->prefix('partner')->name('api.partner.')->group(function () {
     Route::get('/report/{month}', [\App\Http\Controllers\PartnerController::class, 'monthlyReport'])->name('report');
+});
+
+// SARA — assistante IA publique (landing + app)
+Route::post('/sara/chat', [SaraChatController::class, 'chat'])->middleware('throttle:30,1');
+
+
+// ── §19 : preuve de paiement, validation admin, reçu PDF ──
+Route::middleware(['auth:sanctum'])->prefix('v1/payments')->name('api.v1.payments.')->group(function () {
+    Route::post('/{id}/proof', [\App\Http\Controllers\PaymentController::class, 'uploadProof'])->name('proof');
+    Route::get('/history', [\App\Http\Controllers\PaymentController::class, 'history'])->name('history');
+    Route::get('/{id}/invoice', [\App\Http\Controllers\PaymentController::class, 'generateInvoice'])->name('invoice');
+    Route::post('/{id}/validate', [\App\Http\Controllers\PaymentController::class, 'adminValidate'])
+        ->middleware('role:super_admin')->name('validate');
+    Route::post('/{id}/reject', [\App\Http\Controllers\PaymentController::class, 'adminReject'])
+        ->middleware('role:super_admin')->name('reject');
 });

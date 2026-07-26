@@ -208,4 +208,9 @@ class User extends Authenticatable
             $user->email = strtolower(trim($user->email));
         });
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

@@ -212,7 +212,7 @@ export default function Select({
             'focus:outline-none focus:ring-2 focus:ring-offset-0',
             error
               ? 'border-[#C0392B] focus:ring-[#C0392B]/50'
-              : 'border-gray-300 dark:border-gray-600 focus:border-[#1A3A5C] focus:ring-[#1A3A5C]/30',
+              : 'border-gray-300 dark:border-gray-600 focus:border-[#9333EA] focus:ring-[#9333EA]/30',
             disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
             SIZE_CLASSES[size] ?? SIZE_CLASSES.md,
           ].join(' ')}
@@ -259,13 +259,13 @@ export default function Select({
                     'flex items-center justify-between px-3.5 py-2 text-sm cursor-pointer',
                     'transition-colors',
                     opt.disabled ? 'opacity-40 cursor-not-allowed' : '',
-                    isActive   ? 'bg-[#1A3A5C]/8 dark:bg-white/8 text-[#1A3A5C] dark:text-blue-300' : 'text-gray-700 dark:text-gray-200',
+                    isActive   ? 'bg-[#9333EA]/8 dark:bg-white/8 text-[#9333EA] dark:text-purple-300' : 'text-gray-700 dark:text-gray-200',
                     isSelected && !isActive ? 'font-medium' : '',
                   ].join(' ')}
                 >
                   {opt.label}
                   {isSelected && (
-                    <Check className="w-4 h-4 text-[#1A3A5C] dark:text-blue-300 shrink-0" aria-hidden="true" />
+                    <Check className="w-4 h-4 text-[#9333EA] dark:text-purple-300 shrink-0" aria-hidden="true" />
                   )}
                 </li>
               )
@@ -289,3 +289,4 @@ export default function Select({
     </div>
   )
 }
+export { Select };

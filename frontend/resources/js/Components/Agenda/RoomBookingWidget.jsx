@@ -101,15 +101,15 @@ function RoomCard({ room, isSelected, onSelect, disabled }) {
             className={[
                 'relative p-3 rounded-lg border-2 transition-all duration-150 text-left w-full',
                 isSelected
-                    ? 'border-blue-500 bg-blue-50 shadow-sm'
+                    ? 'border-purple-500 bg-purple-50 shadow-sm'
                     : isSelectable
-                        ? 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm cursor-pointer'
+                        ? 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm cursor-pointer'
                         : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed',
             ].join(' ')}
         >
             {/* Indicateur de sélection */}
             {isSelected && (
-                <span className="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                <span className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white">
                     <IconCheck />
                 </span>
             )}
@@ -271,14 +271,14 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
                     placeholder="Filtrer les salles..."
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
             )}
 
             {/* État chargement */}
             {isLoading && (
                 <div className="flex items-center justify-center py-6">
-                    <svg className="animate-spin h-5 w-5 text-blue-500" viewBox="0 0 24 24" fill="none">
+                    <svg className="animate-spin h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -328,7 +328,7 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
 
                     {/* Salle sélectionnée */}
                     {selected && (
-                        <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md border border-blue-200 text-sm text-blue-700">
+                        <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-md border border-purple-200 text-sm text-purple-700">
                             <IconCheck />
                             <span>
                                 <strong>

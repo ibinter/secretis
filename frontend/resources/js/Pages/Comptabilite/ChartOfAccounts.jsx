@@ -30,7 +30,7 @@ const TYPES = [
 ];
 
 const typeColors = {
-  actif:    'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+  actif:    'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
   passif:   'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400',
   capitaux: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
   charge:   'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400',
@@ -253,7 +253,7 @@ export default function ChartOfAccounts({ accounts, filters }) {
                   </tr>
                 ) : allAccounts.map(acc => (
                   <tr key={acc.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                    <td className="px-4 py-2.5 font-mono font-semibold text-blue-700 dark:text-blue-400">
+                    <td className="px-4 py-2.5 font-mono font-semibold text-purple-700 dark:text-purple-400">
                       {acc.account_number}
                     </td>
                     <td className="px-4 py-2.5 text-gray-800 dark:text-gray-200">{acc.account_name}</td>
@@ -277,7 +277,7 @@ export default function ChartOfAccounts({ accounts, filters }) {
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       {acc.is_system ? (
-                        <span className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
+                        <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 px-2 py-0.5 rounded-full font-medium">
                           <ShieldCheckIcon className="w-3 h-3" /> SYSCOHADA
                         </span>
                       ) : (
@@ -323,3 +323,4 @@ export default function ChartOfAccounts({ accounts, filters }) {
     </AuthLayout>
   );
 }
+export { ChartOfAccounts };

@@ -7,7 +7,7 @@ function fmt(n) {
 
 const STATUS_COLORS = {
   pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  approved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   paid:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
 };
 
@@ -53,7 +53,7 @@ export default function PartnerCommissions({ partner, commissions, summary }) {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total cumulé</p>
-            <p className="mt-1 text-2xl font-bold text-[#2E86C1]">{fmt(summary.total)}</p>
+            <p className="mt-1 text-2xl font-bold text-[#7e22ce]">{fmt(summary.total)}</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Toutes périodes</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function PartnerCommissions({ partner, commissions, summary }) {
         </div>
 
         {/* Légende */}
-        <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-sm text-blue-800 dark:text-blue-300">
+        <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 rounded-xl p-4 text-sm text-purple-800 dark:text-purple-300">
           <p className="font-medium mb-1">Comprendre les statuts :</p>
           <ul className="space-y-1 text-xs">
             <li><strong>En attente</strong> — Commission calculée, en cours de validation par IBIG Soft.</li>
@@ -136,3 +136,4 @@ export default function PartnerCommissions({ partner, commissions, summary }) {
     </AppLayout>
   );
 }
+export { PartnerCommissions };

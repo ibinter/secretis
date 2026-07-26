@@ -346,7 +346,7 @@ export const AccessibleCheckbox = forwardRef(function AccessibleCheckbox(
           aria-describedby={[descId, errId].filter(Boolean).join(' ') || undefined}
           className={`
             w-4 h-4 rounded border-gray-300 dark:border-[#2A3F55]
-            text-blue-600 dark:text-blue-500
+            text-purple-600 dark:text-purple-500
             bg-white dark:bg-[#162230]
             focus:ring-2 focus:ring-[#F39C12] focus:ring-offset-0
             cursor-pointer
@@ -487,7 +487,7 @@ export default function AccessibleForm({
             aria-disabled={loading}
             className="
               flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white
-              bg-[#2E86C1] hover:bg-[#1A6DA0] dark:bg-[#2E86C1] dark:hover:bg-[#1A6DA0]
+              bg-[#7e22ce] hover:bg-[#1A6DA0] dark:bg-[#7e22ce] dark:hover:bg-[#1A6DA0]
               focus:outline-none focus:ring-2 focus:ring-[#F39C12] focus:ring-offset-2
               dark:focus:ring-offset-[#1E2D40]
               disabled:opacity-50 disabled:cursor-not-allowed
@@ -530,3 +530,4 @@ export default function AccessibleForm({
 
 // ─── Re-exports ───────────────────────────────────────────────────────────────
 export { FormField as Field };
+export { AccessibleForm };

@@ -569,7 +569,7 @@ class ProcurementService
         $monthly = PurchaseOrder::where('organization_id', $organizationId)
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['annule', 'brouillon'])
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount_xof) as total')
+            ->selectRaw('EXTRACT(MONTH FROM created_at) as month, SUM(total_amount_xof) as total')
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();

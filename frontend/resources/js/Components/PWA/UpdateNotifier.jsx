@@ -79,7 +79,7 @@ export default function UpdateNotifier() {
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 10000,
-        background: '#1A3A5C',
+        background: '#9333EA',
         color: '#fff',
         borderRadius: 10,
         padding: '14px 18px',
@@ -168,3 +168,4 @@ export default function UpdateNotifier() {
     </div>
   );
 }
+export { UpdateNotifier };

@@ -41,11 +41,11 @@ export default function SkipNavigation({
             focus:px-4 focus:py-2
             focus:rounded-lg
             focus:text-sm focus:font-semibold
-            focus:bg-blue-600 focus:text-white
-            dark:focus:bg-[#2E86C1] dark:focus:text-white
+            focus:bg-purple-600 focus:text-white
+            dark:focus:bg-[#7e22ce] dark:focus:text-white
             focus:outline-none
             focus:ring-2 focus:ring-white focus:ring-offset-2
-            focus:ring-offset-blue-600 dark:focus:ring-offset-[#2E86C1]
+            focus:ring-offset-blue-600 dark:focus:ring-offset-[#7e22ce]
             focus:shadow-lg
             transition-all duration-150
           "
@@ -65,3 +65,4 @@ export default function SkipNavigation({
     </nav>
   );
 }
+export { SkipNavigation };

@@ -68,7 +68,7 @@ function BilanHeader({ cols }) {
 
 function BilanSection({ title }) {
   return (
-    <tr className="bg-blue-600 dark:bg-blue-800">
+    <tr className="bg-purple-600 dark:bg-purple-800">
       <td colSpan={4} className="px-3 py-2 font-bold text-white text-xs uppercase tracking-widest">
         {title}
       </td>
@@ -145,7 +145,7 @@ export default function BalanceSheet({ data, fiscalYears, selectedFY }) {
 
               {/* === ACTIF === */}
               <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="bg-blue-700 dark:bg-blue-800 px-4 py-3">
+                <div className="bg-purple-700 dark:bg-purple-800 px-4 py-3">
                   <h2 className="font-bold text-white uppercase tracking-widest text-sm">ACTIF</h2>
                 </div>
                 <div className="overflow-x-auto">
@@ -188,7 +188,7 @@ export default function BalanceSheet({ data, fiscalYears, selectedFY }) {
                       <BilanRow label="Banques et caisses (51-57)" indent={1} value={actif.tresorerie} />
 
                       {/* Total général actif */}
-                      <tr className="bg-blue-700 dark:bg-blue-800">
+                      <tr className="bg-purple-700 dark:bg-purple-800">
                         <td className="px-3 py-3 font-bold text-white text-sm uppercase tracking-wide">
                           TOTAL ACTIF
                         </td>
@@ -256,3 +256,4 @@ export default function BalanceSheet({ data, fiscalYears, selectedFY }) {
     </AuthLayout>
   );
 }
+export { BalanceSheet };

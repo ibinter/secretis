@@ -102,13 +102,13 @@ export default function Forecast({ budget }) {
             <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs">
               <button
                 onClick={() => setMethod('linear')}
-                className={`px-3 py-1.5 transition ${method === 'linear' ? 'bg-[#1A3A5C] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 transition ${method === 'linear' ? 'bg-[#9333EA] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 Linéaire
               </button>
               <button
                 onClick={() => setMethod('weighted')}
-                className={`px-3 py-1.5 transition ${method === 'weighted' ? 'bg-[#1A3A5C] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 transition ${method === 'weighted' ? 'bg-[#9333EA] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 Saisonnalisée
               </button>
@@ -127,7 +127,7 @@ export default function Forecast({ budget }) {
                 <button
                   key={v}
                   onClick={() => setScenario(v)}
-                  className={`px-3 py-1.5 transition ${scenario === v ? 'bg-[#1A3A5C] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                  className={`px-3 py-1.5 transition ${scenario === v ? 'bg-[#9333EA] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                 >
                   {l}
                 </button>
@@ -195,7 +195,7 @@ export default function Forecast({ budget }) {
                 strokeDasharray="4 2"
                 label={{ value: 'Aujourd\'hui', position: 'top', fontSize: 10, fill: '#94A3B8' }}
               />
-              <Line type="monotone" dataKey="budget"   stroke="#1A3A5C" strokeWidth={2} strokeDasharray="8 4" dot={false} connectNulls />
+              <Line type="monotone" dataKey="budget"   stroke="#9333EA" strokeWidth={2} strokeDasharray="8 4" dot={false} connectNulls />
               <Line type="monotone" dataKey="actual"   stroke="#27AE60" strokeWidth={2.5} dot={false} connectNulls />
               <Line type="monotone" dataKey="forecast" stroke="#F39C12" strokeWidth={2} strokeDasharray="4 4" dot={false} connectNulls />
             </LineChart>
@@ -250,3 +250,4 @@ export default function Forecast({ budget }) {
     </AuthLayout>
   );
 }
+export { Forecast };

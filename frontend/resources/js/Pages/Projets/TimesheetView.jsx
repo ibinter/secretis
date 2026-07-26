@@ -96,7 +96,7 @@ function TimeCell({ value, onSave, highlight, weekend }) {
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false); }}
-        className="w-full h-full text-center text-sm border-2 border-blue-500 rounded outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        className="w-full h-full text-center text-sm border-2 border-purple-500 rounded outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         style={{ minWidth: 44 }}
       />
     );
@@ -110,9 +110,9 @@ function TimeCell({ value, onSave, highlight, weekend }) {
       onDoubleClick={activate}
       className={`w-full h-full flex items-center justify-center text-sm cursor-default select-none rounded transition-colors
         ${weekend ? 'bg-gray-50 dark:bg-gray-800/50' : ''}
-        ${highlight ? 'ring-2 ring-blue-400 ring-inset' : ''}
-        ${hasValue ? 'text-blue-700 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}
-        hover:bg-blue-50 dark:hover:bg-blue-900/20`}
+        ${highlight ? 'ring-2 ring-purple-400 ring-inset' : ''}
+        ${hasValue ? 'text-purple-700 dark:text-purple-400 font-semibold bg-purple-50 dark:bg-purple-900/20' : 'text-gray-400'}
+        hover:bg-purple-50 dark:hover:bg-purple-900/20`}
       style={{ minHeight: 36, minWidth: 44 }}
     >
       {hasValue ? num : ''}
@@ -237,7 +237,7 @@ export default function TimesheetView() {
               {['week', 'month'].map((v) => (
                 <button key={v} onClick={() => setView(v)}
                   className={`px-3 py-1.5 transition-colors ${view === v
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-purple-600 text-white'
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                   {v === 'week' ? 'Semaine' : 'Mois'}
                 </button>
@@ -269,7 +269,7 @@ export default function TimesheetView() {
         {/* ── KPIs rapides ── */}
         <div className="grid grid-cols-3 gap-4 mb-5">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <p className="text-2xl font-bold text-blue-600">{totalHours}h</p>
+            <p className="text-2xl font-bold text-purple-600">{totalHours}h</p>
             <p className="text-xs text-gray-500 mt-1">Heures total</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
@@ -302,7 +302,7 @@ export default function TimesheetView() {
                     {days.map((day) => (
                       <th key={toISO(day)}
                         className={`text-center text-xs font-semibold px-1 py-3 min-w-[52px]
-                          ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : isWeekend(day) ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                          ${isToday(day) ? 'text-purple-600 dark:text-purple-400' : isWeekend(day) ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
                         {formatDay(day, view)}
                       </th>
                     ))}
@@ -355,11 +355,11 @@ export default function TimesheetView() {
                       Total / jour
                     </td>
                     {dayTotals.map((total, i) => (
-                      <td key={i} className={`text-center text-xs font-semibold py-2 ${total > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                      <td key={i} className={`text-center text-xs font-semibold py-2 ${total > 0 ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400'}`}>
                         {total > 0 ? `${total}h` : ''}
                       </td>
                     ))}
-                    <td className="text-center text-sm font-bold text-blue-700 dark:text-blue-400 border-l border-gray-100 dark:border-gray-700 py-2">
+                    <td className="text-center text-sm font-bold text-purple-700 dark:text-purple-400 border-l border-gray-100 dark:border-gray-700 py-2">
                       {totalHours}h
                     </td>
                   </tr>
@@ -376,3 +376,4 @@ export default function TimesheetView() {
     </AppLayout>
   );
 }
+export { TimesheetView };

@@ -93,7 +93,7 @@ export default function Blacklist({ visitors, filters }) {
                             onChange={e => setSearch(e.target.value)}
                             onKeyDown={handleSearch}
                             placeholder="Nom, N° pièce, société…"
-                            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#1A3A5C]"
+                            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-[#9333EA]"
                         />
                     </div>
                     <div className="flex gap-3">
@@ -105,7 +105,7 @@ export default function Blacklist({ visitors, filters }) {
                         </button>
                         <button
                             onClick={() => router.get('/visitors', { search })}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold border ${!filters.blacklisted ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]' : 'border-gray-200 text-gray-600'}`}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold border ${!filters.blacklisted ? 'bg-[#9333EA] text-white border-[#9333EA]' : 'border-gray-200 text-gray-600'}`}
                         >
                             Tous les visiteurs
                         </button>
@@ -191,7 +191,7 @@ export default function Blacklist({ visitors, filters }) {
                             <button
                                 key={page}
                                 onClick={() => router.get('/visitors', { ...filters, page })}
-                                className={`w-9 h-9 rounded-lg text-sm font-bold ${page === visitors.current_page ? 'bg-[#1A3A5C] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                className={`w-9 h-9 rounded-lg text-sm font-bold ${page === visitors.current_page ? 'bg-[#9333EA] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
                                 {page}
                             </button>
@@ -248,3 +248,4 @@ export default function Blacklist({ visitors, filters }) {
         </AppLayout>
     );
 }
+export { Blacklist };

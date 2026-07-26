@@ -7,7 +7,7 @@ import {
 import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Rapports Reception ───────────────────────────────────────────────────────
-const COLORS = ['#1A3A5C', '#F39C12', '#27AE60', '#E74C3C', '#9B59B6', '#3498DB'];
+const COLORS = ['#9333EA', '#F39C12', '#27AE60', '#E74C3C', '#9B59B6', '#3498DB'];
 
 export default function Reports({ report, last30, date }) {
     const [selectedDate, setSelectedDate] = useState(date);
@@ -55,7 +55,7 @@ export default function Reports({ report, last30, date }) {
                             className="border border-gray-200 rounded-xl px-4 py-2 text-sm"
                         />
                         <button onClick={exportPdf}
-                            className="bg-[#1A3A5C] text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                            className="bg-[#9333EA] text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
                             📄 Export PDF
                         </button>
                     </div>
@@ -64,7 +64,7 @@ export default function Reports({ report, last30, date }) {
                 {/* KPIs du jour */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     {[
-                        { label: 'Total visites',      value: report.total_visits,         color: 'bg-blue-50',   text: 'text-blue-700',  icon: '📊' },
+                        { label: 'Total visites',      value: report.total_visits,         color: 'bg-purple-50',   text: 'text-purple-700',  icon: '📊' },
                         { label: 'Présents',           value: report.checked_in,           color: 'bg-green-50',  text: 'text-green-700', icon: '🟢' },
                         { label: 'Partis',             value: report.checked_out,          color: 'bg-gray-50',   text: 'text-gray-700',  icon: '🏃' },
                         { label: 'No-show',            value: report.no_show,              color: 'bg-red-50',    text: 'text-red-700',   icon: '❌' },
@@ -94,7 +94,7 @@ export default function Reports({ report, last30, date }) {
                                     labelFormatter={d => new Date(d).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })}
                                     formatter={v => [v, 'visites']}
                                 />
-                                <Bar dataKey="count" fill="#1A3A5C" radius={[4,4,0,0]} name="Visites" />
+                                <Bar dataKey="count" fill="#9333EA" radius={[4,4,0,0]} name="Visites" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -149,11 +149,11 @@ export default function Reports({ report, last30, date }) {
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-0.5">
                                                 <span className="text-sm font-semibold text-gray-800">{item.host}</span>
-                                                <span className="text-sm font-bold text-[#1A3A5C]">{item.count}</span>
+                                                <span className="text-sm font-bold text-[#9333EA]">{item.count}</span>
                                             </div>
                                             <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-[#1A3A5C] rounded-full"
+                                                    className="h-full bg-[#9333EA] rounded-full"
                                                     style={{ width: `${(item.count / report.top_hosts[0]?.count) * 100}%` }}
                                                 />
                                             </div>
@@ -168,3 +168,4 @@ export default function Reports({ report, last30, date }) {
         </AppLayout>
     );
 }
+export { Reports };

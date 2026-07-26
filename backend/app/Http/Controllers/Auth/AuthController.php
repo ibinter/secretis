@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 /**
  * AuthController — Authentification SECRETIS ERP
@@ -357,4 +358,40 @@ class AuthController extends Controller
             default                          => route('dashboard'),
         };
     }
+
+    // -------------------------------------------------------------------------
+    // Inertia page renderers
+    // -------------------------------------------------------------------------
+
+    public function showLogin(): \Inertia\Response
+    {
+        return Inertia::render('Auth/Login');
+    }
+
+    public function showRegister(): \Inertia\Response
+    {
+        return Inertia::render('Auth/Register');
+    }
+
+    public function showForgotPassword(): \Inertia\Response
+    {
+        return Inertia::render('Auth/ForgotPassword');
+    }
+
+    public function showResetPassword(string $token): \Inertia\Response
+    {
+        return Inertia::render('Auth/ResetPassword', ['token' => $token, 'email' => request('email')]);
+    }
+
+    public function showVerifyEmail(): \Inertia\Response
+    {
+        return Inertia::render('Auth/VerifyEmail');
+    }
+
+    public function verifyEmail(\Illuminate\Foundation\Auth\EmailVerificationRequest $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->fulfill();
+        return redirect()->route('dashboard');
+    }
+
 }

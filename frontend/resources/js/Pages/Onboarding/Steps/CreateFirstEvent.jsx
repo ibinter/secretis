@@ -44,7 +44,7 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
           {EVENT_TYPES.map(t => (
             <button key={t} type="button" onClick={() => set('type', t)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all
-                ${form.type === t ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}>
+                ${form.type === t ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}>
               {t}
             </button>
           ))}
@@ -56,7 +56,7 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
         <label className="block text-sm font-semibold text-slate-300 mb-2">Titre <span className="text-red-400">*</span></label>
         <input type="text" value={form.title} onChange={e => set('title', e.target.value)}
           placeholder="Ex : Réunion de coordination mensuelle"
-          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 transition-colors" />
+          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors" />
         {errors.title && <p className="mt-1 text-red-400 text-xs">{errors.title}</p>}
       </div>
 
@@ -66,18 +66,18 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
           <label className="block text-sm font-semibold text-slate-300 mb-2">Date <span className="text-red-400">*</span></label>
           <input type="date" value={form.date} onChange={e => set('date', e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-blue-400 transition-colors" />
+            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-purple-400 transition-colors" />
           {errors.date && <p className="mt-1 text-red-400 text-xs">{errors.date}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-2">Début</label>
           <input type="time" value={form.startTime} onChange={e => set('startTime', e.target.value)}
-            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-blue-400" />
+            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-purple-400" />
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-300 mb-2">Fin</label>
           <input type="time" value={form.endTime} onChange={e => set('endTime', e.target.value)}
-            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-blue-400" />
+            className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-purple-400" />
         </div>
       </div>
 
@@ -86,7 +86,7 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
         <label className="block text-sm font-semibold text-slate-300 mb-2">Lieu</label>
         <input type="text" value={form.location} onChange={e => set('location', e.target.value)}
           placeholder="Ex : Salle de conférence A, Visioconférence..."
-          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
       </div>
 
       {/* Participants */}
@@ -94,7 +94,7 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
         <label className="block text-sm font-semibold text-slate-300 mb-2">Participants</label>
         <input type="text" value={form.participants} onChange={e => set('participants', e.target.value)}
           placeholder="Emails séparés par des virgules..."
-          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400" />
+          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400" />
       </div>
 
       {/* Description */}
@@ -102,12 +102,12 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
         <label className="block text-sm font-semibold text-slate-300 mb-2">Description (optionnel)</label>
         <textarea value={form.description} onChange={e => set('description', e.target.value)}
           rows={3} placeholder="Ordre du jour, notes..."
-          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 resize-none" />
+          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 resize-none" />
       </div>
 
       <div className="flex gap-3">
         <button type="submit" disabled={saving}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
           {saving ? '⏳...' : '📅 Créer l\'événement →'}
         </button>
         {onSkip && (
@@ -119,3 +119,4 @@ export default function CreateFirstEvent({ step, onComplete, onSkip, saving }) {
     </form>
   );
 }
+export { CreateFirstEvent };

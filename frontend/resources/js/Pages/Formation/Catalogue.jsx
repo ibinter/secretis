@@ -22,7 +22,7 @@ const LEVEL_CONFIG = {
 };
 
 const STATUS_CONFIG = {
-    enrolled:    { label: 'Inscrit',    color: 'bg-blue-100 text-blue-700' },
+    enrolled:    { label: 'Inscrit',    color: 'bg-purple-100 text-purple-700' },
     in_progress: { label: 'En cours',   color: 'bg-orange-100 text-orange-700' },
     completed:   { label: 'Terminé',    color: 'bg-green-100 text-green-700' },
 };
@@ -54,7 +54,7 @@ function CourseCard({ course }) {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
             {/* Thumbnail */}
-            <div className="relative h-36 bg-gradient-to-br from-blue-600 to-indigo-700 overflow-hidden">
+            <div className="relative h-36 bg-gradient-to-br from-purple-600 to-indigo-700 overflow-hidden">
                 {course.thumbnail_path ? (
                     <img src={`/storage/${course.thumbnail_path}`} alt={course.title}
                          className="w-full h-full object-cover"/>
@@ -272,3 +272,4 @@ export default function Catalogue({ courses, pagination, filters, categories }) 
         </AppLayout>
     );
 }
+export { Catalogue };

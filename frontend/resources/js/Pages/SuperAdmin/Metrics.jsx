@@ -9,8 +9,8 @@ import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout'
 
 // ─── Palette brand ────────────────────────────────────────────────────────────
 const C = {
-  primary:   '#1A3A5C',
-  secondary: '#2E86C1',
+  primary:   '#9333EA',
+  secondary: '#7e22ce',
   accent:    '#F39C12',
   success:   '#1E8449',
   danger:    '#C0392B',
@@ -472,3 +472,4 @@ function LegendDot({ color, label }) {
     </span>
   )
 }
+export { Metrics };

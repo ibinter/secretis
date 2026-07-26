@@ -104,7 +104,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
   }
 
   const statusCls = {
-    active: 'bg-green-100 text-green-700', trial: 'bg-blue-100 text-blue-700',
+    active: 'bg-green-100 text-green-700', trial: 'bg-purple-100 text-purple-700',
     suspended: 'bg-red-100 text-red-700', expired: 'bg-gray-100 text-gray-600',
   }[org.status] ?? 'bg-gray-100 text-gray-600'
 
@@ -128,7 +128,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <button onClick={impersonate} className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+          <button onClick={impersonate} className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
             <Ic.Eye /> Prise en main
           </button>
           <button onClick={() => setActionModal('message')} className="flex items-center gap-2 px-3 py-2 text-sm font-medium border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -147,7 +147,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
               className={[
                 'px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
                 tab === t
-                  ? 'border-[#1A3A5C] text-[#1A3A5C] dark:border-blue-400 dark:text-blue-400'
+                  ? 'border-[#9333EA] text-[#9333EA] dark:border-purple-400 dark:text-purple-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
               ].join(' ')}
             >
@@ -171,7 +171,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
           <Card title="Modules actifs">
             <div className="flex flex-wrap gap-2 pt-1">
               {(org.settings?.modules ?? []).map(m => (
-                <span key={m} className="px-2.5 py-1 rounded-lg bg-[#1A3A5C]/10 text-[#1A3A5C] dark:bg-blue-900/30 dark:text-blue-300 text-xs font-medium uppercase">{m}</span>
+                <span key={m} className="px-2.5 py-1 rounded-lg bg-[#9333EA]/10 text-[#9333EA] dark:bg-purple-900/30 dark:text-purple-300 text-xs font-medium uppercase">{m}</span>
               ))}
             </div>
           </Card>
@@ -244,7 +244,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
                     <td className="py-3 pr-4 text-gray-400 text-xs">{fmtDate(p.created_at)}</td>
                     <td className="py-3">
                       {p.proof_file && (
-                        <a href={`/superadmin/payments/${p.id}/proof`} className="text-xs text-[#1A3A5C] dark:text-blue-400 hover:underline">{p.proof_file}</a>
+                        <a href={`/superadmin/payments/${p.id}/proof`} className="text-xs text-[#9333EA] dark:text-purple-400 hover:underline">{p.proof_file}</a>
                       )}
                     </td>
                   </tr>
@@ -260,7 +260,7 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
           <div className="space-y-2">
             {auditLogs.map(log => (
               <div key={log.id} className="flex items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-700/50 last:border-0">
-                <div className="w-7 h-7 rounded-full bg-[#1A3A5C]/10 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-7 h-7 rounded-full bg-[#9333EA]/10 flex items-center justify-center shrink-0 mt-0.5">
                   <Ic.User />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -311,11 +311,11 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
             value={justification}
             onChange={e => setJustification(e.target.value)}
             placeholder="Motif de l'action..."
-            className="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none"
+            className="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#9333EA]/30 outline-none"
           />
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => { setActionModal(null); setJustification(''); setAlert(null) }} className="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Annuler</button>
-            <button disabled={saving} onClick={() => doAction(actionModal)} className="px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
+            <button disabled={saving} onClick={() => doAction(actionModal)} className="px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
               {saving ? 'Traitement…' : 'Confirmer'}
             </button>
           </div>
@@ -327,12 +327,12 @@ export default function OrganizationShow({ organization: propOrg, auditLogs: pro
         <Modal title="Envoyer un email à l'organisation" onClose={() => setActionModal(null)}>
           {alert && <p className="mb-3 text-sm text-red-600 bg-red-50 rounded-lg p-2">{alert}</p>}
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objet</label>
-          <input value={msgSubject} onChange={e => setMsgSubject(e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm mb-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" placeholder="Objet du message" />
+          <input value={msgSubject} onChange={e => setMsgSubject(e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm mb-3 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none" placeholder="Objet du message" />
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
-          <textarea rows={5} value={msgBody} onChange={e => setMsgBody(e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" placeholder="Corps du message..." />
+          <textarea rows={5} value={msgBody} onChange={e => setMsgBody(e.target.value)} className="w-full border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-sm dark:bg-gray-700 dark:text-white resize-none focus:ring-2 focus:ring-[#9333EA]/30 outline-none" placeholder="Corps du message..." />
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setActionModal(null)} className="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Annuler</button>
-            <button disabled={saving} onClick={sendMessage} className="px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
+            <button disabled={saving} onClick={sendMessage} className="px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
               {saving ? 'Envoi…' : 'Envoyer'}
             </button>
           </div>
@@ -362,7 +362,7 @@ function Row({ label, value }) {
 }
 
 const BTN_COLORS = {
-  blue:   'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800',
+  blue:   'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800',
   amber:  'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
   orange: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
   red:    'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
@@ -403,3 +403,4 @@ function Modal({ title, onClose, children }) {
     </div>
   )
 }
+export { OrganizationShow };

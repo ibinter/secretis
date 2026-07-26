@@ -56,7 +56,7 @@ const CATEGORIES = [
 
 const PRIORITIES = [
   { value: 'low',      label: 'Faible',    color: 'text-green-600  bg-green-50  border-green-200' },
-  { value: 'medium',   label: 'Normale',   color: 'text-blue-600   bg-blue-50   border-blue-200' },
+  { value: 'medium',   label: 'Normale',   color: 'text-purple-600   bg-purple-50   border-purple-200' },
   { value: 'high',     label: 'Haute',     color: 'text-orange-600 bg-orange-50 border-orange-200' },
   { value: 'critical', label: 'Critique',  color: 'text-red-600    bg-red-50    border-red-200' },
 ];
@@ -71,7 +71,7 @@ function RichTextArea({ value, onChange, placeholder }) {
       placeholder={placeholder}
       rows={8}
       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm
-        outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 resize-y
+        outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400 resize-y
         placeholder:text-gray-400 leading-relaxed"
     />
   );
@@ -82,32 +82,32 @@ function FaqSuggestion({ faq, onDismiss }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 overflow-hidden">
+    <div className="rounded-xl border border-purple-200 bg-purple-50 overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-start gap-3 p-4 text-left hover:bg-blue-100/50 transition-colors"
+        className="w-full flex items-start gap-3 p-4 text-left hover:bg-purple-100/50 transition-colors"
       >
-        <span className="text-blue-500 flex-shrink-0 mt-0.5"><Icon.Lightbulb /></span>
+        <span className="text-purple-500 flex-shrink-0 mt-0.5"><Icon.Lightbulb /></span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-blue-900 line-clamp-2">{faq.question}</p>
-          <p className="text-xs text-blue-600 mt-0.5">{faq.category_name}</p>
+          <p className="text-sm font-medium text-purple-900 line-clamp-2">{faq.question}</p>
+          <p className="text-xs text-purple-600 mt-0.5">{faq.category_name}</p>
         </div>
         <button
           onClick={e => { e.stopPropagation(); onDismiss(faq.id); }}
-          className="text-blue-400 hover:text-blue-700 flex-shrink-0"
+          className="text-purple-400 hover:text-purple-700 flex-shrink-0"
         >
           <Icon.X />
         </button>
       </button>
       {expanded && (
-        <div className="px-4 pb-4 border-t border-blue-200 bg-white">
+        <div className="px-4 pb-4 border-t border-purple-200 bg-white">
           <div
             className="prose prose-sm max-w-none text-gray-700 mt-3"
             dangerouslySetInnerHTML={{ __html: faq.answer_html || faq.answer }}
           />
           <Link
             to={`/help/faq/${faq.id}`}
-            className="inline-block mt-3 text-xs text-blue-600 hover:underline font-medium"
+            className="inline-block mt-3 text-xs text-purple-600 hover:underline font-medium"
           >
             Voir l'article complet →
           </Link>
@@ -259,8 +259,8 @@ export default function TicketForm() {
               Centre d'aide
             </Link>
             <Link to={`/help/tickets/${submitted.id}`}
-              className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold
-              hover:bg-blue-700 transition-colors text-center">
+              className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-semibold
+              hover:bg-purple-700 transition-colors text-center">
               Voir le ticket
             </Link>
           </div>
@@ -302,7 +302,7 @@ export default function TicketForm() {
                 placeholder="Décrivez brièvement votre problème…"
                 maxLength={150}
                 className={`w-full px-4 py-3 rounded-xl border text-sm outline-none
-                  focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all
+                  focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all
                   ${errors.subject ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'}
                 `}
               />
@@ -324,7 +324,7 @@ export default function TicketForm() {
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-sm
                       font-medium transition-all text-left
                       ${form.category === cat.value
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
                         : 'border-gray-200 text-gray-700 hover:border-gray-300'}
                     `}
                   >
@@ -379,12 +379,12 @@ export default function TicketForm() {
                 onDragOver={e => e.preventDefault()}
                 onClick={() => fileRef.current?.click()}
                 className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center
-                  cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group"
+                  cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-all group"
               >
                 <Icon.Upload />
                 <p className="text-sm text-gray-500 mt-2">
                   Glissez-déposez vos fichiers ici ou{' '}
-                  <span className="text-blue-600 font-medium group-hover:underline">cliquez pour choisir</span>
+                  <span className="text-purple-600 font-medium group-hover:underline">cliquez pour choisir</span>
                 </p>
                 <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF, WEBP, PDF acceptés</p>
                 <input
@@ -429,7 +429,7 @@ export default function TicketForm() {
                     )}
                     {saraResult.faq_id && (
                       <Link to={`/help/faq/${saraResult.faq_id}`}
-                        className="text-xs text-blue-600 hover:underline mt-1 inline-block">
+                        className="text-xs text-purple-600 hover:underline mt-1 inline-block">
                         Voir l'article complet →
                       </Link>
                     )}
@@ -451,11 +451,11 @@ export default function TicketForm() {
                 onClick={checkWithSara}
                 disabled={saraChecking || !form.subject || !form.description}
                 className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl border-2
-                  border-blue-300 text-blue-700 text-sm font-medium hover:bg-blue-50
+                  border-purple-300 text-purple-700 text-sm font-medium hover:bg-purple-50
                   disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {saraChecking ? (
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Icon.Bot />
                 )}
@@ -465,7 +465,7 @@ export default function TicketForm() {
                 type="submit"
                 disabled={submitting}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl
-                  bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700
+                  bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700
                   disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {submitting ? (
@@ -503,7 +503,7 @@ export default function TicketForm() {
               {[
                 { label: 'Critique', delay: '< 4h',   color: 'text-red-600' },
                 { label: 'Haute',    delay: '< 24h',  color: 'text-orange-600' },
-                { label: 'Normale',  delay: '1–3 j',  color: 'text-blue-600' },
+                { label: 'Normale',  delay: '1–3 j',  color: 'text-purple-600' },
                 { label: 'Faible',   delay: '3–5 j',  color: 'text-gray-600' },
               ].map(({ label, delay, color }) => (
                 <div key={label} className="flex justify-between items-center text-xs">
@@ -518,3 +518,4 @@ export default function TicketForm() {
     </div>
   );
 }
+export { TicketForm };

@@ -39,7 +39,7 @@ function NavLeaf({ item, currentUrl }) {
         'flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-lg mx-2',
         isActive
           ? 'bg-white/15 text-white'
-          : 'text-blue-200/70 hover:text-white hover:bg-white/10',
+          : 'text-purple-200/70 hover:text-white hover:bg-white/10',
       ].join(' ')}
     >
       {Icon && <Icon size={16} className="shrink-0" />}
@@ -63,7 +63,7 @@ function NavGroup({ item, currentUrl }) {
           'flex items-center gap-3 w-full px-2 py-2.5 text-sm font-medium transition-colors rounded-lg',
           isChildActive
             ? 'text-white'
-            : 'text-blue-200/70 hover:text-white hover:bg-white/10',
+            : 'text-purple-200/70 hover:text-white hover:bg-white/10',
         ].join(' ')}
       >
         {Icon && <Icon size={16} className="shrink-0" />}
@@ -86,7 +86,7 @@ function NavGroup({ item, currentUrl }) {
                   'flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md transition-colors',
                   active
                     ? 'bg-white/15 text-white'
-                    : 'text-blue-200/60 hover:text-white hover:bg-white/10',
+                    : 'text-purple-200/60 hover:text-white hover:bg-white/10',
                 ].join(' ')}
               >
                 <span className="w-1 h-1 rounded-full bg-current opacity-60 shrink-0" />
@@ -110,7 +110,7 @@ export default function SuperAdminLayout({ children, title }) {
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
 
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 flex flex-col bg-[#1A3A5C] h-screen sticky top-0">
+      <aside className="w-64 shrink-0 flex flex-col bg-[#9333EA] h-screen sticky top-0">
 
         {/* Logo */}
         <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
@@ -119,7 +119,7 @@ export default function SuperAdminLayout({ children, title }) {
           </div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">IBIG Soft</p>
-            <p className="text-blue-200/70 text-[10px] font-medium">Super Admin</p>
+            <p className="text-purple-200/70 text-[10px] font-medium">Super Admin</p>
           </div>
           <span className="ml-auto px-2 py-0.5 rounded text-[10px] font-black bg-[#C0392B] text-white tracking-wide shrink-0">
             SUPER
@@ -158,7 +158,7 @@ export default function SuperAdminLayout({ children, title }) {
               <Avatar name={auth.user.name} size="sm" />
               <div className="min-w-0 flex-1">
                 <p className="text-white text-xs font-medium truncate">{auth.user.name}</p>
-                <p className="text-blue-200/60 text-[10px] truncate">{auth.user.email}</p>
+                <p className="text-purple-200/60 text-[10px] truncate">{auth.user.email}</p>
               </div>
             </div>
           )}
@@ -177,7 +177,7 @@ export default function SuperAdminLayout({ children, title }) {
 
         {/* Header */}
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 px-6 shrink-0">
-          <h1 className="text-base font-semibold text-[#1A3A5C] dark:text-white truncate">
+          <h1 className="text-base font-semibold text-[#9333EA] dark:text-white truncate">
             {title ?? 'IBIG Soft — Super Admin'}
           </h1>
           <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#C0392B] text-white tracking-wide shrink-0">
@@ -199,3 +199,4 @@ export default function SuperAdminLayout({ children, title }) {
     </div>
   )
 }
+export { SuperAdminLayout };

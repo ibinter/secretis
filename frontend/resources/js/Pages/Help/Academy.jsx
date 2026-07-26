@@ -40,7 +40,7 @@ const PARCOURS = [
     level: 'Intermédiaire',
     recommendedFor: ['agent', 'secretaire'],
     description:
-      'Ce parcours couvre l'ensemble des tâches d'une secrétaire de direction : courrier, agenda, réunions, GED et accueil. À l'issue, vous gérerez l'administration quotidienne de manière autonome.',
+      `Ce parcours couvre l'ensemble des tâches d'une secrétaire de direction : courrier, agenda, réunions, GED et accueil. À l'issue, vous gérerez l'administration quotidienne de manière autonome.`,
     modules: [
       { id: 1, title: 'Prise en main de SECRETIS', duration: '20 min', type: 'video' },
       { id: 2, title: 'Maîtriser l\'agenda', duration: '30 min', type: 'interactive' },
@@ -110,7 +110,7 @@ const PARCOURS = [
     level: 'Fondamental',
     recommendedFor: ['agent_accueil'],
     description:
-      'Parcours dédié aux agents d'accueil et standardistes. Maîtrisez l'enregistrement des visiteurs, la gestion de la file d'attente et la production du rapport journalier.',
+      `Parcours dédié aux agents d'accueil et standardistes. Maîtrisez l'enregistrement des visiteurs, la gestion de la file d'attente et la production du rapport journalier.`,
     modules: [
       { id: 1, title: 'Enregistrer l\'arrivée d\'un visiteur', duration: '20 min', type: 'interactive' },
       { id: 2, title: 'Gérer la file d\'attente virtuelle', duration: '20 min', type: 'interactive' },
@@ -128,7 +128,7 @@ const PARCOURS = [
     level: 'Expert',
     recommendedFor: ['super_admin', 'admin'],
     description:
-      'Parcours technique pour les administrateurs système. Couvre la configuration complète de l'organisation, la gestion des utilisateurs et des rôles, les intégrations, la sécurité et la conformité.',
+      `Parcours technique pour les administrateurs système. Couvre la configuration complète de l'organisation, la gestion des utilisateurs et des rôles, les intégrations, la sécurité et la conformité.`,
     modules: [
       { id: 1, title: 'Architecture et concepts SECRETIS', duration: '20 min', type: 'video' },
       { id: 2, title: 'Configuration initiale de l\'organisation', duration: '25 min', type: 'interactive' },
@@ -148,13 +148,13 @@ const PARCOURS = [
 
 const COLOR_MAP = {
   blue: {
-    bg: 'bg-blue-50 dark:bg-blue-950/30',
-    border: 'border-blue-200 dark:border-blue-800',
-    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
-    progress: 'bg-blue-600',
-    icon: 'text-blue-600 dark:text-blue-400',
-    button: 'bg-blue-600 hover:bg-blue-700 text-white',
-    ring: 'ring-blue-200 dark:ring-blue-800',
+    bg: 'bg-purple-50 dark:bg-purple-950/30',
+    border: 'border-purple-200 dark:border-purple-800',
+    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+    progress: 'bg-purple-600',
+    icon: 'text-purple-600 dark:text-purple-400',
+    button: 'bg-purple-600 hover:bg-purple-700 text-white',
+    ring: 'ring-purple-200 dark:ring-purple-800',
   },
   purple: {
     bg: 'bg-purple-50 dark:bg-purple-950/30',
@@ -466,15 +466,15 @@ export default function Academy({ userProgress = {}, userName = 'Utilisateur', u
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         {/* Bannière d'en-tête */}
-        <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white">
+        <div className="bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 text-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-7 h-7 text-blue-200" />
+                  <BookOpen className="w-7 h-7 text-purple-200" />
                   <h1 className="text-2xl md:text-3xl font-bold">Académie SECRETIS</h1>
                 </div>
-                <p className="text-blue-200 text-base max-w-xl">
+                <p className="text-purple-200 text-base max-w-xl">
                   Bonjour, <span className="font-semibold text-white">{userName}</span> ! Maîtrisez
                   SECRETIS à votre rythme avec nos parcours de formation structurés.
                 </p>
@@ -482,18 +482,18 @@ export default function Academy({ userProgress = {}, userName = 'Utilisateur', u
 
               {/* Progression globale */}
               <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-5 min-w-[220px]">
-                <p className="text-blue-200 text-xs font-medium uppercase tracking-wider mb-1">
+                <p className="text-purple-200 text-xs font-medium uppercase tracking-wider mb-1">
                   Votre progression globale
                 </p>
                 <div className="flex items-end gap-2 mb-2">
                   <span className="text-4xl font-bold">{stats.globalPercent}%</span>
-                  <span className="text-blue-200 text-sm mb-1">
+                  <span className="text-purple-200 text-sm mb-1">
                     ({stats.completedModules}/{stats.totalModules} modules)
                   </span>
                 </div>
                 <ProgressBar value={stats.globalPercent} colorClass="bg-white" />
                 {stats.completedParcours > 0 && (
-                  <p className="text-blue-200 text-xs mt-2 flex items-center gap-1">
+                  <p className="text-purple-200 text-xs mt-2 flex items-center gap-1">
                     <Award size={12} />
                     {stats.completedParcours} parcours complété{stats.completedParcours > 1 ? 's' : ''}
                   </p>
@@ -512,7 +512,7 @@ export default function Academy({ userProgress = {}, userName = 'Utilisateur', u
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un parcours..."
-              className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="flex gap-2">
               {[
@@ -526,7 +526,7 @@ export default function Academy({ userProgress = {}, userName = 'Utilisateur', u
                   onClick={() => setFilter(f.key)}
                   className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-colors ${
                     filter === f.key
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
@@ -579,3 +579,4 @@ export default function Academy({ userProgress = {}, userName = 'Utilisateur', u
     </>
   );
 }
+export { Academy };

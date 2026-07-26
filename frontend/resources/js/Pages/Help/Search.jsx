@@ -38,16 +38,16 @@ export default function HelpSearch({ query = '', results = [], count = 0, catego
         {/* En-tête */}
         <div className="mb-8">
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <Link href={route('help.index')} className="hover:text-[#2E86C1]">Centre d'aide</Link>
+            <Link href={route('help.index')} className="hover:text-[#7e22ce]">Centre d'aide</Link>
             <ChevronRight />
             <span className="text-gray-900 dark:text-white">Recherche</span>
           </nav>
           <form action={route('help.search')} method="GET" className="flex gap-3">
             <input name="q" defaultValue={query} type="text" placeholder="Rechercher…"
               className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800
-                text-gray-900 dark:text-white outline-none focus:border-[#2E86C1] focus:ring-1 focus:ring-[#2E86C1]" />
+                text-gray-900 dark:text-white outline-none focus:border-[#7e22ce] focus:ring-1 focus:ring-[#7e22ce]" />
             <button type="submit"
-              className="px-6 py-3 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white font-medium rounded-xl transition-colors">
+              className="px-6 py-3 bg-[#7e22ce] hover:bg-[#9333EA] text-white font-medium rounded-xl transition-colors">
               Rechercher
             </button>
           </form>
@@ -68,12 +68,12 @@ export default function HelpSearch({ query = '', results = [], count = 0, catego
                   <Link key={article.id}
                     href={route('help.article', { category: article.category?.slug, article: article.slug })}
                     className="block p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700
-                      hover:border-[#2E86C1] hover:shadow-md transition-all group">
+                      hover:border-[#7e22ce] hover:shadow-md transition-all group">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
                       <span>{article.category?.icon}</span>
                       <span>{article.category?.name}</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E86C1] transition-colors mb-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#7e22ce] transition-colors mb-1">
                       {highlight(article.title, query)}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -126,7 +126,7 @@ export default function HelpSearch({ query = '', results = [], count = 0, catego
               </ul>
             </div>
 
-            <div className="mt-4 bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] rounded-xl p-4 text-white">
+            <div className="mt-4 bg-gradient-to-br from-[#9333EA] to-[#7e22ce] rounded-xl p-4 text-white">
               <p className="text-sm font-medium mb-3">Vous n'avez pas trouvé ?</p>
               <Link href={route('support.tickets.create')}
                 className="block text-center bg-[#F39C12] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-500 transition-colors">
@@ -139,3 +139,4 @@ export default function HelpSearch({ query = '', results = [], count = 0, catego
     </AppLayout>
   );
 }
+export { HelpSearch };

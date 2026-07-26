@@ -73,8 +73,8 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
                         label="Visites aujourd'hui"
                         value={today_total}
                         icon="📋"
-                        color="bg-blue-50 border-blue-200"
-                        textColor="text-blue-700"
+                        color="bg-purple-50 border-purple-200"
+                        textColor="text-purple-700"
                     />
                     <StatCard
                         label="Invitations en attente"
@@ -127,7 +127,7 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
                                                     className="w-14 h-14 rounded-full object-cover flex-shrink-0"
                                                 />
                                             ) : (
-                                                <div className="w-14 h-14 rounded-full bg-[#1A3A5C] text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                                                <div className="w-14 h-14 rounded-full bg-[#9333EA] text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
                                                     {visit.visitor?.full_name?.[0]?.toUpperCase()}
                                                 </div>
                                             )}
@@ -169,7 +169,7 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
                                         <button
                                             onClick={() => handleCheckOut(visit.id)}
                                             disabled={checkingOut === visit.id}
-                                            className="w-full bg-[#1A3A5C] hover:bg-blue-900 text-white font-bold text-sm py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+                                            className="w-full bg-[#9333EA] hover:bg-purple-900 text-white font-bold text-sm py-2.5 rounded-xl disabled:opacity-50 transition-colors"
                                         >
                                             {checkingOut === visit.id ? 'Traitement…' : '✅ Check-out'}
                                         </button>
@@ -231,3 +231,4 @@ function StatCard({ label, value, icon, color, textColor }) {
         </div>
     );
 }
+export { Dashboard };

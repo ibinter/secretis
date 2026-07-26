@@ -11,7 +11,7 @@ const STATUS_COLORS = {
 
 const COMM_STATUS_COLORS = {
   pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  approved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   paid:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
 };
 
@@ -128,7 +128,7 @@ export default function PartnersShow({ partner, referrals, commissions }) {
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Commission</h2>
-                <button onClick={() => setEditRate(!editRate)} className="text-xs text-[#2E86C1] hover:underline">
+                <button onClick={() => setEditRate(!editRate)} className="text-xs text-[#7e22ce] hover:underline">
                   {editRate ? 'Annuler' : 'Modifier'}
                 </button>
               </div>
@@ -151,7 +151,7 @@ export default function PartnersShow({ partner, referrals, commissions }) {
                     className="w-24 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                   <span className="self-center text-gray-500">%</span>
-                  <button type="submit" className="px-3 py-1.5 bg-[#2E86C1] text-white rounded-lg text-xs">
+                  <button type="submit" className="px-3 py-1.5 bg-[#7e22ce] text-white rounded-lg text-xs">
                     Sauver
                   </button>
                 </form>
@@ -180,7 +180,7 @@ export default function PartnersShow({ partner, referrals, commissions }) {
           <div className="lg:col-span-2 space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Clients actifs" value={activeReferrals} color="text-[#1E8449]" />
-              <StatCard label="Taux conversion" value={`${conversionRate}%`} color="text-[#2E86C1]" />
+              <StatCard label="Taux conversion" value={`${conversionRate}%`} color="text-[#7e22ce]" />
               <StatCard label="MRR généré" value={fmt(partner.total_revenue)} />
               <StatCard label="Commissions versées" value={fmt(partner.total_commissions)} color="text-[#F39C12]" />
             </div>
@@ -216,7 +216,7 @@ export default function PartnersShow({ partner, referrals, commissions }) {
                 onClick={() => setActiveSection(tab.key)}
                 className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
                   activeSection === tab.key
-                    ? 'border-[#2E86C1] text-[#2E86C1]'
+                    ? 'border-[#7e22ce] text-[#7e22ce]'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                 }`}
               >
@@ -302,3 +302,4 @@ export default function PartnersShow({ partner, referrals, commissions }) {
     </SuperAdminLayout>
   );
 }
+export { PartnersShow };

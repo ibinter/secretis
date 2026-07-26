@@ -24,7 +24,7 @@ import { fr } from 'date-fns/locale';
 
 const STATUS_CONFIG = {
   available:   { label: 'Disponible',      color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',   dot: 'bg-green-500'  },
-  in_use:      { label: 'En déplacement',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',       dot: 'bg-blue-500'   },
+  in_use:      { label: 'En déplacement',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',       dot: 'bg-purple-500'   },
   maintenance: { label: 'Maintenance',     color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',   dot: 'bg-amber-500'  },
   retired:     { label: 'Retiré',          color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',          dot: 'bg-gray-400'   },
 };
@@ -53,7 +53,7 @@ function VehicleCard({ vehicle, onRequest, onLogbook }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
       {/* Photo / Icône */}
-      <div className="h-36 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 relative">
+      <div className="h-36 bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 relative">
         {vehicle.photo ? (
           <img src={vehicle.photo} alt={`${vehicle.brand} ${vehicle.model}`} className="w-full h-full object-cover" />
         ) : (
@@ -409,7 +409,7 @@ export default function VehiculesIndex({ vehicles, alerts }) {
               </span>
               {inUseCount > 0 && (
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />{inUseCount} en déplacement
+                  <span className="w-2 h-2 rounded-full bg-purple-500" />{inUseCount} en déplacement
                 </span>
               )}
               {maintenanceCount > 0 && (
@@ -491,3 +491,4 @@ export default function VehiculesIndex({ vehicles, alerts }) {
     </AuthLayout>
   );
 }
+export { VehiculesIndex };

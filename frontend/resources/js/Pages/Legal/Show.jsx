@@ -716,3 +716,4 @@ export default function LegalShow() {
     </div>
   );
 }
+export { LegalShow };

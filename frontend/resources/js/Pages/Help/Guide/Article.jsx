@@ -147,7 +147,7 @@ export default function GuideArticle({
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
                 {/* Header compact */}
-                <div className="text-white py-8 px-4" style={{ background: `linear-gradient(135deg, #1A3A5C, ${section.color})` }}>
+                <div className="text-white py-8 px-4" style={{ background: `linear-gradient(135deg, #9333EA, ${section.color})` }}>
                     <div className="max-w-6xl mx-auto">
                         {/* Breadcrumb */}
                         <nav className="flex items-center gap-2 text-sm text-white/70 mb-4 flex-wrap">
@@ -177,7 +177,7 @@ export default function GuideArticle({
                                 {['fr', 'en'].map(l => (
                                     <button key={l} onClick={() => setLocale(l)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                                            locale === l ? 'bg-white text-[#1A3A5C]' : 'bg-white/20 hover:bg-white/30 text-white'
+                                            locale === l ? 'bg-white text-[#9333EA]' : 'bg-white/20 hover:bg-white/30 text-white'
                                         }`}>
                                         {l === 'fr' ? 'FR' : 'EN'}
                                     </button>
@@ -245,7 +245,7 @@ export default function GuideArticle({
                                             prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed
                                             prose-ul:my-3 prose-li:my-1
                                             prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
-                                            prose-blockquote:border-l-4 prose-blockquote:border-[#2E86C1] prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/20 prose-blockquote:rounded-r-lg prose-blockquote:py-3 prose-blockquote:px-4 prose-blockquote:not-italic
+                                            prose-blockquote:border-l-4 prose-blockquote:border-[#7e22ce] prose-blockquote:bg-purple-50 dark:prose-blockquote:bg-purple-900/20 prose-blockquote:rounded-r-lg prose-blockquote:py-3 prose-blockquote:px-4 prose-blockquote:not-italic
                                             prose-strong:text-gray-900 dark:prose-strong:text-white"
                                         dangerouslySetInnerHTML={{ __html: contentWithIds }}
                                     />
@@ -288,7 +288,7 @@ export default function GuideArticle({
                                         <Icon.ChevronLeft />
                                         <div className="min-w-0">
                                             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{t('Précédent', 'Previous')}</p>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-[#2E86C1] transition-colors truncate">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-[#7e22ce] transition-colors truncate">
                                                 {prevTitle}
                                             </p>
                                         </div>
@@ -303,7 +303,7 @@ export default function GuideArticle({
                                         <Icon.ChevronRight />
                                         <div className="min-w-0 sm:text-right">
                                             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{t('Suivant', 'Next')}</p>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-[#2E86C1] transition-colors truncate">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-[#7e22ce] transition-colors truncate">
                                                 {nextTitle}
                                             </p>
                                         </div>
@@ -348,3 +348,4 @@ export default function GuideArticle({
         </>
     );
 }
+export { GuideArticle };

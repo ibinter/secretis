@@ -221,7 +221,7 @@ class CrmDailyTasks extends Command
                 <td style='padding:6px 12px;border-bottom:1px solid #f0f0f0;'>{$contact->company_name}</td>
                 <td style='padding:6px 12px;border-bottom:1px solid #f0f0f0;'>{$contact->contact_name}</td>
                 <td style='padding:6px 12px;border-bottom:1px solid #f0f0f0;color:#ef4444;'>{$days}</td>
-                <td style='padding:6px 12px;border-bottom:1px solid #f0f0f0;'>{$contact->assignedUser->name ?? '—'}</td>
+                <td style='padding:6px 12px;border-bottom:1px solid #f0f0f0;'>{$contact->assignedUser->name}</td>
             </tr>";
         }
 

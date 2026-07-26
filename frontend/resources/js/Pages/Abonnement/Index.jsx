@@ -210,7 +210,7 @@ export default function AbonnementIndex() {
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
             </div>
         );
     }
@@ -229,7 +229,7 @@ export default function AbonnementIndex() {
                 </div>
                 <Link
                     href="/abonnement/paiement"
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition"
                 >
                     + Renouveler / Changer de plan
                 </Link>
@@ -256,7 +256,7 @@ export default function AbonnementIndex() {
                                 <h2 className="text-xl font-bold text-gray-900">{license.plan_name}</h2>
                                 <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
                                     status === 'active'  ? 'bg-green-100 text-green-800' :
-                                    status === 'trial'   ? 'bg-blue-100 text-blue-800'  :
+                                    status === 'trial'   ? 'bg-purple-100 text-purple-800'  :
                                     status === 'grace'   ? 'bg-orange-100 text-orange-800' :
                                                            'bg-red-100 text-red-800'
                                 }`}>
@@ -300,7 +300,7 @@ export default function AbonnementIndex() {
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
                                         {license.modules.map(mod => (
-                                            <span key={mod} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">
+                                            <span key={mod} className="rounded-full bg-purple-50 px-2.5 py-0.5 text-xs text-purple-700">
                                                 {mod}
                                             </span>
                                         ))}
@@ -313,7 +313,7 @@ export default function AbonnementIndex() {
                         <div className="flex flex-col gap-2">
                             <Link
                                 href="/abonnement/paiement"
-                                className="rounded-lg border border-blue-600 px-4 py-2 text-center text-sm font-medium text-blue-600 hover:bg-blue-50 transition"
+                                className="rounded-lg border border-purple-600 px-4 py-2 text-center text-sm font-medium text-purple-600 hover:bg-purple-50 transition"
                             >
                                 Renouveler
                             </Link>
@@ -343,7 +343,7 @@ export default function AbonnementIndex() {
                     </p>
                     <Link
                         href="/abonnement/paiement"
-                        className="inline-block rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition"
+                        className="inline-block rounded-lg bg-purple-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-700 transition"
                     >
                         Choisir un plan
                     </Link>
@@ -403,7 +403,7 @@ export default function AbonnementIndex() {
                                                     <button
                                                         onClick={() => downloadInvoice(payment.id, payment.invoice_number)}
                                                         disabled={downloadingId === payment.id}
-                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 transition"
+                                                        className="text-purple-600 hover:text-purple-800 text-sm font-medium disabled:opacity-50 transition"
                                                     >
                                                         {downloadingId === payment.id ? '...' : '↓ PDF'}
                                                     </button>
@@ -431,7 +431,7 @@ export default function AbonnementIndex() {
                                     >
                                         ← Précédent
                                     </button>
-                                    <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+                                    <span className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs text-purple-700">
                                         {page} / {pagination.last_page}
                                     </span>
                                     <button
@@ -450,3 +450,4 @@ export default function AbonnementIndex() {
         </div>
     );
 }
+export { AbonnementIndex };

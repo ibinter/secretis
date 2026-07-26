@@ -46,7 +46,7 @@ function CertificateVisual({ certificate }) {
                 {/* Logos */}
                 <div className="w-full flex items-center justify-between mb-6">
                     <div className="flex flex-col items-start">
-                        <span className="text-2xl font-extrabold text-blue-800 tracking-tight">IBIG SECRETIS</span>
+                        <span className="text-2xl font-extrabold text-purple-800 tracking-tight">IBIG SECRETIS</span>
                         <span className="text-xs text-gray-400 tracking-widest uppercase">ERP Platform</span>
                     </div>
                     <div className="flex flex-col items-end">
@@ -81,7 +81,7 @@ function CertificateVisual({ certificate }) {
                 </div>
 
                 <p className="text-sm text-gray-500 mb-2">Pour avoir complété avec succès</p>
-                <h3 className="text-xl font-bold text-blue-800 mb-3 text-balance leading-snug max-w-md">
+                <h3 className="text-xl font-bold text-purple-800 mb-3 text-balance leading-snug max-w-md">
                     {course_title}
                 </h3>
 
@@ -118,8 +118,8 @@ function CertificateVisual({ certificate }) {
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center">
-                            <span className="text-blue-700 text-xs font-extrabold">IS</span>
+                        <div className="w-10 h-10 rounded-full bg-purple-100 border-2 border-purple-300 flex items-center justify-center">
+                            <span className="text-purple-700 text-xs font-extrabold">IS</span>
                         </div>
                         <span className="text-[10px] text-gray-400">Sceau IBIG Soft</span>
                     </div>
@@ -172,9 +172,9 @@ export default function AcademieCertificate({ certificate }) {
 
                 {/* Fil d'Ariane */}
                 <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    <Link href={route('academie.index')} className="hover:text-blue-600">Académie</Link>
+                    <Link href={route('academie.index')} className="hover:text-purple-600">Académie</Link>
                     <span className="mx-2">/</span>
-                    <Link href={route('academie.mon-espace', { '#': 'certificats' })} className="hover:text-blue-600">Mon espace</Link>
+                    <Link href={route('academie.mon-espace', { '#': 'certificats' })} className="hover:text-purple-600">Mon espace</Link>
                     <span className="mx-2">/</span>
                     <span>Certificat</span>
                 </nav>
@@ -190,7 +190,7 @@ export default function AcademieCertificate({ certificate }) {
                 <div className="flex flex-wrap gap-3 mt-6 justify-center">
                     <button
                         onClick={downloadPdf}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors shadow-md"
+                        className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors shadow-md"
                     >
                         <DocumentArrowDownIcon className="w-5 h-5" />
                         Télécharger en PDF
@@ -221,7 +221,7 @@ export default function AcademieCertificate({ certificate }) {
                             href={certificate.verify_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 underline break-all"
+                            className="text-purple-600 dark:text-purple-400 underline break-all"
                         >
                             {certificate.verify_url}
                         </a>
@@ -231,3 +231,4 @@ export default function AcademieCertificate({ certificate }) {
         </AppLayout>
     );
 }
+export { AcademieCertificate };

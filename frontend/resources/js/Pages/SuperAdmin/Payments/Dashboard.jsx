@@ -370,7 +370,7 @@ export default function PaymentsDashboard() {
                     {orders.map(o => {
                       const statusMap = {
                         pending:         { label: 'En attente',   cls: 'bg-yellow-100 text-yellow-700' },
-                        proof_submitted: { label: 'Preuve soumise', cls: 'bg-blue-100 text-blue-700' },
+                        proof_submitted: { label: 'Preuve soumise', cls: 'bg-purple-100 text-purple-700' },
                         processing:      { label: 'Traitement',   cls: 'bg-indigo-100 text-indigo-700' },
                         paid:            { label: 'Payé',         cls: 'bg-emerald-100 text-emerald-700' },
                         cancelled:       { label: 'Annulé',       cls: 'bg-gray-100 text-gray-600' },
@@ -457,3 +457,4 @@ export default function PaymentsDashboard() {
     </>
   );
 }
+export { PaymentsDashboard };

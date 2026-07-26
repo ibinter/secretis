@@ -40,12 +40,12 @@ const Icon = {
     </svg>
   ),
   SortAsc: () => (
-    <svg className="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+    <svg className="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
       <path d="M5 8l5-5 5 5H5z" />
     </svg>
   ),
   SortDesc: () => (
-    <svg className="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+    <svg className="w-3.5 h-3.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
       <path d="M15 12l-5 5-5-5h10z" />
     </svg>
   ),
@@ -249,7 +249,7 @@ export default function DataTable({
           <div className="flex items-center gap-3">
             {/* Compteur de sélection */}
             {selectable && selected.size > 0 && (
-              <span className="text-xs font-medium text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-medium text-purple-700 bg-purple-100 px-2.5 py-1 rounded-full">
                 {selected.size} sélectionné{selected.size > 1 ? 's' : ''}
               </span>
             )}
@@ -274,7 +274,7 @@ export default function DataTable({
                   onChange={e => setLocalSearch(e.target.value)}
                   placeholder="Rechercher…"
                   className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-200
-                    outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 bg-white"
+                    outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400 bg-white"
                 />
               </div>
             )}
@@ -310,7 +310,7 @@ export default function DataTable({
                     checked={allPageSelected}
                     ref={el => { if (el) el.indeterminate = someSelected && !allPageSelected; }}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400"
+                    className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-400"
                   />
                 </th>
               )}
@@ -363,7 +363,7 @@ export default function DataTable({
                   <tr
                     key={key}
                     className={`transition-colors
-                      ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50/50'}
+                      ${isSelected ? 'bg-purple-50' : 'hover:bg-gray-50/50'}
                     `}
                   >
                     {selectable && (
@@ -372,7 +372,7 @@ export default function DataTable({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleRow(key)}
-                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-400"
+                          className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-400"
                         />
                       </td>
                     )}
@@ -423,7 +423,7 @@ export default function DataTable({
                 value={rowsPerPage}
                 onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
                 className="text-xs border border-gray-200 rounded-md px-1.5 py-1 bg-white
-                  outline-none focus:ring-1 focus:ring-blue-300"
+                  outline-none focus:ring-1 focus:ring-purple-300"
               >
                 {[5, 10, 20, 50, 100].map(n => (
                   <option key={n} value={n}>{n}</option>
@@ -480,7 +480,7 @@ export default function DataTable({
                     onClick={() => changePage(page)}
                     className={`min-w-[32px] h-8 rounded-lg text-xs font-medium transition-colors
                       ${page === currentPage
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-purple-600 text-white'
                         : 'text-gray-600 hover:bg-gray-100'}
                     `}
                   >
@@ -512,3 +512,4 @@ export default function DataTable({
     </div>
   );
 }
+export { DataTable };

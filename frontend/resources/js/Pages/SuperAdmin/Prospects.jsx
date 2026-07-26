@@ -18,7 +18,7 @@ const MOCK_PROSPECTS = [
 
 // ─── Configuration pipeline Kanban ───────────────────────────────────────────
 const PIPELINE_STAGES = [
-  { key: 'new',            label: 'Nouveau',       color: 'blue',   bg: 'bg-blue-50',   border: 'border-blue-200',   header: 'bg-blue-100',   dot: 'bg-blue-500'   },
+  { key: 'new',            label: 'Nouveau',       color: 'blue',   bg: 'bg-purple-50',   border: 'border-purple-200',   header: 'bg-purple-100',   dot: 'bg-purple-500'   },
   { key: 'contacted',      label: 'Contacté',      color: 'yellow', bg: 'bg-yellow-50', border: 'border-yellow-200', header: 'bg-yellow-100', dot: 'bg-yellow-500' },
   { key: 'demo_scheduled', label: 'Démo planifiée',color: 'purple', bg: 'bg-purple-50', border: 'border-purple-200', header: 'bg-purple-100', dot: 'bg-purple-500' },
   { key: 'offer_sent',     label: 'Offre envoyée', color: 'orange', bg: 'bg-orange-50', border: 'border-orange-200', header: 'bg-orange-100', dot: 'bg-orange-500' },
@@ -193,7 +193,7 @@ function ProspectDetail({ prospect, onClose, onAddNote, onScheduleDemo, onSendOf
           <div className="flex items-center gap-2 mt-2">
             {stage && (
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                stage.color === 'blue'   ? 'bg-blue-100 text-blue-700' :
+                stage.color === 'blue'   ? 'bg-purple-100 text-purple-700' :
                 stage.color === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
                 stage.color === 'purple' ? 'bg-purple-100 text-purple-700' :
                 stage.color === 'orange' ? 'bg-orange-100 text-orange-700' :
@@ -639,3 +639,4 @@ export default function Prospects({ prospects: initialProspects, stats: initialS
     </>
   );
 }
+export { Prospects };

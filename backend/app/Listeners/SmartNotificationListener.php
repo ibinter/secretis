@@ -294,11 +294,12 @@ class SmartNotificationListener
             'pending'  => 'en attente de validation',
         ];
 
+        $leaveStatusLabel = $statusLabels[$leave->status] ?? $leave->status;
         $this->dispatchWithSmartFilter(
             user:    $user,
             type:    'leave_status_changed',
-            title:   "Demande de congé {$statusLabels[$leave->status] ?? $leave->status}",
-            body:    "Votre demande du {$leave->start_date->format('d/m/Y')} au {$leave->end_date->format('d/m/Y')} a été {$statusLabels[$leave->status] ?? $leave->status}.",
+            title:   "Demande de congé {$leaveStatusLabel}",
+            body:    "Votre demande du {$leave->start_date->format('d/m/Y')} au {$leave->end_date->format('d/m/Y')} a été {$leaveStatusLabel}.",
             data:    [
                 'action_url' => '/rh/conges',
                 'leave_id'   => $leave->id,

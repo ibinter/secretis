@@ -45,11 +45,11 @@ const TYPE_CONFIG = {
     task_assigned:     { icon: ClipboardDocumentCheckIcon, color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/30', label: 'Tâche' },
     task_overdue:      { icon: ExclamationTriangleIcon, color: 'text-red-600 bg-red-50 dark:bg-red-900/30',            label: 'Retard' },
     mail_urgent:       { icon: EnvelopeOpenIcon, color: 'text-red-600 bg-red-50 dark:bg-red-900/30',                   label: 'Courrier urgent' },
-    mail_received:     { icon: EnvelopeOpenIcon, color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30',                label: 'Courrier' },
+    mail_received:     { icon: EnvelopeOpenIcon, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',                label: 'Courrier' },
     meeting_reminder:  { icon: CalendarIcon, color: 'text-green-600 bg-green-50 dark:bg-green-900/30',                 label: 'Réunion' },
     meeting:           { icon: CalendarIcon, color: 'text-green-600 bg-green-50 dark:bg-green-900/30',                 label: 'Réunion' },
     event_created:     { icon: CalendarIcon, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',              label: 'Agenda' },
-    visitor_arrived:   { icon: UserPlusIcon, color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30',                    label: 'Visiteur' },
+    visitor_arrived:   { icon: UserPlusIcon, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',                    label: 'Visiteur' },
     circular:          { icon: MegaphoneIcon, color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',             label: 'Circulaire' },
     stock_alert:       { icon: ExclamationTriangleIcon, color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30',   label: 'Stock' },
     birthday:          { icon: BellIcon, color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/30',                        label: 'Anniversaire' },
@@ -165,7 +165,7 @@ export default function SmartBell() {
                 ref={bellRef}
                 onClick={() => setIsOpen(!isOpen)}
                 className={`relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
-                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                    focus:outline-none focus:ring-2 focus:ring-purple-500
                     ${hasUrgent ? 'animate-[wiggle_1s_ease-in-out_infinite]' : ''}`}
                 aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
                 aria-expanded={isOpen}
@@ -181,7 +181,7 @@ export default function SmartBell() {
                 {/* Badge compteur */}
                 {unreadCount > 0 && (
                     <span className={`absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1
-                        ${hasUrgent ? 'bg-red-500 animate-pulse' : 'bg-blue-600'}
+                        ${hasUrgent ? 'bg-red-500 animate-pulse' : 'bg-purple-600'}
                         text-white text-[10px] font-bold rounded-full flex items-center justify-center`}
                     >
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -212,7 +212,7 @@ export default function SmartBell() {
                             <BellIcon className="h-4 w-4 text-gray-500" />
                             <h3 className="font-semibold text-sm text-gray-900 dark:text-white">Notifications</h3>
                             {unreadCount > 0 && (
-                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-full">
+                                <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-semibold rounded-full">
                                     {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
                                 </span>
                             )}
@@ -222,7 +222,7 @@ export default function SmartBell() {
                                 <button
                                     onClick={() => { markAllRead(); }}
                                     disabled={isMarkingAll}
-                                    className="text-xs text-blue-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+                                    className="text-xs text-purple-600 hover:underline disabled:opacity-50 flex items-center gap-1"
                                 >
                                     <CheckIcon className="h-3 w-3" />
                                     Tout lire
@@ -238,7 +238,7 @@ export default function SmartBell() {
                     <div className="overflow-y-auto max-h-[calc(80vh-120px)]">
                         {isLoading ? (
                             <div className="flex justify-center py-8">
-                                <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full" />
+                                <div className="animate-spin h-5 w-5 border-2 border-purple-500 border-t-transparent rounded-full" />
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="flex flex-col items-center py-10 text-gray-400">
@@ -263,7 +263,7 @@ export default function SmartBell() {
                         <Link
                             href="/notifications/center"
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center justify-center gap-2 w-full text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                            className="flex items-center justify-center gap-2 w-full text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                         >
                             Voir toutes les notifications
                             <ArrowRightIcon className="h-4 w-4" />
@@ -300,7 +300,7 @@ function BellNotifItem({ notification, onClick, onMarkRead, onArchive }) {
             onKeyDown={(e) => e.key === 'Enter' && onClick()}
             className={`group flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50
                 cursor-pointer transition-colors border-b border-gray-50 dark:border-gray-700/50
-                ${!isRead ? 'bg-blue-50/40 dark:bg-blue-900/10' : ''}`}
+                ${!isRead ? 'bg-purple-50/40 dark:bg-purple-900/10' : ''}`}
         >
             {/* Icône */}
             <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${config.color}`}>
@@ -313,7 +313,7 @@ function BellNotifItem({ notification, onClick, onMarkRead, onArchive }) {
                     <p className={`text-sm leading-snug truncate ${!isRead ? 'font-semibold text-gray-900 dark:text-white' : 'font-medium text-gray-600 dark:text-gray-300'}`}>
                         {notification.title}
                     </p>
-                    {!isRead && <span className="flex-shrink-0 w-2 h-2 mt-1.5 bg-blue-500 rounded-full" />}
+                    {!isRead && <span className="flex-shrink-0 w-2 h-2 mt-1.5 bg-purple-500 rounded-full" />}
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">
                     {notification.body}
@@ -379,3 +379,4 @@ function ToastNotification({ notification, onClose, onClick }) {
         </div>
     );
 }
+export { SmartBell };

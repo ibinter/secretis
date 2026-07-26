@@ -26,7 +26,7 @@ export default function UpdatePrompt() {
       aria-live="polite"
       className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[toast] w-[calc(100vw-2rem)] max-w-md animate-slide-up"
     >
-      <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-2xl border border-white/10 bg-[#1A3A5C] dark:bg-[#0C1E30] text-white">
+      <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl shadow-2xl border border-white/10 bg-[#9333EA] dark:bg-[#0C1E30] text-white">
         {/* Indicateur de mise à jour */}
         <div className="shrink-0 w-9 h-9 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center" aria-hidden="true">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-4.5 h-4.5 text-accent">
@@ -72,3 +72,4 @@ export default function UpdatePrompt() {
     </div>
   );
 }
+export { UpdatePrompt };

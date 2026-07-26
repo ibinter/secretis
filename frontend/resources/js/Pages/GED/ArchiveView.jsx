@@ -357,3 +357,4 @@ export default function ArchiveView() {
         </div>
     );
 }
+export { ArchiveView };

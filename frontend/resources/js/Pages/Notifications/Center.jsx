@@ -47,10 +47,10 @@ const TYPE_CONFIG = {
     task_assigned:    { icon: ClipboardDocumentCheckIcon, color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/30',   label: 'Tâche',         module: 'taches' },
     task_overdue:     { icon: ExclamationTriangleIcon,    color: 'text-red-600 bg-red-50 dark:bg-red-900/30',            label: 'Retard',        module: 'taches' },
     mail_urgent:      { icon: EnvelopeOpenIcon,           color: 'text-red-600 bg-red-50 dark:bg-red-900/30',            label: 'Courrier urgent', module: 'courrier' },
-    mail_received:    { icon: EnvelopeOpenIcon,           color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30',         label: 'Courrier',      module: 'courrier' },
+    mail_received:    { icon: EnvelopeOpenIcon,           color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',         label: 'Courrier',      module: 'courrier' },
     meeting_reminder: { icon: CalendarIcon,               color: 'text-green-600 bg-green-50 dark:bg-green-900/30',      label: 'Réunion',       module: 'agenda' },
     event_created:    { icon: CalendarIcon,               color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',   label: 'Agenda',        module: 'agenda' },
-    visitor_arrived:  { icon: UserPlusIcon,               color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30',         label: 'Visiteur',      module: 'accueil' },
+    visitor_arrived:  { icon: UserPlusIcon,               color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',         label: 'Visiteur',      module: 'accueil' },
     circular:         { icon: MegaphoneIcon,              color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30',   label: 'Circulaire',    module: 'messages' },
     stock_alert:      { icon: ExclamationTriangleIcon,    color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/30',   label: 'Stock',         module: 'stock' },
     digest:           { icon: BellIcon,                   color: 'text-gray-600 bg-gray-50 dark:bg-gray-700',            label: 'Digest',        module: 'system' },
@@ -134,7 +134,7 @@ export default function NotificationCenter({ initialNotifications, unreadCount: 
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <BellIcon className="h-7 w-7 text-blue-600" />
+                                <BellIcon className="h-7 w-7 text-purple-600" />
                                 Notifications
                             </h1>
                             {unreadCount > 0 && (
@@ -154,7 +154,7 @@ export default function NotificationCenter({ initialNotifications, unreadCount: 
                                 <button
                                     onClick={markAllRead}
                                     disabled={isMarkingAll}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
                                 >
                                     <CheckCircleSolid className="h-4 w-4" />
                                     {isMarkingAll ? 'En cours…' : 'Tout marquer lu'}
@@ -192,7 +192,7 @@ export default function NotificationCenter({ initialNotifications, unreadCount: 
                                 <select
                                     value={filters.module}
                                     onChange={(e) => updateFilter('module', e.target.value)}
-                                    className="text-sm border-0 bg-gray-50 dark:bg-gray-700 rounded-lg px-2 py-1.5 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500"
+                                    className="text-sm border-0 bg-gray-50 dark:bg-gray-700 rounded-lg px-2 py-1.5 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-purple-500"
                                 >
                                     {MODULES.map((m) => (
                                         <option key={m.value} value={m.value}>{m.label}</option>
@@ -210,7 +210,7 @@ export default function NotificationCenter({ initialNotifications, unreadCount: 
                                         onChange={(e) => setSearchInput(e.target.value)}
                                         className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg
                                             bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300
-                                            focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                     {searchInput && (
                                         <button type="button" onClick={() => { setSearchInput(''); updateFilter('search', ''); }}
@@ -304,7 +304,7 @@ function FilterTab({ active, onClick, label, badge }) {
             onClick={onClick}
             className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
                 active
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-purple-600 text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
         >
@@ -330,7 +330,7 @@ function NotifRow({ notification, onClick, onMarkRead, onArchive, onSnoozeClick,
         <div
             className={`group relative flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors
                 hover:bg-gray-50 dark:hover:bg-gray-700/30
-                ${!isRead ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+                ${!isRead ? 'bg-purple-50/30 dark:bg-purple-900/10' : ''}`}
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
@@ -340,7 +340,7 @@ function NotifRow({ notification, onClick, onMarkRead, onArchive, onSnoozeClick,
         >
             {/* Indicateur non lu */}
             {!isRead && (
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-purple-500 rounded-full" />
             )}
 
             {/* Icône type */}
@@ -370,7 +370,7 @@ function NotifRow({ notification, onClick, onMarkRead, onArchive, onSnoozeClick,
                         {config.label}
                     </span>
                     {notification.data?.action_url && (
-                        <span className="text-[10px] text-blue-500">Cliquez pour ouvrir</span>
+                        <span className="text-[10px] text-purple-500">Cliquez pour ouvrir</span>
                     )}
                 </div>
             </div>
@@ -417,7 +417,7 @@ function SnoozeModal({ onSelect, onClose }) {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-72">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <ClockIcon className="h-5 w-5 text-blue-600" />
+                        <ClockIcon className="h-5 w-5 text-purple-600" />
                         Reporter à…
                     </h3>
                     <button onClick={onClose}><XMarkIcon className="h-4 w-4 text-gray-400" /></button>
@@ -427,7 +427,7 @@ function SnoozeModal({ onSelect, onClose }) {
                         <button
                             key={opt.value}
                             onClick={() => onSelect(opt.value)}
-                            className="w-full text-left px-4 py-3 text-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-700 transition-colors"
+                            className="w-full text-left px-4 py-3 text-sm rounded-xl border border-gray-100 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-200 dark:hover:border-purple-700 transition-colors"
                         >
                             {opt.label}
                         </button>
@@ -471,3 +471,4 @@ function EmptyState({ filters }) {
         </div>
     );
 }
+export { NotificationCenter };

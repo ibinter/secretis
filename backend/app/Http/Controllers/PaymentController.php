@@ -281,53 +281,66 @@ class PaymentController extends Controller
      */
     private function getPaymentInstructions(string $method, string $currency): array
     {
-        $config = config('secretis.payment_methods');
+        // §19.2 : configuration 100% en base (payment_methods_config), modifiable
+        // depuis la console SuperAdmin sans toucher au code.
+        $rows = \Illuminate\Support\Facades\DB::table('payment_methods_config')
+            ->where('type', $method === 'card' ? 'gateway' : $method)
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
 
-        return match ($method) {
-            'mobile_money' => [
-                'type'    => 'mobile_money',
-                'title'   => 'Paiement Mobile Money',
-                'steps'   => [
-                    "Composez le code USSD : {$config['mobile_money']['ussd_code']}",
-                    "Entrez le numéro marchand : {$config['mobile_money']['merchant_number']}",
-                    'Entrez le montant exact',
-                    'Validez avec votre code PIN',
-                    'Uploadez le reçu ci-dessous',
-                ],
-                'merchant_number' => $config['mobile_money']['merchant_number'] ?? '',
-                'ussd_code'       => $config['mobile_money']['ussd_code'] ?? '',
-            ],
+        $options = $rows->map(function ($row) {
+            $cfg = json_decode($row->config ?? '{}', true) ?: [];
+            unset($cfg['secret_key'], $cfg['api_secret']); // jamais de secret côté client
+            return [
+                'provider'     => $row->provider,
+                'display_name' => $row->display_name,
+                'description'  => $row->description,
+                'config'       => $cfg,
+            ];
+        })->values()->all();
 
-            'bank_transfer' => [
-                'type'  => 'bank_transfer',
-                'title' => 'Virement Bancaire',
-                'steps' => [
-                    "Effectuez un virement vers le compte ci-dessous",
-                    'Mentionnez impérativement votre référence de paiement',
-                    'Uploadez le bordereau de virement',
-                ],
-                'bank_name'       => $config['bank_transfer']['bank_name']       ?? 'Ecobank CI',
-                'account_number'  => $config['bank_transfer']['account_number']   ?? '',
-                'iban'            => $config['bank_transfer']['iban']             ?? '',
-                'swift'           => $config['bank_transfer']['swift']            ?? '',
-            ],
+        $titles = [
+            'mobile_money'  => 'Paiement Mobile Money',
+            'bank_transfer' => 'Virement bancaire',
+            'card'          => 'Paiement par carte',
+            'cash'          => 'Paiement en espèces',
+        ];
 
-            'card' => [
-                'type'  => 'card',
-                'title' => 'Paiement par Carte',
-                'steps' => [
-                    'Vous allez être redirigé vers la page de paiement sécurisé',
-                    'Entrez vos coordonnées bancaires',
-                    'Confirmez le paiement',
-                ],
-                'redirect_url' => '/payment/card', // URL de redirection CinetPay
+        return [
+            'type'     => $method,
+            'title'    => $titles[$method] ?? 'Paiement',
+            'security' => 'Nous ne vous demanderons jamais votre code secret ou mot de passe.',
+            'options'  => $options,
+            'steps'    => $options !== [] ? [
+                'Choisissez votre opérateur ci-dessous',
+                'Envoyez le montant exact au numéro / compte indiqué',
+                'Conservez le reçu ou la capture de confirmation',
+                'Uploadez la preuve de paiement — validation sous 24 h ouvrées',
+            ] : [
+                'Contactez notre support (secretis@ibigsoft.com) pour les instructions de paiement.',
             ],
+        ];
+    }
 
-            default => [
-                'type'  => $method,
-                'title' => 'Paiement',
-                'steps' => ['Contactez notre support pour les instructions de paiement.'],
-            ],
-        };
+    // ── Alias de compatibilité avec les noms de routes ──
+    public function initiate(\Illuminate\Http\Request $request)
+    {
+        return $this->initiatePayment($request);
+    }
+
+    public function index(\Illuminate\Http\Request $request)
+    {
+        return $this->history($request);
+    }
+
+    public function show(\Illuminate\Http\Request $request, int $id)
+    {
+        return $this->getStatus($request, $id);
+    }
+
+    public function status(\Illuminate\Http\Request $request, int $id)
+    {
+        return $this->getStatus($request, $id);
     }
 }

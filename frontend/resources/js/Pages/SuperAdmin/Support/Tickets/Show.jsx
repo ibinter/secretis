@@ -47,8 +47,8 @@ const TEMPLATES = [
   { label: 'Résolution', body: 'Bonjour,\n\nNous avons identifié et résolu le problème. La correction sera déployée dans les prochaines heures.\n\nN\'hésitez pas à nous recontacter si le problème persiste.\n\nCordialement.' },
 ]
 
-const PRIORITY_MAP = { critique: 'bg-red-100 text-red-700', haute: 'bg-orange-100 text-orange-700', normale: 'bg-blue-100 text-blue-700', basse: 'bg-gray-100 text-gray-600' }
-const STATUS_MAP   = { open: 'bg-blue-100 text-blue-700', pending: 'bg-amber-100 text-amber-700', resolved: 'bg-green-100 text-green-700', closed: 'bg-gray-100 text-gray-500' }
+const PRIORITY_MAP = { critique: 'bg-red-100 text-red-700', haute: 'bg-orange-100 text-orange-700', normale: 'bg-purple-100 text-purple-700', basse: 'bg-gray-100 text-gray-600' }
+const STATUS_MAP   = { open: 'bg-purple-100 text-purple-700', pending: 'bg-amber-100 text-amber-700', resolved: 'bg-green-100 text-green-700', closed: 'bg-gray-100 text-gray-500' }
 
 export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
   const ticket   = propTicket ?? MOCK_TICKET
@@ -98,7 +98,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${PRIORITY_MAP[ticket.priority] ?? 'bg-gray-100 text-gray-600'}`}>{ticket.priority}</span>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_MAP[status] ?? 'bg-gray-100 text-gray-600'}`}>{status}</span>
             <span className="text-xs text-gray-400">#{ticket.id} · {ticket.org_name}</span>
-            <Link href={`/superadmin/organisations/${ticket.org_id}`} className="text-xs text-[#1A3A5C] dark:text-blue-400 hover:underline flex items-center gap-1">
+            <Link href={`/superadmin/organisations/${ticket.org_id}`} className="text-xs text-[#9333EA] dark:text-purple-400 hover:underline flex items-center gap-1">
               Voir l'organisation <Ic.ExternalLink />
             </Link>
           </div>
@@ -117,11 +117,11 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
                   ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/30'
                   : msg.from === 'client'
                     ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
-                    : 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800/30 ml-8'
+                    : 'bg-purple-50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-800/30 ml-8'
               }`}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    msg.internal ? 'bg-amber-200 text-amber-800' : msg.from === 'client' ? 'bg-gray-200 text-gray-700' : 'bg-[#1A3A5C] text-white'
+                    msg.internal ? 'bg-amber-200 text-amber-800' : msg.from === 'client' ? 'bg-gray-200 text-gray-700' : 'bg-[#9333EA] text-white'
                   }`}>
                     {msg.author[0]}
                   </div>
@@ -156,7 +156,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
               onChange={e => setReply(e.target.value)}
               rows={5}
               placeholder={internal ? 'Note interne (invisible pour le client)…' : 'Répondre au client…'}
-              className={`w-full border rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none dark:bg-gray-700 dark:text-white transition-colors ${
+              className={`w-full border rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-[#9333EA]/30 outline-none dark:bg-gray-700 dark:text-white transition-colors ${
                 internal ? 'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10' : 'border-gray-200 dark:border-gray-600'
               }`}
             />
@@ -169,7 +169,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
               <button
                 disabled={sending || !reply.trim()}
                 onClick={sendReply}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-50 transition-colors"
               >
                 <Ic.Send /> {sending ? 'Envoi…' : internal ? 'Ajouter note' : 'Envoyer'}
               </button>
@@ -207,7 +207,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
 
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Statut</label>
-              <select value={status} onChange={e => { setStatus(e.target.value); updateTicket('status', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+              <select value={status} onChange={e => { setStatus(e.target.value); updateTicket('status', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
                 <option value="open">Ouvert</option>
                 <option value="pending">En attente</option>
                 <option value="resolved">Résolu</option>
@@ -217,7 +217,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
 
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priorité</label>
-              <select value={priority} onChange={e => { setPriority(e.target.value); updateTicket('priority', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+              <select value={priority} onChange={e => { setPriority(e.target.value); updateTicket('priority', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
                 <option value="basse">Basse</option>
                 <option value="normale">Normale</option>
                 <option value="haute">Haute</option>
@@ -227,7 +227,7 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
 
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Agent assigné</label>
-              <select value={agent} onChange={e => { setAgent(e.target.value); updateTicket('agent', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+              <select value={agent} onChange={e => { setAgent(e.target.value); updateTicket('agent', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
                 <option value="">Non assigné</option>
                 <option value="Brice K.">Brice K.</option>
                 <option value="Amenan D.">Amenan D.</option>
@@ -247,3 +247,4 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
     </SuperAdminLayout>
   )
 }
+export { TicketShow };

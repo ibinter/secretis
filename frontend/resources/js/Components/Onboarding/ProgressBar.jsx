@@ -47,7 +47,7 @@ export default function ProgressBar({ steps = [], currentStepKey, onStepClick })
 
                   {/* Circle */}
                   <div className={`relative w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all duration-200 border-2
-                    ${isActive    ? 'bg-blue-600 border-blue-400 shadow-lg shadow-blue-600/40 scale-110'  : ''}
+                    ${isActive    ? 'bg-purple-600 border-purple-400 shadow-lg shadow-blue-600/40 scale-110'  : ''}
                     ${isCompleted ? 'bg-green-600 border-green-500'                                        : ''}
                     ${isSkipped   ? 'bg-slate-700 border-slate-600'                                        : ''}
                     ${!isActive && !isCompleted && !isSkipped ? 'bg-slate-800 border-white/10 group-hover:border-white/30' : ''}
@@ -67,7 +67,7 @@ export default function ProgressBar({ steps = [], currentStepKey, onStepClick })
 
                   {/* Label */}
                   <span className={`text-[10px] font-semibold text-center leading-tight mt-1 transition-colors max-w-[60px]
-                    ${isActive ? 'text-blue-400' : isCompleted ? 'text-green-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
+                    ${isActive ? 'text-purple-400' : isCompleted ? 'text-green-400' : 'text-slate-500 group-hover:text-slate-300'}`}>
                     {step.label}
                   </span>
                 </div>
@@ -85,7 +85,7 @@ export default function ProgressBar({ steps = [], currentStepKey, onStepClick })
         </div>
         <div className="bg-slate-700 rounded-full h-2 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-700 ease-out"
+            className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full transition-all duration-700 ease-out"
             style={{ width: `${percent}%` }}
           />
         </div>
@@ -93,3 +93,4 @@ export default function ProgressBar({ steps = [], currentStepKey, onStepClick })
     </>
   );
 }
+export { ProgressBar };

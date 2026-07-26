@@ -38,7 +38,7 @@ function CRRow({ label, value, base, isTotal, indent = 0, bold, positive, negati
   return (
     <tr className={`
       ${isTotal ? 'bg-gray-50 dark:bg-gray-800/50 border-t border-b border-gray-200 dark:border-gray-700' : ''}
-      ${highlight ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
+      ${highlight ? 'bg-purple-50/50 dark:bg-purple-900/10' : ''}
     `}>
       <td className={`px-4 py-2 ${bold || isTotal ? 'font-semibold' : 'font-normal'} text-gray-700 dark:text-gray-300`}
         style={{ paddingLeft: `${16 + indent * 20}px` }}>
@@ -213,7 +213,7 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
             <div className="space-y-4">
               {/* KPI cards */}
               {[
-                { label: 'Chiffre d\'affaires', value: data.chiffre_affaires, color: 'text-blue-600' },
+                { label: 'Chiffre d\'affaires', value: data.chiffre_affaires, color: 'text-purple-600' },
                 { label: 'Valeur ajoutée',      value: data.valeur_ajoutee, color: 'text-indigo-600' },
                 { label: 'EBE',                 value: data.ebe, color: 'text-purple-600' },
                 { label: 'Résultat net',        value: data.resultat_net,
@@ -249,3 +249,4 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
     </AuthLayout>
   );
 }
+export { IncomeStatement };

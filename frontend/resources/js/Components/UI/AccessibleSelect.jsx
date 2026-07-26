@@ -221,8 +221,8 @@ const AccessibleSelect = forwardRef(function AccessibleSelect({
             : error
             ? 'border-red-500 dark:border-[#a23024] bg-white dark:bg-[#162230] focus:ring-2 focus:ring-red-300 dark:focus:ring-[#a23024]/30'
             : open
-            ? 'border-blue-500 dark:border-[#2E86C1] bg-white dark:bg-[#162230] ring-2 ring-blue-200 dark:ring-[#2E86C1]/30'
-            : 'border-gray-200 dark:border-[#2A3F55] bg-white dark:bg-[#162230] focus:ring-2 focus:ring-blue-200 dark:focus:ring-[#2E86C1]/30 focus:border-blue-500 dark:focus:border-[#2E86C1] hover:border-gray-300 dark:hover:border-[#3A5570]'
+            ? 'border-purple-500 dark:border-[#7e22ce] bg-white dark:bg-[#162230] ring-2 ring-purple-200 dark:ring-[#7e22ce]/30'
+            : 'border-gray-200 dark:border-[#2A3F55] bg-white dark:bg-[#162230] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#7e22ce]/30 focus:border-purple-500 dark:focus:border-[#7e22ce] hover:border-gray-300 dark:hover:border-[#3A5570]'
           }
         `}
       >
@@ -277,7 +277,7 @@ const AccessibleSelect = forwardRef(function AccessibleSelect({
                     border border-gray-200 dark:border-[#2A3F55]
                     text-gray-900 dark:text-[#E8F1FA]
                     placeholder-gray-400 dark:placeholder-[#6B8BA4]
-                    focus:ring-2 focus:ring-blue-300 dark:focus:ring-[#2E86C1]/30"
+                    focus:ring-2 focus:ring-purple-300 dark:focus:ring-[#7e22ce]/30"
                 />
               </li>
             )}
@@ -333,16 +333,16 @@ const AccessibleSelect = forwardRef(function AccessibleSelect({
                       ${option.disabled
                         ? 'opacity-40 cursor-not-allowed text-gray-400 dark:text-[#6B8BA4]'
                         : isActive
-                        ? 'bg-blue-50 dark:bg-[#162230] text-blue-700 dark:text-blue-400'
+                        ? 'bg-purple-50 dark:bg-[#162230] text-purple-700 dark:text-purple-400'
                         : isSelected
-                        ? 'bg-blue-50/50 dark:bg-[#162230]/50 text-blue-600 dark:text-blue-400'
+                        ? 'bg-purple-50/50 dark:bg-[#162230]/50 text-purple-600 dark:text-purple-400'
                         : 'text-gray-700 dark:text-[#A8C0D6] hover:bg-gray-50 dark:hover:bg-[#243447]'
                       }
                     `}
                   >
                     <span className="flex-1">{option.label}</span>
                     {isSelected && (
-                      <span className="text-blue-600 dark:text-blue-400 flex-shrink-0">
+                      <span className="text-purple-600 dark:text-purple-400 flex-shrink-0">
                         <CheckIcon />
                       </span>
                     )}

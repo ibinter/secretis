@@ -21,7 +21,7 @@ const Ic = {
 // ─── Pipeline stages ──────────────────────────────────────────────────────────
 const STAGES = [
   { key: 'new',        label: 'Nouveau',         color: 'bg-gray-400' },
-  { key: 'to_contact', label: 'À contacter',     color: 'bg-blue-400' },
+  { key: 'to_contact', label: 'À contacter',     color: 'bg-purple-400' },
   { key: 'contacted',  label: 'Contacté',        color: 'bg-indigo-400' },
   { key: 'qualified',  label: 'Qualifié',        color: 'bg-violet-400' },
   { key: 'demo_scheduled', label: 'Démo prévue', color: 'bg-amber-400' },
@@ -85,9 +85,9 @@ function KanbanView({ prospects }) {
                 <Link
                   key={p.id}
                   href={`/superadmin/crm/prospects/${p.id}`}
-                  className="block bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:border-[#1A3A5C]/30 dark:hover:border-blue-500/30 transition-all group"
+                  className="block bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:border-[#9333EA]/30 dark:hover:border-purple-500/30 transition-all group"
                 >
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white group-hover:text-[#1A3A5C] dark:group-hover:text-blue-400">{p.first_name} {p.last_name}</p>
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white group-hover:text-[#9333EA] dark:group-hover:text-purple-400">{p.first_name} {p.last_name}</p>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{p.company} · {p.country}</p>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-[10px] text-gray-400">{p.software}</span>
@@ -146,7 +146,7 @@ function TableView({ prospects }) {
                     ) : <span className="text-gray-300">—</span>}
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/superadmin/crm/prospects/${p.id}`} className="p-1.5 rounded-md text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors inline-flex"><Ic.Eye /></Link>
+                    <Link href={`/superadmin/crm/prospects/${p.id}`} className="p-1.5 rounded-md text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors inline-flex"><Ic.Eye /></Link>
                   </td>
                 </tr>
               )
@@ -174,7 +174,7 @@ export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi 
   })
 
   const KPI_CARDS = [
-    { label: 'Nouveaux cette semaine', value: kpi.new_week, color: 'text-[#1A3A5C]', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: <Ic.Plus /> },
+    { label: 'Nouveaux cette semaine', value: kpi.new_week, color: 'text-[#9333EA]', bg: 'bg-purple-50 dark:bg-purple-900/20', icon: <Ic.Plus /> },
     { label: 'En cours', value: kpi.in_progress, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', icon: <Ic.Users /> },
     { label: 'Démos planifiées', value: kpi.demos_scheduled, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', icon: <Ic.Calendar /> },
     { label: 'Convertis ce mois', value: kpi.converted_month, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', icon: <Ic.Star /> },
@@ -201,9 +201,9 @@ export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi 
       <div className="flex flex-wrap gap-3 items-center mb-5">
         <div className="relative flex-1 min-w-48">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nom, entreprise…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nom, entreprise…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none" />
         </div>
-        <select value={filterStage} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+        <select value={filterStage} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
           <option value="">Tous les stages</option>
           {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
         </select>
@@ -211,10 +211,10 @@ export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi 
           <button className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"><Ic.Upload /> Import</button>
           <button className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"><Ic.Download /> Export</button>
           <div className="flex border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button onClick={() => setView('kanban')} className={`p-2 transition-colors ${view === 'kanban' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Grid /></button>
-            <button onClick={() => setView('table')} className={`p-2 transition-colors ${view === 'table' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /></button>
+            <button onClick={() => setView('kanban')} className={`p-2 transition-colors ${view === 'kanban' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Grid /></button>
+            <button onClick={() => setView('table')} className={`p-2 transition-colors ${view === 'table' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /></button>
           </div>
-          <Link href="/superadmin/crm/prospects/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+          <Link href="/superadmin/crm/prospects/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
             <Ic.Plus /> Nouveau prospect
           </Link>
         </div>
@@ -224,3 +224,4 @@ export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi 
     </SuperAdminLayout>
   )
 }
+export { ProspectsIndex };

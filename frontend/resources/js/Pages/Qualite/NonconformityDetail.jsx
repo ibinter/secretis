@@ -26,13 +26,13 @@ function StatusStepper({ status }) {
                         <div className="flex flex-col items-center">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition
                                 ${done   ? 'bg-green-500 border-green-500 text-white' : ''}
-                                ${active ? 'bg-blue-600 border-blue-600 text-white'   : ''}
+                                ${active ? 'bg-purple-600 border-purple-600 text-white'   : ''}
                                 ${pending? 'bg-white border-gray-300 text-gray-400'   : ''}
                             `}>
                                 {done ? '✓' : i + 1}
                             </div>
                             <span className={`text-xs mt-1 whitespace-nowrap
-                                ${active  ? 'text-blue-600 font-semibold' : 'text-gray-500'}
+                                ${active  ? 'text-purple-600 font-semibold' : 'text-gray-500'}
                             `}>
                                 {step.label}
                             </span>
@@ -54,7 +54,7 @@ function FivePourquoiEditor({ value = {}, onChange, readOnly }) {
         <div className="space-y-3">
             {whys.map((key, i) => (
                 <div key={key} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold mt-0.5">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold mt-0.5">
                         {i + 1}
                     </div>
                     <div className="flex-1">
@@ -66,7 +66,7 @@ function FivePourquoiEditor({ value = {}, onChange, readOnly }) {
                                 value={value[key] ?? ''}
                                 onChange={e => onChange({ ...value, [key]: e.target.value })}
                                 placeholder={`Pourquoi ${i + 1}...`}
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                             />
                         }
                     </div>
@@ -84,7 +84,7 @@ function FivePourquoiEditor({ value = {}, onChange, readOnly }) {
                         onChange={e => onChange({ ...value, root_conclusion: e.target.value })}
                         rows={2}
                         placeholder="Conclusion : la cause racine est..."
-                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
                 }
             </div>
@@ -258,8 +258,8 @@ export default function NonconformityDetail() {
                                     onClick={() => setRootCauseMethod(m.key)}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium border transition
                                         ${rootCauseMethod === m.key
-                                            ? 'bg-blue-600 text-white border-blue-600'
-                                            : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400'
+                                            ? 'bg-purple-600 text-white border-purple-600'
+                                            : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
                                         }`}
                                 >
                                     {m.label}
@@ -311,7 +311,7 @@ export default function NonconformityDetail() {
                             <div key={action.id} className="flex items-start gap-3 p-3 rounded-lg border bg-gray-50">
                                 <span className={`mt-0.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${
                                     action.status === 'completed' ? 'bg-green-500' :
-                                    action.status === 'in_progress' ? 'bg-blue-500' :
+                                    action.status === 'in_progress' ? 'bg-purple-500' :
                                     action.status === 'cancelled' ? 'bg-gray-400' : 'bg-yellow-500'
                                 }`} />
                                 <div className="flex-1">
@@ -331,14 +331,14 @@ export default function NonconformityDetail() {
 
                     {/* Formulaire nouvelle action */}
                     {!isClosed && (
-                        <div className="border rounded-lg p-4 bg-blue-50 space-y-3">
+                        <div className="border rounded-lg p-4 bg-purple-50 space-y-3">
                             <h3 className="text-sm font-semibold text-gray-700">Ajouter une action corrective</h3>
                             <textarea
                                 value={newAction.description}
                                 onChange={e => setNewAction({ ...newAction, description: e.target.value })}
                                 placeholder="Description de l'action..."
                                 rows={2}
-                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                             />
                             <div className="grid grid-cols-2 gap-3">
                                 <select
@@ -362,7 +362,7 @@ export default function NonconformityDetail() {
                                 <button
                                     onClick={addCorrectiveAction}
                                     disabled={!newAction.description || addingAction}
-                                    className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                                    className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
                                 >
                                     {addingAction ? 'Ajout...' : 'Ajouter'}
                                 </button>
@@ -413,3 +413,4 @@ export default function NonconformityDetail() {
         </AppLayout>
     );
 }
+export { NonconformityDetail };

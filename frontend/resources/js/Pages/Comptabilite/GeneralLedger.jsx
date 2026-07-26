@@ -63,12 +63,12 @@ function AccountPicker({ accounts, value, onChange }) {
         <ul className="absolute z-50 left-0 right-0 top-full mt-0.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-xl max-h-56 overflow-auto text-sm">
           {filtered.map(acc => (
             <li key={acc.account_number}
-              className="px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 flex gap-2"
+              className="px-3 py-2 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 flex gap-2"
               onMouseDown={() => select(acc)}>
-              <span className="font-mono text-blue-700 dark:text-blue-400 w-16 shrink-0">{acc.account_number}</span>
+              <span className="font-mono text-purple-700 dark:text-purple-400 w-16 shrink-0">{acc.account_number}</span>
               <span className="text-gray-700 dark:text-gray-300 truncate">{acc.account_name}</span>
               <span className={`ml-auto text-xs ${
-                { actif: 'text-blue-500', passif: 'text-orange-500', charge: 'text-red-500', produit: 'text-green-500', capitaux: 'text-purple-500' }[acc.account_type] || ''
+                { actif: 'text-purple-500', passif: 'text-orange-500', charge: 'text-red-500', produit: 'text-green-500', capitaux: 'text-purple-500' }[acc.account_type] || ''
               }`}>{acc.account_type}</span>
             </li>
           ))}
@@ -140,7 +140,7 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
   const journalBadge = (type) => ({
     VE: 'bg-green-100 text-green-700',
     AC: 'bg-orange-100 text-orange-700',
-    BQ: 'bg-blue-100 text-blue-700',
+    BQ: 'bg-purple-100 text-purple-700',
     SA: 'bg-purple-100 text-purple-700',
     CA: 'bg-yellow-100 text-yellow-700',
     OD: 'bg-gray-100 text-gray-600',
@@ -158,7 +158,7 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Grand livre</h1>
             {ledger && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                Compte <span className="font-mono font-semibold text-blue-700 dark:text-blue-400">{ledger.account_number}</span>
+                Compte <span className="font-mono font-semibold text-purple-700 dark:text-purple-400">{ledger.account_number}</span>
                 {' '}— {ledger.account_name}
               </p>
             )}
@@ -209,7 +209,7 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
                 value: ledger.solde_final,
                 sign: true,
                 bold: true,
-                color: ledger.solde_final >= 0 ? 'text-blue-600' : 'text-red-600',
+                color: ledger.solde_final >= 0 ? 'text-purple-600' : 'text-red-600',
               },
             ].map(kpi => (
               <div key={kpi.label} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
@@ -272,7 +272,7 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
                       <td className="px-4 py-2.5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
                         {fmtDate(line.entry_date)}
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-blue-700 dark:text-blue-400 text-xs">
+                      <td className="px-4 py-2.5 font-mono text-purple-700 dark:text-purple-400 text-xs">
                         {line.entry_number}
                       </td>
                       <td className="px-4 py-2.5 text-center">
@@ -283,14 +283,14 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
                       <td className="px-4 py-2.5 text-gray-800 dark:text-gray-200 max-w-xs truncate">
                         {line.description || line.reference || '—'}
                       </td>
-                      <td className="px-4 py-2.5 text-right font-mono text-blue-700 dark:text-blue-400">
+                      <td className="px-4 py-2.5 text-right font-mono text-purple-700 dark:text-purple-400">
                         {parseFloat(line.debit_amount) > 0 ? fcfa(line.debit_amount) : '—'}
                       </td>
                       <td className="px-4 py-2.5 text-right font-mono text-orange-700 dark:text-orange-400">
                         {parseFloat(line.credit_amount) > 0 ? fcfa(line.credit_amount) : '—'}
                       </td>
                       <td className={`px-4 py-2.5 text-right font-mono font-semibold ${
-                        line.solde_cumul >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'
+                        line.solde_cumul >= 0 ? 'text-purple-700 dark:text-purple-400' : 'text-red-700 dark:text-red-400'
                       }`}>
                         {fcfa(Math.abs(line.solde_cumul))}
                         <span className="text-xs ml-1">{line.solde_cumul >= 0 ? 'D' : 'C'}</span>
@@ -307,10 +307,10 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
                   <tfoot className="bg-gray-100 dark:bg-gray-800 font-bold border-t-2 border-gray-300 dark:border-gray-600">
                     <tr>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm uppercase" colSpan={4}>Totaux période</td>
-                      <td className="px-4 py-3 text-right font-mono text-blue-700 dark:text-blue-400">{fcfa(ledger.total_debit)}</td>
+                      <td className="px-4 py-3 text-right font-mono text-purple-700 dark:text-purple-400">{fcfa(ledger.total_debit)}</td>
                       <td className="px-4 py-3 text-right font-mono text-orange-700 dark:text-orange-400">{fcfa(ledger.total_credit)}</td>
                       <td className={`px-4 py-3 text-right font-mono font-bold text-lg ${
-                        ledger.solde_final >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'
+                        ledger.solde_final >= 0 ? 'text-purple-700 dark:text-purple-400' : 'text-red-700 dark:text-red-400'
                       }`}>
                         {fcfa(Math.abs(ledger.solde_final))} {ledger.solde_final >= 0 ? 'D' : 'C'}
                       </td>
@@ -326,3 +326,4 @@ export default function GeneralLedger({ ledger, chartAccounts, filters, dateRang
     </AuthLayout>
   );
 }
+export { GeneralLedger };

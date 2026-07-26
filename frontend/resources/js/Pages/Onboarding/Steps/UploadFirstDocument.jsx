@@ -95,7 +95,7 @@ export default function UploadFirstDocument({ step, onComplete, onSkip, saving }
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           className={`w-full h-52 rounded-2xl border-2 border-dashed cursor-pointer flex flex-col items-center justify-center gap-3 transition-all duration-300
-            ${dragging ? 'border-blue-400 bg-blue-500/15 scale-105' : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'}`}
+            ${dragging ? 'border-purple-400 bg-purple-500/15 scale-105' : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'}`}
         >
           <div className={`text-5xl transition-transform duration-300 ${dragging ? 'scale-125' : ''}`}>
             {dragging ? '⬇️' : '📂'}
@@ -125,7 +125,7 @@ export default function UploadFirstDocument({ step, onComplete, onSkip, saving }
             <div className="space-y-2">
               <div className="bg-slate-700 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${uploaded ? 'bg-green-500' : 'bg-blue-500'}`}
+                  className={`h-full rounded-full transition-all duration-300 ${uploaded ? 'bg-green-500' : 'bg-purple-500'}`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -145,7 +145,7 @@ export default function UploadFirstDocument({ step, onComplete, onSkip, saving }
           <button
             onClick={handleUpload}
             disabled={!file || uploading || saving}
-            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+            className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all active:scale-95"
           >
             {uploading ? `⏳ Upload en cours... ${Math.round(progress)}%` : '📤 Uploader le document →'}
           </button>
@@ -159,3 +159,4 @@ export default function UploadFirstDocument({ step, onComplete, onSkip, saving }
     </div>
   );
 }
+export { UploadFirstDocument };

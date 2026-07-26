@@ -97,7 +97,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
         <div className={[
             'border rounded-2xl transition-all',
             isEnabled
-                ? 'border-blue-300 dark:border-blue-600 bg-blue-50/30 dark:bg-blue-900/10'
+                ? 'border-purple-300 dark:border-purple-600 bg-purple-50/30 dark:bg-purple-900/10'
                 : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800',
         ].join(' ')}>
             <div className="flex items-center justify-between p-4">
@@ -117,7 +117,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setExpanded(e => !e)}
-                        className="text-xs text-blue-600 hover:underline"
+                        className="text-xs text-purple-600 hover:underline"
                     >
                         {expanded ? 'Masquer' : 'Configurer'}
                     </button>
@@ -126,7 +126,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
                         onClick={() => onToggle(provider.key)}
                         className={[
                             'w-10 h-5 rounded-full transition-colors relative',
-                            isEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600',
+                            isEnabled ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-600',
                         ].join(' ')}
                     >
                         <span className={[
@@ -148,7 +148,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
                                 <select
                                     value={config[`${provider.key}_${field}`] ?? 'sandbox'}
                                     onChange={e => onConfigChange(`${provider.key}_${field}`, e.target.value)}
-                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                 >
                                     <option value="sandbox">Sandbox (test)</option>
                                     <option value="production">Production</option>
@@ -159,7 +159,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
                                     value={config[`${provider.key}_${field}`] ?? ''}
                                     onChange={e => onConfigChange(`${provider.key}_${field}`, e.target.value)}
                                     placeholder={['api_key', 'client_secret', 'auth_token', 'api_secret'].includes(field) ? '••••••••••••' : ''}
-                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                                 />
                             )}
                         </div>
@@ -169,7 +169,7 @@ function ProviderCard({ provider, isEnabled, onToggle, config, onConfigChange, c
                         href={provider.website}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-blue-600 hover:underline"
+                        className="text-xs text-purple-600 hover:underline"
                     >
                         Obtenir mes clés API →
                     </a>
@@ -256,7 +256,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                     </button>
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <DevicePhoneMobileIcon className="w-6 h-6 text-blue-600" />
+                            <DevicePhoneMobileIcon className="w-6 h-6 text-purple-600" />
                             Configuration SMS Multi-Provider
                         </h1>
                         <p className="text-sm text-gray-500">Routage automatique selon le pays du destinataire</p>
@@ -315,7 +315,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                 ].map(([country, provider]) => (
                                     <div key={country} className="flex items-center justify-between p-2 bg-white dark:bg-gray-700 rounded-lg">
                                         <span>{country}</span>
-                                        <span className="font-medium text-blue-600">{provider}</span>
+                                        <span className="font-medium text-purple-600">{provider}</span>
                                     </div>
                                 ))}
                             </div>
@@ -324,7 +324,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="mt-4 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                            className="mt-4 w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                         >
                             {saving
                                 ? <ArrowPathIcon className="w-4 h-4 animate-spin" />
@@ -348,7 +348,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                     <label className="text-sm font-semibold text-gray-900 dark:text-white">{tpl.label}</label>
                                     <div className="flex gap-1">
                                         {tpl.vars.map(v => (
-                                            <span key={v} className="text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-mono">{v}</span>
+                                            <span key={v} className="text-xs bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded font-mono">{v}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -356,7 +356,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                     value={templates[tpl.key] ?? ''}
                                     onChange={e => setTemplates(t => ({ ...t, [tpl.key]: e.target.value }))}
                                     rows={2}
-                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                                    className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2 bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none resize-none"
                                 />
                                 <p className="text-xs text-gray-400 mt-1">
                                     {(templates[tpl.key] ?? '').length} caractères
@@ -372,7 +372,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                             </div>
                         ))}
 
-                        <button onClick={handleSave} disabled={saving} className="w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors">
+                        <button onClick={handleSave} disabled={saving} className="w-full py-2.5 bg-purple-600 text-white rounded-xl font-semibold text-sm hover:bg-purple-700 transition-colors">
                             Enregistrer les templates
                         </button>
                     </div>
@@ -382,7 +382,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                 {activeTab === 'test' && (
                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 space-y-4">
                         <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                            <PaperAirplaneIcon className="w-5 h-5 text-blue-600" />
+                            <PaperAirplaneIcon className="w-5 h-5 text-purple-600" />
                             Envoyer un SMS de test
                         </h3>
 
@@ -393,7 +393,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                 value={testPhone}
                                 onChange={e => setTestPhone(e.target.value)}
                                 placeholder="+2250700000000"
-                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
 
@@ -403,7 +403,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                 value={testMsg}
                                 onChange={e => setTestMsg(e.target.value)}
                                 rows={3}
-                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none resize-none"
                             />
                         </div>
 
@@ -412,7 +412,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                             <select
                                 value={testProvider}
                                 onChange={e => setTestProvider(e.target.value)}
-                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
                             >
                                 <option value="auto">Auto (selon pays)</option>
                                 {PROVIDERS.filter(p => enabledProvs.includes(p.key)).map(p => (
@@ -430,7 +430,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                         <button
                             onClick={handleTest}
                             disabled={testLoading || !testPhone}
-                            className="w-full py-2.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full py-2.5 bg-purple-600 text-white rounded-xl font-semibold text-sm hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             {testLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <PaperAirplaneIcon className="w-4 h-4" />}
                             Envoyer le SMS de test
@@ -465,7 +465,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                 {stats.by_provider && (
                                     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
                                         <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
-                                            <ChartBarIcon className="w-4 h-4 text-blue-600" /> Répartition par fournisseur
+                                            <ChartBarIcon className="w-4 h-4 text-purple-600" /> Répartition par fournisseur
                                         </h4>
                                         <div className="space-y-2">
                                             {Object.entries(stats.by_provider).map(([key, count]) => {
@@ -475,7 +475,7 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
                                                     <div key={key} className="flex items-center gap-3 text-sm">
                                                         <span className="w-28 text-gray-600 dark:text-gray-400 truncate">{name}</span>
                                                         <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-2">
-                                                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${pct}%` }} />
+                                                            <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${pct}%` }} />
                                                         </div>
                                                         <span className="w-12 text-right text-gray-500 text-xs">{count}</span>
                                                     </div>
@@ -492,3 +492,4 @@ export default function SmsConfig({ initialConfig = {}, stats = null }) {
         </AppLayout>
     );
 }
+export { SmsConfig };

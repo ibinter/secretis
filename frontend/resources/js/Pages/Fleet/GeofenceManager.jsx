@@ -113,7 +113,7 @@ export default function GeofenceManager({ geofences: initialZones }) {
                             <h1 className="font-bold text-gray-900 dark:text-white">Zones géographiques</h1>
                             <button
                                 onClick={() => { setEditZone(null); setShowForm(true); }}
-                                className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
+                                className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition"
                             >+ Nouvelle zone</button>
                         </div>
                         <p className="text-xs text-gray-500">{zones.length} zone(s) configurée(s)</p>
@@ -137,7 +137,7 @@ export default function GeofenceManager({ geofences: initialZones }) {
                                     }
                                 }}
                                 className={`p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition ${
-                                    selected?.id === zone.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                    selected?.id === zone.id ? 'bg-purple-50 dark:bg-purple-900/20' : ''
                                 }`}
                             >
                                 <div className="flex items-start justify-between gap-2">
@@ -338,7 +338,7 @@ function GeofenceFormModal({ zone, onClose, onSuccess }) {
                     )}
 
                     {form.type === 'polygon' && (
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 text-xs text-purple-700 dark:text-purple-300">
                             La définition de polygones se fait via la carte interactive. Tracez votre zone sur la carte et les coordonnées seront automatiquement enregistrées.
                         </div>
                     )}
@@ -348,7 +348,7 @@ function GeofenceFormModal({ zone, onClose, onSuccess }) {
                         <div className="flex items-center gap-2">
                             <input type="checkbox" id="alert_enter" checked={form.alert_on_enter}
                                 onChange={e => setForm(f => ({ ...f, alert_on_enter: e.target.checked }))}
-                                className="w-4 h-4 rounded text-blue-600" />
+                                className="w-4 h-4 rounded text-purple-600" />
                             <label htmlFor="alert_enter" className="text-sm text-gray-700 dark:text-gray-300">
                                 Alerte lors de l'entrée dans la zone
                             </label>
@@ -356,7 +356,7 @@ function GeofenceFormModal({ zone, onClose, onSuccess }) {
                         <div className="flex items-center gap-2">
                             <input type="checkbox" id="alert_exit" checked={form.alert_on_exit}
                                 onChange={e => setForm(f => ({ ...f, alert_on_exit: e.target.checked }))}
-                                className="w-4 h-4 rounded text-blue-600" />
+                                className="w-4 h-4 rounded text-purple-600" />
                             <label htmlFor="alert_exit" className="text-sm text-gray-700 dark:text-gray-300">
                                 Alerte lors de la sortie de la zone
                             </label>
@@ -369,7 +369,7 @@ function GeofenceFormModal({ zone, onClose, onSuccess }) {
                             Annuler
                         </button>
                         <button type="submit" disabled={saving}
-                            className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50">
+                            className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition disabled:opacity-50">
                             {saving ? 'Enregistrement...' : (zone ? 'Modifier' : 'Créer')}
                         </button>
                     </div>
@@ -378,3 +378,4 @@ function GeofenceFormModal({ zone, onClose, onSuccess }) {
         </div>
     );
 }
+export { GeofenceManager };

@@ -87,9 +87,9 @@ const VARIANTS = {
   },
   primary: {
     icon:   <Icon.Check />,
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    btn:    'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    iconBg: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+    btn:    'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500',
   },
   info: {
     icon:   <Icon.Info />,
@@ -401,3 +401,4 @@ export function useConfirmModal() {
 
   return { confirmProps, confirm, close };
 }
+export { ConfirmModal };

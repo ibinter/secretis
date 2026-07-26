@@ -75,7 +75,7 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
     finally { setSaving(false) }
   }
 
-  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none'
+  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none'
   const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
   return (
@@ -138,8 +138,8 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
               <div>
                 <label className={LABEL}>Remise (%)</label>
                 <div className="flex items-center gap-2">
-                  <input type="range" min={0} max={50} step={5} value={form.discount_pct} onChange={e => setF('discount_pct', +e.target.value)} className="flex-1 accent-[#1A3A5C]" />
-                  <span className="text-sm font-bold text-[#1A3A5C] dark:text-blue-400 tabular-nums w-10 text-right">{form.discount_pct}%</span>
+                  <input type="range" min={0} max={50} step={5} value={form.discount_pct} onChange={e => setF('discount_pct', +e.target.value)} className="flex-1 accent-[#9333EA]" />
+                  <span className="text-sm font-bold text-[#9333EA] dark:text-purple-400 tabular-nums w-10 text-right">{form.discount_pct}%</span>
                 </div>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
                 <span>TVA 18%</span>
                 <span className="tabular-nums">{fmtXOF(tva)}</span>
               </div>
-              <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-2 flex justify-between font-bold text-[#1A3A5C] dark:text-white text-lg">
+              <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-2 flex justify-between font-bold text-[#9333EA] dark:text-white text-lg">
                 <span>Total TTC</span>
                 <span className="tabular-nums">{fmtXOF(totalTTC)}</span>
               </div>
@@ -238,7 +238,7 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
               <button
                 disabled={saving}
                 onClick={() => { setAction('send'); submit() }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60 transition-colors"
               >
                 <Ic.Mail /> Générer PDF & Envoyer
               </button>
@@ -269,3 +269,4 @@ function Card({ title, children }) {
     </div>
   )
 }
+export { OfferCreate };

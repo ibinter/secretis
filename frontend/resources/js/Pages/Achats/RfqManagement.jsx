@@ -7,7 +7,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 const STATUS_BADGE = {
     brouillon: 'bg-gray-100 text-gray-600',
     publie:    'bg-green-100 text-green-700',
-    clos:      'bg-blue-100 text-blue-700',
+    clos:      'bg-purple-100 text-purple-700',
     annule:    'bg-red-100 text-red-600',
 };
 
@@ -96,7 +96,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                                 type="text"
                                 value={data.title}
                                 onChange={e => setData('title', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                             />
                         </div>
@@ -106,7 +106,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                                 type="datetime-local"
                                 value={data.closing_date}
                                 onChange={e => setData('closing_date', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                             />
                         </div>
@@ -116,7 +116,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                                 type="text"
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
                     </div>
@@ -125,7 +125,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                     <div>
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="text-sm font-semibold text-gray-700">Articles / Prestations *</h3>
-                            <button type="button" onClick={addItem} className="text-blue-600 text-sm font-medium">
+                            <button type="button" onClick={addItem} className="text-purple-600 text-sm font-medium">
                                 + Ajouter
                             </button>
                         </div>
@@ -197,7 +197,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                                     ...data.evaluation_criteria,
                                     { name: '', weight: 0, type: 'technique' },
                                 ])}
-                                className="text-blue-600 text-sm font-medium"
+                                className="text-purple-600 text-sm font-medium"
                             >
                                 + Ajouter
                             </button>
@@ -257,7 +257,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                         </h3>
                         <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
                             {suppliers?.map(s => (
-                                <label key={s.id} className="flex items-center gap-3 p-3 hover:bg-blue-50/50 cursor-pointer">
+                                <label key={s.id} className="flex items-center gap-3 p-3 hover:bg-purple-50/50 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         checked={selectedSuppliers.includes(s.id)}
@@ -285,7 +285,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                             value={data.notes}
                             onChange={e => setData('notes', e.target.value)}
                             rows={3}
-                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                         />
                     </div>
 
@@ -296,7 +296,7 @@ function CreateRfqModal({ suppliers, onClose }) {
                         <button
                             type="submit"
                             disabled={processing || totalWeight !== 100}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                            className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
                         >
                             {processing ? 'Création…' : 'Créer l\'AO'}
                         </button>
@@ -329,7 +329,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                     </div>
                     <button
                         onClick={() => setShowCreate(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                     >
                         + Nouvel AO
                     </button>
@@ -343,7 +343,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                             onClick={() => router.get('/procurement/rfqs', { status: s || undefined }, { preserveState: true, replace: true })}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                                 (filters?.status ?? '') === s
-                                    ? 'bg-blue-600 text-white'
+                                    ? 'bg-purple-600 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         >
@@ -370,7 +370,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-mono text-sm text-blue-600 font-medium">{rfq.rfq_number}</span>
+                                            <span className="font-mono text-sm text-purple-600 font-medium">{rfq.rfq_number}</span>
                                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[rfq.status]}`}>
                                                 {rfq.status}
                                             </span>
@@ -437,7 +437,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                                                     key={rs.id}
                                                     className={`text-xs px-3 py-1.5 rounded-full font-medium ${
                                                         rs.status === 'repondu'     ? 'bg-green-100 text-green-700' :
-                                                        rs.status === 'selectionne' ? 'bg-blue-100 text-blue-700' :
+                                                        rs.status === 'selectionne' ? 'bg-purple-100 text-purple-700' :
                                                         rs.status === 'elimine'     ? 'bg-red-100 text-red-600' :
                                                                                       'bg-gray-100 text-gray-600'
                                                     }`}
@@ -489,3 +489,4 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
         </AuthenticatedLayout>
     );
 }
+export { RfqManagement };

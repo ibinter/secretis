@@ -167,7 +167,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                   <select
                     value={form.client_id}
                     onChange={(e) => setForm((p) => ({ ...p, client_id: e.target.value }))}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.client_id ? 'border-red-400' : 'border-gray-200'}`}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.client_id ? 'border-red-400' : 'border-gray-200'}`}
                   >
                     <option value="">— Sélectionner un client —</option>
                     {clients.map((c) => (
@@ -186,7 +186,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     placeholder="Ex: Prestation conseil — Mars 2026"
                     value={form.title}
                     onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
                   />
                 </div>
 
@@ -196,7 +196,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     type="date"
                     value={form.issue_date}
                     onChange={(e) => setForm((p) => ({ ...p, issue_date: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                   />
                 </div>
 
@@ -206,7 +206,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     type="date"
                     value={form.due_date}
                     onChange={(e) => setForm((p) => ({ ...p, due_date: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                   />
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                 <h2 className="text-sm font-semibold text-gray-700">Lignes de facturation</h2>
                 <button
                   onClick={addItem}
-                  className="inline-flex items-center gap-1.5 text-xs text-[#1A3A5C] font-medium hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs text-[#9333EA] font-medium hover:underline"
                 >
                   <PlusIcon className="h-3.5 w-3.5" />
                   Ajouter une ligne
@@ -245,7 +245,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                           placeholder="Description du service ou produit"
                           value={item.description}
                           onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                         />
                       </div>
                       <div className="col-span-2">
@@ -255,7 +255,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                           step="0.001"
                           value={item.quantity}
                           onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                         />
                       </div>
                       <div className="col-span-3">
@@ -265,7 +265,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                           step="1"
                           value={item.unit_price}
                           onChange={(e) => updateItem(item.id, 'unit_price', e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                          className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                         />
                       </div>
                       <div className="col-span-1 text-right text-sm font-medium text-gray-700 tabular-nums">
@@ -298,7 +298,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                         onClick={() => setForm((p) => ({ ...p, tax_rate: rate }))}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                           parseFloat(form.tax_rate) === rate
-                            ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]'
+                            ? 'bg-[#9333EA] text-white border-[#9333EA]'
                             : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                         }`}
                       >
@@ -310,7 +310,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                       min="0" max="100" step="0.5"
                       value={form.tax_rate}
                       onChange={(e) => setForm((p) => ({ ...p, tax_rate: e.target.value }))}
-                      className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                      className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                     />
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     min="0"
                     value={form.discount_amount}
                     onChange={(e) => setForm((p) => ({ ...p, discount_amount: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
                   />
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     value={form.notes}
                     onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
                     placeholder="Informations complémentaires à afficher sur la facture..."
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 resize-none"
                   />
                 </div>
                 <div>
@@ -348,7 +348,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                     value={form.terms}
                     onChange={(e) => setForm((p) => ({ ...p, terms: e.target.value }))}
                     placeholder="Paiement à 30 jours. Tout retard entraîne des pénalités..."
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 resize-none"
                   />
                 </div>
               </div>
@@ -372,7 +372,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
               <button
                 onClick={() => handleSubmit(false)}
                 disabled={saving}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#1A3A5C] text-white rounded-xl text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#9333EA] text-white rounded-xl text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
               >
                 <CheckIcon className="h-4 w-4" />
                 {saving ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Créer la facture'}
@@ -385,13 +385,13 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
             <div className="hidden lg:block">
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 sticky top-6">
                 {/* En-tête aperçu */}
-                <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-[#1A3A5C]">
+                <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-[#9333EA]">
                   <div>
                     <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Votre organisation</div>
                     <div className="w-24 h-2 bg-gray-200 rounded mb-2" />
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-[#1A3A5C]">FACTURE</div>
+                    <div className="text-2xl font-bold text-[#9333EA]">FACTURE</div>
                     <div className="text-sm text-gray-500">{isEdit ? invoice.invoice_number : 'FACT-2026-XXXXX'}</div>
                     <div className="text-xs text-gray-400 mt-1">{form.issue_date || '—'}</div>
                   </div>
@@ -399,7 +399,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
 
                 {/* Client aperçu */}
                 {selectedClient && (
-                  <div className="mb-5 p-3 bg-blue-50 rounded-lg border-l-4 border-[#1A3A5C]">
+                  <div className="mb-5 p-3 bg-purple-50 rounded-lg border-l-4 border-[#9333EA]">
                     <div className="text-xs text-gray-500 mb-1">Facturé à</div>
                     <div className="font-semibold text-gray-800">{selectedClient.name}</div>
                     {selectedClient.email && (
@@ -418,7 +418,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                 {/* Tableau items */}
                 <table className="w-full text-xs mb-4">
                   <thead>
-                    <tr className="bg-[#1A3A5C] text-white">
+                    <tr className="bg-[#9333EA] text-white">
                       <th className="px-2 py-1.5 text-left">Description</th>
                       <th className="px-2 py-1.5 text-center">Qté</th>
                       <th className="px-2 py-1.5 text-right">P.U.</th>
@@ -456,7 +456,7 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
                       <span>- {fcfa(discount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center bg-[#1A3A5C] text-white rounded-lg px-3 py-2 mt-2">
+                  <div className="flex justify-between items-center bg-[#9333EA] text-white rounded-lg px-3 py-2 mt-2">
                     <span className="font-bold text-sm">TOTAL TTC</span>
                     <span className="font-bold text-base">{fcfa(total)}</span>
                   </div>
@@ -476,3 +476,4 @@ export default function InvoiceForm({ clients, invoice, defaultTax }) {
     </AuthLayout>
   );
 }
+export { InvoiceForm };

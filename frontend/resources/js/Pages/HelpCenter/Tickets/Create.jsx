@@ -40,7 +40,7 @@ const MODULES = [
 ];
 
 const PRIORITIES = [
-  { value: 'normal', label: 'Normale',  color: 'border-blue-200 bg-blue-50 text-blue-700' },
+  { value: 'normal', label: 'Normale',  color: 'border-purple-200 bg-purple-50 text-purple-700' },
   { value: 'high',   label: 'Haute',    color: 'border-orange-200 bg-orange-50 text-orange-700' },
   { value: 'urgent', label: 'Urgente',  color: 'border-red-200 bg-red-50 text-red-700' },
 ];
@@ -220,7 +220,7 @@ export default function TicketCreate() {
               Notre équipe vous répondra dans les plus brefs délais.
             </p>
           </div>
-          <Link to="/help/tickets" className="text-sm text-blue-600 hover:underline">
+          <Link to="/help/tickets" className="text-sm text-purple-600 hover:underline">
             Mes tickets
           </Link>
         </div>
@@ -230,16 +230,16 @@ export default function TicketCreate() {
 
         {/* ── Suggestions SARA ────────────────────────────────────────── */}
         {showSaraSuggestions && saraArticles.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-6">
             <div className="flex items-start gap-3 mb-4">
-              <div className="bg-blue-600 text-white p-1.5 rounded-lg">
+              <div className="bg-purple-600 text-white p-1.5 rounded-lg">
                 <Icon.Bot />
               </div>
               <div>
-                <p className="font-semibold text-blue-900">
+                <p className="font-semibold text-purple-900">
                   Avez-vous consulté ces articles avant d'ouvrir un ticket ?
                 </p>
-                <p className="text-sm text-blue-700 mt-0.5">
+                <p className="text-sm text-purple-700 mt-0.5">
                   Ils pourraient répondre à votre question immédiatement.
                 </p>
               </div>
@@ -252,9 +252,9 @@ export default function TicketCreate() {
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-2 px-4 py-3 bg-white rounded-lg border
-                             border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all group"
+                             border-purple-100 hover:border-purple-300 hover:shadow-sm transition-all group"
                 >
-                  <span className="text-sm text-gray-800 flex-1 group-hover:text-blue-700">
+                  <span className="text-sm text-gray-800 flex-1 group-hover:text-purple-700">
                     {art.title?.fr ?? art.title}
                   </span>
                   <Icon.ChevronRight />
@@ -264,7 +264,7 @@ export default function TicketCreate() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowSaraSuggestions(false)}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-purple-600 hover:underline"
               >
                 Ces articles n'ont pas résolu mon problème — continuer
               </button>
@@ -273,8 +273,8 @@ export default function TicketCreate() {
                   setShowSaraSuggestions(false);
                   doSubmit();
                 }}
-                className="ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg text-sm
-                           hover:bg-blue-700 transition-colors"
+                className="ml-auto px-4 py-2 bg-purple-600 text-white rounded-lg text-sm
+                           hover:bg-purple-700 transition-colors"
               >
                 Soumettre quand même
               </button>
@@ -302,7 +302,7 @@ export default function TicketCreate() {
                     className={`flex items-start gap-3 p-3 border rounded-xl text-left
                                 transition-all
                                 ${form.category === cat.value
-                                  ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                                  ? 'border-purple-500 bg-purple-50 ring-1 ring-purple-500'
                                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
                   >
                     <span className="text-lg">{cat.emoji}</span>
@@ -327,7 +327,7 @@ export default function TicketCreate() {
                 value={form.module}
                 onChange={e => setForm(f => ({ ...f, module: e.target.value }))}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
-                           focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="">Sélectionnez un module (optionnel)</option>
                 {MODULES.map(m => <option key={m} value={m}>{m}</option>)}
@@ -350,7 +350,7 @@ export default function TicketCreate() {
                 placeholder="Ex : Impossible d'exporter les rapports en PDF"
                 maxLength={200}
                 className={`w-full border rounded-lg px-3 py-2.5 text-sm
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                            focus:outline-none focus:ring-2 focus:ring-purple-500
                             ${errors.subject ? 'border-red-300' : 'border-gray-200'}`}
               />
               {errors.subject && (
@@ -372,7 +372,7 @@ export default function TicketCreate() {
                 rows={6}
                 placeholder={'Décrivez le problème en détail :\n- Étapes pour reproduire\n- Ce que vous attendiez\n- Ce qui s\'est passé à la place\n- Messages d\'erreur éventuels'}
                 className={`w-full border rounded-lg px-3 py-2.5 text-sm resize-y
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                            focus:outline-none focus:ring-2 focus:ring-purple-500
                             ${errors.description ? 'border-red-300' : 'border-gray-200'}`}
               />
               <div className="flex justify-between mt-1">
@@ -427,7 +427,7 @@ export default function TicketCreate() {
                     onClick={() => fileInputRef.current?.click()}
                     className="flex items-center gap-2 px-4 py-2 border border-dashed
                                border-gray-300 rounded-lg text-sm text-gray-500
-                               hover:border-blue-400 hover:text-blue-600 transition-colors"
+                               hover:border-purple-400 hover:text-purple-600 transition-colors"
                   >
                     <Icon.Paperclip />
                     Ajouter des fichiers
@@ -496,7 +496,7 @@ export default function TicketCreate() {
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
+              className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg
                          text-sm font-medium transition-colors disabled:opacity-60
                          disabled:cursor-not-allowed flex items-center gap-2"
             >
@@ -517,3 +517,4 @@ export default function TicketCreate() {
     </div>
   );
 }
+export { TicketCreate };

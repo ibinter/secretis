@@ -5,7 +5,7 @@ const VARIANTS = {
   success: { icon: CheckCircle2, bg: 'bg-[#1E8449]/10 dark:bg-[#1E8449]/20', border: 'border-[#1E8449]/30', text: 'text-[#1E8449] dark:text-green-300', iconColor: 'text-[#1E8449]' },
   warning: { icon: AlertTriangle,bg: 'bg-[#F39C12]/10 dark:bg-[#F39C12]/20', border: 'border-[#F39C12]/30', text: 'text-[#d68910] dark:text-yellow-300', iconColor: 'text-[#F39C12]' },
   danger:  { icon: XCircle,      bg: 'bg-[#C0392B]/10 dark:bg-[#C0392B]/20', border: 'border-[#C0392B]/30', text: 'text-[#C0392B] dark:text-red-300', iconColor: 'text-[#C0392B]' },
-  info:    { icon: Info,         bg: 'bg-[#2E86C1]/10 dark:bg-[#2E86C1]/20', border: 'border-[#2E86C1]/30', text: 'text-[#2E86C1] dark:text-blue-300', iconColor: 'text-[#2E86C1]' },
+  info:    { icon: Info,         bg: 'bg-[#7e22ce]/10 dark:bg-[#7e22ce]/20', border: 'border-[#7e22ce]/30', text: 'text-[#7e22ce] dark:text-purple-300', iconColor: 'text-[#7e22ce]' },
 }
 
 export default function Alert({
@@ -36,3 +36,4 @@ export default function Alert({
     </div>
   )
 }
+export { Alert };

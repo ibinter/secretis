@@ -10,7 +10,7 @@ const MOCK_ANNOUNCEMENTS = [
 ];
 
 const TYPE_CONFIG = {
-  info:        { label: 'Information', color: 'bg-blue-100 text-blue-800 border-blue-200',    banner: 'bg-blue-50 border-blue-200 text-blue-900',   icon: 'ℹ️' },
+  info:        { label: 'Information', color: 'bg-purple-100 text-purple-800 border-purple-200',    banner: 'bg-purple-50 border-purple-200 text-purple-900',   icon: 'ℹ️' },
   warning:     { label: 'Avertissement', color: 'bg-amber-100 text-amber-800 border-amber-200', banner: 'bg-amber-50 border-amber-200 text-amber-900', icon: '⚠️' },
   maintenance: { label: 'Maintenance',  color: 'bg-red-100 text-red-800 border-red-200',       banner: 'bg-red-50 border-red-200 text-red-900',      icon: '🔧' },
   feature:     { label: 'Nouveauté',    color: 'bg-green-100 text-green-800 border-green-200', banner: 'bg-green-50 border-green-200 text-green-900',icon: '✨' },
@@ -27,13 +27,13 @@ function RichEditor({ value, onChange }) {
     return (
       <div>
         <div className="flex justify-end mb-1.5">
-          <button onClick={() => setMode('visual')} className="text-xs text-blue-700 hover:underline">Vue visuelle</button>
+          <button onClick={() => setMode('visual')} className="text-xs text-purple-700 hover:underline">Vue visuelle</button>
         </div>
         <textarea
           value={value}
           onChange={e => onChange(e.target.value)}
           rows={8}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-900 resize-y"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-purple-900 resize-y"
           placeholder="<p>Contenu HTML...</p>"
         />
       </div>
@@ -61,7 +61,7 @@ function RichEditor({ value, onChange }) {
         <button onClick={() => setMode('html')} className="text-xs text-gray-400 hover:text-gray-600 ml-auto">{'</>'} HTML</button>
       </div>
       <div
-        className="min-h-[120px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:outline-none"
+        className="min-h-[120px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:outline-none"
         contentEditable
         dangerouslySetInnerHTML={{ __html: value }}
         onInput={e => onChange(e.currentTarget.innerHTML)}
@@ -131,7 +131,7 @@ function AnnouncementModal({ announcement, onClose, onSave }) {
                   key={key}
                   type="button"
                   onClick={() => setForm(f => ({ ...f, type: key }))}
-                  className={`py-2.5 px-3 rounded-lg border-2 text-xs font-semibold transition-all text-center ${form.type === key ? 'border-blue-900 bg-blue-50 text-blue-900' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  className={`py-2.5 px-3 rounded-lg border-2 text-xs font-semibold transition-all text-center ${form.type === key ? 'border-purple-900 bg-purple-50 text-purple-900' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
                 >
                   <div className="text-lg">{cfg.icon}</div>
                   <div>{cfg.label}</div>
@@ -144,7 +144,7 @@ function AnnouncementModal({ announcement, onClose, onSave }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Titre <span className="text-red-500">*</span></label>
             <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="Titre de l'annonce..." className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900" />
+              placeholder="Titre de l'annonce..." className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900" />
           </div>
 
           {/* Contenu */}
@@ -162,7 +162,7 @@ function AnnouncementModal({ announcement, onClose, onSave }) {
                   key={val}
                   type="button"
                   onClick={() => togglePlan(val)}
-                  className={`px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all ${(form.target_plans || []).includes(val) ? 'border-blue-900 bg-blue-50 text-blue-900' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                  className={`px-3 py-1.5 rounded-lg border-2 text-xs font-semibold transition-all ${(form.target_plans || []).includes(val) ? 'border-purple-900 bg-purple-50 text-purple-900' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
                 >
                   {label}
                 </button>
@@ -175,18 +175,18 @@ function AnnouncementModal({ announcement, onClose, onSave }) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Planifié à</label>
               <input type="datetime-local" value={form.scheduled_at || ''} onChange={e => setForm(f => ({ ...f, scheduled_at: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Expire à</label>
               <input type="datetime-local" value={form.expires_at || ''} onChange={e => setForm(f => ({ ...f, expires_at: e.target.value }))}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900" />
             </div>
           </div>
 
           {/* Aperçu */}
           <div>
-            <button onClick={() => setShowPreview(p => !p)} className="text-sm text-blue-700 font-medium hover:underline mb-3 block">
+            <button onClick={() => setShowPreview(p => !p)} className="text-sm text-purple-700 font-medium hover:underline mb-3 block">
               {showPreview ? '▲ Masquer' : '▼ Aperçu du bandeau'}
             </button>
             {showPreview && (
@@ -202,7 +202,7 @@ function AnnouncementModal({ announcement, onClose, onSave }) {
 
         <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
           <button onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Annuler</button>
-          <button onClick={handleSave} disabled={!form.title || saving} className="px-5 py-2.5 text-sm font-medium text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50">
+          <button onClick={handleSave} disabled={!form.title || saving} className="px-5 py-2.5 text-sm font-medium text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50">
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </div>
@@ -269,17 +269,17 @@ export default function Announcements({ announcements: propAnnouncements }) {
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-              <span className="text-blue-400">/</span>
+              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Annonces plateforme</h1>
               <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
             </div>
             <button
               onClick={() => setEditing({ title: '', content: '', type: 'info', target_plans: ['all'], scheduled_at: '', expires_at: '' })}
-              className="px-4 py-2 bg-white text-blue-900 text-sm font-bold rounded-lg hover:bg-blue-50"
+              className="px-4 py-2 bg-white text-purple-900 text-sm font-bold rounded-lg hover:bg-purple-50"
             >
               + Nouvelle annonce
             </button>
@@ -343,3 +343,4 @@ export default function Announcements({ announcements: propAnnouncements }) {
     </>
   );
 }
+export { Announcements };

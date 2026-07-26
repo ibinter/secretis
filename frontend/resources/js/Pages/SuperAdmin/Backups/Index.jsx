@@ -30,7 +30,7 @@ function Badge({ status }) {
   const map = {
     success : 'bg-green-100 text-green-800',
     failed  : 'bg-red-100   text-red-800',
-    running : 'bg-blue-100  text-blue-800',
+    running : 'bg-purple-100  text-purple-800',
     pending : 'bg-gray-100  text-gray-700',
   };
   const labels = { success: 'Succès', failed: 'Échec', running: 'En cours', pending: 'En attente' };
@@ -154,7 +154,7 @@ function TriggerButton({ onTrigger, loading }) {
       type="button"
       onClick={onTrigger}
       disabled={loading}
-      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+      className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
     >
       {loading ? (
         <>
@@ -198,7 +198,7 @@ function BackupSchedule({ schedule }) {
             <p className="text-sm font-semibold text-gray-900">Rétention</p>
             <p className="text-xs text-gray-500 mt-0.5">Les sauvegardes plus anciennes sont supprimées automatiquement</p>
           </div>
-          <span className="text-sm font-bold text-blue-700">{schedule?.retention_days ?? 30} jours</span>
+          <span className="text-sm font-bold text-purple-700">{schedule?.retention_days ?? 30} jours</span>
         </div>
 
         {/* Destinations */}
@@ -261,7 +261,7 @@ function BackupList({ backups, onDownload, onRestore, onDelete, restoringId, del
               <tr key={b.filename} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-mono text-xs text-gray-700">{fmt.date(b.created_at)}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${b.type === 'auto' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${b.type === 'auto' ? 'bg-purple-50 text-purple-700' : 'bg-purple-50 text-purple-700'}`}>
                     {b.type === 'auto' ? 'Auto' : 'Manuel'}
                   </span>
                 </td>
@@ -282,7 +282,7 @@ function BackupList({ backups, onDownload, onRestore, onDelete, restoringId, del
                       type="button"
                       title="Télécharger (ZIP)"
                       onClick={() => onDownload(b.filename)}
-                      className="rounded p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      className="rounded p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                     >
                       ⬇️
                     </button>
@@ -640,3 +640,4 @@ export default function BackupsIndex({ lastBackup, backups: initialBackups, sche
     </>
   );
 }
+export { BackupsIndex };

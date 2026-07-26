@@ -63,7 +63,7 @@ function FaqItem({ item }) {
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-start justify-between gap-4 py-4 text-left
-                   hover:text-blue-600 transition-colors"
+                   hover:text-purple-600 transition-colors"
         aria-expanded={open}
       >
         <span className="text-sm font-medium text-gray-800 leading-relaxed">{q}</span>
@@ -75,7 +75,7 @@ function FaqItem({ item }) {
         <div className="pb-4 pr-6">
           <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{a}</p>
           {item.module && (
-            <span className="inline-block mt-3 text-xs bg-blue-50 text-blue-600
+            <span className="inline-block mt-3 text-xs bg-purple-50 text-purple-600
                              px-2 py-0.5 rounded-full">
               Module : {item.module}
             </span>
@@ -161,7 +161,7 @@ export default function FaqPage() {
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Rechercher une question..."
               className="w-full pl-9 pr-9 py-2.5 border border-gray-200 rounded-lg text-sm
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
             {searchQuery && (
               <button
@@ -188,7 +188,7 @@ export default function FaqPage() {
                 onClick={() => setActiveCategory(null)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors
                             ${!activeCategory
-                              ? 'bg-blue-50 text-blue-700 font-medium'
+                              ? 'bg-purple-50 text-purple-700 font-medium'
                               : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 Toutes ({faqs.length})
@@ -203,7 +203,7 @@ export default function FaqPage() {
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors
                                 flex items-center gap-2
                                 ${activeCategory === cat
-                                  ? 'bg-blue-50 text-blue-700 font-medium'
+                                  ? 'bg-purple-50 text-purple-700 font-medium'
                                   : 'text-gray-600 hover:bg-gray-100'}`}
                   >
                     <span>{meta?.emoji}</span>
@@ -231,8 +231,8 @@ export default function FaqPage() {
               </p>
               <button
                 onClick={openSara}
-                className="flex items-center gap-2 mx-auto px-4 py-2 bg-blue-600
-                           hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                className="flex items-center gap-2 mx-auto px-4 py-2 bg-purple-600
+                           hover:bg-purple-700 text-white rounded-lg text-sm font-medium"
               >
                 <Icon.Bot />
                 Poser la question à SARA
@@ -267,7 +267,7 @@ export default function FaqPage() {
 
           {/* CTA SARA en bas */}
           {!loading && filtered.length > 0 && (
-            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+            <div className="mt-8 bg-purple-50 border border-purple-200 rounded-xl p-6 text-center">
               <p className="text-gray-700 font-medium mb-2">
                 Cette FAQ n'a pas répondu à votre question ?
               </p>
@@ -276,8 +276,8 @@ export default function FaqPage() {
               </p>
               <button
                 onClick={openSara}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600
-                           hover:bg-blue-700 text-white rounded-lg text-sm font-medium
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600
+                           hover:bg-purple-700 text-white rounded-lg text-sm font-medium
                            transition-colors"
               >
                 <Icon.Bot />
@@ -290,3 +290,4 @@ export default function FaqPage() {
     </div>
   );
 }
+export { FaqPage };

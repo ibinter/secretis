@@ -14,7 +14,7 @@ import axios from 'axios';
 import AuthLayout from '@/Layouts/AuthLayout';
 
 const THRESHOLDS = [
-  { value: 50,  type: 'threshold_50',  label: '50%',  color: 'text-blue-600' },
+  { value: 50,  type: 'threshold_50',  label: '50%',  color: 'text-purple-600' },
   { value: 80,  type: 'threshold_80',  label: '80%',  color: 'text-orange-500' },
   { value: 100, type: 'threshold_100', label: '100%', color: 'text-red-500' },
   { value: 110, type: 'exceeded',      label: 'Dépassé', color: 'text-red-700' },
@@ -108,7 +108,7 @@ export default function AlertsConfig({ budgets, users }) {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] disabled:opacity-50 transition"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] disabled:opacity-50 transition"
           >
             <CheckIcon className="h-4 w-4" />
             {saving ? 'Sauvegarde...' : 'Sauvegarder'}
@@ -116,9 +116,9 @@ export default function AlertsConfig({ budgets, users }) {
         </div>
 
         {/* Résumé */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3">
-          <BellIcon className="h-5 w-5 text-blue-500" />
-          <div className="text-sm text-blue-800">
+        <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 flex items-center gap-3">
+          <BellIcon className="h-5 w-5 text-purple-500" />
+          <div className="text-sm text-purple-800">
             <strong>{activeCount} alertes actives</strong> configurées sur {linesCount} lignes.
             Les alertes sont envoyées par email aux destinataires sélectionnés lors du CRON mensuel.
           </div>
@@ -135,12 +135,12 @@ export default function AlertsConfig({ budgets, users }) {
                 onClick={() => setActiveBudget(b.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
                   activeBudget === b.id
-                    ? 'bg-[#1A3A5C] text-white'
+                    ? 'bg-[#9333EA] text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <div className="truncate font-medium">{b.name}</div>
-                <div className={`text-xs mt-0.5 ${activeBudget === b.id ? 'text-blue-200' : 'text-gray-400'}`}>
+                <div className={`text-xs mt-0.5 ${activeBudget === b.id ? 'text-purple-200' : 'text-gray-400'}`}>
                   {b.lines?.length ?? 0} ligne(s)
                 </div>
               </button>
@@ -207,8 +207,8 @@ export default function AlertsConfig({ budgets, users }) {
                                         onClick={() => toggleUser(line.id, type, u.id)}
                                         className={`px-2 py-0.5 rounded-full text-xs border transition ${
                                           selected
-                                            ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]'
-                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#1A3A5C]'
+                                            ? 'bg-[#9333EA] text-white border-[#9333EA]'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#9333EA]'
                                         }`}
                                       >
                                         {u.name}
@@ -238,3 +238,4 @@ export default function AlertsConfig({ budgets, users }) {
     </AuthLayout>
   );
 }
+export { AlertsConfig };

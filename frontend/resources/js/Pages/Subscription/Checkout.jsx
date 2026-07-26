@@ -119,11 +119,11 @@ function MobileMoney({ order, paymentMethods, onSuccess }) {
 
       {/* Instructions */}
       {config.instructions && (
-        <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-800 space-y-1">
+        <div className="bg-purple-50 rounded-lg p-4 text-sm text-purple-800 space-y-1">
           {Array.isArray(config.instructions)
             ? config.instructions.map((step, i) => (
                 <p key={i} className="flex gap-2">
-                  <span className="font-semibold text-blue-600">{i + 1}.</span> {step}
+                  <span className="font-semibold text-purple-600">{i + 1}.</span> {step}
                 </p>
               ))
             : <p>{config.instructions}</p>}
@@ -202,7 +202,7 @@ function ElectronicPayment({ order, paymentMethods, selectedProvider, onProvider
 
   return (
     <div className="space-y-3 mt-4">
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-sm text-blue-700">
+      <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 text-sm text-purple-700">
         Vous serez redirigé vers la plateforme sécurisée. <strong>Ne fermez pas la fenêtre</strong> pendant le paiement.
         Votre licence sera activée automatiquement après confirmation.
       </div>
@@ -677,3 +677,4 @@ export default function Checkout({
     </>
   );
 }
+export { Checkout };

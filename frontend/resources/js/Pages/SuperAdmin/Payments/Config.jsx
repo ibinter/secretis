@@ -5,7 +5,7 @@ import axios from 'axios';
 // ─── Familles de paiement ─────────────────────────────────────────────────────
 const TYPE_LABELS = {
   mobile_money:           { label: 'Mobile Money',               icon: '📱', color: 'bg-orange-50 text-orange-700 border-orange-200' },
-  electronic:             { label: 'Paiement électronique',      icon: '💳', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  electronic:             { label: 'Paiement électronique',      icon: '💳', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   bank_transfer:          { label: 'Virement national',          icon: '🏦', color: 'bg-slate-50 text-slate-700 border-slate-200' },
   international_transfer: { label: 'Virement international',     icon: '🌐', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   money_transfer:         { label: 'Transfert d\'argent',        icon: '💸', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
@@ -318,3 +318,4 @@ export default function PaymentsConfig() {
     </>
   );
 }
+export { PaymentsConfig };

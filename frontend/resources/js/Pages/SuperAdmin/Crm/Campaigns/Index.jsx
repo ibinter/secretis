@@ -14,7 +14,7 @@ const Ic = {
 
 const STATUS_MAP = {
   draft:     { label: 'Brouillon',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-  scheduled: { label: 'Planifiée',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  scheduled: { label: 'Planifiée',  cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   running:   { label: 'En cours',   cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
   done:      { label: 'Terminée',   cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
   paused:    { label: 'En pause',   cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
@@ -75,7 +75,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
 
   const fmtDate = d => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
 
-  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none'
+  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none'
 
   return (
     <SuperAdminLayout title="Campagnes commerciales">
@@ -85,7 +85,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
       <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
         <nav className="flex gap-1">
           {[['campaigns', 'Campagnes'], ['templates', 'Modèles de messages']].map(([k, l]) => (
-            <button key={k} onClick={() => setActiveTab(k)} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === k ? 'border-[#1A3A5C] text-[#1A3A5C] dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{l}</button>
+            <button key={k} onClick={() => setActiveTab(k)} className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === k ? 'border-[#9333EA] text-[#9333EA] dark:border-purple-400 dark:text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}>{l}</button>
           ))}
         </nav>
       </div>
@@ -95,7 +95,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-5">
             <p className="text-sm text-gray-500 dark:text-gray-400">{campaigns.length} campagne(s)</p>
-            <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+            <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
               <Ic.Plus /> Nouvelle campagne
             </button>
           </div>
@@ -140,7 +140,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
               </div>
               <div className="flex justify-end gap-2 mt-4">
                 <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Annuler</button>
-                <button disabled={saving} onClick={save} className="px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
+                <button disabled={saving} onClick={save} className="px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60">
                   {saving ? 'Sauvegarde…' : 'Créer la campagne'}
                 </button>
               </div>
@@ -170,7 +170,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
                       </p>
                     </div>
                     {c.status === 'scheduled' && (
-                      <button onClick={() => sendCampaign(c.id)} className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors shrink-0">
+                      <button onClick={() => sendCampaign(c.id)} className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors shrink-0">
                         <Ic.Send /> Lancer
                       </button>
                     )}
@@ -192,7 +192,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
       {activeTab === 'templates' && (
         <div className="space-y-4">
           <div className="flex justify-end">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
               <Ic.Plus /> Nouveau modèle
             </button>
           </div>
@@ -202,7 +202,7 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-gray-400">{t.type === 'email' ? <Ic.Mail /> : <Ic.MessageSquare />}</span>
                   <h3 className="font-medium text-gray-900 dark:text-white text-sm">{t.name}</h3>
-                  <span className={`ml-auto px-2 py-0.5 rounded text-xs font-medium ${t.type === 'email' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{t.type}</span>
+                  <span className={`ml-auto px-2 py-0.5 rounded text-xs font-medium ${t.type === 'email' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>{t.type}</span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{t.subject}</p>
               </div>
@@ -213,3 +213,4 @@ export default function CampaignsIndex({ campaigns: propCampaigns, templates: pr
     </SuperAdminLayout>
   )
 }
+export { CampaignsIndex };

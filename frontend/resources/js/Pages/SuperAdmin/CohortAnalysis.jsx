@@ -85,10 +85,10 @@ export default function CohortAnalysis({ cohorts: propCohorts }) {
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center gap-3">
-            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-            <span className="text-blue-400">/</span>
+            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+            <span className="text-purple-400">/</span>
             <h1 className="text-lg font-bold">Analyse de cohortes</h1>
             <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
           </div>
@@ -143,7 +143,7 @@ export default function CohortAnalysis({ cohorts: propCohorts }) {
                               onClick={() => pct !== null && setSelectedCell(isSelected ? null : { cohort: row.cohort, period: p, pct, initial: row.initial })}
                               className={`w-full rounded-lg py-2 px-1 text-xs font-bold transition-all border ${c.bg} ${c.text} ${c.border}
                                 ${pct !== null ? 'cursor-pointer hover:opacity-80 hover:shadow-sm' : 'cursor-default'}
-                                ${isSelected ? 'ring-2 ring-blue-500 ring-offset-1' : ''}`}
+                                ${isSelected ? 'ring-2 ring-purple-500 ring-offset-1' : ''}`}
                             >
                               {pct !== null ? `${pct}%` : '—'}
                             </button>
@@ -159,32 +159,32 @@ export default function CohortAnalysis({ cohorts: propCohorts }) {
 
           {/* Détail cellule sélectionnée */}
           {selectedCell && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-blue-900">
+                  <h3 className="font-semibold text-purple-900">
                     Cohorte {selectedCell.cohort} — {selectedCell.period}
                   </h3>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-sm text-purple-700 mt-1">
                     <strong>{Math.round(selectedCell.initial * selectedCell.pct / 100)}</strong> organisations actives
                     sur <strong>{selectedCell.initial}</strong> initiales ({selectedCell.pct}% de rétention)
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedCell(null)}
-                  className="text-blue-400 hover:text-blue-600 p-1"
+                  className="text-purple-400 hover:text-purple-600 p-1"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <p className="text-xs text-blue-500 mt-2">
+              <p className="text-xs text-purple-500 mt-2">
                 Cliquez sur "Voir les organisations" pour accéder au détail des abonnés de cette cohorte.
               </p>
               <button
                 onClick={() => router.visit(`/superadmin/organizations?cohort=${selectedCell.cohort}&period=${selectedCell.period}`)}
-                className="mt-3 px-4 py-2 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800"
+                className="mt-3 px-4 py-2 bg-purple-900 text-white text-sm font-medium rounded-lg hover:bg-purple-800"
               >
                 Voir les organisations →
               </button>
@@ -204,7 +204,7 @@ export default function CohortAnalysis({ cohorts: propCohorts }) {
                   return vals.length ? `${(vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1)}%` : 'N/A';
                 })(),
                 desc: 'Après 1 mois de souscription',
-                color: 'bg-blue-50 text-blue-900',
+                color: 'bg-purple-50 text-purple-900',
               },
               {
                 label: 'Rétention M+6 (moy.)',
@@ -238,3 +238,4 @@ export default function CohortAnalysis({ cohorts: propCohorts }) {
     </>
   );
 }
+export { CohortAnalysis };

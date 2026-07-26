@@ -3,9 +3,9 @@ import { Inbox, SearchX, AlertTriangle, Loader2 } from 'lucide-react'
 
 const VARIANTS = {
   'no-data':    { icon: Inbox,         iconColor: 'text-gray-300 dark:text-gray-600' },
-  'no-results': { icon: SearchX,       iconColor: 'text-[#2E86C1]/40'                },
+  'no-results': { icon: SearchX,       iconColor: 'text-[#7e22ce]/40'                },
   'error':      { icon: AlertTriangle, iconColor: 'text-[#C0392B]/50'                },
-  'loading':    { icon: Loader2,       iconColor: 'text-[#2E86C1]', animate: true    },
+  'loading':    { icon: Loader2,       iconColor: 'text-[#7e22ce]', animate: true    },
 }
 
 export default function EmptyState({
@@ -43,3 +43,4 @@ export default function EmptyState({
     </div>
   )
 }
+export { EmptyState };

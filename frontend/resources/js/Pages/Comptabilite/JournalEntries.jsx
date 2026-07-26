@@ -76,7 +76,7 @@ function AccountCombobox({ value, onChange, accounts, placeholder = 'N° compte'
   return (
     <div className="relative" ref={ref}>
       <input
-        className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-500 outline-none"
+        className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-purple-500 outline-none"
         value={search}
         placeholder={placeholder}
         onChange={e => { setSearch(e.target.value); onChange(e.target.value); setOpen(true); }}
@@ -88,10 +88,10 @@ function AccountCombobox({ value, onChange, accounts, placeholder = 'N° compte'
           {filtered.map(acc => (
             <li
               key={acc.account_number}
-              className="px-3 py-1.5 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 flex gap-2"
+              className="px-3 py-1.5 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/30 flex gap-2"
               onMouseDown={() => select(acc)}
             >
-              <span className="font-mono text-blue-700 dark:text-blue-400 w-14 shrink-0">{acc.account_number}</span>
+              <span className="font-mono text-purple-700 dark:text-purple-400 w-14 shrink-0">{acc.account_number}</span>
               <span className="text-gray-700 dark:text-gray-300 truncate">{acc.account_name}</span>
             </li>
           ))}
@@ -238,7 +238,7 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
                       </td>
                       <td className="px-2 py-1.5">
                         <input
-                          className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
                           placeholder="Libellé…"
                           value={line.description}
                           onChange={e => setLine(idx, 'description', e.target.value)}
@@ -247,7 +247,7 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
                       <td className="px-2 py-1.5">
                         <input
                           type="number" step="0.01" min="0"
-                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
                           value={line.debit_amount}
                           onChange={e => setLine(idx, 'debit_amount', e.target.value)}
                         />
@@ -255,7 +255,7 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
                       <td className="px-2 py-1.5">
                         <input
                           type="number" step="0.01" min="0"
-                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-blue-500"
+                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
                           value={line.credit_amount}
                           onChange={e => setLine(idx, 'credit_amount', e.target.value)}
                         />
@@ -302,7 +302,7 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
             </div>
 
             <button type="button" onClick={addLine}
-              className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+              className="mt-2 text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
               <PlusIcon className="w-4 h-4" /> Ajouter une ligne
             </button>
           </div>
@@ -364,7 +364,7 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
     const colors = {
       VE: 'bg-green-100 text-green-700',
       AC: 'bg-orange-100 text-orange-700',
-      BQ: 'bg-blue-100 text-blue-700',
+      BQ: 'bg-purple-100 text-purple-700',
       SA: 'bg-purple-100 text-purple-700',
       CA: 'bg-yellow-100 text-yellow-700',
       OD: 'bg-gray-100 text-gray-600',
@@ -438,7 +438,7 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
                   </tr>
                 ) : entries.data.map(entry => (
                   <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                    <td className="px-4 py-3 font-mono text-blue-700 dark:text-blue-400 font-medium">
+                    <td className="px-4 py-3 font-mono text-purple-700 dark:text-purple-400 font-medium">
                       {entry.entry_number}
                     </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
@@ -522,3 +522,4 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
     </AuthLayout>
   );
 }
+export { JournalEntries };

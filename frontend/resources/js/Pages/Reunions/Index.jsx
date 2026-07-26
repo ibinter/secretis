@@ -34,7 +34,7 @@ const TABS = [
 ];
 
 const STATUS_CONFIG = {
-  planned:   { label: 'Planifiée',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'   },
+  planned:   { label: 'Planifiée',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'   },
   ongoing:   { label: 'En cours',   color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
   completed: { label: 'Terminée',   color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
   cancelled: { label: 'Annulée',    color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'         },
@@ -197,8 +197,8 @@ function MeetingCard({ meeting }) {
             <a
               href={route('reunions.minutes.download', meeting.id)}
               className="flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium
-                         text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30
-                         rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                         text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30
+                         rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
             >
               <Download className="w-4 h-4" />
               CR
@@ -267,7 +267,7 @@ export default function ReunionsIndex({ meetings, filters }) {
           {canCreate && (
             <Link
               href={route('reunions.create')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700
                          text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
             >
               <PlusCircle className="w-4 h-4" />
@@ -287,7 +287,7 @@ export default function ReunionsIndex({ meetings, filters }) {
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
             />
           </div>
           <button
@@ -295,7 +295,7 @@ export default function ReunionsIndex({ meetings, filters }) {
             className={`
               flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium text-sm transition-colors
               ${showFilters
-                ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300'
                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
               }
             `}
@@ -316,7 +316,7 @@ export default function ReunionsIndex({ meetings, filters }) {
                 type="date"
                 defaultValue={filters.from ?? ''}
                 onChange={(e) => router.get(route('reunions.index'), { ...filters, status: activeTab, from: e.target.value }, { preserveState: true, replace: true })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
             <div>
@@ -327,7 +327,7 @@ export default function ReunionsIndex({ meetings, filters }) {
                 type="date"
                 defaultValue={filters.to ?? ''}
                 onChange={(e) => router.get(route('reunions.index'), { ...filters, status: activeTab, to: e.target.value }, { preserveState: true, replace: true })}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
             <div className="flex items-end">
@@ -389,7 +389,7 @@ export default function ReunionsIndex({ meetings, filters }) {
                 className={`
                   w-9 h-9 rounded-lg text-sm font-medium transition-colors
                   ${meetings.current_page === page
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-purple-600 text-white'
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }
                 `}
@@ -403,3 +403,4 @@ export default function ReunionsIndex({ meetings, filters }) {
     </AuthLayout>
   );
 }
+export { ReunionsIndex };

@@ -30,9 +30,9 @@ function RolloutSlider({ value, onChange, flagId }) {
         type="range" min={0} max={100} step={5}
         value={value}
         onChange={e => onChange(+e.target.value)}
-        className="flex-1 h-1.5 appearance-none rounded-full bg-gray-200 dark:bg-gray-600 cursor-pointer accent-[#1A3A5C]"
+        className="flex-1 h-1.5 appearance-none rounded-full bg-gray-200 dark:bg-gray-600 cursor-pointer accent-[#9333EA]"
       />
-      <span className="text-xs font-bold text-[#1A3A5C] dark:text-blue-400 tabular-nums w-10 text-right">{value}%</span>
+      <span className="text-xs font-bold text-[#9333EA] dark:text-purple-400 tabular-nums w-10 text-right">{value}%</span>
     </div>
   )
 }
@@ -71,7 +71,7 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Feature Flags</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Contrôle du déploiement progressif des fonctionnalités</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
           <Ic.Plus /> Nouveau flag
         </button>
       </div>
@@ -84,7 +84,7 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
             <div
               key={flag.id}
               className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border transition-colors cursor-pointer ${
-                selected?.id === flag.id ? 'border-[#1A3A5C] dark:border-blue-500' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
+                selected?.id === flag.id ? 'border-[#9333EA] dark:border-purple-500' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
               }`}
               onClick={() => setSelected(flag)}
             >
@@ -102,7 +102,7 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
                   </div>
                   <button
                     onClick={e => { e.stopPropagation(); updateFlag(flag, { active: !flag.active }) }}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${flag.active ? 'bg-[#1A3A5C]' : 'bg-gray-200 dark:bg-gray-600'}`}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors shrink-0 ${flag.active ? 'bg-[#9333EA]' : 'bg-gray-200 dark:bg-gray-600'}`}
                   >
                     <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${flag.active ? 'translate-x-4' : 'translate-x-1'}`} />
                   </button>
@@ -123,7 +123,7 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
                     <button
                       onClick={() => saveRollout(flag)}
                       disabled={saving}
-                      className="px-2.5 py-1 text-xs font-medium bg-[#1A3A5C]/10 text-[#1A3A5C] dark:bg-blue-900/30 dark:text-blue-400 rounded-md hover:bg-[#1A3A5C]/20 transition-colors disabled:opacity-50"
+                      className="px-2.5 py-1 text-xs font-medium bg-[#9333EA]/10 text-[#9333EA] dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-[#9333EA]/20 transition-colors disabled:opacity-50"
                     >
                       Sauvegarder
                     </button>
@@ -163,7 +163,7 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
                           setSelected(updated)
                           setFlags(fs => fs.map(f => f.id === selected.id ? updated : f))
                         }}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${o.enabled ? 'bg-[#1A3A5C]' : 'bg-gray-200 dark:bg-gray-600'}`}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${o.enabled ? 'bg-[#9333EA]' : 'bg-gray-200 dark:bg-gray-600'}`}
                       >
                         <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${o.enabled ? 'translate-x-4' : 'translate-x-1'}`} />
                       </button>
@@ -184,8 +184,8 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
               {log.map(entry => (
                 <div key={entry.id} className="border-b border-gray-50 dark:border-gray-700/50 pb-3 last:border-0 last:pb-0">
                   <div className="flex items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#1A3A5C]/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[#1A3A5C] dark:text-blue-400 font-bold text-[10px]">{entry.author[0]}</span>
+                    <div className="w-6 h-6 rounded-full bg-[#9333EA]/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[#9333EA] dark:text-purple-400 font-bold text-[10px]">{entry.author[0]}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{entry.author}</p>
@@ -206,3 +206,4 @@ export default function FeatureFlagsPage({ flags: propFlags, log: propLog }) {
     </SuperAdminLayout>
   )
 }
+export { FeatureFlagsPage };

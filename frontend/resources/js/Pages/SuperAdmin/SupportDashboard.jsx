@@ -17,7 +17,7 @@ function PriorityBadge({ priority }) {
   const map = {
     urgent: 'bg-red-100 text-red-700 border-red-200',
     high:   'bg-orange-100 text-orange-700 border-orange-200',
-    normal: 'bg-blue-100 text-blue-700 border-blue-200',
+    normal: 'bg-purple-100 text-purple-700 border-purple-200',
     low:    'bg-gray-100 text-gray-600 border-gray-200',
   };
   const labels = { urgent: 'Urgent', high: 'Haute', normal: 'Normale', low: 'Faible' };
@@ -31,7 +31,7 @@ function PriorityBadge({ priority }) {
 function StatusBadge({ status }) {
   const map = {
     open:             'bg-red-50 text-red-700',
-    in_progress:      'bg-blue-50 text-blue-700',
+    in_progress:      'bg-purple-50 text-purple-700',
     waiting_customer: 'bg-amber-50 text-amber-700',
     resolved:         'bg-green-50 text-green-700',
     closed:           'bg-gray-50 text-gray-500',
@@ -69,11 +69,11 @@ function MessageThread({ ticket, onSend, onResolve }) {
       <div className="flex-1 overflow-y-auto space-y-3 p-4 min-h-0 max-h-80">
         {(ticket.messages || []).map((msg, i) => (
           <div key={i} className={`flex gap-3 ${msg.author_type === 'agent' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${msg.author_type === 'agent' ? 'bg-blue-900 text-white' : 'bg-gray-200 text-gray-700'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${msg.author_type === 'agent' ? 'bg-purple-900 text-white' : 'bg-gray-200 text-gray-700'}`}>
               {msg.author_name.charAt(0).toUpperCase()}
             </div>
-            <div className={`max-w-[75%] rounded-xl px-4 py-3 text-sm ${msg.author_type === 'agent' ? 'bg-blue-900 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}>
-              <p className={`text-xs mb-1 font-semibold ${msg.author_type === 'agent' ? 'text-blue-200' : 'text-gray-500'}`}>{msg.author_name}</p>
+            <div className={`max-w-[75%] rounded-xl px-4 py-3 text-sm ${msg.author_type === 'agent' ? 'bg-purple-900 text-white rounded-tr-sm' : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}>
+              <p className={`text-xs mb-1 font-semibold ${msg.author_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>{msg.author_name}</p>
               <p>{msg.content}</p>
             </div>
           </div>
@@ -91,13 +91,13 @@ function MessageThread({ ticket, onSend, onResolve }) {
             onChange={e => setReply(e.target.value)}
             rows={3}
             placeholder="Votre réponse..."
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 resize-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 resize-none"
           />
           <div className="flex items-center gap-2">
             <button
               onClick={handleSend}
               disabled={!reply.trim() || sending}
-              className="px-4 py-2 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-purple-900 text-white text-sm font-medium rounded-lg hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {sending && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>}
               Envoyer
@@ -174,10 +174,10 @@ export default function SupportDashboard({ tickets: propTickets, stats: propStat
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center gap-3">
-            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-            <span className="text-blue-400">/</span>
+            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+            <span className="text-purple-400">/</span>
             <h1 className="text-lg font-bold">Centre de support</h1>
             <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
           </div>
@@ -188,10 +188,10 @@ export default function SupportDashboard({ tickets: propTickets, stats: propStat
           {/* Métriques support */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {[
-              { label: 'Tickets ouverts', value: stats.open,       color: stats.open > 10 ? 'text-red-700' : 'text-blue-900' },
+              { label: 'Tickets ouverts', value: stats.open,       color: stats.open > 10 ? 'text-red-700' : 'text-purple-900' },
               { label: 'Urgents',         value: stats.urgent,     color: stats.urgent > 0 ? 'text-red-700' : 'text-gray-700' },
               { label: 'Cette semaine',   value: stats.this_week,  color: 'text-gray-700' },
-              { label: 'MTTR moyen',      value: stats.mttr_hours ? `${stats.mttr_hours}h` : 'N/A', color: 'text-blue-900' },
+              { label: 'MTTR moyen',      value: stats.mttr_hours ? `${stats.mttr_hours}h` : 'N/A', color: 'text-purple-900' },
               { label: 'CSAT',            value: stats.csat ? `${stats.csat}/5` : 'N/A', color: stats.csat >= 4 ? 'text-green-700' : 'text-amber-700' },
             ].map(m => (
               <div key={m.label} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
@@ -213,17 +213,17 @@ export default function SupportDashboard({ tickets: propTickets, stats: propStat
                   placeholder="Rechercher un ticket..."
                   value={filters.search}
                   onChange={e => setFilters(p => ({ ...p, search: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
                 />
                 <div className="grid grid-cols-2 gap-2">
-                  <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-900">
+                  <select value={filters.status} onChange={e => setFilters(p => ({ ...p, status: e.target.value }))} className="rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-purple-900">
                     <option value="">Tous les statuts</option>
                     <option value="open">Ouvert</option>
                     <option value="in_progress">En cours</option>
                     <option value="waiting_customer">Attente client</option>
                     <option value="resolved">Résolu</option>
                   </select>
-                  <select value={filters.priority} onChange={e => setFilters(p => ({ ...p, priority: e.target.value }))} className="rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-900">
+                  <select value={filters.priority} onChange={e => setFilters(p => ({ ...p, priority: e.target.value }))} className="rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-purple-900">
                     <option value="">Toutes priorités</option>
                     <option value="urgent">Urgent</option>
                     <option value="high">Haute</option>
@@ -244,7 +244,7 @@ export default function SupportDashboard({ tickets: propTickets, stats: propStat
                   <button
                     key={ticket.id}
                     onClick={() => setSelected(ticket)}
-                    className={`w-full text-left bg-white rounded-xl shadow-sm border transition-all p-4 ${selected?.id === ticket.id ? 'border-blue-500 ring-2 ring-blue-500 ring-offset-1' : 'border-gray-100 hover:border-gray-200'}`}
+                    className={`w-full text-left bg-white rounded-xl shadow-sm border transition-all p-4 ${selected?.id === ticket.id ? 'border-purple-500 ring-2 ring-purple-500 ring-offset-1' : 'border-gray-100 hover:border-gray-200'}`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -313,3 +313,4 @@ export default function SupportDashboard({ tickets: propTickets, stats: propStat
     </>
   );
 }
+export { SupportDashboard };

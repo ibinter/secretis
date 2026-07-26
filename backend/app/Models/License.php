@@ -147,4 +147,15 @@ class License extends Model
     {
         return max(0, (int) now()->diffInDays($this->ends_at, false));
     }
+
+    // ── Alias de compatibilité (LicenseService utilise expires_at / grace_ends_at) ──
+    public function getExpiresAtAttribute(): ?\Carbon\Carbon
+    {
+        return $this->ends_at;
+    }
+
+    public function getGraceEndsAtAttribute(): ?\Carbon\Carbon
+    {
+        return $this->grace_until ?? $this->ends_at;
+    }
 }

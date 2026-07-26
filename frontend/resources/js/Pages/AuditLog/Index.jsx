@@ -177,7 +177,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
     window.location.href = route('audit-log.export') + '?' + params.toString()
   }
 
-  const selectClass = 'text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]'
+  const selectClass = 'text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#9333EA]'
   const inputClass  = selectClass
 
   return (
@@ -189,7 +189,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
         {/* ── En-tête ─────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1A3A5C] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#9333EA] flex items-center justify-center">
               <Shield size={20} className="text-white" />
             </div>
             <div>
@@ -206,7 +206,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
             </button>
             <button
               onClick={exportCsv}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-[#1A3A5C] text-white hover:bg-[#162f4a] transition"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-[#9333EA] text-white hover:bg-[#162f4a] transition"
             >
               <Download size={14} /> Exporter CSV
             </button>
@@ -214,7 +214,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
         </div>
 
         {/* ── Notice ──────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-xl text-sm text-blue-700 dark:text-blue-300">
+        <div className="flex items-center gap-2 px-4 py-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900 rounded-xl text-sm text-purple-700 dark:text-purple-300">
           <Shield size={14} className="shrink-0" />
           Le journal d'audit est en lecture seule. Aucune entrée ne peut être modifiée ou supprimée.
         </div>
@@ -247,7 +247,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
 
             <div className="flex gap-2">
               <button onClick={applyFilters}
-                className="flex-1 px-3 py-2 text-sm rounded-lg bg-[#1A3A5C] text-white hover:bg-[#162f4a] transition">
+                className="flex-1 px-3 py-2 text-sm rounded-lg bg-[#9333EA] text-white hover:bg-[#162f4a] transition">
                 Filtrer
               </button>
               <button onClick={resetFilters}
@@ -305,7 +305,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
                     <td className="px-4 py-3">
                       <button
                         onClick={e => { e.stopPropagation(); setSelectedLog(log) }}
-                        className="text-gray-300 hover:text-[#1A3A5C] dark:hover:text-blue-400 transition"
+                        className="text-gray-300 hover:text-[#9333EA] dark:hover:text-purple-400 transition"
                         title="Voir les détails"
                       >
                         <Eye size={15} />
@@ -350,3 +350,4 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
     </>
   )
 }
+export { AuditLogIndex };

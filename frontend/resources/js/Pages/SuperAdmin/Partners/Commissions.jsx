@@ -4,7 +4,7 @@ import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
 
 const STATUS_COLORS = {
   pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  approved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   paid:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
 };
 
@@ -30,7 +30,7 @@ function PayModal({ commission, onClose, onPay }) {
           value={ref}
           onChange={(e) => setRef(e.target.value)}
           placeholder="ex: VIR-20260701-001"
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-[#2E86C1] focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-[#7e22ce] focus:border-transparent"
         />
         <div className="flex gap-3 justify-end">
           <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
@@ -159,7 +159,7 @@ export default function PartnersCommissions({ commissions, filters, summary }) {
                     <td className="px-4 py-3">
                       <Link
                         href={route('superadmin.partners.show', c.partner_id)}
-                        className="text-sm font-medium text-[#2E86C1] hover:underline"
+                        className="text-sm font-medium text-[#7e22ce] hover:underline"
                       >
                         {c.partner_name}
                       </Link>
@@ -216,3 +216,4 @@ export default function PartnersCommissions({ commissions, filters, summary }) {
     </SuperAdminLayout>
   );
 }
+export { PartnersCommissions };

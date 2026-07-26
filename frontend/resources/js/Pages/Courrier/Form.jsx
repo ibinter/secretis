@@ -54,7 +54,7 @@ function FormField({ label, required, error, children }) {
 function Input({ className = '', ...props }) {
     return (
         <input
-            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
+            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 ${className}`}
             {...props}
         />
     );
@@ -63,7 +63,7 @@ function Input({ className = '', ...props }) {
 function Select({ children, className = '', ...props }) {
     return (
         <select
-            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
+            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 ${className}`}
             {...props}
         >
             {children}
@@ -134,8 +134,8 @@ function DropZone({ files, onChange }) {
                 onClick={() => inputRef.current?.click()}
                 className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
                     isDragging
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-blue-50'
+                        ? 'border-purple-400 bg-purple-50'
+                        : 'border-gray-200 bg-gray-50 hover:border-purple-300 hover:bg-purple-50'
                 }`}
             >
                 <CloudArrowUpIcon className="mx-auto h-10 w-10 text-gray-300" />
@@ -143,7 +143,7 @@ function DropZone({ files, onChange }) {
                     Glissez-déposez vos fichiers ici
                 </p>
                 <p className="mt-1 text-xs text-gray-400">
-                    ou <span className="text-blue-600 underline">parcourir</span> — PDF, Word, Excel, images
+                    ou <span className="text-purple-600 underline">parcourir</span> — PDF, Word, Excel, images
                 </p>
                 <p className="mt-1 text-xs text-gray-400">
                     Max {MAX_FILE_SIZE_MB} Mo par fichier — {MAX_FILES} fichiers max
@@ -244,7 +244,7 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                             </a>
                             <button
                                 onClick={() => { setSubmitted(false); reset(); setFiles([]); }}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
                             >
                                 Nouveau courrier
                             </button>
@@ -294,7 +294,7 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                     disabled={editMode}
                                     className={`rounded-lg border-2 p-4 text-left transition-colors ${
                                         data.type === opt.value
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                            ? 'border-purple-500 bg-purple-50 text-purple-700'
                                             : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
                                     } ${editMode ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                                 >
@@ -435,7 +435,7 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                             onChange={e => setData('notes', e.target.value)}
                             placeholder="Notes internes, observations particulières…"
                             rows={4}
-                            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                         />
 
                         {errors.notes && (
@@ -467,7 +467,7 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                         <button
                             type="submit"
                             disabled={processing}
-                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                            className="flex items-center gap-2 rounded-lg bg-purple-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-60"
                         >
                             {processing && (
                                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -483,3 +483,4 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
         </AppLayout>
     );
 }
+export { CourrierForm };

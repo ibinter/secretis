@@ -23,7 +23,7 @@ const TabButton = ({ active, onClick, children, icon }) => (
     onClick={onClick}
     className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-all
       ${active
-        ? 'bg-blue-600 text-white shadow-sm'
+        ? 'bg-purple-600 text-white shadow-sm'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
       }`}
   >
@@ -48,7 +48,7 @@ const Input = ({ ...props }) => (
     {...props}
     className={`w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600
       bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm
-      focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all
+      focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all
       ${props.className ?? ''}`}
   />
 );
@@ -59,7 +59,7 @@ const Textarea = ({ ...props }) => (
     rows={props.rows ?? 5}
     className={`w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600
       bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm font-mono
-      focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-y
+      focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-y
       ${props.className ?? ''}`}
   />
 );
@@ -240,7 +240,7 @@ const SamlTab = ({ provider, orgSlug }) => {
         </div>
         <div className="flex flex-wrap gap-2">
           {data.email_domains.map((d) => (
-            <span key={d} className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs">
+            <span key={d} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs">
               {d}
               <button type="button" onClick={() => removeDomain(d)} className="hover:text-red-500">×</button>
             </span>
@@ -267,8 +267,8 @@ const SamlTab = ({ provider, orgSlug }) => {
         <button
           type="submit"
           disabled={processing}
-          className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium
-                     transition-all disabled:opacity-60 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium
+                     transition-all disabled:opacity-60 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
         >
           {processing ? 'Enregistrement...' : 'Enregistrer la configuration'}
         </button>
@@ -449,7 +449,7 @@ const LdapTab = ({ provider }) => {
         <button
           type="submit"
           disabled={processing}
-          className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-all disabled:opacity-60"
+          className="px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all disabled:opacity-60"
         >
           {processing ? 'Enregistrement...' : 'Enregistrer'}
         </button>
@@ -595,7 +595,7 @@ const OidcTab = ({ provider }) => {
 
       <div className="flex items-center gap-3 pt-2">
         <button type="submit" disabled={processing}
-                className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-all disabled:opacity-60">
+                className="px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-all disabled:opacity-60">
           {processing ? 'Enregistrement...' : 'Enregistrer'}
         </button>
 
@@ -661,7 +661,7 @@ export default function SsoConfig({ providers = {}, organization }) {
             onClick={handleSsoOnlyToggle}
             disabled={ssoOnlyLoading}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
-              ${ssoOnly ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'}
+              ${ssoOnly ? 'bg-purple-600' : 'bg-slate-200 dark:bg-slate-700'}
               ${ssoOnlyLoading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform
@@ -698,3 +698,4 @@ export default function SsoConfig({ providers = {}, organization }) {
     </>
   );
 }
+export { SsoConfig };

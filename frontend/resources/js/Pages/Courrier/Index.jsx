@@ -20,14 +20,14 @@ import {
 
 const STATUS_CONFIG = {
     pending:    { label: 'En attente',    color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-    processing: { label: 'En traitement', color: 'bg-blue-100 text-blue-800 border-blue-200' },
+    processing: { label: 'En traitement', color: 'bg-purple-100 text-purple-800 border-purple-200' },
     processed:  { label: 'Traité',        color: 'bg-green-100 text-green-800 border-green-200' },
     archived:   { label: 'Archivé',       color: 'bg-gray-100 text-gray-700 border-gray-200' },
 };
 
 const URGENCY_CONFIG = {
     low:    { label: 'Faible',  color: 'bg-gray-100 text-gray-600 border-gray-200' },
-    normal: { label: 'Normal',  color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    normal: { label: 'Normal',  color: 'bg-purple-100 text-purple-700 border-purple-200' },
     high:   { label: 'Élevée', color: 'bg-orange-100 text-orange-700 border-orange-200' },
     urgent: { label: 'Urgent',  color: 'bg-red-100 text-red-700 border-red-200' },
 };
@@ -38,7 +38,7 @@ const URGENCY_CONFIG = {
 
 function StatCard({ label, value, icon: Icon, color = 'blue' }) {
     const colors = {
-        blue:   'bg-blue-50 text-blue-700 border-blue-200',
+        blue:   'bg-purple-50 text-purple-700 border-purple-200',
         yellow: 'bg-yellow-50 text-yellow-700 border-yellow-200',
         green:  'bg-green-50 text-green-700 border-green-200',
         red:    'bg-red-50 text-red-700 border-red-200',
@@ -82,7 +82,7 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                 <select
                     value={filters.type || ''}
                     onChange={e => handleChange('type', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 >
                     <option value="">Tous</option>
                     <option value="incoming">Entrant</option>
@@ -96,7 +96,7 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                 <select
                     value={filters.status || ''}
                     onChange={e => handleChange('status', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 >
                     <option value="">Tous</option>
                     <option value="pending">En attente</option>
@@ -112,7 +112,7 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                 <select
                     value={filters.urgency || ''}
                     onChange={e => handleChange('urgency', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 >
                     <option value="">Toutes</option>
                     <option value="urgent">Urgent</option>
@@ -128,7 +128,7 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                 <select
                     value={filters.department_id || ''}
                     onChange={e => handleChange('department_id', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 >
                     <option value="">Tous les services</option>
                     {departments?.map(dept => (
@@ -144,7 +144,7 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                     type="date"
                     value={filters.from || ''}
                     onChange={e => handleChange('from', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
             </div>
 
@@ -154,14 +154,14 @@ function FilterPanel({ filters, setFilters, departments, onApply }) {
                     type="date"
                     value={filters.to || ''}
                     onChange={e => handleChange('to', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
             </div>
 
             <div className="flex gap-2">
                 <button
                     onClick={onApply}
-                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                     Appliquer
                 </button>
@@ -269,7 +269,7 @@ function MailRow({ mail, onChangeStatus }) {
                                     onClick={() => { onChangeStatus(mail.id, 'processing'); setMenuOpen(false); }}
                                     className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                                 >
-                                    <ClockIcon className="h-4 w-4 text-blue-500" />
+                                    <ClockIcon className="h-4 w-4 text-purple-500" />
                                     Prendre en charge
                                 </button>
                             )}
@@ -386,14 +386,14 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters, d
                                 </button>
                                 <a
                                     href="/courrier/create?type=incoming"
-                                    className="flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                                    className="flex items-center gap-1.5 rounded-lg border border-purple-100 bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100"
                                 >
                                     <PlusIcon className="h-4 w-4" />
                                     Entrant
                                 </a>
                                 <a
                                     href="/courrier/create?type=outgoing"
-                                    className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                    className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700"
                                 >
                                     <PlusIcon className="h-4 w-4" />
                                     Sortant
@@ -442,7 +442,7 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters, d
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                     onKeyDown={e => e.key === 'Enter' && applyFilters()}
-                                    className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-4 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                                 />
                             </div>
 
@@ -451,14 +451,14 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters, d
                                 onClick={() => setShowFilters(v => !v)}
                                 className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                                     showFilters
-                                        ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                        ? 'border-purple-300 bg-purple-50 text-purple-700'
                                         : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                                 }`}
                             >
                                 <FunnelIcon className="h-4 w-4" />
                                 Filtres
                                 {Object.values(filters).some(Boolean) && (
-                                    <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                                    <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-xs font-bold text-white">
                                         {Object.values(filters).filter(Boolean).length}
                                     </span>
                                 )}
@@ -516,7 +516,7 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters, d
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                                 className={`rounded px-3 py-1 text-xs ${
                                                     link.active
-                                                        ? 'bg-blue-600 text-white'
+                                                        ? 'bg-purple-600 text-white'
                                                         : link.url
                                                             ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                                                             : 'text-gray-300 cursor-not-allowed'
@@ -545,3 +545,4 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters, d
         </AppLayout>
     );
 }
+export { CourrierIndex };

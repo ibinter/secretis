@@ -27,7 +27,7 @@ import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 // Palette couleurs module comptabilité
-const PIE_COLORS = ['#1A3A5C', '#2E86C1', '#27AE60', '#F39C12', '#E74C3C'];
+const PIE_COLORS = ['#9333EA', '#7e22ce', '#27AE60', '#F39C12', '#E74C3C'];
 
 // Formateur FCFA
 const fcfa = (v) =>
@@ -99,7 +99,7 @@ export default function AccountingDashboard({ kpis, dateRange }) {
             </button>
             <a
               href="/comptabilite/invoices/create"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
             >
               + Nouvelle facture
             </a>
@@ -143,7 +143,7 @@ export default function AccountingDashboard({ kpis, dateRange }) {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-gray-700">Taux de recouvrement</span>
-            <span className="text-2xl font-bold text-[#1A3A5C]">{kpis.payment_rate}%</span>
+            <span className="text-2xl font-bold text-[#9333EA]">{kpis.payment_rate}%</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-3">
             <div
@@ -178,8 +178,8 @@ export default function AccountingDashboard({ kpis, dateRange }) {
                 <AreaChart data={revenueData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1A3A5C" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#1A3A5C" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#9333EA" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#9333EA" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -196,7 +196,7 @@ export default function AccountingDashboard({ kpis, dateRange }) {
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#1A3A5C"
+                    stroke="#9333EA"
                     strokeWidth={2}
                     fill="url(#colorRev)"
                   />
@@ -302,3 +302,4 @@ export default function AccountingDashboard({ kpis, dateRange }) {
     </AuthLayout>
   );
 }
+export { AccountingDashboard };

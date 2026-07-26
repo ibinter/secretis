@@ -124,8 +124,8 @@ function CheckCell({ checked, onChange, disabled }) {
     return (
         <td className="px-4 py-3 text-center">
             {disabled ? (
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-blue-100 dark:bg-blue-900/40">
-                    <svg className="h-3 w-3 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-purple-100 dark:bg-purple-900/40">
+                    <svg className="h-3 w-3 text-purple-600 dark:text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" />
                     </svg>
                 </span>
@@ -134,7 +134,7 @@ function CheckCell({ checked, onChange, disabled }) {
                     type="checkbox"
                     checked={checked}
                     onChange={(e) => onChange(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500 cursor-pointer"
                 />
             )}
         </td>
@@ -145,7 +145,7 @@ function Toggle({ checked, onChange, label, description }) {
     return (
         <label className="flex items-start gap-3 cursor-pointer select-none">
             <div
-                className={`relative mt-0.5 w-11 h-6 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                className={`relative mt-0.5 w-11 h-6 rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}
                 onClick={() => onChange(!checked)}
             >
                 <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : ''}`} />
@@ -234,7 +234,7 @@ function PushSection() {
                         className={`relative px-4 py-1.5 text-sm font-medium rounded-lg transition overflow-hidden
                             ${isSubscribed
                                 ? 'bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                : 'bg-purple-600 hover:bg-purple-700 text-white'
                             }
                             disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
@@ -292,7 +292,7 @@ function DndSection({ dndEnabled, dndStart, dndEnd, onChange }) {
                         <select
                             value={dndStart}
                             onChange={(e) => onChange('dnd_start', e.target.value)}
-                            className="block w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 py-1.5 px-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="block w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 py-1.5 px-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         >
                             {HOURS.map(h => <option key={h}>{h}</option>)}
                         </select>
@@ -302,7 +302,7 @@ function DndSection({ dndEnabled, dndStart, dndEnd, onChange }) {
                         <select
                             value={dndEnd}
                             onChange={(e) => onChange('dnd_end', e.target.value)}
-                            className="block w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 py-1.5 px-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="block w-28 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 py-1.5 px-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         >
                             {HOURS.map(h => <option key={h}>{h}</option>)}
                         </select>
@@ -451,7 +451,7 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
                                                     <button
                                                         type="button"
                                                         onClick={() => toggleAll(canal.id, !isCanalAllChecked(canal.id))}
-                                                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                                        className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
                                                     >
                                                         {isCanalAllChecked(canal.id) ? 'Tout décocher' : 'Tout cocher'}
                                                     </button>
@@ -477,7 +477,7 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-sm text-gray-700 dark:text-gray-300">{ev.label}</span>
                                                             {ev.locked && (
-                                                                <span className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                                                                <span className="inline-flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800">
                                                                     🔒 Obligatoire
                                                                 </span>
                                                             )}
@@ -547,7 +547,7 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
                                     <label key={f.value}
                                         className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition
                                             ${data.digest === f.value
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                             }`}
                                     >
@@ -557,7 +557,7 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
                                             value={f.value}
                                             checked={data.digest === f.value}
                                             onChange={() => setData('digest', f.value)}
-                                            className="text-blue-600 focus:ring-blue-500"
+                                            className="text-purple-600 focus:ring-purple-500"
                                         />
                                         <span className="text-sm text-gray-700 dark:text-gray-300">{f.label}</span>
                                     </label>
@@ -577,7 +577,7 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
                         <button
                             type="submit"
                             disabled={processing || !isDirty}
-                            className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition flex items-center gap-2"
+                            className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition flex items-center gap-2"
                         >
                             {processing && (
                                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -594,3 +594,4 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
         </AppLayout>
     );
 }
+export { Notifications };

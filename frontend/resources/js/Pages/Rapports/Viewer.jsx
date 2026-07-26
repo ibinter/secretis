@@ -29,7 +29,7 @@ import axios from 'axios';
 // CONSTANTES
 // ============================================================================
 
-const C = { navy: '#1A3A5C', blue: '#2E86C1', amber: '#F39C12', green: '#27AE60', red: '#E74C3C' };
+const C = { navy: '#9333EA', blue: '#7e22ce', amber: '#F39C12', green: '#27AE60', red: '#E74C3C' };
 
 const REPORT_TITLES = {
     mail: 'Registre Courrier', meetings: 'Réunions', tasks: 'Avancement des Tâches',
@@ -90,7 +90,7 @@ function DataTable({ headers, rows, maxRows = 100 }) {
                     placeholder="Filtrer..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full sm:w-64 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                    className="w-full sm:w-64 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                 />
             </div>
             <div className="overflow-x-auto rounded-xl border border-gray-100">
@@ -154,7 +154,7 @@ function MailReportView({ data }) {
             {/* AreaChart par jour */}
             {data?.by_day?.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4">Flux journalier</h3>
+                    <h3 className="text-sm font-semibold text-[#9333EA] mb-4">Flux journalier</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <AreaChart data={data.by_day}>
                             <defs>
@@ -182,7 +182,7 @@ function MailReportView({ data }) {
             {/* Tableau */}
             {data?.records?.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4">Registre détaillé</h3>
+                    <h3 className="text-sm font-semibold text-[#9333EA] mb-4">Registre détaillé</h3>
                     <DataTable
                         headers={['reference', 'type', 'subject', 'urgency', 'status', 'received_at', 'assigned_to']}
                         rows={data.records}
@@ -208,7 +208,7 @@ function TaskReportView({ data }) {
 
             {byDept.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4">Par service</h3>
+                    <h3 className="text-sm font-semibold text-[#9333EA] mb-4">Par service</h3>
                     <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={byDept} layout="vertical" margin={{ left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
@@ -242,7 +242,7 @@ function VisitorReportView({ data }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {data?.by_day?.length > 0 && (
                     <div className="bg-white rounded-xl border border-gray-100 p-5">
-                        <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4">Flux journalier</h3>
+                        <h3 className="text-sm font-semibold text-[#9333EA] mb-4">Flux journalier</h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <BarChart data={data.by_day}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
@@ -257,7 +257,7 @@ function VisitorReportView({ data }) {
 
                 {data?.by_department?.length > 0 && (
                     <div className="bg-white rounded-xl border border-gray-100 p-5">
-                        <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4">Par service</h3>
+                        <h3 className="text-sm font-semibold text-[#9333EA] mb-4">Par service</h3>
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
                                 <Pie data={data.by_department} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="count" nameKey="department">
@@ -292,7 +292,7 @@ function GenericReportView({ data }) {
             )}
             {tables.map(([key, rows]) => rows.length > 0 && (
                 <div key={key} className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h3 className="text-sm font-semibold text-[#1A3A5C] mb-4 capitalize">
+                    <h3 className="text-sm font-semibold text-[#9333EA] mb-4 capitalize">
                         {key.replace(/_/g, ' ')}
                     </h3>
                     <DataTable headers={Object.keys(rows[0])} rows={rows} />
@@ -355,7 +355,7 @@ export default function Viewer() {
                                 <ArrowLeftIcon className="h-4 w-4" />
                             </Link>
                             <div>
-                                <h1 className="text-lg font-bold text-[#1A3A5C]">{title}</h1>
+                                <h1 className="text-lg font-bold text-[#9333EA]">{title}</h1>
                                 {reportData?.period && (
                                     <p className="text-xs text-gray-500">
                                         Du {reportData.period.start} au {reportData.period.end}
@@ -422,3 +422,4 @@ export default function Viewer() {
         </>
     );
 }
+export { Viewer };

@@ -9,8 +9,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Log Channel — SECRETIS ERP
+    | Default Log Channel
     |--------------------------------------------------------------------------
+    |
+    | This option defines the default log channel that is utilized to write
+    | messages to your logs. The value provided here should match one of
+    | the channels present in the list of "channels" configured below.
+    |
     */
 
     'default' => env('LOG_CHANNEL', 'stack'),
@@ -19,161 +24,107 @@ return [
     |--------------------------------------------------------------------------
     | Deprecations Log Channel
     |--------------------------------------------------------------------------
+    |
+    | This option controls the log channel that should be used to log warnings
+    | regarding deprecated PHP and library features. This allows you to get
+    | your application ready for upcoming major versions of dependencies.
+    |
     */
 
     'deprecations' => [
         'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
-        'trace'   => env('LOG_DEPRECATIONS_TRACE', false),
+        'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Channels
+    | Log Channels
     |--------------------------------------------------------------------------
+    |
+    | Here you may configure the log channels for your application. Laravel
+    | utilizes the Monolog PHP logging library, which includes a variety
+    | of powerful log handlers and formatters that you're free to use.
+    |
+    | Available drivers: "single", "daily", "slack", "syslog",
+    |                    "errorlog", "monolog", "custom", "stack"
+    |
     */
 
     'channels' => [
 
-        // ── Stacks ────────────────────────────────────────────────────────────
-
-        /**
-         * Stack production : daily + slack (critical/alert uniquement)
-         */
-        'production' => [
-            'driver'   => 'stack',
-            'channels' => ['daily', 'slack'],
-            'ignore_exceptions' => false,
-        ],
-
-        /**
-         * Stack development : daily + stderr
-         */
-        'development' => [
-            'driver'   => 'stack',
-            'channels' => ['daily', 'stderr'],
-            'ignore_exceptions' => false,
-        ],
-
-        /**
-         * Stack par défaut (alias dynamique selon l'env)
-         */
         'stack' => [
-            'driver'            => 'stack',
-            'channels'          => env('APP_ENV', 'production') === 'production'
-                ? ['daily', 'slack']
-                : ['daily', 'stderr'],
+            'driver' => 'stack',
+            'channels' => explode(',', env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
         ],
 
-        // ── Channels individuels ──────────────────────────────────────────────
+        'single' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
 
-        /**
-         * Logs quotidiens principaux — rotation 14 jours, WARNING+ en prod
-         */
         'daily' => [
-            'driver'     => 'daily',
-            'path'       => storage_path('logs/secretis.log'),
-            'level'      => env('LOG_LEVEL', env('APP_ENV', 'production') === 'production' ? 'warning' : 'debug'),
-            'days'       => 14,
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
 
-        /**
-         * Slack — alertes critiques uniquement
-         * Configurer SLACK_LOG_WEBHOOK_URL dans .env
-         */
         'slack' => [
-            'driver'   => 'slack',
-            'url'      => env('SLACK_LOG_WEBHOOK_URL', ''),
-            'username' => 'SECRETIS Monitor',
-            'emoji'    => ':rotating_light:',
-            'level'    => env('LOG_SLACK_LEVEL', 'critical'),
+            'driver' => 'slack',
+            'url' => env('LOG_SLACK_WEBHOOK_URL'),
+            'username' => env('LOG_SLACK_USERNAME', 'Laravel Log'),
+            'emoji' => env('LOG_SLACK_EMOJI', ':boom:'),
+            'level' => env('LOG_LEVEL', 'critical'),
             'replace_placeholders' => true,
         ],
 
-        /**
-         * Audit — logs d'audit immuables (INSERT ONLY), 365 jours
-         * Fichier séparé, jamais rotaté avant 1 an
-         */
-        'audit' => [
-            'driver' => 'daily',
-            'path'   => storage_path('logs/audit/audit.log'),
-            'level'  => 'debug',
-            'days'   => 365,
-            'replace_placeholders' => true,
+        'papertrail' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => env('LOG_PAPERTRAIL_HANDLER', SyslogUdpHandler::class),
+            'handler_with' => [
+                'host' => env('PAPERTRAIL_URL'),
+                'port' => env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+            ],
+            'processors' => [PsrLogMessageProcessor::class],
         ],
 
-        /**
-         * Payment — logs paiements critiques, fichier dédié
-         */
-        'payment' => [
-            'driver' => 'daily',
-            'path'   => storage_path('logs/payment/payment.log'),
-            'level'  => 'info',
-            'days'   => 365,
-            'replace_placeholders' => true,
-        ],
-
-        /**
-         * Security — violations de sécurité, tentatives d'intrusion
-         */
-        'security' => [
-            'driver' => 'daily',
-            'path'   => storage_path('logs/security/security.log'),
-            'level'  => 'info',
-            'days'   => 365,
-            'replace_placeholders' => true,
-        ],
-
-        /**
-         * Performance — requêtes lentes, N+1, timeouts
-         */
-        'performance' => [
-            'driver' => 'daily',
-            'path'   => storage_path('logs/performance/performance.log'),
-            'level'  => 'info',
-            'days'   => 30,
-            'replace_placeholders' => true,
-        ],
-
-        /**
-         * Stderr — utile en développement pour voir les logs dans la console
-         */
         'stderr' => [
-            'driver'    => 'monolog',
-            'level'     => env('LOG_LEVEL', 'debug'),
-            'handler'   => StreamHandler::class,
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'handler' => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
-            'with'      => [
+            'with' => [
                 'stream' => 'php://stderr',
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],
 
-        /**
-         * Syslog — pour intégration avec des outils systèmes (rsyslog, etc.)
-         */
         'syslog' => [
-            'driver'  => 'syslog',
-            'channel' => env('APP_NAME', 'secretis'),
+            'driver' => 'syslog',
+            'level' => env('LOG_LEVEL', 'debug'),
             'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
-            'level'   => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
-        /**
-         * Null — absorbe tous les logs (tests, etc.)
-         */
+        'errorlog' => [
+            'driver' => 'errorlog',
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
         'null' => [
-            'driver'  => 'monolog',
+            'driver' => 'monolog',
             'handler' => NullHandler::class,
         ],
 
-        /**
-         * Emergency — fichier d'urgence si tous les channels échouent
-         */
         'emergency' => [
-            'path' => storage_path('logs/emergency.log'),
+            'path' => storage_path('logs/laravel.log'),
         ],
 
     ],

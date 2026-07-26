@@ -281,7 +281,7 @@ export default function AvailabilityPicker({
                                 </div>
                             ))}
                             <div className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 rounded-sm bg-blue-500" />
+                                <div className="w-3 h-3 rounded-sm bg-purple-500" />
                                 <span className="text-xs text-gray-600 dark:text-gray-400">Sélectionné</span>
                             </div>
                         </div>
@@ -328,7 +328,7 @@ export default function AvailabilityPicker({
                                                 col-span-${Math.max(participantsWithMs.length, 1)}
                                                 h-8 rounded cursor-pointer transition-all duration-100 border-2 flex items-center justify-center
                                                 ${selected
-                                                    ? 'bg-blue-500 border-blue-600 dark:bg-blue-600 dark:border-blue-500'
+                                                    ? 'bg-purple-500 border-purple-600 dark:bg-purple-600 dark:border-purple-500'
                                                     : isBest
                                                         ? `${config.bg} border-green-400 dark:border-green-600`
                                                         : `${config.bg} border-transparent`
@@ -350,7 +350,7 @@ export default function AvailabilityPicker({
 
                         {/* Créneau sélectionné */}
                         {selectedSlot && (
-                            <div className="mt-3 flex items-center gap-2 text-sm text-blue-700 dark:text-blue-400">
+                            <div className="mt-3 flex items-center gap-2 text-sm text-purple-700 dark:text-purple-400">
                                 <Clock className="w-4 h-4" />
                                 <span>
                                     Créneau sélectionné :{' '}
@@ -368,3 +368,4 @@ export default function AvailabilityPicker({
         </div>
     );
 }
+export { AvailabilityPicker };

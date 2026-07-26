@@ -17,7 +17,7 @@ function KpiCard({ icon: Icon, label, value, sub, color = 'indigo', trend }) {
         indigo: { bg: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-600 dark:text-indigo-400' },
         green:  { bg: 'bg-green-50 dark:bg-green-900/20',   text: 'text-green-600 dark:text-green-400' },
         yellow: { bg: 'bg-yellow-50 dark:bg-yellow-900/20', text: 'text-yellow-600 dark:text-yellow-400' },
-        blue:   { bg: 'bg-blue-50 dark:bg-blue-900/20',     text: 'text-blue-600 dark:text-blue-400' },
+        blue:   { bg: 'bg-purple-50 dark:bg-purple-900/20',     text: 'text-purple-600 dark:text-purple-400' },
     };
     const c = colors[color] ?? colors.indigo;
 
@@ -272,3 +272,4 @@ export default function AdminDashboard({ kpis = {}, topCourses = [], activityByM
         </AppLayout>
     );
 }
+export { AdminDashboard };

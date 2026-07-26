@@ -17,7 +17,7 @@ const MOCK_PAYMENTS = [
 ];
 
 const METHOD_LABELS = {
-  bank_transfer: { label: 'Virement bancaire', color: 'bg-blue-100 text-blue-700',    icon: '🏦' },
+  bank_transfer: { label: 'Virement bancaire', color: 'bg-purple-100 text-purple-700',    icon: '🏦' },
   mobile_money:  { label: 'Mobile Money',       color: 'bg-orange-100 text-orange-700', icon: '📱' },
   card:          { label: 'Carte bancaire',     color: 'bg-purple-100 text-purple-700', icon: '💳' },
   cash:          { label: 'Espèces',            color: 'bg-gray-100 text-gray-700',     icon: '💵' },
@@ -437,3 +437,4 @@ export default function Payments({ payments: initialPayments }) {
     </>
   );
 }
+export { Payments };

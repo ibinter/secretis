@@ -34,8 +34,8 @@ const REPORTS = [
         title: 'Registre Courrier',
         description: 'Courriers entrants et sortants, statuts, délais de traitement et statistiques de suivi.',
         icon: EnvelopeIcon,
-        color: 'bg-blue-50 text-[#2E86C1]',
-        border: 'border-blue-100 hover:border-[#2E86C1]',
+        color: 'bg-purple-50 text-[#7e22ce]',
+        border: 'border-purple-100 hover:border-[#7e22ce]',
     },
     {
         id: 'meetings',
@@ -90,8 +90,8 @@ const REPORTS = [
         title: 'Rapport Global',
         description: 'Synthèse complète de toute l\'activité de l\'organisation sur la période.',
         icon: GlobeAltIcon,
-        color: 'bg-[#1A3A5C]/5 text-[#1A3A5C]',
-        border: 'border-[#1A3A5C]/20 hover:border-[#1A3A5C]',
+        color: 'bg-[#9333EA]/5 text-[#9333EA]',
+        border: 'border-[#9333EA]/20 hover:border-[#9333EA]',
         featured: true,
     },
     {
@@ -164,7 +164,7 @@ function ReportModal({ report, onClose }) {
                         <div className={`p-2 rounded-lg ${report.color}`}>
                             <report.icon className="h-5 w-5" />
                         </div>
-                        <h2 className="text-base font-semibold text-[#1A3A5C]">{report.title}</h2>
+                        <h2 className="text-base font-semibold text-[#9333EA]">{report.title}</h2>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
                         <XMarkIcon className="h-5 w-5" />
@@ -182,7 +182,7 @@ function ReportModal({ report, onClose }) {
                                 <button
                                     key={p.label}
                                     onClick={() => applyQuickPeriod(p)}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:border-[#2E86C1] hover:text-[#2E86C1] transition-colors"
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:border-[#7e22ce] hover:text-[#7e22ce] transition-colors"
                                 >
                                     {p.label}
                                 </button>
@@ -201,7 +201,7 @@ function ReportModal({ report, onClose }) {
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
                                 max={endDate}
-                                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] focus:border-transparent"
+                                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] focus:border-transparent"
                             />
                         </div>
                         <div>
@@ -213,7 +213,7 @@ function ReportModal({ report, onClose }) {
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 min={startDate}
-                                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] focus:border-transparent"
+                                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] focus:border-transparent"
                             />
                         </div>
                     </div>
@@ -234,7 +234,7 @@ function ReportModal({ report, onClose }) {
                                     onClick={() => setFormat(f.value)}
                                     className={`py-2 text-sm font-medium rounded-lg border transition-all ${
                                         format_ === f.value
-                                            ? 'bg-[#1A3A5C] text-white border-[#1A3A5C]'
+                                            ? 'bg-[#9333EA] text-white border-[#9333EA]'
                                             : 'border-gray-200 text-gray-600 hover:border-gray-300'
                                     }`}
                                 >
@@ -256,7 +256,7 @@ function ReportModal({ report, onClose }) {
                     <button
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="flex-1 py-2.5 rounded-xl bg-[#1A3A5C] text-white text-sm font-semibold hover:bg-[#2E86C1] transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="flex-1 py-2.5 rounded-xl bg-[#9333EA] text-white text-sm font-semibold hover:bg-[#7e22ce] transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                         {loading ? (
                             <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -287,14 +287,14 @@ export default function RapportsIndex() {
                 <div className="bg-white border-b border-gray-100 px-6 py-5">
                     <div className="max-w-screen-xl mx-auto flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-bold text-[#1A3A5C]">Centre des rapports</h1>
+                            <h1 className="text-xl font-bold text-[#9333EA]">Centre des rapports</h1>
                             <p className="text-sm text-gray-500 mt-0.5">
                                 Générez et exportez vos rapports d'activité
                             </p>
                         </div>
                         <button
                             onClick={() => setSelectedReport(REPORTS.find(r => r.id === 'global'))}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-[#1A3A5C] text-white rounded-xl text-sm font-semibold hover:bg-[#2E86C1] transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-[#9333EA] text-white rounded-xl text-sm font-semibold hover:bg-[#7e22ce] transition-colors"
                         >
                             <GlobeAltIcon className="h-4 w-4" />
                             Rapport global
@@ -310,22 +310,22 @@ export default function RapportsIndex() {
                                 key={report.id}
                                 onClick={() => setSelectedReport(report)}
                                 className={`text-left bg-white rounded-xl border p-5 transition-all hover:shadow-md active:scale-[0.98] ${report.border} ${
-                                    report.featured ? 'ring-2 ring-[#1A3A5C]/10' : ''
+                                    report.featured ? 'ring-2 ring-[#9333EA]/10' : ''
                                 }`}
                             >
                                 <div className={`inline-flex p-2.5 rounded-xl mb-4 ${report.color}`}>
                                     <report.icon className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-sm font-semibold text-[#1A3A5C] mb-1">
+                                <h3 className="text-sm font-semibold text-[#9333EA] mb-1">
                                     {report.title}
                                     {report.featured && (
-                                        <span className="ml-2 text-[10px] font-bold bg-[#1A3A5C] text-white px-1.5 py-0.5 rounded-full">
+                                        <span className="ml-2 text-[10px] font-bold bg-[#9333EA] text-white px-1.5 py-0.5 rounded-full">
                                             COMPLET
                                         </span>
                                     )}
                                 </h3>
                                 <p className="text-xs text-gray-500 leading-relaxed">{report.description}</p>
-                                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-[#2E86C1]">
+                                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-[#7e22ce]">
                                     <ArrowDownTrayIcon className="h-3.5 w-3.5" />
                                     Configurer et générer
                                 </div>
@@ -350,3 +350,4 @@ export default function RapportsIndex() {
         </>
     );
 }
+export { RapportsIndex };

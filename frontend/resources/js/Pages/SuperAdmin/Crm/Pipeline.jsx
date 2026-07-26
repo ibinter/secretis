@@ -128,7 +128,7 @@ function DealCard({ deal, onDragStart, onView, onMoveStage, stages }) {
 
       {/* Valeur + probabilité */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-base font-bold text-blue-900">{fmtXOF(deal.value)}</span>
+        <span className="text-base font-bold text-purple-900">{fmtXOF(deal.value)}</span>
         <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
           deal.probability >= 70 ? 'bg-green-100 text-green-700' :
           deal.probability >= 40 ? 'bg-amber-100 text-amber-700' :
@@ -208,7 +208,7 @@ function KanbanColumn({ stage, deals, onDrop, onDragOver, onView, onMoveStage, s
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`min-h-40 rounded-xl p-2 space-y-2 transition-colors ${
-          isDragOver ? 'bg-blue-50 ring-2 ring-blue-300 ring-dashed' : 'bg-gray-50'
+          isDragOver ? 'bg-purple-50 ring-2 ring-purple-300 ring-dashed' : 'bg-gray-50'
         } ${stage.is_closed_won ? 'bg-green-50' : stage.is_closed_lost ? 'bg-red-50' : ''}`}
       >
         {deals.map(deal => (
@@ -244,7 +244,7 @@ function LostReasonModal({ deal, onConfirm, onCancel }) {
           onChange={e => setReason(e.target.value)}
           rows={3}
           placeholder="Pourquoi ce deal a été perdu ? (budget, concurrent, timing...)"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 focus:border-blue-900 resize-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 focus:border-purple-900 resize-none"
         />
         <div className="flex justify-end gap-3 mt-4">
           <button onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
@@ -344,11 +344,11 @@ export default function CrmPipeline({ initialData }) {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white">
+        <header className="bg-purple-900 text-white">
           <div className="max-w-full px-6 py-4 flex items-center justify-between">
             <div>
               <h1 className="text-lg font-bold">Pipeline CRM — IBIG Soft</h1>
-              <p className="text-blue-200 text-xs mt-0.5">
+              <p className="text-purple-200 text-xs mt-0.5">
                 {data?.total_deals ?? 0} deals · {data ? fmtXOF(data.total_pipeline) : '—'}
               </p>
             </div>
@@ -361,7 +361,7 @@ export default function CrmPipeline({ initialData }) {
               </button>
               <button
                 onClick={() => router.visit('/superadmin/crm/contacts/create')}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-blue-900 rounded-lg text-sm font-bold hover:bg-blue-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white text-purple-900 rounded-lg text-sm font-bold hover:bg-purple-50 transition-colors"
               >
                 <Icon.Plus /> Nouveau lead
               </button>
@@ -412,7 +412,7 @@ export default function CrmPipeline({ initialData }) {
         <main className="p-6 overflow-x-auto">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-900 border-t-transparent rounded-full" />
+              <div className="animate-spin w-8 h-8 border-4 border-purple-900 border-t-transparent rounded-full" />
             </div>
           ) : (
             <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
@@ -447,3 +447,4 @@ export default function CrmPipeline({ initialData }) {
     </>
   );
 }
+export { CrmPipeline };

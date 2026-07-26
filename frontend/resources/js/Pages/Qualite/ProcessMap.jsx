@@ -7,8 +7,8 @@ const CATEGORY_CONFIG = {
     management: {
         label:  'Processus de Management',
         color:  'blue',
-        bgCard: 'bg-blue-50 border-blue-200',
-        header: 'bg-blue-600',
+        bgCard: 'bg-purple-50 border-purple-200',
+        header: 'bg-purple-600',
     },
     realization: {
         label:  'Processus de Réalisation',
@@ -228,13 +228,13 @@ export default function ProcessMap() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setView('grid')}
-                            className={`px-3 py-2 text-sm rounded-lg border transition ${view === 'grid' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'}`}
+                            className={`px-3 py-2 text-sm rounded-lg border transition ${view === 'grid' ? 'bg-purple-600 text-white border-purple-600' : 'hover:bg-gray-50'}`}
                         >
                             Grille
                         </button>
                         <button
                             onClick={() => setView('flow')}
-                            className={`px-3 py-2 text-sm rounded-lg border transition ${view === 'flow' ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'}`}
+                            className={`px-3 py-2 text-sm rounded-lg border transition ${view === 'flow' ? 'bg-purple-600 text-white border-purple-600' : 'hover:bg-gray-50'}`}
                         >
                             Macrocarto
                         </button>
@@ -282,3 +282,4 @@ export default function ProcessMap() {
         </AppLayout>
     );
 }
+export { ProcessMap };

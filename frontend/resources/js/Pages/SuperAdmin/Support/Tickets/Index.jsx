@@ -33,12 +33,12 @@ const MOCK_SLA = { total: 18, ontime: 14, overdue: 4, pct: 78 }
 const PRIORITY_MAP = {
   critique: { label: 'Critique', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
   haute:    { label: 'Haute',    cls: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  normale:  { label: 'Normale',  cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  normale:  { label: 'Normale',  cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   basse:    { label: 'Basse',    cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
 }
 
 const STATUS_MAP = {
-  open:     { label: 'Ouvert',    cls: 'bg-blue-100 text-blue-700' },
+  open:     { label: 'Ouvert',    cls: 'bg-purple-100 text-purple-700' },
   pending:  { label: 'En attente', cls: 'bg-amber-100 text-amber-700' },
   resolved: { label: 'Résolu',    cls: 'bg-green-100 text-green-700' },
   closed:   { label: 'Fermé',     cls: 'bg-gray-100 text-gray-500' },
@@ -100,7 +100,7 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
       {/* ── SLA Métriques ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { icon: <Ic.Ticket />, label: 'Total tickets', value: sla.total, color: 'text-[#1A3A5C]', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+          { icon: <Ic.Ticket />, label: 'Total tickets', value: sla.total, color: 'text-[#9333EA]', bg: 'bg-purple-50 dark:bg-purple-900/20' },
           { icon: <Ic.CheckCircle />, label: 'Dans les délais', value: sla.ontime, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
           { icon: <Ic.AlertTriangle />, label: 'SLA dépassé', value: sla.overdue, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20' },
           {
@@ -133,7 +133,7 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
               className={[
                 'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                 activeTab === t.key
-                  ? 'border-[#1A3A5C] text-[#1A3A5C] dark:border-blue-400 dark:text-blue-400'
+                  ? 'border-[#9333EA] text-[#9333EA] dark:border-purple-400 dark:text-purple-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
               ].join(' ')}
             >
@@ -156,13 +156,13 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Sujet, organisation…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Sujet, organisation…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-transparent dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none" />
         </div>
         {[
           { val: filterPriority, set: setFP, opts: [['', 'Toutes priorités'], ['critique', 'Critique'], ['haute', 'Haute'], ['normale', 'Normale'], ['basse', 'Basse']] },
           { val: filterStatus, set: setFS, opts: [['', 'Tous statuts'], ['open', 'Ouvert'], ['pending', 'En attente'], ['overdue', 'En retard'], ['resolved', 'Résolu']] },
         ].map((f, i) => (
-          <select key={i} value={f.val} onChange={e => f.set(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
+          <select key={i} value={f.val} onChange={e => f.set(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-800 focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
             {f.opts.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
         ))}
@@ -188,7 +188,7 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
                     <td className="px-4 py-3 text-gray-400 text-xs font-mono">#{t.id}</td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 max-w-[120px] truncate">{t.org_name}</td>
                     <td className="px-4 py-3 max-w-[200px]">
-                      <Link href={`/superadmin/support/tickets/${t.id}`} className="text-[#1A3A5C] dark:text-blue-400 hover:underline line-clamp-1">{t.subject}</Link>
+                      <Link href={`/superadmin/support/tickets/${t.id}`} className="text-[#9333EA] dark:text-purple-400 hover:underline line-clamp-1">{t.subject}</Link>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{t.category}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${prio.cls}`}>{prio.label}</span></td>
@@ -197,7 +197,7 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
                     <td className="px-4 py-3"><SlaTimer breachAt={t.sla_breach_at} /></td>
                     <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">{fmtDate(t.created_at)}</td>
                     <td className="px-4 py-3">
-                      <Link href={`/superadmin/support/tickets/${t.id}`} className="p-1.5 rounded-md text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors inline-flex">
+                      <Link href={`/superadmin/support/tickets/${t.id}`} className="p-1.5 rounded-md text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors inline-flex">
                         <Ic.Eye />
                       </Link>
                     </td>
@@ -214,3 +214,4 @@ export default function TicketsIndex({ tickets: propTickets, sla: propSla }) {
     </SuperAdminLayout>
   )
 }
+export { TicketsIndex };

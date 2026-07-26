@@ -66,6 +66,17 @@ class Organization extends Model
         return $this->hasMany(User::class);
     }
 
+
+    public function activeLicense(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(License::class)->where('status', 'active')->latestOfMany();
+    }
+
+    public function latestLicense(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(License::class)->latestOfMany();
+    }
+
     public function license(): HasOne
     {
         return $this->hasOne(License::class)->latestOfMany();

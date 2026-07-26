@@ -7,7 +7,7 @@ const BANT_COLOR = (s) => s >= 75 ? 'bg-green-500' : s >= 50 ? 'bg-amber-400' : 
 
 const TYPE_MAP = {
   lead:     { label: 'Lead',       cls: 'bg-gray-100 text-gray-700' },
-  prospect: { label: 'Prospect',   cls: 'bg-blue-100 text-blue-700' },
+  prospect: { label: 'Prospect',   cls: 'bg-purple-100 text-purple-700' },
   client:   { label: 'Client',     cls: 'bg-green-100 text-green-700' },
   partner:  { label: 'Partenaire', cls: 'bg-purple-100 text-purple-700' },
 };
@@ -98,7 +98,7 @@ function ContactModal({ contact, onClose, onSaved }) {
                 <select
                   value={form[key]}
                   onChange={e => f(key, e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
                 >
                   {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
@@ -108,7 +108,7 @@ function ContactModal({ contact, onClose, onSaved }) {
                   value={form[key]}
                   onChange={e => f(key, e.target.value)}
                   maxLength={maxLength}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
                   placeholder={placeholder}
                 />
               )}
@@ -120,7 +120,7 @@ function ContactModal({ contact, onClose, onSaved }) {
               rows={3}
               value={form.notes}
               onChange={e => f('notes', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 resize-none"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900 resize-none"
             />
           </div>
         </div>
@@ -129,7 +129,7 @@ function ContactModal({ contact, onClose, onSaved }) {
           <button
             onClick={save}
             disabled={saving || !form.company_name || !form.contact_name || !form.email}
-            className="px-4 py-2 text-sm font-bold text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-bold text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50"
           >
             {saving ? 'Sauvegarde...' : isEdit ? 'Mettre à jour' : 'Créer'}
           </button>
@@ -195,7 +195,7 @@ function CsvImportModal({ onClose, onImported }) {
         <div className="p-6 space-y-4">
           <div
             onClick={() => fileRef.current.click()}
-            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+            className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50 transition-colors"
           >
             <p className="text-sm font-medium text-gray-700">
               {file ? file.name : 'Cliquez ou glissez un fichier CSV'}
@@ -233,7 +233,7 @@ function CsvImportModal({ onClose, onImported }) {
           <button
             onClick={doImport}
             disabled={!file || importing}
-            className="px-4 py-2 text-sm font-bold text-white bg-blue-900 rounded-lg hover:bg-blue-800 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-bold text-white bg-purple-900 rounded-lg hover:bg-purple-800 disabled:opacity-50"
           >
             {importing ? 'Import en cours...' : `Importer ${preview.length > 0 ? '(aperçu OK)' : ''}`}
           </button>
@@ -330,11 +330,11 @@ export default function CrmContacts() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-blue-900 text-white px-6 py-4">
+        <header className="bg-purple-900 text-white px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div>
               <h1 className="text-lg font-bold">Contacts CRM</h1>
-              <p className="text-blue-200 text-xs mt-0.5">
+              <p className="text-purple-200 text-xs mt-0.5">
                 {meta.total ?? contacts.length} contacts
                 {selected.size > 0 && ` · ${selected.size} sélectionnés`}
               </p>
@@ -378,7 +378,7 @@ export default function CrmContacts() {
               </button>
               <button
                 onClick={() => setEditContact({})}
-                className="px-4 py-2 bg-white text-blue-900 rounded-lg text-sm font-bold hover:bg-blue-50"
+                className="px-4 py-2 bg-white text-purple-900 rounded-lg text-sm font-bold hover:bg-purple-50"
               >
                 + Nouveau contact
               </button>
@@ -394,7 +394,7 @@ export default function CrmContacts() {
               value={filters.search}
               onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
               placeholder="Rechercher société, contact, email..."
-              className="flex-1 min-w-48 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+              className="flex-1 min-w-48 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
             />
             {[
               { key: 'type', label: 'Type', options: [['', 'Tous les types'], ...Object.entries(TYPE_MAP).map(([k,v]) => [k, v.label])] },
@@ -406,7 +406,7 @@ export default function CrmContacts() {
                 key={key}
                 value={filters[key]}
                 onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-900"
               >
                 {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
@@ -425,7 +425,7 @@ export default function CrmContacts() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {loading ? (
               <div className="flex items-center justify-center h-48">
-                <div className="animate-spin w-8 h-8 border-4 border-blue-900 border-t-transparent rounded-full" />
+                <div className="animate-spin w-8 h-8 border-4 border-purple-900 border-t-transparent rounded-full" />
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -457,13 +457,13 @@ export default function CrmContacts() {
                       const type = TYPE_MAP[c.type] || { label: c.type, cls: 'bg-gray-100 text-gray-600' };
                       const status = STATUS_MAP[c.status] || { label: c.status, cls: 'bg-gray-100 text-gray-600' };
                       return (
-                        <tr key={c.id} className={`hover:bg-gray-50 ${selected.has(c.id) ? 'bg-blue-50' : ''}`}>
+                        <tr key={c.id} className={`hover:bg-gray-50 ${selected.has(c.id) ? 'bg-purple-50' : ''}`}>
                           <td className="px-4 py-3">
                             <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} className="rounded" />
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-blue-900 text-white rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
+                              <div className="w-8 h-8 bg-purple-900 text-white rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0">
                                 {c.company_name.charAt(0)}
                               </div>
                               <div>
@@ -504,7 +504,7 @@ export default function CrmContacts() {
                               </button>
                               <button
                                 onClick={() => setEditContact(c)}
-                                className="text-xs px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium"
+                                className="text-xs px-3 py-1.5 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 font-medium"
                               >
                                 Modifier
                               </button>
@@ -524,7 +524,7 @@ export default function CrmContacts() {
                       <tr>
                         <td colSpan={11} className="px-6 py-12 text-center text-gray-400">
                           Aucun contact trouvé.
-                          <button onClick={() => setEditContact({})} className="ml-2 text-blue-700 font-semibold hover:underline">
+                          <button onClick={() => setEditContact({})} className="ml-2 text-purple-700 font-semibold hover:underline">
                             Ajouter le premier →
                           </button>
                         </td>
@@ -580,3 +580,4 @@ export default function CrmContacts() {
     </>
   );
 }
+export { CrmContacts };

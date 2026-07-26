@@ -85,7 +85,7 @@ function CourseCatalogCard({ course, catColor }) {
     return (
         <Link
             href={route('academie.cours', { slug: course.slug })}
-            className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-all duration-200"
+            className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-purple-200 dark:hover:border-purple-700 transition-all duration-200"
         >
             {/* Bande catégorie */}
             <div className="h-1.5" style={{ backgroundColor: catColor || '#3B82F6' }} />
@@ -105,7 +105,7 @@ function CourseCatalogCard({ course, catColor }) {
                 {course.progress_percent > 0 && !course.is_completed && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10">
                         <div
-                            className="h-full bg-blue-500 transition-all"
+                            className="h-full bg-purple-500 transition-all"
                             style={{ width: `${course.progress_percent}%` }}
                         />
                     </div>
@@ -114,7 +114,7 @@ function CourseCatalogCard({ course, catColor }) {
 
             <div className="flex flex-col flex-1 p-4">
                 <div className="flex items-start gap-2 mb-2">
-                    <h3 className="flex-1 text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-balance">
+                    <h3 className="flex-1 text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors text-balance">
                         {title}
                     </h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${levelColor(course.level)}`}>
@@ -140,7 +140,7 @@ function CourseCatalogCard({ course, catColor }) {
                                 <CheckCircleIcon className="w-3.5 h-3.5" /> Terminé
                             </span>
                         ) : course.progress_percent > 0 ? (
-                            <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                            <span className="text-purple-600 dark:text-purple-400 flex items-center gap-1">
                                 <PlayCircleIcon className="w-3.5 h-3.5" /> {course.progress_percent}%
                             </span>
                         ) : (
@@ -216,7 +216,7 @@ export default function AcademieCatalog({ catalog }) {
                 {/* En-tête */}
                 <div className="mb-8">
                     <nav className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                        <Link href={route('academie.index')} className="hover:text-blue-600 dark:hover:text-blue-400">Académie</Link>
+                        <Link href={route('academie.index')} className="hover:text-purple-600 dark:hover:text-purple-400">Académie</Link>
                         <span className="mx-2">/</span>
                         <span>Catalogue</span>
                     </nav>
@@ -235,19 +235,19 @@ export default function AcademieCatalog({ catalog }) {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Rechercher un cours…"
-                            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                     </div>
                     <button
                         onClick={() => setShowFilters(v => !v)}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
                             hasActiveFilters
-                                ? 'bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900/30 dark:border-blue-600 dark:text-blue-300'
+                                ? 'bg-purple-50 border-purple-300 text-purple-700 dark:bg-purple-900/30 dark:border-purple-600 dark:text-purple-300'
                                 : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                         }`}
                     >
                         <FunnelIcon className="w-4 h-4" />
-                        Filtres {hasActiveFilters && <span className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span>}
+                        Filtres {hasActiveFilters && <span className="bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">!</span>}
                     </button>
                 </div>
 
@@ -262,7 +262,7 @@ export default function AcademieCatalog({ catalog }) {
                             <select
                                 value={filterCat}
                                 onChange={e => setFilterCat(e.target.value)}
-                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 <option value="">Toutes les catégories</option>
                                 {catalog.map(cat => (
@@ -281,7 +281,7 @@ export default function AcademieCatalog({ catalog }) {
                             <select
                                 value={filterLevel}
                                 onChange={e => setFilterLevel(e.target.value)}
-                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 {LEVEL_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
@@ -295,7 +295,7 @@ export default function AcademieCatalog({ catalog }) {
                             <select
                                 value={filterDur}
                                 onChange={e => setFilterDur(e.target.value)}
-                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 {DURATION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
@@ -309,7 +309,7 @@ export default function AcademieCatalog({ catalog }) {
                             <select
                                 value={filterStatus}
                                 onChange={e => setFilterStatus(e.target.value)}
-                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                                 {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
@@ -335,7 +335,7 @@ export default function AcademieCatalog({ catalog }) {
                         <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Aucun cours trouvé</p>
                         <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
                             Modifiez vos critères de recherche ou{' '}
-                            <button onClick={clearFilters} className="text-blue-600 dark:text-blue-400 underline">
+                            <button onClick={clearFilters} className="text-purple-600 dark:text-purple-400 underline">
                                 réinitialisez les filtres
                             </button>
                         </p>
@@ -375,3 +375,4 @@ export default function AcademieCatalog({ catalog }) {
         </AppLayout>
     );
 }
+export { AcademieCatalog };

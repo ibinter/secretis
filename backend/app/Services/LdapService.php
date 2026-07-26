@@ -207,7 +207,7 @@ class LdapService
             $role  = $this->getRoles($entry['dn'], $roleMapping, $memberOf);
             $ldapEmails[] = strtolower($email);
 
-            DB::transaction(function () use ($email, $entry, $role, $provider, $org, $disabled, $entry, &$stats) {
+            DB::transaction(function () use ($email, $entry, $role, $provider, $org, $disabled, &$stats) {
                 try {
                     $user = User::withTrashed()
                         ->where('organization_id', $org->id)

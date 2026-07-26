@@ -16,7 +16,7 @@ import axios from 'axios';
 
 // ─── Configuration statuts ────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  open:             { label: 'Ouvert',         color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  open:             { label: 'Ouvert',         color: 'bg-purple-100 text-purple-700 border-purple-200' },
   waiting_customer: { label: 'En attente',      color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   waiting_support:  { label: 'En cours',         color: 'bg-orange-100 text-orange-700 border-orange-200' },
   in_progress:      { label: 'En traitement',    color: 'bg-purple-100 text-purple-700 border-purple-200' },
@@ -26,7 +26,7 @@ const STATUS_CONFIG = {
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Basse',   dot: 'bg-gray-300' },
-  normal: { label: 'Normale', dot: 'bg-blue-400' },
+  normal: { label: 'Normale', dot: 'bg-purple-400' },
   high:   { label: 'Haute',   dot: 'bg-orange-400' },
   urgent: { label: 'Urgente', dot: 'bg-red-500' },
 };
@@ -85,7 +85,7 @@ function MessageBubble({ message, currentUserId }) {
     <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                       ${isSupport ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                       ${isSupport ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
         {isSupport ? 'S' : (message.user?.name?.[0] ?? '?')}
       </div>
 
@@ -94,7 +94,7 @@ function MessageBubble({ message, currentUserId }) {
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-400">{message.user?.name ?? 'Utilisateur'}</span>
           {isSupport && (
-            <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">
+            <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">
               Support IBIG Soft
             </span>
           )}
@@ -103,7 +103,7 @@ function MessageBubble({ message, currentUserId }) {
 
         <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed
                          ${isOwn
-                           ? 'bg-blue-600 text-white rounded-tr-sm'
+                           ? 'bg-purple-600 text-white rounded-tr-sm'
                            : 'bg-white border border-gray-200 text-gray-700 rounded-tl-sm'}`}>
           <p className="whitespace-pre-wrap">{message.content}</p>
 
@@ -116,7 +116,7 @@ function MessageBubble({ message, currentUserId }) {
                   href={`/api/v1/help/tickets/attachments/${att.id}`}
                   download={att.filename}
                   className={`flex items-center gap-1.5 text-xs underline
-                              ${isOwn ? 'text-blue-200' : 'text-blue-600'}`}
+                              ${isOwn ? 'text-purple-200' : 'text-purple-600'}`}
                 >
                   <Icon.Paperclip />
                   {att.filename}
@@ -223,7 +223,7 @@ export default function TicketShow() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <svg className="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
         </svg>
@@ -235,7 +235,7 @@ export default function TicketShow() {
     return (
       <div className="text-center py-20">
         <p className="text-gray-400">Ticket introuvable.</p>
-        <Link to="/help/tickets" className="text-blue-600 hover:underline mt-3 block">
+        <Link to="/help/tickets" className="text-purple-600 hover:underline mt-3 block">
           Retour à mes tickets
         </Link>
       </div>
@@ -279,7 +279,7 @@ export default function TicketShow() {
               </div>
               <h1 className="text-lg font-bold text-gray-900">{ticket.subject}</h1>
               {ticket.module && (
-                <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mt-1 inline-block">
+                <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full mt-1 inline-block">
                   Module : {ticket.module}
                 </span>
               )}
@@ -346,7 +346,7 @@ export default function TicketShow() {
                   rows={2}
                   placeholder="Commentaire optionnel..."
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm
-                             focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                             focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3"
                 />
                 <button
                   onClick={handleRatingSubmit}
@@ -377,7 +377,7 @@ export default function TicketShow() {
               rows={3}
               placeholder="Ajoutez une réponse ou des informations complémentaires..."
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
-                         resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                         resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 mb-3"
             />
 
             {replyFiles.length > 0 && (
@@ -412,7 +412,7 @@ export default function TicketShow() {
               <button
                 type="submit"
                 disabled={sending || (!reply.trim() && replyFiles.length === 0)}
-                className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700
+                className="flex items-center gap-2 px-5 py-2 bg-purple-600 hover:bg-purple-700
                            text-white rounded-lg text-sm font-medium transition-colors
                            disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -426,7 +426,7 @@ export default function TicketShow() {
         {isResolved && (
           <div className="text-center py-6 text-sm text-gray-400">
             Ce ticket est résolu. Si le problème persiste,{' '}
-            <Link to="/help/tickets/create" className="text-blue-600 hover:underline">
+            <Link to="/help/tickets/create" className="text-purple-600 hover:underline">
               ouvrez un nouveau ticket
             </Link>.
           </div>
@@ -435,3 +435,4 @@ export default function TicketShow() {
     </div>
   );
 }
+export { TicketShow };

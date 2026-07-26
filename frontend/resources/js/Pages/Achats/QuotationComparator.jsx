@@ -142,7 +142,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <a href="/procurement/rfqs" className="text-blue-600 hover:underline text-sm">
+                            <a href="/procurement/rfqs" className="text-purple-600 hover:underline text-sm">
                                 ← Appels d'offres
                             </a>
                         </div>
@@ -215,8 +215,8 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                             ))}
                                         </tr>
                                         {/* Score financier */}
-                                        <tr className="border-t border-gray-100 bg-blue-50/30">
-                                            <td className="py-3 px-4 font-semibold text-blue-700">📊 Score financier</td>
+                                        <tr className="border-t border-gray-100 bg-purple-50/30">
+                                            <td className="py-3 px-4 font-semibold text-purple-700">📊 Score financier</td>
                                             {quotations.map((q, idx) => {
                                                 const res = results.find(r => r.quotation_id === q.id);
                                                 return (
@@ -278,7 +278,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                 <button
                                     onClick={evaluate}
                                     disabled={isEvaluating}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                                    className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
                                 >
                                     {isEvaluating ? 'Calcul en cours…' : '🔄 Calculer les scores'}
                                 </button>
@@ -376,7 +376,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                             value={justification}
                                             onChange={e => setJustification(e.target.value)}
                                             rows={6}
-                                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                             placeholder="Expliquez les raisons de ce choix (qualité technique, rapport qualité/prix, délais, références…)"
                                         />
                                         <button
@@ -410,3 +410,4 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
         </AuthenticatedLayout>
     );
 }
+export { QuotationComparator };

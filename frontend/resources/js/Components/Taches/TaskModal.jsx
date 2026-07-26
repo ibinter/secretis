@@ -36,7 +36,7 @@ import { fr } from 'date-fns/locale';
 
 const PRIORITY_OPTIONS = [
   { value: 'low',    label: 'Faible',  color: 'text-gray-500'   },
-  { value: 'normal', label: 'Normal',  color: 'text-blue-600'   },
+  { value: 'normal', label: 'Normal',  color: 'text-purple-600'   },
   { value: 'high',   label: 'Haute',   color: 'text-orange-600' },
   { value: 'urgent', label: 'Urgente', color: 'text-red-600'    },
 ];
@@ -61,7 +61,7 @@ function TipTapToolbar({ editor }) {
       onClick={action}
       className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
         active
-          ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
           : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
       }`}
     >
@@ -106,7 +106,7 @@ function UserMultiSelect({ value = [], onChange, placeholder, orgUsers }) {
         type="button"
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700
-                   bg-white dark:bg-gray-800 text-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500
+                   bg-white dark:bg-gray-800 text-sm text-left focus:outline-none focus:ring-2 focus:ring-purple-500
                    min-h-[40px]"
       >
         <div className="flex flex-wrap gap-1 flex-1">
@@ -114,7 +114,7 @@ function UserMultiSelect({ value = [], onChange, placeholder, orgUsers }) {
             selectedUsers.map((u) => (
               <span
                 key={u.id}
-                className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium"
+                className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium"
               >
                 <img
                   src={u.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=16`}
@@ -153,7 +153,7 @@ function UserMultiSelect({ value = [], onChange, placeholder, orgUsers }) {
                   <p className="text-xs text-gray-400 truncate">{u.email}</p>
                 </div>
                 {value.includes(u.id) && (
-                  <CheckSquare className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                  <CheckSquare className="w-4 h-4 text-purple-500 flex-shrink-0" />
                 )}
               </button>
             ))
@@ -230,13 +230,13 @@ function CommentsSection({ taskId, comments: initialComments }) {
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendComment()}
           placeholder="Ajouter un commentaire..."
           className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
-                     text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
         <button
           type="button"
           onClick={sendComment}
           disabled={sending || !content.trim()}
-          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl transition-colors"
+          className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl transition-colors"
         >
           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
@@ -414,7 +414,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                 required
                 className="w-full text-lg font-semibold px-0 py-1 border-0 border-b-2 border-gray-200 dark:border-gray-700
                            bg-transparent text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600
-                           focus:outline-none focus:border-blue-500 transition-colors"
+                           focus:outline-none focus:border-purple-500 transition-colors"
               />
               {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title[0]}</p>}
             </div>
@@ -429,7 +429,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                 <select
                   value={form.priority}
                   onChange={(e) => setField('priority', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {PRIORITY_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -445,7 +445,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                 <select
                   value={form.status}
                   onChange={(e) => setField('status', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {STATUS_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -462,7 +462,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                   type="date"
                   value={form.due_date}
                   onChange={(e) => setField('due_date', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -476,7 +476,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                 <select
                   value={form.project_id}
                   onChange={(e) => setField('project_id', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="">Aucun projet</option>
                   {orgProjects.map((p) => (
@@ -551,13 +551,13 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                     value={newSubtask}
                     onChange={(e) => setNewSubtask(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addSubtask())}
-                    className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <button
                     type="button"
                     onClick={addSubtask}
                     disabled={!newSubtask.trim()}
-                    className="px-3 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 disabled:opacity-40 rounded-lg transition-colors"
+                    className="px-3 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 disabled:opacity-40 rounded-lg transition-colors"
                   >
                     <PlusCircle className="w-4 h-4" />
                   </button>
@@ -576,7 +576,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
                 className="relative border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center
-                           hover:border-blue-300 dark:hover:border-blue-600 transition-colors cursor-pointer"
+                           hover:border-purple-300 dark:hover:border-purple-600 transition-colors cursor-pointer"
                 onClick={() => document.getElementById('file-input')?.click()}
               >
                 <input
@@ -587,7 +587,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                   onChange={(e) => handleFileUpload(e.target.files)}
                 />
                 {uploading ? (
-                  <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                  <div className="flex items-center justify-center gap-2 text-sm text-purple-600 dark:text-purple-400">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Upload en cours…
                   </div>
@@ -595,7 +595,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
                   <div className="flex flex-col items-center gap-1">
                     <Upload className="w-6 h-6 text-gray-400" />
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Glissez des fichiers ici ou <span className="text-blue-600 dark:text-blue-400 font-medium">parcourir</span>
+                      Glissez des fichiers ici ou <span className="text-purple-600 dark:text-purple-400 font-medium">parcourir</span>
                     </p>
                     <p className="text-xs text-gray-400">Max 20 MB par fichier</p>
                   </div>
@@ -644,7 +644,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
             type="submit"
             form="task-form"
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50
+            className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50
                        text-white text-sm font-semibold rounded-xl shadow-sm transition-colors"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -655,3 +655,4 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
     </div>
   );
 }
+export { TaskModal };

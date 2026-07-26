@@ -434,3 +434,4 @@ export default function CourseDetail({ course, modules = [], enrollment, ratings
         </AppLayout>
     );
 }
+export { CourseDetail };

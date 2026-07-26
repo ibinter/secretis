@@ -309,9 +309,9 @@ export default function LanguageSwitcher({ variant = 'header', showLabel = false
                 className={`
                   flex items-center gap-3 px-4 py-2.5 cursor-pointer
                   text-sm transition-colors outline-none
-                  focus:ring-2 focus:ring-inset focus:ring-[#2E86C1]
+                  focus:ring-2 focus:ring-inset focus:ring-[#7e22ce]
                   ${isSelected
-                    ? 'bg-blue-50 dark:bg-[#162230] text-[#2E86C1] dark:text-blue-400 font-medium'
+                    ? 'bg-purple-50 dark:bg-[#162230] text-[#7e22ce] dark:text-purple-400 font-medium'
                     : isActive
                     ? 'bg-gray-50 dark:bg-[#243447] text-gray-900 dark:text-[#E8F1FA]'
                     : 'text-gray-700 dark:text-[#A8C0D6] hover:bg-gray-50 dark:hover:bg-[#243447]'
@@ -333,7 +333,7 @@ export default function LanguageSwitcher({ variant = 'header', showLabel = false
 
                 {/* Coche si actif */}
                 {isSelected && (
-                  <span className="text-[#2E86C1] dark:text-blue-400 flex-shrink-0">
+                  <span className="text-[#7e22ce] dark:text-purple-400 flex-shrink-0">
                     <CheckMark />
                   </span>
                 )}
@@ -359,3 +359,4 @@ export function useLocale() {
   const lang = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0];
   return { locale, lang, isRTL: lang.dir === 'rtl', LANGUAGES };
 }
+export { LanguageSwitcher };

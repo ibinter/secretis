@@ -29,15 +29,15 @@ import { FolderIcon as FolderSolidIcon } from '@heroicons/react/24/solid';
 
 const ACCESS_LEVEL_CONFIG = {
     public:        { label: 'Public',         color: 'bg-green-100 text-green-700 border-green-200' },
-    internal:      { label: 'Interne',        color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    internal:      { label: 'Interne',        color: 'bg-purple-100 text-purple-700 border-purple-200' },
     confidential:  { label: 'Confidentiel',   color: 'bg-orange-100 text-orange-700 border-orange-200' },
     top_secret:    { label: 'Secret',         color: 'bg-red-100 text-red-700 border-red-200' },
 };
 
 const FILE_ICON_COLORS = {
     'application/pdf':     'text-red-500',
-    'application/msword':  'text-blue-500',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'text-blue-500',
+    'application/msword':  'text-purple-500',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'text-purple-500',
     'application/vnd.ms-excel': 'text-green-500',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'text-green-500',
     'image/jpeg':          'text-purple-500',
@@ -86,7 +86,7 @@ function FolderTreeItem({ folder, currentFolderId, onSelect, depth = 0 }) {
             <div
                 className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm transition-colors ${
                     isActive
-                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        ? 'bg-purple-50 text-purple-700 font-medium'
                         : 'text-gray-700 hover:bg-gray-100'
                 }`}
                 style={{ paddingLeft: `${8 + depth * 16}px` }}
@@ -101,7 +101,7 @@ function FolderTreeItem({ folder, currentFolderId, onSelect, depth = 0 }) {
                 )}
 
                 {expanded && isActive
-                    ? <FolderOpenIcon className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                    ? <FolderOpenIcon className="h-4 w-4 flex-shrink-0 text-purple-500" />
                     : <FolderIcon className="h-4 w-4 flex-shrink-0 text-yellow-500" />
                 }
 
@@ -174,7 +174,7 @@ function NewFolderModal({ parentId, onClose, onCreated }) {
                             onChange={e => setName(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && handleCreate()}
                             placeholder="Ex : Contrats 2026"
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                         />
                     </div>
 
@@ -183,7 +183,7 @@ function NewFolderModal({ parentId, onClose, onCreated }) {
                         <select
                             value={accessLevel}
                             onChange={e => setAccessLevel(e.target.value)}
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                         >
                             <option value="public">Public</option>
                             <option value="internal">Interne</option>
@@ -200,7 +200,7 @@ function NewFolderModal({ parentId, onClose, onCreated }) {
                     <button
                         onClick={handleCreate}
                         disabled={!name.trim() || loading}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-60"
                     >
                         {loading && <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>}
                         Créer
@@ -427,7 +427,7 @@ function PreviewModal({ document, onClose }) {
                 <div className="flex-1 overflow-hidden">
                     {loading ? (
                         <div className="flex h-full items-center justify-center">
-                            <svg className="h-8 w-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <svg className="h-8 w-8 animate-spin text-purple-500" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                             </svg>
@@ -444,7 +444,7 @@ function PreviewModal({ document, onClose }) {
                             <p className="text-sm">Prévisualisation non disponible pour ce type de fichier.</p>
                             <a
                                 href={`/api/ged/documents/${document.id}/download`}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
                             >
                                 Télécharger le fichier
                             </a>
@@ -504,7 +504,7 @@ function ShareModal({ document, onClose }) {
                     <select
                         value={hours}
                         onChange={e => setHours(Number(e.target.value))}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-purple-500 focus:outline-none"
                     >
                         <option value={1}>1 heure</option>
                         <option value={6}>6 heures</option>
@@ -526,7 +526,7 @@ function ShareModal({ document, onClose }) {
                             <button
                                 onClick={handleCopy}
                                 className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                                    copied ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                    copied ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                                 }`}
                             >
                                 {copied ? <CheckIcon className="h-4 w-4" /> : null}
@@ -543,7 +543,7 @@ function ShareModal({ document, onClose }) {
                     <button
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
+                        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-60"
                     >
                         {loading && <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>}
                         {shareUrl ? 'Regénérer' : 'Générer le lien'}
@@ -647,7 +647,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                             onClick={() => handleFolderSelect(null)}
                             className={`mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${
                                 !currentFolderId
-                                    ? 'bg-blue-50 text-blue-700 font-medium'
+                                    ? 'bg-purple-50 text-purple-700 font-medium'
                                     : 'text-gray-700 hover:bg-gray-100'
                             }`}
                         >
@@ -706,7 +706,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                                className="w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
                             />
                         </div>
 
@@ -737,7 +737,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
 
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700"
                         >
                             <ArrowUpTrayIcon className="h-4 w-4" />
                             Upload
@@ -754,7 +754,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                                 <p className="mt-1 text-xs">Uploadez des documents ou créez un sous-dossier</p>
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="mt-4 flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                    className="mt-4 flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
                                 >
                                     <ArrowUpTrayIcon className="h-4 w-4" />
                                     Uploader un document
@@ -818,7 +818,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                             className={`rounded px-3 py-1 text-xs ${
                                                 link.active
-                                                    ? 'bg-blue-600 text-white'
+                                                    ? 'bg-purple-600 text-white'
                                                     : link.url
                                                         ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                                                         : 'text-gray-300 cursor-not-allowed'
@@ -857,3 +857,4 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
         </AppLayout>
     );
 }
+export { GEDIndex };

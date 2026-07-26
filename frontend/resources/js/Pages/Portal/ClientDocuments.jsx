@@ -43,7 +43,7 @@ function getMimeLabel(mime) {
 
 function getMimeColor(mime) {
     if (mime?.includes('pdf'))   return 'text-red-500 bg-red-50';
-    if (mime?.includes('word'))  return 'text-blue-500 bg-blue-50';
+    if (mime?.includes('word'))  return 'text-purple-500 bg-purple-50';
     if (mime?.includes('excel') || mime?.includes('sheet')) return 'text-green-500 bg-green-50';
     if (mime?.includes('image')) return 'text-purple-500 bg-purple-50';
     return 'text-gray-500 bg-gray-100';
@@ -109,7 +109,7 @@ function DocumentCard({ doc, onPreview }) {
             expired ? 'border-gray-200 opacity-60' : 'border-gray-200'
         }`}>
             {/* En-tête coloré */}
-            <div className="h-1.5 bg-gradient-to-r from-indigo-400 to-blue-500"/>
+            <div className="h-1.5 bg-gradient-to-r from-indigo-400 to-purple-500"/>
 
             <div className="p-4">
                 {/* Badges */}
@@ -245,3 +245,4 @@ export default function ClientDocuments({ documents }) {
         </>
     );
 }
+export { ClientDocuments };

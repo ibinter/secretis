@@ -44,7 +44,7 @@ function IndicatorCard({ indicator, onClick }) {
     return (
         <button
             onClick={() => onClick(indicator)}
-            className="bg-white rounded-xl border shadow-sm p-5 text-left hover:shadow-md transition hover:border-blue-300 w-full"
+            className="bg-white rounded-xl border shadow-sm p-5 text-left hover:shadow-md transition hover:border-purple-300 w-full"
         >
             <div className="flex items-start justify-between mb-3">
                 <div>
@@ -144,7 +144,7 @@ function RecordValueModal({ indicator, onClose, onSuccess }) {
                             value={value}
                             onChange={e => setValue(e.target.value)}
                             placeholder="0.00"
-                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
                         />
                     </div>
                     <div>
@@ -166,7 +166,7 @@ function RecordValueModal({ indicator, onClose, onSuccess }) {
                         <button
                             onClick={submit}
                             disabled={!value || loading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50"
                         >
                             {loading ? 'Enregistrement...' : 'Enregistrer'}
                         </button>
@@ -205,7 +205,7 @@ function HistoryPanel({ indicator, onClose, onRecord }) {
                     <div className="flex gap-2">
                         <button
                             onClick={onRecord}
-                            className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700"
+                            className="px-3 py-1.5 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700"
                         >
                             + Saisir
                         </button>
@@ -359,3 +359,4 @@ export default function Indicators() {
         </AppLayout>
     );
 }
+export { Indicators };

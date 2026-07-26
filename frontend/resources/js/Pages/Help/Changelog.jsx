@@ -67,7 +67,7 @@ const DEFAULT_VERSIONS = [
 // ─── Styles badges ────────────────────────────────────────────────────────────
 const BADGE = {
   new:      { label: 'Nouveau',  className: 'bg-[#1E8449] text-white' },
-  improved: { label: 'Améliora',  className: 'bg-[#2E86C1] text-white' },
+  improved: { label: 'Améliora',  className: 'bg-[#7e22ce] text-white' },
   fixed:    { label: 'Corrigé',  className: 'bg-[#F39C12] text-white' },
 }
 
@@ -88,19 +88,19 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
       <Head title="Changelog — SECRETIS ERP" />
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] text-white">
+      <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-sm font-medium mb-4">
             <span>📋</span> Historique des mises à jour
           </div>
           <h1 className="text-4xl font-bold mb-3">Changelog SECRETIS</h1>
-          <p className="text-blue-200 text-lg max-w-2xl mx-auto">
+          <p className="text-purple-200 text-lg max-w-2xl mx-auto">
             Toutes les nouvelles fonctionnalités, améliorations et corrections de votre ERP africain.
           </p>
 
           {/* Lien retour */}
           <div className="mt-6">
-            <Link href="/" className="text-blue-200 hover:text-white text-sm transition-colors">
+            <Link href="/" className="text-purple-200 hover:text-white text-sm transition-colors">
               ← Retour à l'accueil
             </Link>
           </div>
@@ -120,7 +120,7 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${filter === f.key ? 'bg-[#1A3A5C] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${filter === f.key ? 'bg-[#9333EA] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
             >
               {f.icon} {f.label}
             </button>
@@ -132,7 +132,7 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <div className="relative">
           {/* Ligne verticale */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#2E86C1] via-gray-200 to-gray-100 dark:via-gray-700 dark:to-gray-800" aria-hidden="true" />
+          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#7e22ce] via-gray-200 to-gray-100 dark:via-gray-700 dark:to-gray-800" aria-hidden="true" />
 
           <div className="space-y-12">
             {versions.map((version, vi) => {
@@ -147,7 +147,7 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
                 <div key={version.version} className="relative flex gap-6">
                   {/* Dot */}
                   <div className="flex-shrink-0 relative z-10 flex flex-col items-center">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-900 font-bold text-sm ${isLatest ? 'bg-[#1A3A5C] text-white' : 'bg-white dark:bg-gray-800 text-[#1A3A5C] dark:text-blue-300 border-2 border-[#2E86C1]'}`}>
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-900 font-bold text-sm ${isLatest ? 'bg-[#9333EA] text-white' : 'bg-white dark:bg-gray-800 text-[#9333EA] dark:text-purple-300 border-2 border-[#7e22ce]'}`}>
                       {version.version}
                     </div>
                   </div>
@@ -171,8 +171,8 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
                     </div>
 
                     {/* Highlight */}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-[#2E86C1] rounded-r-xl px-4 py-3 mb-5">
-                      <p className="text-sm font-medium text-[#1A3A5C] dark:text-blue-300">{version.highlight}</p>
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-[#7e22ce] rounded-r-xl px-4 py-3 mb-5">
+                      <p className="text-sm font-medium text-[#9333EA] dark:text-purple-300">{version.highlight}</p>
                     </div>
 
                     {/* Entrées */}
@@ -200,7 +200,7 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
         <div className="mt-16 text-center border-t border-gray-200 dark:border-gray-700 pt-8">
           <p className="text-gray-400 text-sm">
             Vous avez une idée de fonctionnalité ?{' '}
-            <a href="/aide/support" className="text-[#2E86C1] hover:text-[#1A3A5C] dark:hover:text-blue-300 font-medium transition-colors">
+            <a href="/aide/support" className="text-[#7e22ce] hover:text-[#9333EA] dark:hover:text-purple-300 font-medium transition-colors">
               Contacter le support
             </a>
           </p>
@@ -210,3 +210,4 @@ export default function Changelog({ versions = DEFAULT_VERSIONS }) {
     </div>
   )
 }
+export { Changelog };

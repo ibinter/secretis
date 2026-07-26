@@ -249,7 +249,7 @@ export default function GanttView() {
             − Zoom
           </button>
           <button onClick={scrollToToday}
-            className="px-3 py-1 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg">
+            className="px-3 py-1 text-sm bg-purple-600 text-white hover:bg-purple-700 rounded-lg">
             Aujourd'hui
           </button>
           <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">Vue : {zoom.label}</span>
@@ -279,7 +279,7 @@ export default function GanttView() {
               <div key={task.id}
                 style={{ height: ROW_HEIGHT }}
                 className={`flex items-center px-3 border-b border-gray-100 dark:border-gray-700 text-sm cursor-pointer transition-colors
-                  ${selectedTaskId === task.id ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+                  ${selectedTaskId === task.id ? 'bg-purple-50 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
                 onClick={() => setSelectedTaskId(task.id === selectedTaskId ? null : task.id)}>
                 <span
                   className="w-2 h-2 rounded-full mr-2 flex-shrink-0"
@@ -413,3 +413,4 @@ export default function GanttView() {
     </AppLayout>
   );
 }
+export { GanttView };

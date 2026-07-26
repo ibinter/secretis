@@ -102,7 +102,7 @@ const Input = forwardRef(function Input(
             // states
             error
               ? 'border-[#C0392B] dark:border-red-500 focus:ring-[#C0392B]/50'
-              : 'border-gray-300 dark:border-gray-600 focus:border-[#1A3A5C] focus:ring-[#1A3A5C]/30',
+              : 'border-gray-300 dark:border-gray-600 focus:border-[#9333EA] focus:ring-[#9333EA]/30',
             disabled
               ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-800'
               : '',

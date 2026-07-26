@@ -39,7 +39,7 @@ function MessageMini({ msg }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-2`}>
       <div className={`max-w-[85%] text-xs rounded-xl px-3 py-2 leading-relaxed ${
-        isUser ? 'bg-[#1A3A5C] text-white rounded-tr-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-sm'
+        isUser ? 'bg-[#9333EA] text-white rounded-tr-sm' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-tl-sm'
       }`}>
         {msg.content.length > 120 ? msg.content.slice(0, 120) + '…' : msg.content}
       </div>
@@ -96,7 +96,7 @@ export default function ChatWidget() {
         style={{ height: '480px' }}
         data-tour="sara-panel"
       >
-        <div className="bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="bg-gradient-to-r from-[#9333EA] to-[#7e22ce] px-4 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-amber-400 flex items-center justify-center text-white text-xs font-bold">S</div>
             <div>
@@ -119,7 +119,7 @@ export default function ChatWidget() {
               <div className="space-y-1.5">
                 {suggestions.map((s, i) => (
                   <button key={i} onClick={() => sendMessage(s)}
-                    className="w-full text-left text-xs px-3 py-2 bg-gray-50 dark:bg-gray-800 hover:bg-[#EBF5FF] dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:border-[#2E86C1] hover:text-[#2E86C1] transition-colors">
+                    className="w-full text-left text-xs px-3 py-2 bg-gray-50 dark:bg-gray-800 hover:bg-[#EBF5FF] dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:border-[#7e22ce] hover:text-[#7e22ce] transition-colors">
                     {s}
                   </button>
                 ))}
@@ -146,7 +146,7 @@ export default function ChatWidget() {
           <div className="flex items-center gap-2">
             <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
               placeholder="Votre question…" disabled={sending}
-              className="flex-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-[#2E86C1] transition-colors text-gray-800 dark:text-gray-100 placeholder-gray-400" />
+              className="flex-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-[#7e22ce] transition-colors text-gray-800 dark:text-gray-100 placeholder-gray-400" />
             <button onClick={() => sendMessage()} disabled={!input.trim() || sending}
               className="w-8 h-8 flex-shrink-0 rounded-xl bg-[#F39C12] hover:bg-amber-600 text-white flex items-center justify-center transition-colors disabled:opacity-40">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
@@ -214,7 +214,7 @@ const MinimizeIcon = () => (
 function TypingIndicator() {
   return (
     <div className="flex items-start gap-2 mb-3">
-      <div className="w-7 h-7 rounded-full bg-blue-900 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+      <div className="w-7 h-7 rounded-full bg-purple-900 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
         S
       </div>
       <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
@@ -251,7 +251,7 @@ function MessageBubble({ msg }) {
     <div className={`flex items-start gap-2 mb-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
       <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold
-        ${isUser ? 'bg-gray-200 text-gray-700' : 'bg-blue-900 text-white'}`}>
+        ${isUser ? 'bg-gray-200 text-gray-700' : 'bg-purple-900 text-white'}`}>
         {isUser ? (msg.userInitial || 'V') : 'S'}
       </div>
 
@@ -260,7 +260,7 @@ function MessageBubble({ msg }) {
         <div
           className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed
             ${isUser
-              ? 'bg-blue-900 text-white rounded-tr-sm'
+              ? 'bg-purple-900 text-white rounded-tr-sm'
               : 'bg-gray-100 text-gray-800 rounded-tl-sm'}`}
           dangerouslySetInnerHTML={isUser
             ? undefined
@@ -283,8 +283,8 @@ function QuickChip({ label, onClick, disabled }) {
     <button
       onClick={() => onClick(label)}
       disabled={disabled}
-      className="text-xs px-3 py-1.5 rounded-full border border-blue-200 text-blue-800 bg-blue-50
-                 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50
+      className="text-xs px-3 py-1.5 rounded-full border border-purple-200 text-purple-800 bg-purple-50
+                 hover:bg-purple-100 hover:border-purple-300 transition-colors disabled:opacity-50
                  disabled:cursor-not-allowed whitespace-nowrap"
     >
       {label}
@@ -467,8 +467,8 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
         <button
           onClick={handleOpen}
           aria-label="Ouvrir l'assistant SARA"
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-blue-900 text-white shadow-2xl
-                     hover:bg-blue-800 hover:scale-105 active:scale-95 transition-all duration-200
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-purple-900 text-white shadow-2xl
+                     hover:bg-purple-800 hover:scale-105 active:scale-95 transition-all duration-200
                      flex items-center justify-center"
         >
           <RobotIcon />
@@ -494,7 +494,7 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
           style={{ height: 520 }}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-blue-900 text-white flex-shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3 bg-purple-900 text-white flex-shrink-0">
             <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
               <RobotIcon />
             </div>
@@ -506,7 +506,7 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
                   En ligne
                 </span>
               </div>
-              <p className="text-xs text-blue-200 truncate">Assistante IBIG SECRETIS</p>
+              <p className="text-xs text-purple-200 truncate">Assistante IBIG SECRETIS</p>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -555,7 +555,7 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
           {/* Zone de saisie */}
           <div className="border-t border-gray-100 px-3 py-3 flex-shrink-0">
             <div className="flex items-end gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-200
-                            focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                            focus-within:border-purple-400 focus-within:ring-2 focus-within:ring-purple-100 transition-all">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -576,8 +576,8 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || sending}
                 aria-label="Envoyer"
-                className="w-8 h-8 rounded-lg bg-blue-900 text-white flex items-center justify-center
-                           hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+                className="w-8 h-8 rounded-lg bg-purple-900 text-white flex items-center justify-center
+                           hover:bg-purple-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed
                            flex-shrink-0 mb-0.5"
               >
                 {sending
@@ -598,3 +598,4 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
     </>
   );
 }
+export { ChatWidget };

@@ -78,7 +78,7 @@ export default function CorrespondenceBI() {
                 <div className="max-w-6xl mx-auto flex items-center gap-4">
                     <Link href="/bi" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><ArrowLeft size={16} /></Link>
                     <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-700 rounded-xl"><Mail size={18} className="text-white" /></div>
+                        <div className="p-2 bg-purple-700 rounded-xl"><Mail size={18} className="text-white" /></div>
                         <div>
                             <h1 className="text-lg font-bold text-slate-900">Analytics Courrier</h1>
                             <p className="text-xs text-slate-500">Volume, urgences, délais de traitement</p>
@@ -87,7 +87,7 @@ export default function CorrespondenceBI() {
                     <div className="ml-auto flex gap-2">
                         {['today', 'week', 'month', 'quarter', 'year'].map(p => (
                             <button key={p} onClick={() => setPreset(p)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${preset === p ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium ${preset === p ? 'bg-purple-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                                 {({ today: "Auj.", week: "Sem.", month: "Mois", quarter: "Trim.", year: "An." })[p]}
                             </button>
                         ))}
@@ -178,7 +178,7 @@ export default function CorrespondenceBI() {
                                                 {r[keyLabel]}
                                             </td>
                                             <td className="py-2 text-right">
-                                                <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">{r.total}</span>
+                                                <span className="bg-purple-50 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">{r.total}</span>
                                             </td>
                                         </tr>
                                     ))}
@@ -191,3 +191,4 @@ export default function CorrespondenceBI() {
         </div>
     );
 }
+export { CorrespondenceBI };

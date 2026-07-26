@@ -159,11 +159,11 @@ export default function BudgetGauge({
         {/* Aiguille */}
         <polygon
           points={`${needleTip.x},${needleTip.y} ${needleBase1.x},${needleBase1.y} ${needleBase2.x},${needleBase2.y}`}
-          fill="#1A3A5C"
+          fill="#9333EA"
           opacity={0.85}
           style={{ transition: 'all 0.8s ease-out' }}
         />
-        <circle cx={cx} cy={cy} r={8} fill="#1A3A5C" />
+        <circle cx={cx} cy={cy} r={8} fill="#9333EA" />
 
         {/* Valeur centrale */}
         <text
@@ -211,3 +211,4 @@ export default function BudgetGauge({
     </div>
   );
 }
+export { BudgetGauge };

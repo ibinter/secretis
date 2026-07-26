@@ -90,7 +90,7 @@ export default function EditorConfig({ config: propConfig }) {
 
   const togglePwd = (key) => setShowPasswords(p => ({ ...p, [key]: !p[key] }))
 
-  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none'
+  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none'
   const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
   return (
@@ -108,7 +108,7 @@ export default function EditorConfig({ config: propConfig }) {
                 className={[
                   'flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   activeSection === s.key
-                    ? 'bg-[#1A3A5C] text-white'
+                    ? 'bg-[#9333EA] text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800',
                 ].join(' ')}
               >
@@ -175,7 +175,7 @@ export default function EditorConfig({ config: propConfig }) {
                 </F>
               </Grid2>
               <div className="mt-4 flex items-center gap-3">
-                <button onClick={testSmtp} disabled={smtpTesting} className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-[#1A3A5C] text-[#1A3A5C] dark:border-blue-500 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-60 transition-colors">
+                <button onClick={testSmtp} disabled={smtpTesting} className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-[#9333EA] text-[#9333EA] dark:border-purple-500 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 disabled:opacity-60 transition-colors">
                   <Ic.Mail /> {smtpTesting ? 'Test en cours…' : 'Tester la connexion'}
                 </button>
                 {smtpResult && (
@@ -201,8 +201,8 @@ export default function EditorConfig({ config: propConfig }) {
                 <F label="Modèle"><input value={config.ai.model} onChange={e => setC('ai', 'model', e.target.value)} className={INPUT} /></F>
                 <F label="Température (0–1)">
                   <div className="flex items-center gap-3">
-                    <input type="range" min={0} max={1} step={0.1} value={config.ai.temperature} onChange={e => setC('ai', 'temperature', e.target.value)} className="flex-1 accent-[#1A3A5C]" />
-                    <span className="text-sm font-bold text-[#1A3A5C] dark:text-blue-400 tabular-nums w-8">{config.ai.temperature}</span>
+                    <input type="range" min={0} max={1} step={0.1} value={config.ai.temperature} onChange={e => setC('ai', 'temperature', e.target.value)} className="flex-1 accent-[#9333EA]" />
+                    <span className="text-sm font-bold text-[#9333EA] dark:text-purple-400 tabular-nums w-8">{config.ai.temperature}</span>
                   </div>
                 </F>
                 <F label="Fournisseur de secours">
@@ -304,7 +304,7 @@ function Section({ title, onSave, saving, success, children }) {
           className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
             success
               ? 'bg-green-500 text-white'
-              : 'bg-[#1A3A5C] text-white hover:bg-[#122a45]'
+              : 'bg-[#9333EA] text-white hover:bg-[#122a45]'
           } disabled:opacity-60`}
         >
           {success ? <><Ic.Check /> Sauvegardé</> : saving ? 'Sauvegarde…' : <><Ic.Save /> Sauvegarder</>}
@@ -327,3 +327,4 @@ function F({ label, children, cl = '' }) {
     </div>
   )
 }
+export { EditorConfig };

@@ -41,6 +41,7 @@ class TaskController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
+        try {
         $user  = Auth::user();
         $query = Task::forOrganization($user->organization_id)
             ->rootTasks()  // Pas les sous-tâches dans la liste principale
@@ -107,6 +108,14 @@ class TaskController extends Controller
             'tasks'   => $tasks,
             'filters' => $request->only(['status', 'priority', 'assignee', 'project_id', 'due_from', 'due_to', 'search', 'overdue']),
         ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('TaskController::index: ' . $e->getMessage());
+            $emptyPage = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
+            return Inertia::render('Taches/Liste', [
+                'tasks'   => $emptyPage,
+                'filters' => [],
+            ]);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -424,5 +433,13 @@ class TaskController extends Controller
             'allowed_transitions' => $task->allowedTransitions(),
             'created_at'          => $task->created_at,
         ];
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => []]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => 'Taches']);
     }
 }

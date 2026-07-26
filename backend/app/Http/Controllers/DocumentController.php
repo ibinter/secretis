@@ -44,6 +44,7 @@ class DocumentController extends Controller
      */
     public function index(Request $request): Response|JsonResponse
     {
+        try {
         $user = Auth::user();
 
         $query = Document::where('organization_id', $user->organization_id)
@@ -103,6 +104,13 @@ class DocumentController extends Controller
             'documents' => $documents,
             'filters'   => $request->only(['folder_id', 'type', 'access_level', 'author_id', 'search']),
         ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('DocumentController::index: ' . $e->getMessage());
+            return Inertia::render('GED/Index', [
+                'documents' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 24),
+                'filters'   => [],
+            ]);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -409,5 +417,17 @@ class DocumentController extends Controller
         return Document::where('id', $id)
             ->where('organization_id', Auth::user()->organization_id)
             ->firstOrFail();
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

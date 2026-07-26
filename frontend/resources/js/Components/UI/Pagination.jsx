@@ -41,7 +41,7 @@ export default function Pagination({ currentPage, lastPage, onPageChange, classN
               onClick={() => onPageChange(item)}
               aria-current={item === currentPage ? 'page' : undefined}
               className={`${btn} ${item === currentPage
-                ? 'bg-[#1A3A5C] text-white'
+                ? 'bg-[#9333EA] text-white'
                 : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10'
               }`}
             >
@@ -61,3 +61,4 @@ export default function Pagination({ currentPage, lastPage, onPageChange, classN
     </nav>
   )
 }
+export { Pagination };

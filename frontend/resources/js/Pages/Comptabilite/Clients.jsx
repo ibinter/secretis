@@ -112,7 +112,7 @@ export default function Clients({ clients, filters }) {
           </div>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
           >
             <PlusIcon className="h-4 w-4" />
             Nouveau client
@@ -128,7 +128,7 @@ export default function Clients({ clients, filters }) {
               placeholder="Nom, email, NIF..."
               defaultValue={filters.search}
               onChange={(e) => applySearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30"
             />
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function Clients({ clients, filters }) {
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
             <UserGroupIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">Aucun client trouvé.</p>
-            <button onClick={openCreate} className="mt-4 text-sm text-[#1A3A5C] font-medium hover:underline">
+            <button onClick={openCreate} className="mt-4 text-sm text-[#9333EA] font-medium hover:underline">
               Créer le premier client
             </button>
           </div>
@@ -152,7 +152,7 @@ export default function Clients({ clients, filters }) {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     {/* Avatar initiales */}
-                    <div className="h-10 w-10 rounded-full bg-[#1A3A5C] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-[#9333EA] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {client.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -180,13 +180,13 @@ export default function Clients({ clients, filters }) {
                 {/* Stats */}
                 <div className="flex items-center justify-between border-t border-gray-50 pt-3">
                   <div className="text-center">
-                    <div className="text-sm font-bold text-[#1A3A5C]">{client.invoices_count ?? 0}</div>
+                    <div className="text-sm font-bold text-[#9333EA]">{client.invoices_count ?? 0}</div>
                     <div className="text-xs text-gray-400">Factures</div>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEdit(client)}
-                      className="p-1.5 text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 rounded-lg transition"
+                      className="p-1.5 text-gray-400 hover:text-[#9333EA] hover:bg-purple-50 rounded-lg transition"
                       title="Modifier"
                     >
                       <PencilIcon className="h-4 w-4" />
@@ -200,7 +200,7 @@ export default function Clients({ clients, filters }) {
                     </button>
                     <a
                       href={`/comptabilite/invoices?client_id=${client.id}`}
-                      className="px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition"
+                      className="px-2.5 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-100 transition"
                     >
                       Factures
                     </a>
@@ -222,7 +222,7 @@ export default function Clients({ clients, filters }) {
                 dangerouslySetInnerHTML={{ __html: link.label }}
                 className={`px-3 py-1.5 rounded-lg text-xs transition ${
                   link.active
-                    ? 'bg-[#1A3A5C] text-white'
+                    ? 'bg-[#9333EA] text-white'
                     : link.url
                     ? 'bg-white border border-gray-200 hover:bg-gray-50'
                     : 'opacity-40 cursor-not-allowed'
@@ -251,7 +251,7 @@ export default function Clients({ clients, filters }) {
                   type="text"
                   value={form.name}
                   onChange={(e) => setField('name', e.target.value)}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
                 />
                 {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name[0]}</p>}
               </div>
@@ -260,32 +260,32 @@ export default function Clients({ clients, filters }) {
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
                   <input type="email" value={form.email} onChange={(e) => setField('email', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30" />
                   {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email[0]}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Téléphone</label>
                   <input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Adresse</label>
                 <textarea rows={2} value={form.address} onChange={(e) => setField('address', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 resize-none" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">NIF / Identifiant fiscal</label>
                   <input type="text" value={form.tax_number} onChange={(e) => setField('tax_number', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Devise</label>
                   <select value={form.currency} onChange={(e) => setField('currency', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30">
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30">
                     <option value="XOF">FCFA (XOF)</option>
                     <option value="EUR">Euro (EUR)</option>
                     <option value="USD">Dollar (USD)</option>
@@ -297,7 +297,7 @@ export default function Clients({ clients, filters }) {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
                 <textarea rows={2} value={form.notes} onChange={(e) => setField('notes', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333EA]/30 resize-none"
                   placeholder="Informations internes sur ce client..." />
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function Clients({ clients, filters }) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
+                className="flex-1 px-4 py-2 bg-[#9333EA] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
               >
                 {saving ? 'Enregistrement...' : modal.mode === 'create' ? 'Créer' : 'Mettre à jour'}
               </button>
@@ -324,3 +324,4 @@ export default function Clients({ clients, filters }) {
     </AuthLayout>
   );
 }
+export { Clients };

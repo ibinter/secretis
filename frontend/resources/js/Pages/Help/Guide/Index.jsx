@@ -98,10 +98,10 @@ export default function GuideIndex({ sections = [] }) {
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
                 {/* Hero */}
-                <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] text-white py-14 px-4">
+                <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white py-14 px-4">
                     <div className="max-w-5xl mx-auto">
                         {/* Breadcrumb */}
-                        <nav className="flex items-center gap-2 text-sm text-blue-200 mb-6">
+                        <nav className="flex items-center gap-2 text-sm text-purple-200 mb-6">
                             <Link href="/aide" className="hover:text-white">{t('Aide', 'Help')}</Link>
                             <span>/</span>
                             <span className="text-white">{t('Guide utilisateur', 'User Guide')}</span>
@@ -111,7 +111,7 @@ export default function GuideIndex({ sections = [] }) {
                                 <h1 className="text-3xl sm:text-4xl font-bold mb-3">
                                     {t('Guide utilisateur', 'User Guide')}
                                 </h1>
-                                <p className="text-blue-100 text-lg">
+                                <p className="text-purple-100 text-lg">
                                     {t(
                                         `${sections.length} sections · ${sections.reduce((acc, s) => acc + (s.articles_count || 0), 0)} articles détaillés`,
                                         `${sections.length} sections · ${sections.reduce((acc, s) => acc + (s.articles_count || 0), 0)} detailed articles`
@@ -123,7 +123,7 @@ export default function GuideIndex({ sections = [] }) {
                                 {['fr', 'en'].map(l => (
                                     <button key={l} onClick={() => setLocale(l)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                                            locale === l ? 'bg-white text-[#1A3A5C]' : 'bg-white/20 hover:bg-white/30 text-white'
+                                            locale === l ? 'bg-white text-[#9333EA]' : 'bg-white/20 hover:bg-white/30 text-white'
                                         }`}>
                                         {l === 'fr' ? 'Français' : 'English'}
                                     </button>
@@ -145,8 +145,8 @@ export default function GuideIndex({ sections = [] }) {
                                 <button key={r.key} onClick={() => setRole(r.key)}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                         role === r.key
-                                            ? 'bg-[#1A3A5C] text-white'
-                                            : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#2E86C1] hover:text-[#2E86C1]'
+                                            ? 'bg-[#9333EA] text-white'
+                                            : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#7e22ce] hover:text-[#7e22ce]'
                                     }`}>
                                     {locale === 'fr' ? r.labelFr : r.labelEn}
                                 </button>
@@ -156,8 +156,8 @@ export default function GuideIndex({ sections = [] }) {
 
                     {/* Par où commencer */}
                     {firstSection && role === 'all' && (
-                        <div className="mb-10 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-6">
-                            <h2 className="text-lg font-bold text-[#1A3A5C] dark:text-blue-300 mb-4">
+                        <div className="mb-10 bg-purple-50 dark:bg-purple-900/20 rounded-2xl p-6">
+                            <h2 className="text-lg font-bold text-[#9333EA] dark:text-purple-300 mb-4">
                                 🚀 {t('Par où commencer ?', 'Where to start?')}
                             </h2>
                             <div className="grid sm:grid-cols-3 gap-3">
@@ -174,10 +174,10 @@ export default function GuideIndex({ sections = [] }) {
                                                 href={`/guide/premiers-pas/${item.slug}`}
                                                 className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow group"
                                             >
-                                                <span className="w-8 h-8 rounded-full bg-[#1A3A5C] text-white text-sm font-bold flex items-center justify-center shrink-0">
+                                                <span className="w-8 h-8 rounded-full bg-[#9333EA] text-white text-sm font-bold flex items-center justify-center shrink-0">
                                                     {item.num}
                                                 </span>
-                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-[#2E86C1] transition-colors">
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-[#7e22ce] transition-colors">
                                                     {locale === 'fr' ? item.fr : item.en}
                                                 </span>
                                             </Link>
@@ -215,7 +215,7 @@ export default function GuideIndex({ sections = [] }) {
                                     >
                                         <SectionIcon name={section.icon} className="w-6 h-6" />
                                     </div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-[#2E86C1] transition-colors">
+                                    <h3 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-[#7e22ce] transition-colors">
                                         {title}
                                     </h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
@@ -243,3 +243,4 @@ export default function GuideIndex({ sections = [] }) {
         </>
     );
 }
+export { GuideIndex };
