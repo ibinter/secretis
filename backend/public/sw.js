@@ -1,4 +1,4 @@
-const CACHE_NAME = 'secretis-v2';
+const CACHE_NAME = 'secretis-v3';
 const PRECACHE_URLS = ['/', '/manifest.json', '/favicon.ico'];
 
 // Install: pre-cache static assets
@@ -25,12 +25,12 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch: network-first for /api/*, cache-first otherwise
+// Fetch: network-first for /api/*, navigation, and build assets; cache-first for icons/manifest
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
+  // Always network-first for API calls
   if (url.pathname.startsWith('/api/')) {
-    // Network-first strategy for API calls
     event.respondWith(
       fetch(event.request)
         .then(response => {
@@ -42,27 +42,46 @@ self.addEventListener('fetch', event => {
         })
         .catch(() => caches.match(event.request))
     );
-  } else {
-    // Cache-first strategy for static assets
+    return;
+  }
+
+  // Network-first for navigation and JS/CSS build assets (so rebuilds always propagate)
+  if (event.request.mode === 'navigate' ||
+      url.pathname.startsWith('/build/') ||
+      url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('.css')) {
     event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request)
-          .then(response => {
-            if (!response || response.status !== 200 || response.type === 'opaque') {
-              return response;
-            }
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200 && response.type !== 'opaque') {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-            return response;
-          })
-          .catch(() => {
-            // Offline fallback: serve cached '/' for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/');
-            }
-          });
-      })
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
     );
+    return;
   }
+
+  // Cache-first for static assets (images, fonts, manifest)
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request)
+        .then(response => {
+          if (!response || response.status !== 200 || response.type === 'opaque') {
+            return response;
+          }
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => {
+          if (event.request.mode === 'navigate') {
+            return caches.match('/');
+          }
+        });
+    })
+  );
 });

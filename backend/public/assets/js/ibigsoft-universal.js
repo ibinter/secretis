@@ -58,6 +58,10 @@ function injectStyles(accent) {
   var css = '.ibig-footer{background:#1a1a2e;color:#e2e8f0;padding:40px 20px 20px;font-family:sans-serif;margin-top:40px}'
     + '.ibig-footer-grid{display:flex;flex-wrap:wrap;gap:30px;max-width:1200px;margin:0 auto 30px}'
     + '.ibig-footer-col{flex:1;min-width:180px}'
+    + '.ibig-footer-col.ibig-footer-col--solutions{flex:1.6;min-width:220px}'
+    + '.ibig-footer-col--solutions .ibig-fsols{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px}'
+    + '.ibig-footer-col--solutions .ibig-fsols a{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+    + '.ibig-footer-col--solutions .ibig-fsols-more{grid-column:1/-1;margin-top:6px;font-weight:600}'
     + '.ibig-footer-col h4{color:' + accent + ';margin-bottom:12px;font-size:14px;text-transform:uppercase;letter-spacing:1px}'
     + '.ibig-footer-col p,.ibig-footer-col a{font-size:13px;color:#94a3b8;line-height:1.8;display:block;text-decoration:none}'
     + '.ibig-footer-col a:hover{color:' + accent + '}'
@@ -116,11 +120,13 @@ function renderFooter(target, sol) {
   html += '<a href="tel:' + CONTACTS.tel1 + '">' + CONTACTS.tel1 + '</a>';
   html += '<a href="tel:' + CONTACTS.tel2 + '">' + CONTACTS.tel2 + '</a>';
   html += '<a href="mailto:' + CONTACTS.email + '">' + CONTACTS.email + '</a></div>';
-  html += '<div class="ibig-footer-col"><h4>Nos Solutions</h4>';
-  SOLUTIONS.slice(0,6).forEach(function(s) {
+  html += '<div class="ibig-footer-col ibig-footer-col--solutions"><h4>Nos Solutions</h4>';
+  html += '<div class="ibig-fsols">';
+  SOLUTIONS.slice(0,8).forEach(function(s) {
     html += '<a href="' + s.url + '" target="_blank">' + s.nom + '</a>';
   });
-  html += '</div><div class="ibig-footer-col"><h4>Paiements</h4>';
+  html += '<a href="https://ibigsoft.com/" target="_blank" class="ibig-fsols-more">Voir toutes nos solutions &rarr;</a>';
+  html += '</div></div><div class="ibig-footer-col"><h4>Paiements</h4>';
   PAIEMENTS.forEach(function(p) {
     html += '<p>' + p.nom + ': ' + p.numero + '</p>';
   });

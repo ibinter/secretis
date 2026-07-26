@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\Plan;
 use App\Services\AuditService;
 use App\Services\LicenseService;
 use App\Services\PartnerService;
@@ -190,9 +191,16 @@ class AuthController extends Controller
             'password'          => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()->uncompromised()],
             // IBIG PARTNERS — code de parrainage optionnel
             'referral_code'     => ['nullable', 'string', 'max:12'],
+            // Formule choisie lors de l'inscription (optionnel)
+            'plan'              => ['nullable', 'string', 'in:decouverte,essentiel,pro,entreprise'],
         ]);
 
         $result = DB::transaction(function () use ($validated) {
+            // Résoudre le plan choisi lors de l'inscription
+            $planId = null;
+            if (!empty($validated['plan'])) {
+                $planId = \App\Models\Plan::where('slug', $validated['plan'])->value('id');
+            }
             // Créer l'organisation en mode trial
             $organization = Organization::create([
                 'name'         => $validated['organization_name'],
@@ -206,6 +214,7 @@ class AuthController extends Controller
                     'enabled_modules' => ['agenda', 'courrier', 'taches', 'contacts', 'reunions', 'documents'],
                     'language'        => 'fr',
                 ],
+                'plan_id'      => $planId,
             ]);
 
             // Créer l'administrateur
@@ -241,6 +250,7 @@ class AuthController extends Controller
             newValues: [
                 'organization_name' => $result['organization']->name,
                 'admin_email'       => $result['admin']->email,
+                'plan'              => $validated['plan'] ?? null,
             ],
             userId: $result['admin']->id,
             organizationId: $result['organization']->id,

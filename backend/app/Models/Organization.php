@@ -44,6 +44,7 @@ class Organization extends Model
         'settings',
         'status',
         'trial_ends_at',
+        'plan_id',
     ];
 
     protected $casts = [
