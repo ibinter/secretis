@@ -51,9 +51,26 @@ class DashboardController extends Controller
     {
         $user  = Auth::user();
         $orgId = $user->organization_id;
+        $org   = $user->organization;
 
         return Inertia::render('Dashboard/Index', [
-            'stats'           => Inertia::defer(fn () => $this->getStats($orgId)),
+            // ── Données synchrones (nécessaires au rendu initial) ──────────────
+            'auth' => [
+                'user' => $user->only('id', 'name', 'email', 'role'),
+            ],
+
+            'organization' => $org
+                ? $org->only('id', 'name', 'plan_id', 'trial_ends_at')
+                : null,
+
+            'trial_days_remaining' => $org && $org->trial_ends_at
+                ? max(0, (int) now()->diffInDays($org->trial_ends_at, false))
+                : 14,
+
+            // ── Données KPI (chargées directement — pas de defer) ─────────────
+            'stats' => $this->getStats($orgId),
+
+            // ── Données secondaires en différé (non bloquantes) ───────────────
             'recentEvents'    => Inertia::defer(fn () => $this->getRecentEvents($orgId)),
             'pendingTasks'    => Inertia::defer(fn () => $this->getPendingTasks($orgId, $user->id)),
             'recentDocuments' => Inertia::defer(fn () => $this->getRecentDocuments($orgId)),
@@ -89,7 +106,8 @@ class DashboardController extends Controller
                             ->where('created_at', '>=', $month)
                             ->count(),
 
-                        'visitors_today'       => Visitor::where('organization_id', $orgId)
+                        'visitors_today'       => DB::table('visit_logs')
+                            ->where('organization_id', $orgId)
                             ->whereDate('check_in_at', today())
                             ->count(),
                     ];
@@ -201,12 +219,12 @@ class DashboardController extends Controller
 
         // Visiteurs par service pour PieChart
         $visitorsByDept = DB::select("
-            SELECT COALESCE(d.name, 'Autre') AS name, COUNT(v.id) AS value
-            FROM visitors v
-            LEFT JOIN departments d ON d.id = v.department_id
-            WHERE v.organization_id = :org
-              AND v.check_in_at >= NOW() - INTERVAL '30 days'
-              AND v.deleted_at IS NULL
+            SELECT COALESCE(d.name, 'Autre') AS name, COUNT(vl.id) AS value
+            FROM visit_logs vl
+            JOIN visitors v ON v.id = vl.visitor_id
+            LEFT JOIN departments d ON d.id = vl.host_user_id
+            WHERE vl.organization_id = :org
+              AND vl.check_in_at >= NOW() - INTERVAL '30 days'
             GROUP BY d.name
             ORDER BY value DESC
             LIMIT 6

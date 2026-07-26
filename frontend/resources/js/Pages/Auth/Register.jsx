@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
 
 const slugify = (s) =>
@@ -11,11 +11,24 @@ const COUNTRIES = [
   ['GA', 'Gabon'], ['CD', 'RD Congo'], ['FR', 'France'], ['MA', 'Maroc'], ['DZ', 'Algérie'],
 ];
 
+const PLAN_LABELS = {
+  decouverte: { name: 'Découverte', price: '4 900 FCFA / mois', users: '3 utilisateurs' },
+  essentiel:  { name: 'Essentiel',  price: '9 900 FCFA / mois', users: '10 utilisateurs' },
+  pro:        { name: 'Pro',        price: '19 900 FCFA / mois', users: '25 utilisateurs' },
+  entreprise: { name: 'Entreprise', price: '39 900 FCFA / mois', users: 'utilisateurs illimités' },
+};
+
 export default function Register() {
+  const plan = useMemo(() => {
+    const p = new URLSearchParams(window.location.search).get('plan') || '';
+    return PLAN_LABELS[p] ? p : null;
+  }, []);
+
   const [form, setForm] = useState({
     organization_name: '', organization_slug: '', country: 'CI',
     timezone: 'Africa/Abidjan', admin_name: '', email: '',
     password: '', password_confirmation: '', referral_code: '',
+    plan: plan || '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -57,14 +70,16 @@ export default function Register() {
   const label = 'block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1';
 
   if (done) {
+    const planLabel = plan ? PLAN_LABELS[plan] : null;
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-slate-100 dark:from-purple-950 dark:to-slate-900 p-6">
         <Head title="Inscription réussie" />
         <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center">
-          <div className="mx-auto w-14 h-14 rounded-xl bg-green-600 text-white text-3xl flex items-center justify-center mb-4">✓</div>
+          <div className="mx-auto w-14 h-14 rounded-xl bg-green-600 text-white text-3xl flex items-center justify-center mb-4">&#x2713;</div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Bienvenue sur SECRETIS ERP !</h1>
           <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">
-            Votre organisation <strong>{form.organization_name}</strong> est créée avec un essai gratuit de 14 jours.
+            Votre organisation <strong>{form.organization_name}</strong> est créée avec un essai gratuit de 14 jours
+            {planLabel ? <> sur la formule <strong>{planLabel.name}</strong></> : ''}.
             Un email de bienvenue a été envoyé à <strong>{form.email}</strong>.
           </p>
           <Link href="/login" className="inline-block w-full py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold">
@@ -75,6 +90,8 @@ export default function Register() {
     );
   }
 
+  const planInfo = plan ? PLAN_LABELS[plan] : null;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-slate-100 dark:from-purple-950 dark:to-slate-900 p-6">
       <Head title="Créer mon compte — Essai gratuit" />
@@ -84,6 +101,20 @@ export default function Register() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Essai gratuit 14 jours</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sans carte bancaire, sans engagement.</p>
         </div>
+
+        {planInfo && (
+          <div className="mb-5 p-4 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700">
+            <p className="text-sm font-semibold text-purple-700 dark:text-purple-300">
+              Formule choisie : {planInfo.name}
+            </p>
+            <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+              {planInfo.price} &middot; {planInfo.users} &middot; 14 jours d&apos;essai gratuit inclus
+            </p>
+            <a href="/#tarifs" className="text-xs text-purple-500 hover:underline mt-1 inline-block">
+              Changer de formule &rarr;
+            </a>
+          </div>
+        )}
 
         {errors.global && (
           <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">

@@ -1320,7 +1320,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
           <li>1 Go de stockage</li>
           <li>Support par email</li>
         </ul>
-        <a href="/register" class="pricing-cta">Commencer l'essai gratuit</a>
+        <a href="/register?plan=decouverte" class="pricing-cta">Commencer l'essai gratuit</a>
       </div>
       <div class="pricing-card">
         <div class="pricing-name">Essentiel</div>
@@ -1334,7 +1334,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
           <li>Assistante IA SARA</li>
           <li>3 Go de stockage</li>
         </ul>
-        <a href="/register" class="pricing-cta">Commencer l'essai gratuit</a>
+        <a href="/register?plan=essentiel" class="pricing-cta">Commencer l'essai gratuit</a>
       </div>
       <div class="pricing-card featured">
         <div class="pricing-badge">Recommandé</div>
@@ -1350,7 +1350,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
           <li>10 Go de stockage</li>
           <li>Support prioritaire</li>
         </ul>
-        <a href="/register" class="pricing-cta">Commencer l'essai gratuit</a>
+        <a href="/register?plan=pro" class="pricing-cta">Commencer l'essai gratuit</a>
       </div>
       <div class="pricing-card">
         <div class="pricing-name">Entreprise</div>
@@ -1364,7 +1364,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
           <li>30 Go de stockage</li>
           <li>Accompagnement dédié</li>
         </ul>
-        <a href="/register" class="pricing-cta" style="background:rgba(147,51,234,0.15);border:1px solid var(--primary);">Commencer l'essai gratuit</a>
+        <a href="/register?plan=entreprise" class="pricing-cta" style="background:rgba(147,51,234,0.15);border:1px solid var(--primary);">Commencer l'essai gratuit</a>
       </div>
     </div>
     <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:24px;">
@@ -1584,9 +1584,13 @@ document.getElementById('mobile-menu')?.addEventListener('keydown', e => {
 });
 
 // ─── Header compact on scroll ─────────────────────────────────
-let topbarH = document.querySelector('.topbar')?.offsetHeight || 0;
-// When scrolled past topbar, fix header at top-0 instead of behind topbar
-// (topbar is not fixed, so header needs to compensate)
+const mainHeader = document.getElementById("main-header");
+let topbarH = document.querySelector(".topbar")?.offsetHeight || 0;
+if (mainHeader) mainHeader.style.top = topbarH + "px";
+window.addEventListener("scroll", function() {
+  var scrolled = window.scrollY > topbarH;
+  if (mainHeader) mainHeader.style.top = scrolled ? "0" : topbarH + "px";
+}, { passive: true });
 
 // ─── SARA modal ────────────────────────────────────────────────
 function openSara() {
