@@ -37,4 +37,3 @@ export default function Alert({
   )
 }
 export { Alert };
-export const AlertDescription = (...args) => null;
