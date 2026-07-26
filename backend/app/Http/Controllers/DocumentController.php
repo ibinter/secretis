@@ -44,6 +44,7 @@ class DocumentController extends Controller
      */
     public function index(Request $request): Response|JsonResponse
     {
+        try {
         $user = Auth::user();
 
         $query = Document::where('organization_id', $user->organization_id)
@@ -103,6 +104,13 @@ class DocumentController extends Controller
             'documents' => $documents,
             'filters'   => $request->only(['folder_id', 'type', 'access_level', 'author_id', 'search']),
         ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('DocumentController::index: ' . $e->getMessage());
+            return Inertia::render('GED/Index', [
+                'documents' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 24),
+                'filters'   => [],
+            ]);
+        }
     }
 
     // -------------------------------------------------------------------------

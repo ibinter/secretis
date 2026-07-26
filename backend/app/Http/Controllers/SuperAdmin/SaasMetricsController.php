@@ -280,6 +280,91 @@ class SaasMetricsController extends Controller
         return round(($churnedThisMonth / $activeLastMonth) * 100, 2);
     }
 
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET /superadmin/monitoring
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Monitoring système : disk, memory, queue, recent errors.
+     */
+    public function monitoring(\Illuminate\Http\Request $request): \Inertia\Response|\Illuminate\Http\JsonResponse
+    {
+        // Disk usage
+        $diskFree  = disk_free_space("/");
+        $diskTotal = disk_total_space("/");
+        $diskUsedPct = $diskTotal > 0 ? round((1 - $diskFree / $diskTotal) * 100, 1) : 0;
+
+        // Memory from /proc/meminfo
+        $memTotal = 0; $memAvailable = 0;
+        if (file_exists("/proc/meminfo")) {
+            $meminfo = file_get_contents("/proc/meminfo");
+            preg_match("/MemTotal:\s+(\d+)/", $meminfo, $m); $memTotal = (int)($m[1] ?? 0);
+            preg_match("/MemAvailable:\s+(\d+)/", $meminfo, $m); $memAvailable = (int)($m[1] ?? 0);
+        }
+        $memUsedPct = $memTotal > 0 ? round((1 - $memAvailable / $memTotal) * 100, 1) : 0;
+
+        // Queue status
+        try {
+            $queueJobs  = \Illuminate\Support\Facades\DB::table("jobs")->count();
+            $failedJobs = \Illuminate\Support\Facades\DB::table("failed_jobs")->count();
+        } catch (\Throwable $e) {
+            $queueJobs  = 0;
+            $failedJobs = 0;
+        }
+
+        // Recent errors from logs
+        $recentErrors = 0;
+        $logFile = storage_path("logs/laravel.log");
+        if (file_exists($logFile)) {
+            $tail = shell_exec("tail -n 500 " . escapeshellarg($logFile) . " 2>/dev/null");
+            $recentErrors = substr_count((string)$tail, ".ERROR:");
+        }
+
+        // Last backup
+        $backupDir  = "/var/backups/secretis";
+        $lastBackup = null;
+        if (is_dir($backupDir)) {
+            $files = glob($backupDir . "/*.sql*") ?: [];
+            if ($files) {
+                usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+                $lastBackup = date("Y-m-d H:i:s", filemtime($files[0]));
+            }
+        }
+
+        $data = [
+            "disk" => [
+                "free_gb"  => round($diskFree / 1073741824, 1),
+                "total_gb" => round($diskTotal / 1073741824, 1),
+                "used_pct" => $diskUsedPct,
+            ],
+            "memory" => [
+                "total_mb"     => round($memTotal / 1024, 0),
+                "available_mb" => round($memAvailable / 1024, 0),
+                "used_pct"     => $memUsedPct,
+            ],
+            "queue" => [
+                "pending_jobs" => $queueJobs,
+                "failed_jobs"  => $failedJobs,
+                "status"       => $failedJobs > 10 ? "warning" : "ok",
+            ],
+            "errors" => [
+                "recent_error_count" => $recentErrors,
+            ],
+            "backup" => [
+                "last_backup_at" => $lastBackup,
+                "status"         => $lastBackup ? "ok" : "unknown",
+            ],
+            "uptime" => trim((string)shell_exec("uptime -p 2>/dev/null") ?: "unknown"),
+        ];
+
+        if ($request->wantsJson()) {
+            return response()->json($data);
+        }
+
+        return \Inertia\Inertia::render("SuperAdmin/Monitoring", ["monitoring" => $data]);
+    }
+
     /**
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.

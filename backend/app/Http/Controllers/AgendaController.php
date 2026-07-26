@@ -41,6 +41,7 @@ class AgendaController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
+        try {
         $user = $request->user();
 
         // Calendriers de l'utilisateur pour la sidebar
@@ -61,11 +62,13 @@ class AgendaController extends Controller
             ->map(fn(Event $e) => $e->toCalendarFormat());
 
         // Utilisateurs de l'organisation pour le sélecteur de participants
-        $orgUsers = $user->organization->users()
-            ->active()
-            ->select(['id', 'name', 'email', 'avatar', 'department_id'])
-            ->orderBy('name')
-            ->get();
+        $orgUsers = $user->organization
+            ? $user->organization->users()
+                ->active()
+                ->select(['id', 'name', 'email', 'avatar', 'department_id'])
+                ->orderBy('name')
+                ->get()
+            : collect();
 
         return Inertia::render('Agenda/Index', [
             'calendars'   => $calendars,
@@ -73,6 +76,15 @@ class AgendaController extends Controller
             'orgUsers'    => $orgUsers,
             'timezone'    => $user->organization?->timezone ?? 'UTC',
         ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('AgendaController::index: ' . $e->getMessage());
+            return Inertia::render('Agenda/Index', [
+                'calendars'   => [],
+                'todayEvents' => [],
+                'orgUsers'    => [],
+                'timezone'    => 'UTC',
+            ]);
+        }
     }
 
     // -------------------------------------------------------------------------

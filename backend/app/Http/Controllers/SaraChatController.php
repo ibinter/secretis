@@ -88,6 +88,15 @@ PROMPT;
         return "Je rencontre un souci technique momentané. Vous pouvez nous écrire à secretis@ibigsoft.com ou via WhatsApp — notre équipe vous répondra rapidement !";
     }
 
+
+    /**
+     * Page SARA standalone (iframe / accès public).
+     */
+    public function chatPage()
+    {
+        return response()->view('sara-chat-standalone');
+    }
+
     /**
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.

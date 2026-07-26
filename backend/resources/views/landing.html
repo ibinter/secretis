@@ -36,7 +36,7 @@
   --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 html, body { width: 100%; max-width: 100%; margin: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
@@ -733,146 +733,6 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   padding: 8px 10px;
 }
 
-/* ─── Floating buttons ───────────────────────────────────────── */
-.float-sara {
-  position: fixed;
-  bottom: 24px; right: 24px;
-  z-index: 997;
-}
-.sara-float-btn {
-  width: 58px; height: 58px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 6px 20px rgba(147,51,234,0.5);
-  cursor: pointer;
-  transition: all var(--transition);
-  position: relative;
-  font-size: 24px;
-  border: none;
-}
-.sara-float-btn:hover { transform: scale(1.08); box-shadow: 0 10px 28px rgba(147,51,234,0.6); }
-.sara-float-btn .badge-online {
-  position: absolute; top: 2px; right: 2px;
-  width: 12px; height: 12px;
-  background: #4ade80; border-radius: 50%;
-  border: 2px solid var(--dark);
-}
-.sara-tooltip {
-  position: absolute;
-  bottom: 68px; right: 0;
-  background: var(--dark3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  color: #fff;
-  white-space: nowrap;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: all var(--transition);
-}
-.float-sara:hover .sara-tooltip { opacity: 1; transform: translateY(0); }
-.float-whatsapp {
-  position: fixed;
-  bottom: 24px; left: 24px;
-  z-index: 997;
-}
-.whatsapp-btn {
-  width: 52px; height: 52px;
-  background: #25D366;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 14px rgba(37,211,102,0.4);
-  font-size: 24px;
-  cursor: pointer;
-  transition: all var(--transition);
-  text-decoration: none;
-}
-.whatsapp-btn:hover { transform: scale(1.08); }
-
-/* ─── SARA Modal ─────────────────────────────────────────────── */
-#sara-modal {
-  display: none;
-  position: fixed;
-  bottom: 90px; right: 24px;
-  z-index: 998;
-  width: 360px; max-width: calc(100vw - 40px);
-  background: var(--dark3);
-  border: 1px solid var(--primary);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  overflow: hidden;
-  flex-direction: column;
-  animation: slideUp 0.3s ease;
-}
-#sara-modal.open { display: flex; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.sara-modal-header {
-  background: linear-gradient(135deg, var(--primary-dark), var(--dark3));
-  padding: 16px 18px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.sara-modal-info { display: flex; align-items: center; gap: 10px; }
-.sara-modal-avatar {
-  width: 38px; height: 38px;
-  background: #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-.sara-modal-name { font-weight: 700; color: #fff; font-size: 0.95rem; }
-.sara-modal-status { font-size: 0.72rem; color: #4ade80; }
-.sara-modal-close { color: var(--text-muted); font-size: 1.2rem; line-height: 1; transition: color var(--transition); }
-.sara-modal-close:hover { color: #fff; }
-.sara-modal-body { flex: 1; overflow-y: auto; padding: 16px; max-height: 300px; display: flex; flex-direction: column; gap: 10px; }
-.sara-msg { padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; line-height: 1.5; }
-.sara-msg.bot { background: rgba(147,51,234,0.12); color: var(--text); border-radius: 4px 12px 12px 12px; }
-.sara-msg.user { background: rgba(255,255,255,0.06); color: var(--text-muted); border-radius: 12px 4px 12px 12px; align-self: flex-end; }
-.sara-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
-.sara-sugg {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 50px;
-  padding: 5px 12px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.sara-sugg:hover { border-color: var(--primary); color: var(--primary-light); }
-.sara-input-row {
-  display: flex; gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-.sara-input-row input {
-  flex: 1;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 9px 14px;
-  color: #fff;
-  font-size: 0.85rem;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.sara-input-row input:focus { border-color: var(--primary); }
-.sara-input-row input::placeholder { color: var(--text-muted); }
-.sara-send {
-  background: var(--primary); color: #fff;
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-  transition: background var(--transition);
-}
-.sara-send:hover { background: var(--primary-dark); }
-.sara-disclaimer { font-size: 0.68rem; text-align: center; color: var(--text-muted); padding: 8px 16px 12px; }
 
 /* ─── Cookie Banner ──────────────────────────────────────────── */
 #cookie-banner {
@@ -903,24 +763,25 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   .sara-section { grid-template-columns: 1fr; gap: 36px; }
   .preview-ui { grid-template-columns: 1fr; }
   .preview-sidebar { display: none; }
-  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .pricing-grid { grid-template-columns: 1fr !important; max-width: 400px; }
   .section { padding: 64px 0; }
   .cta-final { padding: 48px 24px; }
   .partners-card { padding: 36px 24px; }
   .topbar { gap: 10px; font-size: 0.76rem; }
-  .float-whatsapp { bottom: 90px; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .section-header:not(.center) { text-align: center; }
 }
 </style>
 </head>
 <body>
 
-<!-- Topbar -->
+<!-- Topbar §7.1 -->
 <div class="topbar">
-  <span>🚀 Essayez SECRETIS ERP gratuitement — 14 jours sans engagement</span>
-  <span>|</span>
-  <span>📞 Assistance : <a href="tel:+22600000000">support disponible</a></span>
-  <span>|</span>
-  <span><a href="https://ibigsoft.com">Une solution IBIG Soft</a></span>
+  <span>Essayez SECRETIS gratuitement</span>
+  <span>•</span>
+  <span>Assistance : <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a></span>
+  <span>•</span>
+  <span>FR / EN</span>
 </div>
 
 <!-- Header -->
@@ -1537,7 +1398,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
             <span style="color:var(--primary-light);">🌐</span> Compatible Android, iPhone, PC, tablette
           </div>
         </div>
-        <button class="cta-primary" id="install-btn" onclick="installPwa()" style="display:none;">📲 Installer l'application</button>
+        <button class="cta-primary" id="pwa-install-btn" onclick="installPwa()" style="display:none;">📲 Installer l'application</button>
         <p style="font-size:0.82rem;color:var(--text-muted);margin-top:10px;" id="pwa-hint">
           Sur iPhone : touchez Partager ↑ puis « Ajouter à l'écran d'accueil »
         </p>
@@ -1606,6 +1467,18 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   </div>
 </section>
 
+<!-- Section masquée — aucun témoignage réel disponible -->
+<!-- §7.25 Testimonials - hidden until real testimonials are available -->
+<section id="temoignages" style="display:none;" aria-hidden="true">
+  <div class="container">
+    <div class="section-header center">
+      <span class="section-label">Témoignages</span>
+      <h2 class="section-title">Ce que disent nos clients</h2>
+    </div>
+    <!-- Témoignages à ajouter lorsque disponibles -->
+  </div>
+</section>
+
 <!-- IBIG PARTNERS -->
 <section class="section" id="partenaires">
   <div class="container">
@@ -1658,70 +1531,7 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   </div>
 </section>
 
-<!-- Footer (Universal Script target) -->
-<div data-ibig="footer"></div>
 
-<!-- Footer fallback -->
-<footer style="background:var(--dark2);border-top:1px solid var(--border);padding:40px 0 24px;">
-  <div class="container">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:32px;margin-bottom:36px;">
-      <div>
-        <div class="logo" style="margin-bottom:12px;">
-          <div class="logo-icon" style="width:36px;height:36px;font-size:14px;">SE</div>
-          <div class="logo-name" style="font-size:0.95rem;">SECRETIS<span> ERP</span></div>
-        </div>
-        <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.6;">Gestion du courrier et du secrétariat pour les organisations professionnelles.</p>
-      </div>
-      <div>
-        <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:12px;">Navigation</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="#fonctionnalites" style="font-size:0.82rem;color:var(--text-muted);">Fonctionnalités</a>
-          <a href="#modules" style="font-size:0.82rem;color:var(--text-muted);">Modules</a>
-          <a href="#tarifs" style="font-size:0.82rem;color:var(--text-muted);">Tarifs</a>
-          <a href="#demonstration" style="font-size:0.82rem;color:var(--text-muted);">Démonstration</a>
-          <a href="/login" style="font-size:0.82rem;color:var(--text-muted);">Connexion</a>
-          <a href="/register" style="font-size:0.82rem;color:var(--text-muted);">Inscription</a>
-        </div>
-      </div>
-      <div>
-        <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:12px;">Ressources</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="/aide" style="font-size:0.82rem;color:var(--text-muted);">Centre d'aide</a>
-          <a href="/aide" style="font-size:0.82rem;color:var(--text-muted);">Guide utilisateur</a>
-          <a href="/aide" style="font-size:0.82rem;color:var(--text-muted);">FAQ</a>
-          <a href="/aide" style="font-size:0.82rem;color:var(--text-muted);">Nouveautés</a>
-          <a href="/aide" style="font-size:0.82rem;color:var(--text-muted);">Support</a>
-        </div>
-      </div>
-      <div>
-        <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:12px;">IBIG Soft</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="https://ibigsoft.com" style="font-size:0.82rem;color:var(--text-muted);">À propos</a>
-          <a href="https://ibigsoft.com" style="font-size:0.82rem;color:var(--text-muted);">Autres logiciels</a>
-          <a href="https://ibigpartners.com/" style="font-size:0.82rem;color:var(--text-muted);">IBIG PARTNERS</a>
-          <a href="mailto:secretis@ibigsoft.com" style="font-size:0.82rem;color:var(--text-muted);">Contact</a>
-        </div>
-      </div>
-      <div>
-        <div style="font-weight:700;color:#fff;font-size:0.9rem;margin-bottom:12px;">Légal</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <a href="/mentions-legales" style="font-size:0.82rem;color:var(--text-muted);">Mentions légales</a>
-          <a href="/cgu" style="font-size:0.82rem;color:var(--text-muted);">CGU</a>
-          <a href="/confidentialite" style="font-size:0.82rem;color:var(--text-muted);">Confidentialité</a>
-          <a href="/cookies" style="font-size:0.82rem;color:var(--text-muted);">Cookies</a>
-          <a href="/contrat-licence" style="font-size:0.82rem;color:var(--text-muted);">Licence</a>
-        </div>
-      </div>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;text-align:center;">
-      <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.7;">
-        © 2025 SECRETIS ERP. Tous droits réservés.<br>
-        Logiciel conçu, édité et exploité par <a href="https://ibigsoft.com" style="color:var(--primary-light);">IBIG Soft</a>, une marque de IBIG SARL – Intermark Business International Group.<br>
-        Toute reproduction, imitation ou utilisation non autorisée de ce logiciel, de son interface ou de son identité visuelle est interdite.
-      </p>
-    </div>
-  </div>
-</footer>
 
 <!-- PWA Banner -->
 <div id="pwa-banner" role="dialog" aria-label="Installer l'application">
@@ -1736,49 +1546,6 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   </div>
 </div>
 
-<!-- Bouton WhatsApp -->
-<div class="float-whatsapp">
-  <a href="https://wa.me/message/IBIGSOFT?text=Bonjour+IBIG+Soft%2C+je+souhaite+obtenir+des+informations+sur+SECRETIS+ERP." target="_blank" rel="noopener" class="whatsapp-btn" title="Contacter via WhatsApp" aria-label="Contacter via WhatsApp">
-    <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-  </a>
-</div>
-
-<!-- SARA Float Button -->
-<div class="float-sara">
-  <div class="sara-tooltip">Besoin d'aide ? Parlez à SARA</div>
-  <button class="sara-float-btn" onclick="openSara()" title="Assistant SARA" aria-label="Ouvrir l'assistant SARA">
-    🤖
-    <span class="badge-online"></span>
-  </button>
-</div>
-
-<!-- SARA Modal -->
-<div id="sara-modal" role="dialog" aria-label="Assistant SARA">
-  <div class="sara-modal-header">
-    <div class="sara-modal-info">
-      <div class="sara-modal-avatar">🤖</div>
-      <div>
-        <div class="sara-modal-name">SARA — Assistant SECRETIS</div>
-        <div class="sara-modal-status">● En ligne</div>
-      </div>
-    </div>
-    <button class="sara-modal-close" onclick="closeSara()" aria-label="Fermer">✕</button>
-  </div>
-  <div class="sara-modal-body" id="sara-messages">
-    <div class="sara-msg bot">Bonjour ! Je suis SARA, l'assistante intelligente de SECRETIS ERP. Je peux vous présenter la solution, vous aider à choisir une formule ou organiser une démonstration. Comment puis-je vous aider ?</div>
-  </div>
-  <div class="sara-suggestions">
-    <div class="sara-sugg" onclick="saraSend(this)">Que fait SECRETIS ?</div>
-    <div class="sara-sugg" onclick="saraSend(this)">Essai gratuit ?</div>
-    <div class="sara-sugg" onclick="saraSend(this)">C'est combien ?</div>
-    <div class="sara-sugg" onclick="saraSend(this)">Demander une démo</div>
-  </div>
-  <div class="sara-input-row">
-    <input type="text" id="sara-input" placeholder="Posez votre question…" onkeydown="if(event.key==='Enter')sendSara()" aria-label="Message pour SARA">
-    <button class="sara-send" onclick="sendSara()" aria-label="Envoyer">➤</button>
-  </div>
-  <div class="sara-disclaimer">SARA répond sur la base des informations officielles de SECRETIS ERP. Pour les questions sensibles, un conseiller IBIG Soft vous contactera.</div>
-</div>
 
 <!-- Cookie Banner -->
 <div id="cookie-banner" role="dialog" aria-label="Gestion des cookies">
@@ -1792,13 +1559,16 @@ nav a:hover { color: #fff; background: rgba(255,255,255,0.07); }
   </div>
 </div>
 
-<!-- Script universel IBIG SOFT -->
+<!-- Placement pour le script universel IBIG SOFT -->
+<div data-ibig="footer"></div>
 <script src="/assets/js/ibigsoft-universal.js"
-  data-solution="secretis"
-  data-accent="#9333EA"
-  data-render="solutions,footer"
-  data-speed="4000">
-</script>
+        data-solution="secretis"
+        data-accent="#9333EA"
+        data-paiements="false"
+        data-bulles="true"
+        data-pwa="true"
+        data-barre="false"
+        data-masquer-courante="false"></script>
 
 <script>
 // ─── Mobile menu ─────────────────────────────────────────────
@@ -1819,8 +1589,11 @@ let topbarH = document.querySelector('.topbar')?.offsetHeight || 0;
 // (topbar is not fixed, so header needs to compensate)
 
 // ─── SARA modal ────────────────────────────────────────────────
-function openSara() { document.getElementById('sara-modal').classList.add('open'); }
-function closeSara() { document.getElementById('sara-modal').classList.remove('open'); }
+function openSara() {
+  var bubble = document.querySelector('.ibig-bubble-sara');
+  if (bubble) { bubble.click(); }
+}
+function closeSara() { /* handled by universal script */ }
 function saraSend(el) {
   const txt = el.textContent;
   addMsg(txt, 'user');
@@ -1962,5 +1735,86 @@ window.addEventListener('resize', fixDemoGrids);
   };
 })();
 </script>
+
+<script>
+/* window.SARA.open — interface pour le bubble universel ibigsoft */
+window.SARA = window.SARA || {};
+window.SARA.open = function () {
+  var existing = document.getElementById('sara-chat-overlay');
+  if (existing) {
+    existing.style.display = existing.style.display === 'none' ? 'flex' : 'none';
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.id = 'sara-chat-overlay';
+  overlay.style.cssText = 'position:fixed;bottom:90px;right:20px;width:360px;max-width:calc(100vw - 40px);height:520px;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);z-index:2147483001;display:flex;flex-direction:column;overflow:hidden;font-family:system-ui,sans-serif;';
+  overlay.innerHTML =
+    '<div style="background:#7c3aed;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:22px;">&#129302;</span>' +
+        '<div><div style="font-weight:700;font-size:.95rem;">SARA</div><div style="font-size:.72rem;color:#4ade80;">&#9679; En ligne</div></div>' +
+      '</div>' +
+      '<button id="sara-overlay-close" style="background:none;border:none;color:#fff;cursor:pointer;font-size:24px;line-height:1;padding:0;">&times;</button>' +
+    '</div>' +
+    '<div id="sara-overlay-messages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#f9fafb;">' +
+      '<div style="background:#7c3aed;color:#fff;padding:10px 14px;border-radius:12px 12px 12px 2px;font-size:.88rem;line-height:1.5;max-width:90%;">Bonjour ! Je suis SARA, l'assistante de SECRETIS ERP. Comment puis-je vous aider ?</div>' +
+    '</div>' +
+    '<div style="padding:10px;border-top:1px solid #e5e7eb;display:flex;gap:8px;background:#fff;flex-shrink:0;">' +
+      '<input id="sara-overlay-input" type="text" placeholder="Votre message..." style="flex:1;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:.88rem;outline:none;">' +
+      '<button id="sara-overlay-send" style="background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:700;">&#9658;</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  var historyO = [];
+
+  document.getElementById('sara-overlay-close').addEventListener('click', function () {
+    overlay.style.display = 'none';
+  });
+
+  function appendMsg(text, role) {
+    var box = document.getElementById('sara-overlay-messages');
+    var d = document.createElement('div');
+    if (role === 'user') {
+      d.style.cssText = 'background:#7c3aed;color:#fff;padding:10px 14px;border-radius:12px 12px 2px 12px;font-size:.88rem;line-height:1.5;max-width:90%;align-self:flex-end;';
+    } else {
+      d.style.cssText = 'background:#fff;color:#1f2937;padding:10px 14px;border-radius:12px 12px 12px 2px;font-size:.88rem;line-height:1.5;max-width:90%;box-shadow:0 1px 3px rgba(0,0,0,.08);';
+    }
+    d.textContent = text;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+    return d;
+  }
+
+  function sendMessage() {
+    var inp = document.getElementById('sara-overlay-input');
+    var msg = inp.value.trim();
+    if (!msg) return;
+    inp.value = '';
+    appendMsg(msg, 'user');
+    var typing = appendMsg('...', 'bot');
+    fetch('/api/sara/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify({message: msg, history: historyO.slice(-8)})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      var reply = (d && d.reply) ? d.reply : 'Desolee, je rencontre un souci. Ecrivez-nous a secretis@ibigsoft.com !';
+      historyO.push({role: 'user', content: msg});
+      historyO.push({role: 'assistant', content: reply});
+      typing.textContent = reply;
+    }).catch(function() {
+      typing.textContent = 'Desolee, je rencontre un souci. Ecrivez-nous a secretis@ibigsoft.com !';
+    });
+  }
+
+  document.getElementById('sara-overlay-send').addEventListener('click', sendMessage);
+  document.getElementById('sara-overlay-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMessage();
+  });
+};
+
+/* Retrocompatibilite */
+window.openSara = function () { window.SARA.open(); };
+</script>
+
 </body>
 </html>

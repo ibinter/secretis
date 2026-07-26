@@ -60,12 +60,9 @@ class ProductionSeeder extends Seeder
                 'name'              => 'Starter',
                 'slug'              => 'starter',
                 'description'       => 'Idéal pour les petites structures et PME débutantes. Accès aux modules essentiels pour démarrer votre digitalisation.',
-                'price_monthly'     => 0,        // Freemium : 0 FCFA/mois
-                'price_yearly'      => 0,
-                'currency'          => 'XOF',
+                'price_xof'     => 0,        // Freemium : 0 FCFA/mois
+                'price_eur'      => 0,
                 'max_users'         => 5,
-                'max_storage_gb'    => 2,
-                'max_organizations' => 1,
                 'modules'           => json_encode([
                     'agenda',
                     'courrier',
@@ -75,21 +72,7 @@ class ProductionSeeder extends Seeder
                     'communication',
                 ]),
                 'features'          => json_encode([
-                    'support_email'     => true,
-                    'support_priority'  => false,
-                    'sso'               => false,
-                    'api_access'        => false,
-                    'on_premise'        => false,
-                    'custom_domain'     => false,
-                    'advanced_reports'  => false,
-                    'audit_log'         => false,
-                    'sara_ai'           => false,
-                    'e_signature'       => false,
-                    'white_label'       => false,
-                    'dedicated_support' => false,
                 ]),
-                'is_active'         => true,
-                'is_featured'       => false,
                 'sort_order'        => 1,
             ],
 
@@ -98,12 +81,9 @@ class ProductionSeeder extends Seeder
                 'name'              => 'Pro',
                 'slug'              => 'pro',
                 'description'       => 'Pour les PME et cabinets qui veulent toute la puissance de SECRETIS. Tous les modules métier, rapports avancés et signature électronique.',
-                'price_monthly'     => 49900,    // 49 900 FCFA/mois
-                'price_yearly'      => 499000,   // 2 mois offerts
-                'currency'          => 'XOF',
+                'price_xof'     => 49900,    // 49 900 FCFA/mois
+                'price_eur'      => 499000,   // 2 mois offerts
                 'max_users'         => 25,
-                'max_storage_gb'    => 25,
-                'max_organizations' => 1,
                 'modules'           => json_encode([
                     'agenda',
                     'courrier',
@@ -124,21 +104,7 @@ class ProductionSeeder extends Seeder
                     'automations',
                 ]),
                 'features'          => json_encode([
-                    'support_email'     => true,
-                    'support_priority'  => true,
-                    'sso'               => false,
-                    'api_access'        => true,
-                    'on_premise'        => false,
-                    'custom_domain'     => true,
-                    'advanced_reports'  => true,
-                    'audit_log'         => true,
-                    'sara_ai'           => false,
-                    'e_signature'       => true,
-                    'white_label'       => false,
-                    'dedicated_support' => false,
                 ]),
-                'is_active'         => true,
-                'is_featured'       => true,
                 'sort_order'        => 2,
             ],
 
@@ -147,12 +113,9 @@ class ProductionSeeder extends Seeder
                 'name'              => 'Enterprise',
                 'slug'              => 'enterprise',
                 'description'       => 'La solution complète pour les grandes organisations. Modules IA SARA, support prioritaire dédié, accès illimité et options on-premise.',
-                'price_monthly'     => 149900,   // 149 900 FCFA/mois
-                'price_yearly'      => 1499000,  // 2 mois offerts
-                'currency'          => 'XOF',
+                'price_xof'     => 149900,   // 149 900 FCFA/mois
+                'price_eur'      => 1499000,  // 2 mois offerts
                 'max_users'         => -1,       // illimité
-                'max_storage_gb'    => -1,       // illimité
-                'max_organizations' => -1,
                 'modules'           => json_encode([
                     'agenda', 'courrier', 'taches', 'contacts', 'visiteurs', 'communication',
                     'reunions', 'rh', 'comptabilite', 'budget', 'achats', 'rapports',
@@ -168,22 +131,7 @@ class ProductionSeeder extends Seeder
                     'rgpd',          // Module RGPD & conformité
                 ]),
                 'features'          => json_encode([
-                    'support_email'     => true,
-                    'support_priority'  => true,
-                    'sso'               => true,
-                    'api_access'        => true,
-                    'on_premise'        => true,
-                    'custom_domain'     => true,
-                    'advanced_reports'  => true,
-                    'audit_log'         => true,
-                    'sara_ai'           => true,
-                    'e_signature'       => true,
-                    'white_label'       => true,
-                    'dedicated_support' => true,
-                    'sla_99_9'          => true,
                 ]),
-                'is_active'         => true,
-                'is_featured'       => false,
                 'sort_order'        => 3,
             ],
         ];
@@ -236,7 +184,6 @@ class ProductionSeeder extends Seeder
             DB::table('modules')->updateOrInsert(
                 ['key' => $module['key']],
                 array_merge($module, [
-                    'is_active'  => true,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ])
@@ -260,10 +207,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'Orange Money Côte d\'Ivoire',
                 'provider'    => 'orange_money',
                 'country'     => 'CI',
-                'currency'    => 'XOF',
                 'logo'        => 'orange-money.svg',
                 'type'        => 'mobile_money',
-                'is_active'   => true,
                 'is_default'  => true,
                 'min_amount'  => 500,
                 'max_amount'  => 2000000,
@@ -274,10 +219,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'MTN Mobile Money Côte d\'Ivoire',
                 'provider'    => 'mtn_momo',
                 'country'     => 'CI',
-                'currency'    => 'XOF',
                 'logo'        => 'mtn-momo.svg',
                 'type'        => 'mobile_money',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 500,
                 'max_amount'  => 2000000,
@@ -288,10 +231,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'Wave Côte d\'Ivoire',
                 'provider'    => 'wave',
                 'country'     => 'CI',
-                'currency'    => 'XOF',
                 'logo'        => 'wave.svg',
                 'type'        => 'mobile_money',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 1,
                 'max_amount'  => 5000000,
@@ -302,10 +243,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'Moov Money Côte d\'Ivoire',
                 'provider'    => 'moov_money',
                 'country'     => 'CI',
-                'currency'    => 'XOF',
                 'logo'        => 'moov-money.svg',
                 'type'        => 'mobile_money',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 100,
                 'max_amount'  => 1000000,
@@ -316,10 +255,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'CINet Paiement',
                 'provider'    => 'cinet',
                 'country'     => 'CI',
-                'currency'    => 'XOF',
                 'logo'        => 'cinet.svg',
                 'type'        => 'card',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 1000,
                 'max_amount'  => 10000000,
@@ -330,10 +267,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'Stripe (Carte bancaire internationale)',
                 'provider'    => 'stripe',
                 'country'     => null, // International
-                'currency'    => 'EUR',
                 'logo'        => 'stripe.svg',
                 'type'        => 'card',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 100,    // en centimes EUR
                 'max_amount'  => null,
@@ -344,10 +279,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'PayPal',
                 'provider'    => 'paypal',
                 'country'     => null,
-                'currency'    => 'USD',
                 'logo'        => 'paypal.svg',
                 'type'        => 'paypal',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 1,
                 'max_amount'  => null,
@@ -358,10 +291,8 @@ class ProductionSeeder extends Seeder
                 'name'        => 'Virement Bancaire',
                 'provider'    => 'manual',
                 'country'     => null,
-                'currency'    => 'XOF',
                 'logo'        => 'bank-transfer.svg',
                 'type'        => 'wire_transfer',
-                'is_active'   => true,
                 'is_default'  => false,
                 'min_amount'  => 10000,
                 'max_amount'  => null,
@@ -397,7 +328,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:rocket-launch',
                 'color'        => '#3B82F6',
                 'order'        => 1,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Premiers pas', 'description' => 'Démarrez avec SECRETIS ERP : configuration initiale, compte, organisation.'],
                     'en' => ['name' => 'Getting started', 'description' => 'Get started with SECRETIS ERP: initial setup, account, organization.'],
@@ -408,7 +338,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:envelope',
                 'color'        => '#10B981',
                 'order'        => 2,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Gestion du courrier', 'description' => 'Enregistrement, traitement et archivage des courriers entrants et sortants.'],
                     'en' => ['name' => 'Mail management', 'description' => 'Recording, processing and archiving incoming and outgoing mail.'],
@@ -419,7 +348,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:calendar-days',
                 'color'        => '#F59E0B',
                 'order'        => 3,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Agenda & Réunions', 'description' => 'Gestion du calendrier, réservation de salles et compte-rendus de réunion.'],
                     'en' => ['name' => 'Calendar & Meetings', 'description' => 'Calendar management, room booking and meeting minutes.'],
@@ -430,7 +358,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:credit-card',
                 'color'        => '#8B5CF6',
                 'order'        => 4,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Facturation & Paiement', 'description' => 'Plans tarifaires, méthodes de paiement, factures et renouvellements.'],
                     'en' => ['name' => 'Billing & Payment', 'description' => 'Pricing plans, payment methods, invoices and renewals.'],
@@ -441,7 +368,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:shield-check',
                 'color'        => '#EF4444',
                 'order'        => 5,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Sécurité & Accès', 'description' => 'Gestion des rôles, permissions, authentification et sécurité du compte.'],
                     'en' => ['name' => 'Security & Access', 'description' => 'Role management, permissions, authentication and account security.'],
@@ -452,7 +378,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:sparkles',
                 'color'        => '#06B6D4',
                 'order'        => 6,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Assistant SARA (IA)', 'description' => 'Utilisation de l\'assistant IA SARA : commandes, conseils et bonnes pratiques.'],
                     'en' => ['name' => 'SARA Assistant (AI)', 'description' => 'Using the SARA AI assistant: commands, tips and best practices.'],
@@ -463,7 +388,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:puzzle-piece',
                 'color'        => '#F97316',
                 'order'        => 7,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Intégrations & API', 'description' => 'Connexion avec vos outils existants : Microsoft 365, Google Workspace, API REST.'],
                     'en' => ['name' => 'Integrations & API', 'description' => 'Connect with your existing tools: Microsoft 365, Google Workspace, REST API.'],
@@ -474,7 +398,6 @@ class ProductionSeeder extends Seeder
                 'icon'         => 'heroicons:wrench-screwdriver',
                 'color'        => '#84CC16',
                 'order'        => 8,
-                'is_active'    => true,
                 'translations' => json_encode([
                     'fr' => ['name' => 'Dépannage', 'description' => 'Résolution des problèmes courants, erreurs fréquentes et conseils de diagnostic.'],
                     'en' => ['name' => 'Troubleshooting', 'description' => 'Resolving common issues, frequent errors and diagnostic tips.'],
@@ -519,13 +442,11 @@ class ProductionSeeder extends Seeder
                 'locale'          => 'fr',
                 'type'            => 'internal',
                 'settings'        => json_encode([
-                    'currency'      => 'XOF',
                     'date_format'   => 'd/m/Y',
                     'working_hours' => ['start' => '08:00', 'end' => '18:00'],
                     'working_days'  => ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'],
                 ]),
                 'modules_enabled' => json_encode(['*']),
-                'is_active'       => true,
                 'status'          => 'active',
                 'created_at'      => now(),
                 'updated_at'      => now(),
@@ -558,7 +479,6 @@ class ProductionSeeder extends Seeder
                 'job_title'         => 'Super Administrateur Plateforme',
                 'locale'            => 'fr',
                 'timezone'          => 'Africa/Abidjan',
-                'is_active'         => true,
                 'status'            => 'active',
                 'email_verified_at' => now(),
                 'settings'          => json_encode(['onboarding_skipped' => true]),

@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'editeur'        => 'IBIG Soft',
+    'groupe'         => 'IBIG SARL',
+    'site'           => 'https://ibigsoft.com/',
+    'partenaires'    => 'https://ibigpartners.com/',
+    'mail_contact'   => 'contact@ibigsoft.com',
+    'mail_support'   => 'support@ibigsoft.com',
+    'mail_legal'     => 'legal@ibigsoft.com',
+    'mail_secretis'  => 'secretis@ibigsoft.com',
+    'tel1'           => '+225 27 22 27 60 14',
+    'tel2'           => '+225 05 55 05 99 01',
+    'whatsapp'       => '+225 07 78 88 25 92',
+    'whatsapp_link'  => 'https://wa.me/2250778882592',
+    'ville'          => 'Abidjan, Côte d\'Ivoire',
+    'horaires'       => 'Lun - Sam · 8h00 - 18h00',
+    'rccm'           => 'N°CI-ABJ-03-2023-B13-05718',
+    'ncc'            => '2302502 V',
+    'facebook'       => 'https://www.facebook.com/ibigsoft',
+    'linkedin'       => 'https://www.linkedin.com/company/ibigsoft/',
+    'youtube'        => 'https://www.youtube.com/@IBIGSOFT',
+    'tiktok'         => 'https://www.tiktok.com/@ibigsoft',
+    'instagram'      => 'https://www.instagram.com/ibigsoft/',
+    'groupe_fb'      => 'https://www.facebook.com/groups/1655325562202049',
+    'canal_wa'       => 'https://whatsapp.com/channel/0029VbD8TIr9xVJmniJ8m81w',
+];

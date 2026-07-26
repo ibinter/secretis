@@ -81,6 +81,17 @@ use Illuminate\Support\Facades\Route;
 // ROUTES PUBLIQUES — Sans authentification
 // =============================================================================
 
+
+// Public health endpoint (JSON)
+Route::get('/health', function () {
+    return response()->json([
+        'status'    => 'ok',
+        'version'   => config('app.version', '2.5.0'),
+        'platform'  => 'SECRETIS ERP',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+})->name('health.public');
+
 Route::middleware(['throttle:web'])->group(function () {
 
     // Landing pages
@@ -723,7 +734,7 @@ Route::middleware([
 
 // ─── SARA Chat ────────────────────────────────────────────────────────────────
 Route::middleware('auth')->prefix('sara')->name('sara.')->group(function () {
-    Route::get('/chat', [\App\Http\Controllers\SaraChatController::class, 'index'])->name('chat');
+    Route::get('/chat', [\App\Http\Controllers\SaraChatController::class, 'chatPage'])->name('chat');
 });
 
 // ─── Cas pratiques ────────────────────────────────────────────────────────────
@@ -804,6 +815,19 @@ Route::get('/cgu',               [\App\Http\Controllers\LegalPagesController::cl
 Route::get('/confidentialite',   [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'confidentialite');
 Route::get('/cookies',           [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'cookies');
 Route::get('/contrat-licence',   [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'contrat-licence');
+Route::get('/conditions-commerciales',       [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'conditions-commerciales');
+Route::get('/politique-sauvegarde',          [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'politique-sauvegarde');
+Route::get('/politique-support',             [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'politique-support');
+Route::get('/politique-resiliation',         [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'politique-resiliation');
+Route::get('/politique-remboursement',       [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'politique-remboursement');
+Route::get('/traitement-donnees',            [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'traitement-donnees');
+Route::get('/propriete-intellectuelle',      [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'propriete-intellectuelle');
+Route::get('/protection-marque',             [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'protection-marque');
+Route::get('/conditions-essai',              [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'conditions-essai');
+Route::get('/conditions-sara',               [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'conditions-sara');
+Route::get('/limitation-responsabilite-ia',  [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'limitation-responsabilite-ia');
+Route::get('/gestion-compte',                [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'gestion-compte');
+Route::get('/gestion-reclamations',          [\App\Http\Controllers\LegalPagesController::class, 'show'])->defaults('slug', 'gestion-reclamations');
 Route::get('/demander-demonstration',  [\App\Http\Controllers\LegalPagesController::class, 'demoForm']);
 Route::post('/demander-demonstration', [\App\Http\Controllers\LegalPagesController::class, 'demoSubmit']);
 Route::get('/aide/tickets', fn () => redirect('/aide'));

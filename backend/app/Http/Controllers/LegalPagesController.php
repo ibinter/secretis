@@ -234,6 +234,175 @@ HTML],
 <h2>11. Droit applicable</h2>
 <p>Le présent contrat est régi par le droit ivoirien et les Actes uniformes OHADA applicables. Compétence : juridictions d'Abidjan, après tentative de règlement amiable.</p>
 HTML],
+
+        'conditions-commerciales' => ['title' => 'Conditions commerciales et tarifaires', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V</em></p>
+
+<h2>1. Présentation des formules</h2>
+<p>SECRETIS ERP est commercialisé en mode SaaS selon quatre formules distinctes : <strong>Découverte</strong> (3 utilisateurs, modules essentiels), <strong>Essentiel</strong> (10 utilisateurs, modules standard), <strong>Pro</strong> (25 utilisateurs, modules avancés + SARA IA), et <strong>Entreprise</strong> (utilisateurs illimités, tous modules, support dédié). Les prix en vigueur sont publiés sur la page Tarifs de secretis.ibigsoft.com et exprimés en francs CFA XOF hors taxes. Une tarification spéciale peut être convenue par devis pour les collectivités, institutions publiques, établissements d'enseignement et associations à but non lucratif reconnus.</p>
+
+<h2>2. Modalités de paiement et activation</h2>
+<p>Le règlement s'effectue par Mobile Money (Orange Money CI, MTN MoMo CI, Wave, Moov Money) ou par virement bancaire. L'activation de la licence est conditionnée à la réception et à la validation du paiement : validation automatique pour les passerelles Mobile Money, ou validation manuelle de la preuve de paiement sous 24 heures ouvrées pour les virements. Un reçu numéroté est émis pour chaque transaction. IBIG Soft ne demande jamais de code secret, PIN ou mot de passe à ses clients.</p>
+
+<h2>3. Révision des tarifs et droits acquis</h2>
+<p>IBIG Soft se réserve le droit de modifier ses tarifs avec un préavis minimum de 30 jours, communiqué par email et dans l'application. Toute période déjà payée est honorée au tarif souscrit : la révision n'est applicable qu'aux nouvelles souscriptions ou renouvellements postérieurs à son entrée en vigueur. Le présent article est soumis au droit ivoirien et aux dispositions pertinentes de l'Acte uniforme OHADA sur le droit commercial général.</p>
+HTML],
+
+        'politique-sauvegarde' => ['title' => 'Politique de sauvegarde des données', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V</em></p>
+
+<h2>1. Engagement de sauvegarde</h2>
+<p>IBIG Soft met en oeuvre une politique de sauvegarde rigoureuse pour protéger les données de ses clients hébergées dans SECRETIS ERP. Des sauvegardes automatiques chiffrées (AES-256) sont réalisées quotidiennement, avec rétention glissante sur 30 jours. Les sauvegardes sont stockées sur une infrastructure distincte du serveur de production, dans un datacenter de niveau professionnel situé dans l'Union européenne, afin de garantir leur disponibilité même en cas d'incident majeur affectant le site primaire.</p>
+
+<h2>2. Procédure de restauration</h2>
+<p>En cas de perte ou d'altération de données imputable à un dysfonctionnement de l'infrastructure IBIG Soft, la restauration est effectuée à partir de la sauvegarde la plus récente et cohérente, dans un délai cible de 4 heures ouvrées après ouverture d'un ticket de support. Les restaurations demandées pour des suppressions volontaires réalisées par le client peuvent faire l'objet d'une prestation de service complémentaire selon devis.</p>
+
+<h2>3. Responsabilités partagées</h2>
+<p>IBIG Soft assure la sauvegarde de l'infrastructure et des données applicatives. Le client est responsable de la qualité et de l'exactitude des données qu'il saisit, et est encouragé à effectuer des exports réguliers de ses données critiques via la fonctionnalité d'export disponible dans son espace. La présente politique ne constitue pas une garantie absolue contre toute perte de données ; la responsabilité d'IBIG Soft en cas de perte de données est encadrée par l'article 9 des Conditions Générales d'Utilisation et le droit ivoirien applicable.</p>
+HTML],
+
+        'politique-support' => ['title' => 'Politique de support et assistance', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718</em></p>
+
+<h2>1. Niveaux de support selon la formule</h2>
+<p>Le support SECRETIS ERP est fourni selon le niveau inclus dans la formule souscrite. La formule <strong>Découverte</strong> inclut un support par email avec temps de réponse cible de 48 heures ouvrées. La formule <strong>Essentiel</strong> bénéficie d'un support email et chat avec réponse cible sous 24 heures ouvrées. La formule <strong>Pro</strong> dispose d'un support prioritaire multicanal (email, chat, WhatsApp) avec réponse cible sous 8 heures ouvrées. La formule <strong>Entreprise</strong> bénéficie d'un accompagnement dédié et d'un numéro de support prioritaire avec réponse cible sous 2 heures ouvrées.</p>
+
+<h2>2. Canaux de contact et horaires</h2>
+<p>Le support est joignable à l'adresse <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a>, via le module de ticketing intégré à l'application, du lundi au samedi de 8h à 22h (GMT). Les demandes reçues en dehors de ces horaires ou les jours fériés officiels en Côte d'Ivoire sont traitées dès la reprise. IBIG Soft s'engage à accuser réception de tout ticket dans un délai de 2 heures ouvrées.</p>
+
+<h2>3. Périmètre et exclusions</h2>
+<p>Le support inclut : l'assistance à l'utilisation des fonctionnalités, la résolution d'incidents liés à l'infrastructure ou au logiciel, le paramétrage initial, et la réponse aux questions de facturation. Il ne couvre pas : les développements spécifiques hors catalogue, la formation approfondie des équipes (prestation distincte sur devis), ni la résolution d'incidents résultant d'une mauvaise utilisation documentée. IBIG Soft publie une base de connaissances et des tutoriels vidéo accessibles gratuitement à tous les abonnés actifs.</p>
+HTML],
+
+        'politique-resiliation' => ['title' => 'Politique de résiliation et fin de contrat', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V</em></p>
+
+<h2>1. Résiliation à l'initiative du client</h2>
+<p>Le client peut résilier son abonnement SECRETIS ERP à tout moment, sans frais ni pénalité, depuis son espace de gestion de compte ou en adressant une demande écrite à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a>. La résiliation prend effet à la fin de la période d'abonnement en cours déjà payée ; aucun remboursement prorata n'est effectué pour la période restante, sauf disposition légale contraire ou accord express d'IBIG Soft. Après la date effective de résiliation, un délai de grâce de 7 jours est accordé pour permettre l'export des données.</p>
+
+<h2>2. Résiliation à l'initiative d'IBIG Soft</h2>
+<p>IBIG Soft peut suspendre ou résilier l'accès au service en cas de : non-paiement persistant au-delà de la période de grâce de 7 jours ; violation grave ou répétée des Conditions Générales d'Utilisation ou du Contrat de Licence ; activité frauduleuse, tentative de contournement du système de licence, ou usage portant atteinte à la sécurité de la plateforme ou aux droits des tiers. En cas de violation grave, la suspension peut être immédiate, avec notification simultanée.</p>
+
+<h2>3. Sort des données en fin de contrat</h2>
+<p>À compter de la date effective de fin de contrat, les données du client sont conservées intégralement pendant une période de restitution de <strong>90 jours</strong>. Durant cette période, le client peut demander l'export complet de ses données dans un format structuré et réexploitable (JSON, CSV, PDF). À l'expiration du délai de 90 jours, les données sont supprimées de manière sécurisée et définitive de tous les supports, et une attestation de destruction peut être délivrée sur demande écrite. Cette disposition est conforme aux obligations du sous-traitant de données au sens de la loi ivoirienne n°2013-450 du 19 juin 2013.</p>
+HTML],
+
+        'politique-remboursement' => ['title' => 'Politique de remboursement', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V</em></p>
+
+<h2>1. Principe général</h2>
+<p>Les abonnements SECRETIS ERP sont conclus pour une durée définie (mensuelle ou annuelle) et sont, en règle générale, non remboursables une fois la période d'abonnement démarrée, conformément aux pratiques standards des services SaaS et au droit commercial ivoirien applicable. L'essai gratuit de 14 jours permet à chaque client de valider l'adéquation du service à ses besoins avant tout engagement financier.</p>
+
+<h2>2. Cas de remboursement</h2>
+<p>Un remboursement total ou partiel peut être accordé dans les situations suivantes, sur demande motivée adressée à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a> : (a) double facturation ou erreur technique de facturation imputable à IBIG Soft, constatée et reconnue par nos équipes ; (b) indisponibilité prolongée du service dépassant 72 heures consécutives sur une période mensuelle, hors maintenance planifiée notifiée et cas de force majeure, pour la portion de période affectée ; (c) décision commerciale discrétionnaire d'IBIG Soft dans des situations exceptionnelles dûment documentées. Les demandes doivent être formulées dans les 30 jours suivant le fait générateur.</p>
+
+<h2>3. Procédure et délai</h2>
+<p>Les remboursements accordés sont traités dans un délai de 10 jours ouvrés à compter de la décision, par le même moyen de paiement que le paiement initial lorsque cela est techniquement possible. IBIG Soft peut proposer, en alternative au remboursement monétaire et avec l'accord du client, un crédit équivalent applicable sur la prochaine période d'abonnement. La présente politique de remboursement ne restreint pas les droits légaux des consommateurs reconnus par le droit ivoirien.</p>
+HTML],
+
+        'traitement-donnees' => ['title' => 'Politique de traitement des données personnelles', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — Conformément à la loi ivoirienne n°2013-450 du 19 juin 2013 (ARTCI). IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V.</em></p>
+
+<h2>1. Rôles des parties et double qualité</h2>
+<p>Dans le cadre de SECRETIS ERP, IBIG Soft agit en qualité de <strong>responsable de traitement</strong> pour les données de compte et de facturation collectées lors de la souscription et de l'administration du service. Pour les données métiers saisies par l'organisation cliente dans son espace, IBIG Soft agit en qualité de <strong>sous-traitant au sens de la loi n°2013-450</strong>, et l'organisation cliente en qualité de responsable de traitement. Un accord de sous-traitance conforme à la réglementation est réputé conclu par l'acceptation des présentes conditions.</p>
+
+<h2>2. Engagements du sous-traitant (IBIG Soft)</h2>
+<p>En qualité de sous-traitant, IBIG Soft s'engage à : traiter les données uniquement sur instruction documentée du client ; garantir la confidentialité stricte des données par des mesures techniques et organisationnelles appropriées (chiffrement AES-256, TLS, contrôle d'accès par rôle, journalisation) ; n'avoir recours à aucun sous-traitant ultérieur sans information préalable du client ; assister le client dans l'exercice des droits des personnes concernées dans des délais compatibles avec les obligations légales (30 jours) ; notifier tout incident de sécurité susceptible d'affecter les données du client dans les meilleurs délais et au plus tard 72 heures après sa détection.</p>
+
+<h2>3. Obligations du client (responsable de traitement)</h2>
+<p>En qualité de responsable de traitement des données métiers, le client est seul responsable de la licéité des traitements qu'il réalise via SECRETIS ERP, notamment : de la légalité de la collecte des données de ses propres clients, employés ou partenaires ; du respect des droits d'information, d'accès et d'opposition des personnes concernées ; de la conservation des données dans des délais conformes à la réglementation applicable à son activité ; et de la déclaration de ses traitements à l'ARTCI si requise par la réglementation ivoirienne.</p>
+HTML],
+
+        'propriete-intellectuelle' => ['title' => 'Propriété intellectuelle et protection de la marque', 'content' => <<<'HTML'
+<p><em>IBIG Soft — RCCM N°CI-ABJ-03-2023-B13-05718 — NCC : 2302502 V</em></p>
+
+<h2>1. Titularité des droits</h2>
+<p>L'intégralité des éléments constitutifs du service SECRETIS ERP — code source, architecture logicielle, interfaces graphiques, charte violette distinctive, monogramme « SE », logos, typographies, icônes, bases de données, documentation technique et utilisateur, algorithmes, workflows, et tout développement réalisé par IBIG Soft — est et demeure la propriété exclusive d'IBIG Soft, protégée par le droit d'auteur, le droit des bases de données et le droit des marques, conformément à l'<strong>Accord de Bangui révisé de l'OAPI</strong> et au droit ivoirien de la propriété intellectuelle.</p>
+
+<h2>2. Droits concédés au client</h2>
+<p>La souscription à SECRETIS ERP confère au client un droit d'utilisation du service, limité, non exclusif, non transférable et non cessible, défini par le Contrat de Licence. Ce droit ne comprend en aucun cas : le droit de copier, reproduire, modifier ou adapter le logiciel ; le droit de procéder à de la décompilation, du désassemblage ou de l'ingénierie inverse ; le droit d'extraire substantiellement le contenu de la base de données applicative ; ou le droit d'utiliser les marques et signes distinctifs d'IBIG Soft sans autorisation écrite expresse.</p>
+
+<h2>3. Contenu créé par le client</h2>
+<p>Les données, documents, textes et fichiers que le client saisit ou importe dans son espace SECRETIS ERP restent sa propriété exclusive. IBIG Soft n'acquiert aucun droit sur ces contenus. La licence concédée par le client à IBIG Soft sur ces contenus est strictement limitée à ce qui est nécessaire à la fourniture du service (stockage, traitement, affichage, sauvegarde). Toute atteinte aux droits de propriété intellectuelle d'IBIG Soft est susceptible d'engager la responsabilité civile et pénale de son auteur devant les juridictions ivoiriennes compétentes.</p>
+HTML],
+
+        'protection-marque' => ['title' => 'Protection de la marque IBIG Soft', 'content' => <<<'HTML'
+<p><em>IBIG Soft — RCCM N°CI-ABJ-03-2023-B13-05718 — NCC : 2302502 V — Protection par l'OAPI (Accord de Bangui)</em></p>
+
+<h2>1. Marques protégées</h2>
+<p>Les dénominations <strong>« IBIG Soft »</strong>, <strong>« SECRETIS »</strong>, <strong>« SECRETIS ERP »</strong>, <strong>« SARA »</strong>, ainsi que les logos, monogrammes, chartes graphiques et signes distinctifs associés, sont des marques commerciales d'IBIG Soft, protégées en tant que telles sur le territoire de la Côte d'Ivoire et dans les États membres de l'Organisation Africaine de la Propriété Intellectuelle (OAPI) en vertu de l'Accord de Bangui révisé. Toute utilisation non expressément autorisée par écrit est strictement interdite.</p>
+
+<h2>2. Usages non autorisés</h2>
+<p>Sont notamment interdits sans autorisation écrite préalable d'IBIG Soft : l'utilisation des marques dans une dénomination commerciale, un nom de domaine ou une URL ; l'utilisation des marques dans des supports publicitaires d'une manière qui pourrait créer une confusion sur l'origine ; la création d'un produit ou service susceptible d'être confondu avec SECRETIS ERP ; et tout acte de nature à porter atteinte à la réputation ou à la distinctivité des marques d'IBIG Soft. Les partenaires revendeurs autorisés peuvent utiliser les marques dans le cadre strict défini par leur accord de partenariat.</p>
+
+<h2>3. Signalement et recours</h2>
+<p>Toute utilisation contrefaisante ou susceptible de porter atteinte aux droits d'IBIG Soft sur ses marques peut être signalée à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a>. IBIG Soft se réserve le droit d'engager toute procédure civile et/ou pénale appropriée devant les juridictions ivoiriennes compétentes, et de saisir l'OAPI pour tout acte de contrefaçon relevant de son ressort. Les décisions de l'OAPI en matière de marques produisent leurs effets dans l'ensemble des États membres conformément à l'Accord de Bangui.</p>
+HTML],
+
+        'conditions-essai' => ['title' => "Conditions du programme d'essai gratuit", 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718</em></p>
+
+<h2>1. Caractéristiques de l'essai</h2>
+<p>IBIG Soft propose à toute nouvelle organisation un accès à SECRETIS ERP en mode essai gratuit d'une durée de <strong>14 jours calendaires</strong> à compter de la date de création du compte. L'essai est sans engagement financier et ne requiert aucune information de paiement. Il est strictement limité à <strong>une seule période d'essai par organisation</strong> (identifiée par son nom et son email administrateur) ; toute tentative de créer plusieurs comptes d'essai pour la même organisation peut entraîner la suspension de l'ensemble des comptes concernés. Pendant l'essai, les fonctionnalités accessibles correspondent à la formule Pro.</p>
+
+<h2>2. Données pendant et après l'essai</h2>
+<p>Les données saisies pendant la période d'essai sont intégralement conservées si l'organisation souscrit un abonnement payant avant l'expiration. À l'expiration de l'essai sans souscription, l'accès est suspendu et les données sont conservées pendant une période supplémentaire de <strong>30 jours</strong> pour permettre une souscription tardive avec récupération des données. Passé ce délai, les données de l'essai sont supprimées définitivement. L'organisation peut demander la suppression anticipée de ses données à tout moment en écrivant à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a>.</p>
+
+<h2>3. Conditions d'utilisation et limites</h2>
+<p>L'essai est soumis aux Conditions Générales d'Utilisation de SECRETIS ERP. Il est destiné exclusivement à évaluer le service en conditions réelles d'utilisation professionnelle. L'utilisation de l'essai à des fins de contournement du système de licence payante, de test de charge non autorisé, ou de toute activité contraire aux CGU peut entraîner la résiliation immédiate de l'accès. IBIG Soft se réserve le droit de modifier les conditions ou la durée du programme d'essai à tout moment pour les nouvelles inscriptions.</p>
+HTML],
+
+        'conditions-sara' => ['title' => "Conditions d'utilisation de SARA (IA)", 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718</em></p>
+
+<h2>1. Description du service SARA</h2>
+<p><strong>SARA</strong> (Secrétaire Assistante à Réponse Automatisée) est l'assistante à intelligence artificielle intégrée à SECRETIS ERP. Disponible dans les formules Pro et Entreprise, SARA permet notamment : la génération et la rédaction de courriers professionnels, la synthèse de documents, la formulation de réponses types, et la réponse à des questions relatives aux fonctionnalités du logiciel. SARA s'appuie sur un modèle de langage de grande taille (LLM) fourni par un prestataire tiers spécialisé.</p>
+
+<h2>2. Nature du service et limites</h2>
+<p>SARA est un outil d'assistance et d'aide à la rédaction. Les réponses et textes générés par SARA sont des <strong>suggestions que l'utilisateur est seul responsable de valider, vérifier et adapter</strong> avant tout usage. SARA peut produire des contenus inexacts, incomplets ou inadaptés au contexte spécifique du client ; elle ne remplace en aucun cas un conseil juridique, fiscal, comptable, médical ou professionnel qualifié. IBIG Soft ne garantit pas l'exactitude, l'exhaustivité ou la pertinence des réponses de SARA.</p>
+
+<h2>3. Traitement des données et confidentialité</h2>
+<p>Les échanges avec SARA sont transmis au prestataire d'inférence uniquement aux fins de traitement et de génération de la réponse. Ces données ne sont pas utilisées pour entraîner des modèles d'IA tiers sans consentement explicite. Les conversations avec SARA peuvent être journalisées côté SECRETIS pour des finalités de sécurité et d'audit interne, conformément à la Politique de confidentialité. L'utilisateur s'engage à ne pas soumettre à SARA de données personnelles sensibles (données de santé, numéros d'identification nationaux, codes d'accès) ou de secrets d'affaires dont la divulgation serait susceptible de causer un préjudice.</p>
+HTML],
+
+        'limitation-responsabilite-ia' => ['title' => "Limitation de responsabilité de l'IA", 'content' => <<<'HTML'
+<p><em>IBIG Soft — RCCM N°CI-ABJ-03-2023-B13-05718 — NCC : 2302502 V</em></p>
+
+<h2>1. Caractère probabiliste des systèmes d'IA</h2>
+<p>Les fonctionnalités d'intelligence artificielle intégrées à SECRETIS ERP, dont l'assistante SARA, reposent sur des modèles de langage probabilistes. Par nature, ces systèmes peuvent produire des résultats inexacts, obsolètes, incohérents ou hallucinés (informations plausibles mais factuellement incorrectes). L'IA ne dispose pas d'une connaissance exhaustive et à jour des réglementations, des pratiques sectorielles, ni du contexte spécifique de chaque organisation. IBIG Soft n'assure aucune garantie quant à l'exactitude, la complétude, la pertinence ou la licéité des contenus générés par les fonctions d'IA du service.</p>
+
+<h2>2. Responsabilité exclusive de l'utilisateur</h2>
+<p>L'utilisateur est seul responsable de l'usage qu'il fait des résultats fournis par les fonctions d'IA. Avant tout usage opérationnel — envoi d'un courrier généré, prise de décision basée sur une synthèse automatique, utilisation d'un texte à caractère juridique ou contractuel — il incombe à l'utilisateur ou à un professionnel qualifié de vérifier, valider et si nécessaire adapter le contenu produit. IBIG Soft ne saurait être tenu responsable de tout préjudice direct ou indirect résultant de l'utilisation sans vérification préalable des sorties générées par les fonctions d'IA.</p>
+
+<h2>3. Cadre légal et évolution réglementaire</h2>
+<p>L'utilisation des systèmes d'IA dans le cadre de SECRETIS ERP est conforme aux réglementations en vigueur en Côte d'Ivoire au moment de la publication. L'encadrement légal des systèmes d'IA est en évolution rapide au niveau mondial et régional ; IBIG Soft s'engage à adapter ses pratiques en conséquence et à informer ses clients de tout changement substantiel affectant leur utilisation du service. La responsabilité totale d'IBIG Soft au titre des fonctions d'IA est limitée dans les mêmes conditions que celle définie à l'article 9 des Conditions Générales d'Utilisation.</p>
+HTML],
+
+        'gestion-compte' => ['title' => 'Gestion et suppression du compte utilisateur', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — Conformément à la loi ivoirienne n°2013-450 du 19 juin 2013 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718</em></p>
+
+<h2>1. Gestion des utilisateurs par l'administrateur</h2>
+<p>L'administrateur de compte d'une organisation souscriptrice dispose d'un accès complet au panneau de gestion des utilisateurs, accessible depuis l'espace Paramètres de SECRETIS ERP. Il peut à tout moment : créer et supprimer des comptes utilisateurs dans la limite du quota de sa formule ; modifier les rôles et permissions de chaque utilisateur (Administrateur, Responsable, Agent, Lecture seule) ; réinitialiser les mots de passe ; suspendre temporairement un accès ; et consulter l'historique des connexions de chaque utilisateur à des fins de supervision et d'audit interne.</p>
+
+<h2>2. Droit à l'effacement et suppression de compte</h2>
+<p>Conformément à l'article 20 de la loi n°2013-450 et, le cas échéant, à l'article 17 du RGPD, tout utilisateur dispose du droit de demander la suppression de son compte et de ses données personnelles. Cette demande peut être adressée à l'administrateur de son organisation (pour un compte utilisateur ordinaire) ou directement à IBIG Soft à l'adresse <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a> (pour le compte administrateur principal). La suppression est effectuée dans un délai de 30 jours suivant la demande, sous réserve des obligations légales de conservation (données de facturation : 10 ans conformément au droit OHADA). Une confirmation de suppression est envoyée par email.</p>
+
+<h2>3. Sécurité du compte et bonnes pratiques</h2>
+<p>Il est fortement recommandé de : utiliser un mot de passe d'au moins 12 caractères combinant majuscules, minuscules, chiffres et caractères spéciaux ; ne jamais partager ses identifiants, y compris avec le support IBIG Soft (nos agents ne vous demanderont jamais votre mot de passe) ; activer la déconnexion automatique sur les appareils partagés ; et signaler immédiatement toute connexion suspecte à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a>. IBIG Soft envoie une alerte par email en cas de connexion depuis un appareil ou une localisation inhabituels.</p>
+HTML],
+
+        'gestion-reclamations' => ['title' => 'Gestion des réclamations', 'content' => <<<'HTML'
+<p><em>Dernière mise à jour : juillet 2026 — IBIG Soft, RCCM N°CI-ABJ-03-2023-B13-05718, NCC : 2302502 V</em></p>
+
+<h2>1. Voies de réclamation</h2>
+<p>Tout client ou utilisateur de SECRETIS ERP insatisfait d'une prestation, d'une facturation, d'une décision relative à son compte, ou de toute autre situation liée au service peut adresser une réclamation formelle à IBIG Soft selon les modalités suivantes : (a) par email à <a href="mailto:secretis@ibigsoft.com">secretis@ibigsoft.com</a> avec l'objet « RÉCLAMATION — [Objet succinct] » ; (b) via le module de ticketing intégré à l'application, en sélectionnant la catégorie « Réclamation » ; (c) par courrier écrit adressé au siège social d'IBIG Soft à Abidjan. Pour être traitée dans les meilleurs délais, la réclamation doit préciser : l'identité du réclamant, le numéro de compte ou d'organisation concerné, la description précise des faits, et les pièces justificatives éventuelles.</p>
+
+<h2>2. Procédure de traitement</h2>
+<p>IBIG Soft s'engage à accuser réception de toute réclamation dans un délai de <strong>48 heures ouvrées</strong> et à apporter une réponse de fond dans un délai de <strong>15 jours ouvrés</strong> à compter de la réception du dossier complet. En cas de complexité particulière nécessitant des investigations approfondies, ce délai peut être prolongé jusqu'à 30 jours ouvrés, avec information du réclamant de l'avancement de l'instruction. Chaque réclamation fait l'objet d'un numéro de suivi communiqué au réclamant.</p>
+
+<h2>3. Voies de recours externes</h2>
+<p>En l'absence de résolution satisfaisante dans les délais définis, le client peut saisir les voies de recours externes suivantes : (a) l'<strong>ARTCI</strong> (Autorité de Régulation des Télécommunications/TIC de Côte d'Ivoire) pour toute réclamation relative à la protection des données personnelles ou aux services numériques ; (b) les juridictions compétentes d'Abidjan, après tentative préalable de règlement amiable. IBIG Soft s'engage à coopérer de bonne foi à toute procédure de médiation ou de conciliation proposée par le client, conformément aux principes du droit commercial ivoirien et de l'Acte uniforme OHADA sur la médiation.</p>
+HTML],
     ];
 
     public function show(string $slug)

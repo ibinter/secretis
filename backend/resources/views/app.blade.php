@@ -13,5 +13,17 @@
     <body class="font-sans antialiased">
         {{-- Format classique data-page : compatible @inertiajs/react 2.x --}}
         <div id="app" data-page="{{ json_encode($page) }}"></div>
-    </body>
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(console.warn);}</script>
+    <script src="/assets/js/ibigsoft-universal.js"
+            data-solution="secretis"
+            data-accent="#9333EA"
+            data-render="none"
+            data-bulles="true"
+            data-pwa="true"></script>
+    <script>
+    window.openSaraChat = function() {
+      window.location.href = '/sara';
+    };
+    </script>
+</body>
 </html>
