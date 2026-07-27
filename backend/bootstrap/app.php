@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,

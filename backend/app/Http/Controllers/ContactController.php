@@ -64,7 +64,7 @@ class ContactController extends Controller
         $query->when($request->company, fn ($q, $c) => $q->where('company', 'ilike', "%{$c}%"));
         $query->when($request->has('active_only'), fn ($q) => $q->where('is_active', true));
 
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() && !$request->hasHeader("X-Inertia")) {
             return response()->json($query->paginate(50));
         }
 

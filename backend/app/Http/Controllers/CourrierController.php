@@ -105,7 +105,7 @@ class CourrierController extends Controller
         // Statistiques pour les compteurs
         $stats = $this->getStats($user->organization_id);
 
-        if ($request->wantsJson()) {
+        if ($request->wantsJson() && !$request->hasHeader("X-Inertia")) {
             return response()->json([
                 'data'  => $mails,
                 'stats' => $stats,
@@ -205,7 +205,7 @@ class CourrierController extends Controller
             resourceId: $mail->id,
         );
 
-        if (request()->wantsJson()) {
+        if (request()->wantsJson() && !request()->hasHeader("X-Inertia")) {
             return response()->json($mail);
         }
 

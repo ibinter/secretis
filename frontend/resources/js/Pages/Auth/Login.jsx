@@ -10,11 +10,13 @@ export default function Login() {
     e.preventDefault();
     setLoading(true); setError("");
     try {
+      // 1. Obtenir le cookie CSRF
       await fetch("/sanctum/csrf-cookie", { credentials: "include" });
       const xsrf = decodeURIComponent(
         (document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1] || ""
       );
-      const res = await fetch("/api/v1/auth/login", {
+      // 2. POST sur la route WEB /login → crée la session Laravel
+      const res = await fetch("/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,13 +26,18 @@ export default function Login() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (data.success || data.data?.token) {
-        const token = data.token || data.data?.token;
-        localStorage.setItem("auth_token", token);
+      if (res.ok || res.redirected) {
+        // Session établie — redirect vers dashboard
         window.location.href = "/dashboard";
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data.errors?.email) {
+        setError(data.errors.email[0]);
+      } else if (data.message) {
+        setError(data.message);
       } else {
-        setError(data.message || "Identifiants incorrects.");
+        setError("Identifiants incorrects.");
       }
     } catch (err) {
       setError("Erreur de connexion. Réessayez.");

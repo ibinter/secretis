@@ -37,3 +37,4 @@ export default function Alert({
   )
 }
 export { Alert };
+export const AlertDescription = ({ children, className="" }) => <div className={"text-sm " + className}>{children}</div>;

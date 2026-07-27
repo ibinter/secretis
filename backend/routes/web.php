@@ -160,6 +160,12 @@ Route::middleware(['throttle:web'])->group(function () {
         Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
     });
 
+    // Session login / logout — crée la session Laravel (POST web)
+    Route::post('/login', [\App\Http\Controllers\Auth\AuthController::class, 'login'])
+        ->middleware(['guest', 'throttle:5,1'])->name('login.store');
+    Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])
+        ->middleware(['auth'])->name('logout');
+
     // Email verification (page publique affichée après connexion)
     Route::get('/verify-email', [\App\Http\Controllers\Auth\AuthController::class, 'showVerifyEmail'])
         ->middleware(['auth'])

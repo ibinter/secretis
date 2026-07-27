@@ -107,6 +107,12 @@ export const PLANS = {
 
 // ─── Modules ─────────────────────────────────────────────────────────────────
 export const MODULES = [
+  // Général
+  { id: 'dashboard',     label: 'Tableau de bord',  icon: 'LayoutDashboard', route: 'dashboard',               section: 'general' },
+  // GED & Contacts
+  { id: 'ged',           label: 'GED',               icon: 'Archive',         route: 'ged.index',               section: 'general' },
+  { id: 'contacts',      label: 'Contacts',           icon: 'Users2',          route: 'contacts.index',          section: 'general' },
+  { id: 'aide',          label: 'Aide',               icon: 'HelpCircle',      route: 'help.index',              section: 'general' },
   // Secrétariat
   { id: 'agenda',        label: 'Agenda',          icon: 'CalendarDays',  route: 'agenda.index',           section: 'secretariat' },
   { id: 'courrier',      label: 'Courrier',         icon: 'Mail',          route: 'courrier.index',          section: 'secretariat' },
@@ -153,6 +159,7 @@ export const MODULES = [
 ]
 
 export const MODULE_SECTIONS = [
+  { id: 'general',     label: 'Général',       icon: 'LayoutDashboard' },
   { id: 'secretariat', label: 'Secrétariat',  icon: 'Briefcase'  },
   { id: 'accueil',     label: 'Accueil',      icon: 'Home'       },
   { id: 'ressources',  label: 'Ressources',   icon: 'Archive'    },

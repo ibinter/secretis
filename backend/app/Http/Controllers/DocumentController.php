@@ -104,7 +104,7 @@ class DocumentController extends Controller
 
             $documents = $query->paginate($request->query('per_page', 24));
 
-            if ($request->wantsJson()) {
+            if ($request->wantsJson() && !$request->hasHeader("X-Inertia")) {
                 return response()->json($documents);
             }
 
@@ -180,7 +180,7 @@ class DocumentController extends Controller
             resourceId: $document->id,
         );
 
-        if (request()->wantsJson()) {
+        if (request()->wantsJson() && !request()->hasHeader("X-Inertia")) {
             return response()->json($document);
         }
 
