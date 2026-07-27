@@ -137,7 +137,7 @@ function DocumentList({ docs }) {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{d.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                         {d.updated_at ? new Date(d.updated_at).toLocaleDateString('fr-FR') : '—'}
-                        {d.file_type ? ` · ${d.file_type.toUpperCase()}` : ''}
+                        {d.mime_type ? ` · ${d.mime_type.toUpperCase()}` : ''}
                     </p>
                 </li>
             ))}

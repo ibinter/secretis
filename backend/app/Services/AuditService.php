@@ -64,9 +64,9 @@ class AuditService
 
             // Résolution de l'organization_id depuis le contexte tenant
             $resolvedOrgId = $organizationId
-                ?? app()->bound('current_organization')
+                ?? (app()->bound('current_organization')
                     ? app('current_organization')?->id
-                    : Auth::user()?->organization_id;
+                    : Auth::user()?->organization_id);
 
             // Capture automatique du contexte réseau
             $request = Request::instance();

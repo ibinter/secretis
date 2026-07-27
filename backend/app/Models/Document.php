@@ -6,9 +6,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'documents';
     protected $guarded = [];
 
@@ -17,13 +21,18 @@ class Document extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function versions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function author(): BelongsTo
     {
-        return $this->hasMany(\App\Models\DocumentVersion::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function folder(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function folder(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\DocumentFolder::class, 'folder_id');
+        return $this->belongsTo(DocumentFolder::class, 'folder_id');
+    }
+
+    public function versions(): HasMany
+    {
+        return $this->hasMany(DocumentVersion::class);
     }
 }

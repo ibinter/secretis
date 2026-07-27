@@ -122,7 +122,7 @@ class AppointmentController extends Controller
         if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 3)) {
             return response()->json(['message' => 'Trop de demandes. Réessayez dans une heure.'], 429);
         }
-        \Illuminate\Support\Facades\RateLimiter::hit($key, decay: 3600);
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 3600);
 
         $org = \App\Models\Organization::where('slug', $organizationSlug)
             ->where('status', '!=', 'suspended')

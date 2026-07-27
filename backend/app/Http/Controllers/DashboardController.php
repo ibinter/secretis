@@ -148,9 +148,9 @@ class DashboardController extends Controller
                 "pending_tasks_{$orgId}_user_{$userId}",
                 60, // 1 minute — données très personnelles
                 function () use ($orgId, $userId) {
-                    return Task::with(['project:id,name', 'assignees:id,name,avatar'])
+                    return Task::with(['project:id,name'])
                         ->where('organization_id', $orgId)
-                        ->whereHas('assignees', fn ($q) => $q->where('users.id', $userId))
+                        ->where(function($q) use ($userId) { $q->where('assigned_to', $userId)->orWhere('created_by', $userId); })
                         ->whereNotIn('status', ['done', 'cancelled'])
                         ->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END")
                         ->orderBy('due_date')
@@ -172,11 +172,11 @@ class DashboardController extends Controller
                 "recent_docs_{$orgId}",
                 CacheService::DASHBOARD_TTL,
                 function () use ($orgId) {
-                    return Document::with(['updatedBy:id,name,avatar', 'folder:id,name'])
+                    return Document::with(['folder:id,name'])
                         ->where('organization_id', $orgId)
                         ->orderByDesc('updated_at')
                         ->limit(8)
-                        ->get(['id', 'title', 'file_type', 'updated_at', 'updated_by_id', 'folder_id'])
+                        ->get(['id', 'title', 'mime_type', 'updated_at', 'created_by', 'folder_id'])
                         ->toArray();
                 }
             );
@@ -287,8 +287,8 @@ class DashboardController extends Controller
                 p.name AS project_name
             FROM tasks t
             LEFT JOIN projects p ON p.id = t.project_id
-            JOIN task_user tu ON tu.task_id = t.id AND tu.user_id = :user
             WHERE t.organization_id = :org
+              AND t.assigned_to = :user
               AND t.priority IN ('high','urgent')
               AND t.status NOT IN ('done','cancelled')
               AND t.deleted_at IS NULL
@@ -330,10 +330,10 @@ class DashboardController extends Controller
         // Documents récents (7 derniers jours)
         $recentDocs = DB::select("
             SELECT
-                d.id, d.title, d.file_type, d.updated_at,
+                d.id, d.title, d.mime_type, d.updated_at,
                 u.name AS updated_by
             FROM documents d
-            JOIN users u ON u.id = d.updated_by_id
+            JOIN users u ON u.id = d.created_by
             WHERE d.organization_id = :org
               AND d.updated_at >= NOW() - INTERVAL '7 days'
               AND d.deleted_at IS NULL

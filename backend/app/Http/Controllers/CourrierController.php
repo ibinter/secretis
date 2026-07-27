@@ -46,7 +46,7 @@ class CourrierController extends Controller
         $user = Auth::user();
 
         $query = MailRegistry::forOrganization($user->organization_id)
-            ->with(['assignee:id,name,avatar', 'department:id,name'])
+            ->with(['assignee:id,name'])
             ->orderBy('created_at', 'desc');
 
         // Filtre type
@@ -65,9 +65,7 @@ class CourrierController extends Controller
         }
 
         // Filtre service/département
-        if ($departmentId = $request->query('department_id')) {
-            $query->where('department_id', $departmentId);
-        }
+        // department_id not in DB v1 — skip filter
 
         // Plage de dates
         if ($from = $request->query('from')) {
@@ -92,8 +90,7 @@ class CourrierController extends Controller
                   ->orWhere('subject', 'ilike', $search)
                   ->orWhere('sender_name', 'ilike', $search)
                   ->orWhere('recipient_name', 'ilike', $search)
-                  ->orWhere('sender_org', 'ilike', $search)
-                  ->orWhere('recipient_org', 'ilike', $search);
+                  ->orWhere('sender_organization', 'ilike', $search);
             });
         }
 
@@ -139,17 +136,17 @@ class CourrierController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'type'                  => ['required', 'in:incoming,outgoing'],
+            'type'                  => ['required', 'in:incoming,outgoing,internal'],
             'sender_name'           => ['nullable', 'string', 'max:255'],
-            'sender_org'            => ['nullable', 'string', 'max:255'],
+            'sender_organization'   => ['nullable', 'string', 'max:255'],
             'recipient_name'        => ['nullable', 'string', 'max:255'],
-            'recipient_org'         => ['nullable', 'string', 'max:255'],
+            'sender_email'          => ['nullable', 'email', 'max:255'],
             'subject'               => ['required', 'string', 'max:500'],
             'urgency'               => ['required', 'in:low,normal,high,urgent'],
             'received_at'           => ['nullable', 'date'],
             'sent_at'               => ['nullable', 'date'],
-            'department_id'         => ['nullable', 'exists:departments,id'],
-            'assigned_to_id'        => ['nullable', 'exists:users,id'],
+            // department_id not in DB v1
+            'assigned_to'           => ['nullable', 'exists:users,id'],
             'notes'                 => ['nullable', 'string', 'max:2000'],
             'processing_delay_days' => ['nullable', 'integer', 'min:1', 'max:90'],
             'attachments'           => ['nullable', 'array', 'max:10'],
@@ -173,18 +170,19 @@ class CourrierController extends Controller
                 );
 
                 \App\Models\MailAttachment::create([
-                    'mail_id'   => $mail->id,
-                    'filename'  => $file->getClientOriginalName(),
-                    'path'      => $path,
-                    'mime_type' => $file->getMimeType(),
-                    'size'      => $file->getSize(),
+                    'mail_registry_id' => $mail->id,
+                    'file_name'        => $file->getClientOriginalName(),
+                    'file_path'        => $path,
+                    'mime_type'        => $file->getMimeType(),
+                    'file_size'        => $file->getSize(),
+                    'uploaded_by'      => Auth::id(),
                 ]);
             }
         }
 
         return response()->json([
             'message' => 'Courrier enregistré avec succès.',
-            'mail'    => $mail->load(['assignee', 'department', 'attachments']),
+            'mail'    => $mail->load(['assignee:id,name', 'attachments']),
         ], 201);
     }
 
@@ -198,7 +196,7 @@ class CourrierController extends Controller
     public function show(string $id): Response|JsonResponse
     {
         $mail = $this->findMailForCurrentOrg($id);
-        $mail->load(['assignee', 'department', 'attachments', 'trackingHistory.user:id,name,avatar', 'createdBy:id,name']);
+        $mail->load(['assignee:id,name', 'attachments']);
 
         $this->auditService->log(
             action: 'viewed',
@@ -230,14 +228,13 @@ class CourrierController extends Controller
 
         $validated = $request->validate([
             'sender_name'    => ['nullable', 'string', 'max:255'],
-            'sender_org'     => ['nullable', 'string', 'max:255'],
+            'sender_organization' => ['nullable', 'string', 'max:255'],
             'recipient_name' => ['nullable', 'string', 'max:255'],
-            'recipient_org'  => ['nullable', 'string', 'max:255'],
+            'recipient_email' => ['nullable', 'email', 'max:255'],
             'subject'        => ['sometimes', 'required', 'string', 'max:500'],
             'urgency'        => ['sometimes', 'required', 'in:low,normal,high,urgent'],
             'received_at'    => ['nullable', 'date'],
             'sent_at'        => ['nullable', 'date'],
-            'department_id'  => ['nullable', 'exists:departments,id'],
             'notes'          => ['nullable', 'string', 'max:2000'],
         ]);
 
@@ -254,7 +251,7 @@ class CourrierController extends Controller
 
         return response()->json([
             'message' => 'Courrier mis à jour.',
-            'mail'    => $mail->fresh(['assignee', 'department']),
+            'mail'    => $mail->fresh(['assignee:id,name']),
         ]);
     }
 
@@ -319,7 +316,7 @@ class CourrierController extends Controller
         $mail = $this->findMailForCurrentOrg($id);
 
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,processing,processed,archived'],
+            'status' => ['required', 'in:received,registered,assigned,in_progress,replied,archived,closed'],
         ]);
 
         $this->courrierService->changeStatus($mail, $validated['status'], Auth::user());
@@ -435,12 +432,15 @@ class CourrierController extends Controller
         $base = MailRegistry::forOrganization($organizationId);
 
         return [
-            'total'      => (clone $base)->count(),
-            'pending'    => (clone $base)->where('status', 'pending')->count(),
-            'processing' => (clone $base)->where('status', 'processing')->count(),
-            'processed'  => (clone $base)->where('status', 'processed')->count(),
-            'overdue'    => (clone $base)->overdue()->count(),
-            'urgent'     => (clone $base)->urgent()->where('status', '!=', 'archived')->count(),
+            'total'       => (clone $base)->count(),
+            'incoming'    => (clone $base)->where('type', 'incoming')->count(),
+            'outgoing'    => (clone $base)->where('type', 'outgoing')->count(),
+            'received'    => (clone $base)->where('status', 'received')->count(),
+            'in_progress' => (clone $base)->whereIn('status', ['registered', 'assigned', 'in_progress'])->count(),
+            'replied'     => (clone $base)->where('status', 'replied')->count(),
+            'archived'    => (clone $base)->whereIn('status', ['archived', 'closed'])->count(),
+            'overdue'     => (clone $base)->overdue()->count(),
+            'urgent'      => (clone $base)->urgent()->whereNotIn('status', ['archived', 'closed'])->count(),
         ];
     }
 }

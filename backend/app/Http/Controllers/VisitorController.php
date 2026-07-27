@@ -21,23 +21,91 @@ class VisitorController extends Controller
     }
 
     // GET /visitors — liste des visiteurs (filtres : blacklist, frequents)
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
         $query = Visitor::where('organization_id', auth()->user()->organization_id)
-            ->when($request->boolean('blacklisted'), fn ($q) => $q->where('is_blacklisted', true))
-            ->when($request->boolean('frequent'), fn ($q) => $q->where('visit_count', '>=', 5))
             ->when($request->search, fn ($q) => $q->where(function ($sq) use ($request) {
-                $sq->where('full_name', 'ilike', "%{$request->search}%")
-                   ->orWhere('id_number', 'ilike', "%{$request->search}%")
+                $sq->where('first_name', 'ilike', "%{$request->search}%")
+                   ->orWhere('last_name', 'ilike', "%{$request->search}%")
                    ->orWhere('company', 'ilike', "%{$request->search}%");
             }))
-            ->orderByDesc('last_visit_at')
+            ->orderByDesc('created_at')
             ->paginate(25)
             ->withQueryString();
 
+        if ($request->wantsJson() || $request->is('api/*') || $request->hasHeader('Authorization') || $request->bearerToken()) {
+            return response()->json([
+                'success' => true,
+                'data'    => $query,
+            ]);
+        }
+
         return Inertia::render('Reception/Blacklist', [
             'visitors' => $query,
-            'filters'  => $request->only(['blacklisted', 'frequent', 'search']),
+            'filters'  => $request->only(['search']),
+        ]);
+    }
+
+    // GET /api/v1/visitors — API JSON response
+    public function apiIndex(Request $request): JsonResponse
+    {
+        $query = Visitor::where('organization_id', auth()->user()->organization_id)
+            ->when($request->search, fn ($q) => $q->where(function ($sq) use ($request) {
+                $sq->where('first_name', 'ilike', "%{$request->search}%")
+                   ->orWhere('last_name', 'ilike', "%{$request->search}%")
+                   ->orWhere('company', 'ilike', "%{$request->search}%");
+            }))
+            ->orderByDesc('created_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $query,
+        ]);
+    }
+
+
+    // GET /reception — dashboard (visiteurs presents + stats jour)
+    public function dashboard(): Response
+    {
+        $orgId = auth()->user()->organization_id;
+        $today = now()->toDateString();
+
+        $visitors = Visitor::where('organization_id', $orgId)
+            ->whereNull('check_out_at')
+            ->whereNotNull('check_in_at')
+            ->orderBy('check_in_at')
+            ->get();
+
+        $present = $visitors->map(function ($v) {
+            $hostName = $v->host_user_id
+                ? \App\Models\User::where('id', $v->host_user_id)->value('name')
+                : null;
+            return [
+                'id'          => $v->id,
+                'check_in_at' => $v->check_in_at,
+                'location'    => null,
+                'floor'       => null,
+                'visitor'     => [
+                    'full_name'   => trim($v->first_name . ' ' . $v->last_name),
+                    'photo_path'  => $v->photo_path,
+                    'company'     => $v->company,
+                    'visit_count' => 0,
+                ],
+                'host' => $hostName ? ['name' => $hostName] : null,
+            ];
+        });
+
+        $todayTotal = Visitor::where('organization_id', $orgId)
+            ->whereDate('check_in_at', $today)
+            ->count();
+
+        return Inertia::render('Reception/Dashboard', [
+            'present'     => $present,
+            'scheduled'   => [],
+            'today_total' => $todayTotal,
+            'pending_inv' => 0,
         ]);
     }
 
@@ -125,35 +193,10 @@ class VisitorController extends Controller
         ]);
     }
 
-    // GET /visits/today — visiteurs presents aujourd hui
+    // GET /visits/today — redirige vers dashboard
     public function today(): Response
     {
-        $orgId = auth()->user()->organization_id;
-
-        $present = VisitLog::where('organization_id', $orgId)
-            ->where('status', 'checked_in')
-            ->with(['visitor', 'host', 'accessZone'])
-            ->orderBy('check_in_at')
-            ->get();
-
-        $scheduled = VisitorInvitation::where('organization_id', $orgId)
-            ->where('visit_date', today())
-            ->where('is_used', false)
-            ->where('expires_at', '>', now())
-            ->with('invitedBy')
-            ->orderBy('visit_time_start')
-            ->get();
-
-        $todayTotal = VisitLog::where('organization_id', $orgId)
-            ->whereDate('check_in_at', today())
-            ->count();
-
-        return Inertia::render('Reception/Dashboard', [
-            'present'      => $present,
-            'scheduled'    => $scheduled,
-            'today_total'  => $todayTotal,
-            'pending_inv'  => $scheduled->count(),
-        ]);
+        return $this->dashboard();
     }
 
     // GET /visits/report — rapport journalier
@@ -248,7 +291,6 @@ class VisitorController extends Controller
     public function log(Request $request): Response
     {
         $query = VisitLog::where('organization_id', auth()->user()->organization_id)
-            ->with(['visitor', 'host', 'accessZone'])
             ->when($request->date, fn ($q) => $q->whereDate('check_in_at', $request->date))
             ->when($request->host_id, fn ($q) => $q->where('host_user_id', $request->host_id))
             ->when($request->status, fn ($q) => $q->where('status', $request->status))
