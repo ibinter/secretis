@@ -75,12 +75,12 @@ class Organization extends Model
 
     public function latestLicense(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(License::class)->latestOfMany();
+        return $this->hasOne(License::class)->latestOfMany("ends_at");
     }
 
     public function license(): HasOne
     {
-        return $this->hasOne(License::class)->latestOfMany();
+        return $this->hasOne(License::class)->latestOfMany("ends_at");
     }
 
     public function licenses(): HasMany

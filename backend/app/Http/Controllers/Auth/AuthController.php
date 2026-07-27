@@ -79,7 +79,7 @@ class AuthController extends Controller
 
         // SECURITE : vérification uniforme pour éviter le timing attack (toujours hasher)
         if (! $user || ! Hash::check($request->input('password'), $user->password)) {
-            RateLimiter::hit($rateLimitKey, decay: 60);
+            RateLimiter::hit($rateLimitKey, 60);
 
             // Incrémenter le compteur et potentiellement verrouiller le compte
             $user?->recordFailedLogin();
@@ -292,7 +292,7 @@ class AuthController extends Controller
             ], 429);
         }
 
-        RateLimiter::hit($key, decay: 3600);
+        RateLimiter::hit($key, 3600);
 
         // SECURITE : Toujours retourner le même message quelle que soit l'existence de l'email
         // pour éviter l'énumération d'utilisateurs

@@ -310,6 +310,8 @@ Route::middleware([
     });
 
     Route::get('/annuaire', [ContactController::class, 'index'])->name('annuaire');
+    Route::redirect('/contacts', '/annuaire', 301);
+    Route::redirect('/visiteurs', '/reception', 301);
     Route::get('/tableau-affichage', [AnnouncementController::class, 'board'])->name('tableau-affichage');
 
     // -------------------------------------------------------------------------
@@ -729,6 +731,21 @@ Route::middleware([
         Route::delete('/licences/{id}', [SuperAdminLicenseController::class, 'destroy'])->name('licences.destroy');
         Route::post('/licences/{id}/extend', [SuperAdminLicenseController::class, 'extend'])->name('licences.extend');
         Route::post('/licences/{id}/regenerate', [SuperAdminLicenseController::class, 'regenerate'])->name('licences.regenerate');
+
+        // Paiements SuperAdmin — page de gestion des paiements
+        Route::get('/paiements', fn () => \Inertia\Inertia::render('SuperAdmin/Payments'))->name('paiements');
+
+        // Licences — clés de licence (alias vers /licences)
+        Route::redirect('/licences/cles', '/superadmin/licences', 302)->name('licences.cles');
+
+        // Rapports SuperAdmin — métriques consolidées
+        Route::get('/rapports', [\App\Http\Controllers\SuperAdmin\MetricsController::class, 'index'])->name('rapports');
+
+        // Configuration SuperAdmin — alias vers /settings
+        Route::redirect('/configuration', '/superadmin/settings', 302)->name('configuration');
+
+        // Utilisateurs SuperAdmin — redirige vers la gestion des organisations
+        Route::redirect('/utilisateurs', '/superadmin/organisations', 301)->name('superadmin.utilisateurs');
     });
 });
 

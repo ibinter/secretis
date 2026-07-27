@@ -51,7 +51,7 @@ class StatisticsService
                 -- Réunions cette semaine
                 (SELECT COUNT(*) FROM meetings
                  WHERE organization_id = :org4
-                   AND DATE(start_at) BETWEEN :week_start AND :week_end
+                   AND DATE(started_at) BETWEEN :week_start AND :week_end
                    AND deleted_at IS NULL) AS meetings_week,
 
                 -- Visiteurs aujourd'hui (arrivés)
@@ -61,7 +61,7 @@ class StatisticsService
                    AND deleted_at IS NULL) AS visitors_today,
 
                 -- Absences aujourd'hui
-                (SELECT COUNT(*) FROM leaves
+                (SELECT COUNT(*) FROM leave_requests
                  WHERE organization_id = :org6
                    AND status = 'approved'
                    AND start_date <= :today3
@@ -71,9 +71,8 @@ class StatisticsService
                 -- Ressources réservées aujourd'hui
                 (SELECT COUNT(*) FROM room_reservations
                  WHERE organization_id = :org7
-                   AND DATE(start_at) = :today5
-                   AND status IN ('confirmed','pending')
-                   AND deleted_at IS NULL) AS rooms_reserved_today,
+                   AND DATE(starts_at) = :today5
+                   AND status IN ('approved','pending')) AS rooms_reserved_today,
 
                 -- Événements cette semaine
                 (SELECT COUNT(*) FROM events
@@ -142,24 +141,23 @@ class StatisticsService
             ",
             'meetings' => "
                 SELECT
-                    DATE(start_at) AS day,
+                    DATE(started_at) AS day,
                     COUNT(*) AS total,
-                    SUM(EXTRACT(EPOCH FROM (end_at - start_at))/3600)::numeric(6,1) AS total_hours
+                    SUM(EXTRACT(EPOCH FROM (ended_at - started_at))/3600)::numeric(6,1) AS total_hours
                 FROM meetings
                 WHERE organization_id = :org
-                  AND start_at >= :start
+                  AND started_at >= :start
                   AND deleted_at IS NULL
                 GROUP BY 1 ORDER BY 1
             ",
             'rooms' => "
                 SELECT
-                    DATE(start_at) AS day,
+                    DATE(starts_at) AS day,
                     COUNT(*) AS reservations,
                     COUNT(DISTINCT room_id) AS rooms_used
                 FROM room_reservations
                 WHERE organization_id = :org
-                  AND start_at >= :start
-                  AND deleted_at IS NULL
+                  AND starts_at >= :start
                 GROUP BY 1 ORDER BY 1
             ",
         ];
@@ -235,8 +233,7 @@ class StatisticsService
                 COUNT(t.id) FILTER (WHERE t.status = 'done') AS done_tasks,
                 COUNT(t.id) FILTER (WHERE t.status NOT IN ('done','cancelled') AND t.due_date < NOW()) AS overdue_tasks
             FROM departments d
-            LEFT JOIN tasks t ON t.department_id = d.id
-                AND t.organization_id = :org1
+            LEFT JOIN tasks t ON t.organization_id = :org1
                 AND t.deleted_at IS NULL
                 AND t.created_at >= NOW() - INTERVAL '30 days'
             WHERE d.organization_id = :org2

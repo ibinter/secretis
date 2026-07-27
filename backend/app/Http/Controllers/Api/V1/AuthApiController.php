@@ -65,7 +65,7 @@ class AuthApiController extends ApiController
 
         // Vérification credentials (timing-safe)
         if (! $user || ! Hash::check($request->input('password'), $user->password)) {
-            RateLimiter::hit($key, decay: 60);
+            RateLimiter::hit($key, 60);
             $user?->recordFailedLogin();
 
             $this->audit->log(

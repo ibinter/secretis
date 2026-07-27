@@ -316,7 +316,7 @@ PROMPT;
     {
         $model = config('secretis.ai.groq_model', 'llama-3.3-70b-versatile');
 
-        $response = Http::withToken(config('secretis.ai.groq_key'))
+        $response = Http::withToken(config('secretis.ai.groq_key', env('GROQ_API_KEY')))
             ->timeout(30)
             ->post('https://api.groq.com/openai/v1/chat/completions', [
                 'model'       => $model,

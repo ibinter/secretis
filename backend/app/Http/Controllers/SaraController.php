@@ -67,7 +67,9 @@ class SaraController extends Controller
 
         // ── Appel SARA ─────────────────────────────────────────────────────────
         try {
-            $response = $this->sara->chat($message, $context, $user ?? $this->getGuestUser());
+            // Build messages array for SaraService (expects array of [{role, content}])
+            $messages = [['role' => 'user', 'content' => $message]];
+            $response = $this->sara->chat($messages, $user ?? $this->getGuestUser(), $context['module'] ?? null);
 
             return response()->json([
                 'success'  => true,
@@ -75,6 +77,7 @@ class SaraController extends Controller
                 'remaining_requests' => max(0, 20 - RateLimiter::attempts($rateLimitKey)),
             ]);
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SaraController::chat error', ['msg' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
             return response()->json([
                 'success' => false,
                 'error'   => 'service_error',
@@ -136,6 +139,17 @@ class SaraController extends Controller
     }
 
     /**
+     * GET /sara
+     * Page SARA Chat (Inertia).
+     */
+    public function index(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('Sara/Chat', [
+            'quickQuestions' => $this->sara->getQuickQuestions('internal', []),
+        ]);
+    }
+
+        /**
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */

@@ -222,27 +222,27 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // COURRIER & GED (Vague 2)
     // -------------------------------------------------------------------------
     Route::prefix('courrier')->name('courrier.')->group(function () {
-        Route::get('/', [CourrierController::class, 'apiIndex'])->name('index');
-        Route::post('/', [CourrierController::class, 'apiStore'])->name('store');
-        Route::get('/{id}', [CourrierController::class, 'apiShow'])->name('show');
-        Route::put('/{id}', [CourrierController::class, 'apiUpdate'])->name('update');
-        Route::delete('/{id}', [CourrierController::class, 'apiDestroy'])->name('destroy');
-        Route::post('/{id}/assign', [CourrierController::class, 'apiAssign'])->name('assign');
-        Route::post('/{id}/archive', [CourrierController::class, 'apiArchive'])->name('archive');
-        Route::post('/{id}/transmit', [CourrierController::class, 'apiTransmit'])->name('transmit');
-        Route::post('/{id}/acknowledge', [CourrierController::class, 'apiAcknowledge'])->name('acknowledge');
-        Route::get('/{id}/history', [CourrierController::class, 'apiHistory'])->name('history');
-        Route::get('/{id}/qr-code', [CourrierController::class, 'apiQrCode'])->name('qr-code');
-        Route::get('/stats', [CourrierController::class, 'apiStats'])->name('stats');
-        Route::get('/export', [CourrierController::class, 'apiExport'])->name('export');
+        Route::get('/', [CourrierController::class, 'index'])->name('index');
+        Route::post('/', [CourrierController::class, 'store'])->name('store');
+        Route::get('/{id}', [CourrierController::class, 'show'])->name('show');
+        Route::put('/{id}', [CourrierController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CourrierController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/assign', [CourrierController::class, 'assign'])->name('assign');
+        Route::post('/{id}/archive', [CourrierController::class, 'changeStatus'])->name('archive');
+        Route::post('/{id}/transmit', [CourrierController::class, 'changeStatus'])->name('transmit');
+        Route::post('/{id}/acknowledge', [CourrierController::class, 'changeStatus'])->name('acknowledge');
+        Route::get('/{id}/history', [CourrierController::class, 'show'])->name('history');
+        Route::get('/{id}/qr-code', [CourrierController::class, 'show'])->name('qr-code');
+        Route::get('/stats', [CourrierController::class, 'index'])->name('stats');
+        Route::get('/export', [CourrierController::class, 'exportExcel'])->name('export');
     });
 
     Route::prefix('documents')->name('documents.')->group(function () {
-        Route::get('/', [DocumentController::class, 'apiIndex'])->name('index');
-        Route::post('/', [DocumentController::class, 'apiStore'])->name('store');
-        Route::get('/{id}', [DocumentController::class, 'apiShow'])->name('show');
-        Route::put('/{id}', [DocumentController::class, 'apiUpdate'])->name('update');
-        Route::delete('/{id}', [DocumentController::class, 'apiDestroy'])->name('destroy');
+        Route::get('/', [DocumentController::class, 'index'])->name('index');
+        Route::post('/', [DocumentController::class, 'store'])->name('store');
+        Route::get('/{id}', [DocumentController::class, 'show'])->name('show');
+        Route::put('/{id}', [DocumentController::class, 'update'])->name('update');
+        Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/download', [DocumentController::class, 'apiDownload'])->name('download');
         Route::post('/{id}/share', [DocumentController::class, 'apiShare'])->name('share');
         Route::get('/{id}/versions', [DocumentController::class, 'apiVersions'])->name('versions');
@@ -260,15 +260,15 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // RÉUNIONS (Vague 3)
     // -------------------------------------------------------------------------
     Route::prefix('meetings')->name('meetings.')->group(function () {
-        Route::get('/', [MeetingController::class, 'apiIndex'])->name('index');
-        Route::post('/', [MeetingController::class, 'apiStore'])->name('store');
-        Route::get('/{id}', [MeetingController::class, 'apiShow'])->name('show');
-        Route::put('/{id}', [MeetingController::class, 'apiUpdate'])->name('update');
-        Route::delete('/{id}', [MeetingController::class, 'apiDestroy'])->name('destroy');
+        Route::get('/', [MeetingController::class, 'index'])->name('index');
+        Route::post('/', [MeetingController::class, 'store'])->name('store');
+        Route::get('/{id}', [MeetingController::class, 'show'])->name('show');
+        Route::put('/{id}', [MeetingController::class, 'update'])->name('update');
+        Route::delete('/{id}', [MeetingController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/start', [MeetingController::class, 'apiStart'])->name('start');
         Route::post('/{id}/end', [MeetingController::class, 'apiEnd'])->name('end');
         Route::get('/{id}/minutes', [MeetingController::class, 'apiMinutes'])->name('minutes');
-        Route::post('/{id}/minutes', [MeetingController::class, 'apiStoreMinutes'])->name('minutes.store');
+        Route::post('/{id}/minutes', [MeetingController::class, 'storeMinutes'])->name('minutes.store');
         Route::post('/{id}/minutes/generate', [MeetingController::class, 'apiGenerateMinutes'])->name('minutes.generate');
         Route::get('/{id}/minutes/pdf', [MeetingController::class, 'apiMinutesPdf'])->name('minutes.pdf');
         Route::post('/{id}/minutes/send', [MeetingController::class, 'apiSendMinutes'])->name('minutes.send');
@@ -281,9 +281,9 @@ Route::prefix('v1')->name('api.v1.')->middleware([
 
         // Ordre du jour
         Route::get('/{id}/odj', [MeetingController::class, 'apiAgenda'])->name('odj');
-        Route::post('/{id}/odj', [MeetingController::class, 'apiStoreAgendaItem'])->name('odj.store');
-        Route::put('/{id}/odj/{pid}', [MeetingController::class, 'apiUpdateAgendaItem'])->name('odj.update');
-        Route::delete('/{id}/odj/{pid}', [MeetingController::class, 'apiDestroyAgendaItem'])->name('odj.destroy');
+        Route::post('/{id}/odj', [MeetingController::class, 'storeAgendaItem'])->name('odj.store');
+        Route::put('/{id}/odj/{pid}', [MeetingController::class, 'updateAgendaItem'])->name('odj.update');
+        Route::delete('/{id}/odj/{pid}', [MeetingController::class, 'destroyAgendaItem'])->name('odj.destroy');
         Route::post('/{id}/odj/reorder', [MeetingController::class, 'apiReorderAgenda'])->name('odj.reorder');
     });
 
@@ -366,19 +366,19 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // -------------------------------------------------------------------------
     Route::prefix('visitors')->name('visitors.')->group(function () {
         Route::get('/', [VisitorController::class, 'apiIndex'])->name('index');
-        Route::post('/', [VisitorController::class, 'apiStore'])->name('store');
-        Route::get('/{id}', [VisitorController::class, 'apiShow'])->name('show');
-        Route::put('/{id}', [VisitorController::class, 'apiUpdate'])->name('update');
-        Route::delete('/{id}', [VisitorController::class, 'apiDestroy'])->name('destroy');
+        Route::post('/', [VisitorController::class, 'store'])->name('store');
+        Route::get('/{id}', [VisitorController::class, 'show'])->name('show');
+        Route::put('/{id}', [VisitorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [VisitorController::class, 'destroy'])->name('destroy');
         Route::post('/check-in', [VisitorController::class, 'apiCheckin'])->name('check-in');
         Route::post('/{id}/check-out', [VisitorController::class, 'apiCheckout'])->name('check-out');
         Route::get('/{id}/badge', [VisitorController::class, 'apiBadge'])->name('badge');
-        Route::get('/stats', [VisitorController::class, 'apiStats'])->name('stats');
+        Route::get('/stats', [VisitorController::class, 'index'])->name('stats');
 
         // Invitations
         Route::get('/invitations', [VisitorController::class, 'apiInvitations'])->name('invitations');
         Route::post('/invitations', [VisitorController::class, 'apiCreateInvitation'])->name('invitations.store');
-        Route::delete('/invitations/{id}', [VisitorController::class, 'apiDestroyInvitation'])->name('invitations.destroy');
+        Route::delete('/invitations/{id}', [VisitorController::class, 'destroyInvitation'])->name('invitations.destroy');
 
         // Blacklist
         Route::get('/blacklist', [VisitorController::class, 'apiBlacklist'])->name('blacklist');
@@ -715,7 +715,7 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // NOTIFICATIONS (transversal)
     // -------------------------------------------------------------------------
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/',            [NotificationController::class, 'apiIndex'])->name('index');
+        Route::get('/',            [NotificationController::class, 'index'])->name('index');
         Route::get('/unread-count',[NotificationController::class, 'unreadCount'])->name('unread-count');
         Route::put('/read-all',    [NotificationController::class, 'markAllRead'])->name('read-all');
         Route::post('/read-all',   [NotificationController::class, 'markAllRead'])->name('read-all.post');
@@ -729,7 +729,7 @@ Route::prefix('v1')->name('api.v1.')->middleware([
     // -------------------------------------------------------------------------
     // JOURNAL D'AUDIT — API
     // -------------------------------------------------------------------------
-    Route::get('/audit-log', [AuditLogController::class, 'apiIndex'])
+    Route::get('/audit-log', [AuditLogController::class, 'index'])
         ->name('audit-log.index')
         ->middleware('can:view.audit_logs');
     Route::get('/audit-log/export', [AuditLogController::class, 'export'])
@@ -866,6 +866,10 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::apiResource('feature-flags', FeatureFlagController::class)->names('feature-flags');
         Route::post('/announcements', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'store'])->name('announcements.store');
         Route::get('/announcements', [\App\Http\Controllers\SuperAdmin\AnnouncementController::class, 'index'])->name('announcements.index');
+
+        // Dashboard & Stats raccourcis (compatibilité frontend)
+        Route::get('/dashboard', [\App\Http\Controllers\SuperAdmin\DashboardController::class, 'apiDashboard'])->name('dashboard');
+        Route::get('/stats', [\App\Http\Controllers\SuperAdmin\MetricsController::class, 'apiMetrics'])->name('stats');
     });
 });
 
@@ -944,4 +948,11 @@ Route::middleware(['auth:sanctum'])->prefix('v1/payments')->name('api.v1.payment
         ->middleware('role:super_admin')->name('validate');
     Route::post('/{id}/reject', [\App\Http\Controllers\PaymentController::class, 'adminReject'])
         ->middleware('role:super_admin')->name('reject');
+});
+
+// Dashboard API routes
+Route::middleware(["auth:sanctum"])->prefix("dashboard")->name("api.dashboard.")->group(function () {
+    Route::get("/kpis", [App\Http\Controllers\DashboardController::class, "apiKpis"])->name("kpis");
+    Route::get("/trends", [App\Http\Controllers\DashboardController::class, "apiTrends"])->name("trends");
+    Route::get("/heatmap", [App\Http\Controllers\DashboardController::class, "apiHeatmap"])->name("heatmap");
 });

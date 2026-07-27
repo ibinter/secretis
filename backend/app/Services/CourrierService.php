@@ -45,10 +45,13 @@ class CourrierService
             $prefix = $type === 'incoming' ? 'ENTRANT' : 'SORTANT';
 
             // Compte les courriers de cette org/type/année pour calculer le prochain numéro
-            $count = MailRegistry::lockForUpdate()
+            // Note: lockForUpdate() ne fonctionne pas avec count() sur PostgreSQL.
+            // On utilise une sous-requête pour serialiser l'accès.
+            $count = DB::table('mail_registry')
                 ->where('organization_id', $organizationId)
                 ->where('type', $type)
                 ->whereYear('created_at', $year)
+                ->whereNull('deleted_at')
                 ->count();
 
             $sequence = str_pad($count + 1, 5, '0', STR_PAD_LEFT);
@@ -74,18 +77,18 @@ class CourrierService
                 'type'                  => 'incoming',
                 'reference'             => $reference,
                 'sender_name'           => $data['sender_name'] ?? null,
-                'sender_org'            => $data['sender_org'] ?? null,
+                'sender_organization'   => $data['sender_organization'] ?? null,
                 'recipient_name'        => $data['recipient_name'] ?? null,
-                'recipient_org'         => $data['recipient_org'] ?? null,
+                'sender_email'          => $data['sender_email'] ?? null,
                 'subject'               => $data['subject'],
                 'urgency'               => $data['urgency'] ?? 'normal',
                 'received_at'           => $data['received_at'] ?? now(),
-                'department_id'         => $data['department_id'] ?? null,
-                'assigned_to_id'        => $data['assigned_to_id'] ?? null,
-                'status'                => 'pending',
+                // 'department_id' not in DB v1
+                'assigned_to'           => $data['assigned_to'] ?? null,
+                'status'                => 'received',
                 'notes'                 => $data['notes'] ?? null,
                 'processing_delay_days' => $data['processing_delay_days'] ?? 3,
-                'created_by_id'         => $user->id,
+                'registered_by'         => $user->id,
             ]);
 
             $this->addTrackingEntry($mail, $user, 'created', 'Courrier entrant enregistré');
@@ -114,17 +117,17 @@ class CourrierService
                 'type'                  => 'outgoing',
                 'reference'             => $reference,
                 'sender_name'           => $data['sender_name'] ?? $user->name,
-                'sender_org'            => $data['sender_org'] ?? null,
+                'sender_organization'   => $data['sender_organization'] ?? null,
                 'recipient_name'        => $data['recipient_name'] ?? null,
-                'recipient_org'         => $data['recipient_org'] ?? null,
+                'sender_email'          => $data['sender_email'] ?? null,
                 'subject'               => $data['subject'],
                 'urgency'               => $data['urgency'] ?? 'normal',
                 'sent_at'               => $data['sent_at'] ?? now(),
-                'department_id'         => $data['department_id'] ?? null,
-                'assigned_to_id'        => $data['assigned_to_id'] ?? null,
-                'status'                => 'processed',
+                // 'department_id' not in DB v1
+                'assigned_to'           => $data['assigned_to'] ?? null,
+                'status'                => 'replied',
                 'notes'                 => $data['notes'] ?? null,
-                'created_by_id'         => $user->id,
+                'registered_by'         => $user->id,
             ]);
 
             $this->addTrackingEntry($mail, $user, 'created', 'Courrier sortant enregistré');
@@ -149,11 +152,11 @@ class CourrierService
      */
     public function assignCourrier(MailRegistry $mail, string $userId): void
     {
-        $previousAssignee = $mail->assigned_to_id;
+        $previousAssignee = $mail->assigned_to;
 
         $mail->update([
-            'assigned_to_id' => $userId,
-            'status'         => $mail->status === 'pending' ? 'processing' : $mail->status,
+            'assigned_to' => $userId,
+            'status'         => $mail->status === 'received' ? 'in_progress' : $mail->status,
         ]);
 
         $assignee = User::find($userId);
@@ -169,8 +172,8 @@ class CourrierService
             module: 'courrier',
             resourceType: 'mail_registry',
             resourceId: $mail->id,
-            original: ['assigned_to_id' => $previousAssignee],
-            changes: ['assigned_to_id' => $userId],
+            original: ['assigned_to' => $previousAssignee],
+            changes: ['assigned_to' => $userId],
         );
     }
 
@@ -186,8 +189,11 @@ class CourrierService
     public function changeStatus(MailRegistry $mail, string $newStatus, User $user): void
     {
         $allowedTransitions = [
-            'pending'    => ['processing', 'archived'],
-            'processing' => ['processed', 'pending', 'archived'],
+            'received'    => ['registered', 'assigned', 'in_progress', 'archived'],
+            'registered'  => ['assigned', 'in_progress', 'archived'],
+            'assigned'    => ['in_progress', 'archived'],
+            'in_progress' => ['replied', 'archived'],
+            'replied'     => ['archived'],
             'processed'  => ['archived'],
             'archived'   => [],
         ];
@@ -275,9 +281,11 @@ class CourrierService
         string $action,
         string $comment = '',
     ): void {
-        // La table mail_trackings peut ne pas exister encore en dev,
-        // on wrappe pour ne pas bloquer si la table est absente.
+        // La table mail_trackings peut ne pas exister encore en v1.
+        // On utilise un SAVEPOINT PostgreSQL pour que l'échec n'avorte pas
+        // la transaction parente (comportement critique pour la persistance du courrier).
         try {
+            DB::statement('SAVEPOINT sp_tracking');
             DB::table('mail_trackings')->insert([
                 'id'         => \Illuminate\Support\Str::uuid(),
                 'mail_id'    => $mail->id,
@@ -287,7 +295,9 @@ class CourrierService
                 'status'     => $mail->status,
                 'created_at' => now(),
             ]);
+            DB::statement('RELEASE SAVEPOINT sp_tracking');
         } catch (\Throwable $e) {
+            try { DB::statement('ROLLBACK TO SAVEPOINT sp_tracking'); } catch (\Throwable) {}
             Log::warning("Impossible d'ajouter l'entrée de tracking courrier", [
                 'mail_id' => $mail->id,
                 'error'   => $e->getMessage(),

@@ -1,0 +1,1 @@
+import{j as s}from"./app-CJKVdEvI.js";function r({children:e,header:a}){return s.jsxs("div",{className:"min-h-screen bg-gray-100",children:[a&&s.jsx("header",{className:"bg-white shadow",children:s.jsx("div",{className:"mx-auto max-w-7xl py-6 px-4",children:a})}),s.jsx("main",{children:e})]})}export{r as A};

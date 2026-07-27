@@ -45,69 +45,81 @@ class DocumentController extends Controller
     public function index(Request $request): Response|JsonResponse
     {
         try {
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $query = Document::where('organization_id', $user->organization_id)
-            ->where('status', 'active')
-            ->with(['author:id,name,avatar', 'folder:id,name', 'department:id,name'])
-            ->withCount('versions')
-            ->orderBy('updated_at', 'desc');
+            $query = Document::where('organization_id', $user->organization_id)
+                ->whereNull('deleted_at')
+                ->with(['author:id,name', 'folder:id,name'])
+                ->withCount('versions')
+                ->orderBy('updated_at', 'desc');
 
-        // Filtres
-        if ($folderId = $request->query('folder_id')) {
-            $query->where('folder_id', $folderId);
-        } else {
-            // Si aucun dossier spécifié, on retourne les documents racine
-            if (! $request->query('all')) {
+            // Filtres
+            if ($folderId = $request->query('folder_id')) {
+                $query->where('folder_id', $folderId);
+            } elseif (! $request->query('all')) {
                 $query->whereNull('folder_id');
             }
-        }
 
-        if ($type = $request->query('type')) {
-            $query->where('type', $type);
-        }
+            if ($category = $request->query('category')) {
+                $query->where('category', $category);
+            }
 
-        if ($accessLevel = $request->query('access_level')) {
-            $query->where('access_level', $accessLevel);
-        }
+            if ($accessLevel = $request->query('access_level')) {
+                $query->where('access_level', $accessLevel);
+            }
 
-        if ($authorId = $request->query('author_id')) {
-            $query->where('author_id', $authorId);
-        }
+            if ($authorId = $request->query('author_id')) {
+                $query->where('created_by', $authorId);
+            }
 
-        if ($departmentId = $request->query('department_id')) {
-            $query->where('department_id', $departmentId);
-        }
+            // Restriction par niveau de confidentialité
+            if (! $user->hasPermissionForModule('ged', 'view_confidential')) {
+                $query->whereNotIn('access_level', ['top_secret']);
+            }
 
-        // Restriction par niveau de confidentialité
-        if (! $user->hasPermissionForModule('ged', 'view_confidential')) {
-            $query->whereNotIn('access_level', ['top_secret']);
-        }
+            // Recherche plein texte
+            if ($search = $request->query('search')) {
+                $query->where(function ($q) use ($search) {
+                    $like = '%' . addcslashes($search, '%_') . '%';
+                    $q->where('title', 'ilike', $like)
+                      ->orWhere('description', 'ilike', $like);
+                });
+            }
 
-        // Recherche plein texte
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $like = '%' . addcslashes($search, '%_') . '%';
-                $q->where('title', 'ilike', $like)
-                  ->orWhere('description', 'ilike', $like)
-                  ->orWhereRaw("array_to_string(keywords, ' ') ilike ?", [$like]);
-            });
-        }
+            $orgId = $user->organization_id;
+            $stats = [
+                'total'    => Document::where('organization_id', $orgId)->whereNull('deleted_at')->count(),
+                'month'    => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('created_at', '>=', now()->startOfMonth())->count(),
+                'shared'   => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('access_level', 'public')->count(),
+                'archived' => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('validation_status', 'archived')->count(),
+            ];
 
-        $documents = $query->paginate($request->query('per_page', 24));
+            $folders = \App\Models\DocumentFolder::where('organization_id', $orgId)
+                ->whereNull('parent_id')
+                ->orderBy('name')
+                ->get(['id', 'name']);
 
-        if ($request->wantsJson()) {
-            return response()->json($documents);
-        }
+            $documents = $query->paginate($request->query('per_page', 24));
 
-        return Inertia::render('GED/Index', [
-            'documents' => $documents,
-            'filters'   => $request->only(['folder_id', 'type', 'access_level', 'author_id', 'search']),
-        ]);
+            if ($request->wantsJson()) {
+                return response()->json($documents);
+            }
+
+            return Inertia::render('GED/Index', [
+                'documents' => $documents,
+                'folders'   => $folders,
+                'stats'     => $stats,
+                'filters'   => $request->only(['folder_id', 'category', 'access_level', 'author_id', 'search']),
+            ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('DocumentController::index: ' . $e->getMessage());
             return Inertia::render('GED/Index', [
                 'documents' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 24),
+                'folders'   => [],
+                'stats'     => ['total' => 0, 'month' => 0, 'shared' => 0, 'archived' => 0],
                 'filters'   => [],
             ]);
         }
