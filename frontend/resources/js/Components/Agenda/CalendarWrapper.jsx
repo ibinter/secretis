@@ -1,31 +1,78 @@
 /**
  * CalendarWrapper.jsx — Remplace FullCalendar par react-big-calendar
- * (FullCalendar v6 est incompatible Vite/Rollup à cause de Preact interne)
+ * Expose getApi() via forwardRef pour compatibilité avec Agenda/Index.jsx
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback, useState, forwardRef, useImperativeHandle,
+} from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import {
   format, parse, startOfWeek, getDay,
-  startOfMonth, endOfMonth, startOfWeek as soW,
-  endOfWeek, startOfDay, endOfDay,
+  startOfMonth, endOfMonth, endOfWeek,
   addMonths, subMonths, addWeeks, subWeeks, addDays, subDays,
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
-// ─── Localisation fr ───────────────────────────────────────────────────────────
-const locales = { fr };
+// ─── Localiser date-fns/fr ────────────────────────────────────────────────────
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: (date) => startOfWeek(date, { locale: fr }),
+  startOfWeek: (d) => startOfWeek(d, { locale: fr }),
   getDay,
-  locales,
+  locales: { fr },
 });
 
-// ─── Couleurs par type d'événement ─────────────────────────────────────────────
+// ─── Vue map : noms FullCalendar → react-big-calendar ─────────────────────────
+const VIEW_MAP = {
+  dayGridMonth: 'month',
+  timeGridWeek: 'week',
+  timeGridDay:  'day',
+  listWeek:     'agenda',
+};
+
+// ─── Titre lisible par vue ────────────────────────────────────────────────────
+function buildTitle(view, date) {
+  if (view === 'month') return format(date, 'MMMM yyyy', { locale: fr });
+  if (view === 'week') {
+    const s = startOfWeek(date, { locale: fr });
+    const e = endOfWeek(date, { locale: fr });
+    return `${format(s, 'd MMM', { locale: fr })} – ${format(e, 'd MMM yyyy', { locale: fr })}`;
+  }
+  if (view === 'day') return format(date, 'EEEE d MMMM yyyy', { locale: fr });
+  const e = addDays(date, 6);
+  return `${format(date, 'd MMM', { locale: fr })} – ${format(e, 'd MMM yyyy', { locale: fr })}`;
+}
+
+// ─── Navigation date ──────────────────────────────────────────────────────────
+function navigateDate(view, date, direction) {
+  if (direction === 'today') return new Date();
+  const fwd = direction === 'next';
+  if (view === 'month')  return fwd ? addMonths(date, 1) : subMonths(date, 1);
+  if (view === 'week' || view === 'agenda')
+    return fwd ? addWeeks(date, 1) : subWeeks(date, 1);
+  return fwd ? addDays(date, 1) : subDays(date, 1);
+}
+
+// ─── Messages fr ─────────────────────────────────────────────────────────────
+const messages = {
+  allDay:          'Journée',
+  previous:        '‹',
+  next:            '›',
+  today:           "Aujourd'hui",
+  month:           'Mois',
+  week:            'Semaine',
+  day:             'Jour',
+  agenda:          'Liste',
+  date:            'Date',
+  time:            'Heure',
+  event:           'Événement',
+  noEventsInRange: 'Aucun événement à afficher.',
+  showMore:        (n) => `+ ${n} de plus`,
+};
+
 const TYPE_COLORS = {
   event:    '#3B82F6',
   meeting:  '#8B5CF6',
@@ -33,78 +80,48 @@ const TYPE_COLORS = {
   reminder: '#EF4444',
 };
 
-// ─── Vue map: FullCalendar → react-big-calendar ────────────────────────────────
-const VIEW_MAP = {
-  dayGridMonth:  'month',
-  timeGridWeek:  'week',
-  timeGridDay:   'day',
-  listWeek:      'agenda',
-};
-const VIEW_MAP_REVERSE = {
-  month:   'dayGridMonth',
-  week:    'timeGridWeek',
-  day:     'timeGridDay',
-  agenda:  'listWeek',
-};
-
-// ─── Messages en français ───────────────────────────────────────────────────────
-const messages = {
-  allDay:      'Journée',
-  previous:    '‹',
-  next:        '›',
-  today:       "Aujourd'hui",
-  month:       'Mois',
-  week:        'Semaine',
-  day:         'Jour',
-  agenda:      'Liste',
-  date:        'Date',
-  time:        'Heure',
-  event:       'Événement',
-  noEventsInRange: 'Aucun événement à afficher.',
-  showMore:    (total) => `+ ${total} de plus`,
-};
-
-// ─── Composant principal ────────────────────────────────────────────────────────
 const DnDCalendar = withDragAndDrop(Calendar);
 
-export default function CalendarWrapper({
-  // Props passées par Agenda/Index.jsx (équivalents FullCalendar)
-  initialView = 'dayGridMonth',
-  events: fetchEvents,     // fonction async FullCalendar-style
-  dateClick,
-  eventClick,
-  eventDrop: onEventDrop,
-  datesSet,
-  headerToolbar,           // false = on gère la toolbar nous-mêmes
-  height,
-  selectable,
-  editable,
-  slotMinTime,
-  slotMaxTime,
-  dayMaxEvents,
-  ref: _ref,               // ignoré (on expose getApi() ci-dessous)
-  ...rest
-}) {
-  const [rbcView, setRbcView] = useState(VIEW_MAP[initialView] ?? 'month');
-  const [date, setDate]       = useState(new Date());
+// ─── Composant principal ──────────────────────────────────────────────────────
+const CalendarWrapper = forwardRef(function CalendarWrapper(
+  {
+    initialView = 'dayGridMonth',
+    events: fetchEvents,
+    dateClick,
+    eventClick,
+    eventDrop: onEventDrop,
+    datesSet,
+    height,
+    selectable,
+    editable,
+    slotMinTime,
+    slotMaxTime,
+    headerToolbar,  // ignoré
+    dayMaxEvents,   // ignoré
+    timeZone,       // ignoré
+    ...rest
+  },
+  ref,
+) {
+  const [rbcView, setRbcView]     = useState(VIEW_MAP[initialView] ?? 'month');
+  const [date, setDate]           = useState(new Date());
   const [rbcEvents, setRbcEvents] = useState([]);
   const [loading, setLoading]     = useState(false);
 
-  // ── Charger les événements quand la plage change ──────────────────────────────
+  // ── loadRange (déclarée avant useImperativeHandle pour la closure) ────────
   const loadRange = useCallback(async (start, end) => {
     if (!fetchEvents) return;
     setLoading(true);
     try {
       await fetchEvents(
         {
-          start: start.toISOString(),
-          end:   end.toISOString(),
+          start:    start.toISOString(),
+          end:      end.toISOString(),
           startStr: start.toISOString(),
           endStr:   end.toISOString(),
         },
-        (events) => {
-          // successCallback: convertir le format FullCalendar → react-big-calendar
-          const converted = (events ?? []).map(ev => ({
+        (evts) => {
+          setRbcEvents((evts ?? []).map((ev) => ({
             id:       ev.id,
             title:    ev.title,
             start:    new Date(ev.start),
@@ -112,8 +129,7 @@ export default function CalendarWrapper({
             allDay:   ev.allDay ?? false,
             resource: ev.extendedProps ?? {},
             color:    ev.color ?? TYPE_COLORS[ev.extendedProps?.type] ?? '#3B82F6',
-          }));
-          setRbcEvents(converted);
+          })));
         },
         (err) => console.error('[CalendarWrapper] fetchEvents error:', err),
       );
@@ -122,7 +138,32 @@ export default function CalendarWrapper({
     }
   }, [fetchEvents]);
 
-  // Charger à chaque changement de vue/date
+  // ── API impérative exposée au parent ─────────────────────────────────────
+  useImperativeHandle(ref, () => ({
+    getApi: () => ({
+      prev:    () => setDate((d) => navigateDate(rbcView, d, 'prev')),
+      next:    () => setDate((d) => navigateDate(rbcView, d, 'next')),
+      today:   () => setDate(new Date()),
+      changeView: (fcView) => setRbcView(VIEW_MAP[fcView] ?? fcView),
+      refetchEvents: () => {
+        const s = startOfWeek(startOfMonth(date), { locale: fr });
+        const e = endOfWeek(endOfMonth(date), { locale: fr });
+        loadRange(s, e);
+      },
+      view: { title: buildTitle(rbcView, date) },
+    }),
+  }), [rbcView, date, loadRange]);
+
+  // Chargement initial
+  React.useEffect(() => {
+    const now = new Date();
+    loadRange(
+      startOfWeek(startOfMonth(now), { locale: fr }),
+      endOfWeek(endOfMonth(now), { locale: fr }),
+    );
+  }, []); // eslint-disable-line
+
+  // Recharge quand la plage visible change
   const handleRangeChange = useCallback((range) => {
     let start, end;
     if (Array.isArray(range)) {
@@ -130,21 +171,18 @@ export default function CalendarWrapper({
       end   = range[range.length - 1];
     } else {
       start = range.start ?? range;
-      end   = range.end ?? range;
+      end   = range.end   ?? range;
     }
     loadRange(start, end);
-    datesSet?.({ start, end, startStr: start.toISOString(), endStr: end.toISOString(), view: { title: '' } });
-  }, [loadRange, datesSet]);
+    datesSet?.({
+      start, end,
+      startStr: start.toISOString(),
+      endStr:   end.toISOString(),
+      view: { title: buildTitle(rbcView, date) },
+    });
+  }, [loadRange, datesSet, rbcView, date]);
 
-  // Charge initial
-  React.useEffect(() => {
-    const now = new Date();
-    const start = startOfMonth(now);
-    const end   = endOfMonth(now);
-    loadRange(soW(start, { locale: fr }), endOfWeek(end, { locale: fr }));
-  }, [loadRange]);
-
-  // ── Style des événements ──────────────────────────────────────────────────────
+  // ── Styles événements ─────────────────────────────────────────────────────
   const eventStyleGetter = useCallback((event) => ({
     style: {
       backgroundColor: event.color ?? '#3B82F6',
@@ -157,7 +195,7 @@ export default function CalendarWrapper({
     },
   }), []);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────────
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleSelectSlot = useCallback(({ start }) => {
     dateClick?.({ date: start, dateStr: start.toISOString() });
   }, [dateClick]);
@@ -165,12 +203,13 @@ export default function CalendarWrapper({
   const handleSelectEvent = useCallback((event) => {
     eventClick?.({
       event: {
-        id:            event.id,
-        title:         event.title,
-        start:         event.start?.toISOString(),
-        end:           event.end?.toISOString(),
-        allDay:        event.allDay,
-        extendedProps: event.resource ?? {},
+        id:              event.id,
+        title:           event.title,
+        startStr:        event.start?.toISOString(),
+        endStr:          event.end?.toISOString(),
+        allDay:          event.allDay,
+        backgroundColor: event.color,
+        extendedProps:   event.resource ?? {},
       },
     });
   }, [eventClick]);
@@ -179,28 +218,15 @@ export default function CalendarWrapper({
     onEventDrop?.({
       event: {
         id:            event.id,
-        title:         event.title,
-        start:         event.start?.toISOString(),
-        end:           event.end?.toISOString(),
-        allDay:        event.allDay,
+        startStr:      start.toISOString(),
+        endStr:        end.toISOString(),
         extendedProps: event.resource ?? {},
       },
-      delta:   {},
-      revert:  () => {},
-      newStart: start,
-      newEnd:   end,
+      revert: () => {},
     });
   }, [onEventDrop]);
 
-  const handleViewChange = useCallback((view) => {
-    setRbcView(view);
-  }, []);
-
-  const handleNavigate = useCallback((newDate) => {
-    setDate(newDate);
-  }, []);
-
-  // ── Rendu ─────────────────────────────────────────────────────────────────────
+  // ── Rendu ─────────────────────────────────────────────────────────────────
   return (
     <div
       className="rbc-calendar-wrapper"
@@ -224,29 +250,31 @@ export default function CalendarWrapper({
       )}
 
       <style>{`
-        .rbc-calendar-wrapper .rbc-calendar { height: 100%; font-family: inherit; }
-        .rbc-calendar-wrapper .rbc-toolbar { display: none; }
-        .rbc-calendar-wrapper .rbc-header { background: #f9fafb; font-size: 12px; font-weight: 600; color: #374151; padding: 8px 4px; border-color: #e5e7eb; }
-        .rbc-calendar-wrapper .rbc-month-view { border-color: #e5e7eb; border-radius: 12px; overflow: hidden; }
-        .rbc-calendar-wrapper .rbc-day-bg { border-color: #e5e7eb; }
-        .rbc-calendar-wrapper .rbc-today { background-color: #f5f3ff; }
-        .rbc-calendar-wrapper .rbc-off-range-bg { background: #f9fafb; }
-        .rbc-calendar-wrapper .rbc-event { cursor: pointer; }
-        .rbc-calendar-wrapper .rbc-event:focus { outline: none; }
-        .rbc-calendar-wrapper .rbc-show-more { color: #9333ea; font-size: 11px; font-weight: 600; }
-        .rbc-calendar-wrapper .rbc-agenda-table { border-color: #e5e7eb; }
-        .rbc-calendar-wrapper .rbc-agenda-date-cell, .rbc-calendar-wrapper .rbc-agenda-time-cell { font-size: 13px; color: #6b7280; }
-        .rbc-calendar-wrapper .rbc-timeslot-group { border-color: #f3f4f6; min-height: 40px; }
+        .rbc-calendar-wrapper .rbc-calendar        { height: 100%; font-family: inherit; }
+        .rbc-calendar-wrapper .rbc-toolbar         { display: none; }
+        .rbc-calendar-wrapper .rbc-header          { background: #f9fafb; font-size: 12px; font-weight: 600; color: #374151; padding: 8px 4px; border-color: #e5e7eb; }
+        .rbc-calendar-wrapper .rbc-month-view      { border-color: #e5e7eb; border-radius: 12px; overflow: hidden; }
+        .rbc-calendar-wrapper .rbc-day-bg          { border-color: #e5e7eb; }
+        .rbc-calendar-wrapper .rbc-today           { background-color: #f5f3ff; }
+        .rbc-calendar-wrapper .rbc-off-range-bg    { background: #f9fafb; }
+        .rbc-calendar-wrapper .rbc-event           { cursor: pointer; }
+        .rbc-calendar-wrapper .rbc-event:focus     { outline: none; }
+        .rbc-calendar-wrapper .rbc-show-more       { color: #9333ea; font-size: 11px; font-weight: 600; }
+        .rbc-calendar-wrapper .rbc-agenda-table    { border-color: #e5e7eb; }
+        .rbc-calendar-wrapper .rbc-agenda-date-cell,
+        .rbc-calendar-wrapper .rbc-agenda-time-cell { font-size: 13px; color: #6b7280; }
+        .rbc-calendar-wrapper .rbc-timeslot-group  { border-color: #f3f4f6; min-height: 40px; }
         .rbc-calendar-wrapper .rbc-time-header-content { border-color: #e5e7eb; }
-        .rbc-calendar-wrapper .rbc-time-content { border-color: #e5e7eb; }
+        .rbc-calendar-wrapper .rbc-time-content    { border-color: #e5e7eb; }
         .rbc-calendar-wrapper .rbc-current-time-indicator { background-color: #9333ea; }
+        .rbc-calendar-wrapper .rbc-day-slot .rbc-time-slot { border-color: #f9fafb; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .dark .rbc-calendar-wrapper .rbc-header { background: #1e2d3d; color: #d1d5db; border-color: #1e3048; }
-        .dark .rbc-calendar-wrapper .rbc-month-view { border-color: #1e3048; }
-        .dark .rbc-calendar-wrapper .rbc-day-bg { border-color: #1e3048; }
-        .dark .rbc-calendar-wrapper .rbc-today { background-color: #2d1b69; }
-        .dark .rbc-calendar-wrapper .rbc-off-range-bg { background: #0f1923; }
-        .dark .rbc-calendar-wrapper .rbc-agenda-table { border-color: #1e3048; }
+        .dark .rbc-calendar-wrapper .rbc-header        { background: #1e2d3d; color: #d1d5db; border-color: #1e3048; }
+        .dark .rbc-calendar-wrapper .rbc-month-view    { border-color: #1e3048; }
+        .dark .rbc-calendar-wrapper .rbc-day-bg        { border-color: #1e3048; }
+        .dark .rbc-calendar-wrapper .rbc-today         { background-color: #2d1b69; }
+        .dark .rbc-calendar-wrapper .rbc-off-range-bg  { background: #0f1923; }
+        .dark .rbc-calendar-wrapper .rbc-agenda-table  { border-color: #1e3048; }
       `}</style>
 
       <DnDCalendar
@@ -256,13 +284,13 @@ export default function CalendarWrapper({
         events={rbcEvents}
         view={rbcView}
         date={date}
-        onView={handleViewChange}
-        onNavigate={handleNavigate}
+        onView={setRbcView}
+        onNavigate={setDate}
         onRangeChange={handleRangeChange}
         onSelectSlot={selectable ? handleSelectSlot : undefined}
         onSelectEvent={handleSelectEvent}
         onEventDrop={editable ? handleEventDrop : undefined}
-        selectable={selectable}
+        selectable={!!selectable}
         resizable={false}
         popup
         eventPropGetter={eventStyleGetter}
@@ -271,4 +299,6 @@ export default function CalendarWrapper({
       />
     </div>
   );
-}
+});
+
+export default CalendarWrapper;

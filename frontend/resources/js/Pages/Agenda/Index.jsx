@@ -246,8 +246,10 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
      * Mise à jour de l'en-tête de navigation lors du changement de vue.
      */
     const handleDatesSet = useCallback((dateInfo) => {
-        const api = calendarRef.current?.getApi();
-        setCurrentTitle(api?.view?.title ?? '');
+        const title = dateInfo?.view?.title
+            ?? calendarRef.current?.getApi()?.view?.title
+            ?? '';
+        setCurrentTitle(title);
     }, []);
 
     // -----------------------------------------------------------------------
