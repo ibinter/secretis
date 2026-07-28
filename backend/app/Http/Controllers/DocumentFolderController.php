@@ -74,7 +74,7 @@ class DocumentFolderController extends Controller
             'name'            => $validated['name'],
             'parent_id'       => $validated['parent_id'] ?? null,
             'access_level'    => $validated['access_level'],
-            'created_by_id'   => $user->id,
+            'created_by'      => $user->id,
         ]);
 
         $this->auditService->logCreated(
