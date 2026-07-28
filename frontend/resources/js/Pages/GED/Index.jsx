@@ -145,11 +145,15 @@ function NewFolderModal({ parentId, onClose, onCreated }) {
         setLoading(true);
 
         try {
-            await router.post('/api/ged/folders', {
+            const { default: axios } = await import('axios');
+            await axios.post('/api/ged/folders', {
                 name:         name.trim(),
                 parent_id:    parentId,
                 access_level: accessLevel,
-            }, { onSuccess: onCreated });
+            });
+            onCreated?.();
+        } catch (err) {
+            console.error('[GED] Erreur création dossier', err);
         } finally {
             setLoading(false);
         }
