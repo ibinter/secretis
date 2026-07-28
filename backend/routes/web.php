@@ -82,6 +82,10 @@ use Illuminate\Support\Facades\Route;
 // =============================================================================
 
 
+// ─── QR Code — Page de vérification publique (sans authentification) ─────────
+Route::get('/verify/{token}', [\App\Http\Controllers\QrVerifyController::class, 'verify'])
+    ->name("qr.verify");
+
 // Public health endpoint (JSON)
 Route::get('/health', function () {
     return response()->json([
@@ -230,15 +234,23 @@ Route::middleware([
     Route::prefix('courrier')->name('courrier.')->group(function () {
         Route::get('/', [CourrierController::class, 'index'])->name('index');
         Route::post('/', [CourrierController::class, 'store'])->name('store');
+        Route::get('/create', [CourrierController::class, 'create'])->name('create');
         Route::get('/{id}', [CourrierController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [CourrierController::class, 'edit'])->name('edit');
         Route::put('/{id}', [CourrierController::class, 'update'])->name('update');
         Route::delete('/{id}', [CourrierController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/assign', [CourrierController::class, 'assign'])->name('assign');
         Route::post('/{id}/archive', [CourrierController::class, 'archive'])->name('archive');
+        Route::post('/{id}/status', [CourrierController::class, 'changeStatus'])->name('status');
     });
+
+    // QR code API (auth)
+    Route::get('/ged/documents/{id}/qr', [\App\Http\Controllers\QrVerifyController::class, 'documentQr'])->name('qr.document');
+    Route::get('/courrier/{id}/qr', [\App\Http\Controllers\QrVerifyController::class, 'courrierQr'])->name('qr.courrier');
 
     Route::prefix('ged')->name('ged.')->group(function () {
         Route::get('/', [DocumentController::class, 'index'])->name('index');
+        Route::get('/upload', [DocumentController::class, 'index'])->name('upload.form');
         Route::post('/upload', [DocumentController::class, 'upload'])->name('upload');
         Route::get('/search', [DocumentController::class, 'search'])->name('search');
         Route::get('/archives', [DocumentController::class, 'archives'])->name('archives');

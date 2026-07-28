@@ -124,6 +124,39 @@ class CourrierController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // Create — formulaire nouveau courrier
+    // -------------------------------------------------------------------------
+
+    public function create(Request $request): Response
+    {
+        $user = Auth::user();
+        return Inertia::render('Courrier/Form', [
+            'type'        => $request->query('type', 'incoming'),
+            'departments' => \App\Models\Department::where('organization_id', $user->organization_id)
+                                ->select('id', 'name')->orderBy('name')->get(),
+            'users'       => \App\Models\User::where('organization_id', $user->organization_id)
+                                ->select('id', 'name', 'email')->orderBy('name')->get(),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Edit — formulaire modification courrier
+    // -------------------------------------------------------------------------
+
+    public function edit(string $id): Response
+    {
+        $mail = $this->findMailForCurrentOrg($id);
+        $user = Auth::user();
+        return Inertia::render('Courrier/Form', [
+            'courrier'    => $mail->load('attachments'),
+            'departments' => \App\Models\Department::where('organization_id', $user->organization_id)
+                                ->select('id', 'name')->orderBy('name')->get(),
+            'users'       => \App\Models\User::where('organization_id', $user->organization_id)
+                                ->select('id', 'name', 'email')->orderBy('name')->get(),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
     // Store
     // -------------------------------------------------------------------------
 

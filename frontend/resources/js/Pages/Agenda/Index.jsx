@@ -25,18 +25,13 @@
  *  - timezone     : string
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, lazy, Suspense } from "react";
 import PropTypes from 'prop-types';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import frLocale from '@fullcalendar/core/locales/fr';
 import { Head } from '@inertiajs/react';
 import { useQueryClient } from '@tanstack/react-query';
 import EventModal from '../../Components/Agenda/EventModal';
 import { AGENDA_KEYS } from '../../hooks/useAgenda';
+const LazyCalendar = lazy(() => import("../../Components/Agenda/CalendarWrapper"));
 
 // -----------------------------------------------------------------------
 // Constantes
@@ -429,11 +424,9 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
                     {/* Calendrier FullCalendar */}
                     <div className="flex-1 overflow-auto p-4">
                         <div className="h-full">
-                            <FullCalendar
+                            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>}><LazyCalendar
                                 ref={calendarRef}
-                                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                                 initialView={currentView}
-                                locale={frLocale}
                                 timeZone={timezone}
                                 headerToolbar={false}  // On utilise notre propre toolbar
                                 height="100%"
@@ -485,7 +478,7 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
                                     // Ajouter le type comme attribut data pour le CSS
                                     info.el.dataset.eventType = info.event.extendedProps?.type ?? 'event';
                                 }}
-                            />
+                            /></Suspense>
                         </div>
                     </div>
                 </main>

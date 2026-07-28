@@ -29,6 +29,7 @@ use App\Http\Controllers\CircularController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourrierController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentFolderController;
 use App\Http\Controllers\DocumentWorkflowController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExpenseController;
@@ -151,6 +152,32 @@ Route::post('/v1/xapi/statements', [ScormRuntimeController::class, 'storeStateme
     ->name('xapi.statements');
 
 // =============================================================================
+// =============================================================================
+// ROUTES GED / COURRIER — alias sans préfixe v1 (attendus par le frontend React)
+// Même middlewares que v1 mais sans le préfixe
+// =============================================================================
+
+Route::middleware(['auth:sanctum', 'tenant', 'throttle:api'])->group(function () {
+    Route::prefix('ged')->name('api.ged.')->group(function () {
+        Route::get('/folders', [DocumentFolderController::class, 'index'])->name('folders.index');
+        Route::post('/folders', [DocumentFolderController::class, 'store'])->name('folders.store');
+        Route::put('/folders/{id}', [DocumentFolderController::class, 'update'])->name('folders.update');
+        Route::delete('/folders/{id}', [DocumentFolderController::class, 'destroy'])->name('folders.destroy');
+        Route::post('/folders/{id}/move', [DocumentFolderController::class, 'move'])->name('folders.move');
+        Route::get('/documents/{id}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
+        Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
+        Route::post('/documents/{id}/share', [DocumentController::class, 'share'])->name('documents.share');
+    });
+    Route::prefix('courrier')->name('api.courrier.')->group(function () {
+        Route::post('/{id}/status', [CourrierController::class, 'changeStatus'])->name('status');
+        Route::get('/export/{format}', function (\Illuminate\Http\Request $req, string $format) {
+            return $format === 'pdf'
+                ? app(\App\Http\Controllers\CourrierController::class)->exportPdf($req)
+                : app(\App\Http\Controllers\CourrierController::class)->exportExcel($req);
+        })->name('export');
+    });
+});
+
 // API v1 — Routes protégées (Sanctum + tenant + license)
 // =============================================================================
 
@@ -235,6 +262,7 @@ Route::prefix('v1')->name('api.v1.')->middleware([
         Route::get('/{id}/qr-code', [CourrierController::class, 'show'])->name('qr-code');
         Route::get('/stats', [CourrierController::class, 'index'])->name('stats');
         Route::get('/export', [CourrierController::class, 'exportExcel'])->name('export');
+        Route::post('/{id}/status', [CourrierController::class, 'changeStatus'])->name('status');
     });
 
     Route::prefix('documents')->name('documents.')->group(function () {
