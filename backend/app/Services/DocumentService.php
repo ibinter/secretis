@@ -118,7 +118,7 @@ class DocumentService
                 'current_version' => 1,
                 'status'          => 'active',
                 'access_level'    => $metadata['access_level'] ?? 'internal',
-                'tags'            => $metadata['keywords'] ?? [],
+                'tags'            => json_encode($metadata['keywords'] ?? []),
                 'mime_type'       => $file->getMimeType(),
                 'file_path'       => $storedPath,
                 'file_size'       => $file->getSize(),
