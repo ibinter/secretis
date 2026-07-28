@@ -164,6 +164,7 @@ Route::middleware(['auth:sanctum', 'tenant', 'throttle:api'])->group(function ()
         Route::put('/folders/{id}', [DocumentFolderController::class, 'update'])->name('folders.update');
         Route::delete('/folders/{id}', [DocumentFolderController::class, 'destroy'])->name('folders.destroy');
         Route::post('/folders/{id}/move', [DocumentFolderController::class, 'move'])->name('folders.move');
+        Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
         Route::get('/documents/{id}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
         Route::post('/documents/{id}/share', [DocumentController::class, 'share'])->name('documents.share');

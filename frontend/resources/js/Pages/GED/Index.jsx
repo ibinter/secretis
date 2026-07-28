@@ -132,6 +132,87 @@ function FolderTreeItem({ folder, currentFolderId, onSelect, depth = 0 }) {
 }
 
 // ---------------------------------------------------------------------------
+// Modal upload document
+// ---------------------------------------------------------------------------
+
+function UploadModal({ file, uploading, error, onClose, onConfirm }) {
+    const [title, setTitle]           = useState(file?.name ?? '');
+    const [accessLevel, setAccessLevel] = useState('internal');
+
+    const fmt = (bytes) => bytes < 1024 * 1024
+        ? `${(bytes / 1024).toFixed(1)} Ko`
+        : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+                <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900">Uploader un document</h2>
+                    <button onClick={onClose} disabled={uploading} className="rounded p-1 text-gray-400 hover:bg-gray-100">
+                        <XMarkIcon className="h-5 w-5" />
+                    </button>
+                </div>
+
+                {/* Aperçu fichier */}
+                <div className="mb-4 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                    <DocumentIcon className="h-8 w-8 flex-shrink-0 text-purple-400" />
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-800">{file?.name}</p>
+                        <p className="text-xs text-gray-400">{fmt(file?.size ?? 0)}</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Titre du document</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            disabled={uploading}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                    </div>
+                    <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Niveau de confidentialité</label>
+                        <select
+                            value={accessLevel}
+                            onChange={e => setAccessLevel(e.target.value)}
+                            disabled={uploading}
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none"
+                        >
+                            <option value="public">Public</option>
+                            <option value="internal">Interne</option>
+                            <option value="confidential">Confidentiel</option>
+                            <option value="top_secret">Secret</option>
+                        </select>
+                    </div>
+                    {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                    <button
+                        onClick={onClose}
+                        disabled={uploading}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        onClick={() => onConfirm(title, accessLevel)}
+                        disabled={uploading || !title.trim()}
+                        className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+                    >
+                        {uploading ? (
+                            <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />Envoi…</>
+                        ) : 'Uploader'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // Modal nouveau dossier
 // ---------------------------------------------------------------------------
 
@@ -567,6 +648,7 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
     const [viewMode, setViewMode]               = useState('grid'); // 'grid' | 'list'
     const [search, setSearch]                   = useState(initialFilters.search || '');
     const [showNewFolder, setShowNewFolder]     = useState(false);
+    const [uploadState, setUploadState]         = useState(null); // { file, uploading, error }
     const [previewDoc, setPreviewDoc]           = useState(null);
     const [shareDoc, setShareDoc]               = useState(null);
 
@@ -604,8 +686,30 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
     const handleUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        // Rediriger vers la page d'upload avec le dossier courant pré-sélectionné
-        router.visit(`/ged/upload?folder_id=${currentFolderId || ''}`);
+        // Réinitialiser l'input pour permettre re-sélection du même fichier
+        e.target.value = '';
+        setUploadState({ file, uploading: false, error: null });
+    };
+
+    const handleUploadConfirm = async (title, accessLevel) => {
+        if (!uploadState?.file) return;
+        setUploadState(s => ({ ...s, uploading: true, error: null }));
+        try {
+            const { default: axios } = await import('axios');
+            const fd = new FormData();
+            fd.append('file', uploadState.file);
+            fd.append('title', title || uploadState.file.name);
+            fd.append('access_level', accessLevel || 'internal');
+            if (currentFolderId) fd.append('folder_id', currentFolderId);
+            await axios.post('/api/ged/documents', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setUploadState(null);
+            router.reload({ only: ['documents'] });
+        } catch (err) {
+            const msg = err?.response?.data?.message || err.message || 'Erreur upload';
+            setUploadState(s => ({ ...s, uploading: false, error: msg }));
+        }
     };
 
     const handleDownload = (doc) => {
@@ -842,6 +946,16 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                     parentId={currentFolderId}
                     onClose={() => setShowNewFolder(false)}
                     onCreated={() => { setShowNewFolder(false); router.reload({ only: ['folders', 'documents'] }); }}
+                />
+            )}
+
+            {uploadState && (
+                <UploadModal
+                    file={uploadState.file}
+                    uploading={uploadState.uploading}
+                    error={uploadState.error}
+                    onClose={() => setUploadState(null)}
+                    onConfirm={handleUploadConfirm}
                 />
             )}
 
