@@ -113,16 +113,16 @@ class DocumentService
                 'folder_id'       => $metadata['folder_id'] ?? null,
                 'title'           => $metadata['title'] ?? $file->getClientOriginalName(),
                 'description'     => $metadata['description'] ?? null,
-                'type'            => $metadata['type'] ?? null,
-                'department_id'   => $metadata['department_id'] ?? null,
                 'author_id'       => $user->id,
+                'created_by'      => $user->id,
                 'current_version' => 1,
                 'status'          => 'active',
                 'access_level'    => $metadata['access_level'] ?? 'internal',
-                'keywords'        => $metadata['keywords'] ?? [],
+                'tags'            => $metadata['keywords'] ?? [],
                 'mime_type'       => $file->getMimeType(),
                 'file_path'       => $storedPath,
                 'file_size'       => $file->getSize(),
+                'file_name'       => $file->getClientOriginalName(),
             ]);
 
             // Créer la version initiale
@@ -131,8 +131,10 @@ class DocumentService
                 'version_number' => 1,
                 'file_path'      => $storedPath,
                 'file_size'      => $file->getSize(),
-                'uploaded_by_id' => $user->id,
-                'notes'          => 'Version initiale',
+                'file_name'      => $file->getClientOriginalName(),
+                'mime_type'      => $file->getMimeType(),
+                'uploaded_by'    => $user->id,
+                'change_summary' => 'Version initiale',
             ]);
 
             $this->auditService->logCreated(
