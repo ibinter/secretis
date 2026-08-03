@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Convocation;
 use App\Models\Meeting;
+use App\Models\Task;
+use App\Models\User;
 use App\Services\MeetingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +20,24 @@ class MeetingController extends Controller
     public function __construct(private readonly MeetingService $meetingService)
     {
         $this->middleware('auth');
+    }
+
+    // -------------------------------------------------------------------------
+    // create — Formulaire création
+    // -------------------------------------------------------------------------
+
+    public function create(): InertiaResponse
+    {
+        $user = Auth::user();
+        $orgId = $user->organization_id;
+
+        return Inertia::render('Reunions/Create', [
+            'users' => User::where('organization_id', $orgId)
+                ->where('id', '!=', $user->id)
+                ->select('id', 'name', 'email', 'avatar')
+                ->orderBy('name')
+                ->get(),
+        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -111,12 +132,32 @@ class MeetingController extends Controller
             'agenda_items.*.order'        => 'required|integer|min:0',
         ]);
 
-        $meeting = $this->meetingService->createMeeting($data, Auth::user());
+        $user    = Auth::user();
+        $meeting = $this->meetingService->createMeeting($data, $user);
+
+        // Créer les convocations automatiquement pour chaque participant
+        if (! empty($data['participant_ids'])) {
+            $this->createConvocations($meeting, $data['participant_ids'], $user);
+        }
 
         return response()->json([
             'message' => 'Réunion créée avec succès.',
             'meeting' => $meeting,
         ], 201);
+    }
+
+    private function createConvocations(Meeting $meeting, array $participantIds, User $sender): void
+    {
+        foreach ($participantIds as $userId) {
+            Convocation::firstOrCreate(
+                ['meeting_id' => $meeting->id, 'user_id' => $userId],
+                [
+                    'organization_id' => $meeting->organization_id,
+                    'sent_by'         => $sender->id,
+                    'status'          => 'pending',
+                ]
+            );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -355,7 +396,6 @@ class MeetingController extends Controller
         $meeting = Meeting::forOrganization($user->organization_id)->findOrFail($id);
 
         if (empty($meeting->minutes_pdf_path)) {
-            // Générer à la volée si pas encore disponible
             try {
                 $path = $this->meetingService->generateMeetingSummaryPdf($meeting);
             } catch (\Throwable $e) {
@@ -372,5 +412,125 @@ class MeetingController extends Controller
         $filename = 'CR_' . str_replace([' ', '/'], '_', $meeting->title) . '.pdf';
 
         return Storage::download($path, $filename);
+    }
+
+    // -------------------------------------------------------------------------
+    // showMinutes — Redirection vers détail (onglet PV)
+    // -------------------------------------------------------------------------
+
+    public function showMinutes(string $id): \Illuminate\Http\RedirectResponse
+    {
+        return redirect()->route('reunions.show', $id);
+    }
+
+    // -------------------------------------------------------------------------
+    // convocations — Liste les convocations d'une réunion
+    // -------------------------------------------------------------------------
+
+    public function convocations(string $id): InertiaResponse
+    {
+        $user    = Auth::user();
+        $meeting = Meeting::forOrganization($user->organization_id)
+            ->with(['organizer:id,name'])
+            ->findOrFail($id);
+
+        $convocations = Convocation::where('meeting_id', $id)
+            ->with(['user:id,name,email,avatar', 'sender:id,name'])
+            ->orderBy('created_at')
+            ->get();
+
+        return Inertia::render('Reunions/Convocations', [
+            'meeting'      => $meeting,
+            'convocations' => $convocations,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // sendConvocations — Envoie les convocations par email
+    // -------------------------------------------------------------------------
+
+    public function sendConvocations(Request $request, string $id): JsonResponse
+    {
+        $user    = Auth::user();
+        $meeting = Meeting::forOrganization($user->organization_id)->findOrFail($id);
+
+        $userIds = $request->input('user_ids', []);
+
+        $query = Convocation::where('meeting_id', $id);
+        if (! empty($userIds)) {
+            $query->whereIn('user_id', $userIds);
+        }
+
+        $convocations = $query->with('user')->get();
+        $sent = 0;
+
+        foreach ($convocations as $conv) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($conv->user->email)->send(
+                    new \App\Mail\ConvocationMail($meeting, $conv->user)
+                );
+                $conv->update(['status' => 'sent', 'sent_at' => now(), 'sent_by' => $user->id]);
+                $sent++;
+            } catch (\Throwable) {
+                // on continue les autres envois même si un échoue
+            }
+        }
+
+        return response()->json(['message' => "{$sent} convocation(s) envoyée(s).", 'sent' => $sent]);
+    }
+
+    // -------------------------------------------------------------------------
+    // decisionToTask — Convertit une décision en tâche
+    // -------------------------------------------------------------------------
+
+    public function decisionToTask(Request $request, string $id, string $decisionId): JsonResponse
+    {
+        $user    = Auth::user();
+        $meeting = Meeting::forOrganization($user->organization_id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'title'       => 'nullable|string|max:255',
+            'assignee_id' => 'nullable|uuid|exists:users,id',
+            'due_date'    => 'nullable|date',
+        ]);
+
+        // Chercher la décision dans le JSONB ou la table meeting_decisions
+        $decisions = $meeting->decisions ?? [];
+        $decision  = collect($decisions)->firstWhere('id', $decisionId)
+            ?? \App\Models\MeetingDecision::find($decisionId)?->toArray();
+
+        if (! $decision) {
+            return response()->json(['message' => 'Décision introuvable.'], 404);
+        }
+
+        $taskTitle = $validated['title'] ?? ($decision['action_required'] ?? $decision['decision'] ?? 'Tâche issue de réunion');
+
+        $task = Task::create([
+            'organization_id' => $user->organization_id,
+            'title'           => $taskTitle,
+            'description'     => "Issue de la réunion : {$meeting->title}\n\nDécision : " . ($decision['decision'] ?? ''),
+            'status'          => 'todo',
+            'priority'        => 'normal',
+            'created_by'      => $user->id,
+            'meeting_id'      => $meeting->id,
+            'due_date'        => $validated['due_date'] ?? ($decision['deadline'] ?? null),
+        ]);
+
+        if (! empty($validated['assignee_id'])) {
+            $task->assignees()->attach($validated['assignee_id'], [
+                'assigned_at' => now(),
+                'assigned_by' => $user->id,
+            ]);
+        } elseif (! empty($decision['responsible_id'])) {
+            $task->assignees()->attach($decision['responsible_id'], [
+                'assigned_at' => now(),
+                'assigned_by' => $user->id,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Tâche créée depuis la décision.',
+            'task'    => $task->load('assignees:id,name,avatar'),
+        ], 201);
     }
 }

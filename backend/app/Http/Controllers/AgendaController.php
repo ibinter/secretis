@@ -88,6 +88,61 @@ class AgendaController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // day / week — Vues Jour et Semaine
+    // -------------------------------------------------------------------------
+
+    public function day(Request $request): InertiaResponse
+    {
+        $user  = $request->user();
+        $tz    = $user->organization?->timezone ?? 'UTC';
+        $date  = $request->query('date')
+            ? Carbon::parse($request->query('date'), $tz)->startOfDay()
+            : Carbon::today($tz);
+
+        $events = Event::forOrganization($user->organization_id)
+            ->inDateRange($date, $date->copy()->endOfDay())
+            ->with('participants:id,name,avatar')
+            ->orderBy('start_at')
+            ->get()
+            ->map(fn(Event $e) => $e->toCalendarFormat());
+
+        return Inertia::render('Agenda/Day', [
+            'date'     => $date->toDateString(),
+            'events'   => $events,
+            'timezone' => $tz,
+            'orgUsers' => $user->organization
+                ? $user->organization->users()->active()->select(['id', 'name', 'email', 'avatar'])->orderBy('name')->get()
+                : collect(),
+        ]);
+    }
+
+    public function week(Request $request): InertiaResponse
+    {
+        $user  = $request->user();
+        $tz    = $user->organization?->timezone ?? 'UTC';
+        $date  = $request->query('date')
+            ? Carbon::parse($request->query('date'), $tz)->startOfWeek()
+            : Carbon::now($tz)->startOfWeek();
+
+        $events = Event::forOrganization($user->organization_id)
+            ->inDateRange($date, $date->copy()->endOfWeek())
+            ->with('participants:id,name,avatar')
+            ->orderBy('start_at')
+            ->get()
+            ->map(fn(Event $e) => $e->toCalendarFormat());
+
+        return Inertia::render('Agenda/Week', [
+            'weekStart' => $date->toDateString(),
+            'weekEnd'   => $date->copy()->endOfWeek()->toDateString(),
+            'events'    => $events,
+            'timezone'  => $tz,
+            'orgUsers'  => $user->organization
+                ? $user->organization->users()->active()->select(['id', 'name', 'email', 'avatar'])->orderBy('name')->get()
+                : collect(),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
     // API JSON
     // -------------------------------------------------------------------------
 

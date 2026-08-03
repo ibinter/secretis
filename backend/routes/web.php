@@ -275,14 +275,34 @@ Route::middleware([
     // -------------------------------------------------------------------------
     Route::prefix('reunions')->name('reunions.')->group(function () {
         Route::get('/', [MeetingController::class, 'index'])->name('index');
+        Route::get('/create', [MeetingController::class, 'create'])->name('create');
         Route::post('/', [MeetingController::class, 'store'])->name('store');
         Route::get('/{id}', [MeetingController::class, 'show'])->name('show');
         Route::put('/{id}', [MeetingController::class, 'update'])->name('update');
         Route::delete('/{id}', [MeetingController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/start', [MeetingController::class, 'start'])->name('start');
-        Route::post('/{id}/end', [MeetingController::class, 'end'])->name('end');
+
+        // Actions de cycle de vie
+        Route::post('/{id}/start', [MeetingController::class, 'startMeeting'])->name('start');
+        Route::post('/{id}/end', [MeetingController::class, 'endMeeting'])->name('end');
+
+        // Ordre du jour
+        Route::post('/{id}/agenda', [MeetingController::class, 'addAgendaItem'])->name('agenda.add');
+
+        // Compte rendu / PV
         Route::get('/{id}/compte-rendu', [MeetingController::class, 'showMinutes'])->name('compte-rendu.show');
-        Route::post('/{id}/compte-rendu', [MeetingController::class, 'storeMinutes'])->name('compte-rendu.store');
+        Route::post('/{id}/minutes', [MeetingController::class, 'saveMinutes'])->name('minutes.save');
+        Route::post('/{id}/minutes/approve', [MeetingController::class, 'approveMinutes'])->name('minutes.approve');
+        Route::get('/{id}/minutes/download', [MeetingController::class, 'downloadMinutes'])->name('minutes.download');
+
+        // Décisions
+        Route::post('/{id}/decisions/extract', [MeetingController::class, 'extractDecisions'])->name('decisions.extract');
+        Route::post('/{id}/decisions/{decisionId}/to-task', [MeetingController::class, 'decisionToTask'])->name('decisions.to-task');
+
+        // Convocations
+        Route::get('/{id}/convocations', [MeetingController::class, 'convocations'])->name('convocations');
+        Route::post('/{id}/convocations/send', [MeetingController::class, 'sendConvocations'])->name('convocations.send');
+
+        // Tâches depuis réunion
         Route::post('/{id}/tasks', [TaskController::class, 'createFromMeeting'])->name('tasks.create');
     });
 
