@@ -331,6 +331,7 @@ Route::middleware([
     Route::redirect('/contacts', '/annuaire', 301);
     Route::redirect('/visiteurs', '/reception', 301);
     Route::get('/tableau-affichage', [AnnouncementController::class, 'board'])->name('tableau-affichage');
+    Route::post('/tableau-affichage/{id}/dismiss', [AnnouncementController::class, 'dismiss'])->name('tableau-affichage.dismiss');
 
     // -------------------------------------------------------------------------
     // MODULE 6 — Réception Visiteurs (Vague 6)
@@ -597,6 +598,9 @@ Route::middleware([
         ->middleware('can:view.audit_logs');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::get('/aide', [HelpController::class, 'index'])->name('aide');
 
     // -------------------------------------------------------------------------

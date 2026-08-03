@@ -435,6 +435,204 @@ class TaskController extends Controller
         ];
     }
 
+    // -------------------------------------------------------------------------
+    // kanban — Vue Kanban dédiée (tâches groupées par statut)
+    // -------------------------------------------------------------------------
+
+    public function kanban(Request $request): InertiaResponse
+    {
+        $user  = Auth::user();
+        $query = Task::forOrganization($user->organization_id)
+            ->rootTasks()
+            ->with([
+                'assignees:id,name,avatar',
+                'project:id,name,color',
+                'subtasks:id,parent_id,status',
+            ])
+            ->orderBy('position');
+
+        if ($priority = $request->input('priority')) {
+            $query->byPriority($priority);
+        }
+        if ($assignee = $request->input('assignee')) {
+            $query->assignedTo($assignee);
+        }
+        if ($project = $request->input('project_id')) {
+            $query->byProject($project);
+        }
+        if ($search = $request->input('search')) {
+            $query->where('title', 'ilike', "%{$search}%");
+        }
+
+        $byStatus = $query->get()
+            ->map(fn ($t) => $this->formatTask($t))
+            ->groupBy('status');
+
+        $statuses = ['todo', 'in_progress', 'review', 'done', 'cancelled'];
+        $tasksByStatus = [];
+        foreach ($statuses as $s) {
+            $tasksByStatus[$s] = $byStatus->get($s, collect())->values();
+        }
+
+        return Inertia::render('Taches/Kanban', [
+            'tasksByStatus' => $tasksByStatus,
+            'filters'       => $request->only(['priority', 'assignee', 'project_id', 'due_from', 'due_to', 'search']),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // complete — Marquer une tâche comme terminée
+    // -------------------------------------------------------------------------
+
+    public function complete(string $id): JsonResponse
+    {
+        $user = Auth::user();
+        $task = Task::forOrganization($user->organization_id)->findOrFail($id);
+        $task->update(['status' => 'done', 'completed_at' => now()]);
+
+        return response()->json(['message' => 'Tâche marquée comme terminée.', 'task' => $this->formatTask($task->fresh())]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Commentaires
+    // -------------------------------------------------------------------------
+
+    public function comments(string $id): JsonResponse
+    {
+        $user = Auth::user();
+        $task = Task::forOrganization($user->organization_id)->findOrFail($id);
+
+        return response()->json([
+            'data' => $task->comments()->with('user:id,name,avatar')->orderBy('created_at')->get(),
+        ]);
+    }
+
+    public function storeComment(Request $request, string $id): JsonResponse
+    {
+        $user = Auth::user();
+        $task = Task::forOrganization($user->organization_id)->findOrFail($id);
+
+        $data = $request->validate(['content' => 'required|string|max:5000']);
+
+        $comment = $task->comments()->create([
+            'user_id' => $user->id,
+            'content' => $data['content'],
+        ]);
+
+        return response()->json(['comment' => $comment->load('user:id,name,avatar')], 201);
+    }
+
+    public function updateComment(Request $request, string $id, string $cid): JsonResponse
+    {
+        $user    = Auth::user();
+        $task    = Task::forOrganization($user->organization_id)->findOrFail($id);
+        $comment = $task->comments()->where('user_id', $user->id)->findOrFail($cid);
+
+        $data = $request->validate(['content' => 'required|string|max:5000']);
+        $comment->update($data);
+
+        return response()->json(['comment' => $comment->fresh('user:id,name,avatar')]);
+    }
+
+    public function destroyComment(string $id, string $cid): JsonResponse
+    {
+        $user    = Auth::user();
+        $task    = Task::forOrganization($user->organization_id)->findOrFail($id);
+        $comment = $task->comments()->where('user_id', $user->id)->findOrFail($cid);
+        $comment->delete();
+
+        return response()->json(['message' => 'Commentaire supprimé.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // Sous-tâches
+    // -------------------------------------------------------------------------
+
+    public function storeSubtask(Request $request, string $id): JsonResponse
+    {
+        $user   = Auth::user();
+        $parent = Task::forOrganization($user->organization_id)->findOrFail($id);
+
+        $data = $request->validate(['title' => 'required|string|max:255']);
+
+        $subtask = Task::create([
+            'organization_id' => $user->organization_id,
+            'parent_id'       => $parent->id,
+            'title'           => $data['title'],
+            'status'          => 'todo',
+            'priority'        => 'normal',
+            'created_by'      => $user->id,
+            'position'        => $parent->subtasks()->max('position') + 1,
+        ]);
+
+        return response()->json(['subtask' => $subtask], 201);
+    }
+
+    public function updateSubtask(Request $request, string $id, string $sid): JsonResponse
+    {
+        $user    = Auth::user();
+        Task::forOrganization($user->organization_id)->findOrFail($id);
+        $subtask = Task::where('parent_id', $id)->forOrganization($user->organization_id)->findOrFail($sid);
+
+        $data = $request->validate([
+            'title'    => 'sometimes|required|string|max:255',
+            'status'   => 'sometimes|in:todo,in_progress,review,done,cancelled',
+            'priority' => 'sometimes|in:low,normal,high,urgent',
+        ]);
+
+        $subtask->update($data);
+
+        return response()->json(['subtask' => $subtask->fresh()]);
+    }
+
+    public function destroySubtask(string $id, string $sid): JsonResponse
+    {
+        $user    = Auth::user();
+        Task::forOrganization($user->organization_id)->findOrFail($id);
+        $subtask = Task::where('parent_id', $id)->forOrganization($user->organization_id)->findOrFail($sid);
+        $subtask->delete();
+
+        return response()->json(['message' => 'Sous-tâche supprimée.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // createFromMeeting — Créer une tâche liée à une décision de réunion
+    // -------------------------------------------------------------------------
+
+    public function createFromMeeting(Request $request, string $meetingId): JsonResponse
+    {
+        $data = $request->validate([
+            'title'      => 'required|string|max:255',
+            'assignee_ids' => 'nullable|array',
+            'assignee_ids.*' => 'uuid|exists:users,id',
+            'due_date'   => 'nullable|date',
+            'priority'   => 'nullable|in:low,normal,high,urgent',
+        ]);
+
+        $user = Auth::user();
+
+        $task = Task::create([
+            'organization_id' => $user->organization_id,
+            'meeting_id'      => $meetingId,
+            'title'           => $data['title'],
+            'status'          => 'todo',
+            'priority'        => $data['priority'] ?? 'normal',
+            'due_date'        => $data['due_date'] ?? null,
+            'created_by'      => $user->id,
+            'position'        => 0,
+        ]);
+
+        if (! empty($data['assignee_ids'])) {
+            $task->assignees()->attach(
+                collect($data['assignee_ids'])->mapWithKeys(fn ($uid) => [
+                    $uid => ['assigned_at' => now(), 'assigned_by' => $user->id],
+                ])->all()
+            );
+        }
+
+        return response()->json(['message' => 'Tâche créée depuis la réunion.', 'task' => $task->load('assignees:id,name,avatar')], 201);
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {

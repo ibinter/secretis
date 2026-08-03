@@ -431,6 +431,61 @@ class DocumentController extends Controller
             ->firstOrFail();
     }
 
+    // -------------------------------------------------------------------------
+    // Versions — Historique des versions d'un document
+    // -------------------------------------------------------------------------
+
+    /**
+     * Retourne les versions d'un document (web Inertia ou JSON).
+     */
+    public function versions(string $id): Response|JsonResponse
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+        $versions = $document->versions()
+            ->with('uploadedBy:id,name')
+            ->orderByDesc('version_number')
+            ->get();
+
+        if (request()->wantsJson() && ! request()->hasHeader('X-Inertia')) {
+            return response()->json(['data' => $versions]);
+        }
+
+        return Inertia::render('GED/Versions', [
+            'document' => $document->load(['author:id,name', 'folder:id,name']),
+            'versions' => $versions,
+        ]);
+    }
+
+    /**
+     * API REST: GET /api/v1/documents/{id}/versions
+     */
+    public function apiVersions(string $id): JsonResponse
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+        $versions = $document->versions()
+            ->with('uploadedBy:id,name')
+            ->orderByDesc('version_number')
+            ->get();
+
+        return response()->json(['data' => $versions]);
+    }
+
+    /**
+     * API REST: GET /api/v1/documents/{id}/download
+     */
+    public function apiDownload(string $id): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\RedirectResponse
+    {
+        return $this->download($id);
+    }
+
+    /**
+     * API REST: POST /api/v1/documents/{id}/share
+     */
+    public function apiShare(Request $request, string $id): JsonResponse
+    {
+        return $this->share($request, $id);
+    }
+
     /**
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
