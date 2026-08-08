@@ -37,6 +37,8 @@ export * from './tokens'
 export { default as Modal }         from './Modal'
 export { default as Table }         from './Table'
 export { default as FormInput }     from './FormInput'
+export { default as Select }        from './Select'
+export { default as Input }         from './Input'
 export { default as Alert }         from './Alert'
 export { default as Spinner }       from './Spinner'
 export { default as Stepper }       from './Stepper'
@@ -49,10 +51,11 @@ export { default as Toast, toast }  from './Toast'
 export { default as Dropdown }      from './Dropdown'
 export { default as ConfirmDialog } from './ConfirmDialog'
 
-/* ─── Volontairement NON réexportés ────────────────────────────────────────── */
-// Tabs.jsx et Tooltip.jsx existent en double dans le dépôt (casse Pascal ET
-// minuscule) avec des contenus et des exports DIFFÉRENTS. Les réexporter ici
-// casserait le build soit sous Windows, soit sous Linux. Les importer
-// explicitement depuis la page qui en a besoin :
-//   import { Tabs, TabsList } from '@/Components/UI/tabs'
-//   import { Tooltip }        from '@/Components/UI/tooltip'
+/* ─── Tabs & Tooltip ───────────────────────────────────────────────────────── */
+// Ces deux modules existaient en double (casse Pascal ET minuscule) avec des
+// contenus différents : les versions minuscules étaient des ébauches shadcn,
+// dont `TooltipContent` renvoyait `null` — les infobulles n'affichaient donc
+// rien. Les doublons ont été supprimés le 2026-08-08 ; il ne reste que les
+// implémentations maison, réexportables sans risque.
+export { default as Tabs }    from './Tabs'
+export { default as Tooltip } from './Tooltip'
