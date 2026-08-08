@@ -117,6 +117,7 @@ export const MODULES = [
   // Secrétariat
   { id: 'agenda',        label: 'Agenda',          icon: 'CalendarDays',  href: '/agenda',                 section: 'secretariat' },
   { id: 'courrier',      label: 'Courrier',         icon: 'Mail',          href: '/courrier',               section: 'secretariat' },
+  { id: 'parapheur',     label: 'Parapheur',          icon: 'Stamp',           href: '/courrier/parapheur',     section: 'secretariat' },
   { id: 'reunions',      label: 'Réunions',         icon: 'Users',         href: '/reunions',               section: 'secretariat' },
   { id: 'taches',        label: 'Tâches',           icon: 'CheckSquare',   href: '/taches',                 section: 'secretariat' },
   { id: 'communication', label: 'Communication',    icon: 'MessageSquare', href: '/messages',               section: 'secretariat' },

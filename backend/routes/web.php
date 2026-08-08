@@ -286,6 +286,12 @@ Route::middleware([
         Route::delete('/{id}', [CourrierController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/assign', [CourrierController::class, 'assign'])->name('assign');
         Route::post('/{id}/reply', [CourrierController::class, 'reply'])->name('reply');
+
+        // ── Parapheur : le visa, pièce manquante du parcours ────────────────
+        // « parapheur » AVANT « {id} », sinon il est capturé comme identifiant.
+        Route::get('/parapheur', [CourrierController::class, 'parapheur'])->name('parapheur');
+        Route::post('/parapheur/{etape}/decision', [CourrierController::class, 'deciderVisa'])->whereNumber('etape')->name('parapheur.decision');
+        Route::post('/{id}/parapheur', [CourrierController::class, 'soumettreAuVisa'])->name('parapheur.soumettre');
         Route::post('/{id}/archive', [CourrierController::class, 'archive'])->name('archive');
         Route::post('/{id}/status', [CourrierController::class, 'changeStatus'])->name('status');
     });

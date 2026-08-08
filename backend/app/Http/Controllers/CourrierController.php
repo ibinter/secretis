@@ -583,4 +583,81 @@ class CourrierController extends Controller
             'urgent'      => (clone $base)->urgent()->whereNotIn('status', ['archived', 'closed'])->count(),
         ];
     }
+
+    // -------------------------------------------------------------------------
+    // Parapheur — visa avant départ
+    // -------------------------------------------------------------------------
+
+    /**
+     * GET /courrier/parapheur — les visas que j'ai à rendre.
+     */
+    public function parapheur(Request $request): \Inertia\Response
+    {
+        $service = app(\App\Services\MailApprovalService::class);
+
+        return \Inertia\Inertia::render('Courrier/Parapheur', [
+            'aViser' => $service->enAttentePour($request->user())->values(),
+            // Ce que j'ai soumis et qui attend encore : l'auteur doit pouvoir
+            // suivre son courrier sans relancer le viseur de vive voix.
+            'soumis' => \Illuminate\Support\Facades\DB::table('mail_approvals as a')
+                ->join('mail_registry as m', 'm.id', '=', 'a.mail_id')
+                ->join('users as u', 'u.id', '=', 'a.approver_id')
+                ->where('a.submitted_by', $request->user()->id)
+                ->whereIn('a.status', ['pending', 'in_progress'])
+                ->orderBy('a.created_at')
+                ->get(['a.id', 'a.status', 'a.step_order', 'm.id as mail_id',
+                       'm.reference', 'm.subject', 'u.name as viseur']),
+        ]);
+    }
+
+    /**
+     * POST /courrier/{id}/parapheur — soumettre au visa.
+     */
+    public function soumettreAuVisa(Request $request, string $id): \Illuminate\Http\RedirectResponse
+    {
+        $mail = $this->findMailForCurrentOrg($id);
+
+        $valide = $request->validate([
+            'approbateurs'           => ['required', 'array', 'min:1'],
+            'approbateurs.*.user_id' => ['required', 'integer', 'exists:users,id'],
+            'approbateurs.*.role'    => ['nullable', 'string', 'max:120'],
+        ]);
+
+        try {
+            app(\App\Services\MailApprovalService::class)
+                ->soumettre($mail, $valide['approbateurs'], Auth::user());
+        } catch (\Throwable $e) {
+            return back()->withErrors(['parapheur' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Courrier soumis au parapheur.');
+    }
+
+    /**
+     * POST /courrier/parapheur/{etape}/decision
+     */
+    public function deciderVisa(Request $request, int $etape): \Illuminate\Http\RedirectResponse
+    {
+        $valide = $request->validate([
+            'decision'    => ['required', 'in:approve,reject,send_back'],
+            'commentaire' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            app(\App\Services\MailApprovalService::class)->decider(
+                $etape,
+                Auth::user(),
+                $valide['decision'],
+                $valide['commentaire'] ?? null
+            );
+        } catch (\Throwable $e) {
+            return back()->withErrors(['visa' => $e->getMessage()]);
+        }
+
+        return back()->with('success', match ($valide['decision']) {
+            'approve'   => 'Visa donné.',
+            'reject'    => "Visa refusé — l'auteur est prévenu.",
+            'send_back' => 'Courrier renvoyé pour correction.',
+        });
+    }
 }
