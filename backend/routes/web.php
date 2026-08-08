@@ -39,6 +39,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ParametresController;
 use App\Http\Controllers\Portal\ClientPortalController as PortalClientPortalController;
 use App\Http\Controllers\ProcurementController;
+use App\Http\Controllers\SupplierInvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\QualityController;
@@ -780,6 +781,14 @@ Route::middleware([
     // -------------------------------------------------------------------------
     Route::prefix('achats')->name('achats.')->group(function () {
         Route::get('/', [ProcurementController::class, 'dashboard'])->name('index');
+
+        // Factures fournisseurs — dernière étape du cycle achat, et seul
+        // document qui porte la TVA déductible. Le chemin littéral est déclaré
+        // AVANT toute route à paramètre du même préfixe.
+        Route::get('/factures',                     [SupplierInvoiceController::class, 'index'])->name('factures');
+        Route::post('/factures',                    [SupplierInvoiceController::class, 'store'])->name('factures.store');
+        Route::post('/factures/comptabiliser-tout', [SupplierInvoiceController::class, 'comptabiliserTout'])->name('factures.comptabiliser-tout');
+        Route::post('/factures/{id}/comptabiliser', [SupplierInvoiceController::class, 'comptabiliser'])->name('factures.comptabiliser');
 
         // Demandes d'achat
         Route::get('/demandes',                 [ProcurementController::class, 'prIndex'])->name('demandes');

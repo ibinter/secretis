@@ -564,7 +564,7 @@ class SyscohadaService
         $totals = $this->getAccountTotals($org->id, $start, $end);
 
         return match ($type) {
-            'TVA'     => $this->calcTva($totals, $start, $end),
+            'TVA'     => $this->calcTva($totals, $org, $start, $end),
             'IS'      => $this->calcIs($totals, $org, $start, $end),
             'PATENTE' => $this->calcPatente($totals, $org),
             'CNPS'    => $this->calcCotisationsSociales($totals, $org, $start, $end),
@@ -572,13 +572,23 @@ class SyscohadaService
         };
     }
 
-    private function calcTva(array $totals, Carbon $start, Carbon $end): array
+    /**
+     * Déclaration de TVA.
+     *
+     * ⚠️ Les comptes venaient d'une liste EN DUR (`4431`/`443` pour la collecte,
+     * `4441`/`444` pour la déduction) qui ne correspondait pas au plan
+     * réellement semé : la TVA déductible remontait donc à ZÉRO même quand les
+     * écritures d'achat étaient correctement passées au 4451. Les comptes sont
+     * désormais lus dans `accounting_mappings`, comme partout ailleurs — un
+     * plan subdivisé différemment reste ainsi exploitable.
+     */
+    private function calcTva(array $totals, Organization $org, Carbon $start, Carbon $end): array
     {
-        // TVA collectée : comptes 4431 (TVA sur ventes)
-        $tvaCollectee = $this->sumAccounts($totals, ['4431', '443']);
+        $collecte   = $this->comptesTva($org->id, 'vat_collected',  ['4431', '443']);
+        $deductible = $this->comptesTva($org->id, 'vat_deductible', ['4451', '445']);
 
-        // TVA déductible : comptes 4441 (TVA sur achats)
-        $tvaDeductible = $this->sumAccounts($totals, ['4441', '444']);
+        $tvaCollectee  = $this->sumAccounts($totals, $collecte);
+        $tvaDeductible = $this->sumAccounts($totals, $deductible);
 
         $tvaNette = $tvaCollectee - $tvaDeductible;
 
@@ -590,12 +600,42 @@ class SyscohadaService
             'tva_nette'     => $tvaNette,
             'a_payer'       => max(0, $tvaNette),
             'credit_report' => max(0, -$tvaNette),
-            'taux'          => 0.18,
             'breakdown'     => [
-                'comptes_collecte'  => ['4431', '443'],
-                'comptes_deductible'=> ['4441', '444'],
+                'comptes_collecte'   => $collecte,
+                'comptes_deductible' => $deductible,
             ],
         ];
+    }
+
+    /**
+     * Comptes de TVA d'une organisation : celui paramétré, plus ses
+     * subdivisions éventuelles. Le repli n'est utilisé qu'à défaut de
+     * paramétrage.
+     *
+     * @return array<int, string>
+     */
+    private function comptesTva(int $orgId, string $purpose, array $repli): array
+    {
+        $compte = DB::table('accounting_mappings')
+            ->where('organization_id', $orgId)
+            ->where('purpose', $purpose)
+            ->value('account_number');
+
+        if (! $compte) {
+            return $repli;
+        }
+
+        // Une organisation peut ventiler sa TVA sur plusieurs sous-comptes
+        // (44521, 44522…) : on retient le compte paramétré et tous ceux qui en
+        // découlent, sinon une partie de la taxe échapperait à la déclaration.
+        return DB::table('chart_of_accounts')
+            ->where('organization_id', $orgId)
+            ->where(function ($q) use ($compte) {
+                $q->where('account_number', $compte)
+                  ->orWhere('account_number', 'like', $compte . '%');
+            })
+            ->pluck('account_number')
+            ->all();
     }
 
     private function calcIs(array $totals, Organization $org, Carbon $start, Carbon $end): array
