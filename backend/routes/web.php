@@ -39,6 +39,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ParametresController;
 use App\Http\Controllers\Portal\ClientPortalController as PortalClientPortalController;
 use App\Http\Controllers\ProcurementController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\SupplierInvoiceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -779,6 +780,21 @@ Route::middleware([
     // -------------------------------------------------------------------------
     // MODULE ACHATS & PROCUREMENT (Vague 12)
     // -------------------------------------------------------------------------
+    // -- Stock ---------------------------------------------------------------
+    // Le module Ressources gere deja les fournitures en quantite. Ce groupe
+    // ajoute ce qui en fait un stock : une valeur, un journal des mouvements
+    // et la confrontation du theorique au reel.
+    Route::prefix('stock')->name('stock.')->group(function () {
+        Route::get ('/',           [StockController::class, 'index'])->name('index');
+        Route::post('/mouvement',  [StockController::class, 'mouvement'])->name('mouvement');
+
+        // Chemin litteral declare AVANT toute route a parametre du groupe.
+        Route::get ('/inventaire',                  [StockController::class, 'inventaire'])->name('inventaire');
+        Route::post('/inventaire',                  [StockController::class, 'ouvrirInventaire'])->name('inventaire.ouvrir');
+        Route::post('/inventaire/{id}/comptage',    [StockController::class, 'saisirComptage'])->name('inventaire.comptage');
+        Route::post('/inventaire/{id}/cloturer',    [StockController::class, 'cloturerInventaire'])->name('inventaire.cloturer');
+    });
+
     Route::prefix('achats')->name('achats.')->group(function () {
         Route::get('/', [ProcurementController::class, 'dashboard'])->name('index');
 

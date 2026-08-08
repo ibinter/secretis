@@ -447,6 +447,10 @@ class ProcurementController extends Controller
             'items_received.*.qty_ordered'  => 'required|numeric',
             'items_received.*.qty_received' => 'required|numeric|min:0',
             'items_received.*.qty_rejected' => 'nullable|numeric|min:0',
+            // Rattachement facultatif a une fourniture suivie en stock : sans
+            // lui, la ligne est receptionnee mais n'entre pas en stock.
+            'items_received.*.supply_id'    => 'nullable|integer|exists:supplies,id',
+            'items_received.*.unit_price'   => 'nullable|numeric|min:0',
             'items_received.*.rejection_reason' => 'nullable|string',
         ]);
 

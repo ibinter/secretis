@@ -34,6 +34,8 @@ class Supply extends Model
         'quantity',
         'min_quantity',
         'unit_price',
+        'average_cost',
+        'last_cost',
         'supplier',
         'reference',
         'location',
@@ -43,6 +45,8 @@ class Supply extends Model
         'quantity'     => 'integer',
         'min_quantity' => 'integer',
         'unit_price'   => 'float',
+        'average_cost' => 'float',
+        'last_cost'    => 'float',
     ];
 
     // -------------------------------------------------------------------------
@@ -86,6 +90,12 @@ class Supply extends Model
     public function needsReorder(): bool
     {
         return $this->quantity <= $this->min_quantity;
+    }
+
+    /** Valeur du stock au coût moyen pondéré. */
+    public function stockValue(): float
+    {
+        return round($this->quantity * (float) $this->average_cost, 2);
     }
 
     /**
