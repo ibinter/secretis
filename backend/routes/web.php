@@ -700,6 +700,15 @@ Route::middleware([
         Route::delete('/factures/{id}',      [AccountingController::class, 'invoicesDestroy'])->name('factures.destroy');
         Route::post('/factures/{id}/send',   [AccountingController::class, 'invoicesSend'])->name('factures.send');
         Route::post('/factures/{id}/remind', [AccountingController::class, 'invoicesRemind'])->name('factures.remind');
+        // ── Pont facturation → comptabilité ─────────────────────────────────
+        // Sans lui, une facture émise ne produisait aucune écriture : la TVA
+        // sortait structurellement à zéro.
+        // « factures-non-comptabilisees » n'entre pas en conflit avec {id} :
+        // les URI diffèrent, mais on la déclare avant par prudence.
+        Route::get('/factures-non-comptabilisees', [AccountingController::class, 'invoicesPendingJournal'])->name('factures.a-comptabiliser');
+        Route::post('/factures-non-comptabilisees/tout', [AccountingController::class, 'journalizeAllInvoices'])->name('factures.comptabiliser-tout');
+        Route::post('/factures/{id}/comptabiliser', [AccountingController::class, 'invoiceToJournal'])->whereNumber('id')->name('factures.comptabiliser');
+
         Route::post('/factures/{id}/pay',    [AccountingController::class, 'invoicesPay'])->name('factures.pay');
         Route::get('/factures/{id}/pdf',     [AccountingController::class, 'invoicesPdf'])->name('factures.pdf');
 

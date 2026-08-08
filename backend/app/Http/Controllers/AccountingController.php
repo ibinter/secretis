@@ -750,4 +750,101 @@ class AccountingController extends Controller
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
+
+    // -------------------------------------------------------------------------
+    // Pont facturation → comptabilité
+    // -------------------------------------------------------------------------
+
+    /**
+     * POST /comptabilite/factures/{id}/comptabiliser
+     *
+     * Sans cette passerelle, une facture émise ne produisait AUCUNE écriture :
+     * la déclaration de TVA sortait structurellement à zéro.
+     */
+    public function invoiceToJournal(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $facture = \App\Models\Invoice::where('organization_id', $request->user()->organization_id)
+            ->findOrFail($id);
+
+        try {
+            $ecriture = app(\App\Services\InvoiceAccountingService::class)
+                ->comptabiliserFacture($facture, $request->user());
+        } catch (\Throwable $e) {
+            return back()->withErrors(['comptabilisation' => $e->getMessage()]);
+        }
+
+        return back()->with(
+            'success',
+            "Facture comptabilisée — écriture {$ecriture->entry_number}."
+        );
+    }
+
+    /**
+     * GET /comptabilite/factures-non-comptabilisees
+     *
+     * Le trou entre les deux silos, rendu visible : tant qu'une facture émise
+     * n'a pas d'écriture, elle n'existe pas pour l'administration fiscale.
+     */
+    public function invoicesPendingJournal(Request $request): \Inertia\Response
+    {
+        $orgId   = $request->user()->organization_id;
+        $service = app(\App\Services\InvoiceAccountingService::class);
+
+        $enAttente = $service->facturesNonComptabilisees($orgId);
+
+        return Inertia::render('Comptabilite/FacturesAComptabiliser', [
+            'factures' => $enAttente->map(fn ($f) => [
+                'id'             => $f->id,
+                'invoice_number' => $f->invoice_number,
+                'client'         => $f->client->name ?? null,
+                'issue_date'     => optional($f->issue_date)->format('d/m/Y'),
+                'subtotal'       => (float) $f->subtotal,
+                'tax_amount'     => (float) $f->tax_amount,
+                'total'          => (float) $f->total,
+                'status'         => $f->status,
+            ])->values(),
+            'totaux' => [
+                'nombre' => $enAttente->count(),
+                'ht'     => round($enAttente->sum('subtotal'), 2),
+                'tva'    => round($enAttente->sum('tax_amount'), 2),
+                'ttc'    => round($enAttente->sum('total'), 2),
+            ],
+            // Le paramétrage utilisé, pour qu'un comptable puisse le vérifier
+            // sans ouvrir la base.
+            'comptes' => \Illuminate\Support\Facades\DB::table('accounting_mappings')
+                ->where('organization_id', $orgId)
+                ->orderBy('purpose')
+                ->get(['purpose', 'account_number', 'label']),
+        ]);
+    }
+
+    /**
+     * POST /comptabilite/factures-non-comptabilisees/tout
+     *
+     * Comptabilise en une fois. Une facture en erreur n'interrompt pas les
+     * autres : on remonte la liste précise de ce qui reste à traiter.
+     */
+    public function journalizeAllInvoices(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $service = app(\App\Services\InvoiceAccountingService::class);
+        $ok = 0;
+        $erreurs = [];
+
+        foreach ($service->facturesNonComptabilisees($request->user()->organization_id) as $facture) {
+            try {
+                $service->comptabiliserFacture($facture, $request->user());
+                $ok++;
+            } catch (\Throwable $e) {
+                $erreurs[] = $facture->invoice_number . ' : ' . $e->getMessage();
+            }
+        }
+
+        if ($erreurs) {
+            return back()
+                ->with('success', "{$ok} facture(s) comptabilisée(s).")
+                ->withErrors(['comptabilisation' => $erreurs]);
+        }
+
+        return back()->with('success', "{$ok} facture(s) comptabilisée(s).");
+    }
 }
