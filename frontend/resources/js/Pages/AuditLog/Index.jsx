@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { Head, router } from '@inertiajs/react'
 import { Shield, Download, RefreshCw, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
+import AppLayout from '@/Layouts/AppLayout'
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -163,25 +164,25 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
   const [selectedLog, setSelectedLog] = useState(null)
 
   const applyFilters = useCallback(() => {
-    router.get(route('audit-log.index'), filters, { preserveState: true })
+    router.get(route('audit.index'), filters, { preserveState: true })
   }, [filters])
 
   const resetFilters = () => {
     const empty = { module: '', action: '', user_id: '', severity: '', date_from: '', date_to: '' }
     setFilters(empty)
-    router.get(route('audit-log.index'), {})
+    router.get(route('audit.index'), {})
   }
 
   const exportCsv = () => {
     const params = new URLSearchParams(filters)
-    window.location.href = route('audit-log.export') + '?' + params.toString()
+    window.location.href = route('api.v1.audit-log.export') + '?' + params.toString()
   }
 
   const selectClass = 'text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#9333EA]'
   const inputClass  = selectClass
 
   return (
-    <>
+    <AppLayout>
       <Head title="Journal d'audit — SECRETIS" />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6 space-y-6">
@@ -347,7 +348,7 @@ export default function AuditLogIndex({ logs, filters: initialFilters = {} }) {
       </div>
 
       <DetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
-    </>
+    </AppLayout>
   )
 }
 export { AuditLogIndex };

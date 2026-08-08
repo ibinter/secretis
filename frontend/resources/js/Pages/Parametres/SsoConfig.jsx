@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 /**
  * SsoConfig — Page de configuration SSO pour l'Admin organisation
@@ -636,7 +637,7 @@ export default function SsoConfig({ providers = {}, organization }) {
   };
 
   return (
-    <>
+    <AppLayout>
       <Head title="Configuration SSO — SECRETIS ERP" />
 
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -695,7 +696,7 @@ export default function SsoConfig({ providers = {}, organization }) {
           </div>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { SsoConfig };

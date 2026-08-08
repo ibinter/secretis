@@ -117,7 +117,7 @@ class ImportController extends Controller
      */
     public function validateImport(Request $request, int $jobId): JsonResponse
     {
-        $job = ImportJob::findOrFail($jobId);
+        $job = ImportJob::where('organization_id', auth()->user()->organization_id)->findOrFail($jobId);
 
         $data = $request->validate([
             'column_mapping'           => 'required|array',
@@ -148,7 +148,7 @@ class ImportController extends Controller
      */
     public function start(int $jobId): JsonResponse
     {
-        $job = ImportJob::findOrFail($jobId);
+        $job = ImportJob::where('organization_id', auth()->user()->organization_id)->findOrFail($jobId);
 
         if ($job->status === 'completed') {
             return response()->json(['message' => 'Déjà importé.'], 409);
@@ -172,7 +172,7 @@ class ImportController extends Controller
      */
     public function status(int $jobId): JsonResponse
     {
-        $job = ImportJob::findOrFail($jobId);
+        $job = ImportJob::where('organization_id', auth()->user()->organization_id)->findOrFail($jobId);
 
         return response()->json([
             'id'            => $job->id,
@@ -216,7 +216,7 @@ class ImportController extends Controller
      */
     public function errorReport(int $jobId): StreamedResponse
     {
-        $job    = ImportJob::findOrFail($jobId);
+        $job    = ImportJob::where('organization_id', auth()->user()->organization_id)->findOrFail($jobId);
         $errors = $job->validation_errors ?? [];
 
         $filename = "erreurs-import-{$job->module}-{$job->id}.csv";
@@ -247,7 +247,7 @@ class ImportController extends Controller
      */
     public function destroy(int $jobId): JsonResponse
     {
-        $job = ImportJob::findOrFail($jobId);
+        $job = ImportJob::where('organization_id', auth()->user()->organization_id)->findOrFail($jobId);
         $job->delete();
 
         return response()->json(['message' => 'Import supprimé.']);

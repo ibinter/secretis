@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ───────────────────────────────────────────────────────────────────
 const Icon = {
@@ -141,7 +142,7 @@ export default function GuideArticle({
     const nextTitle = nextArticle?.translations?.[locale]?.title ?? nextArticle?.translations?.fr?.title ?? '';
 
     return (
-        <>
+        <AppLayout>
             <Head title={`${articleTitle} | ${sectionTitle} | Guide IBIG SECRETIS`} />
 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -345,7 +346,7 @@ export default function GuideArticle({
                     </div>
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }
 export { GuideArticle };

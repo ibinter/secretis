@@ -493,7 +493,7 @@ Système
 Prochaines étapes :
   1. Copier votre repo dans ${APP_DIR}/backend
   2. Configurer ${APP_DIR}/backend/.env (utiliser les identifiants ci-dessus)
-  3. Copier deploy/nginx/secretis.conf dans /etc/nginx/sites-available/
+  3. Configurer nginx : voir deploy/nginx/LISEZ-MOI.md (config non versionnee)
   4. ln -s /etc/nginx/sites-available/secretis.conf /etc/nginx/sites-enabled/
   5. Obtenir le certificat SSL : certbot --nginx -d ${DOMAIN} -d "*.${DOMAIN}"
   6. Copier les configs Supervisor depuis deploy/supervisor/

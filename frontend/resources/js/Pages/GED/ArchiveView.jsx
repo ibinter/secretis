@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from '@inertiajs/react';
 import {
     ArchiveBoxIcon,
     ShieldCheckIcon,
@@ -9,7 +10,7 @@ import {
     CalendarDaysIcon,
     DocumentTextIcon,
 } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 /**
  * ArchiveView — Vue des archives légales
@@ -100,82 +101,71 @@ function IntegrityBadge({ verified, onVerify, verifying }) {
     );
 }
 
-export default function ArchiveView() {
-    const [archives, setArchives]       = useState([]);
-    const [loading, setLoading]         = useState(true);
+export default function ArchiveView({ documents = { data: [] } }) {
+    // Les documents archivés viennent de la prop Inertia (DocumentController@archives).
+    const rows = Array.isArray(documents) ? documents : (documents?.data ?? []);
+
+    // Normalisation vers le format « registre d'archives » attendu par la vue.
+    const archives = rows.map(d => {
+        const archiveDate = d.archived_at ?? d.updated_at ?? d.created_at;
+        const retention   = d.retention_years ?? 10;
+        const expiry      = archiveDate
+            ? new Date(new Date(archiveDate).setFullYear(new Date(archiveDate).getFullYear() + retention)).toISOString()
+            : null;
+        return {
+            id:              d.id,
+            document_id:     d.id,
+            document:        { title: d.title },
+            category:        d.category,
+            archive_date:    archiveDate,
+            retention_years: retention,
+            expiry_date:     d.retention_until ?? expiry,
+            sha256_hash:     d.checksum ?? d.sha256_hash ?? null,
+        };
+    });
+
+    const loading = false;
     const [filterCat, setFilterCat]     = useState('');
     const [filterYear, setFilterYear]   = useState('');
     const [search, setSearch]           = useState('');
-    const [retrieving, setRetrieving]   = useState(null);
-    const [verifying, setVerifying]     = useState(null);
-    const [integrities, setIntegrities] = useState({});
-    const [exporting, setExporting]     = useState(false);
     const [page, setPage]               = useState(1);
     const PER_PAGE = 20;
 
-    useEffect(() => {
-        fetchArchives();
-    }, [filterCat, filterYear]);
-
-    async function fetchArchives() {
-        setLoading(true);
-        try {
-            const res = await axios.get('/api/documents/archives', {
-                params: { category: filterCat || undefined, year: filterYear || undefined },
-            });
-            setArchives(res.data?.data ?? res.data ?? []);
-        } finally {
-            setLoading(false);
-        }
+    // Le fichier reste accessible via la route de téléchargement GED.
+    function handleRetrieve(docId) {
+        window.open(`/ged/documents/${docId}/download`, '_blank');
     }
 
-    async function handleRetrieve(docId) {
-        setRetrieving(docId);
-        try {
-            const res = await axios.post(`/api/documents/${docId}/archive/retrieve`);
-            const url = res.data?.url;
-            if (url) {
-                window.open(url, '_blank');
-            }
-        } catch (e) {
-            alert(e.response?.data?.message ?? 'Erreur lors de la récupération.');
-        } finally {
-            setRetrieving(null);
-        }
-    }
-
-    async function handleVerify(docId) {
-        setVerifying(docId);
-        try {
-            const res = await axios.post(`/api/documents/${docId}/archive/verify`);
-            setIntegrities(prev => ({ ...prev, [docId]: res.data?.integrity ?? false }));
-        } finally {
-            setVerifying(null);
-        }
-    }
-
-    async function exportCSV() {
-        setExporting(true);
-        try {
-            const res = await axios.get('/api/documents/archives/export', {
-                responseType: 'blob',
-                params: { category: filterCat || undefined },
-            });
-            const url  = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href  = url;
-            link.setAttribute('download', `registre-archives-${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } finally {
-            setExporting(false);
-        }
+    // Export CSV généré côté client à partir du registre affiché.
+    function exportCSV() {
+        const header = ['Document', 'Catégorie', 'Date archivage', 'Conservation (ans)', 'Expiration', 'SHA-256'];
+        const lines  = filtered.map(a => [
+            a.document?.title ?? `Document #${a.document_id}`,
+            a.category ?? '',
+            a.archive_date ? new Date(a.archive_date).toLocaleDateString('fr-FR') : '',
+            a.retention_years,
+            a.expiry_date ? new Date(a.expiry_date).toLocaleDateString('fr-FR') : '',
+            a.sha256_hash ?? '',
+        ]);
+        const csv  = [header, ...lines]
+            .map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(';'))
+            .join('\n');
+        const url  = window.URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' }));
+        const link = window.document.createElement('a');
+        link.href  = url;
+        link.setAttribute('download', `registre-archives-${new Date().toISOString().slice(0, 10)}.csv`);
+        window.document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
     }
 
     const filtered = archives.filter(a => {
         const title = (a.document?.title ?? '').toLowerCase();
-        return title.includes(search.toLowerCase());
+        if (!title.includes(search.toLowerCase())) return false;
+        if (filterCat && a.category !== filterCat) return false;
+        if (filterYear && a.archive_date && String(new Date(a.archive_date).getFullYear()) !== String(filterYear)) return false;
+        return true;
     });
 
     const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -184,6 +174,7 @@ export default function ArchiveView() {
     const years = [...new Set(archives.map(a => new Date(a.archive_date).getFullYear()))].sort((x, y) => y - x);
 
     return (
+        <AppLayout>
         <div className="max-w-5xl mx-auto p-6 space-y-6">
             {/* En-tête */}
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -195,11 +186,10 @@ export default function ArchiveView() {
                 </div>
                 <button
                     onClick={exportCSV}
-                    disabled={exporting}
                     className="flex items-center gap-2 border border-gray-300 hover:border-gray-400 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
                 >
                     <ArrowDownTrayIcon className="h-4 w-4" />
-                    {exporting ? 'Export…' : 'Exporter CSV'}
+                    Exporter CSV
                 </button>
             </div>
 
@@ -301,18 +291,19 @@ export default function ArchiveView() {
                                         </div>
 
                                         <div className="flex items-center gap-3 shrink-0">
-                                            <IntegrityBadge
-                                                verified={integrities[archive.document_id] ?? archive.integrity_verified ?? null}
-                                                onVerify={() => handleVerify(archive.document_id)}
-                                                verifying={verifying === archive.document_id}
-                                            />
+                                            <Link
+                                                href={`/ged/documents/${archive.document_id}`}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                                            >
+                                                <DocumentTextIcon className="h-3.5 w-3.5" />
+                                                Fiche
+                                            </Link>
                                             <button
                                                 onClick={() => handleRetrieve(archive.document_id)}
-                                                disabled={retrieving === archive.document_id}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 border border-indigo-300 text-indigo-700 text-xs font-medium rounded-lg hover:bg-indigo-50 disabled:opacity-50 transition-colors"
                                             >
                                                 <ArrowDownTrayIcon className="h-3.5 w-3.5" />
-                                                {retrieving === archive.document_id ? 'Récupération…' : 'Récupérer'}
+                                                Récupérer
                                             </button>
                                         </div>
                                     </div>
@@ -355,6 +346,7 @@ export default function ArchiveView() {
                 </div>
             )}
         </div>
+        </AppLayout>
     );
 }
 export { ArchiveView };

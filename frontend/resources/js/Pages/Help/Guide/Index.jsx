@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes par slug de section ───────────────────────────────────────────────
 const SectionIcon = ({ name, className = 'w-7 h-7' }) => {
@@ -92,7 +93,7 @@ export default function GuideIndex({ sections = [] }) {
     const t = (fr, en) => locale === 'fr' ? fr : en;
 
     return (
-        <>
+        <AppLayout>
             <Head title={t('Guide utilisateur | IBIG SECRETIS', 'User Guide | IBIG SECRETIS')} />
 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -240,7 +241,7 @@ export default function GuideIndex({ sections = [] }) {
                     )}
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }
 export { GuideIndex };

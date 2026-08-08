@@ -492,7 +492,7 @@ class PredictionService
             ->join('event_participants', 'events.id', '=', 'event_participants.event_id')
             ->whereIn('event_participants.user_id', $participantIds)
             ->where('events.start_at', '>=', now()->subMonths(3))
-            ->selectRaw('HOUR(events.start_at) as hour, COUNT(*) as cnt')
+            ->selectRaw('EXTRACT(HOUR FROM events.start_at) as hour, COUNT(*) as cnt')
             ->groupBy('hour')
             ->get();
 

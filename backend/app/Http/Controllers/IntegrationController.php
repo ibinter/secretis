@@ -257,10 +257,88 @@ class IntegrationController extends Controller
         return response()->json($this->service->getIntegrationStats($integration));
     }
 
+    // ─── GET /parametres/webhooks ─────────────────────────────────────────────
+
+    public function webhooks(Request $request): Response
+    {
+        $org = $request->user()->organization;
+
+        $endpoints = \App\Models\WebhookEndpoint::where('organization_id', $org->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return Inertia::render('Integrations/WebhooksIn', [
+            'endpoints' => $endpoints,
+        ]);
+    }
+
+    public function storeWebhook(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'url'         => ['required', 'url', 'max:500'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'events'      => ['required', 'array', 'min:1'],
+            'events.*'    => ['string'],
+        ]);
+
+        $endpoint = \App\Models\WebhookEndpoint::create([
+            'organization_id' => $request->user()->organization_id,
+            'url'             => $validated['url'],
+            'description'     => $validated['description'] ?? null,
+            'events'          => $validated['events'],
+            'secret'          => \Illuminate\Support\Str::random(32),
+            'is_active'       => true,
+        ]);
+
+        return response()->json(['message' => 'Endpoint créé.', 'endpoint' => $endpoint], 201);
+    }
+
+    public function destroyWebhook(Request $request, int $id): JsonResponse
+    {
+        $endpoint = \App\Models\WebhookEndpoint::where('organization_id', $request->user()->organization_id)
+            ->findOrFail($id);
+        $endpoint->delete();
+
+        return response()->json(['message' => 'Endpoint supprimé.']);
+    }
+
+    // ─── GET /parametres/api-keys ─────────────────────────────────────────────
+
+    public function apiKeys(Request $request): Response
+    {
+        return Inertia::render('Integrations/ApiKeys', [
+            'organization' => $request->user()->organization?->only(['id', 'name', 'slug']),
+        ]);
+    }
+
+    // ─── Alias API (voir routes/api.php) ──────────────────────────────────────
+
     /**
-     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
-     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     * Alias route POST /integrations/{slug}/connect → install().
+     * Résout le slug du connecteur en ID avant de déléguer.
      */
+    public function connect(Request $request, string $slug): JsonResponse
+    {
+        $connector = IntegrationConnector::where('slug', $slug)->firstOrFail();
+
+        return $this->install($request, $connector->id);
+    }
+
+    /**
+     * Alias route DELETE /integrations/{slug}/disconnect → uninstall().
+     * Résout le slug en intégration installée de l'organisation avant de déléguer.
+     */
+    public function disconnect(Request $request, string $slug): JsonResponse
+    {
+        $org         = $request->user()->organization;
+        $connector   = IntegrationConnector::where('slug', $slug)->firstOrFail();
+        $integration = OrganizationIntegration::where('organization_id', $org->id)
+            ->where('connector_id', $connector->id)
+            ->firstOrFail();
+
+        return $this->uninstall($request, $integration->id);
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {

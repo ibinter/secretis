@@ -4,13 +4,22 @@
  * Géré via usePwa().updateAvailable
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import usePwa from '@/hooks/usePwa';
 
 export default function UpdatePrompt() {
-  const { updateAvailable, updateApp } = usePwa();
+  const { updateAvailable, updateApp, forceUpdate } = usePwa();
   const [dismissed,   setDismissed]   = useState(false);
   const [isUpdating,  setIsUpdating]  = useState(false);
+  const [showForce,   setShowForce]   = useState(false);
+
+  // Si la mise à jour normale n'aboutit pas (Service Worker bloqué, cache
+  // corrompu), proposer la purge complète au bout de 5 s.
+  useEffect(() => {
+    if (!isUpdating) return;
+    const t = setTimeout(() => setShowForce(true), 5000);
+    return () => clearTimeout(t);
+  }, [isUpdating]);
 
   if (!updateAvailable || dismissed) return null;
 
@@ -39,6 +48,16 @@ export default function UpdatePrompt() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold leading-snug">Nouvelle version disponible</p>
           <p className="text-xs text-white/65 mt-0.5">SECRETIS a été mis à jour. Rechargez pour en profiter.</p>
+
+          {/* Filet de sécurité : purge complète si la mise à jour reste bloquée */}
+          {showForce && (
+            <button
+              onClick={forceUpdate}
+              className="mt-1 text-[11px] font-semibold text-accent underline underline-offset-2 hover:text-white transition-colors"
+            >
+              La mise à jour ne se termine pas ? Vider le cache et forcer
+            </button>
+          )}
         </div>
 
         {/* Actions */}

@@ -46,7 +46,7 @@ class CourrierController extends Controller
         $user = Auth::user();
 
         $query = MailRegistry::forOrganization($user->organization_id)
-            ->with(['assignee:id,name'])
+            ->with(['assignee:id,name', 'department:id,name'])
             ->orderBy('created_at', 'desc');
 
         // Filtre type
@@ -65,7 +65,9 @@ class CourrierController extends Controller
         }
 
         // Filtre service/département
-        // department_id not in DB v1 — skip filter
+        if ($departmentId = $request->query('department_id')) {
+            $query->where('department_id', $departmentId);
+        }
 
         // Plage de dates
         if ($from = $request->query('from')) {
@@ -166,19 +168,21 @@ class CourrierController extends Controller
      * La référence est générée automatiquement (REF-ENTRANT-YYYY-XXXXX).
      * Les pièces jointes sont uploadées en parallèle dans le stockage privé.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
             'type'                  => ['required', 'in:incoming,outgoing,internal'],
             'sender_name'           => ['nullable', 'string', 'max:255'],
             'sender_organization'   => ['nullable', 'string', 'max:255'],
             'recipient_name'        => ['nullable', 'string', 'max:255'],
+            'recipient_organization'=> ['nullable', 'string', 'max:255'],
+            'recipient_email'       => ['nullable', 'email', 'max:255'],
             'sender_email'          => ['nullable', 'email', 'max:255'],
-            'subject'               => ['required', 'string', 'max:500'],
+            'subject'               => ['required', 'string', 'max:255'],
             'urgency'               => ['required', 'in:low,normal,high,urgent'],
             'received_at'           => ['nullable', 'date'],
             'sent_at'               => ['nullable', 'date'],
-            // department_id not in DB v1
+            'department_id'         => ['nullable', 'exists:departments,id'],
             'assigned_to'           => ['nullable', 'exists:users,id'],
             'notes'                 => ['nullable', 'string', 'max:2000'],
             'processing_delay_days' => ['nullable', 'integer', 'min:1', 'max:90'],
@@ -213,10 +217,16 @@ class CourrierController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Courrier enregistré avec succès.',
-            'mail'    => $mail->load(['assignee:id,name', 'attachments']),
-        ], 201);
+        // Requête API pure → JSON ; navigation web/Inertia → redirection avec message
+        if ($request->wantsJson() && ! $request->header('X-Inertia')) {
+            return response()->json([
+                'message' => 'Courrier enregistré avec succès.',
+                'mail'    => $mail->load(['assignee:id,name', 'attachments']),
+            ], 201);
+        }
+
+        return redirect()->route('courrier.index')
+            ->with('success', "Courrier {$mail->reference} enregistré avec succès.");
     }
 
     // -------------------------------------------------------------------------
@@ -229,7 +239,16 @@ class CourrierController extends Controller
     public function show(string $id): Response|JsonResponse
     {
         $mail = $this->findMailForCurrentOrg($id);
-        $mail->load(['assignee:id,name', 'attachments']);
+        $mail->load([
+            'assignee:id,name',
+            'department:id,name',
+            'attachments',
+            // Chaînage arrivée ↔ réponse : la fiche doit montrer d'où vient le
+            // courrier et ce qu'on y a répondu.
+            'parent:id,reference,subject,type,received_at',
+            'replies:id,parent_mail_id,reference,subject,sent_at,status',
+            'trackings.user:id,name',
+        ]);
 
         $this->auditService->log(
             action: 'viewed',
@@ -263,12 +282,18 @@ class CourrierController extends Controller
             'sender_name'    => ['nullable', 'string', 'max:255'],
             'sender_organization' => ['nullable', 'string', 'max:255'],
             'recipient_name' => ['nullable', 'string', 'max:255'],
+            'recipient_organization' => ['nullable', 'string', 'max:255'],
             'recipient_email' => ['nullable', 'email', 'max:255'],
-            'subject'        => ['sometimes', 'required', 'string', 'max:500'],
+            'subject'        => ['sometimes', 'required', 'string', 'max:255'],
             'urgency'        => ['sometimes', 'required', 'in:low,normal,high,urgent'],
             'received_at'    => ['nullable', 'date'],
             'sent_at'        => ['nullable', 'date'],
             'notes'          => ['nullable', 'string', 'max:2000'],
+            // Champs éditables à l'écran mais jusque-là ignorés côté serveur.
+            'type'           => ['sometimes', 'required', 'in:incoming,outgoing,internal'],
+            'assigned_to'    => ['nullable', 'exists:users,id'],
+            'department_id'  => ['nullable', 'exists:departments,id'],
+            'processing_delay_days' => ['nullable', 'integer', 'min:1', 'max:90'],
         ]);
 
         $original = $mail->toArray();
@@ -336,6 +361,58 @@ class CourrierController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // Réponse
+    // -------------------------------------------------------------------------
+
+    /**
+     * Enregistre un courrier départ en réponse à un courrier arrivée.
+     * L'étape « répondre » du parcours du secrétariat n'existait nulle part.
+     */
+    public function reply(Request $request, string $id): \Illuminate\Http\RedirectResponse|JsonResponse
+    {
+        $original = $this->findMailForCurrentOrg($id);
+
+        $validated = $request->validate([
+            'subject'                => ['nullable', 'string', 'max:255'],
+            'body'                   => ['nullable', 'string'],
+            'recipient_name'         => ['nullable', 'string', 'max:255'],
+            'recipient_organization' => ['nullable', 'string', 'max:255'],
+            'recipient_email'        => ['nullable', 'email', 'max:255'],
+            'urgency'                => ['nullable', 'in:low,normal,high,urgent'],
+            'sent_at'                => ['nullable', 'date'],
+            'notes'                  => ['nullable', 'string'],
+            // `replyToMail` sait exploiter ces trois champs, mais ils n'étaient
+            // pas validés : ils n'atteignaient donc jamais le service et les
+            // valeurs de repli s'appliquaient systématiquement.
+            'sender_name'            => ['nullable', 'string', 'max:255'],
+            'sender_email'           => ['nullable', 'email', 'max:255'],
+            'assigned_to'            => ['nullable', 'exists:users,id'],
+            'department_id'          => ['nullable', 'exists:departments,id'],
+        ]);
+
+        try {
+            $reponse = $this->courrierService->replyToMail($original, $validated, Auth::user());
+        } catch (\InvalidArgumentException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
+            return back()->withErrors(['reply' => $e->getMessage()]);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Réponse enregistrée.',
+                'mail'    => $reponse,
+            ], 201);
+        }
+
+        return redirect()
+            ->route('courrier.show', $reponse->id)
+            ->with('success', "Réponse enregistrée sous la référence {$reponse->reference}.");
+    }
+
+    // -------------------------------------------------------------------------
     // Change Status
     // -------------------------------------------------------------------------
 
@@ -358,6 +435,19 @@ class CourrierController extends Controller
             'message' => 'Statut mis à jour.',
             'mail'    => $mail->fresh(),
         ]);
+    }
+
+    /**
+     * POST /courrier/{id}/archive (route web) — archive un courrier.
+     * Réutilise la logique de changeStatus en forçant le statut "archived".
+     */
+    public function archive(string $id): \Illuminate\Http\RedirectResponse
+    {
+        $mail = $this->findMailForCurrentOrg($id);
+
+        $this->courrierService->changeStatus($mail, 'archived', Auth::user());
+
+        return redirect()->back()->with('success', 'Courrier archivé.');
     }
 
     // -------------------------------------------------------------------------
@@ -438,7 +528,7 @@ class CourrierController extends Controller
     private function buildExportQuery(\App\Models\User $user, Request $request)
     {
         $query = MailRegistry::forOrganization($user->organization_id)
-            ->with(['assignee:id,name', 'department:id,name'])
+            ->with(['assignee:id,name', 'registeredBy:id,name', 'department:id,name'])
             ->orderBy('created_at', 'desc');
 
         if ($type = $request->query('type')) {
@@ -447,11 +537,28 @@ class CourrierController extends Controller
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
+        // `urgency` était accepté par l'écran d'export et affiché dans l'en-tête
+        // du PDF, mais n'était jamais appliqué à la requête.
+        if ($urgency = $request->query('urgency')) {
+            $query->where('urgency', $urgency);
+        }
+        if ($departmentId = $request->query('department_id')) {
+            $query->where('department_id', $departmentId);
+        }
+        // Le registre se lit par date de RÉCEPTION (ou d'envoi pour le départ),
+        // pas par date de saisie : filtrer sur `created_at` donnait des périodes
+        // fausses dès qu'un courrier était enregistré en différé.
         if ($from = $request->query('from')) {
-            $query->whereDate('created_at', '>=', $from);
+            $query->where(function ($q) use ($from) {
+                $q->whereDate('received_at', '>=', $from)
+                  ->orWhere(fn ($q2) => $q2->whereNull('received_at')->whereDate('created_at', '>=', $from));
+            });
         }
         if ($to = $request->query('to')) {
-            $query->whereDate('created_at', '<=', $to);
+            $query->where(function ($q) use ($to) {
+                $q->whereDate('received_at', '<=', $to)
+                  ->orWhere(fn ($q2) => $q2->whereNull('received_at')->whereDate('created_at', '<=', $to));
+            });
         }
 
         return $query;

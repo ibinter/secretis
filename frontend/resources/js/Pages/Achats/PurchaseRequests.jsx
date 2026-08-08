@@ -149,7 +149,7 @@ function CreatePrModal({ onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/purchase-requests', { onSuccess: () => onClose() });
+        post('/achats/demandes', { onSuccess: () => onClose() });
     };
 
     return (
@@ -295,11 +295,11 @@ function ApproveModal({ pr, onClose }) {
     const submit = () => {
         setLoading(true);
         if (action === 'approve') {
-            router.post(`/procurement/purchase-requests/${pr.id}/approve`, {}, {
+            router.post(`/achats/demandes/${pr.id}/approuver`, {}, {
                 onFinish: () => { setLoading(false); onClose(); },
             });
         } else {
-            router.post(`/procurement/purchase-requests/${pr.id}/refuse`, { reason }, {
+            router.post(`/achats/demandes/${pr.id}/refuser`, { reason }, {
                 onFinish: () => { setLoading(false); onClose(); },
             });
         }
@@ -382,7 +382,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
     const [search, setSearch] = useState(filters?.search ?? '');
 
     const applyFilter = (key, val) => {
-        router.get('/procurement/purchase-requests', { ...filters, [key]: val || undefined }, {
+        router.get('/achats/demandes', { ...filters, [key]: val || undefined }, {
             preserveState: true, replace: true,
         });
     };
@@ -507,7 +507,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                                             <div className="flex gap-2 justify-center">
                                                 {pr.status === 'brouillon' && (
                                                     <button
-                                                        onClick={() => router.post(`/procurement/purchase-requests/${pr.id}/submit`)}
+                                                        onClick={() => router.post(`/achats/demandes/${pr.id}/soumettre`)}
                                                         className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
                                                     >
                                                         Soumettre
@@ -523,7 +523,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                                                 )}
                                                 {pr.status === 'approuve' && (
                                                     <a
-                                                        href={`/procurement/rfqs/create?pr_id=${pr.id}`}
+                                                        href={`/achats/appels-offres?pr_id=${pr.id}`}
                                                         className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
                                                     >
                                                         → AO
@@ -544,7 +544,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                         {Array.from({ length: purchase_requests.last_page }, (_, i) => i + 1).map(page => (
                             <button
                                 key={page}
-                                onClick={() => router.get('/procurement/purchase-requests', { ...filters, page })}
+                                onClick={() => router.get('/achats/demandes', { ...filters, page })}
                                 className={`w-8 h-8 rounded text-sm ${
                                     page === purchase_requests.current_page
                                         ? 'bg-purple-600 text-white'

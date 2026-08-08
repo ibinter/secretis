@@ -320,4 +320,21 @@ class ExpenseController extends Controller
     {
         abort_if($expense->organization_id !== Auth::user()->organization_id, 403);
     }
+
+    // -------------------------------------------------------------------------
+    // ALIAS API (routes api.php → méthodes réelles)
+    // -------------------------------------------------------------------------
+
+    /**
+     * GET /expenses/{id}/export → exportForAccounting
+     *
+     * ATTENTION sémantique : exportForAccounting() exporte TOUTES les notes de frais
+     * d'une période (paramètre requis `period` au format Y-m) pour l'organisation.
+     * Le paramètre {id} de la route est donc ignoré. À revoir si un export
+     * par note unique est réellement attendu.
+     */
+    public function export(Request $request, $id): JsonResponse
+    {
+        return $this->exportForAccounting($request);
+    }
 }

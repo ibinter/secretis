@@ -16,4 +16,9 @@ class VisitorInvitation extends Model
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function invitedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invited_by');
+    }
 }

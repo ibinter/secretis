@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GoodsReceipt;
+use App\Models\Organization;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseRequest;
 use App\Models\Quotation;
@@ -77,7 +78,7 @@ class ProcurementController extends Controller
 
         // Générer le numéro fournisseur
         $orgId = Auth::user()->organization_id;
-        $last  = Supplier::where('organization_id', $orgId)->lockForUpdate()->count();
+        $last  = Supplier::where('organization_id', $orgId)->count();
         $number = sprintf('FOURN-%04d', $last + 1);
 
         Supplier::create(array_merge($validated, [
@@ -372,7 +373,7 @@ class ProcurementController extends Controller
         $pos = PurchaseOrder::where('organization_id', Auth::user()->organization_id)
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
             ->when($request->supplier_id, fn($q, $s) => $q->where('supplier_id', $s))
-            ->with(['supplier', 'rfq', 'quotation'])
+            ->with(['supplier'])
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -456,6 +457,44 @@ class ProcurementController extends Controller
         return back()->with('success', 'Bon de réception enregistré.');
     }
 
+    /**
+     * GET /achats/commandes/{po}/pdf — Génère le PDF du bon de commande (DomPDF).
+     */
+    public function poPdf(PurchaseOrder $po): \Illuminate\Http\Response
+    {
+        $this->authorizeOrg($po);
+
+        // Chargement manuel : les relations du modèle PurchaseOrder ne sont pas fiables.
+        $supplier        = Supplier::find($po->supplier_id);
+        $org             = Organization::find($po->organization_id);
+        $purchaseRequest = $po->purchase_request_id
+            ? PurchaseRequest::find($po->purchase_request_id)
+            : null;
+
+        // Les lignes d'articles éventuelles vivent dans purchase_requests.data (json).
+        $items = [];
+        if ($purchaseRequest) {
+            $data = $purchaseRequest->data;
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            if (is_array($data) && isset($data['items']) && is_array($data['items'])) {
+                $items = array_values(array_filter($data['items'], 'is_array'));
+            }
+        }
+
+        $pdf = app('dompdf.wrapper')->loadView('pdf.purchase-order', compact('po', 'supplier', 'org', 'purchaseRequest', 'items'));
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+
+        $reference = $po->reference ?: ('BC-' . $po->id);
+
+        return response($pdf->output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"bon-de-commande-{$reference}.pdf\"",
+        ]);
+    }
+
     public function poDestroy(PurchaseOrder $po): RedirectResponse
     {
         $this->authorizeOrg($po);
@@ -490,4 +529,79 @@ class ProcurementController extends Controller
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
+
+    // ── Alias routes ──────────────────────────────────────────────────────────
+    public function purchaseRequests(Request $request) { return $this->prIndex($request); }
+    public function rfqs(Request $request)             { return $this->rfqIndex($request); }
+    public function purchaseOrders(Request $request)   { return $this->poIndex($request); }
+    public function suppliers(Request $request)        { return $this->suppliersIndex($request); }
+
+    /**
+     * Clôture manuelle d'un appel d'offres (sans sélection de gagnant).
+     */
+    public function rfqClose(Rfq $rfq): RedirectResponse
+    {
+        $this->authorizeOrg($rfq);
+
+        if (in_array($rfq->status, ['clos', 'annule'])) {
+            return back()->withErrors(['error' => 'Cet appel d\'offres est déjà clôturé.']);
+        }
+
+        $rfq->update(['status' => 'clos']);
+
+        return back()->with('success', 'Appel d\'offres clôturé.');
+    }
+
+    /**
+     * Page comparateur de devis : liste les devis reçus + résultats d'évaluation.
+     */
+    public function rfqCompare(Rfq $rfq): Response
+    {
+        $this->authorizeOrg($rfq);
+
+        $quotations = Quotation::where('rfq_id', $rfq->id)
+            ->with('supplier')
+            ->get()
+            ->map(fn($q) => [
+                'id'               => $q->id,
+                'quotation_number' => $q->quotation_number,
+                'supplier_id'      => $q->supplier_id,
+                'supplier_name'    => $q->supplier?->company_name,
+                'total_amount_xof' => $q->total_amount_xof,
+                'technical_score'  => $q->technical_score,
+                'financial_score'  => $q->financial_score,
+                'total_score'      => $q->total_score,
+                'status'           => $q->status,
+            ]);
+
+        // Premier rendu : (re)calcule les scores si des devis sont en attente.
+        $results = $this->service->evaluateQuotations($rfq);
+
+        // Déjà évalué → reconstruire les résultats depuis les devis existants.
+        if (empty($results)) {
+            $results = $quotations
+                ->filter(fn($q) => $q['total_score'] !== null)
+                ->map(fn($q) => [
+                    'quotation_id'     => $q['id'],
+                    'quotation_number' => $q['quotation_number'],
+                    'supplier_id'      => $q['supplier_id'],
+                    'supplier_name'    => $q['supplier_name'],
+                    'total_amount'     => $q['total_amount_xof'],
+                    'technical_score'  => $q['technical_score'],
+                    'financial_score'  => $q['financial_score'],
+                    'total_score'      => $q['total_score'],
+                ])
+                ->sortByDesc('total_score')
+                ->values()
+                ->all();
+        }
+
+        return Inertia::render('Achats/QuotationComparator', [
+            'rfq'                => $rfq->load('purchaseRequest'),
+            'quotations'         => $quotations,
+            'evaluation_results' => $results,
+        ]);
+    }
+
+
 }

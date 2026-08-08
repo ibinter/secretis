@@ -43,6 +43,7 @@ class User extends Authenticatable
         'password',
         'status',
         'avatar',
+        'locale',
         'preferences',
         'failed_login_attempts',
         'locked_until',

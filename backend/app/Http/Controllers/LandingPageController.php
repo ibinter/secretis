@@ -20,6 +20,29 @@ class LandingPageController extends Controller
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */
+
+    // ── Routes publiques manquantes ───────────────────────────────────────────
+    public function contact(): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('Public/Contact');
+    }
+
+    public function sendContact(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'name'    => ['required', 'string', 'max:100'],
+            'email'   => ['required', 'email', 'max:255'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+        // TODO: envoyer email — pour l'instant on redirige avec succès
+        return redirect()->route('contact')->with('success', 'Votre message a été envoyé.');
+    }
+
+    public function apiDocs(): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('Public/ApiDocs');
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {

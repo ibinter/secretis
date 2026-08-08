@@ -245,7 +245,7 @@ export default function CookieConsent() {
               Nous utilisons des cookies pour améliorer votre expérience SECRETIS.
               En continuant, vous acceptez notre{' '}
               <a
-                href="/legal/politique-cookies"
+                href="/cookies"
                 className="text-[#7e22ce] hover:underline focus:outline-none focus:ring-1 focus:ring-[#7e22ce] rounded"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -333,7 +333,7 @@ export default function CookieConsent() {
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <a
-                href="/legal/politique-cookies"
+                href="/cookies"
                 className="text-xs text-gray-500 dark:text-gray-400 hover:underline focus:outline-none focus:ring-1 focus:ring-gray-400 rounded"
                 target="_blank"
                 rel="noopener noreferrer"

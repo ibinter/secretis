@@ -79,7 +79,7 @@ export default function Kiosk({ organization, hosts }) {
         setLoading(true);
         setError('');
         try {
-            const { data } = await axios.get(`/visitor-invitations/${codeInput.trim()}`);
+            const { data } = await axios.get(`/visitor-invitation/${codeInput.trim()}`);
             if (data.valid) {
                 setInvitation(data.invitation);
                 setStep('confirm');
@@ -98,7 +98,7 @@ export default function Kiosk({ organization, hosts }) {
         setLoading(true);
         setError('');
         try {
-            await axios.post('/visitors/check-in', {
+            await axios.post('/reception/check-in', {
                 ...formData,
                 full_name:        invitation.visitor_name,
                 invitation_code:  invitation.access_code,
@@ -126,7 +126,7 @@ export default function Kiosk({ organization, hosts }) {
         setLoading(true);
         setError('');
         try {
-            await axios.post('/visitors/check-in', {
+            await axios.post('/reception/check-in', {
                 ...formData,
                 organization_id: organization.id,
                 photo_base64: photoSrc,

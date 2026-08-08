@@ -90,7 +90,7 @@ function ProcessDetailModal({ process, onClose }) {
                     </div>
                     <div className="pt-2 flex gap-2">
                         <a
-                            href={`/qualite/nc?process_id=${process.id}`}
+                            href={`/qualite/non-conformites?process_id=${process.id}`}
                             className="flex-1 text-center px-3 py-2 border rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
                         >
                             Voir les NC

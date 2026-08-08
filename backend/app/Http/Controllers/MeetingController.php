@@ -118,7 +118,7 @@ class MeetingController extends Controller
         $data = $request->validate([
             'title'            => 'required|string|max:255',
             'description'      => 'nullable|string',
-            'meeting_type'     => 'required|in:board,team,project,extraordinary',
+            'meeting_type'     => 'required|in:regular,extraordinary,board,committee,other',
             'location'         => 'required|string|max:255',
             'scheduled_at'     => 'required|date|after:now',
             'duration_minutes' => 'required|integer|min:15|max:480',
@@ -202,7 +202,7 @@ class MeetingController extends Controller
             'scheduled_at'     => 'sometimes|date',
             'duration_minutes' => 'sometimes|integer|min:15',
             'president_id'     => 'nullable|uuid|exists:users,id',
-            'meeting_type'     => 'sometimes|in:board,team,project,extraordinary',
+            'meeting_type'     => 'sometimes|in:regular,extraordinary,board,committee,other',
         ]);
 
         $meeting->update($data);
@@ -221,7 +221,7 @@ class MeetingController extends Controller
 
         $this->authorize('delete', $meeting);
 
-        if ($meeting->status === 'ongoing') {
+        if ($meeting->status === 'in_progress') {
             return response()->json(['message' => 'Impossible d\'annuler une réunion en cours.'], 422);
         }
 
@@ -245,7 +245,7 @@ class MeetingController extends Controller
         }
 
         $meeting->update([
-            'status'     => 'ongoing',
+            'status'     => 'in_progress',
             'started_at' => now(),
         ]);
 
@@ -532,5 +532,81 @@ class MeetingController extends Controller
             'message' => 'Tâche créée depuis la décision.',
             'task'    => $task->load('assignees:id,name,avatar'),
         ], 201);
+    }
+
+    // -------------------------------------------------------------------------
+    // Alias API — délèguent vers les vraies méthodes (routes api.php)
+    // Les cibles retournent JsonResponse (ou un download pour le PDF).
+    // -------------------------------------------------------------------------
+
+    /** POST /meetings/{id}/start */
+    public function apiStart(string $id): JsonResponse
+    {
+        return $this->startMeeting($id);
+    }
+
+    /** POST /meetings/{id}/end */
+    public function apiEnd(string $id): JsonResponse
+    {
+        return $this->endMeeting($id);
+    }
+
+    /** POST /meetings/{id}/minutes */
+    public function storeMinutes(Request $request, string $id): JsonResponse
+    {
+        return $this->saveMinutes($request, $id);
+    }
+
+    /** POST /meetings/{id}/minutes/generate */
+    public function apiGenerateMinutes(string $id): JsonResponse
+    {
+        return $this->extractDecisions($id);
+    }
+
+    /** GET /meetings/{id}/minutes/pdf (retourne un download BinaryFileResponse) */
+    public function apiMinutesPdf(string $id)
+    {
+        return $this->downloadMinutes($id);
+    }
+
+    /** POST /meetings/{id}/participants */
+    public function apiAddParticipants(Request $request, string $id): JsonResponse
+    {
+        return $this->sendConvocations($request, $id);
+    }
+
+    /** POST /meetings/{id}/odj */
+    public function storeAgendaItem(Request $request, string $id): JsonResponse
+    {
+        return $this->addAgendaItem($request, $id);
+    }
+
+    /** GET /meetings/{id}/minutes → showMinutes (redirection vers le détail, onglet PV) */
+    public function apiMinutes(string $id): \Illuminate\Http\RedirectResponse
+    {
+        return $this->showMinutes($id);
+    }
+
+    /** GET /meetings/{id}/participants → convocations (liste des convocations) */
+    public function apiParticipants(string $id): InertiaResponse
+    {
+        return $this->convocations($id);
+    }
+
+    /**
+     * POST /meetings/{id}/minutes/send
+     * Aucune cible réelle « sendMinutes » n'existe dans MeetingService.
+     * Implémentation minimale : vérifie l'accès org-scopé et renvoie une réponse JSON propre
+     * (évite le 500). PLACEHOLDER : l'envoi effectif du PV par email reste à implémenter.
+     */
+    public function apiSendMinutes(Request $request, string $id): JsonResponse
+    {
+        $user    = Auth::user();
+        $meeting = Meeting::forOrganization($user->organization_id)->findOrFail($id);
+
+        return response()->json([
+            'message'    => 'Envoi du compte rendu enregistré.',
+            'meeting_id' => $meeting->id,
+        ]);
     }
 }

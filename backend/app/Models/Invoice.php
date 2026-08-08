@@ -140,8 +140,11 @@ class Invoice extends Model
 
         $lastNumber = static::where('organization_id', $orgId)
             ->whereYear('created_at', $year)
+            // PostgreSQL refuse FOR UPDATE avec un agrégat : on prend la ligne la plus
+            // haute triée, ce qui conserve le verrou tout en restant portable.
+            ->orderByDesc('invoice_number')
             ->lockForUpdate()
-            ->max('invoice_number');
+            ->value('invoice_number');
 
         if ($lastNumber) {
             // Extraire le dernier séquence : FACT-2026-00042 → 42

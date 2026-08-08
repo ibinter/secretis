@@ -167,20 +167,49 @@ class HelpCenterController extends Controller
     }
 
     // -------------------------------------------------------------------------
-    // Recherche fulltext (API)
+    // Recherche fulltext
+    //
+    // Servie par DEUX routes vers la même méthode :
+    //   - API  GET /api/help/search  (name api.help.search) → réponse JSON
+    //          (utilisée par l'autocomplete de Help/Index et Support/Tickets/Create)
+    //   - WEB  GET /aide/search      (name help.search)     → page Inertia Help/Search
+    //          (utilisée par router.visit(route('help.search', {q})))
+    //
+    // Le format de sortie est choisi selon le contexte de la requête.
     // -------------------------------------------------------------------------
 
-    public function search(Request $request): JsonResponse
+    public function search(Request $request): JsonResponse|Response
     {
         $request->validate([
-            'q'        => 'required|string|min:2|max:100',
+            // 'q' est nullable : la page web /aide/search peut être ouverte sans terme
+            // (le formulaire de la sidebar peut être soumis vide) sans déclencher un 422.
+            'q'        => 'nullable|string|max:200',
             'category' => 'nullable|string',
             'limit'    => 'nullable|integer|min:1|max:30',
         ]);
 
-        $q      = $request->string('q')->trim()->toString();
+        $q      = trim((string) $request->input('q', ''));
         $limit  = (int) ($request->input('limit', 10));
         $locale = app()->getLocale();
+
+        // API / AJAX (axios) → JSON ; sinon → page Inertia.
+        $wantsJson = $request->routeIs('api.help.search')
+            || $request->ajax()
+            || $request->wantsJson();
+
+        // Requête trop courte : on renvoie un résultat vide sans requêter la base.
+        if (mb_strlen($q) < 2) {
+            if ($wantsJson) {
+                return response()->json(['query' => $q, 'count' => 0, 'results' => []]);
+            }
+
+            return Inertia::render('Help/Search', [
+                'query'      => $q,
+                'count'      => 0,
+                'results'    => [],
+                'categories' => $this->categoriesList($locale),
+            ]);
+        }
 
         $query = HelpArticle::published()->with('category');
 
@@ -192,34 +221,47 @@ class HelpCenterController extends Controller
             }
         }
 
-        // Recherche dans le JSON translations
-        // Compatible PostgreSQL jsonb et MySQL JSON
-        $query->where(function ($q2) use ($q) {
-            $q2->whereRaw("translations->>'$.fr.title' LIKE ?", ["%{$q}%"])
-               ->orWhereRaw("translations->>'$.fr.content' LIKE ?", ["%{$q}%"])
-               ->orWhereRaw("translations->>'$.fr.excerpt' LIKE ?", ["%{$q}%"])
-               ->orWhereRaw("translations->>'$.en.title' LIKE ?", ["%{$q}%"])
-               ->orWhereRaw("translations->>'$.en.content' LIKE ?", ["%{$q}%"]);
+        // Recherche dans le JSON translations (colonne jsonb PostgreSQL).
+        // Accès jsonb correct : translations->'fr'->>'title'. ILIKE = insensible à la casse.
+        $like = '%' . $q . '%';
+        $query->where(function ($w) use ($like) {
+            foreach (['fr', 'en'] as $loc) {
+                foreach (['title', 'excerpt', 'content'] as $field) {
+                    // $loc et $field sont des littéraux contrôlés (pas d'injection).
+                    $w->orWhereRaw("translations->'{$loc}'->>'{$field}' ILIKE ?", [$like]);
+                }
+            }
         });
 
         $results = $query->orderByDesc('view_count')->take($limit)->get();
 
-        return response()->json([
-            'query'   => $q,
-            'count'   => $results->count(),
-            'results' => $results->map(fn (HelpArticle $a) => [
-                'id'       => $a->id,
-                'slug'     => $a->slug,
-                'title'    => $a->getTitle($locale),
-                'excerpt'  => $a->getExcerpt($locale),
-                'category' => [
-                    'id'   => $a->category?->id,
-                    'slug' => $a->category?->slug,
-                    'name' => $a->category?->getName($locale),
-                    'icon' => $a->category?->icon,
-                ],
-                'view_count' => $a->view_count,
-            ]),
+        $mapped = $results->map(fn (HelpArticle $a) => [
+            'id'       => $a->id,
+            'slug'     => $a->slug,
+            'title'    => $a->getTitle($locale),
+            'excerpt'  => $a->getExcerpt($locale),
+            'category' => [
+                'id'   => $a->category?->id,
+                'slug' => $a->category?->slug,
+                'name' => $a->category?->getName($locale),
+                'icon' => $a->category?->icon,
+            ],
+            'view_count' => $a->view_count,
+        ])->values();
+
+        if ($wantsJson) {
+            return response()->json([
+                'query'   => $q,
+                'count'   => $mapped->count(),
+                'results' => $mapped,
+            ]);
+        }
+
+        return Inertia::render('Help/Search', [
+            'query'      => $q,
+            'count'      => $mapped->count(),
+            'results'    => $mapped,
+            'categories' => $this->categoriesList($locale),
         ]);
     }
 
@@ -246,6 +288,22 @@ class HelpCenterController extends Controller
     // -------------------------------------------------------------------------
     // Helpers privés
     // -------------------------------------------------------------------------
+
+    /** Liste des catégories actives (id, slug, icon, name, articles_count) pour sidebars/filtres */
+    private function categoriesList(string $locale): \Illuminate\Support\Collection
+    {
+        return HelpCategory::active()
+            ->ordered()
+            ->withCount(['articles' => fn ($q) => $q->published()])
+            ->get()
+            ->map(fn (HelpCategory $cat) => [
+                'id'             => $cat->id,
+                'slug'           => $cat->slug,
+                'icon'           => $cat->icon,
+                'name'           => $cat->getName($locale),
+                'articles_count' => $cat->articles_count,
+            ]);
+    }
 
     private function mapArticle(HelpArticle $article, string $locale): array
     {

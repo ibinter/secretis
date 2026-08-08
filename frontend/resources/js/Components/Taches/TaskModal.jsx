@@ -36,7 +36,7 @@ import { fr } from 'date-fns/locale';
 
 const PRIORITY_OPTIONS = [
   { value: 'low',    label: 'Faible',  color: 'text-gray-500'   },
-  { value: 'normal', label: 'Normal',  color: 'text-purple-600'   },
+  { value: 'medium', label: 'Normal',  color: 'text-purple-600'   },
   { value: 'high',   label: 'Haute',   color: 'text-orange-600' },
   { value: 'urgent', label: 'Urgente', color: 'text-red-600'    },
 ];
@@ -177,7 +177,7 @@ function CommentsSection({ taskId, comments: initialComments }) {
     if (!content.trim()) return;
     setSending(true);
     try {
-      const res = await axios.post(route('taches.comments.add', taskId), { content });
+      const res = await axios.post(`/api/v1/tasks/${taskId}/comments`, { content });
       setComments((prev) => [...prev, res.data.comment]);
       setContent('');
     } catch {
@@ -255,7 +255,7 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
   // -- Formulaire state --
   const [form, setForm] = useState({
     title:        task?.title        ?? '',
-    priority:     task?.priority     ?? 'normal',
+    priority:     task?.priority     ?? 'medium',
     status:       task?.status       ?? defaultStatus,
     project_id:   task?.project?.id  ?? '',
     due_date:     task?.due_date     ?? '',
@@ -322,7 +322,8 @@ export default function TaskModal({ task, defaultStatus = 'todo', onClose, onSav
       const fd = new FormData();
       fd.append('file', file);
       try {
-        const res = await axios.post(route('taches.attachments.upload', task.id), fd, {
+        // TaskController@uploadAttachment (route API à exposer : POST /api/v1/tasks/{id}/attachments)
+        const res = await axios.post(`/api/v1/tasks/${task.id}/attachments`, fd, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         setAttachments(res.data.attachments);

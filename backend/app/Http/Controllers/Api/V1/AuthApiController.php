@@ -203,6 +203,16 @@ class AuthApiController extends ApiController
     }
 
     // -------------------------------------------------------------------------
+    // Alias API (voir routes/api.php)
+    // -------------------------------------------------------------------------
+
+    /** Alias route POST /api/v1/auth/refresh-token → refresh(). */
+    public function refreshToken(Request $request): JsonResponse
+    {
+        return $this->refresh($request);
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 

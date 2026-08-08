@@ -1,548 +1,550 @@
-import { useState, useCallback } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
-import AppLayout from '@/Components/Layout/AppLayout';
-import {
-    MagnifyingGlassIcon,
-    FunnelIcon,
-    ArrowDownTrayIcon,
-    PlusIcon,
-    ExclamationTriangleIcon,
-    ClockIcon,
-    CheckCircleIcon,
-    ArchiveBoxIcon,
-    ChevronUpDownIcon,
-    EllipsisVerticalIcon,
-} from '@heroicons/react/24/outline';
+/**
+ * Courrier/Index.jsx — Registre du courrier entrant / sortant
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier STRICTEMENT inchangée : mêmes props Inertia, mêmes routes
+ * (`/courrier`, `POST /courrier/{id}/status`, `/api/courrier/export/{format}`),
+ * mêmes états locaux, mêmes payloads.
+ *
+ * Props réelles (CourrierController@index → Inertia::render('Courrier/Index')) :
+ *   mails       : paginateur Laravel { data[], links[], from, to, total, last_page, … }
+ *                 chaque courrier : { id, reference, type (incoming|outgoing),
+ *                   urgency (low|normal|high|urgent),
+ *                   status (received|registered|assigned|in_progress|replied|archived|closed),
+ *                   subject, sender_name, sender_organization, sender_email,
+ *                   recipient_name, recipient_email, received_at, sent_at, due_date,
+ *                   assignee:{id,name}, is_overdue (appended), created_at }
+ *   stats       : { total, incoming, outgoing, received, in_progress, replied,
+ *                   archived, overdue, urgent }
+ *   filters     : { type, status, urgency, from, to, search }
+ *   departments : [{ id, name }]  — ventilation par service (colonne
+ *                 mail_registry.department_id, migration 2026_08_08_000005)
+ */
 
-// ---------------------------------------------------------------------------
-// Constantes UI
-// ---------------------------------------------------------------------------
+import { useState, useCallback } from 'react';
+import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
+import {
+    Mail, Search, SlidersHorizontal, Download, Plus, ArrowDownLeft, ArrowUpRight,
+    AlertTriangle, Clock, CheckCircle2, Archive, Inbox, Eye,
+    Pencil, FileText, Flame,
+} from 'lucide-react';
+import {
+    PageHeader, Button, Badge, Card, DataTable, EmptyState, StatCard,
+    cx, CONTROL, BORDER, SURFACE, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING, TONES,
+} from '@/Components/UI';
+
+/* ─── Statuts (enum réel du backend + valeurs héritées) ─────────────────────── */
+/* Un statut n'utilise JAMAIS l'accent violet : uniquement des tons sémantiques.
+   `outline` sert à distinguer deux étapes voisines partageant le même ton.     */
 
 const STATUS_CONFIG = {
-    pending:    { label: 'En attente',    color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-    processing: { label: 'En traitement', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-    processed:  { label: 'Traité',        color: 'bg-green-100 text-green-800 border-green-200' },
-    archived:   { label: 'Archivé',       color: 'bg-gray-100 text-gray-700 border-gray-200' },
+    received:    { label: 'Reçu',          tone: 'warning', outline: true  },
+    registered:  { label: 'Enregistré',    tone: 'info',    outline: true  },
+    assigned:    { label: 'Assigné',       tone: 'info',    outline: false },
+    in_progress: { label: 'En traitement', tone: 'warning', outline: false },
+    replied:     { label: 'Répondu',       tone: 'success', outline: false },
+    archived:    { label: 'Archivé',       tone: 'neutral', outline: false },
+    closed:      { label: 'Clôturé',       tone: 'neutral', outline: true  },
+    // Valeurs héritées éventuelles
+    pending:     { label: 'En attente',    tone: 'warning', outline: true  },
+    processing:  { label: 'En traitement', tone: 'warning', outline: false },
+    processed:   { label: 'Traité',        tone: 'success', outline: false },
 };
 
 const URGENCY_CONFIG = {
-    low:    { label: 'Faible',  color: 'bg-gray-100 text-gray-600 border-gray-200' },
-    normal: { label: 'Normal',  color: 'bg-purple-100 text-purple-700 border-purple-200' },
-    high:   { label: 'Élevée', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-    urgent: { label: 'Urgent',  color: 'bg-red-100 text-red-700 border-red-200' },
+    low:    { label: 'Faible',  tone: 'neutral' },
+    normal: { label: 'Normale', tone: 'info'    },
+    high:   { label: 'Élevée',  tone: 'warning' },
+    urgent: { label: 'Urgent',  tone: 'danger'  },
 };
 
-// ---------------------------------------------------------------------------
-// Sous-composants
-// ---------------------------------------------------------------------------
+const fmtDate = (iso) =>
+    iso ? new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-function StatCard({ label, value, icon: Icon, color = 'blue' }) {
-    const colors = {
-        blue:   'bg-purple-50 text-purple-700 border-purple-200',
-        yellow: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-        green:  'bg-green-50 text-green-700 border-green-200',
-        red:    'bg-red-50 text-red-700 border-red-200',
-        orange: 'bg-orange-50 text-orange-700 border-orange-200',
-    };
-
-    return (
-        <div className={`flex items-center gap-3 rounded-xl border p-4 ${colors[color]}`}>
-            <div className="flex-shrink-0">
-                <Icon className="h-6 w-6" />
-            </div>
-            <div>
-                <p className="text-2xl font-bold leading-none">{value}</p>
-                <p className="mt-0.5 text-xs font-medium opacity-75">{label}</p>
-            </div>
-        </div>
-    );
+function StatusBadge({ status }) {
+    const cfg = STATUS_CONFIG[status];
+    if (!cfg) return <span className={TEXT_FAINT}>—</span>;
+    return <Badge variant={cfg.tone} outline={cfg.outline} dot>{cfg.label}</Badge>;
 }
 
-function Badge({ config }) {
-    if (!config) return null;
-    return (
-        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${config.color}`}>
-            {config.label}
-        </span>
-    );
+function UrgencyBadge({ urgency }) {
+    const cfg = URGENCY_CONFIG[urgency];
+    if (!cfg) return <span className={TEXT_FAINT}>—</span>;
+    return <Badge variant={cfg.tone} dot>{cfg.label}</Badge>;
 }
 
-function FilterPanel({ filters, setFilters, departments, onApply }) {
-    const handleChange = (key, value) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-    };
+/* ─── Panneau de filtres ───────────────────────────────────────────────────── */
+
+const STATUS_OPTIONS = [
+    ['received', 'Reçu'], ['registered', 'Enregistré'], ['assigned', 'Assigné'],
+    ['in_progress', 'En traitement'], ['replied', 'Répondu'],
+    ['archived', 'Archivé'], ['closed', 'Clôturé'],
+];
+
+const URGENCY_OPTIONS = [
+    ['urgent', 'Urgent'], ['high', 'Élevée'], ['normal', 'Normale'], ['low', 'Faible'],
+];
+
+function FilterPanel({ filters, setFilters, onApply, onClear, departments = [] }) {
+    const set = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+    const lbl = cx('mb-1.5 block text-xs font-medium', TEXT_MUTED);
 
     return (
-        <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700">Filtres</h3>
-
-            {/* Type */}
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Type</label>
-                <select
-                    value={filters.type || ''}
-                    onChange={e => handleChange('type', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                >
-                    <option value="">Tous</option>
-                    <option value="incoming">Entrant</option>
-                    <option value="outgoing">Sortant</option>
-                </select>
-            </div>
-
-            {/* Statut */}
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Statut</label>
-                <select
-                    value={filters.status || ''}
-                    onChange={e => handleChange('status', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                >
-                    <option value="">Tous</option>
-                    <option value="pending">En attente</option>
-                    <option value="processing">En traitement</option>
-                    <option value="processed">Traité</option>
-                    <option value="archived">Archivé</option>
-                </select>
-            </div>
-
-            {/* Urgence */}
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Urgence</label>
-                <select
-                    value={filters.urgency || ''}
-                    onChange={e => handleChange('urgency', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                >
-                    <option value="">Toutes</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="high">Élevée</option>
-                    <option value="normal">Normale</option>
-                    <option value="low">Faible</option>
-                </select>
-            </div>
-
-            {/* Service */}
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Service</label>
-                <select
-                    value={filters.department_id || ''}
-                    onChange={e => handleChange('department_id', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                >
-                    <option value="">Tous les services</option>
-                    {departments?.map(dept => (
-                        <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Plage de dates */}
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Date de début</label>
-                <input
-                    type="date"
-                    value={filters.from || ''}
-                    onChange={e => handleChange('from', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                />
-            </div>
-
-            <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-600">Date de fin</label>
-                <input
-                    type="date"
-                    value={filters.to || ''}
-                    onChange={e => handleChange('to', e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                />
-            </div>
-
-            <div className="flex gap-2">
-                <button
-                    onClick={onApply}
-                    className="flex-1 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                    Appliquer
-                </button>
-                <button
-                    onClick={() => setFilters({})}
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                >
-                    Effacer
-                </button>
-            </div>
-        </div>
-    );
-}
-
-function MailRow({ mail, onChangeStatus }) {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const isOverdue = mail.is_overdue;
-    const isUrgent  = mail.urgency === 'urgent';
-
-    const rowClass = isOverdue
-        ? 'bg-red-50 border-l-4 border-l-red-400'
-        : isUrgent
-            ? 'bg-orange-50 border-l-4 border-l-orange-400'
-            : '';
-
-    return (
-        <tr className={`group border-b border-gray-100 hover:bg-gray-50 transition-colors ${rowClass}`}>
-            {/* Référence */}
-            <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                    {isOverdue && (
-                        <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0 text-red-500" title="Courrier en retard" />
-                    )}
+        <Card
+            title="Filtres avancés"
+            subtitle="Affinez le registre par type, statut, urgence, service ou période."
+            footer={
+                <div className="flex justify-end gap-2">
+                    <Button type="button" variant="ghost" onClick={onClear}>Effacer</Button>
+                    <Button type="button" variant="primary" onClick={onApply}>Appliquer les filtres</Button>
+                </div>
+            }
+        >
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <label className={lbl}>Type</label>
+                    <select value={filters.type || ''} onChange={(e) => set('type', e.target.value)} className={cx(CONTROL, 'h-10')}>
+                        <option value="">Tous</option>
+                        <option value="incoming">Entrant</option>
+                        <option value="outgoing">Sortant</option>
+                    </select>
+                </div>
+                <div>
+                    <label className={lbl}>Statut</label>
+                    <select value={filters.status || ''} onChange={(e) => set('status', e.target.value)} className={cx(CONTROL, 'h-10')}>
+                        <option value="">Tous</option>
+                        {STATUS_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className={lbl}>Urgence</label>
+                    <select value={filters.urgency || ''} onChange={(e) => set('urgency', e.target.value)} className={cx(CONTROL, 'h-10')}>
+                        <option value="">Toutes</option>
+                        {URGENCY_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                    </select>
+                </div>
+                {departments.length > 0 && (
                     <div>
-                        <span className="block font-mono text-xs font-semibold text-gray-800">
-                            {mail.reference}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                            {mail.type === 'incoming' ? '← Entrant' : '→ Sortant'}
-                        </span>
+                        <label className={lbl}>Service</label>
+                        <select
+                            value={filters.department_id || ''}
+                            onChange={(e) => set('department_id', e.target.value)}
+                            className={cx(CONTROL, 'h-10')}
+                        >
+                            <option value="">Tous les services</option>
+                            {departments.map((d) => (
+                                <option key={d.id} value={d.id}>{d.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className={lbl}>Du</label>
+                        <input type="date" value={filters.from || ''} onChange={(e) => set('from', e.target.value)} className={cx(CONTROL, 'h-10', NUM)} />
+                    </div>
+                    <div>
+                        <label className={lbl}>Au</label>
+                        <input type="date" value={filters.to || ''} onChange={(e) => set('to', e.target.value)} className={cx(CONTROL, 'h-10', NUM)} />
                     </div>
                 </div>
-            </td>
-
-            {/* Date */}
-            <td className="px-4 py-3 text-xs text-gray-600">
-                {new Date(mail.received_at || mail.sent_at || mail.created_at).toLocaleDateString('fr-FR')}
-            </td>
-
-            {/* Expéditeur / Destinataire */}
-            <td className="px-4 py-3">
-                <div className="max-w-[160px]">
-                    <p className="truncate text-sm font-medium text-gray-800">
-                        {mail.type === 'incoming' ? mail.sender_name : mail.recipient_name}
-                    </p>
-                    <p className="truncate text-xs text-gray-500">
-                        {mail.type === 'incoming' ? mail.sender_org : mail.recipient_org}
-                    </p>
-                </div>
-            </td>
-
-            {/* Objet */}
-            <td className="px-4 py-3">
-                <p className="max-w-[220px] truncate text-sm text-gray-700" title={mail.subject}>
-                    {mail.subject}
-                </p>
-            </td>
-
-            {/* Urgence */}
-            <td className="px-4 py-3">
-                <Badge config={URGENCY_CONFIG[mail.urgency]} />
-            </td>
-
-            {/* Service */}
-            <td className="px-4 py-3 text-xs text-gray-600">
-                {mail.department?.name || '—'}
-            </td>
-
-            {/* Statut */}
-            <td className="px-4 py-3">
-                <Badge config={STATUS_CONFIG[mail.status]} />
-            </td>
-
-            {/* Actions */}
-            <td className="px-4 py-3">
-                <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a
-                        href={`/courrier/${mail.id}`}
-                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                        title="Voir le détail"
-                    >
-                        <MagnifyingGlassIcon className="h-4 w-4" />
-                    </a>
-                    <button
-                        onClick={() => setMenuOpen(v => !v)}
-                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                    >
-                        <EllipsisVerticalIcon className="h-4 w-4" />
-                    </button>
-
-                    {menuOpen && (
-                        <div className="absolute right-0 top-7 z-20 w-44 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
-                            {mail.status === 'pending' && (
-                                <button
-                                    onClick={() => { onChangeStatus(mail.id, 'processing'); setMenuOpen(false); }}
-                                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <ClockIcon className="h-4 w-4 text-purple-500" />
-                                    Prendre en charge
-                                </button>
-                            )}
-                            {mail.status === 'processing' && (
-                                <button
-                                    onClick={() => { onChangeStatus(mail.id, 'processed'); setMenuOpen(false); }}
-                                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                    Marquer traité
-                                </button>
-                            )}
-                            {mail.status !== 'archived' && (
-                                <button
-                                    onClick={() => { onChangeStatus(mail.id, 'archived'); setMenuOpen(false); }}
-                                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <ArchiveBoxIcon className="h-4 w-4 text-gray-400" />
-                                    Archiver
-                                </button>
-                            )}
-                            <a
-                                href={`/courrier/${mail.id}/edit`}
-                                className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                                Modifier
-                            </a>
-                        </div>
-                    )}
-                </div>
-            </td>
-        </tr>
+            </div>
+        </Card>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Page principale
-// ---------------------------------------------------------------------------
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
 
-export default function CourrierIndex({ mails, stats, filters: initialFilters, departments }) {
+export default function CourrierIndex({ mails, stats, filters: initialFilters = {}, departments }) {
     const [activeTab, setActiveTab] = useState(initialFilters.type || 'all');
-    const [search, setSearch]       = useState(initialFilters.search || '');
-    const [filters, setFilters]     = useState(initialFilters || {});
+    const [search, setSearch] = useState(initialFilters.search || '');
+    const [filters, setFilters] = useState(initialFilters || {});
     const [showFilters, setShowFilters] = useState(false);
 
-    const applyFilters = useCallback(() => {
-        const params = { ...filters, search };
-        if (activeTab !== 'all') params.type = activeTab;
-
-        router.get('/courrier', params, { preserveState: true });
+    const navigate = useCallback((extra = {}) => {
+        const params = { ...filters, search: search || undefined, ...extra };
+        if (activeTab !== 'all') params.type = activeTab; else delete params.type;
+        Object.keys(params).forEach((k) => { if (!params[k]) delete params[k]; });
+        router.get('/courrier', params, { preserveState: true, preserveScroll: true });
     }, [filters, search, activeTab]);
+
+    const applyFilters = useCallback(() => navigate(), [navigate]);
+
+    const clearFilters = useCallback(() => {
+        setFilters({});
+        setSearch('');
+        router.get('/courrier', activeTab !== 'all' ? { type: activeTab } : {}, { preserveState: true, preserveScroll: true });
+    }, [activeTab]);
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
-        const params = { ...filters, search, type: tab === 'all' ? undefined : tab };
-        router.get('/courrier', params, { preserveState: true });
+        const params = { ...filters, search: search || undefined };
+        if (tab !== 'all') params.type = tab; else delete params.type;
+        Object.keys(params).forEach((k) => { if (!params[k]) delete params[k]; });
+        router.get('/courrier', params, { preserveState: true, preserveScroll: true });
     };
 
-    const handleChangeStatus = (mailId, newStatus) => {
-        router.post(`/courrier/${mailId}/status`, { status: newStatus }, {
-            preserveState: true,
-            onSuccess: () => router.reload({ only: ['mails', 'stats'] }),
-        });
+    // CourrierController@changeStatus renvoie du JSON → axios, pas router.post.
+    const handleChangeStatus = async (mailId, newStatus) => {
+        try {
+            await axios.post(`/courrier/${mailId}/status`, { status: newStatus });
+            router.reload({ only: ['mails', 'stats'] });
+        } catch (err) {
+            alert(err.response?.data?.message ?? 'Impossible de changer le statut.');
+        }
     };
 
     const handleExport = (format) => {
-        const params = new URLSearchParams({ ...filters, search, type: activeTab !== 'all' ? activeTab : '' });
-        window.location.href = `/api/courrier/export/${format}?${params}`;
+        const params = new URLSearchParams();
+        Object.entries({ ...filters, search }).forEach(([k, v]) => { if (v) params.set(k, v); });
+        if (activeTab !== 'all') params.set('type', activeTab);
+        window.location.href = `/api/courrier/export/${format}?${params.toString()}`;
     };
+
+    const activeFilterCount = Object.values(filters).filter(Boolean).length;
+    const isFiltered = Boolean(activeFilterCount || search || activeTab !== 'all');
+
+    const rows  = mails?.data ?? [];
+    const total = mails?.total ?? rows.length;
+
+    const tabs = [
+        { key: 'all',      label: 'Tous',    icon: Mail },
+        { key: 'incoming', label: 'Entrant', icon: ArrowDownLeft },
+        { key: 'outgoing', label: 'Sortant', icon: ArrowUpRight },
+    ];
+
+    /* ─── Colonnes ─────────────────────────────────────────────────────────── */
+
+    const columns = [
+        {
+            key: 'reference',
+            label: 'Référence',
+            nowrap: true,
+            render: (v, mail) => {
+                const isIncoming = mail.type === 'incoming';
+                const tone = isIncoming ? TONES.info : TONES.neutral;
+                return (
+                    <div className="flex items-center gap-2.5">
+                        <span className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', tone.soft)}>
+                            {isIncoming
+                                ? <ArrowDownLeft className={cx('h-4 w-4', tone.icon)} />
+                                : <ArrowUpRight className={cx('h-4 w-4', tone.icon)} />}
+                        </span>
+                        <div className="min-w-0">
+                            <span className={cx('flex items-center gap-1.5 font-mono text-xs font-semibold', TEXT_TITLE, NUM)}>
+                                {v || '—'}
+                                {mail.is_overdue && (
+                                    <AlertTriangle className="h-3.5 w-3.5 text-red-500" aria-label="Courrier en retard" />
+                                )}
+                            </span>
+                            <span className={cx('text-[11px]', TEXT_FAINT)}>
+                                {isIncoming ? 'Entrant' : 'Sortant'}
+                            </span>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'received_at',
+            label: 'Date',
+            nowrap: true,
+            width: '130px',
+            className: NUM,
+            render: (_v, mail) => (
+                <span className={cx('text-xs', TEXT_MUTED, NUM)}>
+                    {fmtDate(mail.received_at || mail.sent_at || mail.created_at)}
+                </span>
+            ),
+        },
+        {
+            key: 'correspondent',
+            label: 'Correspondant',
+            render: (_v, mail) => {
+                const isIncoming = mail.type === 'incoming';
+                const name = isIncoming ? mail.sender_name : mail.recipient_name;
+                const org  = isIncoming ? mail.sender_organization : null;
+                return (
+                    <div className="max-w-[180px] min-w-0">
+                        <p className={cx('truncate font-medium', TEXT_TITLE)}>
+                            {name || <span className={TEXT_FAINT}>—</span>}
+                        </p>
+                        {org && <p className={cx('truncate text-xs', TEXT_MUTED)}>{org}</p>}
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'subject',
+            label: 'Objet',
+            render: (v) => (
+                <p className="max-w-[280px] truncate" title={v || undefined}>
+                    {v || <span className={TEXT_FAINT}>—</span>}
+                </p>
+            ),
+        },
+        {
+            key: 'urgency',
+            label: 'Urgence',
+            nowrap: true,
+            render: (v) => <UrgencyBadge urgency={v} />,
+        },
+        {
+            key: 'assignee',
+            label: 'Assigné à',
+            nowrap: true,
+            render: (_v, mail) => mail.assignee?.name
+                ? <span className={cx('text-xs', TEXT_MUTED)}>{mail.assignee.name}</span>
+                : <span className={TEXT_FAINT}>—</span>,
+        },
+        {
+            key: 'status',
+            label: 'Statut',
+            nowrap: true,
+            render: (v) => <StatusBadge status={v} />,
+        },
+    ];
+
+    /* ─── Rendu ────────────────────────────────────────────────────────────── */
 
     return (
         <AppLayout>
-            <Head title="Registre Courrier" />
+            <Head title="Registre du courrier" />
 
-            <div className="flex h-full">
-                {/* Panneau filtres latéral */}
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+                <PageHeader
+                    icon={Mail}
+                    title="Registre du courrier"
+                    breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Courrier' }]}
+                    subtitle={`${total} courrier${total !== 1 ? 's' : ''} · suivi du courrier entrant et sortant de l'organisation`}
+                    actions={
+                        <>
+                            <Button variant="secondary" icon={ArrowDownLeft} href="/courrier/create?type=incoming">
+                                Courrier entrant
+                            </Button>
+                            <Button variant="primary" icon={ArrowUpRight} href="/courrier/create?type=outgoing">
+                                Courrier sortant
+                            </Button>
+                        </>
+                    }
+                />
+
+                {/* Indicateurs */}
+                <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+                    <StatCard label="Total"          value={stats?.total ?? 0}       icon={Mail}          tone="accent" />
+                    <StatCard label="Reçus"          value={stats?.received ?? 0}    icon={Inbox}         tone="warning" hint="à traiter" />
+                    <StatCard label="En traitement"  value={stats?.in_progress ?? 0} icon={Clock}         tone="info" />
+                    <StatCard label="Répondus"       value={stats?.replied ?? 0}     icon={CheckCircle2}  tone="success" />
+                    <StatCard label="Urgents"        value={stats?.urgent ?? 0}      icon={Flame}
+                              tone={stats?.urgent > 0 ? 'danger' : 'neutral'} />
+                    <StatCard label="En retard"      value={stats?.overdue ?? 0}     icon={AlertTriangle}
+                              tone={stats?.overdue > 0 ? 'danger' : 'neutral'} />
+                </div>
+
+                {/* Barre d'outils */}
+                <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+
+                    {/* Onglets de sens */}
+                    <div
+                        role="tablist"
+                        aria-label="Sens du courrier"
+                        className={cx('flex shrink-0 rounded-xl border p-1', BORDER, SURFACE)}
+                    >
+                        {tabs.map((tab) => {
+                            const active = activeTab === tab.key;
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={active}
+                                    onClick={() => handleTabChange(tab.key)}
+                                    className={cx(
+                                        'flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors',
+                                        FOCUS_RING,
+                                        active
+                                            ? 'bg-purple-600 text-white'
+                                            : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                    )}
+                                >
+                                    <tab.icon className="h-4 w-4" aria-hidden="true" />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Recherche */}
+                    <div className="relative min-w-[220px] flex-1">
+                        <Search className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
+                        <input
+                            type="search"
+                            placeholder="Rechercher par référence, objet, expéditeur…"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
+                            className={cx(CONTROL, 'h-10 pl-9')}
+                        />
+                    </div>
+
+                    {/* Filtres + exports */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant={showFilters || activeFilterCount ? 'subtle' : 'secondary'}
+                            icon={SlidersHorizontal}
+                            aria-expanded={showFilters}
+                            onClick={() => setShowFilters((v) => !v)}
+                        >
+                            Filtres
+                            {activeFilterCount > 0 && (
+                                <Badge variant="accent" className="ml-1.5">{activeFilterCount}</Badge>
+                            )}
+                        </Button>
+                        <Button variant="secondary" icon={FileText} title="Exporter en PDF" onClick={() => handleExport('pdf')}>
+                            PDF
+                        </Button>
+                        <Button variant="secondary" icon={Download} title="Exporter en Excel" onClick={() => handleExport('excel')}>
+                            Excel
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Panneau filtres */}
                 {showFilters && (
-                    <aside className="w-64 flex-shrink-0 overflow-y-auto border-r border-gray-200 bg-gray-50 p-4">
+                    <div className="mb-4">
                         <FilterPanel
                             filters={filters}
                             setFilters={setFilters}
-                            departments={departments}
                             onApply={applyFilters}
+                            onClear={clearFilters}
+                            departments={departments ?? []}
                         />
-                    </aside>
+                    </div>
                 )}
 
-                {/* Contenu principal */}
-                <main className="flex-1 overflow-auto">
-                    <div className="p-6">
-                        {/* En-tête */}
-                        <div className="mb-6 flex items-start justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Registre du Courrier</h1>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Gestion centralisée du courrier entrant et sortant
-                                </p>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handleExport('pdf')}
-                                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <ArrowDownTrayIcon className="h-4 w-4" />
-                                    PDF
-                                </button>
-                                <button
-                                    onClick={() => handleExport('excel')}
-                                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <ArrowDownTrayIcon className="h-4 w-4" />
-                                    Excel
-                                </button>
-                                <a
-                                    href="/courrier/create?type=incoming"
-                                    className="flex items-center gap-1.5 rounded-lg border border-purple-100 bg-purple-50 px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100"
-                                >
-                                    <PlusIcon className="h-4 w-4" />
-                                    Entrant
-                                </a>
-                                <a
-                                    href="/courrier/create?type=outgoing"
-                                    className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700"
-                                >
-                                    <PlusIcon className="h-4 w-4" />
-                                    Sortant
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* Compteurs */}
-                        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                            <StatCard label="Total"          value={stats?.total ?? 0}      icon={ChevronUpDownIcon} color="blue" />
-                            <StatCard label="En attente"     value={stats?.pending ?? 0}    icon={ClockIcon}         color="yellow" />
-                            <StatCard label="En traitement"  value={stats?.processing ?? 0} icon={ClockIcon}         color="blue" />
-                            <StatCard label="En retard"      value={stats?.overdue ?? 0}    icon={ExclamationTriangleIcon} color="red" />
-                            <StatCard label="Urgents"        value={stats?.urgent ?? 0}     icon={ExclamationTriangleIcon} color="orange" />
-                        </div>
-
-                        {/* Barre d'outils */}
-                        <div className="mb-4 flex items-center gap-3">
-                            {/* Onglets */}
-                            <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5">
-                                {[
-                                    { key: 'all',      label: 'Tous' },
-                                    { key: 'incoming', label: '← Entrant' },
-                                    { key: 'outgoing', label: '→ Sortant' },
-                                ].map(tab => (
+                {/* Tableau */}
+                <DataTable
+                    columns={columns}
+                    data={rows}
+                    rowKey="id"
+                    pageSize={mails?.per_page ?? 15}
+                    totalItems={total}
+                    onRowClick={(mail) => router.visit(`/courrier/${mail.id}`)}
+                    rowClassName={(mail) => mail.is_overdue ? 'bg-red-50/50 dark:bg-red-500/[0.06]' : ''}
+                    actions={(mail) => (
+                        <>
+                            <Button
+                                variant="ghost" size="sm" iconOnly icon={Eye}
+                                title="Voir le détail"
+                                href={`/courrier/${mail.id}`}
+                            />
+                            {['received', 'registered', 'assigned', 'pending'].includes(mail.status) && (
+                                <Button
+                                    variant="ghost" size="sm" iconOnly icon={Clock}
+                                    title="Prendre en charge"
+                                    onClick={() => handleChangeStatus(mail.id, 'in_progress')}
+                                    className="text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10"
+                                />
+                            )}
+                            {['in_progress', 'processing'].includes(mail.status) && (
+                                <Button
+                                    variant="ghost" size="sm" iconOnly icon={CheckCircle2}
+                                    title="Marquer répondu"
+                                    onClick={() => handleChangeStatus(mail.id, 'replied')}
+                                    className="text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                                />
+                            )}
+                            {!['archived', 'closed'].includes(mail.status) && (
+                                <Button
+                                    variant="ghost" size="sm" iconOnly icon={Archive}
+                                    title="Archiver"
+                                    onClick={() => handleChangeStatus(mail.id, 'archived')}
+                                />
+                            )}
+                            <Button
+                                variant="ghost" size="sm" iconOnly icon={Pencil}
+                                title="Modifier"
+                                href={`/courrier/${mail.id}/edit`}
+                            />
+                        </>
+                    )}
+                    empty={
+                        isFiltered ? (
+                            <EmptyState
+                                variant="no-results"
+                                title="Aucun courrier ne correspond"
+                                description="Aucun courrier pour ces critères. Élargissez la période, changez de statut ou revenez à l'onglet « Tous »."
+                                action={<Button variant="secondary" onClick={clearFilters}>Réinitialiser les filtres</Button>}
+                            />
+                        ) : (
+                            <EmptyState
+                                icon={Inbox}
+                                title="Le registre du courrier est vide"
+                                description="Enregistrez ici chaque courrier reçu ou expédié : la référence, l'échéance de traitement et le responsable sont suivis automatiquement."
+                                hints={[
+                                    'La référence du courrier est générée automatiquement à l\'enregistrement.',
+                                    'Un courrier non traité dans le délai imparti est signalé « en retard ».',
+                                    'Les pièces jointes numérisées restent attachées au courrier.',
+                                ]}
+                                action={
+                                    <Button variant="primary" icon={Plus} href="/courrier/create?type=incoming">
+                                        Enregistrer un courrier entrant
+                                    </Button>
+                                }
+                                secondary={
+                                    <Button variant="secondary" href="/courrier/create?type=outgoing">
+                                        Courrier sortant
+                                    </Button>
+                                }
+                            />
+                        )
+                    }
+                    footer={mails?.last_page > 1 ? (
+                        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                            <p className={cx('text-xs', TEXT_MUTED, NUM)}>
+                                {mails.from}–{mails.to} sur {mails.total} courriers
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                                {mails.links?.map((link, i) => (
                                     <button
-                                        key={tab.key}
-                                        onClick={() => handleTabChange(tab.key)}
-                                        className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                                            activeTab === tab.key
-                                                ? 'bg-white text-gray-900 shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-800'
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
+                                        key={i}
+                                        type="button"
+                                        onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true })}
+                                        disabled={!link.url}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                        className={cx(
+                                            'h-8 min-w-[32px] rounded-lg border px-2.5 text-xs font-medium transition-colors',
+                                            NUM, FOCUS_RING,
+                                            link.active
+                                                ? 'border-transparent bg-purple-600 text-white'
+                                                : cx(BORDER, SURFACE, 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                            !link.url && 'pointer-events-none opacity-40',
+                                        )}
+                                    />
                                 ))}
                             </div>
-
-                            {/* Recherche */}
-                            <div className="relative flex-1">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Rechercher par référence, objet, expéditeur…"
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && applyFilters()}
-                                    className="w-full rounded-lg border border-gray-200 bg-white pl-9 pr-4 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                                />
-                            </div>
-
-                            {/* Bouton filtres */}
-                            <button
-                                onClick={() => setShowFilters(v => !v)}
-                                className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                                    showFilters
-                                        ? 'border-purple-300 bg-purple-50 text-purple-700'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                                }`}
-                            >
-                                <FunnelIcon className="h-4 w-4" />
-                                Filtres
-                                {Object.values(filters).some(Boolean) && (
-                                    <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-xs font-bold text-white">
-                                        {Object.values(filters).filter(Boolean).length}
-                                    </span>
-                                )}
-                            </button>
                         </div>
+                    ) : null}
+                />
 
-                        {/* Tableau */}
-                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className="border-b border-gray-100 bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Référence</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Correspondant</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Objet</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Urgence</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Service</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Statut</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {mails?.data?.length > 0 ? (
-                                            mails.data.map(mail => (
-                                                <MailRow
-                                                    key={mail.id}
-                                                    mail={mail}
-                                                    onChangeStatus={handleChangeStatus}
-                                                />
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={8} className="px-4 py-12 text-center text-sm text-gray-400">
-                                                    Aucun courrier trouvé pour ces critères.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Pagination */}
-                            {mails?.last_page > 1 && (
-                                <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
-                                    <p className="text-xs text-gray-500">
-                                        {mails.from}–{mails.to} sur {mails.total} courriers
-                                    </p>
-                                    <div className="flex gap-1">
-                                        {mails.links?.map((link, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => link.url && router.get(link.url)}
-                                                disabled={!link.url}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                                className={`rounded px-3 py-1 text-xs ${
-                                                    link.active
-                                                        ? 'bg-purple-600 text-white'
-                                                        : link.url
-                                                            ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
-                                                            : 'text-gray-300 cursor-not-allowed'
-                                                }`}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Légende */}
-                        <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                            <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded-sm border-l-2 border-red-400 bg-red-50" />
-                                <span>En retard</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded-sm border-l-2 border-orange-400 bg-orange-50" />
-                                <span>Urgent</span>
-                            </div>
-                        </div>
-                    </div>
-                </main>
+                {/* Légende */}
+                <div className={cx('mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs', TEXT_MUTED)}>
+                    <span className="inline-flex items-center gap-1.5">
+                        <ArrowDownLeft className={cx('h-3.5 w-3.5', TONES.info.icon)} aria-hidden="true" /> Entrant
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                        <ArrowUpRight className={cx('h-3.5 w-3.5', TONES.neutral.icon)} aria-hidden="true" /> Sortant
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 text-red-500" aria-hidden="true" /> En retard de traitement
+                    </span>
+                </div>
             </div>
         </AppLayout>
     );
 }
+
 export { CourrierIndex };

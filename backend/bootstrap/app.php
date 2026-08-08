@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
             'ensureLicenseValid' => \App\Http\Middleware\EnsureValidLicense::class,
             'superadmin' => \App\Http\Middleware\SuperAdminOnly::class,
+            'ibig.admin' => \App\Http\Middleware\SuperAdminOnly::class,
             'api.log' => \App\Http\Middleware\RequestMetrics::class,
             'auth.device' => \App\Http\Middleware\SecurityHeaders::class,
             'auth.partner' => \App\Http\Middleware\SecurityHeaders::class,

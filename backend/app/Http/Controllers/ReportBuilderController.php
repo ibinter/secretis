@@ -196,7 +196,8 @@ class ReportBuilderController extends Controller
      */
     public function duplicate(int $id): JsonResponse
     {
-        $source = CustomReport::findOrFail($id);
+        // Isolation multi-tenant : on ne duplique qu'un rapport de sa propre organisation.
+        $source = CustomReport::where('organization_id', auth()->user()->organization_id)->findOrFail($id);
 
         $copy = $source->replicate(['run_count', 'last_run_at']);
         $copy->name       = $source->name . ' (copie)';
@@ -273,7 +274,9 @@ class ReportBuilderController extends Controller
      */
     public function runStatus(int $runId): JsonResponse
     {
-        $run = CustomReportRun::findOrFail($runId);
+        // Isolation multi-tenant : le run doit appartenir à un rapport de l'org courante.
+        $run = CustomReportRun::whereHas('report', fn ($q) => $q->where('organization_id', auth()->user()->organization_id))
+            ->findOrFail($runId);
 
         return response()->json([
             'id'          => $run->id,
@@ -291,7 +294,9 @@ class ReportBuilderController extends Controller
      */
     public function download(int $runId): StreamedResponse|\Illuminate\Http\Response
     {
-        $run = CustomReportRun::findOrFail($runId);
+        // Isolation multi-tenant : interdit de télécharger l'export d'une autre organisation.
+        $run = CustomReportRun::whereHas('report', fn ($q) => $q->where('organization_id', auth()->user()->organization_id))
+            ->findOrFail($runId);
 
         if (! $run->isCompleted() || ! $run->hasFile()) {
             abort(404, 'Fichier non disponible.');

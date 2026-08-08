@@ -100,7 +100,7 @@ export default function ConsentBanner({ orgId }) {
                             (essentiels), mesurer les performances (analytiques) et personnaliser
                             certaines fonctionnalités (marketing). Vous pouvez personnaliser vos choix.{' '}
                             <a
-                                href="/privacy"
+                                href="/confidentialite"
                                 className="underline text-purple-600 hover:text-purple-800 dark:text-purple-400"
                                 target="_blank"
                                 rel="noopener noreferrer"

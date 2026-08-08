@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\InviteUserRequest;
 use App\Services\GamifiedOnboardingService;
 use App\Services\OnboardingService;
 use App\Services\TrialService;

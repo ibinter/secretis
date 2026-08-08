@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes inline ───────────────────────────────────────────────────────────
 const Icon = {
@@ -137,7 +138,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
     const clearSearch = () => setSearch('');
 
     return (
-        <>
+        <AppLayout>
             <Head title="FAQ — 100 questions répondues | IBIG SECRETIS" />
 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -335,7 +336,7 @@ export default function Faq({ faqs = [], categories = {}, total = 0, featured = 
                     </div>
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }
 export { Faq };

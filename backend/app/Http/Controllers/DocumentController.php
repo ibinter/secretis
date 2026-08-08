@@ -99,6 +99,9 @@ class DocumentController extends Controller
 
             $folders = \App\Models\DocumentFolder::where('organization_id', $orgId)
                 ->whereNull('parent_id')
+                // La sidebar affiche folder.documents_count : sans ce withCount,
+                // le compteur restait toujours vide.
+                ->withCount('documents')
                 ->orderBy('name')
                 ->get(['id', 'name']);
 
@@ -138,7 +141,8 @@ class DocumentController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'file'         => ['required', 'file', 'max:51200'], // 50 Mo max
+            // Whitelist stricte des types acceptés (bloque html/svg/php → XSS stocké).
+            'file'         => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,png,jpg,jpeg,gif,webp,zip,rar,odt,ods'], // 50 Mo max
             'title'        => ['required', 'string', 'max:500'],
             'description'  => ['nullable', 'string', 'max:2000'],
             'folder_id'    => ['nullable', 'exists:document_folders,id'],
@@ -490,11 +494,57 @@ class DocumentController extends Controller
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */
+
+    public function upload(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        return $this->store($request);
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {
             return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    public function archives(Request $request = null)
+    {
+        $orgId = auth()->user()->organization_id;
+        $docs  = \App\Models\Document::where('organization_id', $orgId)->where('status', 'archived')->with('author:id,name')->orderBy('updated_at', 'desc')->paginate(30);
+        return \Inertia\Inertia::render('GED/ArchiveView', ['documents' => $docs]);
+    }
+
+    /**
+     * GET /ged/documents/{id}/versions/{versionId}/download
+     * Télécharge une VERSION précise du document (le bouton de l'historique
+     * renvoyait jusqu'ici systématiquement le fichier courant).
+     */
+    public function downloadVersion(string $id, int $versionId): \Symfony\Component\HttpFoundation\Response
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+
+        $version = \App\Models\DocumentVersion::where('id', $versionId)
+            ->where('document_id', $document->id)
+            ->firstOrFail();
+
+        abort_unless(
+            \Illuminate\Support\Facades\Storage::disk('private')->exists($version->file_path),
+            404,
+            'Fichier de cette version introuvable.'
+        );
+
+        $this->auditService->log(
+            action: 'version_downloaded',
+            module: 'ged',
+            resourceType: 'document',
+            resourceId: $document->id,
+            newValues: ['version' => $version->version_number],
+        );
+
+        return \Illuminate\Support\Facades\Storage::disk('private')->download(
+            $version->file_path,
+            $version->file_name ?: ($document->title . '-v' . $version->version_number),
+        );
     }
 }

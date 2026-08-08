@@ -24,7 +24,7 @@ class SupportController extends Controller
         return Inertia::render('SuperAdmin/Support/Tickets/Index', [
             'tickets' => $tickets,
             'sla'     => [
-                'open'     => SupportTicket::whereIn('status', ['open', 'pending'])->count(),
+                'open'     => SupportTicket::whereIn('status', ['open', 'in_progress'])->count(),
                 'resolved' => SupportTicket::where('status', 'resolved')->count(),
             ],
         ]);
@@ -45,7 +45,7 @@ class SupportController extends Controller
             'message'           => $request->input('message'),
             'is_staff'          => true,
         ]);
-        $ticket->update(['status' => 'pending']);
+        $ticket->update(['status' => 'in_progress']);
         return back()->with('success', 'Réponse envoyée.');
     }
 
@@ -56,7 +56,7 @@ class SupportController extends Controller
 
     public function updateStatus(Request $request, SupportTicket $ticket): RedirectResponse
     {
-        $status = $request->validate(['status' => 'required|string'])['status'];
+        $status = $request->validate(['status' => 'required|in:open,in_progress,waiting_user,resolved,closed'])['status'];
         $data = ['status' => $status];
         if ($status === 'resolved') $data['resolved_at'] = now();
         $ticket->update($data);

@@ -10,6 +10,7 @@ import {
     ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 /**
  * DocumentValidation — Tableau de bord de validation pour les approbateurs
@@ -152,11 +153,14 @@ export default function DocumentValidation() {
         setLoading(true);
         try {
             const [pendingRes, statsRes] = await Promise.all([
-                axios.get('/api/documents/pending-validation'),
-                axios.get('/api/documents/validation-stats'),
+                axios.get('/api/v1/documents/pending-validation'),
+                axios.get('/api/v1/documents/validation-stats'),
             ]);
             setPending(pendingRes.data?.data ?? pendingRes.data ?? []);
             setStats(statsRes.data);
+        } catch (e) {
+            console.error('DocumentValidation fetch error', e);
+            setPending([]);
         } finally {
             setLoading(false);
         }
@@ -171,7 +175,7 @@ export default function DocumentValidation() {
         if (!item) return;
 
         await axios.post(
-            `/api/documents/${item.document.id}/workflow/steps/${stepId}/${endpoint}`,
+            `/api/v1/documents/${item.document.id}/workflow/steps/${stepId}/${endpoint}`,
             { comment },
         );
 
@@ -193,6 +197,7 @@ export default function DocumentValidation() {
     }).length;
 
     return (
+        <AppLayout>
         <div className="max-w-5xl mx-auto p-6 space-y-6">
             {/* En-tête */}
             <div>
@@ -393,6 +398,7 @@ export default function DocumentValidation() {
                 </div>
             )}
         </div>
+        </AppLayout>
     );
 }
 export { DocumentValidation };

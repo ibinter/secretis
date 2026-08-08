@@ -31,6 +31,18 @@ use Inertia\Response;
  */
 class ClientPortalController extends Controller
 {
+    // ─── Page d'accueil / login portail ──────────────────────────────────────
+
+    public function loginPage(): Response
+    {
+        // Si déjà connecté, rediriger vers dashboard
+        if (session('portal_client_id')) {
+            return redirect()->route('portail.dashboard');
+        }
+
+        return Inertia::render('Portal/ClientLogin');
+    }
+
     // ─── Auth portail ─────────────────────────────────────────────────────────
 
     public function login(Request $request): JsonResponse

@@ -9,6 +9,9 @@ import { createInertiaApp }from '@inertiajs/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 
+// ─── PWA / mode hors-ligne ────────────────────────────────────────────────────
+import { registerServiceWorker } from './pwa/registerServiceWorker'
+
 // ─── i18n ─────────────────────────────────────────────────────────────────────
 import i18n from 'i18next'
 import { initReactI18next, I18nextProvider } from 'react-i18next'
@@ -131,6 +134,15 @@ Promise.all([
   initEcho(),
   initSentry(),
 ]).catch(console.error)
+
+// Mode hors-ligne : enregistrement du Service Worker.
+// Volontairement hors du flux de rendu — toute erreur y est absorbée et ne peut
+// pas empêcher l'application de démarrer.
+try {
+  registerServiceWorker()
+} catch (err) {
+  console.warn('[PWA] Service Worker non enregistré :', err)
+}
 
 // ─── Inertia App ─────────────────────────────────────────────────────────────
 createInertiaApp({

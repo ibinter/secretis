@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ────────────────────────────────────────────────────────────────────
 const PlusIcon = () => (
@@ -308,6 +309,7 @@ export default function AutomationsIndex() {
   const [filterActive, setFilterActive]   = useState('all');
   const [filterTrigger, setFilterTrigger] = useState('all');
   const [availableTriggers, setAvailableTriggers] = useState({});
+  const [page, setPage]                   = useState(1);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -316,7 +318,7 @@ export default function AutomationsIndex() {
   const loadRules = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page };
       if (filterActive !== 'all') params.is_active = filterActive === 'active' ? 1 : 0;
       if (filterTrigger !== 'all') params.trigger_type = filterTrigger;
 
@@ -329,7 +331,7 @@ export default function AutomationsIndex() {
     } finally {
       setLoading(false);
     }
-  }, [filterActive, filterTrigger]);
+  }, [filterActive, filterTrigger, page]);
 
   useEffect(() => { loadRules(); }, [loadRules]);
 
@@ -375,6 +377,7 @@ export default function AutomationsIndex() {
     : 0;
 
   return (
+    <AppLayout>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="max-w-5xl mx-auto px-6 py-8">
 
@@ -473,7 +476,7 @@ export default function AutomationsIndex() {
         {meta.last_page > 1 && (
           <div className="flex justify-center mt-8 gap-2">
             {Array.from({ length: meta.last_page }, (_, i) => (
-              <button key={i} className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors
+              <button key={i} type="button" onClick={() => setPage(i + 1)} className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors
                 ${meta.current_page === i + 1
                   ? 'bg-purple-900 text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
@@ -545,6 +548,7 @@ export default function AutomationsIndex() {
         <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)}/>
       )}
     </div>
+    </AppLayout>
   );
 }
 export { AutomationsIndex };

@@ -153,6 +153,14 @@ class SaraController extends Controller
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */
+    // ─── Alias API (routes/api.php) → méthode réelle ───────────────────────────
+
+    /** GET /api/sara/suggestions → getQuickQuestions() */
+    public function suggestions(Request $request): JsonResponse
+    {
+        return $this->getQuickQuestions($request);
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {

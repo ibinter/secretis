@@ -29,7 +29,7 @@ class SignatureController extends Controller
      * POST /signatures/requests
      * Créer une nouvelle demande de signature.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'document_id'   => 'required|integer',
@@ -49,17 +49,23 @@ class SignatureController extends Controller
             $request->user()->organization_id
         );
 
-        return response()->json([
-            'message' => 'Demande de signature créée et invitations envoyées.',
-            'data'    => $signatureRequest->load('signers'),
-        ], 201);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Demande de signature créée et invitations envoyées.',
+                'data'    => $signatureRequest->load('signers'),
+            ], 201);
+        }
+
+        return redirect()
+            ->route('signatures.requests.show', $signatureRequest->id)
+            ->with('success', 'Demande de signature créée et invitations envoyées.');
     }
 
     /**
      * GET /signatures/requests
      * Liste des demandes de l'organisation avec filtres.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|InertiaResponse
     {
         $orgId  = $request->user()->organization_id;
         $userId = $request->user()->id;
@@ -77,16 +83,47 @@ class SignatureController extends Controller
             });
         }
 
-        $requests = $query->paginate(20);
+        $requests = $query->paginate(20)->withQueryString();
 
-        return response()->json($requests);
+        // Le module est consommé par deux clients : l'API JSON (`api/v1/...`)
+        // et le front Inertia. Une requête Inertia n'est PAS `expectsJson()`
+        // (elle annonce `Accept: text/html`), ce qui rend le test fiable.
+        if ($request->expectsJson()) {
+            return response()->json($requests);
+        }
+
+        return Inertia::render('Signatures/Index', [
+            'requests' => $requests,
+            'filter'   => $filter,
+        ]);
+    }
+
+    /**
+     * GET /signatures/requests/create
+     * Formulaire de nouvelle demande.
+     */
+    public function create(Request $request): InertiaResponse
+    {
+        $orgId = $request->user()->organization_id;
+
+        return Inertia::render('Signatures/RequestForm', [
+            'documents' => \App\Models\Document::where('organization_id', $orgId)
+                ->orderByDesc('created_at')
+                ->limit(200)
+                ->get(['id', 'title', 'file_name', 'created_at']),
+            'users' => \App\Models\User::where('organization_id', $orgId)
+                ->where('id', '!=', $request->user()->id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'email']),
+            'preselectedDocumentId' => $request->integer('document_id') ?: null,
+        ]);
     }
 
     /**
      * GET /signatures/requests/{id}
      * Détail d'une demande avec statut des signataires.
      */
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse|InertiaResponse
     {
         $orgId = $request->user()->organization_id;
 
@@ -94,14 +131,20 @@ class SignatureController extends Controller
             ->with(['signers', 'document:id,title,file_name', 'auditTrail', 'creator:id,name'])
             ->findOrFail($id);
 
-        return response()->json(['data' => $signatureRequest]);
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $signatureRequest]);
+        }
+
+        return Inertia::render('Signatures/Show', [
+            'request' => $signatureRequest,
+        ]);
     }
 
     /**
      * DELETE /signatures/requests/{id}/cancel
      * Annuler une demande.
      */
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $orgId = $request->user()->organization_id;
 
@@ -112,14 +155,18 @@ class SignatureController extends Controller
 
         $this->signatureService->cancelRequest($signatureRequest);
 
-        return response()->json(['message' => 'Demande annulée.']);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Demande annulée.']);
+        }
+
+        return back()->with('success', 'Demande de signature annulée.');
     }
 
     /**
      * POST /signatures/requests/{id}/remind
      * Envoyer des rappels aux signataires en attente.
      */
-    public function remind(Request $request, int $id): JsonResponse
+    public function remind(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $orgId = $request->user()->organization_id;
 
@@ -129,7 +176,11 @@ class SignatureController extends Controller
 
         $this->signatureService->sendReminder($signatureRequest);
 
-        return response()->json(['message' => 'Rappels envoyés.']);
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Rappels envoyés.']);
+        }
+
+        return back()->with('success', 'Rappels envoyés aux signataires en attente.');
     }
 
     /**
@@ -218,12 +269,45 @@ class SignatureController extends Controller
             );
         }
 
-        // Générer un lien temporaire pour afficher le PDF
-        $documentUrl = $request->document->file_path
-            ? Storage::disk('local')->temporaryUrl($request->document->file_path, now()->addMinutes(60))
+        // Le disque `local` n'implémente pas `temporaryUrl()` : l'appel levait
+        // une exception et la page de signature ne s'affichait jamais. Le
+        // document est servi par une route dédiée, protégée par le même jeton
+        // que la page elle-même.
+        $documentUrl = $request->document?->file_path
+            ? route('signatures.sign.document', ['token' => $token])
             : null;
 
         return view('signatures.sign', compact('signer', 'request', 'documentUrl'));
+    }
+
+    /**
+     * GET /sign/{token}/document
+     * Sert le document à signer. L'accès est porté par le jeton du signataire,
+     * jamais par une session : le signataire n'a pas de compte.
+     */
+    public function signDocument(string $token)
+    {
+        $signer = SignatureRequestSigner::where('token', $token)
+            ->with('request.document')
+            ->firstOrFail();
+
+        $signatureRequest = $signer->request;
+
+        abort_if($signatureRequest->status === 'cancelled', 410, 'Demande annulée.');
+        abort_if(
+            $signatureRequest->expires_at && now()->isAfter($signatureRequest->expires_at),
+            410,
+            'Lien expiré.'
+        );
+
+        $path = $signatureRequest->document?->file_path;
+        abort_if(! $path || ! Storage::disk('local')->exists($path), 404, 'Document introuvable.');
+
+        return Storage::disk('local')->response(
+            $path,
+            $signatureRequest->document->file_name ?? 'document.pdf',
+            ['Content-Disposition' => 'inline']
+        );
     }
 
     /**
@@ -256,6 +340,60 @@ class SignatureController extends Controller
         $this->signatureService->declineSignature($token, $validated['reason']);
 
         return response()->json(['message' => 'Vous avez refusé de signer ce document.']);
+    }
+
+    // =========================================================================
+    // ALIAS API (routes api.php → méthodes réelles)
+    // =========================================================================
+
+    /**
+     * GET /signatures/{id}/certificate → downloadCertificate
+     */
+    public function certificate(Request $request, int $id): mixed
+    {
+        return $this->downloadCertificate($request, $id);
+    }
+
+    /**
+     * DELETE /signatures/requests/{id}
+     * Supprime une demande de signature (org-scopée, réservée au créateur).
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $orgId = $request->user()->organization_id;
+
+        $signatureRequest = SignatureRequest::where('organization_id', $orgId)
+            ->where('created_by', $request->user()->id)
+            ->findOrFail($id);
+
+        $signatureRequest->delete();
+
+        return response()->json(['message' => 'Demande supprimée.']);
+    }
+
+    /**
+     * POST /signatures/requests/{id}/send
+     * Réutilise la logique de rappel (remind → sendReminder) pour (re)notifier
+     * les signataires en attente.
+     */
+    public function send(Request $request, int $id): JsonResponse
+    {
+        return $this->remind($request, $id);
+    }
+
+    /**
+     * GET /signatures/requests/{id}/audit-trail
+     * Retourne l'historique d'audit d'une demande (org-scopée).
+     */
+    public function auditTrail(Request $request, int $id): JsonResponse
+    {
+        $orgId = $request->user()->organization_id;
+
+        $signatureRequest = SignatureRequest::where('organization_id', $orgId)
+            ->with('auditTrail')
+            ->findOrFail($id);
+
+        return response()->json(['data' => $signatureRequest->auditTrail]);
     }
 
     // =========================================================================

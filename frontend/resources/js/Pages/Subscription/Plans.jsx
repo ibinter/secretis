@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Données des plans ────────────────────────────────────────────────────────
 const PLANS = [
@@ -202,6 +203,7 @@ export default function Plans({ currentPlan, trialExpiresAt, remainingDays }) {
   };
 
   return (
+    <AppLayout>
     <div className="min-h-screen bg-slate-50 py-14 px-4">
       <div className="max-w-6xl mx-auto">
 
@@ -422,6 +424,7 @@ export default function Plans({ currentPlan, trialExpiresAt, remainingDays }) {
 
       </div>
     </div>
+    </AppLayout>
   );
 }
 export { Plans };

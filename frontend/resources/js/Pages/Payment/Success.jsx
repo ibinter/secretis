@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Confettis CSS ─────────────────────────────────────────────────────────────
 const ConfettiStyle = () => (
@@ -239,7 +240,7 @@ export default function PaymentSuccess({ order: initialOrder }) {
   };
 
   return (
-    <>
+    <AppLayout>
       <Head title="Confirmation de paiement — SECRETIS" />
       <ConfettiStyle />
 
@@ -270,7 +271,7 @@ export default function PaymentSuccess({ order: initialOrder }) {
           </p>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { PaymentSuccess };

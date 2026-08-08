@@ -10,9 +10,40 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 class BiController extends Controller
 {
+    // -------------------------------------------------------------------------
+    // Page Inertia — Dashboard BI
+    // -------------------------------------------------------------------------
+
+    public function index(Request $request): InertiaResponse
+    {
+        return Inertia::render('BI/Dashboard', [
+            'preset' => $request->input('preset', 'month'),
+        ]);
+    }
+
+    public function kpis(Request $request): JsonResponse
+    {
+        [$start, $end] = $this->parsePeriod($request);
+        $orgId = $this->orgId();
+
+        try {
+            return response()->json([
+                'correspondence' => $this->bi->getCorrespondenceAnalytics($orgId, $start, $end),
+                'tasks'          => $this->bi->getTaskAnalytics($orgId, $start, $end),
+                'meetings'       => $this->bi->getMeetingAnalytics($orgId, $start, $end),
+                'hr'             => $this->bi->getHrAnalytics($orgId, $start, $end),
+            ]);
+        } catch (\Throwable) {
+            return response()->json(['data' => [], 'error' => 'Analytics indisponibles.']);
+        }
+    }
+
+
     public function __construct(
         private readonly BiService           $bi,
         private readonly ReportExportService $exporter

@@ -41,18 +41,30 @@ class NotificationService
      * @param  string $body    Corps du message
      * @param  array  $data    Données contextuelles (IDs de ressources, liens, etc.)
      */
+    /**
+     * @param bool $silent Enregistre et diffuse la notification in-app, mais
+     *                     n'emprunte aucun canal intrusif (email, SMS, push).
+     *                     Utilisé quand le filtre intelligent a jugé le moment
+     *                     inopportun : l'information reste consultable dans la
+     *                     cloche sans déranger le destinataire.
+     */
     public function send(
         User   $user,
         string $type,
         string $title,
         string $body,
         array  $data = [],
+        bool   $silent = false,
     ): void {
         // 1. Toujours créer la notification en base (canal "app")
         $notification = $this->createDbNotification($user, $type, $title, $body, $data);
 
         // 2. Broadcast Reverb si l'utilisateur est connecté
         $this->broadcastToUser($notification, $user);
+
+        if ($silent) {
+            return;
+        }
 
         // 3. Email — si l'utilisateur a activé les emails de notifications
         if ($this->userWantsEmail($user, $type)) {

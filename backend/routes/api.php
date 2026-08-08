@@ -911,6 +911,26 @@ use App\Http\Controllers\Public\PublicController;
 Route::prefix('public')->name('public.')->middleware(['throttle:public'])->group(function () {
     Route::post('/demo-request', [PublicController::class, 'demoRequest'])->name('demo-request');
     Route::post('/newsletter',   [PublicController::class, 'newsletter'])->name('newsletter');
+
+    // ─── Portail visiteur : prise de RDV en ligne (sans authentification) ─────
+    Route::prefix('visitor')->name('visitor.')->group(function () {
+        // Consultation / annulation / ICS via token (déclarées AVANT /{slug})
+        Route::get('/appointment/{token}',         [\App\Http\Controllers\AppointmentController::class, 'showByToken'])->name('appointment.show');
+        Route::post('/appointment/{token}/cancel', [\App\Http\Controllers\AppointmentController::class, 'cancelByToken'])->name('appointment.cancel');
+        Route::get('/appointment/{token}/ics',     [\App\Http\Controllers\AppointmentController::class, 'ics'])->name('appointment.ics');
+        // Assistant de réservation
+        Route::get('/{slug}',                 [\App\Http\Controllers\AppointmentController::class, 'portalConfig'])->name('config');
+        Route::get('/{slug}/hosts',           [\App\Http\Controllers\AppointmentController::class, 'hosts'])->name('hosts');
+        Route::get('/{slug}/available-dates', [\App\Http\Controllers\AppointmentController::class, 'availableDates'])->name('dates');
+        Route::get('/{slug}/slots',           [\App\Http\Controllers\AppointmentController::class, 'slots'])->name('slots');
+        Route::post('/{slug}/book',           [\App\Http\Controllers\AppointmentController::class, 'book'])->name('book');
+    });
+});
+
+// ─── RDV — administration (interne, authentifié) ─────────────────────────────
+Route::middleware(['auth:sanctum'])->prefix('appointments')->name('api.appointments.')->group(function () {
+    Route::get('/',              [\App\Http\Controllers\AppointmentController::class, 'index'])->name('index');
+    Route::patch('/{id}/status', [\App\Http\Controllers\AppointmentController::class, 'updateStatus'])->name('status');
 });
 
 // =============================================================================
@@ -967,6 +987,138 @@ Route::middleware('auth:sanctum')->prefix('partner')->name('api.partner.')->grou
 // SARA — assistante IA publique (landing + app)
 Route::post('/sara/chat', [SaraChatController::class, 'chat'])->middleware('throttle:30,1');
 
+// ─── Alias Agenda sans préfixe v1 (le frontend appelle /api/agenda/*) ───────
+Route::middleware(['auth:sanctum'])->prefix('agenda')->name('api.agenda-compat.')->group(function () {
+    Route::get('/events', [EventApiController::class, 'index'])->name('events.index');
+    Route::post('/events', [EventApiController::class, 'store'])->name('events.store');
+    Route::get('/events/{id}', [EventApiController::class, 'show'])->name('events.show');
+    Route::put('/events/{id}', [EventApiController::class, 'update'])->name('events.update');
+    Route::patch('/events/{id}', [EventApiController::class, 'update'])->name('events.patch');
+    Route::delete('/events/{id}', [EventApiController::class, 'destroy'])->name('events.destroy');
+    Route::post('/availability', [AgendaController::class, 'checkAvailability'])->name('availability');
+    Route::get('/calendar', [AgendaController::class, 'getCalendarEvents'])->name('calendar');
+});
+
+// ─── Alias API sans préfixe v1 (le frontend appelle /api/<module>/*) — Vague 3 ───
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Centre de notifications
+    Route::prefix('notifications')->name('api.notif-compat.')->group(function () {
+        Route::get('/',             [NotificationController::class, 'index'])->name('index');
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
+        Route::post('/read-all',    [NotificationController::class, 'markAllRead'])->name('read-all');
+        Route::post('/{id}/read',   [NotificationController::class, 'markRead'])->name('read');
+        Route::get('/preferences',  [NotificationController::class, 'getPreferences'])->name('preferences');
+        Route::put('/preferences',  [NotificationController::class, 'updatePreferences'])->name('preferences.update');
+    });
+    // Salles
+    Route::get('/rooms',                    [RoomController::class, 'index'])->name('api.rooms-compat.index');
+    Route::get('/rooms/{id}/availability',  [RoomController::class, 'checkAvailability'])->name('api.rooms-compat.availability');
+    // BI
+    // Mêmes permissions que le groupe officiel v1/bi (sinon contournement du droit bi.view).
+    Route::prefix('bi')->name('api.bi-compat.')->middleware(['permission:bi.view'])->group(function () {
+        Route::get('/kpis',          [BiController::class, 'kpis'])->name('kpis');
+        Route::get('/correspondence',[BiController::class, 'correspondence'])->name('correspondence');
+        Route::get('/tasks',         [BiController::class, 'tasks'])->name('tasks');
+        Route::get('/meetings',      [BiController::class, 'meetings'])->name('meetings');
+        Route::get('/hr',            [BiController::class, 'hr'])->name('hr');
+        Route::get('/visitors',      [BiController::class, 'visitors'])->name('visitors');
+        Route::get('/accounting',    [BiController::class, 'accounting'])->name('accounting');
+        Route::post('/custom',       [BiController::class, 'custom'])->name('custom')->middleware('permission:bi.reports');
+        Route::post('/export',       [BiController::class, 'export'])->name('export')->middleware('permission:bi.export');
+    });
+    // Automatisations
+    Route::prefix('automations')->name('api.autom-compat.')->group(function () {
+        Route::get('/',            [AutomationController::class, 'index'])->name('index');
+        Route::post('/',           [AutomationController::class, 'store'])->name('store');
+        Route::get('/{id}',        [AutomationController::class, 'show'])->name('show');
+        Route::put('/{id}',        [AutomationController::class, 'update'])->name('update');
+        Route::delete('/{id}',     [AutomationController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/toggle',[AutomationController::class, 'toggle'])->name('toggle');
+        Route::patch('/{id}/toggle',[AutomationController::class, 'toggle'])->name('toggle.patch');
+        Route::post('/{id}/test',  [AutomationController::class, 'test'])->name('test');
+        Route::get('/{id}/logs',   [AutomationController::class, 'logs'])->name('logs');
+    });
+    // Paiements
+    Route::prefix('payments')->name('api.pay-compat.')->group(function () {
+        Route::post('/initiate',    [PaymentController::class, 'initiate'])->name('initiate');
+        Route::get('/history',      [PaymentController::class, 'history'])->name('history');
+        Route::get('/{id}/status',  [PaymentController::class, 'status'])->name('status');
+        Route::post('/{id}/proof',  [PaymentController::class, 'uploadProof'])->name('proof');
+        Route::get('/{id}/invoice', [PaymentController::class, 'generateInvoice'])->name('invoice');
+    });
+    // Abonnement
+    Route::get('/subscription/current', [SubscriptionController::class, 'current'])->name('api.sub-compat.current');
+
+    // Préférences utilisateur (thème / langue) — Vague 4
+    Route::get('/user/preferences',  [\App\Http\Controllers\UserPreferenceController::class, 'getPreferences'])->name('api.user.preferences');
+    Route::match(['put','patch'], '/user/preferences', [\App\Http\Controllers\UserPreferenceController::class, 'updatePreferences'])->name('api.user.preferences.update');
+    Route::get('/user/locale',       [\App\Http\Controllers\UserPreferenceController::class, 'getLocale'])->name('api.user.locale');
+    Route::match(['put','patch'], '/user/locale', [\App\Http\Controllers\UserPreferenceController::class, 'updateLocale'])->name('api.user.locale.update');
+    Route::match(['put','patch'], '/profile/preferences', [\App\Http\Controllers\UserPreferenceController::class, 'updatePreferences'])->name('api.profile.preferences.update');
+
+    // Centre de notifications avancé (digest / snooze / archive / feedback / stats) — Vague 4
+    Route::prefix('notifications')->name('api.notif-center.')->group(function () {
+        Route::get('/center',        [NotificationCenterController::class, 'list'])->name('center');
+        Route::get('/digest',        [NotificationCenterController::class, 'digest'])->name('digest');
+        Route::get('/stats',         [NotificationCenterController::class, 'stats'])->name('stats');
+        Route::post('/snooze/{id}',  [NotificationCenterController::class, 'snooze'])->name('snooze');
+        Route::post('/archive/{id}', [NotificationCenterController::class, 'archive'])->name('archive');
+        Route::post('/feedback',     [NotificationCenterController::class, 'feedback'])->name('feedback');
+    });
+});
+
+// ─── Admin Paiements (SuperAdmin IBIG) — Vague 4 ────────────────────────────
+Route::middleware(['auth:sanctum', 'ibig.admin'])->group(function () {
+    Route::prefix('admin/payments')->name('api.admin-payments.')->group(function () {
+        Route::get('kpis',                       [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'kpis'])->name('kpis');
+        Route::get('orders',                     [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'orders'])->name('orders');
+        Route::post('orders/{id}/force-activate',[\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'forceActivate'])->name('orders.force-activate');
+        Route::get('proofs',                     [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'proofs'])->name('proofs');
+        Route::post('proofs/{id}/approve',       [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'approveProof'])->name('proofs.approve');
+        Route::post('proofs/{id}/reject',        [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'rejectProof'])->name('proofs.reject');
+        Route::get('config',                     [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'config'])->name('config');
+        Route::put('config/{id}',                [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'updateConfig'])->name('config.update');
+        Route::get('vouchers',                   [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'vouchers'])->name('vouchers');
+        Route::post('vouchers/generate',         [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'generateVouchers'])->name('vouchers.generate');
+        Route::get('vouchers/export/{batch}',    [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'exportVouchers'])->name('vouchers.export');
+        Route::get('webhook-logs',               [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'webhookLogs'])->name('webhook-logs');
+    });
+    // Nom EXACT requis par PaymentAdminController::proofs() → route('admin.proofs.download')
+    Route::get('admin/payments/proofs/{id}/download', [\App\Http\Controllers\SuperAdmin\PaymentAdminController::class, 'downloadProof'])
+        ->name('admin.proofs.download');
+});
+
+// ─── Commandes & Checkout client (Phase 16) ─────────────────────────────────
+// Restauré depuis routes/api/payments.php (jamais chargé par bootstrap/app.php).
+// Les webhooks paiement sont déjà définis plus haut (Route::prefix('webhooks')).
+Route::middleware(['auth:sanctum', 'tenant'])->prefix('v1')->group(function () {
+    Route::get('/payment-methods', [\App\Http\Controllers\Api\OrderController::class, 'getPaymentMethods'])
+        ->name('api.payment-methods');
+    Route::post('/orders', [\App\Http\Controllers\Api\OrderController::class, 'createOrder'])
+        ->middleware('throttle:10,1')->name('api.orders.create');
+    Route::get('/orders/{reference}', [\App\Http\Controllers\Api\OrderController::class, 'showOrder'])
+        ->name('api.orders.show');
+    Route::delete('/orders/{reference}', [\App\Http\Controllers\Api\OrderController::class, 'cancelOrder'])
+        ->name('api.orders.cancel');
+    Route::post('/orders/{reference}/proof', [\App\Http\Controllers\Api\OrderController::class, 'submitProof'])
+        ->middleware('throttle:5,1')->name('api.orders.proof');
+    Route::get('/proofs/{id}/download', [\App\Http\Controllers\Api\OrderController::class, 'downloadProof'])
+        ->name('api.proofs.download');
+    Route::post('/orders/{reference}/voucher', [\App\Http\Controllers\Api\OrderController::class, 'redeemVoucher'])
+        ->middleware('throttle:5,1')->name('api.orders.voucher');
+});
+
+// ─── Dashboard KPIs v1 (Phase 16) ───────────────────────────────────────────
+// Le front (hooks/useDashboard.js) appelle /api/v1/dashboard/* ; api.php exposait
+// déjà ces méthodes en non-v1 (api.dashboard.*). On ajoute la version v1 attendue,
+// avec un préfixe de nom distinct pour éviter toute collision.
+Route::middleware(['auth:sanctum'])->prefix('v1/dashboard')->name('api.v1.dashboard.')->group(function () {
+    Route::get('/kpis', [\App\Http\Controllers\DashboardController::class, 'apiKpis'])->name('kpis');
+    Route::get('/trends', [\App\Http\Controllers\DashboardController::class, 'apiTrends'])->name('trends');
+    Route::get('/heatmap', [\App\Http\Controllers\DashboardController::class, 'apiHeatmap'])->name('heatmap');
+    Route::get('/module-usage', [\App\Http\Controllers\DashboardController::class, 'apiModuleUsage'])->name('module-usage');
+});
+
 
 // ── §19 : preuve de paiement, validation admin, reçu PDF ──
 Route::middleware(['auth:sanctum'])->prefix('v1/payments')->name('api.v1.payments.')->group(function () {
@@ -984,4 +1136,48 @@ Route::middleware(["auth:sanctum"])->prefix("dashboard")->name("api.dashboard.")
     Route::get("/kpis", [App\Http\Controllers\DashboardController::class, "apiKpis"])->name("kpis");
     Route::get("/trends", [App\Http\Controllers\DashboardController::class, "apiTrends"])->name("trends");
     Route::get("/heatmap", [App\Http\Controllers\DashboardController::class, "apiHeatmap"])->name("heatmap");
+});
+
+// =============================================================================
+// MESSAGERIE — chemins attendus par Pages/Messages/Index.jsx (/api/messages/*)
+// Les méthodes existent déjà dans MessageController (scopées organisation).
+// =============================================================================
+Route::middleware(['auth:sanctum'])->group(function () {
+    // On vise les méthodes écrites sur les VRAIES colonnes (user_id/body) :
+    // show() et store(), et non getConversation()/sendMessage() (schéma jamais appliqué).
+    Route::prefix('messages')->name('api.messages-compat.')->group(function () {
+        Route::post  ('/conversations',            [MessageController::class, 'createConversation'])->name('conversations.store');
+        Route::get   ('/conversations/{id}',       [MessageController::class, 'show'])->name('conversations.show');
+        Route::post  ('/conversations/{id}/read',  [MessageController::class, 'markAsRead'])->name('conversations.read');
+        Route::post  ('/send',                     [MessageController::class, 'store'])->name('send');
+        Route::delete('/{id}',                     [MessageController::class, 'deleteMessage'])->name('destroy');
+    });
+
+    // Recherche d'utilisateurs pour démarrer une conversation
+    Route::get('/users/search', [\App\Http\Controllers\UserController::class, 'search'])->name('api.users.search');
+});
+
+// =============================================================================
+// DEVISES (multi-devise) — attendu par le frontend hooks/useCurrency.js : /api/currencies*
+// =============================================================================
+Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
+    Route::prefix('currencies')->name('api.currencies.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\CurrencyController::class, 'index'])->name('index');
+        Route::get('/convert', [\App\Http\Controllers\CurrencyController::class, 'convert'])->name('convert');
+        Route::get('/rates', [\App\Http\Controllers\CurrencyController::class, 'rates'])->name('rates');
+        Route::get('/historical', [\App\Http\Controllers\CurrencyController::class, 'historical'])->name('historical');
+        // {code} en DERNIER pour ne pas capturer convert/rates/historical
+        Route::get('/{code}', [\App\Http\Controllers\CurrencyController::class, 'show'])->name('show');
+    });
+});
+
+// =============================================================================
+// PAGES LÉGALES — CGU / confidentialité / mentions (table legal_pages)
+// =============================================================================
+Route::prefix('v1/legal')->name('api.v1.legal.')->group(function () {
+    Route::get('/',           [\App\Http\Controllers\LegalPagesController::class, 'apiIndex'])->name('index');
+    Route::post('/accept',    [\App\Http\Controllers\LegalPagesController::class, 'accept'])
+        ->middleware('auth:sanctum')->name('accept');
+    Route::get('/{slug}',     [\App\Http\Controllers\LegalPagesController::class, 'apiShow'])->name('show');
+    Route::get('/{slug}/pdf', [\App\Http\Controllers\LegalPagesController::class, 'apiPdf'])->name('pdf');
 });

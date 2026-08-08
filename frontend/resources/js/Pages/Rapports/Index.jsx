@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 import {
     EnvelopeIcon,
     UserGroupIcon,
@@ -279,7 +280,7 @@ export default function RapportsIndex() {
     const [selectedReport, setSelectedReport] = useState(null);
 
     return (
-        <>
+        <AppLayout>
             <Head title="Centre des rapports" />
 
             <div className="min-h-screen bg-gray-50">
@@ -347,7 +348,7 @@ export default function RapportsIndex() {
                     onClose={() => setSelectedReport(null)}
                 />
             )}
-        </>
+        </AppLayout>
     );
 }
 export { RapportsIndex };

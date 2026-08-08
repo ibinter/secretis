@@ -93,7 +93,7 @@ export default function SupplierScorecard({
                     <div className="flex items-start justify-between gap-6">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                                <a href="/procurement/suppliers" className="text-purple-600 text-sm hover:underline">← Base fournisseurs</a>
+                                <a href="/achats/fournisseurs" className="text-purple-600 text-sm hover:underline">← Base fournisseurs</a>
                                 <span className="text-gray-300">/</span>
                                 <span className="text-sm text-gray-500">{supplier?.supplier_number}</span>
                             </div>

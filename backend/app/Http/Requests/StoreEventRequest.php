@@ -39,7 +39,7 @@ class StoreEventRequest extends FormRequest
             'location'         => ['nullable', 'string', 'max:500'],
             'is_all_day'       => ['boolean'],
             'color'            => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'type'             => ['nullable', Rule::in(['event', 'meeting', 'task', 'reminder'])],
+            'type'             => ['nullable', Rule::in(['meeting', 'task', 'reminder', 'holiday', 'other'])],
             'meet_link'        => ['nullable', 'url', 'max:500'],
             'calendar_id'      => [
                 'nullable',

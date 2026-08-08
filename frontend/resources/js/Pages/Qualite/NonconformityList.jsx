@@ -49,18 +49,18 @@ export default function NonconformityList() {
     });
 
     const applyFilters = () => {
-        router.get('/qualite/nc', localFilters, { preserveState: true, replace: true });
+        router.get('/qualite/non-conformites', localFilters, { preserveState: true, replace: true });
     };
 
     const resetFilters = () => {
         const empty = Object.fromEntries(Object.keys(localFilters).map(k => [k, '']));
         setLocalFilters(empty);
-        router.get('/qualite/nc', {}, { preserveState: true, replace: true });
+        router.get('/qualite/non-conformites', {}, { preserveState: true, replace: true });
     };
 
     const exportCsv = () => {
         const params = new URLSearchParams(localFilters).toString();
-        window.location.href = `/qualite/nc/export?${params}`;
+        window.location.href = `/qualite/non-conformites/export?${params}`;
     };
 
     const handleFilterChange = (key, value) => {
@@ -88,7 +88,7 @@ export default function NonconformityList() {
                             ↓ Export CSV
                         </button>
                         <Link
-                            href="/qualite/nc/create"
+                            href="/qualite/non-conformites/create"
                             className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                         >
                             + Nouvelle NC
@@ -194,7 +194,7 @@ export default function NonconformityList() {
                                     <tr
                                         key={nc.id}
                                         className="hover:bg-gray-50 transition cursor-pointer"
-                                        onClick={() => router.visit(`/qualite/nc/${nc.id}`)}
+                                        onClick={() => router.visit(`/qualite/non-conformites/${nc.id}`)}
                                     >
                                         <td className="px-4 py-3 font-mono text-xs text-gray-600 whitespace-nowrap">
                                             {nc.reference}
@@ -241,7 +241,7 @@ export default function NonconformityList() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <Link
-                                                href={`/qualite/nc/${nc.id}`}
+                                                href={`/qualite/non-conformites/${nc.id}`}
                                                 onClick={e => e.stopPropagation()}
                                                 className="text-purple-600 hover:underline text-xs"
                                             >

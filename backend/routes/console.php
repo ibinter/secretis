@@ -44,6 +44,11 @@ Schedule::command('secretis:fetch-rates')->dailyAt('06:00')->withoutOverlapping(
 Schedule::command('secretis:monitor')->dailyAt('08:00')->withoutOverlapping()->runInBackground();
 Schedule::command('secretis:accounting:overdue-reminders')->dailyAt('09:00')->withoutOverlapping(30)->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler-accounting.log'));
+// Relances du registre du courrier : en début de matinée, sur les jours ouvrés
+// uniquement — inutile d'alerter le samedi sur un délai qui court le lundi.
+Schedule::command('secretis:courrier:overdue-alerts')->weekdays()->dailyAt('07:30')
+    ->withoutOverlapping(30)->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-courrier.log'));
 Schedule::command('saas:compute-metrics')->dailyAt('04:00')->withoutOverlapping()->runInBackground();
 Schedule::command('model:prune')->daily();
 Schedule::command('activitylog:clean')->daily();

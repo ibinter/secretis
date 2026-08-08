@@ -26,4 +26,15 @@ class Conversation extends Model
     {
         return $this->hasMany(\App\Models\Message::class);
     }
+
+    /** Dernier message de la conversation (aperçu dans la liste). */
+    public function latestMessage(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\Message::class)->latestOfMany();
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

@@ -24,6 +24,7 @@ import {
 import { format, subDays, startOfMonth } from 'date-fns';
 import { useReport } from '@/hooks/useDashboard';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ============================================================================
 // CONSTANTES
@@ -343,7 +344,7 @@ export default function Viewer() {
     };
 
     return (
-        <>
+        <AppLayout>
             <Head title={title} />
 
             <div className="min-h-screen bg-gray-50">
@@ -419,7 +420,7 @@ export default function Viewer() {
                     .print\\:hidden { display: none !important; }
                 }
             `}</style>
-        </>
+        </AppLayout>
     );
 }
 export { Viewer };

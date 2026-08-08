@@ -192,7 +192,7 @@ class SmartAgendaService
         // Rechercher des réunions similaires dans l'historique
         $similar = Event::where('title', 'LIKE', "%{$normalized}%")
             ->whereNotNull('end_at')
-            ->whereRaw('TIMESTAMPDIFF(MINUTE, start_at, end_at) BETWEEN 15 AND 480')
+            ->whereRaw('EXTRACT(EPOCH FROM (end_at - start_at))/60 BETWEEN 15 AND 480')
             ->latest('start_at')
             ->limit(10)
             ->get();

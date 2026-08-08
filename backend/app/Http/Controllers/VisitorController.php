@@ -213,7 +213,7 @@ class VisitorController extends Controller
             return [
                 'date'  => $d->toDateString(),
                 'count' => VisitLog::where('organization_id', $org->id)
-                    ->whereDate('check_in_at', $d)->count(),
+                    ->whereDate('checked_in_at', $d)->count(),
             ];
         })->reverse()->values();
 
@@ -291,10 +291,12 @@ class VisitorController extends Controller
     public function log(Request $request): Response
     {
         $query = VisitLog::where('organization_id', auth()->user()->organization_id)
-            ->when($request->date, fn ($q) => $q->whereDate('check_in_at', $request->date))
-            ->when($request->host_id, fn ($q) => $q->where('host_user_id', $request->host_id))
-            ->when($request->status, fn ($q) => $q->where('status', $request->status))
-            ->orderByDesc('check_in_at')
+            ->when($request->date, fn ($q) => $q->whereDate('checked_in_at', $request->date))
+            ->when($request->host_id, fn ($q) => $q->where('host_id', $request->host_id))
+            // `visitor_logs` n'a pas de colonne status : « présent » = pas encore reparti.
+            ->when($request->status === 'checked_in', fn ($q) => $q->whereNull('checked_out_at'))
+            ->when($request->status === 'checked_out', fn ($q) => $q->whereNotNull('checked_out_at'))
+            ->orderByDesc('checked_in_at')
             ->paginate(30)
             ->withQueryString();
 
@@ -304,6 +306,64 @@ class VisitorController extends Controller
             'hosts'   => \App\Models\User::where('organization_id', auth()->user()->organization_id)
                 ->select('id', 'name')->orderBy('name')->get(),
         ]);
+    }
+
+    // ─── Alias attendus par web.php ───────────────────────────────────────────
+
+    // GET /reception/reports → délègue vers report()
+    public function reports(Request $request): Response
+    {
+        return $this->report($request);
+    }
+
+    // POST /reception/invitations → délègue vers storeInvitation()
+    public function createInvitation(Request $request): JsonResponse
+    {
+        return $this->storeInvitation($request);
+    }
+
+    // POST /reception/visitors/{id}/blacklist → résout le visiteur depuis {id} puis délègue
+    public function addToBlacklist(Request $request, $id): JsonResponse
+    {
+        $visitor = Visitor::findOrFail($id);
+        return $this->blacklist($request, $visitor);
+    }
+
+    // ── Alias API (routes api.php → méthodes réelles) ─────────────────────────
+    // Délèguent vers les vraies méthodes qui retournent bien du JsonResponse.
+    // NB : `apiInvitations` n'a PAS d'alias : invitations() retourne de l'Inertia
+    // (pas de wantsJson) → laissé au stub __call(). `apiBlacklist` non plus : il
+    // n'existe aucune cible JSON de LISTAGE de la liste noire (blacklist() est une
+    // mutation exigeant Visitor + reason, blacklistPage() retourne de l'Inertia).
+
+    // POST /api/v1/visitors/check-in → checkIn (JsonResponse)
+    public function apiCheckin(VisitorCheckInRequest $request): JsonResponse
+    {
+        return $this->checkIn($request);
+    }
+
+    // POST /api/v1/visitors/{id}/check-out → checkOut (JsonResponse)
+    public function apiCheckout($id): JsonResponse
+    {
+        return $this->checkOut(VisitLog::findOrFail($id));
+    }
+
+    // POST /api/v1/visitors/invitations → createInvitation (JsonResponse)
+    public function apiCreateInvitation(Request $request): JsonResponse
+    {
+        return $this->createInvitation($request);
+    }
+
+    // POST /api/v1/visitors/{id}/blacklist → addToBlacklist (JsonResponse)
+    public function apiAddToBlacklist(Request $request, $id): JsonResponse
+    {
+        return $this->addToBlacklist($request, $id);
+    }
+
+    // DELETE /api/v1/visitors/{id}/blacklist → unblacklist (JsonResponse)
+    public function apiRemoveFromBlacklist($id): JsonResponse
+    {
+        return $this->unblacklist(Visitor::findOrFail($id));
     }
 
     /**
@@ -316,5 +376,119 @@ class VisitorController extends Controller
             return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    // Alias routes expected by web.php
+    public function blacklistPage(\Illuminate\Http\Request $request)
+    {
+        $orgId    = \Illuminate\Support\Facades\Auth::user()->organization_id;
+        $visitors = \App\Models\Visitor::where('organization_id', $orgId)
+            ->where('is_blacklisted', true)
+            ->orderBy('last_name') // la table visitors n'a pas de colonne `name`
+            ->get();
+        return \Inertia\Inertia::render('Reception/Blacklist', ['visitors' => $visitors]);
+    }
+
+    // POST /reception/visites/{visit}/incident — consigner un incident sur une visite
+    public function reportIncident(Request $request, VisitLog $visit): JsonResponse
+    {
+        abort_unless($visit->organization_id === auth()->user()->organization_id, 403);
+
+        $data = $request->validate([
+            'note' => ['required', 'string', 'min:3', 'max:2000'],
+        ]);
+
+        $stamp = now()->format('d/m/Y H:i') . ' — ' . auth()->user()->name;
+        $visit->update([
+            'notes' => trim(($visit->notes ? $visit->notes . "
+" : '') . "[INCIDENT] {$stamp} : " . $data['note']),
+        ]);
+
+        return response()->json(['message' => 'Incident consigné.', 'visit' => $visit->fresh()]);
+    }
+
+    // GET /reception/log/export — journal des visites au format CSV
+    public function exportLog(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $orgId = auth()->user()->organization_id;
+
+        $visits = VisitLog::where('organization_id', $orgId)
+            ->when($request->date, fn ($q) => $q->whereDate('checked_in_at', $request->date))
+            ->with(['visitor', 'host'])
+            ->orderByDesc('checked_in_at')
+            ->limit(5000)
+            ->get();
+
+        $csv = "Badge;Visiteur;Societe;Hote;Objet;Arrivee;Depart;Duree (min);Vehicule
+";
+        foreach ($visits as $v) {
+            $in  = $v->checked_in_at ? \Carbon\Carbon::parse($v->checked_in_at) : null;
+            $out = $v->checked_out_at ? \Carbon\Carbon::parse($v->checked_out_at) : null;
+            $csv .= implode(';', array_map(
+                fn ($x) => str_replace(';', ',', (string) $x),
+                [
+                    $v->badge_number,
+                    trim(($v->visitor->first_name ?? '') . ' ' . ($v->visitor->last_name ?? '')),
+                    $v->visitor->company ?? '',
+                    $v->host->name ?? '',
+                    $v->purpose,
+                    $in?->format('d/m/Y H:i') ?? '',
+                    $out?->format('d/m/Y H:i') ?? '',
+                    ($in && $out) ? $out->diffInMinutes($in) : '',
+                    $v->vehicle_plate ?? '',
+                ]
+            )) . "
+";
+        }
+
+        return response("ï»¿" . $csv, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="journal-visites-' . now()->format('Y-m-d') . '.csv"',
+        ]);
+    }
+
+    // GET /reception/reports/pdf — rapport journalier au format PDF
+    public function reportPdf(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $date = Carbon::parse($request->date ?? today());
+        $org  = auth()->user()->organization;
+
+        $report = $this->visitorService->getDailyReport($org, $date);
+
+        $visits = VisitLog::where('organization_id', $org->id)
+            ->whereDate('checked_in_at', $date)
+            ->with(['visitor', 'host'])
+            ->orderBy('checked_in_at')
+            ->get();
+
+        $pdf = app('dompdf.wrapper')
+            ->loadView('reception.daily-report-pdf', compact('report', 'visits', 'org', 'date'))
+            ->setPaper('a4', 'portrait');
+
+        return response($pdf->output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="rapport-visites-' . $date->format('Y-m-d') . '.pdf"',
+        ]);
+    }
+
+    /**
+     * GET /visites/scan/{visit} — vérification d'un badge visiteur par QR code.
+     * Page publique volontairement minimale : elle sert au poste de garde à
+     * confirmer qu'un badge est authentique et toujours valide.
+     */
+    public function scanBadge(int $id): \Illuminate\Http\Response
+    {
+        $visit = VisitLog::with(['visitor', 'host', 'organization'])->findOrFail($id);
+
+        $valide = $visit->checked_out_at === null;
+        $nom    = trim(($visit->visitor->first_name ?? '') . ' ' . ($visit->visitor->last_name ?? '')) ?: 'Visiteur';
+
+        $html = view('visitor-scan', [
+            'visit'  => $visit,
+            'nom'    => $nom,
+            'valide' => $valide,
+        ])->render();
+
+        return response($html, $valide ? 200 : 410);
     }
 }

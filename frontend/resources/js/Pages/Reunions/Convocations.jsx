@@ -7,6 +7,7 @@
  */
 
 import { Head, Link, router } from '@inertiajs/react';
+import axios from 'axios';
 import AuthLayout from '@/Layouts/AuthLayout';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -44,11 +45,15 @@ function StatusBadge({ status }) {
 export default function Convocations({ meeting, convocations = [] }) {
   const pending = convocations.filter(c => c.status === 'pending');
 
-  const sendAll = () => {
-    router.post(route('reunions.convocations.send', meeting.id), {}, {
-      onSuccess: () => toast.success('Convocations envoyées par email.'),
-      onError:   () => toast.error('Erreur lors de l\'envoi.'),
-    });
+  // MeetingController@sendConvocations renvoie du JSON → axios, pas router.post.
+  const sendAll = async () => {
+    try {
+      const { data } = await axios.post(route('reunions.convocations.send', meeting.id));
+      toast.success(data?.message ?? 'Convocations envoyées par email.');
+      router.reload({ only: ['convocations'] });
+    } catch {
+      toast.error('Erreur lors de l\'envoi.');
+    }
   };
 
   return (

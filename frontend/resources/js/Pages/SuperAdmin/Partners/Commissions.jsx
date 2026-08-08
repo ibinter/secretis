@@ -1,55 +1,83 @@
+/**
+ * SuperAdmin/Partners/Commissions.jsx — Commissions du réseau partenaire
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes routes Ziggy
+ * (`superadmin.partners.commissions`, `superadmin.partners.commission.pay`,
+ *  `superadmin.partners.show|index`), mêmes props Inertia, même export CSV.
+ *
+ * Correction majeure : la page importait `@/Layouts/SuperAdminLayout`, un
+ * composant bouchon sans navigation. Elle utilise désormais
+ * `@/Components/Layout/SuperAdminLayout`.
+ */
+
 import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import SuperAdminLayout from '@/Layouts/SuperAdminLayout';
+import { Wallet, ArrowLeft, Download, X } from 'lucide-react';
+import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout';
+import {
+  PageHeader, Button, Badge, Card, StatCard, DataTable, EmptyState,
+  cx, CONTROL, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
-const STATUS_COLORS = {
-  pending:  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  approved: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  paid:     'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+/* ─── Sémantique ───────────────────────────────────────────────────────────── */
+
+const STATUS_META = {
+  pending:  { label: 'En attente', tone: 'warning' },
+  approved: { label: 'Approuvée',  tone: 'info' },
+  paid:     { label: 'Payée',      tone: 'success' },
 };
 
-function fmt(n) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(n ?? 0);
-}
+const fmt = (n) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(n ?? 0);
+
+/* ─── Marquer comme payée ──────────────────────────────────────────────────── */
 
 function PayModal({ commission, onClose, onPay }) {
   const [ref, setRef] = useState('');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Marquer comme payée</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Commission de <strong>{fmt(commission.amount)}</strong> pour <strong>{commission.partner_name}</strong> — {commission.period_month}
-        </p>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Référence de paiement <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={ref}
-          onChange={(e) => setRef(e.target.value)}
-          placeholder="ex: VIR-20260701-001"
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-[#7e22ce] focus:border-transparent"
-        />
-        <div className="flex gap-3 justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-            Annuler
-          </button>
-          <button
-            onClick={() => ref.trim() && onPay(ref.trim())}
-            disabled={!ref.trim()}
-            className="px-4 py-2 bg-[#1E8449] disabled:opacity-50 hover:bg-[#145a32] text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            Confirmer le paiement
-          </button>
-        </div>
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+    >
+      <div onClick={e => e.stopPropagation()} className="w-full max-w-md">
+        <Card
+          padded={false}
+          className="shadow-xl"
+          title="Marquer la commission comme payée"
+          subtitle={`${fmt(commission.amount)} — ${commission.partner_name} · ${commission.period_month}`}
+          actions={<Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer" onClick={onClose} />}
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={onClose}>Annuler</Button>
+              <Button variant="primary" disabled={!ref.trim()} onClick={() => ref.trim() && onPay(ref.trim())}>
+                Confirmer le paiement
+              </Button>
+            </div>
+          }
+        >
+          <div className="px-4 py-5 sm:px-6">
+            <label className="flex flex-col gap-1.5">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Référence de paiement *</span>
+              <input
+                type="text"
+                value={ref}
+                onChange={e => setRef(e.target.value)}
+                placeholder="ex. VIR-20260701-001"
+                className={cx(CONTROL, 'h-10 font-mono')}
+              />
+            </label>
+          </div>
+        </Card>
       </div>
     </div>
   );
 }
 
-export default function PartnersCommissions({ commissions, filters, summary }) {
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+
+export default function PartnersCommissions({ commissions, filters = {}, summary = {} }) {
   const { flash } = usePage().props;
   const [paying, setPaying] = useState(null);
 
@@ -67,153 +95,157 @@ export default function PartnersCommissions({ commissions, filters, summary }) {
   }
 
   function exportCsv() {
-    window.location.href = route('superadmin.partners.commissions') + '?export=csv&' + new URLSearchParams(filters).toString();
+    window.location.href = `${route('superadmin.partners.commissions')}?export=csv&${new URLSearchParams(filters).toString()}`;
   }
 
+  const rows = commissions?.data ?? [];
+
+  /* ─── Colonnes ───────────────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'partner_name',
+      label: 'Partenaire',
+      render: (v, c) => (
+        <Link
+          href={route('superadmin.partners.show', c.partner_id)}
+          className={cx('rounded text-sm font-medium text-purple-700 hover:underline dark:text-purple-300', FOCUS_RING)}
+        >
+          {v}
+        </Link>
+      ),
+    },
+    { key: 'partner_type', label: 'Type', nowrap: true, className: cx('text-xs', TEXT_MUTED) },
+    { key: 'organization', label: 'Organisation' },
+    { key: 'period_month', label: 'Période', nowrap: true, className: cx('font-mono text-xs', TEXT_MUTED) },
+    { key: 'amount', label: 'Montant', numeric: true, nowrap: true, render: (v) => fmt(v) },
+    {
+      key: 'status',
+      label: 'Statut',
+      nowrap: true,
+      render: (v) => {
+        const meta = STATUS_META[v] ?? { label: v, tone: 'neutral' };
+        return <Badge variant={meta.tone} dot>{meta.label}</Badge>;
+      },
+    },
+    {
+      key: 'paid_at',
+      label: 'Payée le',
+      nowrap: true,
+      className: cx('text-xs', TEXT_MUTED, NUM),
+      render: (v) => v ?? <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'payment_reference',
+      label: 'Référence',
+      nowrap: true,
+      className: cx('font-mono text-xs', TEXT_MUTED),
+      render: (v) => v ?? <span className={TEXT_FAINT}>—</span>,
+    },
+  ];
+
   return (
-    <SuperAdminLayout>
+    <SuperAdminLayout title="Commissions partenaires">
       <Head title="Commissions partenaires" />
 
       {paying && <PayModal commission={paying} onClose={() => setPaying(null)} onPay={handlePay} />}
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href={route('superadmin.partners.index')}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              ←
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Commissions partenaires</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Suivi et paiement des commissions</p>
-            </div>
-          </div>
-          <button
-            onClick={exportCsv}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            ⬇ Exporter CSV
-          </button>
-        </div>
+      <PageHeader
+        icon={Wallet}
+        title="Commissions partenaires"
+        subtitle="Suivi et règlement des commissions du réseau."
+        breadcrumbs={[
+          { label: 'Console', href: '/superadmin' },
+          { label: 'Partenaires', href: route('superadmin.partners.index') },
+          { label: 'Commissions' },
+        ]}
+        actions={
+          <>
+            <Button as={Link} href={route('superadmin.partners.index')} variant="ghost" icon={ArrowLeft}>
+              Retour
+            </Button>
+            <Button variant="secondary" icon={Download} onClick={exportCsv}>
+              Exporter CSV
+            </Button>
+          </>
+        }
+      />
 
-        {/* Flash */}
+      <div className="space-y-6">
+
         {flash?.success && (
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-300 text-sm">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
             {flash.success}
           </div>
         )}
 
-        {/* Summary KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">En attente (pending)</p>
-            <p className="mt-1 text-3xl font-bold text-[#F39C12]">{fmt(summary.pending_total)}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Approuvées à payer</p>
-            <p className="mt-1 text-3xl font-bold text-[#C0392B]">{fmt(summary.approved_total)}</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payées ce mois</p>
-            <p className="mt-1 text-3xl font-bold text-[#1E8449]">{fmt(summary.paid_this_month)}</p>
-          </div>
-        </div>
+        {/* ── Indicateurs ─────────────────────────────────────────────────── */}
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <StatCard tone="warning" label="En attente"        value={fmt(summary.pending_total)} />
+          <StatCard tone="danger"  label="Approuvées à payer" value={fmt(summary.approved_total)} />
+          <StatCard tone="success" label="Payées ce mois"     value={fmt(summary.paid_this_month)} />
+        </section>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3">
-          <select
-            value={filters.status ?? ''}
-            onChange={(e) => applyFilter({ status: e.target.value || undefined })}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-          >
-            <option value="">Tous statuts</option>
-            <option value="pending">En attente</option>
-            <option value="approved">Approuvées</option>
-            <option value="paid">Payées</option>
-          </select>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900/50">
-                <tr>
-                  {['Partenaire', 'Type', 'Organisation', 'Mois', 'Montant', 'Statut', 'Payé le', 'Référence', 'Action'].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                {commissions.data.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-10 text-center text-gray-400 dark:text-gray-500 text-sm">
-                      Aucune commission trouvée.
-                    </td>
-                  </tr>
-                ) : commissions.data.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={route('superadmin.partners.show', c.partner_id)}
-                        className="text-sm font-medium text-[#7e22ce] hover:underline"
-                      >
-                        {c.partner_name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{c.partner_type}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{c.organization}</td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-700 dark:text-gray-300">{c.period_month}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{fmt(c.amount)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[c.status]}`}>
-                        {c.status === 'pending' ? 'En attente' : c.status === 'approved' ? 'Approuvée' : 'Payée'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{c.paid_at ?? '—'}</td>
-                    <td className="px-4 py-3 text-xs font-mono text-gray-500 dark:text-gray-400">{c.payment_reference ?? '—'}</td>
-                    <td className="px-4 py-3">
-                      {c.status !== 'paid' && (
-                        <button
-                          onClick={() => setPaying(c)}
-                          className="text-xs px-3 py-1.5 bg-[#1E8449] hover:bg-[#145a32] text-white rounded-lg transition-colors"
-                        >
-                          Payer
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* ── Filtres ─────────────────────────────────────────────────────── */}
+        <Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filters.status ?? ''}
+              onChange={e => applyFilter({ status: e.target.value || undefined })}
+              aria-label="Filtrer par statut"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[180px]')}
+            >
+              <option value="">Tous les statuts</option>
+              <option value="pending">En attente</option>
+              <option value="approved">Approuvées</option>
+              <option value="paid">Payées</option>
+            </select>
           </div>
+        </Card>
 
-          {/* Pagination */}
-          {commissions.last_page > 1 && (
-            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
-              <span className="text-gray-500 dark:text-gray-400">
+        {/* ── Tableau ─────────────────────────────────────────────────────── */}
+        <DataTable
+          columns={columns}
+          data={rows}
+          rowKey="id"
+          pageSize={commissions?.per_page ?? 25}
+          totalItems={commissions?.total ?? rows.length}
+          actions={(c) => (
+            c.status !== 'paid'
+              ? <Button variant="primary" size="xs" onClick={() => setPaying(c)}>Payer</Button>
+              : <span className={TEXT_FAINT}>—</span>
+          )}
+          empty={
+            <EmptyState
+              icon={Wallet}
+              title="Aucune commission"
+              description="Les commissions générées par les clients référés apparaîtront ici."
+            />
+          }
+          footer={commissions?.last_page > 1 ? (
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <span className={cx('text-xs', TEXT_MUTED, NUM)}>
                 {commissions.from}–{commissions.to} sur {commissions.total} commissions
               </span>
               <div className="flex gap-2">
                 {commissions.prev_page_url && (
-                  <Link href={commissions.prev_page_url} className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors">
+                  <Button as={Link} href={commissions.prev_page_url} variant="secondary" size="sm">
                     Précédent
-                  </Link>
+                  </Button>
                 )}
                 {commissions.next_page_url && (
-                  <Link href={commissions.next_page_url} className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors">
+                  <Button as={Link} href={commissions.next_page_url} variant="secondary" size="sm">
                     Suivant
-                  </Link>
+                  </Button>
                 )}
               </div>
             </div>
-          )}
-        </div>
+          ) : null}
+        />
+
       </div>
     </SuperAdminLayout>
   );
 }
+
 export { PartnersCommissions };

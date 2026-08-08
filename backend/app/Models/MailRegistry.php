@@ -59,10 +59,12 @@ class MailRegistry extends Model
         'organization_id',
         'type',
         'reference',
+        'parent_mail_id',
         'sender_name',
         'sender_email',
         'sender_organization',
         'recipient_name',
+        'recipient_organization',
         'recipient_email',
         'subject',
         'body',
@@ -71,6 +73,7 @@ class MailRegistry extends Model
         'sent_at',
         'due_date',
         'assigned_to',
+        'department_id',
         'registered_by',
         'status',
         'notes',
@@ -104,6 +107,41 @@ class MailRegistry extends Model
     public function registeredBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'registered_by');
+    }
+
+    /**
+     * Le courrier arrivée auquel CE courrier répond (null si original).
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_mail_id');
+    }
+
+    /**
+     * Les courriers départ envoyés en réponse à celui-ci.
+     */
+    public function replies(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_mail_id')->orderBy('created_at');
+    }
+
+    /**
+     * Service (direction) chargé du courrier.
+     */
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Fiche de circulation : chaque mouvement du courrier (enregistrement,
+     * affectation, changement de statut, réponse). Les écritures existaient
+     * déjà mais aucune relation ne les exposait — l'historique était stocké
+     * sans jamais pouvoir être consulté.
+     */
+    public function trackings(): HasMany
+    {
+        return $this->hasMany(MailTracking::class, 'mail_id')->orderBy('created_at');
     }
 
     public function attachments(): HasMany

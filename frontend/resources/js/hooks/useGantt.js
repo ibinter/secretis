@@ -50,7 +50,8 @@ export default function useGantt({ projectId, initialData }) {
     );
 
     try {
-      await axios.patch(`/tasks/${taskId}/dates`, {
+      // api.v1.tasks.patch — seul due_date est persiste cote backend pour l'instant.
+      await axios.patch(`/api/v1/tasks/${taskId}`, {
         start_date: startDate,
         due_date:   endDate,
       });
@@ -72,7 +73,7 @@ export default function useGantt({ projectId, initialData }) {
       prev.map((t) => (t.id === taskId ? { ...t, progress } : t))
     );
     try {
-      await axios.patch(`/tasks/${taskId}/dates`, { progress });
+      await axios.patch(`/api/v1/tasks/${taskId}`, { progress });
     } catch (err) {
       console.error('Erreur mise à jour progression:', err);
     }

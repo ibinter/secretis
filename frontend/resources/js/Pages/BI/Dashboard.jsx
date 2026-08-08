@@ -17,6 +17,7 @@ import {
     XAxis, YAxis, Tooltip,
 } from 'recharts';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ---------------------------------------------------------------------------
 // Données mock — développement
@@ -155,6 +156,7 @@ export default function BIDashboard() {
     const leaveData = (allData.hr?.by_leave_type ?? []).map(l => ({ name: l.type, value: l.total_days }));
 
     return (
+        <AppLayout>
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 px-6 py-4">
@@ -307,6 +309,7 @@ export default function BIDashboard() {
                 </div>
             </div>
         </div>
+        </AppLayout>
     );
 }
 export { BIDashboard };

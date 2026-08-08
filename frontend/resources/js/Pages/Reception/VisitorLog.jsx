@@ -1,26 +1,60 @@
-﻿import React, { useState } from 'react';
+/**
+ * Reception/VisitorLog.jsx — Journal des visites
+ *
+ * Présentation migrée sur `@/Components/UI`.
+ * Logique métier inchangée : mêmes routes Inertia (`/reception/log`,
+ * `/reception/log/export`, `/reception/reports/pdf`), mêmes filtres,
+ * même appel `POST /visits/{id}/incident`.
+ */
+
+import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout';
+import {
+    ClipboardList, Download, FileText, Clock, LogOut, Timer, MapPin,
+    Building2, User, AlertTriangle, X, ChevronLeft, ChevronRight,
+} from 'lucide-react';
+import {
+    PageHeader, Button, Badge, Card, DataTable, EmptyState,
+    cx, CONTROL, BORDER, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT,
+} from '@/Components/UI';
+
+/* ─── Statuts ───────────────────────────────────────────────────────────────── */
+
+const STATUS = {
+    checked_in:  { label: 'Présent',  tone: 'success' },
+    checked_out: { label: 'Parti',    tone: 'neutral' },
+    no_show:     { label: 'No-show',  tone: 'danger'  },
+    cancelled:   { label: 'Annulé',   tone: 'warning' },
+    scheduled:   { label: 'Planifié', tone: 'info'    },
+};
+
+const STATUS_LABELS = Object.fromEntries(
+    Object.entries(STATUS).map(([k, v]) => [k, v.label]),
+);
+
+/** Le modèle Visitor n'expose pas d'accesseur `full_name` : on le reconstruit. */
+const displayName = (v) =>
+    v?.full_name || [v?.first_name, v?.last_name].filter(Boolean).join(' ') || 'Visiteur';
+
+const fmtTime = (iso) => {
+    if (!iso) return null;
+    try {
+        return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } catch { return null; }
+};
 
 // ─── Journal des visites ──────────────────────────────────────────────────────
-export default function VisitorLog({ visits, filters, hosts }) {
+export default function VisitorLog({ visits = { data: [] }, filters = {}, hosts = [] }) {
     const [incident, setIncident] = useState(null);
     const [incidentNote, setIncidentNote] = useState('');
 
-    const STATUS_COLORS = {
-        checked_in:  'bg-green-100 text-green-700',
-        checked_out: 'bg-gray-100 text-gray-600',
-        no_show:     'bg-red-100 text-red-700',
-        cancelled:   'bg-orange-100 text-orange-700',
-        scheduled:   'bg-purple-100 text-purple-700',
-    };
-    const STATUS_LABELS = {
-        checked_in:  'Présent',
-        checked_out: 'Parti',
-        no_show:     'No-show',
-        cancelled:   'Annulé',
-        scheduled:   'Planifié',
-    };
+    const rows        = Array.isArray(visits?.data) ? visits.data : [];
+    const total       = visits?.total ?? rows.length;
+    const lastPage    = visits?.last_page ?? 1;
+    const currentPage = visits?.current_page ?? 1;
+    const hostOptions = Array.isArray(hosts) ? hosts : [];
 
     const duration = (visit) => {
         if (!visit.check_in_at || !visit.check_out_at) return '—';
@@ -39,7 +73,7 @@ export default function VisitorLog({ visits, filters, hosts }) {
     };
 
     const exportPdf = () => {
-        window.location.href = `/reception/log/export-pdf?${new URLSearchParams(filters)}`;
+        window.location.href = `/reception/reports/pdf?${new URLSearchParams(filters)}`;
     };
 
     const reportIncident = (visit) => {
@@ -47,189 +81,293 @@ export default function VisitorLog({ visits, filters, hosts }) {
         setIncidentNote('');
     };
 
+    const isFiltered = Object.values(filters).some(Boolean);
+
+    /* ─── Colonnes ─────────────────────────────────────────────────────────── */
+
+    const columns = [
+        {
+            key: 'visitor',
+            label: 'Visiteur',
+            render: (_v, visit) => {
+                const name = displayName(visit.visitor);
+                return (
+                    <div className="flex min-w-0 items-center gap-3">
+                        {visit.visitor?.photo_path ? (
+                            <img
+                                src={`/storage/${visit.visitor.photo_path}`}
+                                alt=""
+                                className="h-8 w-8 shrink-0 rounded-full object-cover"
+                            />
+                        ) : (
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-50 text-xs font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
+                                {name.charAt(0).toUpperCase()}
+                            </span>
+                        )}
+                        <div className="min-w-0">
+                            <p className={cx('truncate font-medium', TEXT_TITLE)}>{name}</p>
+                            <p className={cx('flex items-center gap-1 truncate text-xs', TEXT_MUTED)}>
+                                {visit.visitor?.company
+                                    ? <><Building2 className="h-3 w-3 shrink-0" />{visit.visitor.company}</>
+                                    : <span className={TEXT_FAINT}>Société non renseignée</span>}
+                            </p>
+                        </div>
+                        {(visit.visitor?.visit_count ?? 0) >= 5 && (
+                            <Badge variant="accent" className="shrink-0">
+                                n° {visit.visitor.visit_count}
+                            </Badge>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'host',
+            label: 'Hôte',
+            render: (_v, visit) => (
+                <span className="inline-flex items-center gap-1.5">
+                    <User className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                    {visit.host?.name ?? <span className={TEXT_FAINT}>—</span>}
+                </span>
+            ),
+        },
+        {
+            key: 'check_in_at',
+            label: 'Arrivée',
+            nowrap: true,
+            render: (v) => {
+                const t = fmtTime(v);
+                return t
+                    ? <span className="inline-flex items-center gap-1.5 tabular-nums">
+                          <Clock className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />{t}
+                      </span>
+                    : <span className={TEXT_FAINT}>—</span>;
+            },
+        },
+        {
+            key: 'check_out_at',
+            label: 'Départ',
+            nowrap: true,
+            render: (v) => {
+                const t = fmtTime(v);
+                return t
+                    ? <span className="inline-flex items-center gap-1.5 tabular-nums">
+                          <LogOut className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />{t}
+                      </span>
+                    : <span className={TEXT_FAINT}>—</span>;
+            },
+        },
+        {
+            key: 'duration',
+            label: 'Durée',
+            nowrap: true,
+            render: (_v, visit) => (
+                <span className="inline-flex items-center gap-1.5 tabular-nums">
+                    <Timer className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                    {duration(visit)}
+                </span>
+            ),
+        },
+        {
+            key: 'purpose',
+            label: 'Objet & lieu',
+            render: (v, visit) => (
+                <div className="min-w-0">
+                    <p className="truncate">{v || <span className={TEXT_FAINT}>—</span>}</p>
+                    {visit.location && (
+                        <p className={cx('flex items-center gap-1 truncate text-xs', TEXT_MUTED)}>
+                            <MapPin className="h-3 w-3 shrink-0" />{visit.location}
+                        </p>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'status',
+            label: 'Statut',
+            nowrap: true,
+            render: (v) => {
+                const s = STATUS[v];
+                return s
+                    ? <Badge variant={s.tone} dot>{s.label}</Badge>
+                    : <span className={TEXT_FAINT}>—</span>;
+            },
+        },
+    ];
+
+    /* ─── Rendu ────────────────────────────────────────────────────────────── */
+
     return (
         <AppLayout>
             <Head title="Journal des visites" />
 
-            <div className="p-6 space-y-5">
-                {/* En-tête */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-900">Journal des visites</h1>
-                        <p className="text-gray-500 text-sm mt-1">
-                            {visits.total} visite{visits.total !== 1 ? 's' : ''} enregistrée{visits.total !== 1 ? 's' : ''}
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <button onClick={exportCsv}
-                            className="border border-gray-200 text-gray-600 font-semibold px-4 py-2 rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2">
-                            ⬇️ CSV
-                        </button>
-                        <button onClick={exportPdf}
-                            className="border border-gray-200 text-gray-600 font-semibold px-4 py-2 rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2">
-                            📄 PDF
-                        </button>
-                    </div>
-                </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+                <PageHeader
+                    icon={ClipboardList}
+                    title="Journal des visites"
+                    breadcrumbs={[{ label: 'Réception' }, { label: 'Journal des visites' }]}
+                    subtitle={`${total} visite${total !== 1 ? 's' : ''} enregistrée${total !== 1 ? 's' : ''} · historique des entrées et sorties`}
+                    actions={
+                        <>
+                            <Button variant="secondary" icon={Download} onClick={exportCsv}>CSV</Button>
+                            <Button variant="secondary" icon={FileText} onClick={exportPdf}>PDF</Button>
+                        </>
+                    }
+                />
 
                 {/* Filtres */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 flex flex-wrap gap-4">
+                <div className={cx('mb-4 flex flex-wrap items-end gap-3 rounded-xl border bg-white p-4 dark:bg-[#162032]', BORDER)}>
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Date</label>
+                        <label className={cx('mb-1 block text-xs font-medium', TEXT_MUTED)}>Date</label>
                         <input
                             type="date"
                             value={filters.date || ''}
                             onChange={e => handleFilter('date', e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className={cx(CONTROL, 'h-10 w-auto')}
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Hôte</label>
+                        <label className={cx('mb-1 block text-xs font-medium', TEXT_MUTED)}>Hôte</label>
                         <select
                             value={filters.host_id || ''}
                             onChange={e => handleFilter('host_id', e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className={cx(CONTROL, 'h-10 w-auto min-w-[170px]')}
                         >
-                            <option value="">Tous</option>
-                            {hosts.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                            <option value="">Tous les hôtes</option>
+                            {hostOptions.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-1">Statut</label>
+                        <label className={cx('mb-1 block text-xs font-medium', TEXT_MUTED)}>Statut</label>
                         <select
                             value={filters.status || ''}
                             onChange={e => handleFilter('status', e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                            className={cx(CONTROL, 'h-10 w-auto min-w-[150px]')}
                         >
-                            <option value="">Tous</option>
-                            {Object.entries(STATUS_LABELS).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+                            <option value="">Tous les statuts</option>
+                            {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                         </select>
                     </div>
-                    {Object.values(filters).some(Boolean) && (
-                        <button
-                            onClick={() => router.get('/reception/log')}
-                            className="self-end text-xs text-gray-400 hover:text-red-500 underline"
-                        >
-                            Effacer les filtres
-                        </button>
+                    {isFiltered && (
+                        <Button variant="ghost" onClick={() => router.get('/reception/log')}>
+                            Réinitialiser
+                        </Button>
                     )}
                 </div>
 
-                {/* Timeline / tableau */}
-                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    {visits.data.length === 0 ? (
-                        <div className="text-center py-16 text-gray-400">
-                            <div className="text-5xl mb-3">📋</div>
-                            <div className="text-lg font-medium">Aucune visite pour ces critères</div>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-gray-50">
-                            {visits.data.map(visit => (
-                                <div key={visit.id} className="p-4 hover:bg-gray-50 flex items-start gap-4">
-                                    {/* Timeline dot */}
-                                    <div className="flex flex-col items-center mt-1">
-                                        <div className={`w-3 h-3 rounded-full ${visit.status === 'checked_in' ? 'bg-green-400' : visit.status === 'checked_out' ? 'bg-gray-300' : 'bg-red-400'}`} />
-                                        <div className="w-0.5 h-full bg-gray-100 mt-1" />
-                                    </div>
-
-                                    {/* Photo */}
-                                    {visit.visitor?.photo_path ? (
-                                        <img src={`/storage/${visit.visitor.photo_path}`} className="w-10 h-10 rounded-full object-cover flex-shrink-0" alt="" />
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-[#9333EA] text-white flex items-center justify-center font-bold flex-shrink-0">
-                                            {visit.visitor?.full_name?.[0]}
-                                        </div>
-                                    )}
-
-                                    {/* Infos */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="font-bold text-gray-900">{visit.visitor?.full_name}</span>
-                                            {visit.visitor?.company && (
-                                                <span className="text-gray-400 text-sm">({visit.visitor.company})</span>
-                                            )}
-                                            {(visit.visitor?.visit_count ?? 0) >= 5 && (
-                                                <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                                                    Visite #{visit.visitor.visit_count}
-                                                </span>
-                                            )}
-                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_COLORS[visit.status]}`}>
-                                                {STATUS_LABELS[visit.status]}
-                                            </span>
-                                        </div>
-                                        <div className="text-sm text-gray-500 mt-0.5 flex flex-wrap gap-3">
-                                            <span>👤 {visit.host?.name}</span>
-                                            <span>⏰ {new Date(visit.check_in_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span>
-                                            {visit.check_out_at && (
-                                                <span>🏃 {new Date(visit.check_out_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span>
-                                            )}
-                                            <span>⏱️ {duration(visit)}</span>
-                                            {visit.location && <span>📍 {visit.location}</span>}
-                                            <span>🎯 {visit.purpose}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="flex-shrink-0">
-                                        <button
-                                            onClick={() => reportIncident(visit)}
-                                            className="text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1"
-                                        >
-                                            🚨 Signaler
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                {/* Journal */}
+                <DataTable
+                    columns={columns}
+                    data={rows}
+                    rowKey="id"
+                    pageSize={rows.length || 10}
+                    totalItems={total}
+                    actionsLabel="Actions"
+                    actions={(visit) => (
+                        <Button
+                            variant="ghost" size="sm" iconOnly icon={AlertTriangle}
+                            title="Signaler un incident"
+                            onClick={() => reportIncident(visit)}
+                            className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+                        />
                     )}
-                </div>
-
-                {/* Pagination */}
-                {visits.last_page > 1 && (
-                    <div className="flex justify-center gap-2">
-                        {Array.from({ length: visits.last_page }, (_, i) => i + 1).map(page => (
-                            <button
-                                key={page}
-                                onClick={() => router.get('/reception/log', { ...filters, page })}
-                                className={`w-9 h-9 rounded-lg text-sm font-bold ${page === visits.current_page ? 'bg-[#9333EA] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                            >
-                                {page}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                    empty={
+                        isFiltered ? (
+                            <EmptyState
+                                variant="no-results"
+                                title="Aucune visite pour ces critères"
+                                description="Aucune entrée du journal ne correspond à la date, à l'hôte ou au statut sélectionnés."
+                                action={
+                                    <Button variant="secondary" onClick={() => router.get('/reception/log')}>
+                                        Réinitialiser les filtres
+                                    </Button>
+                                }
+                            />
+                        ) : (
+                            <EmptyState
+                                icon={ClipboardList}
+                                title="Le journal est vide"
+                                description="Chaque check-in réalisé à la borne d'accueil ou par la réception crée une ligne ici, avec l'heure d'arrivée, l'hôte et la durée de présence."
+                                hints={[
+                                    'La durée se calcule automatiquement au moment du départ.',
+                                    'Le journal est exportable en CSV ou en PDF pour vos rapports de sécurité.',
+                                ]}
+                            />
+                        )
+                    }
+                    footer={lastPage > 1 ? (
+                        <div className="flex items-center justify-between px-4 py-3">
+                            <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+                                Page {currentPage} / {lastPage} · {total} visite{total > 1 ? 's' : ''}
+                            </span>
+                            <div className="flex gap-1">
+                                <Button
+                                    variant="secondary" size="sm" iconOnly icon={ChevronLeft}
+                                    title="Page précédente"
+                                    disabled={currentPage <= 1}
+                                    onClick={() => router.get('/reception/log', { ...filters, page: currentPage - 1 })}
+                                />
+                                <Button
+                                    variant="secondary" size="sm" iconOnly icon={ChevronRight}
+                                    title="Page suivante"
+                                    disabled={currentPage >= lastPage}
+                                    onClick={() => router.get('/reception/log', { ...filters, page: currentPage + 1 })}
+                                />
+                            </div>
+                        </div>
+                    ) : null}
+                />
             </div>
 
             {/* Modal signalement incident */}
             {incident && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-                        <h3 className="text-lg font-black text-gray-900 mb-2">Signaler un incident</h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                            Visite de <strong>{incident.visitor?.full_name}</strong>
-                        </p>
-                        <textarea
-                            value={incidentNote}
-                            onChange={e => setIncidentNote(e.target.value)}
-                            rows={4}
-                            placeholder="Décrivez l'incident..."
-                            className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none mb-4"
-                        />
-                        <div className="flex gap-3">
-                            <button onClick={() => setIncident(null)}
-                                className="flex-1 border border-gray-200 text-gray-500 font-bold py-2.5 rounded-xl text-sm">
-                                Annuler
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    await axios.post(`/visits/${incident.id}/incident`, { note: incidentNote });
-                                    setIncident(null);
-                                }}
-                                className="flex-1 bg-red-600 text-white font-bold py-2.5 rounded-xl text-sm"
-                            >
-                                Envoyer le signalement
-                            </button>
-                        </div>
+                <div
+                    onClick={() => setIncident(null)}
+                    className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+                >
+                    <div onClick={e => e.stopPropagation()} className="w-full max-w-md">
+                        <Card
+                            padded={false}
+                            className="shadow-xl"
+                            title="Signaler un incident"
+                            subtitle={`Visite de ${displayName(incident.visitor)}`}
+                            actions={
+                                <Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer"
+                                        onClick={() => setIncident(null)} />
+                            }
+                            footer={
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="secondary" onClick={() => setIncident(null)}>Annuler</Button>
+                                    <Button
+                                        variant="danger"
+                                        icon={AlertTriangle}
+                                        onClick={async () => {
+                                            await axios.post(`/reception/visites/${incident.id}/incident`, { note: incidentNote });
+                                            setIncident(null);
+                                        }}
+                                    >
+                                        Envoyer le signalement
+                                    </Button>
+                                </div>
+                            }
+                        >
+                            <div className="px-4 py-4 sm:px-6">
+                                <label className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
+                                    Description de l'incident
+                                </label>
+                                <textarea
+                                    value={incidentNote}
+                                    onChange={e => setIncidentNote(e.target.value)}
+                                    rows={4}
+                                    placeholder="Comportement, dégradation, non-respect des consignes…"
+                                    className={cx(CONTROL, 'resize-none')}
+                                />
+                                <p className={cx('mt-2 text-xs', TEXT_FAINT)}>
+                                    Le signalement est rattaché à la visite et reste consultable dans l'historique du visiteur.
+                                </p>
+                            </div>
+                        </Card>
                     </div>
                 </div>
             )}

@@ -1,26 +1,50 @@
+/**
+ * Formation/Catalog.jsx — Catalogue public des formations
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier STRICTEMENT inchangée : mêmes props Inertia, mêmes routes
+ * (`GET /training/catalog`, `POST /training/courses/{id}/enroll`,
+ * `router.visit('/training/courses/{id}')`), mêmes états locaux, mêmes payloads.
+ *
+ * Props réelles (TrainingController@catalog → Inertia::render('Formation/Catalog')) :
+ *   courses  : paginateur Laravel { data[], total, current_page, last_page, … }
+ *              chaque cours : { id, title, description, level, language,
+ *                price_xof, thumbnail_path, trailer_url, duration_minutes,
+ *                rating_avg, rating_count, enrollment_count, created_by_name,
+ *                tags, created_at }
+ *   filters  : { level, language, search, free, sort } — sérialisé en `[]` par PHP
+ *              quand il est vide, d'où la garde `f` ci-dessous (À CONSERVER).
+ *   userRole : string
+ */
+
 import { useState, useMemo } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AppLayout from '@/Components/Layout/AppLayout';
 import {
     MagnifyingGlassIcon,
     FunnelIcon,
-    StarIcon,
     ClockIcon,
     UserGroupIcon,
     AcademicCapIcon,
     PlayCircleIcon,
-    TagIcon,
     ChevronRightIcon,
     GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import {
+    PageHeader, Button, Badge, Card, EmptyState,
+    cx, CONTROL, SURFACE, SURFACE_SUNK, BORDER,
+    TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
+/* Un niveau est une information de contenu, pas une action : ton sémantique,
+   jamais l'accent violet réservé aux actions principales.                     */
 
 const LEVEL_CONFIG = {
-    debutant:      { label: 'Débutant',      color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    intermediaire: { label: 'Intermédiaire', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
-    avance:        { label: 'Avancé',        color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+    beginner:     { label: 'Débutant',      tone: 'success' },
+    intermediate: { label: 'Intermédiaire', tone: 'warning' },
+    advanced:     { label: 'Avancé',        tone: 'danger'  },
 };
 
 const SORT_OPTIONS = [
@@ -38,111 +62,135 @@ function formatDuration(min) {
 }
 
 function StarRating({ value, size = 'sm' }) {
-    const cls = size === 'sm' ? 'w-4 h-4' : 'w-5 h-5';
+    const cls = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
     return (
-        <div className="flex gap-0.5">
+        <div className="flex gap-0.5" aria-hidden="true">
             {[1, 2, 3, 4, 5].map(i => (
                 <StarSolid
                     key={i}
-                    className={`${cls} ${i <= Math.round(value) ? 'text-yellow-400' : 'text-gray-200 dark:text-gray-700'}`}
+                    className={cx(
+                        cls,
+                        i <= Math.round(value)
+                            ? 'text-amber-400'
+                            : 'text-gray-200 dark:text-gray-700',
+                    )}
                 />
             ))}
         </div>
     );
 }
 
-// ─── Card cours ──────────────────────────────────────────────────────────────
+// ─── Carte cours ─────────────────────────────────────────────────────────────
+/* Ordre de lecture volontaire : miniature → niveau/langue → titre → formateur
+   → note → durée & inscrits → action. La carte reste scannable d'un coup d'œil. */
 
 function CourseCard({ course, onEnroll }) {
-    const level = LEVEL_CONFIG[course.level] ?? LEVEL_CONFIG.debutant;
+    const level  = LEVEL_CONFIG[course.level] ?? LEVEL_CONFIG.beginner;
     const isFree = !course.price_xof || course.price_xof === 0;
 
     return (
-        <div
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700
-                       hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col cursor-pointer"
+        <article
+            className={cx(
+                SURFACE, 'border', BORDER, 'rounded-xl shadow-sm overflow-hidden',
+                'flex flex-col cursor-pointer transition-colors',
+                'hover:border-purple-300 dark:hover:border-purple-500/50',
+            )}
             onClick={() => router.visit(`/training/courses/${course.id}`)}
         >
-            {/* Thumbnail */}
-            <div className="relative h-44 rounded-t-xl overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600">
+            {/* Miniature */}
+            <div className={cx('relative aspect-[16/9] overflow-hidden border-b', BORDER, SURFACE_SUNK)}>
                 {course.thumbnail_path ? (
-                    <img src={`/storage/${course.thumbnail_path}`} alt={course.title}
-                         className="w-full h-full object-cover" />
+                    <img
+                        src={`/storage/${course.thumbnail_path}`}
+                        alt=""
+                        className="h-full w-full object-cover"
+                    />
                 ) : (
-                    <div className="flex items-center justify-center h-full">
-                        <AcademicCapIcon className="w-16 h-16 text-white/50" />
+                    <div className="flex h-full items-center justify-center">
+                        <AcademicCapIcon className={cx('h-10 w-10', TEXT_FAINT)} aria-hidden="true" />
                     </div>
                 )}
-                {/* Prix badge */}
-                <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold shadow
-                    ${isFree ? 'bg-green-500 text-white' : 'bg-white text-gray-900'}`}>
-                    {isFree ? 'Gratuit' : `${course.price_xof?.toLocaleString('fr-FR')} XOF`}
+
+                {/* Prix */}
+                <div className="absolute right-3 top-3">
+                    <Badge variant={isFree ? 'success' : 'neutral'} size="md" className="shadow-sm">
+                        {isFree ? 'Gratuit' : (
+                            <span className={NUM}>{course.price_xof?.toLocaleString('fr-FR')} XOF</span>
+                        )}
+                    </Badge>
                 </div>
+
                 {course.trailer_url && (
                     <button
-                        className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity"
+                        type="button"
+                        title="Voir la bande-annonce"
+                        className={cx(
+                            'absolute inset-0 flex items-center justify-center',
+                            'bg-gray-900/30 opacity-0 transition-opacity hover:opacity-100',
+                            FOCUS_RING,
+                        )}
                         onClick={e => { e.stopPropagation(); window.open(course.trailer_url, '_blank'); }}
                     >
-                        <PlayCircleIcon className="w-14 h-14 text-white drop-shadow-lg" />
+                        <PlayCircleIcon className="h-12 w-12 text-white" aria-hidden="true" />
                     </button>
                 )}
             </div>
 
-            <div className="p-4 flex flex-col flex-1">
+            <div className="flex flex-1 flex-col p-4">
                 {/* Niveau + langue */}
-                <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${level.color}`}>
-                        {level.label}
-                    </span>
+                <div className="mb-2 flex items-center gap-2">
+                    <Badge variant={level.tone} outline>{level.label}</Badge>
                     {course.language && (
-                        <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                            <GlobeAltIcon className="w-3.5 h-3.5" />
+                        <span className={cx('flex items-center gap-1 text-xs', TEXT_MUTED)}>
+                            <GlobeAltIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                             {course.language.toUpperCase()}
                         </span>
                     )}
                 </div>
 
                 {/* Titre */}
-                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1 flex-1">
+                <h3 className={cx('mb-1 flex-1 line-clamp-2 text-sm font-semibold leading-5', TEXT_TITLE)}>
                     {course.title}
                 </h3>
 
-                {/* Instructeur */}
-                {course.created_by_name && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{course.created_by_name}</p>
-                )}
+                {/* Formateur */}
+                <p className={cx('mb-2 truncate text-xs', TEXT_MUTED)}>
+                    {course.created_by_name || 'Formateur non renseigné'}
+                </p>
 
-                {/* Rating */}
-                <div className="flex items-center gap-1.5 mb-3">
-                    <span className="text-sm font-bold text-yellow-600">
+                {/* Note */}
+                <div className="mb-3 flex items-center gap-1.5">
+                    <span className={cx('text-sm font-semibold', NUM, TEXT_TITLE)}>
                         {course.rating_avg > 0 ? Number(course.rating_avg).toFixed(1) : '—'}
                     </span>
                     <StarRating value={course.rating_avg ?? 0} />
-                    <span className="text-xs text-gray-400">({course.rating_count ?? 0})</span>
+                    <span className={cx('text-xs', NUM, TEXT_FAINT)}>({course.rating_count ?? 0})</span>
                 </div>
 
                 {/* Méta */}
-                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-4">
+                <div className={cx('mb-4 flex items-center gap-4 text-xs', TEXT_MUTED)}>
                     <span className="flex items-center gap-1">
-                        <ClockIcon className="w-3.5 h-3.5" />
-                        {formatDuration(course.duration_minutes)}
+                        <ClockIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className={NUM}>{formatDuration(course.duration_minutes)}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                        <UserGroupIcon className="w-3.5 h-3.5" />
-                        {(course.enrollment_count ?? 0).toLocaleString()} inscrits
+                        <UserGroupIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className={NUM}>{(course.enrollment_count ?? 0).toLocaleString('fr-FR')}</span>
+                        <span>inscrits</span>
                     </span>
                 </div>
 
-                {/* CTA */}
-                <button
+                {/* Action */}
+                <Button
+                    variant="primary"
+                    size="sm"
+                    block
                     onClick={e => { e.stopPropagation(); onEnroll(course); }}
-                    className="w-full py-2 rounded-lg text-sm font-semibold transition-colors
-                               bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                     {course.my_enrollment ? 'Continuer' : (isFree ? "S'inscrire" : 'Acheter')}
-                </button>
+                </Button>
             </div>
-        </div>
+        </article>
     );
 }
 
@@ -154,21 +202,29 @@ function Carousel({ title, courses, onEnroll }) {
     const max = Math.max(0, courses.length - visible);
 
     return (
-        <section className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+        <section className="mb-8">
+            <div className="mb-4 flex items-center justify-between">
+                <h2 className={cx('text-base font-semibold tracking-tight', TEXT_TITLE)}>{title}</h2>
                 <div className="flex gap-1">
-                    <button onClick={() => setIdx(i => Math.max(0, i - 1))} disabled={idx === 0}
-                            className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-600">
-                        <ChevronRightIcon className="w-4 h-4 rotate-180" />
-                    </button>
-                    <button onClick={() => setIdx(i => Math.min(max, i + 1))} disabled={idx >= max}
-                            className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-600">
-                        <ChevronRightIcon className="w-4 h-4" />
-                    </button>
+                    <Button
+                        variant="secondary" size="sm" iconOnly
+                        title="Précédent"
+                        onClick={() => setIdx(i => Math.max(0, i - 1))}
+                        disabled={idx === 0}
+                    >
+                        <ChevronRightIcon className="h-4 w-4 rotate-180" aria-hidden="true" />
+                    </Button>
+                    <Button
+                        variant="secondary" size="sm" iconOnly
+                        title="Suivant"
+                        onClick={() => setIdx(i => Math.min(max, i + 1))}
+                        disabled={idx >= max}
+                    >
+                        <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+                    </Button>
                 </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {courses.slice(idx, idx + visible).map(c => (
                     <CourseCard key={c.id} course={c} onEnroll={onEnroll} />
                 ))}
@@ -179,14 +235,17 @@ function Carousel({ title, courses, onEnroll }) {
 
 // ─── Page principale ─────────────────────────────────────────────────────────
 
-export default function Catalog({ courses, filters = {}, userRole }) {
-    const [search, setSearch]         = useState(filters.search ?? '');
-    const [level, setLevel]           = useState(filters.level ?? '');
-    const [sort, setSort]             = useState(filters.sort ?? 'popular');
-    const [freeOnly, setFreeOnly]     = useState(filters.free === '1' || filters.free === true);
+export default function Catalog({ courses, filters, userRole }) {
+    /* Garde à conserver : PHP sérialise un `filters` vide en tableau `[]`. */
+    const f = filters && !Array.isArray(filters) ? filters : {};
+    const [search, setSearch]         = useState(f.search ?? '');
+    const [level, setLevel]           = useState(f.level ?? '');
+    const [sort, setSort]             = useState(f.sort ?? 'popular');
+    const [freeOnly, setFreeOnly]     = useState(f.free === '1' || f.free === true);
     const [showFilters, setShowFilters] = useState(false);
 
     const items = courses?.data ?? courses ?? [];
+    const total = courses?.total ?? items.length;
 
     const recommended = useMemo(() => {
         if (!userRole) return items.slice(0, 8);
@@ -209,6 +268,11 @@ export default function Catalog({ courses, filters = {}, userRole }) {
         }, { preserveState: true, replace: true });
     };
 
+    const resetFilters = () => {
+        setSearch(''); setLevel(''); setSort('popular'); setFreeOnly(false);
+        router.get('/training/catalog', { sort: 'popular' }, { preserveState: true, replace: true });
+    };
+
     const handleEnroll = (course) => {
         if (course.my_enrollment) {
             router.visit(`/training/courses/${course.id}`);
@@ -221,79 +285,105 @@ export default function Catalog({ courses, filters = {}, userRole }) {
         }
     };
 
+    const isFiltered = Boolean(f.search || f.level || f.free);
+    const lbl = cx('mb-1.5 block text-xs font-medium', TEXT_MUTED);
+
     return (
         <AppLayout>
             <Head title="Catalogue de formations" />
 
-            {/* Hero */}
-            <div className="bg-gradient-to-r from-indigo-700 to-purple-700 rounded-2xl p-8 mb-8 text-white">
-                <h1 className="text-3xl font-bold mb-2">Catalogue de formations</h1>
-                <p className="text-indigo-200 mb-6">Développez vos compétences avec nos formations certifiantes</p>
+            <PageHeader
+                title="Catalogue de formations"
+                subtitle="Développez vos compétences avec les formations certifiantes de l'organisation."
+                icon={AcademicCapIcon}
+                breadcrumbs={[{ label: 'Formation', href: '/formation' }, { label: 'Catalogue' }]}
+                actions={
+                    <Button
+                        variant={showFilters ? 'subtle' : 'secondary'}
+                        icon={FunnelIcon}
+                        onClick={() => setShowFilters(v => !v)}
+                        aria-expanded={showFilters}
+                    >
+                        Filtres
+                    </Button>
+                }
+            />
 
-                {/* Barre de recherche */}
-                <div className="flex gap-3 max-w-2xl">
-                    <div className="relative flex-1">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && applyFilters()}
-                            placeholder="Rechercher une formation…"
-                            className="w-full pl-10 pr-4 py-3 rounded-xl text-gray-900 bg-white shadow-sm
-                                       focus:outline-none focus:ring-2 focus:ring-white/50"
-                        />
-                    </div>
-                    <button onClick={applyFilters}
-                            className="px-6 py-3 bg-white text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-colors">
-                        Rechercher
-                    </button>
-                    <button onClick={() => setShowFilters(f => !f)}
-                            className="p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-colors">
-                        <FunnelIcon className="w-5 h-5" />
-                    </button>
+            {/* Recherche */}
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row">
+                <div className="relative flex-1">
+                    <MagnifyingGlassIcon
+                        className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)}
+                        aria-hidden="true"
+                    />
+                    <input
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && applyFilters()}
+                        placeholder="Rechercher une formation…"
+                        aria-label="Rechercher une formation"
+                        className={cx(CONTROL, 'h-10 pl-9')}
+                    />
                 </div>
+                <Button variant="primary" onClick={applyFilters}>Rechercher</Button>
             </div>
 
             {/* Filtres */}
             {showFilters && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6 flex flex-wrap gap-4">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Niveau</label>
-                        <select value={level} onChange={e => setLevel(e.target.value)}
-                                className="input-base text-sm">
-                            <option value="">Tous les niveaux</option>
-                            {Object.entries(LEVEL_CONFIG).map(([k, v]) => (
-                                <option key={k} value={k}>{v.label}</option>
-                            ))}
-                        </select>
+                <Card
+                    className="mb-6"
+                    title="Filtres"
+                    subtitle="Affinez le catalogue par niveau, tri ou tarif."
+                    footer={
+                        <div className="flex justify-end gap-2">
+                            <Button variant="ghost" onClick={resetFilters}>Effacer</Button>
+                            <Button variant="primary" onClick={applyFilters}>Appliquer</Button>
+                        </div>
+                    }
+                >
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div>
+                            <label className={lbl} htmlFor="cat-level">Niveau</label>
+                            <select
+                                id="cat-level" value={level}
+                                onChange={e => setLevel(e.target.value)}
+                                className={cx(CONTROL, 'h-10')}
+                            >
+                                <option value="">Tous les niveaux</option>
+                                {Object.entries(LEVEL_CONFIG).map(([k, v]) => (
+                                    <option key={k} value={k}>{v.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={lbl} htmlFor="cat-sort">Trier par</label>
+                            <select
+                                id="cat-sort" value={sort}
+                                onChange={e => setSort(e.target.value)}
+                                className={cx(CONTROL, 'h-10')}
+                            >
+                                {SORT_OPTIONS.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-end">
+                            <label className={cx('flex h-10 cursor-pointer items-center gap-2 text-sm', TEXT_BODY)}>
+                                <input
+                                    type="checkbox"
+                                    checked={freeOnly}
+                                    onChange={e => setFreeOnly(e.target.checked)}
+                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 dark:border-[#1E3048] dark:bg-[#0F1923]"
+                                />
+                                Formations gratuites uniquement
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Trier par</label>
-                        <select value={sort} onChange={e => setSort(e.target.value)}
-                                className="input-base text-sm">
-                            {SORT_OPTIONS.map(o => (
-                                <option key={o.value} value={o.value}>{o.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-end">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={freeOnly} onChange={e => setFreeOnly(e.target.checked)}
-                                   className="w-4 h-4 accent-indigo-600" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Formations gratuites uniquement</span>
-                        </label>
-                    </div>
-                    <div className="flex items-end ml-auto">
-                        <button onClick={applyFilters}
-                                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
-                            Appliquer
-                        </button>
-                    </div>
-                </div>
+                </Card>
             )}
 
             {/* Carrousels */}
-            {!filters.search && !filters.level && (
+            {!f.search && !f.level && (
                 <>
                     {recommended.length > 0 && (
                         <Carousel
@@ -310,23 +400,43 @@ export default function Catalog({ courses, filters = {}, userRole }) {
 
             {/* Grille principale */}
             <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                    <h2 className={cx('text-base font-semibold tracking-tight', TEXT_TITLE)}>
                         Toutes les formations
-                        <span className="ml-2 text-sm font-normal text-gray-400">
-                            ({(courses?.total ?? items.length).toLocaleString()} résultats)
-                        </span>
                     </h2>
+                    <span className={cx('text-xs', NUM, TEXT_MUTED)}>
+                        {total.toLocaleString('fr-FR')} résultat{total > 1 ? 's' : ''}
+                    </span>
                 </div>
 
                 {items.length === 0 ? (
-                    <div className="text-center py-20 text-gray-400">
-                        <AcademicCapIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                        <p className="text-lg">Aucune formation trouvée</p>
-                        <p className="text-sm mt-1">Essayez d'autres critères de recherche</p>
-                    </div>
+                    <EmptyState
+                        bordered
+                        variant={isFiltered ? 'no-results' : 'no-data'}
+                        icon={isFiltered ? undefined : AcademicCapIcon}
+                        title={isFiltered ? 'Aucune formation ne correspond' : 'Le catalogue est vide'}
+                        description={
+                            isFiltered
+                                ? 'Aucun cours ne correspond à ces critères. Élargissez la recherche ou réinitialisez les filtres.'
+                                : "Aucune formation n'est encore publiée. Les cours apparaîtront ici dès qu'un formateur en publiera un."
+                        }
+                        hints={
+                            isFiltered
+                                ? undefined
+                                : [
+                                    'Seuls les cours publiés et publics apparaissent dans ce catalogue.',
+                                    'Chaque carte affiche la durée, le niveau et la note des apprenants.',
+                                    'Les formations gratuites s’ouvrent en un clic depuis la carte.',
+                                ]
+                        }
+                        secondary={
+                            isFiltered
+                                ? <Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>
+                                : undefined
+                        }
+                    />
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {items.map(c => (
                             <CourseCard key={c.id} course={c} onEnroll={handleEnroll} />
                         ))}
@@ -335,21 +445,25 @@ export default function Catalog({ courses, filters = {}, userRole }) {
 
                 {/* Pagination */}
                 {courses?.last_page > 1 && (
-                    <div className="flex justify-center gap-2 mt-8">
+                    <nav className="mt-8 flex flex-wrap justify-center gap-1.5" aria-label="Pagination">
                         {Array.from({ length: courses.last_page }, (_, i) => i + 1).map(p => (
                             <button
                                 key={p}
-                                onClick={() => router.get('/training/catalog', { ...filters, page: p })}
-                                className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors
-                                    ${courses.current_page === p
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                    }`}
+                                type="button"
+                                onClick={() => router.get('/training/catalog', { ...f, page: p })}
+                                aria-current={courses.current_page === p ? 'page' : undefined}
+                                className={cx(
+                                    'h-9 w-9 rounded-lg border text-sm font-medium transition-colors',
+                                    NUM, FOCUS_RING,
+                                    courses.current_page === p
+                                        ? 'border-transparent bg-purple-600 text-white'
+                                        : cx(SURFACE, BORDER, TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                )}
                             >
                                 {p}
                             </button>
                         ))}
-                    </div>
+                    </nav>
                 )}
             </section>
         </AppLayout>

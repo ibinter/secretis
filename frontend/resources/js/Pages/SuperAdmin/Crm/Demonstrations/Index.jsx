@@ -1,25 +1,35 @@
+/**
+ * SuperAdmin/Crm/Demonstrations/Index.jsx — Démonstrations produit
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : même appel réseau
+ * (`POST /superadmin/crm/demonstrations/{id}/send-reminder`),
+ * mêmes états locaux (vue calendrier/liste, filtre de statut),
+ * mêmes destinations de navigation.
+ *
+ * Nettoyage sans effet fonctionnel : import `router` inutilisé supprimé.
+ */
+
 import React, { useState } from 'react'
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import axios from 'axios'
+import {
+  Presentation, Plus, CalendarDays, List, Video, MapPin, Mail, Check, ExternalLink,
+} from 'lucide-react'
 import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout'
+import {
+  PageHeader, Button, Badge, Card, DataTable, EmptyState,
+  cx, SURFACE, BORDER, CONTROL, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI'
 
-const Ic = {
-  Plus: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>,
-  Calendar: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
-  List: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>,
-  Video: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>,
-  Mail: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>,
-  Check: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>,
-  ExternalLink: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>,
-  Globe: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
-}
+/* ─── Sémantique ───────────────────────────────────────────────────────────── */
 
-const STATUS_MAP = {
-  requested:  { label: 'Demandée',   cls: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-  scheduled:  { label: 'Planifiée',  cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  confirmed:  { label: 'Confirmée',  cls: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' },
-  done:       { label: 'Réalisée',   cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  cancelled:  { label: 'Annulée',    cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+const STATUS_META = {
+  requested: { label: 'Demandée',  tone: 'neutral' },
+  scheduled: { label: 'Planifiée', tone: 'info' },
+  confirmed: { label: 'Confirmée', tone: 'accent' },
+  done:      { label: 'Réalisée',  tone: 'success' },
+  cancelled: { label: 'Annulée',   tone: 'danger' },
 }
 
 const MOCK_DEMOS = Array.from({ length: 10 }, (_, i) => ({
@@ -37,141 +47,272 @@ const MOCK_DEMOS = Array.from({ length: 10 }, (_, i) => ({
   duration_min: 60,
 }))
 
+const ModeIcon = ({ mode, className }) =>
+  mode === 'visio'
+    ? <Video className={className} aria-hidden="true" />
+    : <MapPin className={className} aria-hidden="true" />
+
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+
 export default function DemonstrationsIndex({ demos: propDemos }) {
-  const demos      = propDemos ?? MOCK_DEMOS
-  const [view, setView]   = useState('list')
+  const demos = propDemos ?? MOCK_DEMOS
+
+  const [view, setView]       = useState('list')
   const [filterStatus, setFS] = useState('')
 
-  const fmtDateTime = d => new Date(d).toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+  const fmtDateTime = d =>
+    new Date(d).toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
   const sendReminder = async (id) => {
-    try { await axios.post(`/superadmin/crm/demonstrations/${id}/send-reminder`); alert('Rappel envoyé.') }
-    catch { alert('Erreur') }
+    try {
+      await axios.post(`/superadmin/crm/demonstrations/${id}/send-reminder`)
+      alert('Rappel envoyé.')
+    } catch {
+      alert('Erreur')
+    }
   }
 
   const filtered = demos.filter(d => !filterStatus || d.status === filterStatus)
 
-  // ── Calendrier simplifié (groupé par jour) ───────────────────────────────
+  /* ─── Vue calendrier (regroupement par jour) ─────────────────────────────── */
+
   const CalendarView = () => {
     const days = {}
-    demos.forEach(d => {
+    filtered.forEach(d => {
       const key = new Date(d.scheduled_at).toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long' })
       if (!days[key]) days[key] = []
       days[key].push(d)
     })
+
+    if (Object.keys(days).length === 0) {
+      return (
+        <div className={cx(SURFACE, 'border', BORDER, 'rounded-xl shadow-sm')}>
+          <EmptyState
+            icon={CalendarDays}
+            title="Aucune démonstration planifiée"
+            description="Les démonstrations produit programmées apparaîtront ici."
+          />
+        </div>
+      )
+    }
+
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         {Object.entries(days).map(([day, items]) => (
-          <div key={day}>
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 capitalize">{day}</h3>
+          <section key={day}>
+            <h3 className={cx('mb-2 text-xs font-semibold uppercase tracking-wider', TEXT_MUTED)}>{day}</h3>
             <div className="space-y-2">
               {items.map(d => {
-                const stat = STATUS_MAP[d.status] ?? { label: d.status, cls: 'bg-gray-100 text-gray-600' }
+                const meta = STATUS_META[d.status] ?? { label: d.status, tone: 'neutral' }
                 return (
-                  <div key={d.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                    <div className="w-16 text-center shrink-0">
-                      <p className="text-lg font-bold text-[#9333EA] dark:text-purple-400 tabular-nums">{new Date(d.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-                      <p className="text-xs text-gray-400">{d.duration_min}min</p>
+                  <div
+                    key={d.id}
+                    className={cx(SURFACE, 'flex flex-wrap items-center gap-4 rounded-xl border p-4 shadow-sm', BORDER)}
+                  >
+                    <div className="w-16 shrink-0 text-center">
+                      <p className={cx('text-lg font-semibold text-purple-700 dark:text-purple-300', NUM)}>
+                        {new Date(d.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className={cx('text-xs', TEXT_FAINT, NUM)}>{d.duration_min} min</p>
                     </div>
-                    <div className="w-0.5 h-10 bg-[#9333EA]/20 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 dark:text-white">{d.prospect_name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{d.company} · {d.software}</p>
+
+                    <span className="h-10 w-px shrink-0 bg-gray-200 dark:bg-[#1E3048]" />
+
+                    <div className="min-w-0 flex-1">
+                      <p className={cx('font-medium', TEXT_TITLE)}>{d.prospect_name}</p>
+                      <p className={cx('text-xs', TEXT_MUTED)}>{d.company} · {d.software}</p>
                     </div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${stat.cls}`}>{stat.label}</span>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                      {d.mode === 'visio' ? <Ic.Video /> : <Ic.Globe />} {d.mode}
-                    </div>
+
+                    <Badge variant={meta.tone} dot>{meta.label}</Badge>
+
+                    <span className={cx('inline-flex items-center gap-1.5 text-xs', TEXT_MUTED)}>
+                      <ModeIcon mode={d.mode} className="h-3.5 w-3.5" />
+                      {d.mode === 'visio' ? 'Visioconférence' : 'Présentiel'}
+                    </span>
+
                     {d.link && (
-                      <a href={d.link} target="_blank" rel="noopener noreferrer" className="text-[#9333EA] dark:text-purple-400 hover:underline flex items-center gap-1 text-xs">
-                        Rejoindre <Ic.ExternalLink />
+                      <a
+                        href={d.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cx('inline-flex items-center gap-1 rounded text-xs text-purple-700 hover:underline dark:text-purple-300', FOCUS_RING)}
+                      >
+                        Rejoindre <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
                 )
               })}
             </div>
-          </div>
+          </section>
         ))}
       </div>
     )
   }
 
+  /* ─── Colonnes ───────────────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'prospect_name',
+      label: 'Prospect',
+      render: (v, d) => (
+        <Link
+          href={`/superadmin/crm/prospects/${d.prospect_id}`}
+          className={cx('rounded font-medium text-purple-700 hover:underline dark:text-purple-300', FOCUS_RING)}
+        >
+          {v}
+        </Link>
+      ),
+    },
+    { key: 'company', label: 'Entreprise', className: cx('text-xs', TEXT_MUTED) },
+    { key: 'software', label: 'Logiciel', nowrap: true, className: cx('text-xs', TEXT_MUTED) },
+    { key: 'agent', label: 'Agent', nowrap: true, className: cx('text-xs', TEXT_MUTED) },
+    {
+      key: 'scheduled_at',
+      label: 'Date et heure',
+      nowrap: true,
+      className: cx('text-xs', TEXT_MUTED, NUM),
+      render: (v) => fmtDateTime(v),
+    },
+    {
+      key: 'status',
+      label: 'Statut',
+      nowrap: true,
+      render: (v) => {
+        const meta = STATUS_META[v] ?? { label: v, tone: 'neutral' }
+        return <Badge variant={meta.tone} dot>{meta.label}</Badge>
+      },
+    },
+    {
+      key: 'mode',
+      label: 'Mode',
+      nowrap: true,
+      render: (v) => (
+        <span className={cx('inline-flex items-center gap-1.5 text-xs', TEXT_MUTED)}>
+          <ModeIcon mode={v} className="h-3.5 w-3.5" />
+          {v === 'visio' ? 'Visioconférence' : 'Présentiel'}
+        </span>
+      ),
+    },
+  ]
+
   return (
     <SuperAdminLayout title="Démonstrations">
       <Head title="Démonstrations — CRM Super Admin" />
 
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Démonstrations</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{demos.length} démo(s) au total</p>
-        </div>
-        <div className="flex gap-2">
-          <select value={filterStatus} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#9333EA]/30 outline-none">
-            <option value="">Tous les statuts</option>
-            {Object.entries(STATUS_MAP).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-          </select>
-          <div className="flex border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button onClick={() => setView('calendar')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'calendar' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Calendar /> Calendrier</button>
-            <button onClick={() => setView('list')} className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${view === 'list' ? 'bg-[#9333EA] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /> Liste</button>
-          </div>
-          <Link href="/superadmin/crm/demonstrations/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] transition-colors">
-            <Ic.Plus /> Planifier
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        icon={Presentation}
+        title="Démonstrations"
+        subtitle={`${demos.length} démonstration${demos.length > 1 ? 's' : ''} au total`}
+        breadcrumbs={[{ label: 'Console', href: '/superadmin' }, { label: 'CRM' }, { label: 'Démonstrations' }]}
+        actions={
+          <Button as={Link} href="/superadmin/crm/demonstrations/create" variant="primary" icon={Plus}>
+            Planifier une démo
+          </Button>
+        }
+      />
 
-      {view === 'calendar' ? <CalendarView /> : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-                <tr>
-                  {['Prospect', 'Entreprise', 'Logiciel', 'Agent', 'Date & heure', 'Statut', 'Mode', 'Actions'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-                {filtered.map(d => {
-                  const stat = STATUS_MAP[d.status] ?? { label: d.status, cls: 'bg-gray-100 text-gray-600' }
-                  return (
-                    <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                      <td className="px-4 py-3">
-                        <Link href={`/superadmin/crm/prospects/${d.prospect_id}`} className="font-medium text-[#9333EA] dark:text-purple-400 hover:underline">{d.prospect_name}</Link>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs">{d.company}</td>
-                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{d.software}</td>
-                      <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{d.agent}</td>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300 text-xs whitespace-nowrap">{fmtDateTime(d.scheduled_at)}</td>
-                      <td className="px-4 py-3"><span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${stat.cls}`}>{stat.label}</span></td>
-                      <td className="px-4 py-3">
-                        <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                          {d.mode === 'visio' ? <Ic.Video /> : <Ic.Globe />} {d.mode}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => sendReminder(d.id)} className="p-1.5 rounded-md text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" title="Envoyer rappel"><Ic.Mail /></button>
-                          {d.link && (
-                            <a href={d.link} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-md text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" title="Lien visio">
-                              <Ic.ExternalLink />
-                            </a>
-                          )}
-                          <Link href={`/superadmin/crm/demonstrations/${d.id}/notes`} className="p-1.5 rounded-md text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors" title="Compte-rendu">
-                            <Ic.Check />
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+      <div className="space-y-6">
+
+        <Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filterStatus}
+              onChange={e => setFS(e.target.value)}
+              aria-label="Filtrer par statut"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[180px]')}
+            >
+              <option value="">Tous les statuts</option>
+              {Object.entries(STATUS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+
+            {filterStatus && <Button variant="ghost" onClick={() => setFS('')}>Réinitialiser</Button>}
+
+            <div
+              role="group"
+              aria-label="Mode d'affichage"
+              className={cx('ml-auto flex overflow-hidden rounded-lg border', BORDER)}
+            >
+              <button
+                type="button"
+                aria-pressed={view === 'calendar'}
+                onClick={() => setView('calendar')}
+                className={cx(
+                  'inline-flex items-center gap-1.5 px-3 py-2.5 text-sm transition-colors',
+                  view === 'calendar' ? 'bg-purple-600 text-white' : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                  FOCUS_RING,
+                )}
+              >
+                <CalendarDays className="h-4 w-4" /> Calendrier
+              </button>
+              <button
+                type="button"
+                aria-pressed={view === 'list'}
+                onClick={() => setView('list')}
+                className={cx(
+                  'inline-flex items-center gap-1.5 px-3 py-2.5 text-sm transition-colors',
+                  view === 'list' ? 'bg-purple-600 text-white' : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                  FOCUS_RING,
+                )}
+              >
+                <List className="h-4 w-4" /> Liste
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        </Card>
+
+        {view === 'calendar' ? (
+          <CalendarView />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={filtered}
+            rowKey="id"
+            pageSize={25}
+            actions={(d) => (
+              <>
+                <Button
+                  variant="ghost" size="sm" iconOnly icon={Mail}
+                  title="Envoyer un rappel"
+                  onClick={() => sendReminder(d.id)}
+                />
+                {d.link && (
+                  <Button
+                    as="a" href={d.link} target="_blank" rel="noopener noreferrer"
+                    variant="ghost" size="sm" iconOnly icon={ExternalLink}
+                    title="Ouvrir le lien de visioconférence"
+                  />
+                )}
+                <Button
+                  as={Link} href={`/superadmin/crm/demonstrations/${d.id}/notes`}
+                  variant="ghost" size="sm" iconOnly icon={Check}
+                  title="Compte rendu de la démonstration"
+                />
+              </>
+            )}
+            empty={
+              filterStatus ? (
+                <EmptyState
+                  variant="no-results"
+                  title="Aucune démonstration"
+                  description="Aucune démonstration ne correspond à ce statut."
+                  action={<Button variant="secondary" onClick={() => setFS('')}>Réinitialiser le filtre</Button>}
+                />
+              ) : (
+                <EmptyState
+                  icon={Presentation}
+                  title="Aucune démonstration"
+                  description="Les démonstrations produit programmées avec les prospects apparaîtront ici."
+                />
+              )
+            }
+          />
+        )}
+
+      </div>
     </SuperAdminLayout>
   )
 }
+
 export { DemonstrationsIndex };

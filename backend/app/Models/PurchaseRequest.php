@@ -16,4 +16,14 @@ class PurchaseRequest extends Model
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function requestor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requested_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 }

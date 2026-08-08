@@ -567,7 +567,7 @@ class SyscohadaService
             'TVA'     => $this->calcTva($totals, $start, $end),
             'IS'      => $this->calcIs($totals, $org, $start, $end),
             'PATENTE' => $this->calcPatente($totals, $org),
-            'CNPS'    => $this->calcCnps($totals, $start, $end),
+            'CNPS'    => $this->calcCotisationsSociales($totals, $org, $start, $end),
             default   => throw new RuntimeException("Type de déclaration inconnu : {$type}"),
         };
     }
@@ -643,23 +643,45 @@ class SyscohadaService
         ];
     }
 
-    private function calcCnps(array $totals, Carbon $start, Carbon $end): array
+    /**
+     * Cotisations sociales dues sur la masse salariale de la période.
+     *
+     * ⚠️ Cette méthode s'appelait `calcCnps()` et appliquait **les taux CNPS
+     * ivoiriens à toutes les organisations** : 15,45 % patronale et 6,3 %
+     * salariale, en dur. La base compte pourtant des clients sénégalais
+     * (IPRES + CSS) et béninois (CNSS), dont les caisses, taux et plafonds
+     * diffèrent — leur déclaration sociale était donc silencieusement fausse.
+     *
+     * Les taux viennent désormais du référentiel `payroll_contribution_rules`,
+     * par pays et par date d'effet. Si un pays n'y est pas paramétré, le calcul
+     * REFUSE de s'exécuter : une déclaration absente se corrige, une
+     * déclaration fausse se découvre au contrôle.
+     */
+    private function calcCotisationsSociales(array $totals, Organization $org, Carbon $start, Carbon $end): array
     {
         $salaireBrut = $this->sumAccounts($totals, ['661', '663']);
-        // CNPS Côte d'Ivoire :
-        //   Employeur : Retraite 7,7% + Prestations familiales 5,75% + Accidents travail 2-5%
-        //   Salarié   : Retraite 6,3%
-        $patronale  = round($salaireBrut * 0.1545, 2); // 7,7 + 5,75 + 1%
-        $salariale  = round($salaireBrut * 0.063, 2);
+
+        $referentiel = app(\App\Services\PayrollRuleService::class);
+        $pays = $referentiel->paysDe($org);
+
+        // Lève une exception explicite si le pays n'est pas couvert.
+        $calcul = $referentiel->calculerCotisations($salaireBrut, $pays, $end);
 
         return [
-            'type'          => 'CNPS',
+            'type'          => 'COTISATIONS_SOCIALES',
+            'country'       => $pays,
+            'scheme'        => $calcul['scheme'],
             'period'        => ['start' => $start->toDateString(), 'end' => $end->toDateString()],
             'salaire_brut'  => $salaireBrut,
-            'cotisation_patronale'  => $patronale,
-            'cotisation_salariale'  => $salariale,
-            'total_a_verser'=> $patronale + $salariale,
-            'note'          => 'CNPS CI — taux 2026 : patronale 15,45%, salariale 6,3%',
+            'cotisation_patronale' => $calcul['employer'],
+            'cotisation_salariale' => $calcul['employee'],
+            'total_a_verser'=> $calcul['total'],
+            'branches'      => $calcul['branches'],
+            'is_verified'   => $calcul['is_verified'],
+            'note'          => $calcul['is_verified']
+                ? "Taux {$calcul['scheme']} ({$pays}) confirmés sur texte officiel."
+                : "⚠️ Taux {$calcul['scheme']} ({$pays}) NON confirmés sur texte officiel : "
+                  . "à vérifier avant dépôt de la déclaration.",
         ];
     }
 

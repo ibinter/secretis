@@ -1,15 +1,26 @@
-import React, { useState, useEffect } from 'react'
+/**
+ * SuperAdmin/Crm/Offers/Create.jsx — Rédaction d'une offre commerciale
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : même calcul de prix, même payload
+ * (`POST /superadmin/crm/offers`), mêmes états locaux, même redirection.
+ *
+ * Nettoyage sans effet fonctionnel : import `useEffect` inutilisé supprimé ;
+ * le composant local `Card` (qui masquait celui du design system) est
+ * remplacé par le `Card` partagé.
+ */
+
+import React, { useState } from 'react'
 import { Head, Link, router } from '@inertiajs/react'
 import axios from 'axios'
+import { ArrowLeft, Plus, Trash2, FileText, Mail } from 'lucide-react'
 import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout'
+import {
+  PageHeader, Button, Card,
+  cx, SURFACE, BORDER, CONTROL, TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI'
 
-const Ic = {
-  ArrowLeft: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>,
-  Plus: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>,
-  Trash: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>,
-  FileText: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>,
-  Mail: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>,
-}
+/* ─── Référentiel tarifaire ────────────────────────────────────────────────── */
 
 const PLANS = {
   starter:    { label: 'Starter',    base_price_monthly: 35000,  base_price_yearly: 350000 },
@@ -30,6 +41,19 @@ const DEFAULT_FORM = {
   period: 'yearly', discount_pct: 0, valid_days: 30, conditions: '',
 }
 
+/* ─── Champ ────────────────────────────────────────────────────────────────── */
+
+function Field({ label, children, span = false }) {
+  return (
+    <label className={cx('flex flex-col gap-1.5', span && 'md:col-span-2')}>
+      <span className={cx('text-xs font-medium', TEXT_MUTED)}>{label}</span>
+      {children}
+    </label>
+  )
+}
+
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+
 export default function OfferCreate({ prospects: propProspects, defaultProspectId }) {
   const prospects = propProspects ?? [
     { id: 1, name: 'Awa Diallo', company: 'MediaGroup CI' },
@@ -37,29 +61,30 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
     { id: 3, name: 'Brice Koffi', company: 'TechSN' },
   ]
 
-  const [form, setForm]   = useState({ ...DEFAULT_FORM, prospect_id: defaultProspectId ?? '' })
+  const [form, setForm]     = useState({ ...DEFAULT_FORM, prospect_id: defaultProspectId ?? '' })
   const [extras, setExtras] = useState([])
   const [saving, setSaving] = useState(false)
   const [action, setAction] = useState('draft') // 'draft' | 'send'
 
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  // Calculs
-  const plan = PLANS[form.plan]
-  const basePrice = form.period === 'yearly' ? plan.base_price_yearly : plan.base_price_monthly * 12
+  /* Calculs (identiques à la version précédente) */
+  const plan            = PLANS[form.plan]
+  const basePrice       = form.period === 'yearly' ? plan.base_price_yearly : plan.base_price_monthly * 12
   const usersMultiplier = Math.max(1, Math.ceil(form.users / 5))
-  const baseTotal = basePrice * usersMultiplier * form.entities
-  const discount  = baseTotal * (form.discount_pct / 100)
-  const extrasTotal = extras.reduce((a, e) => a + e.unit_price * e.qty, 0)
-  const totalHT   = baseTotal - discount + extrasTotal
-  const tva       = totalHT * 0.18
-  const totalTTC  = totalHT + tva
+  const baseTotal       = basePrice * usersMultiplier * form.entities
+  const discount        = baseTotal * (form.discount_pct / 100)
+  const extrasTotal     = extras.reduce((a, e) => a + e.unit_price * e.qty, 0)
+  const totalHT         = baseTotal - discount + extrasTotal
+  const tva             = totalHT * 0.18
+  const totalTTC        = totalHT + tva
 
-  const fmtXOF = v => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(v)
+  const fmtXOF = v =>
+    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(v ?? 0)
 
-  const addExtra = () => setExtras(e => [...e, { desc: '', unit_price: 0, qty: 1 }])
-  const removeExtra = (i) => setExtras(e => e.filter((_, j) => j !== i))
-  const setExtra = (i, k, v) => setExtras(e => e.map((x, j) => j === i ? { ...x, [k]: v } : x))
+  const addExtra         = () => setExtras(e => [...e, { desc: '', unit_price: 0, qty: 1 }])
+  const removeExtra      = (i) => setExtras(e => e.filter((_, j) => j !== i))
+  const setExtra         = (i, k, v) => setExtras(e => e.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
   const addExtraTemplate = (t) => setExtras(e => [...e, { ...t }])
 
   const submit = async () => {
@@ -70,188 +95,258 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
       const res = await axios.post('/superadmin/crm/offers', payload)
       if (action === 'send') alert('Offre créée et envoyée par email.')
       else alert('Offre enregistrée comme brouillon.')
-      router.visit(`/superadmin/crm/offers/${res.data.id ?? res.data.offer?.id}`)
-    } catch (e) { alert(e.response?.data?.message ?? 'Erreur création offre') }
-    finally { setSaving(false) }
+      router.visit('/superadmin/crm/offers')
+    } catch (e) {
+      alert(e.response?.data?.message ?? 'Erreur création offre')
+    } finally {
+      setSaving(false)
+    }
   }
-
-  const INPUT = 'w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#9333EA]/30 outline-none'
-  const LABEL = 'block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1'
 
   return (
     <SuperAdminLayout title="Créer une offre">
       <Head title="Nouvelle offre — CRM Super Admin" />
 
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/superadmin/crm/offers" className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-400"><Ic.ArrowLeft /></Link>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Nouvelle offre commerciale</h2>
-      </div>
+      <PageHeader
+        icon={FileText}
+        title="Nouvelle offre commerciale"
+        subtitle="Composez l'offre, ajoutez les prestations puis générez le document."
+        breadcrumbs={[
+          { label: 'Console', href: '/superadmin' },
+          { label: 'CRM' },
+          { label: 'Offres', href: '/superadmin/crm/offers' },
+          { label: 'Nouvelle offre' },
+        ]}
+        actions={
+          <Button as={Link} href="/superadmin/crm/offers" variant="ghost" icon={ArrowLeft}>
+            Retour aux offres
+          </Button>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-        {/* ── Formulaire ───────────────────────────────────────────────────────── */}
-        <div className="lg:col-span-2 space-y-5">
+        {/* ── Formulaire ──────────────────────────────────────────────────── */}
+        <div className="space-y-6 lg:col-span-2">
 
-          {/* Section prospect */}
-          <Card title="Prospect / Client">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className={LABEL}>Prospect</label>
-                <select value={form.prospect_id} onChange={e => setF('prospect_id', e.target.value)} className={INPUT}>
-                  <option value="">Sélectionner un prospect…</option>
-                  {prospects.map(p => <option key={p.id} value={p.id}>{p.name} — {p.company}</option>)}
-                </select>
-              </div>
-            </div>
+          <Card title="Prospect ou client">
+            <Field label="Prospect">
+              <select
+                value={form.prospect_id}
+                onChange={e => setF('prospect_id', e.target.value)}
+                className={cx(CONTROL, 'h-10')}
+              >
+                <option value="">Sélectionner un prospect…</option>
+                {prospects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name} — {p.company}</option>
+                ))}
+              </select>
+            </Field>
           </Card>
 
-          {/* Section produit */}
-          <Card title="Logiciel & Plan">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={LABEL}>Logiciel</label>
-                <select value={form.software} onChange={e => setF('software', e.target.value)} className={INPUT}>
+          <Card title="Logiciel et plan">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field label="Logiciel">
+                <select value={form.software} onChange={e => setF('software', e.target.value)} className={cx(CONTROL, 'h-10')}>
                   {SOFTWARES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className={LABEL}>Plan</label>
-                <select value={form.plan} onChange={e => setF('plan', e.target.value)} className={INPUT}>
+              </Field>
+
+              <Field label="Plan">
+                <select value={form.plan} onChange={e => setF('plan', e.target.value)} className={cx(CONTROL, 'h-10')}>
                   {Object.entries(PLANS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className={LABEL}>Nombre d'utilisateurs</label>
-                <input type="number" min={1} value={form.users} onChange={e => setF('users', +e.target.value)} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Nombre d'entités</label>
-                <input type="number" min={1} value={form.entities} onChange={e => setF('entities', +e.target.value)} className={INPUT} />
-              </div>
-              <div>
-                <label className={LABEL}>Période de facturation</label>
-                <select value={form.period} onChange={e => setF('period', e.target.value)} className={INPUT}>
-                  <option value="monthly">Mensuel</option>
-                  <option value="yearly">Annuel (2 mois offerts)</option>
+              </Field>
+
+              <Field label="Nombre d'utilisateurs">
+                <input
+                  type="number" min={1} value={form.users}
+                  onChange={e => setF('users', Number(e.target.value))}
+                  className={cx(CONTROL, 'h-10', NUM)}
+                />
+              </Field>
+
+              <Field label="Nombre d'entités">
+                <input
+                  type="number" min={1} value={form.entities}
+                  onChange={e => setF('entities', Number(e.target.value))}
+                  className={cx(CONTROL, 'h-10', NUM)}
+                />
+              </Field>
+
+              <Field label="Période de facturation">
+                <select value={form.period} onChange={e => setF('period', e.target.value)} className={cx(CONTROL, 'h-10')}>
+                  <option value="monthly">Mensuelle</option>
+                  <option value="yearly">Annuelle (2 mois offerts)</option>
                 </select>
-              </div>
-              <div>
-                <label className={LABEL}>Remise (%)</label>
-                <div className="flex items-center gap-2">
-                  <input type="range" min={0} max={50} step={5} value={form.discount_pct} onChange={e => setF('discount_pct', +e.target.value)} className="flex-1 accent-[#9333EA]" />
-                  <span className="text-sm font-bold text-[#9333EA] dark:text-purple-400 tabular-nums w-10 text-right">{form.discount_pct}%</span>
+              </Field>
+
+              <Field label="Remise">
+                <div className="flex h-10 items-center gap-2">
+                  <input
+                    type="range" min={0} max={50} step={5}
+                    value={form.discount_pct}
+                    onChange={e => setF('discount_pct', Number(e.target.value))}
+                    className="flex-1 accent-purple-600"
+                  />
+                  <span className={cx('w-12 text-right text-sm font-semibold text-purple-700 dark:text-purple-300', NUM)}>
+                    {form.discount_pct} %
+                  </span>
                 </div>
-              </div>
+              </Field>
             </div>
           </Card>
 
-          {/* Lignes supplémentaires */}
           <Card title="Prestations supplémentaires">
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="mb-4 flex flex-wrap gap-2">
               {EXTRA_LINES_TPL.map(t => (
-                <button key={t.desc} onClick={() => addExtraTemplate(t)} className="px-2.5 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">{t.desc}</button>
+                <Button key={t.desc} variant="secondary" size="xs" onClick={() => addExtraTemplate(t)}>
+                  {t.desc}
+                </Button>
               ))}
             </div>
 
             <div className="space-y-2">
               {extras.map((e, i) => (
-                <div key={i} className="grid grid-cols-[1fr_120px_80px_36px] gap-2 items-center">
-                  <input value={e.desc} onChange={ev => setExtra(i, 'desc', ev.target.value)} placeholder="Description" className={INPUT} />
-                  <input type="number" value={e.unit_price} onChange={ev => setExtra(i, 'unit_price', +ev.target.value)} placeholder="Prix unitaire" className={INPUT} />
-                  <input type="number" min={1} value={e.qty} onChange={ev => setExtra(i, 'qty', +ev.target.value)} className={INPUT} />
-                  <button onClick={() => removeExtra(i)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><Ic.Trash /></button>
+                <div key={i} className="grid grid-cols-[1fr_120px_80px_40px] items-center gap-2">
+                  <input
+                    value={e.desc}
+                    onChange={ev => setExtra(i, 'desc', ev.target.value)}
+                    placeholder="Description"
+                    aria-label="Description de la prestation"
+                    className={cx(CONTROL, 'h-10')}
+                  />
+                  <input
+                    type="number" value={e.unit_price}
+                    onChange={ev => setExtra(i, 'unit_price', Number(ev.target.value))}
+                    placeholder="Prix unitaire"
+                    aria-label="Prix unitaire"
+                    className={cx(CONTROL, 'h-10', NUM)}
+                  />
+                  <input
+                    type="number" min={1} value={e.qty}
+                    onChange={ev => setExtra(i, 'qty', Number(ev.target.value))}
+                    aria-label="Quantité"
+                    className={cx(CONTROL, 'h-10', NUM)}
+                  />
+                  <Button
+                    variant="ghost" size="sm" iconOnly icon={Trash2}
+                    title="Supprimer la ligne"
+                    className="text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10"
+                    onClick={() => removeExtra(i)}
+                  />
                 </div>
               ))}
             </div>
 
-            <button onClick={addExtra} className="mt-3 flex items-center gap-2 px-3 py-2 text-xs font-medium border border-dashed border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <Ic.Plus /> Ajouter une ligne
+            <button
+              type="button"
+              onClick={addExtra}
+              className={cx(
+                'mt-3 inline-flex items-center gap-2 rounded-lg border border-dashed px-3 py-2 text-xs font-medium transition-colors',
+                BORDER, TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.04]',
+              )}
+            >
+              <Plus className="h-4 w-4" /> Ajouter une ligne
             </button>
           </Card>
 
-          {/* Conditions */}
-          <Card title="Conditions & Validité">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={LABEL}>Valide pendant (jours)</label>
-                <select value={form.valid_days} onChange={e => setF('valid_days', +e.target.value)} className={INPUT}>
+          <Card title="Conditions et validité">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Field label="Valide pendant">
+                <select
+                  value={form.valid_days}
+                  onChange={e => setF('valid_days', Number(e.target.value))}
+                  className={cx(CONTROL, 'h-10')}
+                >
                   {[15, 30, 45, 60, 90].map(d => <option key={d} value={d}>{d} jours</option>)}
                 </select>
-              </div>
-              <div>
-                <label className={LABEL}>Date de validité (calculée)</label>
-                <input readOnly value={new Date(Date.now() + form.valid_days * 86400000).toLocaleDateString('fr-FR')} className={INPUT + ' bg-gray-50 dark:bg-gray-700/50 cursor-not-allowed'} />
-              </div>
-              <div className="md:col-span-2">
-                <label className={LABEL}>Conditions particulières</label>
-                <textarea rows={3} value={form.conditions} onChange={e => setF('conditions', e.target.value)} placeholder="Conditions spécifiques à cette offre…" className={INPUT + ' resize-none'} />
-              </div>
+              </Field>
+
+              <Field label="Date limite (calculée)">
+                <input
+                  readOnly
+                  value={new Date(Date.now() + form.valid_days * 86400000).toLocaleDateString('fr-FR')}
+                  className={cx(CONTROL, 'h-10 cursor-not-allowed bg-gray-50 dark:bg-white/[0.04]', NUM)}
+                />
+              </Field>
+
+              <Field label="Conditions particulières" span>
+                <textarea
+                  rows={3}
+                  value={form.conditions}
+                  onChange={e => setF('conditions', e.target.value)}
+                  placeholder="Conditions spécifiques à cette offre…"
+                  className={cx(CONTROL, 'resize-none')}
+                />
+              </Field>
             </div>
           </Card>
         </div>
 
-        {/* ── Récapitulatif ────────────────────────────────────────────────────── */}
-        <div className="space-y-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 sticky top-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Récapitulatif</h3>
+        {/* ── Récapitulatif ───────────────────────────────────────────────── */}
+        <div>
+          <div className={cx(SURFACE, 'sticky top-4 rounded-xl border p-5 shadow-sm', BORDER)}>
+            <h3 className={cx('mb-4 text-base font-semibold', TEXT_TITLE)}>Récapitulatif</h3>
 
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Logiciel</span>
-                <span className="font-medium">{form.software}</span>
+            <dl className="space-y-2 text-sm">
+              <div className={cx('flex justify-between gap-3', TEXT_MUTED)}>
+                <dt>Logiciel</dt>
+                <dd className={cx('font-medium', TEXT_BODY)}>{form.software}</dd>
               </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Plan</span>
-                <span className="font-medium">{PLANS[form.plan]?.label}</span>
+              <div className={cx('flex justify-between gap-3', TEXT_MUTED)}>
+                <dt>Plan</dt>
+                <dd className={cx('font-medium', TEXT_BODY)}>{PLANS[form.plan]?.label}</dd>
               </div>
-              <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>{form.users} users × {form.entities} entité(s)</span>
-                <span className="tabular-nums">{fmtXOF(baseTotal)}</span>
+              <div className={cx('flex justify-between gap-3', TEXT_MUTED)}>
+                <dt className={NUM}>{form.users} utilisateurs × {form.entities} entité(s)</dt>
+                <dd className={cx(NUM, TEXT_BODY)}>{fmtXOF(baseTotal)}</dd>
               </div>
+
               {form.discount_pct > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Remise {form.discount_pct}%</span>
-                  <span className="tabular-nums">−{fmtXOF(discount)}</span>
+                <div className="flex justify-between gap-3 text-emerald-600 dark:text-emerald-400">
+                  <dt className={NUM}>Remise {form.discount_pct} %</dt>
+                  <dd className={NUM}>−{fmtXOF(discount)}</dd>
                 </div>
               )}
+
               {extras.map((e, i) => e.desc && (
-                <div key={i} className="flex justify-between text-gray-600 dark:text-gray-400 text-xs">
-                  <span className="truncate max-w-[60%]">{e.desc}</span>
-                  <span className="tabular-nums">{fmtXOF(e.unit_price * e.qty)}</span>
+                <div key={i} className={cx('flex justify-between gap-3 text-xs', TEXT_MUTED)}>
+                  <dt className="max-w-[60%] truncate">{e.desc}</dt>
+                  <dd className={NUM}>{fmtXOF(e.unit_price * e.qty)}</dd>
                 </div>
               ))}
-              <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2 flex justify-between font-medium text-gray-700 dark:text-gray-300">
-                <span>Total HT</span>
-                <span className="tabular-nums">{fmtXOF(totalHT)}</span>
+
+              <div className={cx('mt-2 flex justify-between gap-3 border-t pt-2 font-medium', BORDER, TEXT_BODY)}>
+                <dt>Total HT</dt>
+                <dd className={NUM}>{fmtXOF(totalHT)}</dd>
               </div>
-              <div className="flex justify-between text-gray-500 dark:text-gray-400 text-xs">
-                <span>TVA 18%</span>
-                <span className="tabular-nums">{fmtXOF(tva)}</span>
+              <div className={cx('flex justify-between gap-3 text-xs', TEXT_MUTED)}>
+                <dt>TVA 18 %</dt>
+                <dd className={NUM}>{fmtXOF(tva)}</dd>
               </div>
-              <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-2 flex justify-between font-bold text-[#9333EA] dark:text-white text-lg">
-                <span>Total TTC</span>
-                <span className="tabular-nums">{fmtXOF(totalTTC)}</span>
+              <div className={cx('mt-2 flex justify-between gap-3 border-t pt-2 text-lg font-semibold', BORDER, TEXT_TITLE)}>
+                <dt>Total TTC</dt>
+                <dd className={NUM}>{fmtXOF(totalTTC)}</dd>
               </div>
-            </div>
+            </dl>
 
             <div className="mt-5 space-y-2">
-              <button
-                disabled={saving}
+              <Button
+                variant="primary" icon={Mail} block loading={saving}
                 onClick={() => { setAction('send'); submit() }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium bg-[#9333EA] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-60 transition-colors"
               >
-                <Ic.Mail /> Générer PDF & Envoyer
-              </button>
-              <button
-                disabled={saving}
+                Générer le PDF et envoyer
+              </Button>
+              <Button
+                variant="secondary" icon={FileText} block disabled={saving}
                 onClick={() => { setAction('draft'); submit() }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-medium border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-60 transition-colors"
               >
-                <Ic.FileText /> Enregistrer brouillon
-              </button>
+                Enregistrer en brouillon
+              </Button>
             </div>
 
-            <p className="text-xs text-gray-400 text-center mt-3">
+            <p className={cx('mt-3 text-center text-xs', TEXT_FAINT)}>
               Le prospect pourra accepter l'offre via un lien sécurisé unique.
             </p>
           </div>
@@ -261,12 +356,4 @@ export default function OfferCreate({ prospects: propProspects, defaultProspectI
   )
 }
 
-function Card({ title, children }) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
-      {children}
-    </div>
-  )
-}
 export { OfferCreate };

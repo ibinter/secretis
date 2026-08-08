@@ -47,18 +47,19 @@ class AgendaService
             $event = Event::create([
                 'organization_id' => $user->organization_id,
                 'calendar_id'     => $calendarId,
-                'creator_id'      => $user->id,
+                'created_by'      => $user->id,
                 'title'           => $data['title'],
                 'description'     => $data['description'] ?? null,
                 'location'        => $data['location'] ?? null,
-                'start_at'        => $data['start_at'],
-                'end_at'          => $data['end_at'],
-                'is_all_day'      => $data['is_all_day'] ?? false,
+                'start_at'        => $data['start_at'] ?? ($data['starts_at'] ?? null),
+                'end_at'          => $data['end_at'] ?? ($data['ends_at'] ?? null),
+                'starts_at'       => $data['start_at'] ?? ($data['starts_at'] ?? null),
+                'ends_at'         => $data['end_at'] ?? ($data['ends_at'] ?? null),
+                'all_day'         => $data['is_all_day'] ?? ($data['all_day'] ?? false),
                 'recurrence_rule' => $data['recurrence_rule'] ?? null,
                 'color'           => $data['color'] ?? null,
-                'type'            => $data['type'] ?? 'event',
-                'meet_link'       => $data['meet_link'] ?? null,
-                'reminders'       => $data['reminders'] ?? [],
+                'type'            => $data['type'] ?? 'meeting',
+                'metadata'        => ! empty($data['meet_link']) ? ['meet_link' => $data['meet_link']] : null,
             ]);
 
             // Ajouter le créateur comme organisateur

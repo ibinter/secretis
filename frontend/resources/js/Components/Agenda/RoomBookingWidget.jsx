@@ -4,6 +4,11 @@
  * Affiche les salles disponibles pour le créneau sélectionné,
  * avec leur capacité, équipements et statut (libre/occupé).
  *
+ * Présentation migrée sur le système de composants `@/Components/UI`
+ * (dark mode, tons sémantiques, icônes lucide-react au lieu des SVG inline).
+ * Logique métier inchangée : même requête `/api/rooms`, mêmes clés de cache,
+ * mêmes callbacks de sélection.
+ *
  * Props :
  *  - startAt   : string ISO 8601 — début du créneau
  *  - endAt     : string ISO 8601 — fin du créneau
@@ -16,33 +21,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { Users, MapPin, Check, Search, Loader2, DoorOpen, AlertTriangle } from 'lucide-react';
 import { AGENDA_KEYS } from '../../hooks/useAgenda';
-
-// -----------------------------------------------------------------------
-// Icônes inline SVG (évite la dépendance à une librairie d'icônes)
-// -----------------------------------------------------------------------
-
-const IconUsers = () => (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
-const IconMapPin = () => (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
-const IconCheck = () => (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
-);
+import {
+    Button, Badge, EmptyState,
+    cx, CONTROL, SURFACE, SURFACE_SUNK, BORDER,
+    TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING, TONES,
+} from '@/Components/UI';
 
 // -----------------------------------------------------------------------
 // Sous-composants
@@ -52,21 +37,9 @@ const IconCheck = () => (
  * Badge de statut d'une salle (libre / occupé).
  */
 function AvailabilityBadge({ available }) {
-    if (available) {
-        return (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                Libre
-            </span>
-        );
-    }
-
-    return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-600">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-            Occupée
-        </span>
-    );
+    return available
+        ? <Badge variant="success" dot>Libre</Badge>
+        : <Badge variant="danger" dot>Occupée</Badge>;
 }
 
 AvailabilityBadge.propTypes = {
@@ -98,25 +71,26 @@ function RoomCard({ room, isSelected, onSelect, disabled }) {
             aria-disabled={!isSelectable}
             onClick={handleClick}
             onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-            className={[
-                'relative p-3 rounded-lg border-2 transition-all duration-150 text-left w-full',
+            className={cx(
+                'relative w-full rounded-lg border p-3 text-left transition-colors',
+                FOCUS_RING,
                 isSelected
-                    ? 'border-purple-500 bg-purple-50 shadow-sm'
+                    ? 'border-purple-400 bg-purple-50 dark:border-purple-500/50 dark:bg-purple-500/10'
                     : isSelectable
-                        ? 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm cursor-pointer'
-                        : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed',
-            ].join(' ')}
+                        ? cx(BORDER, SURFACE, 'cursor-pointer hover:bg-gray-50 dark:hover:bg-white/[0.04]')
+                        : cx(BORDER, SURFACE_SUNK, 'cursor-not-allowed opacity-60'),
+            )}
         >
             {/* Indicateur de sélection */}
             {isSelected && (
-                <span className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white">
-                    <IconCheck />
+                <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-white">
+                    <Check className="h-3 w-3" aria-hidden="true" />
                 </span>
             )}
 
             {/* Nom et statut */}
-            <div className="flex items-start justify-between gap-2 mb-1.5 pr-6">
-                <h4 className="text-sm font-semibold text-gray-900 leading-tight">
+            <div className="mb-1.5 flex items-start justify-between gap-2 pr-6">
+                <h4 className={cx('text-sm font-medium leading-tight', TEXT_TITLE)}>
                     {room.name}
                 </h4>
                 <AvailabilityBadge available={isAvailable} />
@@ -124,33 +98,28 @@ function RoomCard({ room, isSelected, onSelect, disabled }) {
 
             {/* Localisation */}
             {room.location && (
-                <p className="flex items-center gap-1 text-xs text-gray-500 mb-1.5">
-                    <IconMapPin />
+                <p className={cx('mb-1.5 flex items-center gap-1.5 text-xs', TEXT_MUTED)}>
+                    <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     {room.location}
                 </p>
             )}
 
             {/* Capacité */}
-            <p className="flex items-center gap-1 text-xs text-gray-600 mb-2">
-                <IconUsers />
-                <span>{room.capacity} personne{room.capacity > 1 ? 's' : ''}</span>
+            <p className={cx('mb-2 flex items-center gap-1.5 text-xs', TEXT_BODY)}>
+                <Users className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className={NUM}>{room.capacity} personne{room.capacity > 1 ? 's' : ''}</span>
             </p>
 
             {/* Équipements */}
             {equipmentNames.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                     {equipmentNames.map((eq) => (
-                        <span
-                            key={eq}
-                            className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded"
-                        >
-                            {eq}
-                        </span>
+                        <Badge key={eq} variant="neutral" pill={false}>{eq}</Badge>
                     ))}
                     {room.equipment.length > 4 && (
-                        <span className="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-xs rounded">
+                        <Badge variant="neutral" pill={false} className={NUM}>
                             +{room.equipment.length - 4}
-                        </span>
+                        </Badge>
                     )}
                 </div>
             )}
@@ -235,8 +204,13 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
 
     if (disabled) {
         return (
-            <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-400">
-                Renseignez les dates et heures pour voir les salles disponibles.
+            <div className={cx('rounded-xl border border-dashed', BORDER)}>
+                <EmptyState
+                    compact
+                    icon={DoorOpen}
+                    title="Créneau à définir"
+                    description="Renseignez les dates et heures de l'événement pour voir les salles disponibles."
+                />
             </div>
         );
     }
@@ -244,62 +218,73 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
     return (
         <div className="space-y-3">
             {/* En-tête */}
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-700">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className={cx('text-sm font-medium', TEXT_TITLE)}>
                     Salles de réunion
                     {hasTimeSlot && (
-                        <span className="ml-1.5 text-xs text-gray-400 font-normal">
+                        <span className={cx('ml-1.5 text-xs font-normal', TEXT_MUTED)}>
                             (disponibilité pour le créneau sélectionné)
                         </span>
                     )}
                 </h3>
                 {selected && (
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="xs"
                         onClick={() => onChange(null)}
-                        className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                        className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                     >
                         Retirer la salle
-                    </button>
+                    </Button>
                 )}
             </div>
 
             {/* Barre de recherche */}
             {rooms.length > 4 && (
-                <input
-                    type="text"
-                    placeholder="Filtrer les salles..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="w-full text-sm px-3 py-1.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                <div className="relative">
+                    <Search className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
+                    <input
+                        type="text"
+                        placeholder="Filtrer les salles…"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                        aria-label="Filtrer les salles"
+                        className={cx(CONTROL, 'h-10 pl-9')}
+                    />
+                </div>
             )}
 
             {/* État chargement */}
             {isLoading && (
-                <div className="flex items-center justify-center py-6">
-                    <svg className="animate-spin h-5 w-5 text-purple-500" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    <span className="ml-2 text-sm text-gray-500">Chargement des salles…</span>
+                <div className="flex items-center justify-center gap-2 py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-purple-600 dark:text-purple-400" aria-hidden="true" />
+                    <span className={cx('text-sm', TEXT_MUTED)}>Chargement des salles…</span>
                 </div>
             )}
 
             {/* État erreur */}
             {isError && (
-                <div className="rounded-md bg-red-50 border border-red-200 p-3">
-                    <p className="text-sm text-red-600">
-                        Impossible de charger les salles.{' '}
-                        <button
+                <div className={cx(
+                    'flex items-start gap-2 rounded-lg border p-3 text-sm',
+                    TONES.danger.soft, TONES.danger.border, TONES.danger.text,
+                )}>
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    <div>
+                        <p>Impossible de charger les salles.</p>
+                        {error?.response?.data?.message && (
+                            <p className="mt-0.5 text-xs opacity-80">{error.response.data.message}</p>
+                        )}
+                        <Button
                             type="button"
+                            variant="ghost"
+                            size="xs"
                             onClick={() => refetch()}
-                            className="underline hover:no-underline"
+                            className="mt-1.5 text-red-700 dark:text-red-300"
                         >
                             Réessayer
-                        </button>
-                    </p>
+                        </Button>
+                    </div>
                 </div>
             )}
 
@@ -307,13 +292,24 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
             {!isLoading && !isError && (
                 <>
                     {filteredRooms.length === 0 ? (
-                        <p className="text-center text-sm text-gray-400 py-4">
-                            {filter
-                                ? 'Aucune salle ne correspond à votre recherche.'
-                                : 'Aucune salle disponible pour ce créneau.'}
-                        </p>
+                        <div className={cx('rounded-xl border border-dashed', BORDER)}>
+                            <EmptyState
+                                compact
+                                variant={filter ? 'no-results' : 'no-data'}
+                                icon={filter ? undefined : DoorOpen}
+                                title={filter ? 'Aucune salle ne correspond' : 'Aucune salle disponible'}
+                                description={filter
+                                    ? 'Aucune salle ne correspond à ce filtre. Essayez un autre nom ou emplacement.'
+                                    : 'Aucune salle n\'est libre sur ce créneau. Décalez l\'horaire ou tenez la réunion en visioconférence.'}
+                                secondary={filter
+                                    ? <Button type="button" variant="secondary" size="sm" onClick={() => setFilter('')}>
+                                          Effacer le filtre
+                                      </Button>
+                                    : undefined}
+                            />
+                        </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-2 max-h-72 overflow-y-auto pr-1">
+                        <div className="grid max-h-72 grid-cols-1 gap-2 overflow-y-auto pr-1">
                             {filteredRooms.map((room) => (
                                 <RoomCard
                                     key={room.id}
@@ -328,13 +324,16 @@ function RoomBookingWidget({ startAt, endAt, selected, onChange, disabled }) {
 
                     {/* Salle sélectionnée */}
                     {selected && (
-                        <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-md border border-purple-200 text-sm text-purple-700">
-                            <IconCheck />
+                        <div className={cx(
+                            'flex items-start gap-2 rounded-lg border p-3 text-sm',
+                            TONES.accent.soft, TONES.accent.border, TONES.accent.text,
+                        )}>
+                            <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                             <span>
-                                <strong>
+                                <strong className="font-semibold">
                                     {rooms.find((r) => r.id === selected)?.name ?? 'Salle'}
                                 </strong>{' '}
-                                sélectionnée — réservation confirmée à l'enregistrement.
+                                sélectionnée — la réservation sera confirmée à l'enregistrement.
                             </span>
                         </div>
                     )}

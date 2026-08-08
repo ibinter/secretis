@@ -9,6 +9,14 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  applyUpdate,
+  forceUpdate as forcerMiseAJour,
+  checkForUpdate,
+  getRegistration,
+  getBuildId,
+  EVENEMENTS,
+} from '@/pwa/registerServiceWorker';
 
 // ─── Communication avec le Service Worker ─────────────────────────────────────
 function swMessage(type, payload = {}) {
@@ -93,54 +101,53 @@ export function usePwa() {
     };
   }, []);
 
-  // ── Service Worker : enregistrement et mises à jour ───────────────────────
+  // ── Service Worker : cycle de vie ─────────────────────────────────────────
+  // L'ENREGISTREMENT lui-même appartient à `@/pwa/registerServiceWorker`, appelé
+  // une seule fois depuis app.jsx. Ce hook se contente d'observer son état — il
+  // est monté plusieurs fois (OfflineIndicator, UpdatePrompt, InstallBanner) et
+  // ne doit surtout pas déclencher d'effets de bord globaux comme un reload.
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-    let reloading = false;
-    const onControllerChange = () => {
-      if (!reloading) { reloading = true; window.location.reload(); }
-    };
     const onSwMessage = ({ data }) => {
-      const { type, data: payload, count } = data ?? {};
-      if (type === 'PENDING_COUNT')   setPendingSyncCount(count ?? 0);
-      if (type === 'action-queued')   refreshPendingCount();
-      if (type === 'action-synced')   refreshPendingCount();
-      if (type === 'sync-complete')   refreshPendingCount();
+      const { type, count } = data ?? {};
+      if (type === 'PENDING_COUNT') setPendingSyncCount(count ?? 0);
+      if (type === 'action-queued' || type === 'action-synced' || type === 'sync-complete') {
+        refreshPendingCount();
+      }
     };
 
-    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+    // Nouvelle version détectée par le module d'enregistrement.
+    const onUpdateAvailable = (event) => {
+      waitingWorkerRef.current = event?.detail?.worker ?? null;
+      setUpdateAvailable(true);
+    };
+
+    // Registration disponible (l'enregistrement vient d'aboutir).
+    const onRegistered = (event) => {
+      if (event?.detail?.registration) setRegistration(event.detail.registration);
+    };
+
     navigator.serviceWorker.addEventListener('message', onSwMessage);
+    window.addEventListener(EVENEMENTS.MAJ_DISPONIBLE, onUpdateAvailable);
+    window.addEventListener(EVENEMENTS.ENREGISTRE, onRegistered);
 
-    navigator.serviceWorker.ready.then((reg) => {
-      setRegistration(reg);
-
-      if (reg.waiting) {
-        waitingWorkerRef.current = reg.waiting;
+    // Si l'enregistrement a déjà eu lieu avant le montage du composant.
+    const dejaEnregistre = getRegistration();
+    if (dejaEnregistre) {
+      setRegistration(dejaEnregistre);
+      if (dejaEnregistre.waiting && navigator.serviceWorker.controller) {
+        waitingWorkerRef.current = dejaEnregistre.waiting;
         setUpdateAvailable(true);
       }
-
-      reg.addEventListener('updatefound', () => {
-        const nw = reg.installing;
-        if (!nw) return;
-        nw.addEventListener('statechange', () => {
-          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            waitingWorkerRef.current = nw;
-            setUpdateAvailable(true);
-          }
-        });
-      });
-
-      // Vérification périodique
-      const interval = setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
-      return () => clearInterval(interval);
-    }).catch(() => {});
+    }
 
     return () => {
-      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       navigator.serviceWorker.removeEventListener('message', onSwMessage);
+      window.removeEventListener(EVENEMENTS.MAJ_DISPONIBLE, onUpdateAvailable);
+      window.removeEventListener(EVENEMENTS.ENREGISTRE, onRegistered);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Réseau ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -184,12 +191,19 @@ export function usePwa() {
     }
   }, [installPrompt]);
 
-  /** Appliquer la mise à jour SW + recharger */
+  /** Appliquer la mise à jour SW + recharger (délégué au module d'enregistrement) */
   const updateApp = useCallback(() => {
-    const worker = waitingWorkerRef.current ?? navigator.serviceWorker?.controller;
-    if (worker) worker.postMessage({ type: 'SKIP_WAITING' });
-    else        window.location.reload();
+    applyUpdate();
   }, []);
+
+  /**
+   * Forcer la mise à jour : purge complète des caches et des Service Workers
+   * puis rechargement. Filet de sécurité si un cache périmé bloque l'application.
+   */
+  const forceUpdate = useCallback(() => forcerMiseAJour(), []);
+
+  /** Demander au navigateur de vérifier immédiatement s'il existe une nouvelle version */
+  const checkUpdate = useCallback(() => checkForUpdate(), []);
 
   /** Demander permission push + s'abonner via VAPID */
   const requestPushPermission = useCallback(async () => {
@@ -266,6 +280,9 @@ export function usePwa() {
     updateAvailable,
     registration,
     updateApp,
+    forceUpdate,
+    checkUpdate,
+    buildId: getBuildId(),
 
     // Réseau
     isOnline,

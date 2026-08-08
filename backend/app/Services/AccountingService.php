@@ -375,7 +375,7 @@ class AccountingService
         $revenueByMonth = Invoice::forOrg($orgId)
             ->where('status', 'paid')
             ->where('issue_date', '>=', now()->subMonths(11)->startOfMonth()->toDateString())
-            ->selectRaw("DATE_FORMAT(issue_date, '%Y-%m') as month, SUM(total) as revenue")
+            ->selectRaw("to_char(issue_date, 'YYYY-MM') as month, SUM(total) as revenue")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -384,9 +384,13 @@ class AccountingService
             ->toArray();
 
         // Top 5 clients
-        $topClients = Invoice::forOrg($orgId)
-            ->whereBetween('issue_date', [$start->toDateString(), $end->toDateString()])
-            ->whereNotIn('status', ['draft', 'cancelled'])
+        // Colonnes qualifiées : invoices ET accounting_clients ont toutes deux
+        // organization_id / status / issue_date → sans préfixe, PostgreSQL renvoie
+        // « column reference is ambiguous » (500 sur tout écran chargeant ce tableau de bord).
+        $topClients = Invoice::query()
+            ->where('invoices.organization_id', $orgId)
+            ->whereBetween('invoices.issue_date', [$start->toDateString(), $end->toDateString()])
+            ->whereNotIn('invoices.status', ['draft', 'cancelled'])
             ->join('accounting_clients', 'accounting_clients.id', '=', 'invoices.client_id')
             ->selectRaw('accounting_clients.name, SUM(invoices.total) as total_billed, COUNT(invoices.id) as invoice_count')
             ->groupBy('accounting_clients.id', 'accounting_clients.name')

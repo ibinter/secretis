@@ -155,8 +155,53 @@ class CurrencyService
      */
     public function getOrganizationCurrency(Organization $org): string
     {
-        return $org->organizationCurrency?->primary_currency
-            ?? config('app.default_currency', 'XOF');
+        if ($choisie = $org->organizationCurrency?->primary_currency) {
+            return $choisie;
+        }
+
+        // SECRETIS n'est pas déployé dans un seul pays : à défaut de devise
+        // explicitement paramétrée, on la DÉDUIT du pays de l'organisation
+        // (la table `currencies` porte la liste des pays de chaque devise).
+        // Sans cela, une organisation camerounaise ou sénégalaise se voyait
+        // imposer le XOF par défaut, y compris en zone XAF ou hors OHADA.
+        if ($pays = $org->country) {
+            $devise = $this->currencyForCountry($pays);
+
+            if ($devise) {
+                return $devise;
+            }
+        }
+
+        return config('app.default_currency', 'XOF');
+    }
+
+    /**
+     * Devise en vigueur dans un pays (code ISO 3166-1 alpha-2).
+     * Renvoie `null` si le pays n'est pas couvert par le référentiel.
+     */
+    public function currencyForCountry(string $codePays): ?string
+    {
+        $codePays = strtoupper(trim($codePays));
+
+        $table = Cache::remember('currency_by_country', self::CACHE_TTL, function () {
+            $index = [];
+
+            foreach (Currency::where('is_active', true)->get(['code', 'countries', 'is_default_for_region']) as $devise) {
+                foreach ((array) ($devise->countries ?? []) as $pays) {
+                    $pays = strtoupper($pays);
+
+                    // Un pays peut apparaître dans plusieurs devises : celle
+                    // marquée par défaut pour sa région l'emporte.
+                    if (! isset($index[$pays]) || $devise->is_default_for_region) {
+                        $index[$pays] = $devise->code;
+                    }
+                }
+            }
+
+            return $index;
+        });
+
+        return $table[$codePays] ?? null;
     }
 
     /**

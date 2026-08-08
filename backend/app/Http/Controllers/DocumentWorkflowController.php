@@ -256,4 +256,18 @@ class DocumentWorkflowController extends Controller
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
+
+    // Inertia pages for web routes
+    public function myQueue(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('GED/DocumentValidation', ['queue' => []]);
+    }
+
+    public function templates(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $result    = $this->indexTemplates($request);
+        $templates = $result instanceof \Illuminate\Http\JsonResponse ? ($result->getData(true)["data"] ?? []) : [];
+        return \Inertia\Inertia::render("GED/WorkflowTemplates", ["templates" => $templates]);
+    }
+
 }

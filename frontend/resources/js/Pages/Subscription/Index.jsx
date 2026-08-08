@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ──────────────────────────────────────────────────────────────────
 const Icon = {
@@ -148,7 +149,7 @@ export default function SubscriptionIndex({
   const totalDays = (license?.quantity_months ?? 1) * 30;
 
   return (
-    <>
+    <AppLayout>
       <Head title="Mon abonnement — SECRETIS ERP" />
 
       <div className="min-h-screen bg-gray-50">
@@ -349,7 +350,7 @@ export default function SubscriptionIndex({
 
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { SubscriptionIndex };

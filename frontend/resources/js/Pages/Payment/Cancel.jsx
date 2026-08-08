@@ -5,13 +5,14 @@
 
 import React from 'react';
 import { Head, router } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 export default function PaymentCancel({ ref: propRef }) {
   const urlParams = new URLSearchParams(window.location.search);
   const ref = urlParams.get('ref') || propRef;
 
   return (
-    <>
+    <AppLayout>
       <Head title="Paiement annulé — SECRETIS" />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 flex items-center justify-center p-4">
@@ -83,7 +84,7 @@ export default function PaymentCancel({ ref: propRef }) {
           </p>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { PaymentCancel };

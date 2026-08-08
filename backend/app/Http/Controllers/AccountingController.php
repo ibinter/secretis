@@ -44,6 +44,11 @@ class AccountingController extends Controller
     // DASHBOARD
     // =========================================================================
 
+    public function index(Request $request): InertiaResponse
+    {
+        return $this->dashboard($request);
+    }
+
     public function dashboard(Request $request): InertiaResponse
     {
         $user  = Auth::user();
@@ -442,6 +447,101 @@ class AccountingController extends Controller
         ], 201);
     }
 
+    public function quotesCreate(): InertiaResponse
+    {
+        $user    = Auth::user();
+        $clients = AccountingClient::forOrg($user->organization_id)->active()->orderBy('name')->get(['id', 'name', 'email', 'tax_number']);
+
+        return Inertia::render('Comptabilite/QuoteForm', [
+            'clients'    => $clients,
+            'quote'      => null,
+            'defaultTax' => 18.0,
+        ]);
+    }
+
+    public function quotesEdit(int $id): InertiaResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)
+            ->with(['client', 'items'])
+            ->findOrFail($id);
+        $clients = AccountingClient::forOrg($user->organization_id)->active()->orderBy('name')->get(['id', 'name', 'email', 'tax_number']);
+
+        return Inertia::render('Comptabilite/QuoteForm', [
+            'clients'    => $clients,
+            'quote'      => $quote,
+            'defaultTax' => 18.0,
+        ]);
+    }
+
+    public function quotesUpdate(Request $request, int $id): JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)->findOrFail($id);
+
+        if ($quote->status !== 'draft') {
+            return response()->json(['message' => 'Seuls les devis en brouillon peuvent être modifiés.'], 422);
+        }
+
+        $data = $request->validate([
+            'client_id'   => 'required|exists:accounting_clients,id',
+            'title'       => 'required|string|max:255',
+            'issue_date'  => 'required|date',
+            'valid_until' => 'nullable|date|after_or_equal:issue_date',
+            'tax_rate'    => 'nullable|numeric|min:0|max:100',
+            'notes'       => 'nullable|string',
+            'terms'       => 'nullable|string',
+            'items'       => 'required|array|min:1',
+            'items.*.description' => 'required|string|max:500',
+            'items.*.quantity'    => 'required|numeric|min:0.001',
+            'items.*.unit_price'  => 'required|numeric|min:0',
+        ]);
+
+        $taxRate  = (float) ($data['tax_rate'] ?? 18.0);
+        $items    = $data['items'];
+        $subtotal = collect($items)->sum(fn($i) => (float) $i['quantity'] * (float) $i['unit_price']);
+        $taxAmt   = round($subtotal * $taxRate / 100, 2);
+
+        $quote->update([
+            'client_id'   => $data['client_id'],
+            'title'       => $data['title'],
+            'issue_date'  => $data['issue_date'],
+            'valid_until' => $data['valid_until'] ?? null,
+            'subtotal'    => $subtotal,
+            'tax_rate'    => $taxRate,
+            'tax_amount'  => $taxAmt,
+            'total'       => round($subtotal + $taxAmt, 2),
+            'notes'       => $data['notes'] ?? null,
+            'terms'       => $data['terms'] ?? null,
+        ]);
+
+        $quote->items()->delete();
+        foreach ($items as $i => $item) {
+            $quote->items()->create([
+                'description' => $item['description'],
+                'quantity'    => $item['quantity'],
+                'unit_price'  => $item['unit_price'],
+                'total'       => round((float) $item['quantity'] * (float) $item['unit_price'], 2),
+                'sort_order'  => $i,
+            ]);
+        }
+
+        $this->audit->logUpdated('accounting', 'quote', $quote->id, [], [
+            'quote_number' => $quote->quote_number,
+        ]);
+
+        $quote->load(['client', 'items']);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Devis mis à jour.',
+                'quote'   => $quote,
+            ]);
+        }
+
+        return redirect('/comptabilite/devis')->with('success', 'Devis mis à jour.');
+    }
+
     /**
      * GET /quotes/{id}/pdf — Télécharge le PDF du devis.
      */
@@ -610,6 +710,33 @@ class AccountingController extends Controller
             'Content-Type'        => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
+    }
+
+    // =========================================================================
+    // ALIAS (câblage frontend Comptabilité)
+    // =========================================================================
+
+    /**
+     * POST /comptabilite/devis/{id}/send — Envoie le devis par email.
+     * Alias : délègue vers AccountingService::sendQuoteByEmail().
+     */
+    public function quotesSend(int $id): JsonResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)->findOrFail($id);
+
+        $this->accounting->sendQuoteByEmail($quote);
+
+        return response()->json(['message' => "Devis {$quote->quote_number} envoyé par email."]);
+    }
+
+    /**
+     * POST /comptabilite/factures/{id}/remind — Relance de paiement.
+     * Alias : délègue vers invoicesSend() (renvoi de la facture par email).
+     */
+    public function invoicesRemind(int $id): JsonResponse
+    {
+        return $this->invoicesSend($id);
     }
 
     /**

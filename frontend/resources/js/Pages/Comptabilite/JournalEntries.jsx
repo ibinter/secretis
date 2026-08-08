@@ -6,37 +6,32 @@
  *   fiscalYears  : exercices fiscaux disponibles
  *   chartAccounts: plan comptable (comptes feuilles)
  *   filters      : filtres actifs
+ *
+ * Présentation migrée sur `@/Components/UI` + socle comptable partagé.
+ * Aucun calcul modifié : l'équilibre Débit/Crédit et le payload envoyé à
+ * `/comptabilite/journal` sont strictement identiques.
  */
 
-import { Head, router, usePage } from '@inertiajs/react';
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useState, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   PlusIcon, CheckIcon, TrashIcon, LockClosedIcon,
-  LockOpenIcon, MagnifyingGlassIcon, FunnelIcon,
-  DocumentTextIcon, ArrowDownTrayIcon,
+  LockOpenIcon, XMarkIcon, BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import AuthLayout from '@/Layouts/AuthLayout';
-
-// ============================================================
-// Constantes
-// ============================================================
-const JOURNAL_TYPES = [
-  { value: 'OD', label: 'Opérations diverses' },
-  { value: 'VE', label: 'Ventes' },
-  { value: 'AC', label: 'Achats' },
-  { value: 'BQ', label: 'Banque' },
-  { value: 'SA', label: 'Salaires' },
-  { value: 'CA', label: 'Caisse' },
-  { value: 'AN', label: 'À-nouveaux' },
-];
-
-const fcfa = (v) =>
-  v == null ? '—' :
-  new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(v)) + ' FCFA';
+import {
+  PageHeader, Button, Badge, Card, DataTable, EmptyState,
+  cx, CONTROL, SURFACE, BORDER, SURFACE_SUNK,
+  TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI';
+import {
+  money, JournalBadge, JOURNAL_TYPES, statusMeta,
+  TABLE_HEAD, TH_CELL, TFOOT,
+} from '@/Components/Comptabilite/accounting';
 
 const emptyLine = () => ({
   account_number: '',
@@ -76,7 +71,7 @@ function AccountCombobox({ value, onChange, accounts, placeholder = 'N° compte'
   return (
     <div className="relative" ref={ref}>
       <input
-        className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-purple-500 outline-none"
+        className={cx(CONTROL, 'h-9')}
         value={search}
         placeholder={placeholder}
         onChange={e => { setSearch(e.target.value); onChange(e.target.value); setOpen(true); }}
@@ -84,15 +79,20 @@ function AccountCombobox({ value, onChange, accounts, placeholder = 'N° compte'
         onBlur={() => setTimeout(() => setOpen(false), 180)}
       />
       {open && filtered.length > 0 && (
-        <ul className="absolute z-50 left-0 right-0 top-full mt-0.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-52 overflow-auto text-sm">
+        <ul className={cx(
+          'absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-auto rounded-lg border shadow-lg',
+          BORDER, SURFACE, 'text-sm',
+        )}>
           {filtered.map(acc => (
             <li
               key={acc.account_number}
-              className="px-3 py-1.5 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/30 flex gap-2"
+              className="flex cursor-pointer gap-2 px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-white/[0.05]"
               onMouseDown={() => select(acc)}
             >
-              <span className="font-mono text-purple-700 dark:text-purple-400 w-14 shrink-0">{acc.account_number}</span>
-              <span className="text-gray-700 dark:text-gray-300 truncate">{acc.account_name}</span>
+              <span className="w-14 shrink-0 font-mono text-xs font-semibold text-purple-700 dark:text-purple-400">
+                {acc.account_number}
+              </span>
+              <span className={cx('truncate', TEXT_TITLE)}>{acc.account_name}</span>
             </li>
           ))}
         </ul>
@@ -150,7 +150,7 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
 
     setSaving(true);
     try {
-      await axios.post('/comptabilite/generale/journal', payload);
+      await axios.post('/comptabilite/journal', payload);
       toast.success('Écriture créée');
       onSaved?.();
       onClose?.();
@@ -162,35 +162,51 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-10 px-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-        <form onSubmit={handleSubmit}>
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Nouvelle écriture comptable
-            </h2>
-            <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl font-bold">×</button>
-          </div>
-
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/50 p-4 pt-10 backdrop-blur-sm dark:bg-black/60">
+      <form onSubmit={handleSubmit} className="w-full max-w-5xl">
+        <Card
+          padded={false}
+          className="shadow-xl max-h-[88vh] overflow-y-auto"
+          title="Nouvelle écriture comptable"
+          subtitle="Une écriture n'est enregistrable que si le total débit égale le total crédit."
+          actions={
+            <Button variant="ghost" size="sm" iconOnly icon={XMarkIcon}
+                    title="Fermer" onClick={onClose} />
+          }
+          footer={
+            <div className="flex items-center justify-between gap-3">
+              <Badge variant={balanced ? 'success' : 'danger'} size="md" icon={balanced ? CheckIcon : undefined}>
+                {balanced ? 'Écriture équilibrée' : `Écart ${money(Math.abs(totalDebit - totalCredit))}`}
+              </Badge>
+              <div className="flex gap-2">
+                <Button type="button" variant="secondary" onClick={onClose}>Annuler</Button>
+                <Button type="submit" variant="primary" loading={saving} disabled={!balanced}>
+                  Enregistrer l'écriture
+                </Button>
+              </div>
+            </div>
+          }
+        >
           {/* En-tête écriture */}
-          <div className="px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="label-sm">Date</label>
-              <input type="date" className="input-sm" value={form.entry_date}
-                onChange={e => setField('entry_date', e.target.value)} required />
-            </div>
-            <div>
-              <label className="label-sm">Journal</label>
-              <select className="input-sm" value={form.journal_type}
-                onChange={e => setField('journal_type', e.target.value)}>
-                {JOURNAL_TYPES.map(j => <option key={j.value} value={j.value}>{j.value} – {j.label}</option>)}
+          <div className="grid grid-cols-2 gap-4 px-4 py-4 sm:px-6 md:grid-cols-4">
+            <label className="flex flex-col gap-1.5">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Date</span>
+              <input type="date" className={cx(CONTROL, 'h-10')} value={form.entry_date}
+                     onChange={e => setField('entry_date', e.target.value)} required />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Journal</span>
+              <select className={cx(CONTROL, 'h-10')} value={form.journal_type}
+                      onChange={e => setField('journal_type', e.target.value)}>
+                {JOURNAL_TYPES.map(j => (
+                  <option key={j.value} value={j.value}>{j.value} – {j.label}</option>
+                ))}
               </select>
-            </div>
-            <div>
-              <label className="label-sm">Exercice</label>
-              <select className="input-sm" value={form.fiscal_year_id}
-                onChange={e => setField('fiscal_year_id', e.target.value)}>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Exercice</span>
+              <select className={cx(CONTROL, 'h-10')} value={form.fiscal_year_id}
+                      onChange={e => setField('fiscal_year_id', e.target.value)}>
                 <option value="">Sans exercice</option>
                 {fiscalYears.map(fy => (
                   <option key={fy.id} value={fy.id} disabled={fy.status === 'closed'}>
@@ -198,82 +214,85 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <label className="label-sm">Référence pièce</label>
-              <input type="text" className="input-sm" placeholder="FAC-2026-001…"
-                value={form.reference} onChange={e => setField('reference', e.target.value)} />
-            </div>
-            <div className="col-span-2 md:col-span-4">
-              <label className="label-sm">Libellé de l'écriture *</label>
-              <input type="text" className="input-sm" required
-                placeholder="Ex : Règlement facture client XYZ…"
-                value={form.description} onChange={e => setField('description', e.target.value)} />
-            </div>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Référence pièce</span>
+              <input type="text" className={cx(CONTROL, 'h-10')} placeholder="FAC-2026-001…"
+                     value={form.reference} onChange={e => setField('reference', e.target.value)} />
+            </label>
+            <label className="col-span-2 flex flex-col gap-1.5 md:col-span-4">
+              <span className={cx('text-xs font-medium', TEXT_MUTED)}>Libellé de l'écriture *</span>
+              <input type="text" className={cx(CONTROL, 'h-10')} required
+                     placeholder="Ex : Règlement facture client XYZ…"
+                     value={form.description} onChange={e => setField('description', e.target.value)} />
+            </label>
           </div>
 
           {/* Lignes d'écriture */}
-          <div className="px-6">
-            <div className="overflow-x-auto rounded border border-gray-200 dark:border-gray-700">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400">
+          <div className="px-4 pb-4 sm:px-6">
+            <div className={cx('overflow-x-auto rounded-lg border', BORDER)}>
+              <table className="w-full border-collapse text-sm">
+                <thead className={TABLE_HEAD}>
                   <tr>
-                    <th className="px-2 py-2 text-left w-40">Compte</th>
-                    <th className="px-2 py-2 text-left">Libellé ligne</th>
-                    <th className="px-2 py-2 text-right w-32">Débit</th>
-                    <th className="px-2 py-2 text-right w-32">Crédit</th>
-                    <th className="px-2 py-2 w-24">Analytique</th>
-                    <th className="px-2 py-2 w-8"></th>
+                    <th scope="col" className={cx(TH_CELL, 'text-left w-44')}>Compte</th>
+                    <th scope="col" className={cx(TH_CELL, 'text-left')}>Libellé ligne</th>
+                    <th scope="col" className={cx(TH_CELL, 'text-right w-36')}>Débit</th>
+                    <th scope="col" className={cx(TH_CELL, 'text-right w-36')}>Crédit</th>
+                    <th scope="col" className={cx(TH_CELL, 'text-left w-28')}>Analytique</th>
+                    <th scope="col" className={cx(TH_CELL, 'w-12')}><span className="sr-only">Retirer</span></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+
+                <tbody className="divide-y divide-gray-100 dark:divide-[#1E3048]">
                   {form.lines.map((line, idx) => (
-                    <tr key={line._key} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-2 py-1.5">
+                    <tr key={line._key}>
+                      <td className="px-2 py-2">
                         <AccountCombobox
                           accounts={accounts}
                           value={line.account_number}
                           onChange={v => setLine(idx, 'account_number', v)}
                         />
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-2">
                         <input
-                          className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
+                          className={cx(CONTROL, 'h-9')}
                           placeholder="Libellé…"
                           value={line.description}
                           onChange={e => setLine(idx, 'description', e.target.value)}
                         />
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-2">
                         <input
                           type="number" step="0.01" min="0"
-                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
+                          className={cx(CONTROL, 'h-9 text-right tabular-nums')}
                           value={line.debit_amount}
                           onChange={e => setLine(idx, 'debit_amount', e.target.value)}
                         />
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-2">
                         <input
                           type="number" step="0.01" min="0"
-                          className="w-full text-sm text-right border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none focus:ring-1 focus:ring-purple-500"
+                          className={cx(CONTROL, 'h-9 text-right tabular-nums')}
                           value={line.credit_amount}
                           onChange={e => setLine(idx, 'credit_amount', e.target.value)}
                         />
                       </td>
-                      <td className="px-2 py-1.5">
+                      <td className="px-2 py-2">
                         <input
-                          className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 outline-none"
+                          className={cx(CONTROL, 'h-9')}
                           placeholder="CC-01…"
                           value={line.analytic_code}
                           onChange={e => setLine(idx, 'analytic_code', e.target.value)}
                         />
                       </td>
-                      <td className="px-2 py-1.5 text-center">
+                      <td className="px-2 py-2 text-center">
                         {form.lines.length > 2 && (
-                          <button type="button" onClick={() => removeLine(idx)}
-                            className="text-red-400 hover:text-red-600">
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                          <Button
+                            type="button" variant="ghost" size="sm" iconOnly icon={TrashIcon}
+                            title="Retirer la ligne"
+                            className="hover:text-red-600 dark:hover:text-red-400"
+                            onClick={() => removeLine(idx)}
+                          />
                         )}
                       </td>
                     </tr>
@@ -281,43 +300,32 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
                 </tbody>
 
                 {/* Totaux */}
-                <tfoot className="bg-gray-50 dark:bg-gray-800 font-semibold text-sm">
+                <tfoot className={TFOOT}>
                   <tr>
-                    <td className="px-2 py-2 text-gray-500 dark:text-gray-400" colSpan={2}>Totaux</td>
-                    <td className="px-2 py-2 text-right font-mono">{fcfa(totalDebit)}</td>
-                    <td className="px-2 py-2 text-right font-mono">{fcfa(totalCredit)}</td>
-                    <td colSpan={2} className="px-2 py-2 text-center">
-                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${
-                        balanced
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                      }`}>
-                        {balanced ? <CheckIcon className="w-3.5 h-3.5" /> : '≠'}
-                        {balanced ? 'Équilibrée' : `Écart ${fcfa(Math.abs(totalDebit - totalCredit))}`}
-                      </span>
+                    <td className={cx('px-4 py-3 text-xs uppercase tracking-wider', TEXT_MUTED)} colSpan={2}>
+                      Totaux
+                    </td>
+                    <td className={cx('px-4 py-3 text-right whitespace-nowrap', NUM)}>{money(totalDebit)}</td>
+                    <td className={cx('px-4 py-3 text-right whitespace-nowrap', NUM)}>{money(totalCredit)}</td>
+                    <td colSpan={2} className="px-4 py-3 text-center">
+                      <Badge variant={balanced ? 'success' : 'danger'} icon={balanced ? CheckIcon : undefined}>
+                        {balanced ? 'Équilibrée' : 'Déséquilibrée'}
+                      </Badge>
                     </td>
                   </tr>
                 </tfoot>
               </table>
             </div>
 
-            <button type="button" onClick={addLine}
-              className="mt-2 text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
-              <PlusIcon className="w-4 h-4" /> Ajouter une ligne
-            </button>
+            <Button
+              type="button" variant="subtle" size="sm" icon={PlusIcon}
+              className="mt-3" onClick={addLine}
+            >
+              Ajouter une ligne
+            </Button>
           </div>
-
-          {/* Actions */}
-          <div className="px-6 py-4 mt-2 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
-            <button type="button" onClick={onClose}
-              className="btn-secondary">Annuler</button>
-            <button type="submit" disabled={saving || !balanced}
-              className="btn-primary flex items-center gap-2">
-              {saving ? 'Enregistrement…' : 'Enregistrer l\'écriture'}
-            </button>
-          </div>
-        </form>
-      </div>
+        </Card>
+      </form>
     </div>
   );
 }
@@ -327,11 +335,10 @@ function JournalForm({ accounts, fiscalYears, onClose, onSaved }) {
 // ============================================================
 export default function JournalEntries({ entries, fiscalYears, chartAccounts, filters }) {
   const [showForm, setShowForm]   = useState(false);
-  const [filterOpen, setFilterOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters || {});
 
   const applyFilters = () => {
-    router.get('/comptabilite/generale/journal', localFilters, { preserveState: true });
+    router.get('/comptabilite/journal', localFilters, { preserveState: true });
   };
 
   const handleSaved = () => {
@@ -341,7 +348,7 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
   const handleValidate = async (id) => {
     if (!confirm('Valider et verrouiller cette écriture ?')) return;
     try {
-      await axios.post(`/comptabilite/generale/journal/${id}/validate`);
+      await axios.post(`/comptabilite/journal/${id}/validate`);
       toast.success('Écriture validée');
       router.reload({ only: ['entries'] });
     } catch (err) {
@@ -352,7 +359,7 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
   const handleDelete = async (id) => {
     if (!confirm('Supprimer cette écriture ?')) return;
     try {
-      await axios.delete(`/comptabilite/generale/journal/${id}`);
+      await axios.delete(`/comptabilite/journal/${id}`);
       toast.success('Écriture supprimée');
       router.reload({ only: ['entries'] });
     } catch (err) {
@@ -360,154 +367,210 @@ export default function JournalEntries({ entries, fiscalYears, chartAccounts, fi
     }
   };
 
-  const journalBadge = (type) => {
-    const colors = {
-      VE: 'bg-green-100 text-green-700',
-      AC: 'bg-orange-100 text-orange-700',
-      BQ: 'bg-purple-100 text-purple-700',
-      SA: 'bg-purple-100 text-purple-700',
-      CA: 'bg-yellow-100 text-yellow-700',
-      OD: 'bg-gray-100 text-gray-600',
-      AN: 'bg-indigo-100 text-indigo-700',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-600';
+  const isFiltered = Boolean(
+    filters?.journal_type || filters?.date_from || filters?.date_to ||
+    (filters?.locked !== undefined && filters?.locked !== ''),
+  );
+
+  const resetFilters = () => {
+    setLocalFilters({});
+    router.get('/comptabilite/journal', {}, { preserveState: true });
   };
+
+  /* ─── Colonnes ───────────────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'entry_number',
+      label: 'N° Écriture',
+      nowrap: true,
+      width: '160px',
+      render: (v) => (
+        <span className="font-mono text-xs font-semibold text-purple-700 dark:text-purple-400">{v}</span>
+      ),
+    },
+    {
+      key: 'entry_date',
+      label: 'Date',
+      nowrap: true,
+      render: (v) => (
+        <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+          {format(new Date(v), 'dd/MM/yyyy', { locale: fr })}
+        </span>
+      ),
+    },
+    {
+      key: 'journal_type',
+      label: 'Journal',
+      align: 'center',
+      width: '90px',
+      render: (v) => <JournalBadge type={v} />,
+    },
+    {
+      key: 'description',
+      label: 'Libellé',
+      render: (v) => (
+        <span className={cx('block max-w-xs truncate font-medium', TEXT_TITLE)}>{v}</span>
+      ),
+    },
+    {
+      key: 'reference',
+      label: 'Référence',
+      render: (v) => v
+        ? <span className={cx('text-xs', TEXT_MUTED)}>{v}</span>
+        : <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'lines_count',
+      label: 'Lignes',
+      numeric: true,
+      width: '90px',
+      render: (v) => <span className={TEXT_MUTED}>{v}</span>,
+    },
+    {
+      key: 'is_locked',
+      label: 'Statut',
+      nowrap: true,
+      render: (v) => {
+        const { label, tone } = statusMeta('entry', v ? 'locked' : 'draft');
+        return (
+          <Badge variant={tone} icon={v ? LockClosedIcon : LockOpenIcon}>{label}</Badge>
+        );
+      },
+    },
+  ];
 
   return (
     <AuthLayout>
       <Head title="Journal comptable SYSCOHADA" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Journal comptable</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">SYSCOHADA Révisé 2017</p>
-          </div>
-          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
-            <PlusIcon className="w-5 h-5" /> Nouvelle écriture
-          </button>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+        <PageHeader
+          icon={BookOpenIcon}
+          title="Journal comptable"
+          breadcrumbs={[{ label: 'Comptabilité', href: '/comptabilite' }, { label: 'Journal' }]}
+          subtitle="SYSCOHADA Révisé 2017 — montants en FCFA (XOF)"
+          actions={
+            <Button variant="primary" icon={PlusIcon} onClick={() => setShowForm(true)}>
+              Nouvelle écriture
+            </Button>
+          }
+        />
 
         {/* Filtres */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <select className="input-sm" value={localFilters.journal_type || ''}
-              onChange={e => setLocalFilters(f => ({ ...f, journal_type: e.target.value }))}>
-              <option value="">Tous les journaux</option>
-              {JOURNAL_TYPES.map(j => <option key={j.value} value={j.value}>{j.value} – {j.label}</option>)}
-            </select>
-            <input type="date" className="input-sm" value={localFilters.date_from || ''}
-              onChange={e => setLocalFilters(f => ({ ...f, date_from: e.target.value }))}
-              placeholder="Du" />
-            <input type="date" className="input-sm" value={localFilters.date_to || ''}
-              onChange={e => setLocalFilters(f => ({ ...f, date_to: e.target.value }))}
-              placeholder="Au" />
-            <select className="input-sm" value={localFilters.locked ?? ''}
-              onChange={e => setLocalFilters(f => ({ ...f, locked: e.target.value }))}>
-              <option value="">Tous statuts</option>
-              <option value="1">Validées</option>
-              <option value="0">Non validées</option>
-            </select>
-            <button onClick={applyFilters} className="btn-primary text-sm">Filtrer</button>
+        <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-5">
+          <select
+            className={cx(CONTROL, 'h-10')}
+            value={localFilters.journal_type || ''}
+            onChange={e => setLocalFilters(f => ({ ...f, journal_type: e.target.value }))}
+          >
+            <option value="">Tous les journaux</option>
+            {JOURNAL_TYPES.map(j => (
+              <option key={j.value} value={j.value}>{j.value} – {j.label}</option>
+            ))}
+          </select>
+          <input
+            type="date" aria-label="Du"
+            className={cx(CONTROL, 'h-10')}
+            value={localFilters.date_from || ''}
+            onChange={e => setLocalFilters(f => ({ ...f, date_from: e.target.value }))}
+          />
+          <input
+            type="date" aria-label="Au"
+            className={cx(CONTROL, 'h-10')}
+            value={localFilters.date_to || ''}
+            onChange={e => setLocalFilters(f => ({ ...f, date_to: e.target.value }))}
+          />
+          <select
+            className={cx(CONTROL, 'h-10')}
+            value={localFilters.locked ?? ''}
+            onChange={e => setLocalFilters(f => ({ ...f, locked: e.target.value }))}
+          >
+            <option value="">Tous statuts</option>
+            <option value="1">Validées</option>
+            <option value="0">Non validées</option>
+          </select>
+          <div className="flex items-center gap-2">
+            <Button variant="primary" onClick={applyFilters}>Filtrer</Button>
+            {isFiltered && <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>}
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                <tr>
-                  <th className="px-4 py-3 text-left">N° Écriture</th>
-                  <th className="px-4 py-3 text-left">Date</th>
-                  <th className="px-4 py-3 text-left">Journal</th>
-                  <th className="px-4 py-3 text-left">Libellé</th>
-                  <th className="px-4 py-3 text-left">Référence</th>
-                  <th className="px-4 py-3 text-right">Lignes</th>
-                  <th className="px-4 py-3 text-center">Statut</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {entries.data.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500">
-                      Aucune écriture enregistrée
-                    </td>
-                  </tr>
-                ) : entries.data.map(entry => (
-                  <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                    <td className="px-4 py-3 font-mono text-purple-700 dark:text-purple-400 font-medium">
-                      {entry.entry_number}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
-                      {format(new Date(entry.entry_date), 'dd/MM/yyyy', { locale: fr })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${journalBadge(entry.journal_type)}`}>
-                        {entry.journal_type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100 max-w-xs truncate">
-                      {entry.description}
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
-                      {entry.reference || '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-500">
-                      {entry.lines_count} ligne{entry.lines_count !== 1 ? 's' : ''}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {entry.is_locked ? (
-                        <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
-                          <LockClosedIcon className="w-3 h-3" /> Validée
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">
-                          <LockOpenIcon className="w-3 h-3" /> Brouillon
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        {!entry.is_locked && (
-                          <>
-                            <button onClick={() => handleValidate(entry.id)}
-                              title="Valider"
-                              className="p-1.5 rounded hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400">
-                              <CheckIcon className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => handleDelete(entry.id)}
-                              title="Supprimer"
-                              className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400">
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {entries.last_page > 1 && (
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-              <span>Page {entries.current_page} / {entries.last_page} — {entries.total} écritures</span>
+        <DataTable
+          columns={columns}
+          data={entries.data}
+          rowKey="id"
+          pageSize={entries.per_page ?? 15}
+          totalItems={entries.total ?? entries.data.length}
+          actions={(entry) => entry.is_locked ? (
+            <span className={cx('text-xs', TEXT_FAINT)}>Verrouillée</span>
+          ) : (
+            <>
+              <Button
+                variant="ghost" size="sm" iconOnly icon={CheckIcon}
+                title="Valider et verrouiller"
+                className="hover:text-emerald-600 dark:hover:text-emerald-400"
+                onClick={() => handleValidate(entry.id)}
+              />
+              <Button
+                variant="ghost" size="sm" iconOnly icon={TrashIcon}
+                title="Supprimer"
+                className="hover:text-red-600 dark:hover:text-red-400"
+                onClick={() => handleDelete(entry.id)}
+              />
+            </>
+          )}
+          empty={
+            isFiltered ? (
+              <EmptyState
+                variant="no-results"
+                title="Aucune écriture ne correspond"
+                description="Aucun résultat pour ces critères. Élargissez la période ou changez de journal."
+                action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>}
+              />
+            ) : (
+              <EmptyState
+                icon={BookOpenIcon}
+                title="Aucune écriture"
+                description="Saisissez votre première écriture : elle alimentera le grand livre, la balance et les états financiers."
+                hints={[
+                  'Une écriture doit toujours être équilibrée (débit = crédit).',
+                  'Une écriture validée est verrouillée et ne peut plus être supprimée.',
+                ]}
+                action={
+                  <Button variant="primary" icon={PlusIcon} onClick={() => setShowForm(true)}>
+                    Saisir la première écriture
+                  </Button>
+                }
+              />
+            )
+          }
+          footer={entries.last_page > 1 ? (
+            <div className={cx('flex items-center justify-between gap-3 px-4 py-3', SURFACE_SUNK)}>
+              <p className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+                Page {entries.current_page} sur {entries.last_page} — {entries.total} écriture{entries.total > 1 ? 's' : ''}
+              </p>
               <div className="flex gap-2">
-                {entries.prev_page_url && (
-                  <button onClick={() => router.visit(entries.prev_page_url)} className="btn-secondary text-xs">← Précédent</button>
-                )}
-                {entries.next_page_url && (
-                  <button onClick={() => router.visit(entries.next_page_url)} className="btn-secondary text-xs">Suivant →</button>
-                )}
+                <Button
+                  variant="secondary" size="sm"
+                  disabled={!entries.prev_page_url}
+                  onClick={() => entries.prev_page_url && router.visit(entries.prev_page_url)}
+                >
+                  Précédent
+                </Button>
+                <Button
+                  variant="secondary" size="sm"
+                  disabled={!entries.next_page_url}
+                  onClick={() => entries.next_page_url && router.visit(entries.next_page_url)}
+                >
+                  Suivant
+                </Button>
               </div>
             </div>
-          )}
-        </div>
+          ) : null}
+        />
       </div>
 
       {/* Formulaire modal */}

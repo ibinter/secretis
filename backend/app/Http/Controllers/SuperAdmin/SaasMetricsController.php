@@ -369,6 +369,14 @@ class SaasMetricsController extends Controller
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
      */
+    // ─── Alias API (routes/api.php) → méthode réelle ───────────────────────────
+
+    /** GET /saas/churn → churnRisk() */
+    public function churn(Request $request): JsonResponse
+    {
+        return $this->churnRisk($request);
+    }
+
     public function __call($method, $parameters)
     {
         if (request()->expectsJson()) {

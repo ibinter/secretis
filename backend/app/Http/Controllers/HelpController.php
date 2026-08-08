@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Faq;
-use App\Models\FaqCategory;
-use App\Models\FaqRating;
 use App\Models\SupportTicket;
 use App\Services\SaraAiService;
 use Illuminate\Http\JsonResponse;

@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { usePage } from '@inertiajs/react';
 import { useTranslation } from '../../hooks/useTranslation';
 
 // ─── Icônes inline SVG légères ───────────────────────────────────────────────
@@ -205,8 +205,7 @@ function CalendarPicker({ selectedDate, onSelect, availableDates, primary }) {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function VisitorPortal() {
-  const { slug } = useParams();
-  const navigate  = useNavigate();
+  const { slug } = usePage().props;
   const { t }     = useTranslation();
 
   // Données organisation
@@ -300,7 +299,7 @@ export default function VisitorPortal() {
         slot:       selectedSlot,
         visitor:    visitorInfo,
       });
-      navigate(`/rdv/confirmation/${res.data.token}`, { state: { appointment: res.data } });
+      window.location.href = `/rdv/confirmation/${res.data.token}`;
     } catch (err) {
       const msg = err.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.';
       setErrors({ submit: msg });

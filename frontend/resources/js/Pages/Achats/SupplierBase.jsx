@@ -58,7 +58,7 @@ function CreateSupplierModal({ onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/suppliers', { onSuccess: () => onClose() });
+        post('/achats/fournisseurs', { onSuccess: () => onClose() });
     };
 
     return (
@@ -223,7 +223,7 @@ function EvalModal({ supplier, onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(`/procurement/suppliers/${supplier.id}/evaluate`, { onSuccess: () => onClose() });
+        post(`/achats/fournisseurs/${supplier.id}/evaluer`, { onSuccess: () => onClose() });
     };
 
     const criteria = [
@@ -301,10 +301,10 @@ export default function SupplierBase({ suppliers, filters }) {
                         type="text"
                         placeholder="Rechercher…"
                         defaultValue={filters?.search ?? ''}
-                        onKeyDown={e => e.key === 'Enter' && router.get('/procurement/suppliers', { ...filters, search: e.target.value }, { preserveState: true, replace: true })}
+                        onKeyDown={e => e.key === 'Enter' && router.get('/achats/fournisseurs', { ...filters, search: e.target.value }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-56 focus:ring-2 focus:ring-purple-500 outline-none"
                     />
-                    <select value={filters?.status ?? ''} onChange={e => router.get('/procurement/suppliers', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
+                    <select value={filters?.status ?? ''} onChange={e => router.get('/achats/fournisseurs', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">Tous les statuts</option>
                         <option value="prospect">Prospect</option>
@@ -312,7 +312,7 @@ export default function SupplierBase({ suppliers, filters }) {
                         <option value="suspendu">Suspendu</option>
                         <option value="blackliste">Blacklisté</option>
                     </select>
-                    <select value={filters?.category ?? ''} onChange={e => router.get('/procurement/suppliers', { ...filters, category: e.target.value || undefined }, { preserveState: true, replace: true })}
+                    <select value={filters?.category ?? ''} onChange={e => router.get('/achats/fournisseurs', { ...filters, category: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">Toutes les catégories</option>
                         {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -373,7 +373,7 @@ export default function SupplierBase({ suppliers, filters }) {
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="flex gap-1.5 justify-center">
-                                                <a href={`/procurement/suppliers/${supplier.id}/scorecard`}
+                                                <a href={`/achats/fournisseurs/${supplier.id}/scorecard`}
                                                     className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">
                                                     Scorecard
                                                 </a>
@@ -384,7 +384,7 @@ export default function SupplierBase({ suppliers, filters }) {
                                                 <button
                                                     onClick={() => {
                                                         const email = prompt('Email portail fournisseur :');
-                                                        if (email) router.post(`/procurement/suppliers/${supplier.id}/portal`, { portal_email: email });
+                                                        if (email) router.post(`/achats/fournisseurs/${supplier.id}/portail`, { portal_email: email });
                                                     }}
                                                     className={`text-xs px-2 py-1 rounded ${supplier.portal_access ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}>
                                                     {supplier.portal_access ? 'Désactiver' : 'Portail'}

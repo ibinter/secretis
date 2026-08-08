@@ -1,45 +1,82 @@
-import React from 'react'
+/**
+ * SECRETIS ERP — Badge
+ *
+ * Pastille de statut. Les couleurs sémantiques sont volontairement
+ * distinctes de l'accent violet de la marque : un statut ne doit jamais
+ * être confondu avec une action.
+ *
+ * Props :
+ *   variant   'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'accent'
+ *   color     alias historique de `variant` (accepte aussi 'primary', 'gray'…)
+ *   size      'sm' | 'md'                       (défaut 'sm')
+ *   dot       boolean — pastille colorée devant le libellé
+ *             (sans children : rend uniquement le point)
+ *   icon      Component lucide-react à gauche du libellé
+ *   pill      boolean — coins pleinement arrondis (défaut true)
+ *   outline   boolean — style contour au lieu du fond doux
+ */
 
-const COLOR_CLASSES = {
-  success: 'bg-[#1E8449]/15 text-[#1E8449] dark:bg-[#1E8449]/25 dark:text-green-300',
-  warning: 'bg-[#F39C12]/15 text-[#d68910] dark:bg-[#F39C12]/25 dark:text-yellow-300',
-  danger:  'bg-[#C0392B]/15 text-[#C0392B] dark:bg-[#C0392B]/25 dark:text-red-300',
-  info:    'bg-[#7e22ce]/15 text-[#7e22ce] dark:bg-[#7e22ce]/25 dark:text-purple-300',
-  primary: 'bg-[#9333EA]/15 text-[#9333EA] dark:bg-[#9333EA]/30 dark:text-purple-200',
-  gray:    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
-}
+import React from 'react';
+import { cx, TONES, resolveTone } from './tokens';
 
-const DOT_COLORS = {
-  success: 'bg-[#1E8449]',
-  warning: 'bg-[#F39C12]',
-  danger:  'bg-[#C0392B]',
-  info:    'bg-[#7e22ce]',
-  primary: 'bg-[#9333EA]',
-  gray:    'bg-gray-400',
+const DOTS = {
+  accent:  'bg-purple-500',
+  success: 'bg-emerald-500',
+  warning: 'bg-amber-500',
+  danger:  'bg-red-500',
+  info:    'bg-sky-500',
+  neutral: 'bg-gray-400',
+};
+
+const SIZES = {
+  sm: 'px-2   py-0.5 text-[11px] gap-1',
+  md: 'px-2.5 py-1   text-xs     gap-1.5',
+};
+
+/** Retourne la clé de ton normalisée (variant > color > 'neutral'). */
+function toneKey(variant, color) {
+  const raw = variant ?? color ?? 'neutral';
+  const resolved = resolveTone(raw);
+  return Object.keys(TONES).find(k => TONES[k] === resolved) ?? 'neutral';
 }
 
 export default function Badge({
-  children,
-  color   = 'gray',
-  size    = 'md',
-  pill    = true,
+  variant,
+  color,
+  size    = 'sm',
   dot     = false,
+  icon: Icon,
+  pill    = true,
+  outline = false,
   className = '',
+  children,
+  ...rest
 }) {
-  const colorCls  = COLOR_CLASSES[color] ?? COLOR_CLASSES.gray
-  const dotColor  = DOT_COLORS[color]    ?? DOT_COLORS.gray
-  const roundCls  = pill ? 'rounded-full' : 'rounded'
-  const sizeCls   = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs'
+  const key  = toneKey(variant, color);
+  const tone = TONES[key];
 
-  if (dot && !children) {
-    return <span className={`inline-block w-2.5 h-2.5 rounded-full ${dotColor} ${className}`} />
+  if (dot && children === undefined) {
+    return <span className={cx('inline-block w-2 h-2 rounded-full', DOTS[key], className)} {...rest} />;
   }
 
   return (
-    <span className={`inline-flex items-center gap-1 font-medium ${colorCls} ${roundCls} ${sizeCls} ${className}`}>
-      {dot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />}
+    <span
+      className={cx(
+        'inline-flex items-center font-medium whitespace-nowrap border',
+        pill ? 'rounded-full' : 'rounded-md',
+        SIZES[size] ?? SIZES.sm,
+        outline
+          ? cx('bg-transparent', tone.text, tone.border)
+          : cx(tone.soft, tone.text, 'border-transparent'),
+        className,
+      )}
+      {...rest}
+    >
+      {dot && <span className={cx('w-1.5 h-1.5 rounded-full shrink-0', DOTS[key])} />}
+      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
       {children}
     </span>
-  )
+  );
 }
+
 export { Badge };

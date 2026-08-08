@@ -130,6 +130,22 @@ class LicenseController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // Alias API (routes api.php → méthodes réelles)
+    // -------------------------------------------------------------------------
+
+    /** Alias : GET /api/license (route license.current) → show() */
+    public function current(): JsonResponse
+    {
+        return $this->show();
+    }
+
+    /** Alias : POST /api/license/verify (route license.verify) → check() */
+    public function verify(): JsonResponse
+    {
+        return $this->check();
+    }
+
+    // -------------------------------------------------------------------------
     // Méthodes privées
     // -------------------------------------------------------------------------
 

@@ -261,7 +261,7 @@ export default function SmartBell() {
                     {/* Footer */}
                     <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
                         <Link
-                            href="/notifications/center"
+                            href="/notifications"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center justify-center gap-2 w-full text-sm text-purple-600 dark:text-purple-400 hover:underline font-medium"
                         >

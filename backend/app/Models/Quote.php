@@ -103,8 +103,11 @@ class Quote extends Model
 
         $lastNumber = static::where('organization_id', $orgId)
             ->whereYear('created_at', $year)
+            // PostgreSQL refuse FOR UPDATE avec un agrégat : on prend la ligne la plus
+            // haute triée, ce qui conserve le verrou tout en restant portable.
+            ->orderByDesc('quote_number')
             ->lockForUpdate()
-            ->max('quote_number');
+            ->value('quote_number');
 
         if ($lastNumber) {
             $sequence = (int) substr($lastNumber, -5);

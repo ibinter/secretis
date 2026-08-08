@@ -206,7 +206,7 @@ export default function GlobalSearch({ open, onClose }) {
             <div className="flex flex-col items-center py-12 text-center text-sm text-gray-400">
               <Search size={36} className="mb-3 opacity-30" />
               <p>Aucun résultat pour <strong className="text-gray-600 dark:text-gray-300">"{query}"</strong></p>
-              <a href="/help" className="mt-3 text-xs text-[#7e22ce] hover:underline">Consulter l'aide</a>
+              <a href="/aide" className="mt-3 text-xs text-[#7e22ce] hover:underline">Consulter l'aide</a>
             </div>
           )}
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ──────────────────────────────────────────────────────────────────
 const Ico = {
@@ -163,7 +164,7 @@ export default function OrderStatus({ order: initialOrder }) {
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c, maximumFractionDigits: 0 }).format(n);
 
   return (
-    <>
+    <AppLayout>
       <Head title={`Commande ${order?.reference ?? '—'} — SECRETIS ERP`} />
 
       <div className="min-h-screen bg-gray-50">
@@ -281,7 +282,7 @@ export default function OrderStatus({ order: initialOrder }) {
           </div>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { OrderStatus };

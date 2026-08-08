@@ -1,5 +1,5 @@
-import React, { useState, useEffect, createContext, useContext } from 'react'
-import { Link, usePage } from '@inertiajs/react'
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react'
+import { Link, usePage, router } from '@inertiajs/react'
 import OfflineIndicator from './OfflineIndicator'
 import InstallBanner    from '@/Components/PWA/InstallBanner'
 import UpdatePrompt     from '@/Components/PWA/UpdatePrompt'
@@ -48,10 +48,11 @@ function NavIcon({ name, size = 16 }) {
 
 // ─── Single nav item ──────────────────────────────────────────────────────────
 function NavItem({ module, collapsed, currentUrl }) {
-  const isActive = currentUrl && currentUrl.includes(module.id)
+  const target = module.href || `/${module.id.replace(/_/g, '-')}`
+  const isActive = currentUrl && (currentUrl === target || currentUrl.startsWith(target + '/'))
   return (
     <Link
-      href={`/${module.id.replace(/_/g, '-')}`}
+      href={target}
       className={[
         'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
         isActive
@@ -122,6 +123,14 @@ function Sidebar({ collapsed, onClose, isMobile }) {
   const userRole = props?.auth?.user?.role ?? 'user'
   const isAdmin  = userRole === 'admin' || userRole === 'super_admin'
 
+  // Persiste la position de scroll du menu entre les navigations Inertia
+  const navRef = useRef(null)
+  useEffect(() => {
+    const el = navRef.current
+    const s  = sessionStorage.getItem('sidebarScroll')
+    if (el && s) el.scrollTop = parseInt(s, 10)
+  }, [])
+
   const sidebarClass = isMobile
     ? 'fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-[#162032] shadow-2xl flex flex-col transition-transform duration-300'
     : `h-screen sticky top-0 flex flex-col bg-white dark:bg-[#162032] border-r border-gray-200 dark:border-[#1E3048] transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`
@@ -147,7 +156,11 @@ function Sidebar({ collapsed, onClose, isMobile }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+      <nav
+        ref={navRef}
+        onScroll={(e) => sessionStorage.setItem('sidebarScroll', e.target.scrollTop)}
+        className="flex-1 overflow-y-auto py-3 px-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700"
+      >
         {MODULE_SECTIONS.map(section => {
           const mods = MODULES.filter(m =>
             m.section === section.id &&
@@ -169,7 +182,9 @@ function Sidebar({ collapsed, onClose, isMobile }) {
       {/* SARA bubble */}
       {(!collapsed || isMobile) && (
         <div className="shrink-0 px-3 pb-4 pt-2 border-t border-gray-100 dark:border-[#1E3048]">
-          <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#9333EA] to-[#7e22ce] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+          <button
+            onClick={() => router.visit('/sara')}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#9333EA] to-[#7e22ce] text-white text-sm font-medium hover:opacity-90 transition-opacity">
             <MessageCircle size={16} />
             Parler à SARA
           </button>
@@ -204,7 +219,7 @@ function Header({ onMenuToggle, collapsed, onCollapseToggle, dark, onThemeToggle
         <div className="bg-[#9333EA] text-white text-xs font-medium text-center py-1.5 px-4 flex items-center justify-center gap-2">
           <span className="px-2 py-0.5 bg-[#F39C12] text-[#9333EA] rounded font-bold">ESSAI</span>
           Essai gratuit — {trial.daysLeft} jour{trial.daysLeft > 1 ? 's' : ''} restant{trial.daysLeft > 1 ? 's' : ''}
-          <a href="/upgrade" className="underline hover:no-underline ml-1">Passer à Pro →</a>
+          <a href="/abonnement/plans" className="underline hover:no-underline ml-1">Passer à Pro →</a>
         </div>
       )}
 
@@ -339,9 +354,10 @@ export default function AppLayout({ children, announcement, trial }) {
           </main>
         </div>
 
-        {/* SARA floating bubble (outside sidebar) */}
+        {/* SARA floating bubble (outside sidebar) — bottom-right sur tous les écrans */}
         <button
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center lg:hidden print:hidden"
+          onClick={() => router.visit('/sara')}
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center print:hidden"
           aria-label="Ouvrir SARA — Assistant IA"
           title="SARA — Assistant IA"
         >

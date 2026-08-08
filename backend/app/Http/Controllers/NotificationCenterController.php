@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppNotification;
+use App\Models\User;
 use App\Services\SmartNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;

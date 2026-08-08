@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, useLocation } from 'react-router-dom';
+import { usePage } from '@inertiajs/react';
 
 // ─── Icônes ──────────────────────────────────────────────────────────────────
 const Icons = {
@@ -153,11 +153,10 @@ function CancelModal({ onClose, onConfirm, cancelling }) {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function AppointmentConfirmation() {
-  const { token } = useParams();
-  const location  = useLocation();
+  const { token } = usePage().props;
 
-  const [appointment, setAppointment] = useState(location.state?.appointment || null);
-  const [loading, setLoading]         = useState(!appointment);
+  const [appointment, setAppointment] = useState(null);
+  const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
   const [showCancel, setShowCancel]   = useState(false);
   const [cancelling, setCancelling]   = useState(false);

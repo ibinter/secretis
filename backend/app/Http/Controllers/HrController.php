@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Employee;
-use App\Models\Leave;
+use App\Models\LeaveRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +14,30 @@ use Inertia\Response;
 class HrController extends Controller
 {
     // ── Web — Inertia pages ───────────────────────────────────────────────────
+
+    public function dashboard(Request $request): Response
+    {
+        $user  = Auth::user();
+        $orgId = $user->organization_id;
+
+        $totalEmployees   = Employee::where('organization_id', $orgId)->where('status', 'active')->count();
+        $totalDepartments = Department::where('organization_id', $orgId)->count();
+
+        // Le modèle visé était `App\Models\Leave`, qui n'existe pas (le bon est
+        // `LeaveRequest`) : l'appel levait une erreur avalée par le `catch`, si
+        // bien que le tableau de bord RH affichait TOUJOURS « 0 congé en attente ».
+        $pendingLeaves = LeaveRequest::whereHas('employee', fn ($q) => $q->where('organization_id', $orgId))
+            ->where('status', 'pending')
+            ->count();
+
+        return Inertia::render('RH/Index', [
+            'stats' => [
+                'total_employees'   => $totalEmployees,
+                'total_departments' => $totalDepartments,
+                'pending_leaves'    => $pendingLeaves,
+            ],
+        ]);
+    }
 
     public function index(Request $request): Response
     {
@@ -56,27 +80,22 @@ class HrController extends Controller
         ]);
     }
 
-    public function orgChart(): Response
+    public function orgChart(): Response|JsonResponse
     {
         $user  = Auth::user();
-        $tree  = $this->buildOrgTree($user->organization_id);
+        $orgId = $user->organization_id;
+        $tree  = $this->buildOrgTree($orgId);
+
+        if (request()->expectsJson() && ! request()->hasHeader('X-Inertia')) {
+            return response()->json(['data' => $tree]);
+        }
 
         return Inertia::render('RH/Organigramme', [
             'tree'        => $tree,
-            'departments' => Department::where('organization_id', $user->organization_id)
+            'departments' => Department::where('organization_id', $orgId)
                 ->orderBy('name')
                 ->get(['id', 'name']),
         ]);
-    }
-
-    // ── API — Orgchart ────────────────────────────────────────────────────────
-
-    public function orgchart(): JsonResponse
-    {
-        $orgId = Auth::user()->organization_id;
-        $tree  = $this->buildOrgTree($orgId);
-
-        return response()->json(['data' => $tree]);
     }
 
     // ── API — Planning ────────────────────────────────────────────────────────
@@ -91,9 +110,9 @@ class HrController extends Controller
 
         $leaves = [];
 
-        if (class_exists(\App\Models\Leave::class)) {
+        if (class_exists(\App\Models\LeaveRequest::class)) {
             try {
-                $leaves = \App\Models\Leave::whereHas('employee', fn ($q) => $q->where('organization_id', $orgId))
+                $leaves = \App\Models\LeaveRequest::whereHas('employee', fn ($q) => $q->where('organization_id', $orgId))
                     ->with(['employee:id,first_name,last_name,department_id', 'leaveType:id,name,color'])
                     ->where('status', 'approved')
                     ->where('start_date', '<=', $to)
@@ -224,7 +243,7 @@ class HrController extends Controller
                 'name'        => "{$e->first_name} {$e->last_name}",
                 'position'    => $e->position,
                 'department'  => $e->department?->name,
-                'avatar'      => $e->avatar,
+                'avatar'      => $e->user?->avatar,
                 'manager_id'  => $e->manager_id,
                 'children'    => [],
             ],
@@ -256,7 +275,7 @@ class HrController extends Controller
             'position'        => $e->position,
             'contract_type'   => $e->contract_type,
             'status'          => $e->status,
-            'avatar'          => $e->avatar,
+            'avatar'          => $e->user?->avatar,
             'employee_number' => $e->employee_number,
             'hire_date'       => $e->hire_date?->toDateString(),
             'department'      => $e->department?->only(['id', 'name']),

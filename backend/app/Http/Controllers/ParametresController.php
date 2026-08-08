@@ -199,6 +199,37 @@ class ParametresController extends Controller
         return response()->json(['message' => 'Langue et région mises à jour.']);
     }
 
+    // ── Assignation de rôle ───────────────────────────────────────────────────
+
+    public function assignRole(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'max:60'],
+        ]);
+
+        // Vérification multi-tenant
+        if ($user->organization_id !== Auth::user()->organization_id) {
+            return response()->json(['message' => 'Non autorisé.'], 403);
+        }
+
+        try {
+            if ($user->hasRole($validated['role'])) {
+                $user->removeRole($validated['role']);
+                $message = "Rôle '{$validated['role']}' retiré.";
+            } else {
+                $user->assignRole($validated['role']);
+                $message = "Rôle '{$validated['role']}' attribué.";
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Erreur lors de l\'assignation du rôle.'], 422);
+        }
+
+        return response()->json([
+            'message' => $message,
+            'roles'   => $user->fresh()->roles->pluck('name'),
+        ]);
+    }
+
     // ── Sécurité ─────────────────────────────────────────────────────────────
 
     public function securite(): Response

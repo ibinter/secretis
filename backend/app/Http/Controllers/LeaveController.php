@@ -55,7 +55,7 @@ class LeaveController extends Controller
             $toApproveN1 = LeaveRequest::where('organization_id', $orgId)
                 ->where('status', 'pending')
                 ->when($subordinateIds->isNotEmpty(), fn($q) => $q->whereIn('employee_id', $subordinateIds))
-                ->with(['employee:id,first_name,last_name,avatar,position'])
+                ->with(['employee:id,first_name,last_name,job_title,user_id'])
                 ->orderBy('start_date')
                 ->get();
         }
@@ -65,7 +65,7 @@ class LeaveController extends Controller
         if ($user->hasAnyRole(['admin_org', 'rh_manager'])) {
             $toApproveHR = LeaveRequest::where('organization_id', $orgId)
                 ->where('status', 'approved_n1')
-                ->with(['employee:id,first_name,last_name,avatar,department_id', 'employee.department:id,name'])
+                ->with(['employee:id,first_name,last_name,department_id,user_id', 'employee.department:id,name'])
                 ->orderBy('start_date')
                 ->get();
         }
@@ -84,7 +84,7 @@ class LeaveController extends Controller
             'employee'     => $employee ? [
                 'id'            => $employee->id,
                 'leave_balance' => $employee->getLeaveBalance(),
-                'available'     => collect(['annual','sick','maternity','unpaid','recovery'])
+                'available'     => collect(['annual','sick','maternity','paternity','compassionate','unpaid','other'])
                     ->mapWithKeys(fn($t) => [$t => $employee->getAvailableLeaveDays($t)]),
             ] : null,
             'filters' => $request->only(['month', 'status', 'type']),
@@ -103,7 +103,7 @@ class LeaveController extends Controller
             ->firstOrFail();
 
         $validated = $request->validate([
-            'leave_type' => 'required|in:annual,sick,maternity,unpaid,recovery',
+            'leave_type' => 'required|in:annual,sick,maternity,paternity,compassionate,unpaid,other',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date'   => 'required|date|after_or_equal:start_date',
             'reason'     => 'nullable|string|max:1000',
@@ -112,7 +112,7 @@ class LeaveController extends Controller
         try {
             $leave = $this->leaveService->createRequest($validated, $employee);
 
-            return back()->with('success', "Demande de congé créée ({$leave->days_count} jours). Votre manager a été notifié.");
+            return back()->with('success', "Demande de congé créée ({$leave->working_days} jours). Votre manager a été notifié.");
         } catch (\Exception $e) {
             return back()->withErrors(['leave' => $e->getMessage()]);
         }
@@ -126,7 +126,7 @@ class LeaveController extends Controller
     {
         $this->authorizeLeave($leave);
 
-        $leave->load(['employee:id,first_name,last_name,avatar,position', 'approverN1:id,name', 'approverHR:id,name']);
+        $leave->load(['employee:id,first_name,last_name,job_title,user_id', 'approverN1:id,name', 'approverHR:id,name']);
 
         return response()->json(['leave' => $leave]);
     }
@@ -157,6 +157,18 @@ class LeaveController extends Controller
     // -------------------------------------------------------------------------
     // approveN1 — Approbation niveau 1 (manager)
     // -------------------------------------------------------------------------
+
+    /**
+     * POST /rh/conges/{id}/approve (web) + /api/v1/hr/leaves/{id}/approve (api)
+     * Ces routes passent {id} (pas de model-binding) : on résout la demande
+     * puis on délègue à l'approbation niveau 1 (approveN1).
+     */
+    public function approve(Request $request, string $id): \Illuminate\Http\RedirectResponse
+    {
+        $leave = LeaveRequest::findOrFail($id);
+
+        return $this->approveN1($leave);
+    }
 
     public function approveN1(LeaveRequest $leave): \Illuminate\Http\RedirectResponse
     {

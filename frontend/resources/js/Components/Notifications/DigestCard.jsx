@@ -184,7 +184,7 @@ export default function DigestCard({ className = '' }) {
                 {/* ── Pied de carte ─────────────────────────────────────────────── */}
                 <div className="mt-4 pt-3 border-t border-purple-100 dark:border-purple-900/30 flex items-center justify-between">
                     <Link
-                        href="/notifications/center"
+                        href="/notifications"
                         className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                     >
                         Voir toutes les notifications

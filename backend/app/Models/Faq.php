@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
 
 class Faq extends Model
@@ -76,5 +77,10 @@ class Faq extends Model
             'sara'         => ['fr' => 'SARA Assistant IA',        'en' => 'SARA AI Assistant'],
             'securite'     => ['fr' => 'Sécurité & Conformité',    'en' => 'Security & Compliance'],
         ];
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(FaqCategory::class, 'category_id');
     }
 }

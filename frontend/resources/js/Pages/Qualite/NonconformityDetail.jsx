@@ -136,7 +136,7 @@ export default function NonconformityDetail() {
     const saveRootCause = async () => {
         setSavingRootCause(true);
         try {
-            await axios.post(`/qualite/nc/${nc.id}/root-cause`, {
+            await axios.post(`/qualite/non-conformites/${nc.id}/cause-racine`, {
                 method:   rootCauseMethod,
                 analysis: rootCauseDetail,
             });
@@ -151,7 +151,7 @@ export default function NonconformityDetail() {
     const addCorrectiveAction = async () => {
         setAddingAction(true);
         try {
-            await axios.post(`/qualite/nc/${nc.id}/corrective-action`, newAction);
+            await axios.post(`/qualite/non-conformites/${nc.id}/action-corrective`, newAction);
             setNewAction({ description: '', responsible_user_id: '', due_date: '' });
             router.reload({ only: ['nonconformity'] });
         } catch (e) {
@@ -165,7 +165,7 @@ export default function NonconformityDetail() {
         if (!verifyRating) { alert('Veuillez sélectionner une note.'); return; }
         setVerifying(true);
         try {
-            await axios.post(`/qualite/nc/${nc.id}/verify`, { rating: verifyRating });
+            await axios.post(`/qualite/non-conformites/${nc.id}/verification`, { rating: verifyRating });
             router.reload({ only: ['nonconformity'] });
         } finally {
             setVerifying(false);

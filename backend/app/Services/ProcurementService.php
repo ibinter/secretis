@@ -31,7 +31,6 @@ class ProcurementService
 
             $last   = PurchaseRequest::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('DA-%d-%05d', $year, $last + 1);
@@ -113,7 +112,6 @@ class ProcurementService
 
             $last   = Rfq::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('AO-%d-%05d', $year, $last + 1);
@@ -178,7 +176,6 @@ class ProcurementService
 
             $last   = Quotation::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('DEV-%d-%05d', $year, $last + 1);
@@ -317,7 +314,6 @@ class ProcurementService
 
             $last   = PurchaseOrder::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('BC-%d-%05d', $year, $last + 1);
@@ -383,7 +379,6 @@ class ProcurementService
 
             $last   = GoodsReceipt::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('BR-%d-%05d', $year, $last + 1);

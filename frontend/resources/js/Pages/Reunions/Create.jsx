@@ -15,10 +15,11 @@ import {
 } from 'lucide-react';
 
 const MEETING_TYPES = [
-  { value: 'board',         label: 'Conseil / Bureau' },
-  { value: 'team',          label: 'Réunion d\'équipe' },
-  { value: 'project',       label: 'Réunion de projet' },
+  { value: 'regular',       label: 'Réunion ordinaire' },
   { value: 'extraordinary', label: 'Réunion extraordinaire' },
+  { value: 'board',         label: 'Conseil / Bureau' },
+  { value: 'committee',     label: 'Comité' },
+  { value: 'other',         label: 'Autre' },
 ];
 
 function Input({ className = '', ...props }) {
@@ -62,7 +63,7 @@ export default function ReunionCreate({ users = [] }) {
   const { data, setData, post, processing, errors } = useForm({
     title:            '',
     description:      '',
-    meeting_type:     'team',
+    meeting_type:     'regular',
     location:         '',
     scheduled_at:     '',
     duration_minutes: 60,

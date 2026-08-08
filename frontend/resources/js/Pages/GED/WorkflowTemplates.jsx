@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import {
     PlusIcon,
     TrashIcon,
@@ -10,6 +11,7 @@ import {
     XMarkIcon,
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 /**
  * WorkflowTemplates — Configuration des templates de workflow (Admin)
@@ -301,24 +303,19 @@ function TemplateModal({ template, onClose, onSaved }) {
     );
 }
 
-export default function WorkflowTemplates() {
-    const [templates, setTemplates] = useState([]);
-    const [loading, setLoading]     = useState(true);
+export default function WorkflowTemplates({ templates: initialTemplates = [] }) {
+    // La liste vient de la prop Inertia (DocumentWorkflowController@templates).
+    const templates = Array.isArray(initialTemplates)
+        ? initialTemplates
+        : (initialTemplates?.data ?? []);
+    const loading = false;
     const [modalTemplate, setModalTemplate] = useState(null); // null = fermé, {} = nouveau, {...} = édition
     const [filterCat, setFilterCat] = useState('');
     const [deleting, setDeleting]   = useState(null);
 
-    async function fetchTemplates() {
-        setLoading(true);
-        try {
-            const res = await axios.get('/api/document-workflow-templates');
-            setTemplates(res.data);
-        } finally {
-            setLoading(false);
-        }
+    function fetchTemplates() {
+        router.reload({ only: ['templates'] });
     }
-
-    useEffect(() => { fetchTemplates(); }, []);
 
     async function deleteTemplate(id) {
         if (!window.confirm('Supprimer ce template ?')) return;
@@ -344,6 +341,7 @@ export default function WorkflowTemplates() {
     const uncategorized = filtered.filter(t => !t.category);
 
     return (
+        <AppLayout>
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             {/* En-tête */}
             <div className="flex items-center justify-between">
@@ -442,6 +440,7 @@ export default function WorkflowTemplates() {
                 />
             )}
         </div>
+        </AppLayout>
     );
 }
 

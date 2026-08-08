@@ -311,7 +311,7 @@ export default function AuditManagement() {
     const refresh = () => router.reload({ only: ['audits'] });
 
     const updateStatus = async (auditId, status) => {
-        await axios.patch(`/qualite/audits/${auditId}`, { status });
+        await axios.put(`/qualite/audits/${auditId}`, { status });
         refresh();
     };
 

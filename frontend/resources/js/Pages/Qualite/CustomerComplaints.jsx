@@ -47,7 +47,7 @@ function NewComplaintModal({ onClose, onSuccess }) {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('/qualite/complaints', form);
+            await axios.post('/qualite/reclamations', form);
             onSuccess();
             onClose();
         } catch {
@@ -162,7 +162,7 @@ function CloseComplaintModal({ complaint, onClose, onSuccess }) {
         if (!resolution || !rating) return;
         setLoading(true);
         try {
-            await axios.post(`/qualite/complaints/${complaint.id}/close`, {
+            await axios.post(`/qualite/reclamations/${complaint.id}/cloture`, {
                 resolution,
                 satisfaction_rating: rating,
             });
@@ -317,7 +317,7 @@ export default function CustomerComplaints() {
                                         </td>
                                         <td className="px-4 py-3 text-xs">
                                             {c.nonconformity
-                                                ? <a href={`/qualite/nc/${c.nonconformity_id}`} className="text-purple-600 hover:underline font-mono">
+                                                ? <a href={`/qualite/non-conformites/${c.nonconformity_id}`} className="text-purple-600 hover:underline font-mono">
                                                     {c.nonconformity.reference}
                                                   </a>
                                                 : <span className="text-gray-400">—</span>

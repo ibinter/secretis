@@ -1,12 +1,38 @@
-﻿import React, { useState, useEffect } from 'react';
+/**
+ * Reception/Dashboard.jsx — Poste d'accueil, vue temps réel
+ *
+ * Présentation migrée sur `@/Components/UI`.
+ * Logique métier inchangée : mêmes props Inertia, même canal Echo
+ * (`organization.{id}` / `.visitor.checked_in` / `.visitor.checked_out`),
+ * même appel `POST /reception/visits/{id}/check-out`, mêmes états.
+ */
+
+import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import { router } from '@inertiajs/react';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout';
-import Echo from 'laravel-echo';
+import {
+    LayoutDashboard, Users, ClipboardList, Mail, LogOut, Clock, MapPin,
+    AlertTriangle, Building2, User, CalendarClock, DoorOpen,
+} from 'lucide-react';
+import {
+    PageHeader, Button, Badge, DataTable, EmptyState, StatCard,
+    cx, SURFACE, BORDER, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT,
+} from '@/Components/UI';
+
+/** Le modèle Visitor n'expose pas d'accesseur `full_name` : on le reconstruit. */
+const displayName = (v) =>
+    v?.full_name || [v?.first_name, v?.last_name].filter(Boolean).join(' ') || 'Visiteur';
+
+const fmtTime = (iso) => {
+    if (!iso) return '—';
+    try {
+        return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } catch { return '—'; }
+};
 
 // ─── Dashboard Receptionniste — vue temps reel ────────────────────────────────
-export default function Dashboard({ present: initialPresent, scheduled, today_total, pending_inv }) {
+export default function Dashboard({ present: initialPresent = [], scheduled = [], today_total = 0, pending_inv = 0 }) {
     const [present, setPresent]     = useState(initialPresent);
     const [checkingOut, setCheckingOut] = useState(null);
     const [now, setNow]             = useState(new Date());
@@ -35,7 +61,7 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
     const handleCheckOut = async (visitId) => {
         setCheckingOut(visitId);
         try {
-            await axios.post(`/visits/${visitId}/check-out`);
+            await axios.post(`/reception/visits/${visitId}/check-out`);
             setPresent(prev => prev.filter(v => v.id !== visitId));
         } catch {
             alert('Erreur lors du check-out. Veuillez réessayer.');
@@ -55,67 +81,130 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
         return (now - new Date(checkInAt)) > 4 * 60 * 60 * 1000;
     };
 
+    const overstayCount = present.filter(v => isOverstay(v.check_in_at)).length;
+
+    /* ─── Colonnes des visites planifiées ──────────────────────────────────── */
+
+    const scheduledColumns = [
+        {
+            key: 'visitor_name',
+            label: 'Visiteur',
+            render: (v) => <span className={cx('font-medium', TEXT_TITLE)}>{v || '—'}</span>,
+        },
+        {
+            key: 'invited_by',
+            label: 'Hôte',
+            render: (_v, inv) => (
+                <span className="inline-flex items-center gap-1.5">
+                    <User className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                    {inv.invited_by?.name ?? <span className={TEXT_FAINT}>—</span>}
+                </span>
+            ),
+        },
+        {
+            key: 'visit_time_start',
+            label: 'Horaires',
+            nowrap: true,
+            render: (_v, inv) => (
+                <span className="inline-flex items-center gap-1.5 tabular-nums">
+                    <Clock className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                    {inv.visit_time_start || '—'} — {inv.visit_time_end || '—'}
+                </span>
+            ),
+        },
+        {
+            key: 'purpose',
+            label: 'Objet',
+            render: (v) => v || <span className={TEXT_FAINT}>—</span>,
+        },
+        {
+            key: 'location',
+            label: 'Lieu',
+            render: (v) => v || <span className={TEXT_FAINT}>—</span>,
+        },
+        {
+            key: 'status',
+            label: 'Statut',
+            nowrap: true,
+            render: () => <Badge variant="warning" dot>En attente</Badge>,
+        },
+    ];
+
+    /* ─── Rendu ────────────────────────────────────────────────────────────── */
+
     return (
         <AppLayout>
             <Head title="Réception — Tableau de bord" />
 
-            <div className="p-6 space-y-6">
-                {/* Compteurs */}
-                <div className="grid grid-cols-3 gap-4">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+                <PageHeader
+                    icon={LayoutDashboard}
+                    title="Poste d'accueil"
+                    breadcrumbs={[{ label: 'Réception' }, { label: 'Tableau de bord' }]}
+                    subtitle="Visiteurs présents, départs à enregistrer et visites attendues aujourd'hui."
+                    meta={
+                        <Badge variant="success" dot>
+                            Mise à jour automatique
+                        </Badge>
+                    }
+                />
+
+                {/* Indicateurs */}
+                <div className="mb-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
+                    <StatCard label="Visiteurs présents"    value={present.length} icon={Users}          tone="success" />
+                    <StatCard label="Visites aujourd'hui"   value={today_total}    icon={ClipboardList}  tone="accent"  />
+                    <StatCard label="Invitations en attente" value={pending_inv}   icon={Mail}           tone="warning" />
                     <StatCard
-                        label="Visiteurs présents"
-                        value={present.length}
-                        icon="🟢"
-                        color="bg-green-50 border-green-200"
-                        textColor="text-green-700"
-                    />
-                    <StatCard
-                        label="Visites aujourd'hui"
-                        value={today_total}
-                        icon="📋"
-                        color="bg-purple-50 border-purple-200"
-                        textColor="text-purple-700"
-                    />
-                    <StatCard
-                        label="Invitations en attente"
-                        value={pending_inv}
-                        icon="📨"
-                        color="bg-amber-50 border-amber-200"
-                        textColor="text-amber-700"
+                        label="Dépassements"
+                        value={overstayCount}
+                        icon={AlertTriangle}
+                        tone={overstayCount > 0 ? 'danger' : 'neutral'}
+                        hint="présence > 4 h"
                     />
                 </div>
 
-                {/* Visiteurs presents */}
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-gray-900">
+                {/* Visiteurs présents */}
+                <section className="mb-8">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <h2 className={cx('text-lg font-semibold tracking-tight', TEXT_TITLE)}>
                             Visiteurs actuellement présents
-                            <span className="ml-2 text-sm font-normal text-gray-400">
-                                Mise à jour automatique
-                                <span className="inline-block w-2 h-2 rounded-full bg-green-400 ml-1 animate-pulse" />
-                            </span>
                         </h2>
+                        <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+                            {present.length} personne{present.length > 1 ? 's' : ''} dans les locaux
+                        </span>
                     </div>
 
                     {present.length === 0 ? (
-                        <div className="bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-12 text-center text-gray-400">
-                            <div className="text-5xl mb-3">🏢</div>
-                            <div className="text-lg font-medium">Aucun visiteur en ce moment</div>
-                        </div>
+                        <EmptyState
+                            bordered
+                            icon={DoorOpen}
+                            title="Aucun visiteur dans les locaux"
+                            description="Les arrivées enregistrées à la borne ou à l'accueil apparaissent ici en temps réel."
+                            hints={[
+                                'Une fiche visiteur s\'ajoute dès la validation du check-in.',
+                                'Au-delà de 4 h de présence, la fiche passe en alerte de dépassement.',
+                            ]}
+                        />
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                             {present.map(visit => {
                                 const overstay = isOverstay(visit.check_in_at);
+                                const name     = displayName(visit.visitor);
                                 return (
-                                    <div
+                                    <article
                                         key={visit.id}
-                                        className={`bg-white rounded-2xl shadow-sm border-2 p-5 flex flex-col gap-3 ${
-                                            overstay ? 'border-red-400 bg-red-50' : 'border-gray-100'
-                                        }`}
+                                        className={cx(
+                                            SURFACE, 'flex flex-col gap-4 rounded-xl border p-4 shadow-sm transition-colors',
+                                            overstay
+                                                ? 'border-red-300 dark:border-red-500/40'
+                                                : BORDER,
+                                        )}
                                     >
                                         {overstay && (
-                                            <div className="bg-red-500 text-white text-xs font-bold rounded-lg px-3 py-1 self-start animate-pulse">
-                                                ⚠️ DÉPASSEMENT — {duration(visit.check_in_at)}
+                                            <div className="inline-flex items-center gap-1.5 self-start rounded-lg bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
+                                                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="tabular-nums">Dépassement — {duration(visit.check_in_at)}</span>
                                             </div>
                                         )}
 
@@ -123,112 +212,109 @@ export default function Dashboard({ present: initialPresent, scheduled, today_to
                                             {visit.visitor?.photo_path ? (
                                                 <img
                                                     src={`/storage/${visit.visitor.photo_path}`}
-                                                    alt={visit.visitor.full_name}
-                                                    className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                                                    alt={name}
+                                                    className="h-11 w-11 shrink-0 rounded-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-14 h-14 rounded-full bg-[#9333EA] text-white flex items-center justify-center text-2xl font-bold flex-shrink-0">
-                                                    {visit.visitor?.full_name?.[0]?.toUpperCase()}
-                                                </div>
+                                                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-50 text-sm font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
+                                                    {name.charAt(0).toUpperCase()}
+                                                </span>
                                             )}
-                                            <div>
-                                                <div className="font-bold text-gray-900">{visit.visitor?.full_name}</div>
+                                            <div className="min-w-0">
+                                                <p className={cx('truncate font-medium', TEXT_TITLE)}>{name}</p>
                                                 {visit.visitor?.company && (
-                                                    <div className="text-sm text-gray-500">{visit.visitor.company}</div>
+                                                    <p className={cx('flex items-center gap-1 truncate text-xs', TEXT_MUTED)}>
+                                                        <Building2 className="h-3 w-3 shrink-0" />
+                                                        {visit.visitor.company}
+                                                    </p>
                                                 )}
                                                 {visit.visitor?.visit_count > 4 && (
-                                                    <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                                                        Visite #{visit.visitor.visit_count}
-                                                    </span>
+                                                    <Badge variant="accent" className="mt-1">
+                                                        Visite n° {visit.visitor.visit_count}
+                                                    </Badge>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="text-sm space-y-1 text-gray-600">
+                                        <dl className={cx('space-y-1.5 text-sm', TEXT_MUTED)}>
                                             <div className="flex items-center gap-2">
-                                                <span>👤</span>
-                                                <span>Hôte : <strong>{visit.host?.name}</strong></span>
+                                                <User className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                                                <dt className="sr-only">Hôte</dt>
+                                                <dd className="truncate">
+                                                    {visit.host?.name ?? <span className={TEXT_FAINT}>Hôte non renseigné</span>}
+                                                </dd>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span>🕐</span>
-                                                <span>
-                                                    Arrivée {new Date(visit.check_in_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}
-                                                    {' '}<span className={`font-bold ${overstay ? 'text-red-600' : 'text-green-600'}`}>
-                                                        ({duration(visit.check_in_at)})
+                                                <Clock className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                                                <dt className="sr-only">Arrivée</dt>
+                                                <dd className="tabular-nums">
+                                                    Arrivée {fmtTime(visit.check_in_at)}
+                                                    {' · '}
+                                                    <span className={overstay
+                                                        ? 'font-medium text-red-600 dark:text-red-400'
+                                                        : 'font-medium text-emerald-600 dark:text-emerald-400'}>
+                                                        {duration(visit.check_in_at)}
                                                     </span>
-                                                </span>
+                                                </dd>
                                             </div>
                                             {visit.location && (
                                                 <div className="flex items-center gap-2">
-                                                    <span>📍</span>
-                                                    <span>{visit.location}{visit.floor ? `, Étage ${visit.floor}` : ''}</span>
+                                                    <MapPin className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} />
+                                                    <dt className="sr-only">Lieu</dt>
+                                                    <dd className="truncate">
+                                                        {visit.location}{visit.floor ? `, étage ${visit.floor}` : ''}
+                                                    </dd>
                                                 </div>
                                             )}
-                                        </div>
+                                        </dl>
 
-                                        <button
+                                        <Button
+                                            variant="primary"
+                                            block
+                                            icon={LogOut}
+                                            loading={checkingOut === visit.id}
                                             onClick={() => handleCheckOut(visit.id)}
-                                            disabled={checkingOut === visit.id}
-                                            className="w-full bg-[#9333EA] hover:bg-purple-900 text-white font-bold text-sm py-2.5 rounded-xl disabled:opacity-50 transition-colors"
                                         >
-                                            {checkingOut === visit.id ? 'Traitement…' : '✅ Check-out'}
-                                        </button>
-                                    </div>
+                                            Enregistrer le départ
+                                        </Button>
+                                    </article>
                                 );
                             })}
                         </div>
                     )}
-                </div>
+                </section>
 
-                {/* Prochaines visites planifiees */}
-                {scheduled?.length > 0 && (
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">
-                            Prochaines visites planifiées aujourd'hui
+                {/* Prochaines visites planifiées */}
+                <section>
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <h2 className={cx('text-lg font-semibold tracking-tight', TEXT_TITLE)}>
+                            Visites planifiées aujourd'hui
                         </h2>
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-50 border-b border-gray-100">
-                                    <tr>
-                                        {['Visiteur', 'Hôte', 'Horaires', 'Objet', 'Lieu', 'Statut'].map(h => (
-                                            <th key={h} className="text-left px-4 py-3 text-gray-500 font-semibold text-xs uppercase">{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {scheduled.map(inv => (
-                                        <tr key={inv.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 font-medium text-gray-900">{inv.visitor_name}</td>
-                                            <td className="px-4 py-3 text-gray-600">{inv.invited_by?.name}</td>
-                                            <td className="px-4 py-3 text-gray-600">{inv.visit_time_start} — {inv.visit_time_end}</td>
-                                            <td className="px-4 py-3 text-gray-500">{inv.purpose || '—'}</td>
-                                            <td className="px-4 py-3 text-gray-500">{inv.location || '—'}</td>
-                                            <td className="px-4 py-3">
-                                                <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">
-                                                    En attente
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+                            {scheduled.length} attendue{scheduled.length > 1 ? 's' : ''}
+                        </span>
                     </div>
-                )}
+
+                    <DataTable
+                        columns={scheduledColumns}
+                        data={scheduled}
+                        rowKey="id"
+                        pageSize={scheduled.length || 10}
+                        empty={
+                            <EmptyState
+                                icon={CalendarClock}
+                                title="Aucune visite attendue aujourd'hui"
+                                description="Les invitations confirmées par les collaborateurs pour la journée s'afficheront dans ce tableau."
+                                hints={[
+                                    'Une invitation crée automatiquement un code d\'accès pour la borne.',
+                                    'Le visiteur attendu bascule dans « présents » dès son check-in.',
+                                ]}
+                            />
+                        }
+                    />
+                </section>
             </div>
         </AppLayout>
-    );
-}
-
-function StatCard({ label, value, icon, color, textColor }) {
-    return (
-        <div className={`rounded-2xl border-2 p-5 flex items-center gap-4 ${color}`}>
-            <div className="text-4xl">{icon}</div>
-            <div>
-                <div className={`text-4xl font-black ${textColor}`}>{value}</div>
-                <div className="text-gray-500 text-sm font-medium">{label}</div>
-            </div>
-        </div>
     );
 }
 export { Dashboard };

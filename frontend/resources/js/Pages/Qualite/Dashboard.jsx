@@ -85,7 +85,7 @@ export default function QualityDashboard() {
                     </div>
                     <div className="flex gap-2">
                         <a
-                            href="/qualite/nc"
+                            href="/qualite/non-conformites"
                             className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                         >
                             Nouvelle NC

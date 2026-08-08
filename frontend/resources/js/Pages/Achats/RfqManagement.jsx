@@ -76,7 +76,7 @@ function CreateRfqModal({ suppliers, onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/rfqs', { onSuccess: () => onClose() });
+        post('/achats/appels-offres', { onSuccess: () => onClose() });
     };
 
     return (
@@ -340,7 +340,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                     {['', 'brouillon', 'publie', 'clos', 'annule'].map(s => (
                         <button
                             key={s}
-                            onClick={() => router.get('/procurement/rfqs', { status: s || undefined }, { preserveState: true, replace: true })}
+                            onClick={() => router.get('/achats/appels-offres', { status: s || undefined }, { preserveState: true, replace: true })}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                                 (filters?.status ?? '') === s
                                     ? 'bg-purple-600 text-white'
@@ -455,7 +455,7 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                                     <div className="flex gap-3">
                                         {rfq.status === 'publie' && (
                                             <a
-                                                href={`/procurement/rfqs/${rfq.id}/quotations`}
+                                                href={`/achats/appels-offres/${rfq.id}/comparer`}
                                                 className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                                             >
                                                 Voir les devis ({(rfq.rfq_suppliers ?? []).filter(s => s.status === 'repondu').length})
@@ -463,14 +463,14 @@ export default function RfqManagement({ rfqs, filters, suppliers }) {
                                         )}
                                         {rfq.status !== 'clos' && rfq.status !== 'annule' && (
                                             <a
-                                                href={`/procurement/rfqs/${rfq.id}/compare`}
+                                                href={`/achats/appels-offres/${rfq.id}/comparer`}
                                                 className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
                                             >
                                                 Comparateur de devis
                                             </a>
                                         )}
                                         <button
-                                            onClick={() => router.post(`/procurement/rfqs/${rfq.id}/close`)}
+                                            onClick={() => router.post(`/achats/appels-offres/${rfq.id}/cloturer`)}
                                             className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50"
                                         >
                                             Clôturer l'AO

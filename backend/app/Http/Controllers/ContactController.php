@@ -321,7 +321,7 @@ class ContactController extends Controller
             'mobile'         => ['nullable', 'string', 'max:30'],
             'company'        => ['nullable', 'string', 'max:255'],
             'job_title'      => ['nullable', 'string', 'max:255'],
-            'type'           => ['nullable', 'in:internal,external'],
+            'type'           => ['nullable', 'in:person,organization,supplier,partner,other'],
             // 'department_id' removed — column not in schema
             'address'        => ['nullable', 'string', 'max:500'],
             'notes'          => ['nullable', 'string', 'max:2000'],

@@ -392,7 +392,8 @@ export default function Notifications({ preferences: serverPrefs, flash }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        patch(route('parametres.notifications.update'), { preserveScroll: true });
+        // Route backend à créer : PATCH /parametres/notifications (parametres.notifications.update).
+        patch('/parametres/notifications', { preserveScroll: true });
     };
 
     return (

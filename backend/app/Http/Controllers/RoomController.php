@@ -294,4 +294,9 @@ class RoomController extends Controller
             'schedule'   => $schedule,
         ]);
     }
+
+    public function reserve($request_obj, $id)
+    {
+        return response()->json(['message' => 'Reservation coming soon.', 'stub' => true], 202);
+    }
 }

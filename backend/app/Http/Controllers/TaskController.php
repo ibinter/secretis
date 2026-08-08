@@ -30,7 +30,7 @@ class TaskController extends Controller
      *
      * Filtres supportés :
      *   - status     : todo | in_progress | review | done | cancelled
-     *   - priority   : low | normal | high | urgent
+     *   - priority   : low | medium | high | urgent
      *   - assignee   : UUID utilisateur
      *   - project_id : UUID projet
      *   - due_from   : YYYY-MM-DD
@@ -104,8 +104,20 @@ class TaskController extends Controller
             ->withQueryString()
             ->through(fn($task) => $this->formatTask($task));
 
+        // Statistiques globales (tâches racines de l'organisation)
+        $statsBase = Task::forOrganization($user->organization_id)->rootTasks();
+        $stats = [
+            'total'       => (clone $statsBase)->count(),
+            'todo'        => (clone $statsBase)->where('status', 'todo')->count(),
+            'in_progress' => (clone $statsBase)->where('status', 'in_progress')->count(),
+            'review'      => (clone $statsBase)->where('status', 'review')->count(),
+            'done'        => (clone $statsBase)->where('status', 'done')->count(),
+            'overdue'     => (clone $statsBase)->overdue()->count(),
+        ];
+
         return Inertia::render('Taches/Liste', [
             'tasks'   => $tasks,
+            'stats'   => $stats,
             'filters' => $request->only(['status', 'priority', 'assignee', 'project_id', 'due_from', 'due_to', 'search', 'overdue']),
         ]);
         } catch (\Throwable $e) {
@@ -113,6 +125,7 @@ class TaskController extends Controller
             $emptyPage = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20);
             return Inertia::render('Taches/Liste', [
                 'tasks'   => $emptyPage,
+                'stats'   => ['total' => 0, 'todo' => 0, 'in_progress' => 0, 'review' => 0, 'done' => 0, 'overdue' => 0],
                 'filters' => [],
             ]);
         }
@@ -127,15 +140,15 @@ class TaskController extends Controller
         $data = $request->validate([
             'title'           => 'required|string|max:255',
             'description'     => 'nullable|string',
-            'priority'        => 'required|in:low,normal,high,urgent',
+            'priority'        => 'required|in:low,medium,high,urgent',
             'status'          => 'nullable|in:todo,in_progress,review,done,cancelled',
-            'project_id'      => 'nullable|uuid|exists:projects,id',
+            'project_id'      => 'nullable|integer|exists:projects,id',
             'due_date'        => 'nullable|date',
             'assignee_ids'    => 'nullable|array',
-            'assignee_ids.*'  => 'uuid|exists:users,id',
+            'assignee_ids.*'  => 'integer|exists:users,id',
             'observer_ids'    => 'nullable|array',
-            'observer_ids.*'  => 'uuid|exists:users,id',
-            'parent_id'       => 'nullable|uuid|exists:tasks,id',
+            'observer_ids.*'  => 'integer|exists:users,id',
+            'parent_id'       => 'nullable|integer|exists:tasks,id',
             'subtasks'        => 'nullable|array',
             'subtasks.*.title'=> 'required|string|max:255',
         ]);
@@ -187,7 +200,7 @@ class TaskController extends Controller
         $data = $request->validate([
             'title'          => 'sometimes|string|max:255',
             'description'    => 'nullable|string',
-            'priority'       => 'sometimes|in:low,normal,high,urgent',
+            'priority'       => 'sometimes|in:low,medium,high,urgent',
             'due_date'       => 'nullable|date',
             'project_id'     => 'nullable|uuid|exists:projects,id',
             'assignee_ids'   => 'nullable|array',
@@ -560,7 +573,7 @@ class TaskController extends Controller
             'parent_id'       => $parent->id,
             'title'           => $data['title'],
             'status'          => 'todo',
-            'priority'        => 'normal',
+            'priority'        => 'medium',
             'created_by'      => $user->id,
             'position'        => $parent->subtasks()->max('position') + 1,
         ]);
@@ -577,7 +590,7 @@ class TaskController extends Controller
         $data = $request->validate([
             'title'    => 'sometimes|required|string|max:255',
             'status'   => 'sometimes|in:todo,in_progress,review,done,cancelled',
-            'priority' => 'sometimes|in:low,normal,high,urgent',
+            'priority' => 'sometimes|in:low,medium,high,urgent',
         ]);
 
         $subtask->update($data);
@@ -606,7 +619,7 @@ class TaskController extends Controller
             'assignee_ids' => 'nullable|array',
             'assignee_ids.*' => 'uuid|exists:users,id',
             'due_date'   => 'nullable|date',
-            'priority'   => 'nullable|in:low,normal,high,urgent',
+            'priority'   => 'nullable|in:low,medium,high,urgent',
         ]);
 
         $user = Auth::user();
@@ -616,7 +629,7 @@ class TaskController extends Controller
             'meeting_id'      => $meetingId,
             'title'           => $data['title'],
             'status'          => 'todo',
-            'priority'        => $data['priority'] ?? 'normal',
+            'priority'        => $data['priority'] ?? 'medium',
             'due_date'        => $data['due_date'] ?? null,
             'created_by'      => $user->id,
             'position'        => 0,

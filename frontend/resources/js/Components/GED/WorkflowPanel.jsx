@@ -96,7 +96,7 @@ export default function WorkflowPanel({
 
     async function fetchStatus() {
         try {
-            const res = await axios.get(`/api/documents/${documentId}/workflow`);
+            const res = await axios.get(`/api/v1/documents/${documentId}/workflow`);
             setData(res.data);
         } catch (e) {
             console.error('WorkflowPanel fetch error', e);
@@ -123,7 +123,7 @@ export default function WorkflowPanel({
                 : action === 'reject' ? 'reject'
                 : 'send-back';
 
-            await axios.post(`/api/documents/${documentId}/workflow/steps/${stepId}/${endpoint}`, {
+            await axios.post(`/api/v1/documents/${documentId}/workflow/steps/${stepId}/${endpoint}`, {
                 comment,
             });
 

@@ -127,6 +127,9 @@ class ResourceController extends Controller
      */
     public function checkAvailability(Request $request, Room $room): JsonResponse
     {
+        // Isolation multi-tenant : ne pas exposer l'occupation des salles d'une autre organisation.
+        $this->authorizeOrg($request, $room->organization_id);
+
         $request->validate([
             'start_at'   => 'required|date',
             'end_at'     => 'required|date|after:start_at',
@@ -542,6 +545,71 @@ class ResourceController extends Controller
      * GET /resources
      * Dashboard principal des ressources.
      */
+    /**
+     * POST /ressources/vehicules/{vehicle}/carnet — ajoute une entrée au carnet de bord.
+     * Champs alignés sur Pages/Ressources/Vehicules/Index.jsx.
+     */
+    public function storeVehicleLog(Request $request, Vehicle $vehicle): JsonResponse
+    {
+        $this->authorizeOrg($request, $vehicle->organization_id);
+
+        $validated = $request->validate([
+            'mileage_start' => 'required|integer|min:0',
+            'mileage_end'   => 'nullable|integer|gte:mileage_start',
+            'fuel_added'    => 'nullable|numeric|min:0',
+            'destination'   => 'nullable|string|max:255',
+            'purpose'       => 'nullable|string|max:300',
+            'departed_at'   => 'nullable|date',
+            'returned_at'   => 'nullable|date|after_or_equal:departed_at',
+        ]);
+
+        $log = \App\Models\VehicleLog::create([
+            ...$validated,
+            'vehicle_id' => $vehicle->id,
+            'user_id'    => $request->user()->id,
+        ]);
+
+        // Mettre à jour le kilométrage du véhicule si l'entrée le fait avancer.
+        if (!empty($validated['mileage_end']) && $validated['mileage_end'] > (int) $vehicle->mileage) {
+            $vehicle->update(['mileage' => $validated['mileage_end']]);
+        }
+
+        return response()->json(['message' => 'Entrée ajoutée au carnet de bord.', 'log' => $log], 201);
+    }
+
+    /**
+     * GET /ressources/fournitures/export — export CSV du stock.
+     */
+    public function suppliesExport(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $orgId = $request->user()->organization_id;
+
+        $supplies = Supply::where('organization_id', $orgId)->orderBy('name')->get();
+
+        $csv = "Nom;Référence;Unité;Quantité;Seuil mini;Prix unitaire;Fournisseur;Emplacement\n";
+        foreach ($supplies as $s) {
+            $csv .= implode(';', [
+                str_replace(';', ',', (string) $s->name),
+                str_replace(';', ',', (string) $s->reference),
+                (string) $s->unit,
+                (string) $s->quantity,
+                (string) $s->min_quantity,
+                (string) $s->unit_price,
+                str_replace(';', ',', (string) $s->supplier),
+                str_replace(';', ',', (string) $s->location),
+            ]) . "\n";
+        }
+
+        return response(
+            "\xEF\xBB\xBF" . $csv, // BOM UTF-8 pour Excel
+            200,
+            [
+                'Content-Type'        => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="fournitures-' . now()->format('Y-m-d') . '.csv"',
+            ]
+        );
+    }
+
     public function dashboard(Request $request): Response
     {
         $org   = $request->user()->organization;
@@ -609,6 +677,42 @@ class ResourceController extends Controller
         }
     }
 
+    // ── Alias API (routes api.php → méthodes réelles) ─────────────────────────
+    // Ces alias résolvent le paramètre {id} de la route puis délèguent vers les
+    // vraies méthodes rooms* qui retournent bien du JsonResponse.
+    // NB : `index` n'a PAS d'alias : roomsIndex() retourne de l'Inertia et ne gère
+    // pas wantsJson() → laissé au stub __call() (JSON) pour les appels API.
+
+    // POST /resources → roomsStore (JsonResponse)
+    public function store(Request $request): JsonResponse
+    {
+        return $this->roomsStore($request);
+    }
+
+    // GET /resources/{id} → roomsShow (JsonResponse)
+    public function show(Request $request, $id): JsonResponse
+    {
+        return $this->roomsShow($request, Room::findOrFail($id));
+    }
+
+    // PUT /resources/{id} → roomsUpdate (JsonResponse)
+    public function update(Request $request, $id): JsonResponse
+    {
+        return $this->roomsUpdate($request, Room::findOrFail($id));
+    }
+
+    // DELETE /resources/{id} → roomsDestroy (JsonResponse)
+    public function destroy(Request $request, $id): JsonResponse
+    {
+        return $this->roomsDestroy($request, Room::findOrFail($id));
+    }
+
+    // GET /resources/{id}/availability → checkAvailability (JsonResponse)
+    public function availability(Request $request, $id): JsonResponse
+    {
+        return $this->checkAvailability($request, Room::findOrFail($id));
+    }
+
     /**
      * Filet de sécurité : action non implémentée → page "Bientôt disponible"
      * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
@@ -620,4 +724,12 @@ class ResourceController extends Controller
         }
         return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
+
+    // ── Alias routes ──────────────────────────────────────────────────────────
+    public function salles(Request $request)      { return $this->roomsIndex($request); }
+    public function materiel(Request $request)    { return $this->equipmentIndex($request); }
+    public function fournitures(Request $request) { return $this->suppliesIndex($request); }
+    public function vehicules(Request $request)   { return $this->vehiclesIndex($request); }
+
+
 }

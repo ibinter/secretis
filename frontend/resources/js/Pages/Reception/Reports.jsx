@@ -1,24 +1,51 @@
-﻿import React, { useState } from 'react';
+/**
+ * Reception/Reports.jsx — Rapports d'affluence de l'accueil
+ *
+ * Présentation migrée sur `@/Components/UI`.
+ * Logique métier inchangée : mêmes props Inertia (`report`, `last30`, `date`),
+ * même navigation (`/reception/reports?date=`), même export
+ * (`/reception/reports/pdf?date=`), mêmes calculs dérivés.
+ */
+
+import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import {
     BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import AppLayout from '@/Layouts/AppLayout';
+import {
+    BarChart3, FileText, Users, UserCheck, LogOut, UserX, Timer,
+    TrendingDown, Clock, PieChart as PieChartIcon, Trophy,
+} from 'lucide-react';
+import {
+    PageHeader, Button, Card, EmptyState, StatCard,
+    cx, CONTROL, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT,
+} from '@/Components/UI';
 
 // ─── Rapports Reception ───────────────────────────────────────────────────────
-const COLORS = ['#9333EA', '#F39C12', '#27AE60', '#E74C3C', '#9B59B6', '#3498DB'];
+const COLORS = ['#9333EA', '#0284C7', '#059669', '#D97706', '#DC2626', '#64748B'];
 
-export default function Reports({ report, last30, date }) {
+/* Réglages Recharts lisibles en clair comme en sombre. */
+const AXIS_TICK  = { fontSize: 11, fill: '#94A3B8' };
+const GRID_STROKE = 'rgba(148, 163, 184, 0.25)';
+const TOOLTIP_STYLE = {
+    borderRadius: 8,
+    border: '1px solid #E2E8F0',
+    fontSize: 12,
+    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.08)',
+};
+
+export default function Reports({ report = {}, last30 = [], date = '' }) {
     const [selectedDate, setSelectedDate] = useState(date);
 
     const handleDateChange = (d) => {
         setSelectedDate(d);
-        router.get('/visits/report', { date: d }, { preserveState: true });
+        router.get('/reception/reports', { date: d }, { preserveState: true });
     };
 
     const exportPdf = () => {
-        window.location.href = `/visits/report/pdf?date=${selectedDate}`;
+        window.location.href = `/reception/reports/pdf?date=${selectedDate}`;
     };
 
     // Donnees graphiques
@@ -36,133 +63,186 @@ export default function Reports({ report, last30, date }) {
         ? Math.round((report.no_show / report.total_visits) * 100)
         : 0;
 
+    const trend      = Array.isArray(last30) ? last30 : [];
+    const topHosts   = Array.isArray(report.top_hosts) ? report.top_hosts : [];
+    const hasTrend   = trend.some(d => (d?.count ?? 0) > 0);
+    const hasPeak    = peakHoursData.some(d => d.visits > 0);
+
+    /* ─── Rendu ────────────────────────────────────────────────────────────── */
+
     return (
         <AppLayout>
             <Head title="Rapports Réception" />
 
-            <div className="p-6 space-y-6">
-                {/* En-tête */}
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-900">Rapports Réception</h1>
-                        <p className="text-gray-500 text-sm mt-1">Analyse des visites et de l'affluence</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={e => handleDateChange(e.target.value)}
-                            className="border border-gray-200 rounded-xl px-4 py-2 text-sm"
-                        />
-                        <button onClick={exportPdf}
-                            className="bg-[#9333EA] text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
-                            📄 Export PDF
-                        </button>
-                    </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+                <PageHeader
+                    icon={BarChart3}
+                    title="Rapports de l'accueil"
+                    breadcrumbs={[{ label: 'Réception' }, { label: 'Rapports' }]}
+                    subtitle="Affluence, durée de présence et taux d'absence, jour par jour."
+                    actions={
+                        <>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={e => handleDateChange(e.target.value)}
+                                aria-label="Date du rapport"
+                                className={cx(CONTROL, 'h-10 w-auto')}
+                            />
+                            <Button variant="primary" icon={FileText} onClick={exportPdf}>
+                                Export PDF
+                            </Button>
+                        </>
+                    }
+                />
+
+                {/* Indicateurs du jour */}
+                <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+                    <StatCard label="Total visites"  value={report.total_visits ?? 0}  icon={Users}        tone="accent"  />
+                    <StatCard label="Présents"       value={report.checked_in ?? 0}    icon={UserCheck}    tone="success" />
+                    <StatCard label="Partis"         value={report.checked_out ?? 0}   icon={LogOut}       tone="neutral" />
+                    <StatCard label="No-show"        value={report.no_show ?? 0}       icon={UserX}        tone="danger"  />
+                    <StatCard label="Durée moyenne"  value={report.average_duration_min ?? 0} unit="min" icon={Timer} tone="info" />
+                    <StatCard label="Taux no-show"   value={noShowRate} unit="%"       icon={TrendingDown} tone={noShowRate > 20 ? 'danger' : 'warning'} />
                 </div>
 
-                {/* KPIs du jour */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                    {[
-                        { label: 'Total visites',      value: report.total_visits,         color: 'bg-purple-50',   text: 'text-purple-700',  icon: '📊' },
-                        { label: 'Présents',           value: report.checked_in,           color: 'bg-green-50',  text: 'text-green-700', icon: '🟢' },
-                        { label: 'Partis',             value: report.checked_out,          color: 'bg-gray-50',   text: 'text-gray-700',  icon: '🏃' },
-                        { label: 'No-show',            value: report.no_show,              color: 'bg-red-50',    text: 'text-red-700',   icon: '❌' },
-                        { label: 'Durée moy. (min)',   value: report.average_duration_min, color: 'bg-purple-50', text: 'text-purple-700',icon: '⏱️' },
-                        { label: 'Taux no-show',       value: `${noShowRate}%`,            color: 'bg-orange-50', text: 'text-orange-700',icon: '📉' },
-                    ].map(kpi => (
-                        <div key={kpi.label} className={`${kpi.color} rounded-2xl p-4`}>
-                            <div className="text-2xl mb-1">{kpi.icon}</div>
-                            <div className={`text-3xl font-black ${kpi.text}`}>{kpi.value}</div>
-                            <div className="text-gray-500 text-xs font-medium mt-0.5">{kpi.label}</div>
-                        </div>
-                    ))}
-                </div>
+                {/* Graphiques */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-                {/* Graphiques principaux */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Bar chart — visites 30 jours */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                        <h3 className="font-bold text-gray-900 mb-4">Visites sur 30 jours</h3>
-                        <ResponsiveContainer width="100%" height={220}>
-                            <BarChart data={last30} margin={{ top:0, right:0, left:-20, bottom:0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                <XAxis dataKey="date" tick={{ fontSize:10 }}
-                                    tickFormatter={d => new Date(d).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })} />
-                                <YAxis tick={{ fontSize:10 }} />
-                                <Tooltip
-                                    labelFormatter={d => new Date(d).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })}
-                                    formatter={v => [v, 'visites']}
-                                />
-                                <Bar dataKey="count" fill="#9333EA" radius={[4,4,0,0]} name="Visites" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    {/* Visites sur 30 jours */}
+                    <Card
+                        icon={BarChart3}
+                        title="Visites sur 30 jours"
+                        subtitle="Volume quotidien d'entrées enregistrées."
+                    >
+                        {!hasTrend ? (
+                            <EmptyState
+                                compact
+                                icon={BarChart3}
+                                title="Pas encore d'historique"
+                                description="La courbe se construit à partir des check-in enregistrés ; revenez après quelques journées d'activité."
+                            />
+                        ) : (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={trend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
+                                    <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={false}
+                                        tickFormatter={d => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} />
+                                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} allowDecimals={false} />
+                                    <Tooltip
+                                        contentStyle={TOOLTIP_STYLE}
+                                        cursor={{ fill: 'rgba(148, 163, 184, 0.12)' }}
+                                        labelFormatter={d => new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        formatter={v => [v, 'visites']}
+                                    />
+                                    <Bar dataKey="count" fill="#9333EA" radius={[4, 4, 0, 0]} name="Visites" maxBarSize={22} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </Card>
 
-                    {/* Line chart — affluence par heure */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                        <h3 className="font-bold text-gray-900 mb-4">Pic d'affluence (8h–18h)</h3>
-                        <ResponsiveContainer width="100%" height={220}>
-                            <LineChart data={peakHoursData} margin={{ top:0, right:0, left:-20, bottom:0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                <XAxis dataKey="hour" tick={{ fontSize:10 }} />
-                                <YAxis tick={{ fontSize:10 }} />
-                                <Tooltip formatter={v => [v, 'arrivées']} />
-                                <Line type="monotone" dataKey="visits" stroke="#F39C12" strokeWidth={3}
-                                    dot={{ fill:'#F39C12', r:4 }} activeDot={{ r:6 }} name="Arrivées" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
+                    {/* Affluence par heure */}
+                    <Card
+                        icon={Clock}
+                        title="Pic d'affluence"
+                        subtitle="Répartition des arrivées entre 8 h et 18 h."
+                    >
+                        {!hasPeak ? (
+                            <EmptyState
+                                compact
+                                icon={Clock}
+                                title="Aucune arrivée sur la journée"
+                                description="Sélectionnez une autre date : les heures d'affluence se calculent à partir des check-in du jour choisi."
+                            />
+                        ) : (
+                            <ResponsiveContainer width="100%" height={220}>
+                                <LineChart data={peakHoursData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
+                                    <XAxis dataKey="hour" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+                                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} allowDecimals={false} />
+                                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={v => [v, 'arrivées']} />
+                                    <Line type="monotone" dataKey="visits" stroke="#0284C7" strokeWidth={2}
+                                        dot={{ fill: '#0284C7', r: 3 }} activeDot={{ r: 5 }} name="Arrivées" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        )}
+                    </Card>
 
-                    {/* Pie chart — répartition par motif */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                        <h3 className="font-bold text-gray-900 mb-4">Répartition par motif</h3>
+                    {/* Répartition par motif */}
+                    <Card
+                        icon={PieChartIcon}
+                        title="Répartition par motif"
+                        subtitle="Objet déclaré des visites du jour."
+                    >
                         {purposeData.length === 0 ? (
-                            <div className="text-center text-gray-400 py-12">Aucune donnée</div>
+                            <EmptyState
+                                compact
+                                icon={PieChartIcon}
+                                title="Aucun motif renseigné"
+                                description="Le motif est saisi au check-in, à la borne comme à l'accueil ; il alimente ce graphique."
+                            />
                         ) : (
                             <ResponsiveContainer width="100%" height={220}>
                                 <PieChart>
-                                    <Pie data={purposeData} cx="50%" cy="50%" outerRadius={85}
-                                        dataKey="value" label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`}
-                                        labelLine={false}>
+                                    <Pie
+                                        data={purposeData} cx="50%" cy="50%" outerRadius={80}
+                                        dataKey="value" labelLine={false}
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    >
                                         {purposeData.map((_, i) => (
                                             <Cell key={i} fill={COLORS[i % COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
-                                    <Legend />
+                                    <Tooltip contentStyle={TOOLTIP_STYLE} />
+                                    <Legend wrapperStyle={{ fontSize: 12 }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         )}
-                    </div>
+                    </Card>
 
                     {/* Top hôtes */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                        <h3 className="font-bold text-gray-900 mb-4">TOP 10 — Hôtes les plus visités</h3>
-                        {(!report.top_hosts || report.top_hosts.length === 0) ? (
-                            <div className="text-center text-gray-400 py-12">Aucune donnée</div>
+                    <Card
+                        icon={Trophy}
+                        title="Hôtes les plus visités"
+                        subtitle="Classement des 10 collaborateurs recevant le plus de visiteurs."
+                    >
+                        {topHosts.length === 0 ? (
+                            <EmptyState
+                                compact
+                                icon={Trophy}
+                                title="Aucun hôte à classer"
+                                description="Le classement se construit dès que des visites sont rattachées à un collaborateur."
+                            />
                         ) : (
-                            <div className="space-y-2">
-                                {report.top_hosts.map((item, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <span className="text-sm font-bold text-gray-400 w-5">{i+1}</span>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-0.5">
-                                                <span className="text-sm font-semibold text-gray-800">{item.host}</span>
-                                                <span className="text-sm font-bold text-[#9333EA]">{item.count}</span>
+                            <ol className="space-y-3">
+                                {topHosts.map((item, i) => {
+                                    const max = topHosts[0]?.count || 1;
+                                    const pct = Math.max(2, Math.round((item.count / max) * 100));
+                                    return (
+                                        <li key={i} className="flex items-center gap-3">
+                                            <span className={cx('w-5 shrink-0 text-xs font-semibold tabular-nums', TEXT_FAINT)}>
+                                                {i + 1}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="mb-1 flex items-center justify-between gap-3">
+                                                    <span className={cx('truncate text-sm font-medium', TEXT_TITLE)}>
+                                                        {item.host || '—'}
+                                                    </span>
+                                                    <span className={cx('shrink-0 text-sm font-semibold tabular-nums', TEXT_MUTED)}>
+                                                        {item.count}
+                                                    </span>
+                                                </div>
+                                                <div className="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
+                                                    <div className="h-full rounded-full bg-purple-600" style={{ width: `${pct}%` }} />
+                                                </div>
                                             </div>
-                                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-[#9333EA] rounded-full"
-                                                    style={{ width: `${(item.count / report.top_hosts[0]?.count) * 100}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                        </li>
+                                    );
+                                })}
+                            </ol>
                         )}
-                    </div>
+                    </Card>
                 </div>
             </div>
         </AppLayout>

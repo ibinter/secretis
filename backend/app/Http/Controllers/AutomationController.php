@@ -435,4 +435,9 @@ class AutomationController extends Controller
             default               => $base,
         };
     }
+
+    public function indexPage(): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('Automatisations/Index');
+    }
 }

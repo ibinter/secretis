@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 const Icon = {
     Clock: () => (
@@ -45,7 +46,7 @@ export default function GuideSection({ section, articles = [] }) {
     const totalTime = articles.reduce((acc, a) => acc + (a.read_time_minutes || 0), 0);
 
     return (
-        <>
+        <AppLayout>
             <Head title={`${sectionTitle} | Guide | IBIG SECRETIS`} />
 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -161,7 +162,7 @@ export default function GuideSection({ section, articles = [] }) {
                     )}
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }
 export { GuideSection };

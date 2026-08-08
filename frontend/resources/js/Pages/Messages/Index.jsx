@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 import {
     ChatBubbleLeftRightIcon,
     MagnifyingGlassIcon,
@@ -312,7 +313,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
     // ─── Rendu ───────────────────────────────────────────────────────────────
 
     return (
-        <>
+        <AppLayout>
             <Head title="Messagerie interne" />
 
             <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
@@ -569,7 +570,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                     }}
                 />
             )}
-        </>
+        </AppLayout>
     );
 }
 
@@ -827,14 +828,24 @@ function ContactInfoPanel({ conversation, currentUserId, onClose }) {
                 {contact && (
                     <div className="space-y-2">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</p>
-                        <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                        <a
+                            href={contact.phone ? `tel:${contact.phone}` : undefined}
+                            aria-disabled={!contact.phone}
+                            title={contact.phone ?? 'Numéro non renseigné'}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 ${contact.phone ? 'hover:bg-gray-50 dark:hover:bg-gray-700' : 'opacity-50 pointer-events-none'}`}
+                        >
                             <PhoneIcon className="h-4 w-4 text-gray-400" />
                             Appeler
-                        </button>
-                        <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                        </a>
+                        <a
+                            href={contact.email ? `mailto:${contact.email}` : undefined}
+                            aria-disabled={!contact.email}
+                            title={contact.email ?? 'Email non renseigné'}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 ${contact.email ? 'hover:bg-gray-50 dark:hover:bg-gray-700' : 'opacity-50 pointer-events-none'}`}
+                        >
                             <EnvelopeIcon className="h-4 w-4 text-gray-400" />
                             Envoyer un email
-                        </button>
+                        </a>
                     </div>
                 )}
             </div>

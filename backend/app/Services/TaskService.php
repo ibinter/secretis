@@ -31,7 +31,7 @@ class TaskService
                 'organization_id' => $creator->organization_id,
                 'created_by'      => $creator->id,
                 'status'          => $data['status'] ?? 'todo',
-                'priority'        => $data['priority'] ?? 'normal',
+                'priority'        => $data['priority'] ?? 'medium',
                 'position'        => $this->getNextPosition(
                     $data['project_id'] ?? null,
                     $data['status'] ?? 'todo',

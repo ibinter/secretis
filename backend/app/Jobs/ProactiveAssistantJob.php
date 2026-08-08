@@ -239,7 +239,7 @@ class ProactiveAssistantJob implements ShouldQueue
 
         // Chercher les employés dont c'est l'anniversaire d'embauche aujourd'hui
         $birthdays = Employee::where('organization_id', $user->organization_id)
-            ->whereRaw('MONTH(hire_date) = ? AND DAY(hire_date) = ?', [
+            ->whereRaw('EXTRACT(MONTH FROM hire_date) = ? AND EXTRACT(DAY FROM hire_date) = ?', [
                 $today->month,
                 $today->day,
             ])

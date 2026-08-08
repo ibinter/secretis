@@ -63,7 +63,7 @@ class EmployeeController extends Controller
                 $q->where('first_name', 'ilike', "%{$search}%")
                   ->orWhere('last_name', 'ilike', "%{$search}%")
                   ->orWhere('employee_number', 'ilike', "%{$search}%")
-                  ->orWhere('position', 'ilike', "%{$search}%")
+                  ->orWhere('job_title', 'ilike', "%{$search}%")
                   ->orWhere('email', 'ilike', "%{$search}%");
             });
         }
@@ -102,19 +102,19 @@ class EmployeeController extends Controller
                 Rule::unique('employees', 'employee_number')->where('organization_id', $orgId),
             ],
             'phone'                   => 'nullable|string|max:30',
-            'department_id'           => 'nullable|uuid|exists:departments,id',
-            'manager_id'              => 'nullable|uuid|exists:employees,id',
-            'user_id'                 => 'nullable|uuid|exists:users,id',
+            'department_id'           => 'nullable|integer|exists:departments,id',
+            'manager_id'              => 'nullable|integer|exists:employees,id',
+            'user_id'                 => 'nullable|integer|exists:users,id',
             'contract_type'           => 'required|in:cdi,cdd,internship,freelance,other',
-            'position'                => 'required|string|max:150',
+            'job_title'               => 'required|string|max:150',
             'hire_date'               => 'required|date',
-            'end_date'                => 'nullable|date|after:hire_date',
-            'leave_balances'          => 'nullable|array',
-            'leave_balances.annual'   => 'nullable|integer|min:0',
-            'leave_balances.sick'     => 'nullable|integer|min:0',
-            'leave_balances.maternity'=> 'nullable|integer|min:0',
-            'leave_balances.unpaid'   => 'nullable|integer|min:0',
-            'leave_balances.recovery' => 'nullable|integer|min:0',
+            'termination_date'        => 'nullable|date|after:hire_date',
+            'leave_balance'           => 'nullable|array',
+            'leave_balance.annual'   => 'nullable|integer|min:0',
+            'leave_balance.sick'     => 'nullable|integer|min:0',
+            'leave_balance.maternity'=> 'nullable|integer|min:0',
+            'leave_balance.unpaid'   => 'nullable|integer|min:0',
+            'leave_balance.recovery' => 'nullable|integer|min:0',
             'emergency_contact'       => 'nullable|array',
             'notes'                   => 'nullable|string',
         ]);
@@ -123,7 +123,7 @@ class EmployeeController extends Controller
             ...$validated,
             'organization_id' => $orgId,
             'status'          => 'active',
-            'leave_balances'  => $validated['leave_balances'] ?? [
+            'leave_balance'   => $validated['leave_balance'] ?? [
                 'annual'    => 30,
                 'sick'      => 15,
                 'maternity' => 0,
@@ -144,9 +144,18 @@ class EmployeeController extends Controller
     {
         $this->authorizeEmployee($employee);
 
+        // Données sensibles (salaire, RIB, n° CNPS) : réservées à la RH et à l'intéressé.
+        $viewer = Auth::user();
+        $canSeeSensitive = $viewer->hasPermissionForModule('rh', 'manage')
+            || $employee->user_id === $viewer->id;
+
+        if ($canSeeSensitive) {
+            $employee->makeVisible(['base_salary', 'bank_account', 'social_security_number', 'tax_id', 'birth_date']);
+        }
+
         $employee->load([
             'department:id,name',
-            'manager:id,first_name,last_name,position,avatar',
+            'manager:id,first_name,last_name,job_title',
             'user:id,email,status,last_login_at',
         ]);
 
@@ -197,16 +206,16 @@ class EmployeeController extends Controller
                     ->ignore($employee->id),
             ],
             'phone'                   => 'nullable|string|max:30',
-            'department_id'           => 'nullable|uuid|exists:departments,id',
-            'manager_id'              => 'nullable|uuid|exists:employees,id',
+            'department_id'           => 'nullable|integer|exists:departments,id',
+            'manager_id'              => 'nullable|integer|exists:employees,id',
             'contract_type'           => 'required|in:cdi,cdd,internship,freelance,other',
-            'position'                => 'required|string|max:150',
+            'job_title'               => 'required|string|max:150',
             'hire_date'               => 'required|date',
-            'end_date'                => 'nullable|date|after:hire_date',
-            'leave_balances'          => 'nullable|array',
+            'termination_date'        => 'nullable|date|after:hire_date',
+            'leave_balance'           => 'nullable|array',
             'emergency_contact'       => 'nullable|array',
             'notes'                   => 'nullable|string',
-            'status'                  => 'required|in:active,inactive,on_leave',
+            'status'                  => 'required|in:active,on_leave,terminated,suspended',
         ]);
 
         $employee->update($validated);
@@ -223,7 +232,7 @@ class EmployeeController extends Controller
         $this->authorizeEmployee($employee);
 
         // On désactive, on ne supprime pas physiquement
-        $employee->update(['status' => 'inactive']);
+        $employee->update(['status' => 'terminated']);
         $employee->delete(); // soft delete
 
         return redirect()->route('rh.employes.index')
@@ -245,7 +254,8 @@ class EmployeeController extends Controller
         $employees = Employee::forOrganization($orgId)
             ->active()
             ->with('department:id,name')
-            ->get(['id', 'first_name', 'last_name', 'position', 'avatar', 'manager_id', 'department_id']);
+            // Colonnes réelles de `employees` : job_title (pas position), pas d'avatar.
+            ->get(['id', 'first_name', 'last_name', 'job_title', 'manager_id', 'department_id']);
 
         // Construire l'arbre depuis les employés sans manager (racines)
         $tree = $this->buildTree($employees, null);
@@ -262,9 +272,9 @@ class EmployeeController extends Controller
                 return [
                     'id'         => $emp->id,
                     'name'       => $emp->full_name,
-                    'position'   => $emp->position,
+                    'position'   => $emp->job_title,
                     'department' => $emp->department?->name,
-                    'avatar'     => $emp->avatar,
+                    'avatar'     => $emp->user?->avatar, // la colonne vit sur users, pas employees
                     'children'   => $this->buildTree($employees, $emp->id),
                 ];
             })
@@ -306,7 +316,7 @@ class EmployeeController extends Controller
                 'last_name'      => trim($row['Nom'] ?? ''),
                 'email'          => strtolower(trim($row['Email'] ?? '')),
                 'employee_number'=> trim($row['Matricule'] ?? ''),
-                'position'       => trim($row['Poste'] ?? ''),
+                'job_title'      => trim($row['Poste'] ?? ''),
                 'contract_type'  => strtolower(trim($row['Contrat'] ?? 'cdi')),
                 'hire_date'      => trim($row['Date embauche'] ?? ''),
                 'department'     => trim($row['Département'] ?? ''),
@@ -347,13 +357,13 @@ class EmployeeController extends Controller
                         'first_name'      => $row['first_name'],
                         'last_name'       => $row['last_name'],
                         'employee_number' => $row['employee_number'] ?: 'EMP-' . str_pad($index + 1, 4, '0', STR_PAD_LEFT),
-                        'position'        => $row['position'],
+                        'job_title'       => $row['job_title'] ?? $row['position'] ?? '',
                         'contract_type'   => in_array($row['contract_type'], ['cdi','cdd','internship','freelance','other']) ? $row['contract_type'] : 'other',
                         'hire_date'       => $row['hire_date'] ?: now()->toDateString(),
                         'department_id'   => $dept?->id,
                         'phone'           => $row['phone'],
                         'status'          => 'active',
-                        'leave_balances'  => ['annual'=>30,'sick'=>15,'maternity'=>0,'unpaid'=>0,'recovery'=>0],
+                        'leave_balance'   => ['annual'=>30,'sick'=>15,'maternity'=>0,'unpaid'=>0,'recovery'=>0],
                     ]
                 );
                 $imported++;
@@ -380,5 +390,35 @@ class EmployeeController extends Controller
     {
         $orgId = Auth::user()->organization_id;
         abort_if($employee->organization_id !== $orgId, 403);
+    }
+
+    /** GET /rh/personnel/creer — formulaire de création d'un employé */
+    public function create(): InertiaResponse
+    {
+        $orgId = Auth::user()->organization_id;
+
+        return Inertia::render('RH/Employes/Form', [
+            'employee'    => null,
+            'departments' => \App\Models\Department::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name']),
+            'managers'    => Employee::where('organization_id', $orgId)->where('status', 'active')
+                                ->orderBy('last_name')->get(['id', 'first_name', 'last_name']),
+            'users'       => \App\Models\User::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name', 'email']),
+        ]);
+    }
+
+    /** GET /rh/personnel/{employee}/modifier — formulaire d'édition */
+    public function edit(Employee $employee): InertiaResponse
+    {
+        $orgId = Auth::user()->organization_id;
+        abort_unless($employee->organization_id === $orgId, 403);
+
+        return Inertia::render('RH/Employes/Form', [
+            'employee'    => $employee,
+            'departments' => \App\Models\Department::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name']),
+            'managers'    => Employee::where('organization_id', $orgId)->where('status', 'active')
+                                ->where('id', '!=', $employee->id)
+                                ->orderBy('last_name')->get(['id', 'first_name', 'last_name']),
+            'users'       => \App\Models\User::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name', 'email']),
+        ]);
     }
 }

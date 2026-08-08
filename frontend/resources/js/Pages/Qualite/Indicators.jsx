@@ -84,7 +84,7 @@ function RecordValueModal({ indicator, onClose, onSuccess }) {
         if (!value) return;
         setLoading(true);
         try {
-            await axios.post(`/qualite/indicators/${indicator.id}/values`, {
+            await axios.post(`/qualite/indicateurs/${indicator.id}/valeur`, {
                 period_year:  year,
                 period_month: month,
                 value:        parseFloat(value),
@@ -183,7 +183,7 @@ function HistoryPanel({ indicator, onClose, onRecord }) {
     const [loading, setLoading] = useState(true);
 
     React.useEffect(() => {
-        axios.get(`/qualite/indicators/${indicator.id}/history`)
+        axios.get(`/qualite/indicateurs/${indicator.id}/historique`)
             .then(r => setHistory(r.data.values))
             .finally(() => setLoading(false));
     }, [indicator.id]);

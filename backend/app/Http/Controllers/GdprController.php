@@ -16,6 +16,20 @@ class GdprController extends Controller
     public function __construct(private readonly GdprService $gdprService) {}
 
     /**
+     * GET /rgpd
+     * Affiche la page « Mes données personnelles » (Inertia).
+     *
+     * La page charge elle-même ses données via les points d'entrée JSON
+     * /gdpr/my-data/summary, /gdpr/consent et /gdpr/requests : aucune prop
+     * n'est donc transmise ici. On ne renvoie JAMAIS de JSON sur cette URI,
+     * sous peine de « All Inertia requests must receive a valid Inertia response ».
+     */
+    public function myDataPage(Request $request): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('Privacy/MyData');
+    }
+
+    /**
      * GET /gdpr/my-data
      * Exporte les données de l'utilisateur connecté.
      */
@@ -63,7 +77,14 @@ class GdprController extends Controller
             'events'       => \DB::table('events')->where('organization_id', $org->id)->where('created_by', $user->id)->count(),
             'tasks'        => \DB::table('tasks')->where('organization_id', $org->id)->where('assigned_to', $user->id)->count(),
             'documents'    => \DB::table('documents')->where('organization_id', $org->id)->where('created_by', $user->id)->count(),
-            'messages'     => \DB::table('messages')->where('organization_id', $org->id)->where(fn($q) => $q->where('sender_id', $user->id)->orWhere('recipient_id', $user->id))->count(),
+            // `messages` n'a NI organization_id NI sender_id/recipient_id :
+            // colonnes réelles = conversation_id + user_id. Le cloisonnement
+            // par organisation se fait via la table `conversations`.
+            'messages'     => \DB::table('messages')
+                ->join('conversations', 'conversations.id', '=', 'messages.conversation_id')
+                ->where('conversations.organization_id', $org->id)
+                ->where('messages.user_id', $user->id)
+                ->count(),
             'activity_log' => \DB::table('audit_logs')->where('organization_id', $org->id)->where('user_id', $user->id)->count(),
         ];
 
@@ -231,6 +252,36 @@ class GdprController extends Controller
         $consent->update(['revoked_at' => now()]);
 
         return response()->json(['message' => 'Consentement révoqué avec succès.']);
+    }
+
+    // -------------------------------------------------------------------------
+    // Alias API (routes api.php → méthodes réelles)
+    // -------------------------------------------------------------------------
+
+    /** Alias : POST /api/gdpr/export (route gdpr.export) → exportMyData() */
+    public function requestExport(Request $request): BinaryFileResponse|JsonResponse
+    {
+        return $this->exportMyData($request);
+    }
+
+    /** Alias : POST /api/gdpr/delete (route gdpr.delete) → submitRequest() type=erasure */
+    public function requestDeletion(Request $request): JsonResponse
+    {
+        $request->merge(['type' => 'erasure']);
+
+        return $this->submitRequest($request);
+    }
+
+    /** Alias : GET /api/gdpr/consents (route gdpr.consents) → myConsents() */
+    public function consents(Request $request): JsonResponse
+    {
+        return $this->myConsents($request);
+    }
+
+    /** Alias : POST /api/gdpr/consents (route gdpr.consents.update) → saveConsent() */
+    public function updateConsents(Request $request): JsonResponse
+    {
+        return $this->saveConsent($request);
     }
 
     /**

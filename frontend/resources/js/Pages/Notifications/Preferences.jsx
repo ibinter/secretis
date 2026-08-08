@@ -7,6 +7,7 @@
 import React, { useState, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Types de notifications groupés par catégorie ─────────────────────────────
 const GROUPS = [
@@ -237,7 +238,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
   };
 
   return (
-    <>
+    <AppLayout>
       <Head title="Préférences de notifications — SECRETIS" />
 
       {/* Toast */}
@@ -433,7 +434,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
         </div>
 
       </div>
-    </>
+    </AppLayout>
   );
 }
 export { NotificationsPreferences };

@@ -106,13 +106,13 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                     </div>
                     <div className="flex gap-2">
                         <a
-                            href="/procurement/purchase-requests"
+                            href="/achats/demandes"
                             className="btn btn-sm bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition"
                         >
                             + Nouvelle DA
                         </a>
                         <a
-                            href="/procurement/rfqs"
+                            href="/achats/appels-offres"
                             className="btn btn-sm bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
                         >
                             + Nouvel AO
@@ -236,7 +236,7 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                                         return (
                                             <tr key={po.id} className="border-b border-gray-100 hover:bg-red-50/30">
                                                 <td className="py-2 px-3">
-                                                    <a href={`/procurement/purchase-orders/${po.id}`}
+                                                    <a href="/achats/commandes"
                                                        className="text-purple-600 hover:underline font-mono font-medium">
                                                         {po.po_number}
                                                     </a>
@@ -286,7 +286,7 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-baseline mb-1">
                                             <a
-                                                href={`/procurement/suppliers/${s.id}`}
+                                                href={`/achats/fournisseurs/${s.id}/scorecard`}
                                                 className="text-sm font-medium text-gray-800 hover:text-purple-600 truncate"
                                             >
                                                 {s.company_name}

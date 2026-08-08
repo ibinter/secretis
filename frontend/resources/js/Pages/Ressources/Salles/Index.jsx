@@ -62,7 +62,7 @@ function ReservationModal({ room, onClose, onSuccess }) {
     setSaving(true);
     setError('');
     try {
-      await axios.post(route('reservations.store'), {
+      await axios.post(route('api.v1.resources.reservations.store'), {
         room_id:  room.id,
         start_at: form.start_at,
         end_at:   form.end_at,

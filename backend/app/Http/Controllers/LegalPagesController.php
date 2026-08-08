@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
@@ -461,5 +462,223 @@ HTML],
 Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>' . e($data['email']) . '</strong>.</p>
 <p><a href="/">Retour à l\'accueil</a></p>';
         return view('legal', ['title' => 'Demande envoyée', 'content' => $content]);
+    }
+
+    // =========================================================================
+    // API JSON — consommée par le SPA React (frontend/Pages/Legal/Show.jsx)
+    //   GET  /api/v1/legal            → liste des pages publiques
+    //   GET  /api/v1/legal/{slug}     → une page
+    //   GET  /api/v1/legal/{slug}/pdf → export PDF
+    //   POST /api/v1/legal/accept     → enregistre l'acceptation (auth)
+    // =========================================================================
+
+    /** Catégorie par défaut pour les entrées du fallback PAGES (constante). */
+    private const CATEGORY_MAP = [
+        'mentions-legales'            => 'general',
+        'cgu'                         => 'usage',
+        'confidentialite'            => 'privacy',
+        'cookies'                     => 'privacy',
+        'contrat-licence'             => 'usage',
+        'conditions-commerciales'     => 'commercial',
+        'politique-sauvegarde'        => 'support',
+        'politique-support'           => 'support',
+        'politique-resiliation'       => 'commercial',
+        'politique-remboursement'     => 'commercial',
+        'traitement-donnees'          => 'privacy',
+        'propriete-intellectuelle'    => 'general',
+        'protection-marque'           => 'general',
+        'conditions-essai'            => 'commercial',
+        'conditions-sara'             => 'usage',
+        'limitation-responsabilite-ia'=> 'usage',
+        'gestion-compte'              => 'privacy',
+        'gestion-reclamations'        => 'support',
+    ];
+
+    private const REQUIRES_ACCEPTANCE = ['cgu', 'confidentialite', 'contrat-licence'];
+
+    /**
+     * GET /api/v1/legal — Liste des pages légales publiques (métadonnées + contenu).
+     */
+    public function apiIndex(Request $request)
+    {
+        // Source prioritaire : table legal_pages (contenu bilingue json)
+        if (Schema::hasTable('legal_pages')) {
+            $rows = DB::table('legal_pages')
+                ->where('is_active', true)
+                ->orderBy('display_order')
+                ->get();
+
+            if ($rows->isNotEmpty()) {
+                $data = $rows->map(fn ($row) => $this->normalizeDbRow($row, $request))->values();
+                return response()->json(['data' => $data]);
+            }
+        }
+
+        // Fallback : constante PAGES
+        $data = collect(self::PAGES)->map(
+            fn ($page, $slug) => $this->normalizeConstPage($slug, $page, $request)
+        )->values();
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
+     * GET /api/v1/legal/{slug} — Détail d'une page légale.
+     */
+    public function apiShow(Request $request, string $slug)
+    {
+        if (Schema::hasTable('legal_pages')) {
+            $row = DB::table('legal_pages')->where('slug', $slug)->first();
+            if ($row) {
+                return response()->json(['data' => $this->normalizeDbRow($row, $request)]);
+            }
+        }
+
+        $page = self::PAGES[$slug] ?? null;
+        abort_unless((bool) $page, 404);
+
+        return response()->json(['data' => $this->normalizeConstPage($slug, $page, $request)]);
+    }
+
+    /**
+     * GET /api/v1/legal/{slug}/pdf — Export PDF (DomPDF) d'une page légale.
+     */
+    public function apiPdf(string $slug)
+    {
+        $title   = null;
+        $content = null;
+        $version = '1.0';
+
+        if (Schema::hasTable('legal_pages')) {
+            $row = DB::table('legal_pages')->where('slug', $slug)->first();
+            if ($row) {
+                $t       = $this->decodeJson($row->title);
+                $c       = $this->decodeJson($row->content);
+                $title   = is_array($t) ? ($t['fr'] ?? reset($t)) : $t;
+                $content = is_array($c) ? ($c['fr'] ?? reset($c)) : $c;
+                $version = $row->version ?? '1.0';
+            }
+        }
+
+        if ($content === null) {
+            $page = self::PAGES[$slug] ?? null;
+            abort_unless((bool) $page, 404);
+            $title   = $page['title'];
+            $content = $page['content'];
+        }
+
+        $pdf = app('dompdf.wrapper')->loadView('pdf.legal', compact('title', 'content', 'version'));
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+        $pdf->setOption('isHtml5ParserEnabled', true);
+
+        return response($pdf->output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"SECRETIS-{$slug}.pdf\"",
+        ]);
+    }
+
+    /**
+     * POST /api/v1/legal/accept — Enregistre l'acceptation d'un document (auth requise).
+     */
+    public function accept(Request $request)
+    {
+        $data = $request->validate([
+            'slug'    => 'required|string|max:100',
+            'version' => 'required|string|max:20',
+        ]);
+
+        $user = Auth::user();
+        abort_unless((bool) $user, 401);
+
+        if (Schema::hasTable('legal_page_acceptances')) {
+            DB::table('legal_page_acceptances')->updateOrInsert(
+                [
+                    'user_id'   => $user->id,
+                    'page_slug' => $data['slug'],
+                    'version'   => $data['version'],
+                ],
+                [
+                    'ip_address'  => $request->ip(),
+                    'user_agent'  => substr((string) $request->userAgent(), 0, 255),
+                    'accepted_at' => now(),
+                    'updated_at'  => now(),
+                    'created_at'  => now(),
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Acceptation enregistrée.', 'accepted' => true]);
+    }
+
+    // ── Helpers de normalisation ──────────────────────────────────────────────
+
+    private function decodeJson($value)
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        $decoded = json_decode((string) $value, true);
+        return json_last_error() === JSON_ERROR_NONE ? $decoded : $value;
+    }
+
+    /** Normalise une ligne de la table legal_pages vers le format attendu par le SPA. */
+    private function normalizeDbRow($row, Request $request): array
+    {
+        $title   = $this->decodeJson($row->title);
+        $content = $this->decodeJson($row->content);
+
+        // Garantir la forme {fr, en}
+        if (! is_array($title))   { $title   = ['fr' => (string) $title,   'en' => (string) $title]; }
+        if (! is_array($content)) { $content = ['fr' => (string) $content, 'en' => (string) $content]; }
+
+        return [
+            'slug'                => $row->slug,
+            'title'               => $title,
+            'content'             => $content,
+            'icon'                => $row->icon ?? null,
+            'category'            => $row->category ?? 'general',
+            'version'             => $row->version ?? '1.0',
+            'requires_acceptance' => (bool) ($row->requires_acceptance ?? false),
+            'is_public'           => (bool) ($row->is_public ?? true),
+            'effective_date'      => $row->effective_date ?? null,
+            'updated_at'          => $row->updated_at ?? null,
+            'user_accepted'       => $this->userAccepted($row->slug, $row->version ?? '1.0'),
+        ];
+    }
+
+    /** Normalise une entrée de la constante PAGES vers le format attendu par le SPA. */
+    private function normalizeConstPage(string $slug, array $page, Request $request): array
+    {
+        $version = '1.0';
+
+        return [
+            'slug'                => $slug,
+            'title'               => ['fr' => $page['title'], 'en' => $page['title']],
+            'content'             => ['fr' => $page['content'], 'en' => $page['content']],
+            'icon'                => null,
+            'category'            => self::CATEGORY_MAP[$slug] ?? 'general',
+            'version'             => $version,
+            'requires_acceptance' => in_array($slug, self::REQUIRES_ACCEPTANCE, true),
+            'is_public'           => true,
+            'effective_date'      => null,
+            'updated_at'          => null,
+            'user_accepted'       => $this->userAccepted($slug, $version),
+        ];
+    }
+
+    /** Indique si l'utilisateur courant a accepté cette version du document. */
+    private function userAccepted(string $slug, string $version): bool
+    {
+        $user = Auth::user();
+        if (! $user || ! Schema::hasTable('legal_page_acceptances')) {
+            return false;
+        }
+
+        return DB::table('legal_page_acceptances')
+            ->where('user_id', $user->id)
+            ->where('page_slug', $slug)
+            ->where('version', $version)
+            ->exists();
     }
 }

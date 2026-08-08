@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Organisation;
+use App\Models\Organization;
 use App\Notifications\TrialExpiringNotification;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -49,7 +49,7 @@ class SendTrialExpiryReminders implements ShouldQueue
             $targetDate = Carbon::today()->addDays($days)->toDateString();
 
             // Récupère les organisations dont l'essai expire exactement dans $days jours
-            $organisations = Organisation::query()
+            $organisations = Organization::query()
                 ->where('status', 'trial')
                 ->whereDate('trial_ends_at', $targetDate)
                 ->whereNull('subscription_activated_at')
@@ -114,7 +114,7 @@ class SendTrialExpiryReminders implements ShouldQueue
     /**
      * Récupère les fonctionnalités utilisées par l'organisation (pour J-7)
      */
-    protected function getUsedFeatures(Organisation $organisation): array
+    protected function getUsedFeatures(Organization $organisation): array
     {
         $features = [];
 

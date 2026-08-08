@@ -18,11 +18,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string      $id
  * @property string      $organization_id
  * @property string      $employee_id
- * @property string      $leave_type        annual|sick|maternity|unpaid|recovery
+ * @property string      $type        annual|sick|maternity|unpaid|recovery
  * @property string      $status            pending|approved_n1|approved_hr|rejected
  * @property Carbon      $start_date
  * @property Carbon      $end_date
- * @property int         $days_count        Calculé auto (hors weekends)
+ * @property int         $working_days        Calculé auto (hors weekends)
  * @property string|null $reason            Motif fourni par l'employé
  * @property string|null $rejection_reason  Motif de refus
  * @property string|null $approver_n1_id    UUID User (manager)
@@ -42,11 +42,11 @@ class LeaveRequest extends Model
     protected $fillable = [
         'organization_id',
         'employee_id',
-        'leave_type',
+        'type',
         'status',
         'start_date',
         'end_date',
-        'days_count',
+        'working_days',
         'reason',
         'rejection_reason',
         'approver_n1_id',
@@ -63,7 +63,7 @@ class LeaveRequest extends Model
         'approved_n1_at'=> 'datetime',
         'approved_hr_at'=> 'datetime',
         'rejected_at'   => 'datetime',
-        'days_count'    => 'integer',
+        'working_days'  => 'integer',
     ];
 
     // -------------------------------------------------------------------------
@@ -73,14 +73,14 @@ class LeaveRequest extends Model
     protected static function booted(): void
     {
         static::creating(function (self $leave) {
-            if ($leave->start_date && $leave->end_date && ! $leave->days_count) {
-                $leave->days_count = $leave->calculateDays();
+            if ($leave->start_date && $leave->end_date && ! $leave->working_days) {
+                $leave->working_days = $leave->calculateDays();
             }
         });
 
         static::updating(function (self $leave) {
             if ($leave->isDirty(['start_date', 'end_date'])) {
-                $leave->days_count = $leave->calculateDays();
+                $leave->working_days = $leave->calculateDays();
             }
         });
     }
@@ -214,13 +214,13 @@ class LeaveRequest extends Model
      */
     public function getLeaveTypeLabelAttribute(): string
     {
-        return match ($this->leave_type) {
+        return match ($this->type) {
             'annual'    => 'Congé annuel',
             'sick'      => 'Congé maladie',
             'maternity' => 'Congé maternité/paternité',
             'unpaid'    => 'Congé sans solde',
             'recovery'  => 'Récupération',
-            default     => $this->leave_type,
+            default     => $this->type,
         };
     }
 }

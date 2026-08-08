@@ -85,7 +85,7 @@ function CreatePoModal({ suppliers, onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/purchase-orders', { onSuccess: () => onClose() });
+        post('/achats/commandes', { onSuccess: () => onClose() });
     };
 
     return (
@@ -247,7 +247,7 @@ function GoodsReceiptModal({ po, onClose }) {
 
     const submit = () => {
         setLoading(true);
-        router.post(`/procurement/purchase-orders/${po.id}/receive`, {
+        router.post(`/achats/commandes/${po.id}/reception`, {
             received_date: receivedDate,
             notes,
             items_received: items,
@@ -370,7 +370,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                 <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl border border-gray-200">
                     <select
                         value={filters?.status ?? ''}
-                        onChange={e => router.get('/procurement/purchase-orders', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
+                        onChange={e => router.get('/achats/commandes', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     >
                         <option value="">Tous les statuts</option>
@@ -380,7 +380,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                     </select>
                     <select
                         value={filters?.supplier_id ?? ''}
-                        onChange={e => router.get('/procurement/purchase-orders', { ...filters, supplier_id: e.target.value || undefined }, { preserveState: true, replace: true })}
+                        onChange={e => router.get('/achats/commandes', { ...filters, supplier_id: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     >
                         <option value="">Tous les fournisseurs</option>
@@ -440,13 +440,13 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                                             <td className="py-3 px-4">
                                                 <div className="flex gap-1.5 justify-center flex-wrap">
                                                     {po.status === 'brouillon' && (
-                                                        <button onClick={() => router.post(`/procurement/purchase-orders/${po.id}/approve`)}
+                                                        <button onClick={() => router.post(`/achats/commandes/${po.id}/approuver`)}
                                                             className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">
                                                             Approuver
                                                         </button>
                                                     )}
                                                     {po.status === 'approuve' && (
-                                                        <button onClick={() => router.post(`/procurement/purchase-orders/${po.id}/send`)}
+                                                        <button onClick={() => router.post(`/achats/commandes/${po.id}/envoyer`)}
                                                             className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200">
                                                             Envoyer
                                                         </button>
@@ -457,7 +457,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                                                             Réception
                                                         </button>
                                                     )}
-                                                    <a href={`/procurement/purchase-orders/${po.id}/pdf`}
+                                                    <a href={`/achats/commandes/${po.id}/pdf`}
                                                         className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
                                                         target="_blank">
                                                         PDF
@@ -477,7 +477,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                     <div className="flex justify-center gap-2">
                         {Array.from({ length: purchase_orders.last_page }, (_, i) => i + 1).map(page => (
                             <button key={page}
-                                onClick={() => router.get('/procurement/purchase-orders', { ...filters, page })}
+                                onClick={() => router.get('/achats/commandes', { ...filters, page })}
                                 className={`w-8 h-8 rounded text-sm ${page === purchase_orders.current_page ? 'bg-purple-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
                                 {page}
                             </button>

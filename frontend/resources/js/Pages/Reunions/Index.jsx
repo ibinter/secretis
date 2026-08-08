@@ -41,10 +41,11 @@ const STATUS_CONFIG = {
 };
 
 const MEETING_TYPE_LABELS = {
-  board:         'Conseil d\'administration',
-  team:          'Réunion d\'équipe',
-  project:       'Réunion projet',
+  regular:       'Réunion ordinaire',
   extraordinary: 'Réunion extraordinaire',
+  board:         'Conseil d\'administration',
+  committee:     'Comité',
+  other:         'Autre',
 };
 
 // ---------------------------------------------------------------------------
