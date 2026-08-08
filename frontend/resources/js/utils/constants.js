@@ -111,6 +111,7 @@ export const MODULES = [
   { id: 'dashboard',     label: 'Tableau de bord',  icon: 'LayoutDashboard', href: '/dashboard',              section: 'general' },
   // GED & Contacts
   { id: 'ged',           label: 'GED',               icon: 'Archive',         href: '/ged',                    section: 'general' },
+  { id: 'modeles',       label: 'Modèles de lettres', icon: 'FileText',    href: '/ged/modeles',            section: 'general' },
   { id: 'contacts',      label: 'Contacts',           icon: 'Users2',          href: '/annuaire',               section: 'general' },
   { id: 'aide',          label: 'Aide',               icon: 'HelpCircle',      href: '/aide',                   section: 'general' },
   // Secrétariat

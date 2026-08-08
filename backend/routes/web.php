@@ -295,6 +295,19 @@ Route::middleware([
     Route::get('/courrier/{id}/qr', [\App\Http\Controllers\QrVerifyController::class, 'courrierQr'])->name('qr.courrier');
 
     Route::prefix('ged')->name('ged.')->group(function () {
+
+        // ── Modèles de lettres ──────────────────────────────────────────────
+        // La table `document_templates` était migrée depuis longtemps sans une
+        // ligne de code en face : le secrétariat repartait d'une page blanche
+        // pour chaque convocation, attestation ou note de service.
+        Route::prefix('modeles')->name('modeles.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\DocumentTemplateController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\DocumentTemplateController::class, 'store'])->name('store');
+            Route::get('/{id}', [\App\Http\Controllers\DocumentTemplateController::class, 'show'])->whereNumber('id')->name('show');
+            Route::put('/{id}', [\App\Http\Controllers\DocumentTemplateController::class, 'update'])->whereNumber('id')->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\DocumentTemplateController::class, 'destroy'])->whereNumber('id')->name('destroy');
+            Route::post('/{id}/fusionner', [\App\Http\Controllers\DocumentTemplateController::class, 'fusionner'])->whereNumber('id')->name('fusionner');
+        });
         Route::get('/', [DocumentController::class, 'index'])->name('index');
         Route::get('/upload', [DocumentController::class, 'index'])->name('upload.form');
         Route::post('/upload', [DocumentController::class, 'upload'])->name('upload');
