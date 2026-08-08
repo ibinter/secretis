@@ -497,6 +497,23 @@ Route::middleware([
     // MODULE 8 — Ressources Humaines Légère (Vague 4/8)
     // -------------------------------------------------------------------------
     Route::prefix('rh')->name('rh.')->group(function () {
+
+        // ── Paie ────────────────────────────────────────────────────────────
+        // Le référentiel des TAUX relève d'IBIG (matière légale, commune à un
+        // pays) : il vit sous /superadmin/paie. Ici, la RH l'exploite pour son
+        // propre effectif.
+        Route::prefix('paie')->name('paie.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\PayrollController::class, 'index'])->name('index');
+            Route::post('/periodes', [\App\Http\Controllers\PayrollController::class, 'ouvrirPeriode'])->name('periodes.store');
+            Route::get('/periodes/{id}', [\App\Http\Controllers\PayrollController::class, 'periode'])->whereNumber('id')->name('periode');
+            Route::post('/periodes/{id}/calculer', [\App\Http\Controllers\PayrollController::class, 'calculer'])->whereNumber('id')->name('periodes.calculer');
+            Route::post('/periodes/{id}/cloturer', [\App\Http\Controllers\PayrollController::class, 'cloturer'])->whereNumber('id')->name('periodes.cloturer');
+            Route::get('/bulletins/{id}', [\App\Http\Controllers\PayrollController::class, 'bulletin'])->whereNumber('id')->name('bulletin');
+            Route::get('/bulletins/{id}/pdf', [\App\Http\Controllers\PayrollController::class, 'bulletinPdf'])->whereNumber('id')->name('bulletin.pdf');
+            Route::post('/rubriques', [\App\Http\Controllers\PayrollController::class, 'storeRubrique'])->name('rubriques.store');
+            Route::delete('/rubriques/{id}', [\App\Http\Controllers\PayrollController::class, 'destroyRubrique'])->whereNumber('id')->name('rubriques.destroy');
+            Route::post('/taux-employeur', [\App\Http\Controllers\PayrollController::class, 'storeTauxEmployeur'])->name('taux-employeur.store');
+        });
         Route::get('/', [HrController::class, 'dashboard'])->name('index');
         Route::get('/personnel', [HrController::class, 'index'])->name('personnel.index');
         Route::get('/personnel/{employee}', [EmployeeController::class, 'show'])->name('personnel.show')->whereNumber('employee');

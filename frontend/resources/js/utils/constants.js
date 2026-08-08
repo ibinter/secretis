@@ -131,6 +131,7 @@ export const MODULES = [
   // RH
   { id: 'personnel',     label: 'Personnel',        icon: 'Users2',        href: '/rh/personnel',           section: 'rh' },
   { id: 'conges',        label: 'Congés',           icon: 'Umbrella',      href: '/rh/conges',              section: 'rh' },
+  { id: 'paie',          label: 'Paie',             icon: 'Wallet',        href: '/rh/paie',                section: 'rh' },
   { id: 'notes_frais',   label: 'Notes de frais',   icon: 'Receipt',       href: '/rh/notes-de-frais',      section: 'rh' },
   { id: 'planning',      label: 'Planning',         icon: 'CalendarRange', href: '/rh/planning',            section: 'rh' },
   // Finance

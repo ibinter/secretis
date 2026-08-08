@@ -216,8 +216,11 @@ class PayrollRuleService
             $verifie = $verifie && $confirmee;
 
             $branches[] = [
-                'scheme'    => $regle->scheme_code,
-                'branch'    => $regle->branch_label,
+                'scheme'      => $regle->scheme_code,
+                'branch'      => $regle->branch_label,
+                // Le code court sert d'identifiant technique sur la ligne de
+                // bulletin ; le libellé, lui, est fait pour être lu.
+                'branch_code' => $regle->branch_code,
                 'basis'     => $assiette,
                 'floor'     => $plancher ?: null,
                 'ceiling'   => $plafond,

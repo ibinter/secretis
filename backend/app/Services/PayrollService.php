@@ -179,7 +179,7 @@ class PayrollService
             if ($b['employee'] > 0) {
                 $lignes[] = [
                     'category' => 'contribution',
-                    'code'     => $b['scheme'] . '/' . $b['branch'],
+                    'code'     => $b['scheme'] . '/' . $b['branch_code'],
                     'label'    => $b['branch'] . ' (part salariale)',
                     'base'     => $b['basis'],
                     'rate'     => $b['employee_rate'],
@@ -193,7 +193,7 @@ class PayrollService
             if ($b['employer'] > 0) {
                 $lignes[] = [
                     'category' => 'employer_contribution',
-                    'code'     => $b['scheme'] . '/' . $b['branch'],
+                    'code'     => $b['scheme'] . '/' . $b['branch_code'],
                     'label'    => $b['branch'] . ' (part patronale)',
                     'base'     => $b['basis'],
                     'rate'     => $b['employer_rate'],
