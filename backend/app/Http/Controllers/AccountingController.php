@@ -699,6 +699,9 @@ class AccountingController extends Controller
      */
     public function export(Request $request): \Symfony\Component\HttpFoundation\Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user  = Auth::user();
         $start = Carbon::parse($request->input('start', now()->startOfYear()));
         $end   = Carbon::parse($request->input('end', now()->endOfYear()));

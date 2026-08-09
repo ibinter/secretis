@@ -410,6 +410,9 @@ class VisitorController extends Controller
     // GET /reception/log/export — journal des visites au format CSV
     public function exportLog(Request $request): \Symfony\Component\HttpFoundation\Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $orgId = auth()->user()->organization_id;
 
         $visits = VisitLog::where('organization_id', $orgId)

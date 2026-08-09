@@ -273,6 +273,9 @@ class ExpenseController extends Controller
 
     public function exportForAccounting(Request $request): JsonResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         if (! Auth::user()->hasAnyRole(['admin_org', 'accountant'])) {
             abort(403);
         }

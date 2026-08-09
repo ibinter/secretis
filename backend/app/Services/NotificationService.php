@@ -334,6 +334,15 @@ class NotificationService
             return false;
         }
 
+        // Coût variable fermé au palier Découverte (cahier section 3.4) : chaque
+        // SMS coûte de l'argent réel. On ne lève pas d'exception — un envoi de
+        // notification n'est pas une requête utilisateur, et faire échouer le
+        // traitement métier parce qu'un canal est fermé serait disproportionné.
+        // Le canal est simplement omis ; la notification in-app reste écrite.
+        if (! app(\App\Services\LicenceGarde::class)->autorise('sms', $user)) {
+            return false;
+        }
+
         $pref = $user->getPreference("notifications.{$type}.sms");
         if ($pref !== null) {
             return (bool) $pref;

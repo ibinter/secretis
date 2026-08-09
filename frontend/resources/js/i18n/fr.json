@@ -1250,5 +1250,96 @@
     "mileage":      "Kilométrage",
     "next_service": "Prochain entretien",
     "fuel_level":   "Niveau de carburant"
+  },
+
+  "licence": {
+    "etat": {
+      "demo": "Démo publique",
+      "free": "Découverte",
+      "trial": "Essai",
+      "active": "Formule active",
+      "grace": "Période de grâce",
+      "expired": "Expiré — lecture seule"
+    },
+    "banniere": {
+      "demo": "Démonstration publique. Les données sont fictives et effacées chaque nuit.",
+      "trial_one": "Essai en cours — {{count}} jour restant sur la formule {{formule}}.",
+      "trial_many": "Essai en cours — {{count}} jours restants sur la formule {{formule}}.",
+      "trial_other": "Essai en cours — {{count}} jours restants sur la formule {{formule}}.",
+      "trial_dernier_jour": "Dernier jour d'essai. Activez une formule pour conserver l'export et le multi-utilisateur.",
+      "free": "Palier Découverte — {{plafond}}. Passez à une formule payante pour lever la limite.",
+      "apres_essai": "Essai terminé. Vos données sont conservées : {{plafond}} restent modifiables, le reste est en lecture seule.",
+      "grace_one": "Abonnement échu. Accès maintenu {{count}} jour, puis passage en lecture seule.",
+      "grace_many": "Abonnement échu. Accès maintenu {{count}} jours, puis passage en lecture seule.",
+      "grace_other": "Abonnement échu. Accès maintenu {{count}} jours, puis passage en lecture seule.",
+      "expired": "Abonnement expiré — lecture seule. Données conservées jusqu'au {{date}}."
+    },
+    "quota": {
+      "atteint": "Limite du palier Découverte atteinte ({{plafond}}). Vos données restent accessibles et modifiables. Pour aller au-delà, activez la formule {{formule_suivante}} à partir de {{prix}}.",
+      "restant": "Restant : {{restant}} {{compteur}} avant le plafond."
+    },
+    "palier": {
+      "decouverte": {
+        "titre": "Découverte",
+        "accroche": "Gratuit à vie, sans carte bancaire.",
+        "cta": "Créer mon espace gratuit",
+        "note": "Connexion par OTP e-mail. Les documents générés portent la mention « Généré avec {{solution}} — ibigsoft.com ».",
+        "inclus": {
+          "utilisateur": "Utilisateur unique",
+          "fonctions_base": "Toutes les fonctions de base",
+          "web_pwa": "Accès web et installation PWA",
+          "sauvegarde": "Sauvegarde quotidienne"
+        },
+        "exclus": {
+          "export": "Export CSV, Excel et PDF",
+          "multi_utilisateur": "Multi-utilisateur et rôles",
+          "api": "API et intégrations",
+          "relances": "Relances automatiques WhatsApp et SMS",
+          "sara": "Assistant IA SARA",
+          "support": "Support prioritaire"
+        }
+      }
+    },
+    "demo": {
+      "titre": "Démo publique",
+      "accroche": "Le vrai logiciel, données fictives, sans inscription. Remise à zéro chaque nuit.",
+      "cta": "Explorer la démo {{solution}}"
+    },
+    "essai": {
+      "duree_jours": "{{jours}}"
+    },
+    "email": {
+      "j1": {
+        "objet": "Vos premiers pas sur {{solution}}",
+        "corps": "Bienvenue. Votre essai de la formule {{formule}} est en cours. Pour bien démarrer : créez votre premier document, invitez un collègue, puis activez vos notifications. Le centre d'aide et notre équipe WhatsApp répondent à toute question."
+      },
+      "j3": {
+        "objet_one": "Il vous reste {{count}} jour sur {{solution}}",
+        "objet_many": "Il vous reste {{count}} jours sur {{solution}}",
+        "objet_other": "Il vous reste {{count}} jours sur {{solution}}",
+        "corps": "À la fin de l'essai, l'export, le multi-utilisateur, l'API et l'assistant SARA se ferment. Vos données, elles, restent en place. Consultez les formules pour conserver l'ensemble des fonctions."
+      },
+      "j1_final": {
+        "objet": "Dernier jour d'essai — vos données sont conservées",
+        "corps": "Aucune urgence : votre espace bascule automatiquement en Découverte et vos données restent accessibles. Si vous souhaitez conserver l'export, le multi-utilisateur et l'assistant SARA, activez une formule quand vous le voudrez."
+      },
+      "j0": {
+        "objet": "Votre espace est passé en Découverte",
+        "corps": "Votre espace est désormais au palier Découverte : {{plafond}} restent modifiables, le reste est en lecture seule. Rien n'est supprimé. Activez une formule à tout moment pour retrouver l'écriture sur l'ensemble de vos données."
+      },
+      "j7": {
+        "objet": "Une question sur {{solution}} ?",
+        "corps": "Nous restons disponibles pour un échange court, sans engagement. Votre espace Découverte reste ouvert : vous pouvez continuer à l'utiliser aussi longtemps que vous le souhaitez."
+      },
+      "j60": {
+        "objet": "Vos données seront supprimées le {{date}}",
+        "corps": "Vos données seront supprimées le {{date}}. Réactivez votre abonnement ou demandez un export à support@ibigsoft.com."
+      },
+      "j83": {
+        "objet": "Dernier rappel — suppression de vos données le {{date}}",
+        "corps": "Vos données seront supprimées le {{date}}. Réactivez votre abonnement ou demandez un export à support@ibigsoft.com."
+      }
+    },
+    "filigrane": "Généré avec {{solution}} — ibigsoft.com"
   }
 }

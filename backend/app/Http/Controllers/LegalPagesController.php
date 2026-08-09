@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\LicenceDocuments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -406,16 +407,71 @@ HTML],
 HTML],
     ];
 
+    // =========================================================================
+    // Documents engendrés par le moteur de licence (cahier §11)
+    //
+    // POURQUOI ILS PASSENT DEVANT LA BASE ET DEVANT LA CONSTANTE
+    // ----------------------------------------------------------
+    // Six documents — conditions d'essai, CGU, CGV, CLUF, sauvegarde,
+    // résiliation — parlent essentiellement de durées, de plafonds et d'états.
+    // Tant qu'ils vivent en HTML figé, chaque modification de
+    // `licence.config.json` les rend faux en silence : la vitrine annonce une
+    // durée, les CGU en annoncent une autre, et le client conclut que l'éditeur
+    // ne maîtrise pas son propre produit (§12, règle fondatrice).
+    //
+    // Ces six documents sont donc engendrés à la lecture, à partir du moteur.
+    // Une ligne restée en base pour l'un d'eux est ignorée : c'est délibéré,
+    // c'est la seule façon de garantir qu'aucun chiffre périmé ne survive dans
+    // un texte contractuel.
+    // =========================================================================
+
+    private function docsLicence(): LicenceDocuments
+    {
+        return app(LicenceDocuments::class);
+    }
+
+    /**
+     * Applique le régime licence à un contenu : remplacement complet, ajout d'un
+     * bloc, ou passe-plat pour les documents qui ne parlent pas de licence.
+     */
+    private function contenuLicence(string $slug, ?string $html): ?string
+    {
+        $docs = $this->docsLicence();
+
+        if ($docs->remplace($slug)) {
+            return $docs->html($slug);
+        }
+
+        if ($docs->complete($slug) && $html !== null) {
+            return $html . $docs->supplement($slug);
+        }
+
+        return $html;
+    }
+
     public function show(string $slug)
     {
+        $docs = $this->docsLicence();
+
+        if ($docs->remplace($slug)) {
+            return view('legal', [
+                'title'   => $docs->titre($slug),
+                'content' => $docs->html($slug),
+            ]);
+        }
+
         if (Schema::hasTable('legal_pages')) {
             $row = DB::table('legal_pages')->where('slug', $slug)->first();
             if ($row && !empty($row->content)) {
-                return view('legal', ['title' => $row->title ?? ucfirst($slug), 'content' => $row->content]);
+                return view('legal', [
+                    'title'   => $row->title ?? ucfirst($slug),
+                    'content' => $this->contenuLicence($slug, $row->content),
+                ]);
             }
         }
         $page = self::PAGES[$slug] ?? null;
         abort_unless((bool) $page, 404);
+        $page['content'] = $this->contenuLicence($slug, $page['content']);
         return view('legal', $page);
     }
 
@@ -492,9 +548,10 @@ Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>
         'limitation-responsabilite-ia'=> 'usage',
         'gestion-compte'              => 'privacy',
         'gestion-reclamations'        => 'support',
+        'cgv'                         => 'commercial',
     ];
 
-    private const REQUIRES_ACCEPTANCE = ['cgu', 'confidentialite', 'contrat-licence'];
+    private const REQUIRES_ACCEPTANCE = ['cgu', 'confidentialite', 'contrat-licence', 'cgv'];
 
     /**
      * GET /api/v1/legal — Liste des pages légales publiques (métadonnées + contenu).
@@ -514,8 +571,19 @@ Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>
             }
         }
 
-        // Fallback : constante PAGES
-        $data = collect(self::PAGES)->map(
+        // Fallback : constante PAGES, complétée des documents engendrés par le
+        // moteur qui n'y figurent pas (les CGV n'ont jamais eu d'entrée dans la
+        // constante ; sans cet ajout, elles seraient absentes de la liste alors
+        // que la page existe).
+        $pages = self::PAGES;
+
+        foreach (LicenceDocuments::REMPLACES as $slug) {
+            if (! isset($pages[$slug])) {
+                $pages[$slug] = ['title' => $this->docsLicence()->titre($slug), 'content' => ''];
+            }
+        }
+
+        $data = collect($pages)->map(
             fn ($page, $slug) => $this->normalizeConstPage($slug, $page, $request)
         )->values();
 
@@ -534,7 +602,10 @@ Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>
             }
         }
 
-        $page = self::PAGES[$slug] ?? null;
+        $page = self::PAGES[$slug]
+            ?? ($this->docsLicence()->remplace($slug)
+                ? ['title' => $this->docsLicence()->titre($slug), 'content' => '']
+                : null);
         abort_unless((bool) $page, 404);
 
         return response()->json(['data' => $this->normalizeConstPage($slug, $page, $request)]);
@@ -560,14 +631,30 @@ Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>
             }
         }
 
-        if ($content === null) {
+        if ($content === null && ! $this->docsLicence()->remplace($slug)) {
             $page = self::PAGES[$slug] ?? null;
             abort_unless((bool) $page, 404);
             $title   = $page['title'];
             $content = $page['content'];
         }
 
-        $pdf = app('dompdf.wrapper')->loadView('pdf.legal', compact('title', 'content', 'version'));
+        // Le PDF est la surface la plus dangereuse : il est téléchargé, archivé
+        // et ressorti des mois plus tard. Un chiffre périmé y survit à toutes
+        // les corrections faites en ligne. Il est donc engendré comme le reste.
+        if ($this->docsLicence()->remplace($slug)) {
+            $title   = $this->docsLicence()->titre($slug);
+            $version = LicenceDocuments::VERSION;
+        }
+
+        $content = $this->contenuLicence($slug, $content);
+
+        // CGU, CGV, politique de confidentialité : documents de l'ÉDITEUR, pas
+        // du locataire. Y apposer « Généré avec Secretis ERP » reviendrait à
+        // faire signer à l'utilisateur un contrat estampillé comme une sortie
+        // d'application. La page est d'ailleurs servie sans authentification.
+        $pdf = app('dompdf.wrapper')
+            ->sansFiligrane('document contractuel de l\'éditeur, hors périmètre du §3.5')
+            ->loadView('pdf.legal', compact('title', 'content', 'version'));
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('defaultFont', 'DejaVu Sans');
         $pdf->setOption('isHtml5ParserEnabled', true);
@@ -632,30 +719,48 @@ Un membre de l\'équipe IBIG Soft vous contactera sous 24 h ouvrées à <strong>
         if (! is_array($title))   { $title   = ['fr' => (string) $title,   'en' => (string) $title]; }
         if (! is_array($content)) { $content = ['fr' => (string) $content, 'en' => (string) $content]; }
 
+        $docs    = $this->docsLicence();
+        $version = $row->version ?? '1.0';
+
+        if ($docs->remplace($row->slug) || $docs->complete($row->slug)) {
+            foreach (array_keys($content) as $langue) {
+                $content[$langue] = $this->contenuLicence($row->slug, (string) $content[$langue]);
+            }
+
+            if ($docs->remplace($row->slug)) {
+                $titreOfficiel = $docs->titre($row->slug);
+                $title['fr']   = $titreOfficiel;
+                $version       = LicenceDocuments::VERSION;
+            }
+        }
+
         return [
             'slug'                => $row->slug,
             'title'               => $title,
             'content'             => $content,
             'icon'                => $row->icon ?? null,
             'category'            => $row->category ?? 'general',
-            'version'             => $row->version ?? '1.0',
+            'version'             => $version,
             'requires_acceptance' => (bool) ($row->requires_acceptance ?? false),
             'is_public'           => (bool) ($row->is_public ?? true),
             'effective_date'      => $row->effective_date ?? null,
             'updated_at'          => $row->updated_at ?? null,
-            'user_accepted'       => $this->userAccepted($row->slug, $row->version ?? '1.0'),
+            'user_accepted'       => $this->userAccepted($row->slug, $version),
         ];
     }
 
     /** Normalise une entrée de la constante PAGES vers le format attendu par le SPA. */
     private function normalizeConstPage(string $slug, array $page, Request $request): array
     {
-        $version = '1.0';
+        $docs    = $this->docsLicence();
+        $version = $docs->remplace($slug) ? LicenceDocuments::VERSION : '1.0';
+        $titre   = $docs->remplace($slug) ? $docs->titre($slug) : $page['title'];
+        $contenu = $this->contenuLicence($slug, (string) $page['content']);
 
         return [
             'slug'                => $slug,
-            'title'               => ['fr' => $page['title'], 'en' => $page['title']],
-            'content'             => ['fr' => $page['content'], 'en' => $page['content']],
+            'title'               => ['fr' => $titre, 'en' => $page['title']],
+            'content'             => ['fr' => $contenu, 'en' => $contenu],
             'icon'                => null,
             'category'            => self::CATEGORY_MAP[$slug] ?? 'general',
             'version'             => $version,

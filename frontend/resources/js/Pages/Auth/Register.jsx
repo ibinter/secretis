@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 const slugify = (s) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -12,13 +12,21 @@ const COUNTRIES = [
 ];
 
 const PLAN_LABELS = {
-  decouverte: { name: 'Découverte', price: '4 900 FCFA / mois', users: '3 utilisateurs' },
+  // ⚠️ Le prix et le nombre d'utilisateurs ne sont plus écrits ici : ils
+  // dataient et contredisaient la table `plans`. Le libellé des formules
+  // payantes descend du serveur.
+  decouverte: { name: 'Découverte' },
   essentiel:  { name: 'Essentiel',  price: '9 900 FCFA / mois', users: '10 utilisateurs' },
   pro:        { name: 'Pro',        price: '19 900 FCFA / mois', users: '25 utilisateurs' },
   entreprise: { name: 'Entreprise', price: '39 900 FCFA / mois', users: 'utilisateurs illimités' },
 };
 
 export default function Register() {
+  // La durée d'essai vient du serveur (prop partagée `licence.offre`), jamais
+  // du composant. Elle était écrite en dur à trois endroits de cette page,
+  // pendant que les méta-descriptions du site en annonçaient une autre.
+  const essaiJours = usePage().props?.licence?.offre?.essai_jours ?? null;
+
   const plan = useMemo(() => {
     const p = new URLSearchParams(window.location.search).get('plan') || '';
     return PLAN_LABELS[p] ? p : null;
@@ -78,7 +86,7 @@ export default function Register() {
           <div className="mx-auto w-14 h-14 rounded-xl bg-green-600 text-white text-3xl flex items-center justify-center mb-4">&#x2713;</div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Bienvenue sur SECRETIS ERP !</h1>
           <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">
-            Votre organisation <strong>{form.organization_name}</strong> est créée avec un essai gratuit de 14 jours
+            Votre organisation <strong>{form.organization_name}</strong> est créée avec un essai de {essaiJours ?? '—'} jours
             {planLabel ? <> sur la formule <strong>{planLabel.name}</strong></> : ''}.
             Un email de bienvenue a été envoyé à <strong>{form.email}</strong>.
           </p>
@@ -98,7 +106,9 @@ export default function Register() {
       <div className="max-w-lg w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
         <div className="text-center mb-6">
           <div className="mx-auto w-14 h-14 rounded-xl bg-purple-600 text-white text-2xl font-bold flex items-center justify-center mb-3">SE</div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Essai gratuit 14 jours</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {essaiJours ? `Essai de ${essaiJours} jours` : 'Essai'}
+          </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sans carte bancaire, sans engagement.</p>
         </div>
 
@@ -108,7 +118,7 @@ export default function Register() {
               Formule choisie : {planInfo.name}
             </p>
             <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-              {planInfo.price} &middot; {planInfo.users} &middot; 14 jours d&apos;essai gratuit inclus
+              {essaiJours ? `${essaiJours} jours d'essai, sans carte bancaire` : 'Essai sans carte bancaire'}
             </p>
             <a href="/#tarifs" className="text-xs text-purple-500 hover:underline mt-1 inline-block">
               Changer de formule &rarr;

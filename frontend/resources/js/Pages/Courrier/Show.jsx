@@ -42,6 +42,7 @@ import {
   cx, BORDER, SURFACE_SUNK, SURFACE_HOVER, TEXT_TITLE, TEXT_BODY, TEXT_MUTED,
   TEXT_FAINT, NUM, CONTROL,
 } from '@/Components/UI';
+import { BadgeLectureSeule, estLectureSeule } from '@/Components/Licence/LectureSeule';
 
 const TYPE_LABELS = { incoming: 'Entrant', outgoing: 'Sortant', internal: 'Interne' };
 
@@ -290,6 +291,9 @@ export default function CourrierShow({ mail }) {
                   En retard de traitement
                 </Badge>
               )}
+              {/* Excédent au-delà du plafond : le courrier reste entièrement
+                  consultable, sa modification seule est fermée. */}
+              {estLectureSeule(mail) && <BadgeLectureSeule size="md" />}
             </>
           }
           actions={

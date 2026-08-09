@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
+            // Après HandleInertiaRequests : l'état de licence est partagé en
+            // prop Inertia et l'écriture est refusée en lecture seule.
+            \App\Http\Middleware\EnforceLicence::class,
         ]);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([

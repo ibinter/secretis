@@ -22,10 +22,87 @@ use Illuminate\Support\Facades\Notification;
  */
 class CourrierService
 {
+    /**
+     * Compteur métier de SECRETIS (cahier section 6). Le PLAFOND, lui, n'est
+     * écrit nulle part ici : il est lu dans licence.config.json par le moteur.
+     */
+    public const COMPTEUR = 'courriers_mois';
+
     public function __construct(
         private AuditService $auditService,
         private \App\Services\NotificationService $notificationService,
     ) {}
+
+    // -------------------------------------------------------------------------
+    // Plafond du palier Découverte (cahier sections 3.7 et 9.5)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Contrôle AVANT l'écriture.
+     *
+     * Le refus n'est pas silencieux : il est journalisé (section 9.8). Un
+     * espace qui bute cinq fois sur le plafond est le prospect le plus chaud
+     * du portefeuille — c'est la contrepartie commerciale du plafond.
+     *
+     * @throws \App\Exceptions\PlafondAtteintException
+     */
+    private function exigerQuota(User $user): void
+    {
+        $licence = app(\App\Services\LicenceService::class);
+        $orgId   = (int) $user->organization_id;
+
+        if ($licence->peutCreer($orgId, self::COMPTEUR)) {
+            return;
+        }
+
+        $licence->journaliserDepassement($orgId, self::COMPTEUR, $user->id);
+
+        throw new \App\Exceptions\PlafondAtteintException(self::COMPTEUR);
+    }
+
+    /**
+     * Comptabilise APRÈS que l'écriture a réussi.
+     *
+     * Volontairement séparé du contrôle : compter avant l'insertion ferait
+     * consommer un quota par une saisie qu'une contrainte ou une validation
+     * finit par refuser. Placé dans la même transaction que le courrier, le
+     * compteur et l'enregistrement vivent et meurent ensemble.
+     */
+    private function compterCourrier(User $user): void
+    {
+        app(\App\Services\LicenceService::class)
+            ->incrementer((int) $user->organization_id, self::COMPTEUR);
+    }
+
+    /**
+     * Restitue une unité de compteur à la suppression d'un courrier.
+     *
+     * `courriers_mois` est un FLUX, pas un stock : la période comptée est celle
+     * du mois en cours. Archiver en septembre un courrier de juillet ne doit
+     * donc PAS libérer une place de septembre — sinon il suffirait de supprimer
+     * de vieux courriers pour se rouvrir le mois courant indéfiniment.
+     */
+    public function decompterCourrier(MailRegistry $mail): void
+    {
+        $licence = app(\App\Services\LicenceService::class);
+        $orgId   = (int) $mail->organization_id;
+
+        if ($licence->estMensuel(self::COMPTEUR)) {
+            $enregistreLe = $mail->created_at ?? now();
+            $moisCourrier = Carbon::parse($enregistreLe)
+                ->timezone(config('app.timezone'))
+                ->format('Y-m');
+
+            // `periode()` est appelée sans organisation, exactement comme le
+            // fait `incrementer()` : décrémenter sur une autre période que
+            // celle qui a été incrémentée créerait un décalage permanent.
+            if ($moisCourrier !== trim($licence->periode(self::COMPTEUR))) {
+                return;
+            }
+        }
+
+        $licence->decrementer($orgId, self::COMPTEUR);
+    }
 
     // -------------------------------------------------------------------------
     // Génération de référence
@@ -70,6 +147,8 @@ class CourrierService
      */
     public function registerIncoming(array $data, User $user): MailRegistry
     {
+        $this->exigerQuota($user);
+
         return DB::transaction(function () use ($data, $user) {
             $reference = $this->generateReference('incoming', $user->organization_id);
 
@@ -103,6 +182,8 @@ class CourrierService
                 attributes: ['reference' => $reference, 'type' => 'incoming'],
             );
 
+            $this->compterCourrier($user);
+
             return $mail;
         });
     }
@@ -112,6 +193,8 @@ class CourrierService
      */
     public function registerOutgoing(array $data, User $user): MailRegistry
     {
+        $this->exigerQuota($user);
+
         return DB::transaction(function () use ($data, $user) {
             $reference = $this->generateReference('outgoing', $user->organization_id);
 
@@ -146,6 +229,8 @@ class CourrierService
                 attributes: ['reference' => $reference, 'type' => 'outgoing'],
             );
 
+            $this->compterCourrier($user);
+
             return $mail;
         });
     }
@@ -168,6 +253,11 @@ class CourrierService
                 'Seul un courrier arrivée peut recevoir une réponse.'
             );
         }
+
+        // Une réponse est un courrier départ enregistré au registre : elle
+        // consomme le compteur comme n'importe quel autre courrier. L'exclure
+        // ouvrirait un contournement trivial du plafond.
+        $this->exigerQuota($user);
 
         return DB::transaction(function () use ($original, $data, $user) {
             $reference = $this->generateReference('outgoing', $user->organization_id);
@@ -222,6 +312,8 @@ class CourrierService
                     'in_reply_to'=> $original->reference,
                 ],
             );
+
+            $this->compterCourrier($user);
 
             return $reponse;
         });

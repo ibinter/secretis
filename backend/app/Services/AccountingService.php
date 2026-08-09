@@ -294,7 +294,10 @@ class AccountingService
     {
         $invoice->loadMissing(['client', 'items', 'organization', 'creator']);
 
-        $pdf = app('dompdf.wrapper');
+        // L'organisation est prise sur la facture, pas sur l'utilisateur : ce
+        // PDF est aussi produit par une file d'attente et par l'envoi
+        // d'e-mail, où personne n'est authentifié.
+        $pdf = app('dompdf.wrapper')->pourOrganisation($invoice->organization_id);
         $pdf->loadView('invoices.invoice-pdf', [
             'invoice' => $invoice,
             'client'  => $invoice->client,
@@ -319,7 +322,7 @@ class AccountingService
     {
         $quote->loadMissing(['client', 'items', 'organization', 'creator']);
 
-        $pdf = app('dompdf.wrapper');
+        $pdf = app('dompdf.wrapper')->pourOrganisation($quote->organization_id);
         $pdf->loadView('invoices.quote-pdf', [
             'quote'  => $quote,
             'client' => $quote->client,

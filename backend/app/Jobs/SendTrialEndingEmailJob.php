@@ -24,6 +24,15 @@ use Illuminate\Support\Facades\Mail;
  *   Schedule::job(new SendTrialEndingEmailJob(days: 7))->dailyAt('09:00');
  *   Schedule::job(new SendTrialEndingEmailJob(days: 3))->dailyAt('09:00');
  *   Schedule::job(new SendTrialEndingEmailJob(days: 1))->dailyAt('09:00');
+ *
+ * @deprecated REMPLACÉ par `php artisan licence:emails` (sections 5.4, 8.6, 8.8).
+ *
+ * TROISIÈME implémentation de la même séquence, après SendTrialExpiryReminders
+ * et TrialExpiringNotification — et elle non plus n'aboutit pas : la vue
+ * `emails.trial-ending` est absente du dépôt. Son objet écrit la durée en dur
+ * (« se termine dans {n} jours ») et impose la formule (« Passez à Pro »), deux
+ * choses que la section 12.1 réserve à la source unique de vérité.
+ * Déclenché par App\Console\Commands\CheckExpiringLicensesCommand (~ligne 147).
  */
 class SendTrialEndingEmailJob implements ShouldQueue
 {

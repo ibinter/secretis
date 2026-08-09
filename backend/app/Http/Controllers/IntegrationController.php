@@ -121,6 +121,9 @@ class IntegrationController extends Controller
 
     public function install(Request $request, int $connectorId): JsonResponse
     {
+        // API et intégrations fermées au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('api', $request->user());
+
         $org = $request->user()->organization;
 
         // Validation dynamique basée sur config_schema
@@ -197,6 +200,9 @@ class IntegrationController extends Controller
 
     public function sync(Request $request, int $id): JsonResponse
     {
+        // API et intégrations fermées au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('api', $request->user());
+
         $org         = $request->user()->organization;
         $integration = OrganizationIntegration::where('organization_id', $org->id)
             ->with('connector')
@@ -274,6 +280,9 @@ class IntegrationController extends Controller
 
     public function storeWebhook(Request $request): JsonResponse
     {
+        // API et intégrations fermées au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('api', $request->user());
+
         $validated = $request->validate([
             'url'         => ['required', 'url', 'max:500'],
             'description' => ['nullable', 'string', 'max:255'],

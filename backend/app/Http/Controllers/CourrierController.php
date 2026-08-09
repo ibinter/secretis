@@ -334,6 +334,11 @@ class CourrierController extends Controller
 
         $mail->delete(); // Soft delete
 
+        // Le courrier sort du registre : la place qu'il occupait au plafond du
+        // mois lui est rendue. `decompterCourrier` refuse d'elle-même de
+        // décompter un courrier d'un mois antérieur.
+        $this->courrierService->decompterCourrier($mail);
+
         return response()->json(['message' => 'Courrier archivé.']);
     }
 
@@ -460,6 +465,9 @@ class CourrierController extends Controller
      */
     public function exportPdf(Request $request): \Illuminate\Http\Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user  = Auth::user();
         $mails = $this->buildExportQuery($user, $request)->get();
 
@@ -488,6 +496,9 @@ class CourrierController extends Controller
      */
     public function exportExcel(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user = Auth::user();
 
         $this->auditService->log(

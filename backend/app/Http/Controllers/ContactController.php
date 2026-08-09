@@ -261,6 +261,9 @@ class ContactController extends Controller
      */
     public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user = Auth::user();
 
         $contacts = Contact::where('organization_id', $user->organization_id)

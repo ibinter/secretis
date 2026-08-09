@@ -557,7 +557,11 @@ class CrmProspectsController extends Controller
         $prospect = $offer->prospect_id ? DB::table('prospects')->find($offer->prospect_id) : null;
 
         // Générer le PDF via la vue blade
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.commercial-offer', compact('offer', 'lines', 'prospect'));
+        // Offre commerciale d'IBIG SOFT à un prospect : document de l'éditeur,
+        // émis depuis la console interne. Le destinataire n'est pas encore un
+        // espace, il n'y a donc aucun état de licence à refléter.
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::sansFiligrane('offre commerciale de l\'éditeur')
+            ->loadView('pdf.commercial-offer', compact('offer', 'lines', 'prospect'));
 
         return $pdf->download("offre-{$offer->number}.pdf");
     }

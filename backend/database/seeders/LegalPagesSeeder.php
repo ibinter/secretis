@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\LicenceDocuments;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -196,7 +197,7 @@ class LegalPagesSeeder extends Seeder
             // ── 14. Conditions d'essai ───────────────────────────────────────
             [
                 'slug'                => 'conditions-essai',
-                'title'               => json_encode(['fr' => "Conditions d'essai gratuit (Trial)", 'en' => 'Free Trial Terms']),
+                'title'               => json_encode(['fr' => "Conditions du programme d'essai", 'en' => 'Free Trial Terms']),
                 'icon'                => 'beaker',
                 'category'            => 'usage',
                 'display_order'       => 14,
@@ -309,179 +310,33 @@ HTML;
 
     private function cgu(): string
     {
-        return <<<HTML
-<h2>Conditions générales d'utilisation (CGU)</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>Article 1 — Objet</h3>
-<p>
-  Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme logicielle IBIG SECRETIS ERP (ci-après « SECRETIS » ou « la Plateforme »), éditée par IBIG SARL (ci-après « IBIG Soft »).
-  En accédant à SECRETIS, l'utilisateur reconnaît avoir pris connaissance des présentes CGU et les accepte sans réserve.
-</p>
-
-<h3>Article 2 — Accès à la Plateforme</h3>
-<p>
-  L'accès à SECRETIS est réservé aux utilisateurs disposant d'un compte valide, créé dans le cadre d'un abonnement souscrit par leur organisation. L'accès s'effectue via un navigateur web moderne ou l'application mobile SECRETIS, par authentification sécurisée (identifiant + mot de passe, ou SSO selon le plan souscrit).
-</p>
-<p>
-  IBIG Soft garantit une disponibilité de la Plateforme de 99,5% par mois calendaire, hors maintenance planifiée annoncée 48 heures à l'avance.
-</p>
-
-<h3>Article 3 — Création et gestion du compte</h3>
-<p>
-  L'administrateur de l'organisation est responsable de la création et de la gestion des comptes utilisateurs au sein de son espace SECRETIS. Il lui appartient de s'assurer que les informations renseignées sont exactes et à jour, et de révoquer sans délai les accès des utilisateurs ayant quitté l'organisation.
-</p>
-<p>
-  Chaque utilisateur est responsable de la confidentialité de ses identifiants de connexion. Tout accès au compte avec les identifiants de l'utilisateur est présumé effectué par cet utilisateur.
-</p>
-
-<h3>Article 4 — Utilisation autorisée</h3>
-<p>
-  SECRETIS est mis à disposition des utilisateurs pour un usage professionnel dans le cadre des activités de leur organisation. L'utilisateur s'engage à utiliser la Plateforme conformément à sa destination et aux présentes CGU.
-</p>
-
-<h3>Article 5 — Interdictions</h3>
-<p>Il est expressément interdit à l'utilisateur de :</p>
-<ul>
-  <li>Tenter d'accéder aux données d'une autre organisation ;</li>
-  <li>Procéder à des tentatives de piratage, d'intrusion ou de déni de service ;</li>
-  <li>Introduire des virus ou codes malveillants dans la Plateforme ;</li>
-  <li>Utiliser SECRETIS à des fins illégales, frauduleuses ou contraires aux bonnes mœurs ;</li>
-  <li>Revendre, sous-licencier ou transférer l'accès à des tiers non autorisés ;</li>
-  <li>Tenter d'effectuer de la rétro-ingénierie sur le logiciel.</li>
-</ul>
-
-<h3>Article 6 — Responsabilité de l'utilisateur</h3>
-<p>
-  L'utilisateur est seul responsable des données qu'il saisit, importe ou génère dans SECRETIS. IBIG Soft ne peut être tenu responsable des dommages résultant d'une utilisation non conforme aux présentes CGU.
-</p>
-
-<h3>Article 7 — Résiliation</h3>
-<p>
-  IBIG Soft se réserve le droit de suspendre ou de résilier l'accès de tout utilisateur en cas de violation des présentes CGU, sans préavis ni indemnité, et sans préjudice de toute action en justice.
-</p>
-
-<h3>Article 8 — Modifications des CGU</h3>
-<p>
-  IBIG Soft peut modifier les présentes CGU à tout moment. Les utilisateurs sont informés par notification in-app et par email au moins 15 jours avant l'entrée en vigueur des modifications. La poursuite de l'utilisation de la Plateforme après cette date vaut acceptation des nouvelles CGU.
-</p>
-
-<h3>Article 9 — Droit applicable</h3>
-<p>
-  Les présentes CGU sont soumises au droit ivoirien. Tout litige sera soumis, à défaut d'accord amiable, à la compétence des juridictions compétentes d'Abidjan (Côte d'Ivoire).
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('cgu');
     }
 
     private function cgv(): string
     {
-        return <<<HTML
-<h2>Conditions générales de vente (CGV)</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>Article 1 — Champ d'application</h3>
-<p>
-  Les présentes Conditions Générales de Vente régissent les relations commerciales entre IBIG SARL (ci-après « IBIG Soft ») et toute personne morale ou physique (ci-après « le Client ») souscrivant un abonnement à la plateforme IBIG SECRETIS ERP.
-</p>
-
-<h3>Article 2 — Prix et tarification</h3>
-<p>
-  Les prix des abonnements sont exprimés en Francs CFA (FCFA) hors taxes. La TVA applicable est celle en vigueur en Côte d'Ivoire au jour de la facturation (actuellement 18%).
-  Les tarifs en vigueur sont consultables sur la page tarifaire officielle de SECRETIS. IBIG Soft se réserve le droit de modifier ses tarifs avec un préavis de 30 jours calendaires.
-</p>
-
-<h3>Article 3 — Modalités de paiement</h3>
-<p>
-  Les abonnements sont facturés mensuellement ou annuellement selon le choix du Client lors de la souscription. Les paiements sont effectués par virement bancaire, carte bancaire, ou tout autre moyen de paiement accepté par IBIG Soft.
-  En cas de retard de paiement supérieur à 15 jours, IBIG Soft se réserve le droit de suspendre l'accès à la Plateforme jusqu'à régularisation.
-</p>
-
-<h3>Article 4 — Durée et renouvellement</h3>
-<p>
-  L'abonnement est souscrit pour une durée d'un mois ou d'un an (selon l'offre choisie) et se renouvelle tacitement pour une période identique, sauf résiliation adressée par email à <a href="mailto:resiliation@ibigsoft.com">resiliation@ibigsoft.com</a> au moins 30 jours avant la date d'échéance.
-</p>
-
-<h3>Article 5 — Politique de remboursement</h3>
-<p>
-  Conformément à la nature du service (licence logicielle SaaS), aucun remboursement n'est accordé après activation de l'abonnement. Pour les cas d'incidents graves confirmés par IBIG Soft, un crédit commercial peut être accordé. Voir la <a href="/legal/politique-remboursement">Politique de remboursement</a> pour les détails.
-</p>
-
-<h3>Article 6 — Livraison du service</h3>
-<p>
-  L'accès à SECRETIS est ouvert immédiatement après confirmation du paiement et création du compte organisation. IBIG Soft s'engage à fournir un service conforme aux spécifications techniques décrites dans la documentation officielle.
-</p>
-
-<h3>Article 7 — Résiliation</h3>
-<p>
-  Le Client peut résilier son abonnement à tout moment avec un préavis de 30 jours. La résiliation prend effet à la fin de la période d'abonnement en cours. Les données du Client sont conservées pendant 90 jours après la date effective de résiliation, puis supprimées définitivement.
-</p>
-
-<h3>Article 8 — Droit applicable et juridiction compétente</h3>
-<p>
-  Les présentes CGV sont soumises au droit ivoirien et aux règlements de l'OHADA. Tout litige sera soumis, à défaut d'accord amiable dans un délai de 30 jours, à la compétence des juridictions d'Abidjan (Côte d'Ivoire), ou à la médiation de la CCJA (Cour Commune de Justice et d'Arbitrage) selon le choix du demandeur.
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('cgv');
     }
 
     private function contratLicence(): string
     {
-        return <<<HTML
-<h2>Contrat de Licence Utilisateur Final (CLUF)</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>Article 1 — Objet</h3>
-<p>
-  Le présent Contrat de Licence Utilisateur Final (CLUF) est conclu entre IBIG SARL (ci-après « le Concédant ») et l'organisation abonnée (ci-après « le Licencié »). Il définit les droits et obligations relatifs à l'utilisation de la plateforme IBIG SECRETIS ERP (ci-après « le Logiciel »).
-</p>
-
-<h3>Article 2 — Droits accordés</h3>
-<p>Le Concédant accorde au Licencié, pour la durée de l'abonnement actif, une licence :</p>
-<ul>
-  <li><strong>Non-exclusive :</strong> d'autres licenciés peuvent bénéficier des mêmes droits ;</li>
-  <li><strong>Non-transférable :</strong> la licence est strictement personnelle à l'organisation ;</li>
-  <li><strong>Révocable :</strong> en cas de violation du présent CLUF ou des CGU ;</li>
-  <li><strong>Limitée au nombre d'utilisateurs</strong> prévu par le plan souscrit.</li>
-</ul>
-
-<h3>Article 3 — Restrictions</h3>
-<p>Il est expressément interdit au Licencié de :</p>
-<ul>
-  <li>Reproduire, copier ou dupliquer le Logiciel ou sa documentation ;</li>
-  <li>Procéder à de la décompilation, du déassemblage ou de la rétro-ingénierie ;</li>
-  <li>Sous-licencier, vendre, louer ou céder les droits attachés à la licence ;</li>
-  <li>Modifier, adapter ou créer des œuvres dérivées du Logiciel ;</li>
-  <li>Supprimer ou altérer les mentions de propriété intellectuelle du Logiciel.</li>
-</ul>
-
-<h3>Article 4 — Propriété du code et du logiciel</h3>
-<p>
-  Le Logiciel, son code source, son architecture, ses interfaces et toute documentation associée restent la propriété exclusive d'IBIG SARL. La présente licence ne confère au Licencié aucun droit de propriété sur le Logiciel.
-</p>
-
-<h3>Article 5 — Mises à jour et évolutions</h3>
-<p>
-  Le Concédant s'engage à maintenir le Logiciel à jour et à communiquer les notes de version. Les mises à jour majeures (nouvelles fonctionnalités) sont incluses dans l'abonnement actif. Les modules supplémentaires peuvent faire l'objet d'une facturation séparée.
-</p>
-
-<h3>Article 6 — Garanties limitées</h3>
-<p>
-  Le Logiciel est fourni « tel quel », avec les efforts raisonnables de IBIG Soft pour assurer son bon fonctionnement. IBIG Soft ne garantit pas que le Logiciel sera exempt de bugs ou d'interruptions, mais s'engage à les corriger dans des délais raisonnables selon la sévérité.
-</p>
-
-<h3>Article 7 — Limitation de responsabilité</h3>
-<p>
-  La responsabilité d'IBIG Soft au titre du présent CLUF est limitée au montant des abonnements payés par le Licencié au cours des 12 mois précédant le fait générateur. IBIG Soft ne peut être tenu responsable des dommages indirects, pertes de données, pertes de chiffre d'affaires ou interruptions d'activité.
-</p>
-
-<h3>Article 8 — Droit applicable — OHADA</h3>
-<p>
-  Le présent CLUF est soumis au droit OHADA (Organisation pour l'Harmonisation en Afrique du Droit des Affaires) et au droit ivoirien. Tout différend sera porté devant les juridictions compétentes d'Abidjan, ou soumis à l'arbitrage de la CCJA.
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('contrat-licence');
     }
 
     private function politiqueConfidentialite(): string
     {
+        $retention = app(AppServicesicenceservice::class)->retentionjours();
+        $bloc = app(LicenceDocuments::class)->supplement('politique-confidentialite');
+
         return <<<HTML
 <h2>Politique de confidentialité</h2>
 <p><em>Version 1.0 — En vigueur au 1er janvier 2026 — Conforme RGPD et loi ivoirienne ARTCI</em></p>
@@ -513,7 +368,7 @@ HTML;
 
 <h3>4. Durée de conservation</h3>
 <ul>
-  <li>Données de compte actif : durée de l'abonnement + 90 jours après résiliation ;</li>
+  <li>Données de compte actif : durée de l'abonnement + {$retention} jours après résiliation ;</li>
   <li>Données de facturation : 10 ans (obligation OHADA) ;</li>
   <li>Logs de connexion et de sécurité : 12 mois ;</li>
   <li>Données de conversations SARA : 6 mois ;</li>
@@ -541,6 +396,7 @@ HTML;
 <p>
   IBIG Soft met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données : chiffrement AES-256 au repos, TLS 1.3 en transit, authentification à deux facteurs, journaux d'audit.
 </p>
+{$bloc}
 HTML;
     }
 
@@ -599,61 +455,10 @@ HTML;
 
     private function politiqueSauvegarde(): string
     {
-        return <<<HTML
-<h2>Politique de sauvegarde des données</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>1. Fréquence des sauvegardes</h3>
-<p>IBIG Soft effectue des sauvegardes automatiques des données de chaque organisation selon le calendrier suivant :</p>
-<ul>
-  <li><strong>Sauvegarde incrémentale :</strong> toutes les heures ;</li>
-  <li><strong>Sauvegarde complète quotidienne :</strong> chaque nuit entre 01h00 et 04h00 (UTC) ;</li>
-  <li><strong>Sauvegarde hebdomadaire :</strong> chaque dimanche à 02h00 (UTC) ;</li>
-  <li><strong>Sauvegarde mensuelle :</strong> le 1er de chaque mois.</li>
-</ul>
-
-<h3>2. Rétention des sauvegardes</h3>
-<ul>
-  <li>Sauvegardes horaires : conservées 48 heures ;</li>
-  <li>Sauvegardes quotidiennes : conservées 30 jours ;</li>
-  <li>Sauvegardes hebdomadaires : conservées 3 mois ;</li>
-  <li>Sauvegardes mensuelles : conservées 12 mois.</li>
-</ul>
-
-<h3>3. Chiffrement et sécurité</h3>
-<p>
-  Toutes les sauvegardes sont chiffrées en AES-256 avant leur stockage. Les clés de chiffrement sont gérées séparément des données sauvegardées.
-  Les sauvegardes sont répliquées sur au moins deux sites géographiquement distincts pour assurer la résilience en cas de sinistre.
-</p>
-
-<h3>4. Localisation des serveurs</h3>
-<p>
-  Les données primaires et leurs sauvegardes sont hébergées dans des datacenters conformes aux normes ISO 27001, localisés en Afrique de l'Ouest et/ou en Europe selon le plan souscrit.
-  Les clients Enterprise peuvent demander une localisation exclusive de leurs données sur un datacenter de leur choix dans les zones supportées.
-</p>
-
-<h3>5. Procédure de restauration</h3>
-<p>En cas de besoin de restauration de données :</p>
-<ol>
-  <li>Ouvrir un ticket de support prioritaire via SECRETIS ou à <a href="mailto:support@ibigsoft.com">support@ibigsoft.com</a> ;</li>
-  <li>Préciser la date et l'heure de la sauvegarde souhaitée, et la portée de la restauration ;</li>
-  <li>L'équipe technique IBIG Soft évalue la faisabilité et communique un délai (généralement 4 à 24 heures selon la volumétrie) ;</li>
-  <li>La restauration est effectuée dans un environnement de test pour validation avant mise en production.</li>
-</ol>
-
-<h3>6. Responsabilité partagée</h3>
-<p>
-  IBIG Soft est responsable de l'infrastructure de sauvegarde et de la disponibilité des données de la Plateforme.
-  L'organisation cliente est responsable de la qualité et de la complétude des données qu'elle saisit dans SECRETIS.
-  Pour les modules On-Premise, la responsabilité de la sauvegarde incombe entièrement à l'organisation cliente.
-</p>
-
-<h3>7. Export des données</h3>
-<p>
-  Les administrateurs d'organisation peuvent à tout moment exporter leurs données depuis les Paramètres > Export des données.
-  Les formats disponibles sont CSV, Excel et JSON selon les modules.
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('politique-sauvegarde');
     }
 
     private function politiqueSupport(): string
@@ -714,54 +519,15 @@ HTML;
 
     private function politiqueResiliation(): string
     {
-        return <<<HTML
-<h2>Politique de résiliation</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>1. Procédure de résiliation</h3>
-<p>Pour résilier votre abonnement SECRETIS :</p>
-<ol>
-  <li>Envoyer un email de résiliation à <a href="mailto:resiliation@ibigsoft.com">resiliation@ibigsoft.com</a> depuis l'adresse email de l'administrateur principal ;</li>
-  <li>Mentionner : le nom de l'organisation, le numéro d'abonnement, et la date souhaitée de résiliation ;</li>
-  <li>Un accusé de réception vous sera envoyé sous 48 heures ouvrables ;</li>
-  <li>La résiliation prend effet à la fin de la période d'abonnement en cours (minimum 30 jours de préavis).</li>
-</ol>
-<p>
-  La résiliation peut également être initiée depuis Paramètres > Abonnement > Résilier mon abonnement (disponible pour les administrateurs).
-</p>
-
-<h3>2. Export des données avant clôture</h3>
-<p>
-  Avant la date effective de résiliation, nous recommandons vivement d'exporter toutes vos données depuis Paramètres > Export des données.
-  IBIG Soft vous enverra un rappel 30 jours, puis 7 jours avant la date de clôture effective.
-</p>
-
-<h3>3. Conservation et suppression des données après résiliation</h3>
-<ul>
-  <li><strong>J+0 à J+90 :</strong> Les données restent accessibles en lecture seule. Vous pouvez encore exporter ;</li>
-  <li><strong>J+90 :</strong> Suppression définitive de toutes les données opérationnelles ;</li>
-  <li><strong>Exception :</strong> Les données de facturation sont conservées 10 ans conformément aux obligations OHADA.</li>
-</ul>
-
-<h3>4. Résiliation par IBIG Soft</h3>
-<p>
-  IBIG Soft peut résilier l'abonnement sans préavis en cas de :
-</p>
-<ul>
-  <li>Non-paiement après 30 jours de retard et mise en demeure restée sans effet ;</li>
-  <li>Violation grave des CGU ou du CLUF ;</li>
-  <li>Activité frauduleuse ou illégale détectée.</li>
-</ul>
-
-<h3>5. Obligations légales de conservation — OHADA</h3>
-<p>
-  Conformément au droit OHADA (Acte Uniforme relatif au Droit Commercial Général), certaines données comptables et contractuelles doivent être conservées pendant une durée minimale de 10 ans. Ces données seront archivées dans un format sécurisé et non modifiable, et ne seront pas utilisées à d'autres fins.
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('politique-resiliation');
     }
 
     private function politiqueRemboursement(): string
     {
+        $essai = app(AppServicesicenceservice::class)->essaijours();
         return <<<HTML
 <h2>Politique de remboursement</h2>
 <p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
@@ -771,7 +537,7 @@ HTML;
   En raison de la nature du service fourni (licence logicielle SaaS activée immédiatement après paiement), <strong>aucun remboursement n'est accordé après l'activation de l'abonnement SECRETIS</strong>, qu'il s'agisse d'un abonnement mensuel ou annuel.
 </p>
 <p>
-  En souscrivant, le Client reconnaît avoir pris connaissance des fonctionnalités du logiciel, notamment via la période d'essai gratuit de 14 jours proposée préalablement à tout engagement.
+  En souscrivant, le Client reconnaît avoir pris connaissance des fonctionnalités du logiciel, notamment via l'essai de {$essai} jours proposé préalablement à tout engagement.
 </p>
 
 <h3>2. Exception — Incident grave confirmé</h3>
@@ -797,13 +563,15 @@ HTML;
 
 <h3>5. Période d'essai</h3>
 <p>
-  La période d'essai gratuit de 14 jours n'engendre aucune facturation. Aucune carte bancaire n'est requise pour démarrer l'essai. La question du remboursement ne se pose donc pas pendant cette période.
+  L'essai de {$essai} jours n'engendre aucune facturation. Aucune carte bancaire n'est requise pour démarrer l'essai. La question du remboursement ne se pose donc pas pendant cette période.
 </p>
 HTML;
     }
 
     private function traitementDonnees(): string
     {
+        $bloc = app(LicenceDocuments::class)->supplement('politique-confidentialite');
+
         return <<<HTML
 <h2>Accord de traitement des données (DPA)</h2>
 <p><em>Version 1.0 — En vigueur au 1er janvier 2026 — Conforme RGPD Art. 28</em></p>
@@ -863,6 +631,7 @@ HTML;
 <p>
   En cas de violation de données personnelles, IBIG Soft s'engage à notifier le Responsable du traitement dans les 72 heures suivant la découverte de l'incident, conformément à l'article 33 du RGPD.
 </p>
+{$bloc}
 HTML;
     }
 
@@ -955,48 +724,10 @@ HTML;
 
     private function conditionsEssai(): string
     {
-        return <<<HTML
-<h2>Conditions d'essai gratuit — Trial 14 jours</h2>
-<p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
-
-<h3>1. Nature de l'essai</h3>
-<p>
-  IBIG SECRETIS ERP propose une période d'essai gratuite de 14 jours calendaires, sans engagement et sans nécessité de fournir des coordonnées bancaires. L'essai permet de découvrir toutes les fonctionnalités de la plateforme dans un environnement réel.
-</p>
-
-<h3>2. Accès pendant l'essai</h3>
-<p>Pendant la période d'essai, vous bénéficiez d'un accès complet au plan Pro, à l'exception de :</p>
-<ul>
-  <li>L'authentification SSO (Single Sign-On) — réservée aux abonnés Enterprise actifs ;</li>
-  <li>Le déploiement On-Premise — disponible uniquement sur devis après signature de contrat ;</li>
-  <li>Le support téléphonique et WhatsApp dédié ;</li>
-  <li>Le nombre d'utilisateurs est limité à 5 pendant la période d'essai.</li>
-</ul>
-
-<h3>3. Conservation des données après expiration</h3>
-<p>
-  À l'expiration de la période d'essai sans souscription d'un abonnement payant :
-</p>
-<ul>
-  <li>L'accès à la Plateforme est suspendu immédiatement ;</li>
-  <li>Les données saisies pendant l'essai sont conservées pendant 30 jours ;</li>
-  <li>Un email de rappel est envoyé 7 jours avant la suppression définitive ;</li>
-  <li>Passé ce délai, toutes les données sont supprimées définitivement.</li>
-</ul>
-
-<h3>4. Conversion en abonnement payant</h3>
-<p>
-  Si vous souscrivez un abonnement payant avant l'expiration de l'essai, la conversion est automatique et immédiate. Toutes vos données et configurations sont conservées intégralement. La facturation commence à la date de souscription.
-</p>
-<p>
-  Si vous souscrivez après l'expiration (dans le délai de 30 jours de conservation), vos données sont restaurées automatiquement à l'activation de l'abonnement.
-</p>
-
-<h3>5. Un seul essai par organisation</h3>
-<p>
-  Un seul essai gratuit est accordé par organisation (identifiée par son nom, son email administrateur, ou son numéro d'entreprise). Toute tentative de création de multiples comptes d'essai est contraire aux CGU.
-</p>
-HTML;
+        // Document engendre par le moteur de licence (voir App\Support\LicenceDocuments).
+        // Aucune duree ni aucun plafond ne peut etre ecrit ici : ils viendraient
+        // doubler licence.config.json et divergeraient au premier changement.
+        return app(LicenceDocuments::class)->html('conditions-essai');
     }
 
     private function conditionsSara(): string
@@ -1103,6 +834,7 @@ HTML;
 
     private function gestionCompte(): string
     {
+        $retention = app(AppServicesicenceservice::class)->retentionjours();
         return <<<HTML
 <h2>Gestion et clôture du compte</h2>
 <p><em>Version 1.0 — En vigueur au 1er janvier 2026</em></p>
@@ -1132,7 +864,7 @@ HTML;
 
 <h3>5. Suppression du compte organisation</h3>
 <p>
-  Voir la <a href="/legal/politique-resiliation">Politique de résiliation</a> pour la procédure complète. Les données sont supprimées 90 jours après la date effective de clôture, à l'exception des données de facturation conservées 10 ans.
+  Voir la <a href="/legal/politique-resiliation">Politique de résiliation</a> pour la procédure complète. Les données sont supprimées {$retention} jours après la date effective de clôture, à l'exception des données de facturation conservées 10 ans.
 </p>
 
 <h3>6. Héritage du compte</h3>

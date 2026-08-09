@@ -32,6 +32,28 @@ Schedule::command('secretis:process-license-grace')->dailyAt('03:10')->withoutOv
 Schedule::command('secretis:process-expired-licenses')->dailyAt('03:30')->withoutOverlapping()->runInBackground()
     ->appendOutputTo(storage_path('logs/scheduler-trials.log'));
 
+// ── Socle licence six états (cahier IBIG SOFT v1.1, section 9.6) ────────
+// 03:00 — recalcul des états : TRIAL échu → FREE, ACTIVE échu → GRACE,
+// GRACE échu → EXPIRED. Placé AVANT les rappels e-mail de 03:05 : ceux-ci
+// s'appuient sur l'état, et le lire avant recalcul les ferait relancer des
+// espaces déjà basculés.
+Schedule::command('licence:recalculer')->dailyAt('03:00')->withoutOverlapping()->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-licence.log'));
+
+// 04:00 — purge des espaces EXPIRED ayant dépassé date_purge. `--force` est
+// indispensable : sans interaction possible, la commande refuse de supprimer.
+// Elle produit et vérifie sa sauvegarde froide avant toute suppression, et
+// abandonne si celle-ci manque. PAS en arrière-plan : le code de sortie doit
+// remonter au planificateur pour que l'échec soit visible.
+Schedule::command('licence:purger --force')->dailyAt('04:00')->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/scheduler-licence.log'));
+
+// 05:00 — audit de cohérence (section 12.8). Ne modifie rien ; son seul effet
+// est son journal et son code de sortie. Après la purge, pour que l'inventaire
+// du matin reflète l'état réel du parc.
+Schedule::command('licence:verifier')->dailyAt('05:00')->withoutOverlapping()->runInBackground()
+    ->appendOutputTo(storage_path('logs/scheduler-licence.log'));
+
 // ── Quotidien — maintenance & rapports ──────────────────────────────────
 Schedule::command('secretis:cache:warmup')->dailyAt('00:30')->withoutOverlapping(20)->runInBackground();
 Schedule::command('secretis:sync-ldap')->dailyAt('01:00')->withoutOverlapping(30)->runInBackground();

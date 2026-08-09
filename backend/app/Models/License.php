@@ -52,6 +52,23 @@ class License extends Model
         'suspended_by',
         'suspension_reason',
         'external_ref',
+
+        // ── Colonnes du modèle à six états (migration 2026_08_09_000001) ──────
+        // Sans elles, `License::create(['etat' => 'TRIAL', ...])` dans
+        // LicenceService les écartait SILENCIEUSEMENT : la ligne était créée
+        // sans état, donc lue comme EXPIRED au calcul suivant. Un essai
+        // démarré se serait présenté en lecture seule dès la requête d'après.
+        'etat',
+        'solution',
+        'origine',
+        'cle_licence',
+        'date_purge',
+        'prolongation_faite',
+        'prolongation_le',
+        'prolongation_motif',
+        // Idem : `$existante->update(['superseded_at' => now()])` ne faisait
+        // rien, et deux licences restaient courantes pour le même espace.
+        'superseded_at',
     ];
 
     protected $casts = [
@@ -62,7 +79,33 @@ class License extends Model
         'starts_at'   => 'datetime',
         'ends_at'     => 'datetime',
         'grace_until' => 'datetime',
+
+        'date_purge'         => 'datetime',
+        'superseded_at'      => 'datetime',
+        'prolongation_le'    => 'datetime',
+        'prolongation_faite' => 'boolean',
     ];
+
+    /**
+     * Compatibilité avec la colonne héritée `plan_id`.
+     *
+     * `plan_id` est NOT NULL sans valeur par défaut, alors que le moteur à six
+     * états ne la connaît pas : il raisonne en `plan_name` (la formule) et lit
+     * les prix dans `plans`. Un `License::create()` venu du moteur échouait
+     * donc sur une violation de contrainte, et un essai ne pouvait pas démarrer.
+     *
+     * On la dérive du nom de formule au lieu de la supprimer : d'autres écrans
+     * la lisent encore, et la vider aurait déplacé la panne au lieu de la
+     * fermer. À retirer le jour où plus rien ne lit `plan_id`.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $licence): void {
+            if (blank($licence->plan_id)) {
+                $licence->plan_id = \Illuminate\Support\Str::slug((string) $licence->plan_name) ?: 'inconnu';
+            }
+        });
+    }
 
     // ─── Constantes de statut ──────────────────────────────────────────────────
 

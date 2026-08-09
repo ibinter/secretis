@@ -31,7 +31,8 @@ class ReportExportService
     {
         $html = $this->buildPdfHtml($data, $report);
 
-        $pdf = Pdf::loadHTML($html)
+        $pdf = Pdf::pourOrganisation($report->organization_id)
+            ->loadHTML($html)
             ->setPaper('A4', 'landscape')
             ->setOption('defaultFont', 'DejaVu Sans')
             ->setOption('isHtml5ParserEnabled', true);
@@ -49,7 +50,8 @@ class ReportExportService
     {
         $html = $this->buildPdfHtml($data, $report);
 
-        $pdf = Pdf::loadHTML($html)
+        $pdf = Pdf::pourOrganisation($report->organization_id)
+            ->loadHTML($html)
             ->setPaper('A4', 'landscape')
             ->setOption('defaultFont', 'DejaVu Sans');
 

@@ -14,6 +14,18 @@ use Illuminate\Console\Command;
  *
  * Planification dans routes/console.php ou App\Console\Kernel :
  *   $schedule->command('secretis:trial-reminders')->dailyAt('08:00');
+ *
+ * @deprecated REMPLACÉE par `php artisan licence:emails`.
+ *
+ * La séquence officielle compte sept jalons (J+1, J-3, J-1, J0, J+7 —
+ * sections 5.4 et 8.6 — puis J+60 et J+83 — section 8.8). Celle-ci en couvre
+ * trois, dont un (J-7) qui n'existe pas au cahier, et il lui manque les deux
+ * seuls qui comptent vraiment : la confirmation de bascule en Découverte, et
+ * l'avertissement avant purge.
+ *
+ * Elle reste enregistrée dans App\Console\Kernel (~ligne 247). Le remplacement
+ * de cette entrée de planification relève du chantier « planification » : cette
+ * commande n'est donc pas supprimée ici, elle est signalée.
  */
 class SendTrialReminders extends Command
 {

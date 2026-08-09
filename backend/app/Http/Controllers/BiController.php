@@ -230,6 +230,9 @@ class BiController extends Controller
 
     public function export(Request $request): Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $request->validate([
             'format'    => 'required|string|in:pdf,excel,csv',
             'report_id' => 'nullable|integer|exists:saved_reports,id',

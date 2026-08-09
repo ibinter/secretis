@@ -1250,5 +1250,93 @@
     "mileage":      "Mileage",
     "next_service": "Next service",
     "fuel_level":   "Fuel level"
+  },
+
+  "licence": {
+    "etat": {
+      "demo": "Public demo",
+      "free": "Discover plan",
+      "trial": "Trial",
+      "active": "Plan active",
+      "grace": "Grace period",
+      "expired": "Expired — read-only"
+    },
+    "banniere": {
+      "demo": "Public demo. The data is fictitious and wiped every night.",
+      "trial_one": "Trial under way — {{count}} day left on the {{formule}} plan.",
+      "trial_other": "Trial under way — {{count}} days left on the {{formule}} plan.",
+      "trial_dernier_jour": "Last day of the trial. Activate a plan to keep export and multi-user access.",
+      "free": "Discover plan — {{plafond}}. Move to a paid plan to lift the cap.",
+      "apres_essai": "Trial over. Your data is kept: {{plafond}} stay editable, the rest is read-only.",
+      "grace_one": "Subscription past due. Access maintained for {{count}} day, then read-only.",
+      "grace_other": "Subscription past due. Access maintained for {{count}} days, then read-only.",
+      "expired": "Subscription expired — read-only. Data kept until {{date}}."
+    },
+    "quota": {
+      "atteint": "Discover plan cap reached ({{plafond}}). Your data stays accessible and editable. To go further, activate the {{formule_suivante}} plan from {{prix}}.",
+      "restant": "Remaining: {{restant}} {{compteur}} before the cap."
+    },
+    "palier": {
+      "decouverte": {
+        "titre": "Discover plan",
+        "accroche": "Free forever, no bank card.",
+        "cta": "Create my free workspace",
+        "note": "Sign-in by e-mail OTP. Generated documents carry the watermark “Generated with {{solution}} — ibigsoft.com”.",
+        "inclus": {
+          "utilisateur": "Single user",
+          "fonctions_base": "All core features",
+          "web_pwa": "Web access and PWA install",
+          "sauvegarde": "Daily backup"
+        },
+        "exclus": {
+          "export": "CSV, Excel and PDF export",
+          "multi_utilisateur": "Multi-user and roles",
+          "api": "API and integrations",
+          "relances": "Automatic WhatsApp and SMS reminders",
+          "sara": "SARA AI assistant",
+          "support": "Priority support"
+        }
+      }
+    },
+    "demo": {
+      "titre": "Public demo",
+      "accroche": "The real software, fictitious data, no sign-up. Reset every night.",
+      "cta": "Explore the {{solution}} demo"
+    },
+    "essai": {
+      "duree_jours": "{{jours}}"
+    },
+    "email": {
+      "j1": {
+        "objet": "Your first steps with {{solution}}",
+        "corps": "Welcome. Your trial of the {{formule}} plan is under way. To get started: create your first document, invite a colleague, then turn on your notifications. The help centre and our WhatsApp team answer any question."
+      },
+      "j3": {
+        "objet_one": "You have {{count}} day left on {{solution}}",
+        "objet_other": "You have {{count}} days left on {{solution}}",
+        "corps": "When the trial ends, export, multi-user, the API and the SARA assistant close. Your data stays in place. Review the plans to keep every feature."
+      },
+      "j1_final": {
+        "objet": "Last day of the trial — your data is kept",
+        "corps": "No rush: your workspace switches automatically to the Discover plan and your data stays accessible. If you want to keep export, multi-user and the SARA assistant, activate a plan whenever you like."
+      },
+      "j0": {
+        "objet": "Your workspace moved to the Discover plan",
+        "corps": "Your workspace is now on the Discover plan: {{plafond}} stay editable, the rest is read-only. Nothing is deleted. Activate a plan at any time to regain write access to all your data."
+      },
+      "j7": {
+        "objet": "A question about {{solution}}?",
+        "corps": "We remain available for a short call, with no commitment. Your Discover workspace stays open: you can keep using it for as long as you wish."
+      },
+      "j60": {
+        "objet": "Your data will be deleted on {{date}}",
+        "corps": "Your data will be deleted on {{date}}. Reactivate your subscription or request an export at support@ibigsoft.com."
+      },
+      "j83": {
+        "objet": "Final reminder — your data will be deleted on {{date}}",
+        "corps": "Your data will be deleted on {{date}}. Reactivate your subscription or request an export at support@ibigsoft.com."
+      }
+    },
+    "filigrane": "Generated with {{solution}} — ibigsoft.com"
   }
 }

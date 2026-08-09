@@ -414,7 +414,8 @@ class PaymentService
         $admin = $payment->validatedBy;
 
         // Générer le PDF via DomPDF avec le template blade
-        $pdf = Pdf::loadView('invoices.payment', [
+        $pdf = Pdf::pourOrganisation($payment->organization_id)
+        ->loadView('invoices.payment', [
             'payment'         => $payment,
             'organization'    => $org,
             'invoice_number'  => $payment->invoice_number,

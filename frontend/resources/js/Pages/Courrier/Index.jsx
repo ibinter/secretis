@@ -19,9 +19,15 @@
  *   filters     : { type, status, urgency, from, to, search }
  *   departments : [{ id, name }]  — ventilation par service (colonne
  *                 mail_registry.department_id, migration 2026_08_08_000005)
+ *
+ * Marquage de licence (cahier IBIG SOFT v1.1, décision D6) : chaque courrier
+ * peut porter `lecture_seule: true`, posé par la couche métier pour l'excédent
+ * au-delà du plafond du palier Découverte. Ces courriers restent AFFICHÉS et
+ * consultables — seule leur modification est fermée. Le navigateur ne recompte
+ * jamais le plafond : il lit le drapeau.
  */
 
-import { useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout';
@@ -34,6 +40,10 @@ import {
     PageHeader, Button, Badge, Card, DataTable, EmptyState, StatCard,
     cx, CONTROL, BORDER, SURFACE, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING, TONES,
 } from '@/Components/UI';
+import {
+    BadgeLectureSeule, LegendeLectureSeule, estLectureSeule,
+} from '@/Components/Licence/LectureSeule';
+import { PlafondAtteintModal } from '@/Components/Licence/PlafondAtteint';
 
 /* ─── Statuts (enum réel du backend + valeurs héritées) ─────────────────────── */
 /* Un statut n'utilise JAMAIS l'accent violet : uniquement des tons sémantiques.
@@ -162,6 +172,8 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
     const [search, setSearch] = useState(initialFilters.search || '');
     const [filters, setFilters] = useState(initialFilters || {});
     const [showFilters, setShowFilters] = useState(false);
+    // Message officiel de refus au plafond (section 8.5), transmis par le serveur.
+    const [refusPlafond, setRefusPlafond] = useState(null);
 
     const navigate = useCallback((extra = {}) => {
         const params = { ...filters, search: search || undefined, ...extra };
@@ -192,6 +204,14 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
             await axios.post(`/courrier/${mailId}/status`, { status: newStatus });
             router.reload({ only: ['mails', 'stats'] });
         } catch (err) {
+            // Une écriture refusée par la licence n'est pas une erreur technique :
+            // elle appelle le texte officiel et ses deux issues, pas une alerte
+            // système qui ne dit ni pourquoi ni comment continuer.
+            const statut = err.response?.status;
+            if (statut === 402 || statut === 403 || statut === 423) {
+                setRefusPlafond(err.response?.data?.message ?? null);
+                return;
+            }
             alert(err.response?.data?.message ?? 'Impossible de changer le statut.');
         }
     };
@@ -208,6 +228,10 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
 
     const rows  = mails?.data ?? [];
     const total = mails?.total ?? rows.length;
+
+    // Décompte de l'excédent affiché sur la page. Ce n'est pas un calcul de
+    // plafond : on compte des drapeaux posés par le serveur.
+    const nbLectureSeule = useMemo(() => rows.filter(estLectureSeule).length, [rows]);
 
     const tabs = [
         { key: 'all',      label: 'Tous',    icon: Mail },
@@ -239,8 +263,10 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
                                     <AlertTriangle className="h-3.5 w-3.5 text-red-500" aria-label="Courrier en retard" />
                                 )}
                             </span>
-                            <span className={cx('text-[11px]', TEXT_FAINT)}>
+                            <span className={cx('flex items-center gap-1.5 text-[11px]', TEXT_FAINT)}>
                                 {isIncoming ? 'Entrant' : 'Sortant'}
+                                {/* L'excédent est marqué, jamais masqué. */}
+                                {estLectureSeule(mail) && <BadgeLectureSeule />}
                             </span>
                         </div>
                     </div>
@@ -425,6 +451,9 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
                     </div>
                 )}
 
+                {/* Excédent au-delà du plafond — expliqué une fois, jamais masqué */}
+                <LegendeLectureSeule nombre={nbLectureSeule} className="mb-4" />
+
                 {/* Tableau */}
                 <DataTable
                     columns={columns}
@@ -434,43 +463,56 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
                     totalItems={total}
                     onRowClick={(mail) => router.visit(`/courrier/${mail.id}`)}
                     rowClassName={(mail) => mail.is_overdue ? 'bg-red-50/50 dark:bg-red-500/[0.06]' : ''}
-                    actions={(mail) => (
-                        <>
-                            <Button
-                                variant="ghost" size="sm" iconOnly icon={Eye}
-                                title="Voir le détail"
-                                href={`/courrier/${mail.id}`}
-                            />
-                            {['received', 'registered', 'assigned', 'pending'].includes(mail.status) && (
+                    actions={(mail) => {
+                        // Lecture seule : la consultation reste entière, les
+                        // commandes d'écriture sont désactivées et visibles —
+                        // les retirer laisserait croire que le courrier a
+                        // disparu du registre.
+                        const figee = estLectureSeule(mail);
+                        const titreFige = 'Ce courrier est en lecture seule.';
+
+                        return (
+                            <>
                                 <Button
-                                    variant="ghost" size="sm" iconOnly icon={Clock}
-                                    title="Prendre en charge"
-                                    onClick={() => handleChangeStatus(mail.id, 'in_progress')}
-                                    className="text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10"
+                                    variant="ghost" size="sm" iconOnly icon={Eye}
+                                    title="Voir le détail"
+                                    href={`/courrier/${mail.id}`}
                                 />
-                            )}
-                            {['in_progress', 'processing'].includes(mail.status) && (
+                                {['received', 'registered', 'assigned', 'pending'].includes(mail.status) && (
+                                    <Button
+                                        variant="ghost" size="sm" iconOnly icon={Clock}
+                                        title={figee ? titreFige : 'Prendre en charge'}
+                                        disabled={figee}
+                                        onClick={() => handleChangeStatus(mail.id, 'in_progress')}
+                                        className="text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10"
+                                    />
+                                )}
+                                {['in_progress', 'processing'].includes(mail.status) && (
+                                    <Button
+                                        variant="ghost" size="sm" iconOnly icon={CheckCircle2}
+                                        title={figee ? titreFige : 'Marquer répondu'}
+                                        disabled={figee}
+                                        onClick={() => handleChangeStatus(mail.id, 'replied')}
+                                        className="text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                                    />
+                                )}
+                                {!['archived', 'closed'].includes(mail.status) && (
+                                    <Button
+                                        variant="ghost" size="sm" iconOnly icon={Archive}
+                                        title={figee ? titreFige : 'Archiver'}
+                                        disabled={figee}
+                                        onClick={() => handleChangeStatus(mail.id, 'archived')}
+                                    />
+                                )}
                                 <Button
-                                    variant="ghost" size="sm" iconOnly icon={CheckCircle2}
-                                    title="Marquer répondu"
-                                    onClick={() => handleChangeStatus(mail.id, 'replied')}
-                                    className="text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                                    variant="ghost" size="sm" iconOnly icon={Pencil}
+                                    title={figee ? titreFige : 'Modifier'}
+                                    disabled={figee}
+                                    href={figee ? undefined : `/courrier/${mail.id}/edit`}
                                 />
-                            )}
-                            {!['archived', 'closed'].includes(mail.status) && (
-                                <Button
-                                    variant="ghost" size="sm" iconOnly icon={Archive}
-                                    title="Archiver"
-                                    onClick={() => handleChangeStatus(mail.id, 'archived')}
-                                />
-                            )}
-                            <Button
-                                variant="ghost" size="sm" iconOnly icon={Pencil}
-                                title="Modifier"
-                                href={`/courrier/${mail.id}/edit`}
-                            />
-                        </>
-                    )}
+                            </>
+                        );
+                    }}
                     empty={
                         isFiltered ? (
                             <EmptyState
@@ -543,6 +585,13 @@ export default function CourrierIndex({ mails, stats, filters: initialFilters = 
                     </span>
                 </div>
             </div>
+
+            {/* Refus d'écriture au plafond — texte officiel 8.5, produit par le serveur */}
+            <PlafondAtteintModal
+                open={refusPlafond !== null}
+                message={refusPlafond}
+                onClose={() => setRefusPlafond(null)}
+            />
         </AppLayout>
     );
 }

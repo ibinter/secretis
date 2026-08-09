@@ -16,20 +16,72 @@ import { registerServiceWorker } from './pwa/registerServiceWorker'
 import i18n from 'i18next'
 import { initReactI18next, I18nextProvider } from 'react-i18next'
 
-// Lazy-load locales (files must exist under resources/js/i18n/)
-async function loadI18n(locale = 'fr') {
-  const locales = ['fr', 'en', 'ar']
-  const resources = {}
-  for (const lng of locales) {
-    try {
-      const mod = await import(`./i18n/${lng}.json`)
-      resources[lng] = { translation: mod.default ?? mod }
-    } catch { /* locale file optional */ }
+/**
+ * Chargement des traductions.
+ *
+ * La liste des langues etait ECRITE EN DUR : ['fr', 'en', 'ar']. Le dossier
+ * i18n en contient dix. Sept fichiers — ar-MA, ar-TN, ha, pt-BR, pt-MZ, pt-ST,
+ * sw — etaient donc traduits, maintenus, et JAMAIS charges : un utilisateur en
+ * haoussa ou en swahili lisait du francais sans qu'aucune erreur ne le signale.
+ *
+ * On ne charge pas les dix pour autant : dix fichiers de plus de mille chaines
+ * dans le paquet initial se paient a chaque visite, pour neuf langues que
+ * l'utilisateur ne lira jamais. On charge la langue demandee, le francais comme
+ * repli, et — pour les fichiers de variante regionale — la langue de base
+ * qu'ils surchargent.
+ */
+const REPLI = 'fr'
+
+async function chargerLocale(lng) {
+  try {
+    const mod = await import(`./i18n/${lng}.json`)
+    return mod.default ?? mod
+  } catch {
+    return null
   }
+}
+
+/**
+ * Fusion profonde variante -> base.
+ *
+ * ar-MA et ar-TN sont des fichiers de SURCHARGE : ils declarent `_meta.base`
+ * et ne reprennent que ce qui differe. Les charger seuls donnerait une
+ * interface aux trois quarts vide.
+ */
+function fusionner(base, surcharge) {
+  if (!base) return surcharge
+  if (!surcharge) return base
+
+  const sortie = { ...base }
+
+  for (const [cle, valeur] of Object.entries(surcharge)) {
+    sortie[cle] = valeur && typeof valeur === 'object' && !Array.isArray(valeur)
+      ? fusionner(base[cle], valeur)
+      : valeur
+  }
+
+  return sortie
+}
+
+async function loadI18n(locale = REPLI) {
+  const resources = {}
+
+  for (const lng of [...new Set([locale, REPLI])]) {
+    let traductions = await chargerLocale(lng)
+
+    if (traductions?._meta?.base) {
+      traductions = fusionner(await chargerLocale(traductions._meta.base), traductions)
+    }
+
+    if (traductions) {
+      resources[lng] = { translation: traductions }
+    }
+  }
+
   await i18n.use(initReactI18next).init({
     resources,
     lng: locale,
-    fallbackLng: 'fr',
+    fallbackLng: REPLI,
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
   })

@@ -239,7 +239,10 @@ class GenerateReportJob implements ShouldQueue
 
         $filename = 'reports/' . $this->sanitizeFilename($reportName) . '_' . now()->format('Ymd_His') . '.pdf';
 
-        $pdf = Pdf::loadHTML($html)
+        // Travail de file d'attente : aucun utilisateur authentifié, donc
+        // l'organisation du filigrane est prise sur le rapport.
+        $pdf = Pdf::pourOrganisation($this->run->report->organization_id)
+            ->loadHTML($html)
             ->setPaper('A4', 'landscape')
             ->setOption('defaultFont', 'DejaVu Sans')
             ->setOption('isHtml5ParserEnabled', true);

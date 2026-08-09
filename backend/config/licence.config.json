@@ -1,0 +1,132 @@
+{
+  "_lisez_moi": [
+    "SOURCE UNIQUE DE VÉRITÉ — cahier IBIG SOFT v1.1, section 12.1.",
+    "INTERDIT d'écrire « 14 jours », « 5 courriers » ou « 0 FCFA » ailleurs :",
+    "dans un template, un guide, un e-mail, une traduction ou une réponse SARA.",
+    "Ces valeurs sont injectées, jamais saisies. Une chaîne littérale de durée ou",
+    "de plafond trouvée dans le code fait échouer `php artisan licence:verifier`.",
+    "",
+    "CORRESPONDANCE AVEC LE SCHÉMA EXISTANT (section 9.1 adaptée) :",
+    "  la spec décrit une table `licences` ; SECRETIS possède déjà `licenses`",
+    "  (8 lignes en production). Créer une seconde table homonyme en français",
+    "  garantirait qu'un jour les deux divergent. La table existante est donc",
+    "  étendue, et la correspondance est la suivante :",
+    "     spec.etat            -> licenses.etat        (6 valeurs, nouvelle colonne)",
+    "     spec.date_fin        -> licenses.ends_at",
+    "     spec.date_fin_grace  -> licenses.grace_until",
+    "     spec.date_purge      -> licenses.date_purge  (nouvelle colonne)",
+    "     spec.journal_licence -> table license_transitions",
+    "  L'ancienne colonne `status` (trial|active|suspended|expired|cancelled) est",
+    "  conservée en lecture pour le code non encore repris, mais `etat` fait foi."
+  ],
+
+  "solution": "secretis",
+  "nom": "Secretis ERP",
+  "editeur": "IBIG SOFT",
+  "domaine_editeur": "ibigsoft.com",
+
+  "essai_jours": 14,
+  "grace_jours": 7,
+  "retention_jours": 90,
+  "prolongation_jours": 15,
+  "prolongation_max": 1,
+
+  "tolerance_hors_ligne_jours": 15,
+
+  "gratuit": {
+    "nom": "Découverte",
+    "prix": 0,
+    "devise": "XOF",
+    "quotas": { "courriers_mois": 5 },
+    "resume": "5 courriers par mois",
+    "compteurs_mensuels": ["courriers_mois"],
+    "compteurs_cumulatifs": [],
+    "utilisateurs": 1,
+    "stockage_mo": 50,
+    "inclus": [
+      "Toutes les fonctions de base",
+      "1 utilisateur",
+      "Accès web et installation PWA",
+      "Sauvegarde quotidienne",
+      "Documentation et centre d'aide"
+    ],
+    "exclus": [
+      "Export CSV, Excel et PDF",
+      "Multi-utilisateur et rôles",
+      "API et intégrations",
+      "Relances automatiques WhatsApp et SMS",
+      "Assistant IA SARA",
+      "Support prioritaire",
+      "Personnalisation du logo et suppression du filigrane"
+    ],
+    "otp": "email",
+    "filigrane": true
+  },
+
+  "demo": {
+    "url": null,
+    "actif": false,
+    "purge_cron": "02:00",
+    "fuseau_purge": "GMT"
+  },
+
+  "droits_par_etat": {
+    "DEMO":    { "ecriture": true,  "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": false },
+    "FREE":    { "ecriture": true,  "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": true  },
+    "TRIAL":   { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
+    "ACTIVE":  { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
+    "GRACE":   { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
+    "EXPIRED": { "ecriture": false, "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": true  }
+  },
+
+  "formule_suivante": "essentiel",
+
+  "_formules": [
+    "Grille payante INCHANGÉE (décision D1). Les prix sont lus dans la table",
+    "`plans` et ne sont pas recopiés ici : les dupliquer créerait une seconde",
+    "vérité tarifaire, ce que la correction C2 interdit explicitement."
+  ],
+
+  "_arbitrage_requis": {
+    "collision_nom_decouverte": [
+      "La table `plans` contient déjà une formule PAYANTE nommée « Découverte »",
+      "à 4 900 FCFA (slug `decouverte`). La section 3.1 du cahier impose",
+      "« Découverte » comme nom du palier GRATUIT.",
+      "Les deux ne peuvent pas coexister sans que le prospect lise deux prix",
+      "différents pour le même nom — exactement l'incohérence que la section 12",
+      "cherche à éliminer.",
+      "EN ATTENTE D'ARBITRAGE. Le nom du palier gratuit est lu ici et nulle part",
+      "ailleurs : le changer est une modification d'une ligne."
+    ],
+    "trial_days_par_formule": [
+      "`plans.trial_days` porte une durée d'essai PAR FORMULE, ce que la",
+      "décision D4 interdit (durée unique par solution).",
+      "La colonne est neutralisée par la migration : `essai_jours` fait foi."
+    ]
+  },
+
+  "glossaire": {
+    "demo_publique": "Démo publique",
+    "gratuit": "Découverte",
+    "essai": "Essai",
+    "formule": "Formule",
+    "grace": "Période de grâce",
+    "lecture_seule": "Lecture seule",
+    "plafond": "Plafond",
+    "compteur": "Compteur métier",
+    "espace": "Espace",
+    "filigrane": "Filigrane"
+  },
+
+  "termes_bannis": [
+    "version d'évaluation",
+    "période test",
+    "mode gratuit",
+    "compte free",
+    "licence à vie",
+    "licence perpétuelle",
+    "compte suspendu",
+    "compte bloqué",
+    "accès révoqué"
+  ]
+}

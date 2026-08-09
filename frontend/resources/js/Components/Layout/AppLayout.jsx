@@ -123,6 +123,10 @@ function Sidebar({ collapsed, onClose, isMobile }) {
   const userRole = props?.auth?.user?.role ?? 'user'
   const isAdmin  = userRole === 'admin' || userRole === 'super_admin'
 
+  // Droit `sara` calculé côté serveur (HandleInertiaRequests). Défaut : fermé —
+  // une absence de réponse ne doit pas ouvrir un service facturé au jeton.
+  const saraOuverte = props?.licence?.droits?.sara === true
+
   // Persiste la position de scroll du menu entre les navigations Inertia
   const navRef = useRef(null)
   useEffect(() => {
@@ -179,8 +183,10 @@ function Sidebar({ collapsed, onClose, isMobile }) {
         })}
       </nav>
 
-      {/* SARA bubble */}
-      {(!collapsed || isMobile) && (
+      {/* SARA — masquée quand le droit `sara` est fermé (Découverte, Démo
+          publique, abonnement échu). Le serveur reste seul juge : ce masquage
+          évite un clic vers une porte fermée, il ne la ferme pas. */}
+      {saraOuverte && (!collapsed || isMobile) && (
         <div className="shrink-0 px-3 pb-4 pt-2 border-t border-gray-100 dark:border-[#1E3048]">
           <button
             onClick={() => router.visit('/sara')}
@@ -285,7 +291,8 @@ function Header({ onMenuToggle, collapsed, onCollapseToggle, dark, onThemeToggle
 
 // ─── Main AppLayout ───────────────────────────────────────────────────────────
 export default function AppLayout({ children, announcement, trial }) {
-  const { auth } = usePage().props ?? {}
+  const { auth, licence } = usePage().props ?? {}
+  const saraOuverte  = licence?.droits?.sara === true
   const user         = auth?.user
   const notifications= auth?.notifications ?? []
 
@@ -354,15 +361,17 @@ export default function AppLayout({ children, announcement, trial }) {
           </main>
         </div>
 
-        {/* SARA floating bubble (outside sidebar) — bottom-right sur tous les écrans */}
-        <button
-          onClick={() => router.visit('/sara')}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center print:hidden"
-          aria-label="Ouvrir SARA — Assistant IA"
-          title="SARA — Assistant IA"
-        >
-          <MessageCircle size={24} />
-        </button>
+        {/* SARA floating bubble — masquée quand le droit `sara` est fermé. */}
+        {saraOuverte && (
+          <button
+            onClick={() => router.visit('/sara')}
+            className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center print:hidden"
+            aria-label="Ouvrir SARA — Assistant IA"
+            title="SARA — Assistant IA"
+          >
+            <MessageCircle size={24} />
+          </button>
+        )}
 
         <ToastContainer />
 

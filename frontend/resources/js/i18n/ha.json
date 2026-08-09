@@ -290,5 +290,93 @@
     "error_generic":    "Kuskure ya faru. Don Allah sake gwadawa.",
     "error_network":    "Kuskuren yanar gizo. Duba haɗinku.",
     "session_expired":  "Zama ya ƙare. Don Allah shiga sake."
+  },
+
+  "licence": {
+    "etat": {
+      "demo": "Nunin jama'a",
+      "free": "Gano",
+      "trial": "Gwaji",
+      "active": "Tsari mai aiki",
+      "grace": "Lokacin jinkiri",
+      "expired": "Ya ƙare — karatu kawai"
+    },
+    "banniere": {
+      "demo": "Nunin jama'a. Bayanan ƙagaggu ne kuma ana share su kowane dare.",
+      "trial_one": "Gwaji na ci gaba — sauran kwana {{count}} a tsarin {{formule}}.",
+      "trial_other": "Gwaji na ci gaba — sauran kwanaki {{count}} a tsarin {{formule}}.",
+      "trial_dernier_jour": "Rana ta ƙarshe ta gwaji. Kunna tsari don riƙe fitar da bayanai da masu amfani da yawa.",
+      "free": "Matakin Gano — {{plafond}}. Koma tsari mai biya don ɗaga iyaka.",
+      "apres_essai": "Gwaji ya ƙare. An adana bayananku: {{plafond}} suna nan don gyarawa, sauran karatu kawai ne.",
+      "grace_one": "Biyan kuɗi ya ƙare. An ci gaba da bayar da dama na kwana {{count}}, sannan a koma karatu kawai.",
+      "grace_other": "Biyan kuɗi ya ƙare. An ci gaba da bayar da dama na kwanaki {{count}}, sannan a koma karatu kawai.",
+      "expired": "Biyan kuɗi ya ƙare — karatu kawai. An adana bayanai har zuwa {{date}}."
+    },
+    "quota": {
+      "atteint": "An kai iyakar matakin Gano ({{plafond}}). Bayananku suna nan kuma ana iya gyara su. Don ƙari, kunna tsarin {{formule_suivante}} daga {{prix}}.",
+      "restant": "Saura: {{restant}} {{compteur}} kafin iyaka."
+    },
+    "palier": {
+      "decouverte": {
+        "titre": "Gano",
+        "accroche": "Kyauta har abada, ba tare da katin banki ba.",
+        "cta": "Ƙirƙiri wurin aikina na kyauta",
+        "note": "Shiga ta OTP ta imel. Takardun da aka samar suna ɗauke da alamar ruwa « An samar da {{solution}} — ibigsoft.com ».",
+        "inclus": {
+          "utilisateur": "Mai amfani guda ɗaya",
+          "fonctions_base": "Dukkan ayyuka na asali",
+          "web_pwa": "Shiga ta yanar gizo da girka PWA",
+          "sauvegarde": "Ajiyar bayanai kullum"
+        },
+        "exclus": {
+          "export": "Fitar da CSV, Excel da PDF",
+          "multi_utilisateur": "Masu amfani da yawa da matsayi",
+          "api": "API da haɗe-haɗe",
+          "relances": "Tunatarwa ta atomatik ta WhatsApp da SMS",
+          "sara": "Mataimakin AI SARA",
+          "support": "Tallafi mai fifiko"
+        }
+      }
+    },
+    "demo": {
+      "titre": "Nunin jama'a",
+      "accroche": "Ainihin manhajar, bayanan ƙagaggu, ba tare da yin rajista ba. Ana sake saitawa kowane dare.",
+      "cta": "Bincika nunin {{solution}}"
+    },
+    "essai": {
+      "duree_jours": "{{jours}}"
+    },
+    "email": {
+      "j1": {
+        "objet": "Matakan farko na ku a {{solution}}",
+        "corps": "Barka da zuwa. Gwajin tsarin {{formule}} na ci gaba. Don fara da kyau: ƙirƙiri takardarku ta farko, gayyaci abokin aiki, sannan kunna sanarwa. Cibiyar taimako da tawagarmu ta WhatsApp suna amsa duk wata tambaya."
+      },
+      "j3": {
+        "objet_one": "Saura kwana {{count}} a {{solution}}",
+        "objet_other": "Saura kwanaki {{count}} a {{solution}}",
+        "corps": "Idan gwaji ya ƙare, fitar da bayanai, masu amfani da yawa, API da mataimaki SARA za su rufe. Bayananku kuwa za su ci gaba da kasancewa. Duba tsare-tsaren don riƙe dukkan ayyuka."
+      },
+      "j1_final": {
+        "objet": "Rana ta ƙarshe ta gwaji — an adana bayananku",
+        "corps": "Babu gaggawa: wurin aikinku zai koma matakin Gano ta atomatik kuma bayananku za su ci gaba da kasancewa. Idan kuna son riƙe fitar da bayanai, masu amfani da yawa da mataimaki SARA, kunna tsari a duk lokacin da kuke so."
+      },
+      "j0": {
+        "objet": "Wurin aikinku ya koma Gano",
+        "corps": "Wurin aikinku yanzu yana matakin Gano: {{plafond}} suna nan don gyarawa, sauran karatu kawai ne. Ba a share komai ba. Kunna tsari a kowane lokaci don dawo da rubutu a kan dukkan bayananku."
+      },
+      "j7": {
+        "objet": "Kuna da tambaya game da {{solution}}?",
+        "corps": "Muna nan don ɗan gajeren tattaunawa, ba tare da wani alkawari ba. Wurin aikinku na Gano ya ci gaba da buɗewa: kuna iya amfani da shi muddin kuke so."
+      },
+      "j60": {
+        "objet": "Za a share bayananku a {{date}}",
+        "corps": "Za a share bayananku a {{date}}. Sake kunna biyan kuɗinku ko ku nemi fitar da bayanai ta support@ibigsoft.com."
+      },
+      "j83": {
+        "objet": "Tunatarwa ta ƙarshe — za a share bayananku a {{date}}",
+        "corps": "Za a share bayananku a {{date}}. Sake kunna biyan kuɗinku ko ku nemi fitar da bayanai ta support@ibigsoft.com."
+      }
+    },
+    "filigrane": "An samar da {{solution}} — ibigsoft.com"
   }
 }

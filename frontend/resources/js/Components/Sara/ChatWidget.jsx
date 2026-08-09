@@ -339,7 +339,8 @@ export default function ChatWidget({ mode = 'internal', user = null, apiBase = '
         // En cas d'erreur réseau, utiliser des questions par défaut
         setQuickQuestions(
           mode === 'public'
-            ? ['Quels sont vos tarifs ?', 'Démarrer un essai gratuit', 'Quels modules sont inclus ?']
+            // Glossaire imposé (cahier 12.3) : « Essai », jamais « essai gratuit ».
+            ? ['Quels sont vos tarifs ?', 'Comment démarrer un Essai ?', 'Quels modules sont inclus ?']
             : ['Comment réserver une salle ?', 'Comment partager un document ?', 'Comment contacter le support ?']
         );
       }

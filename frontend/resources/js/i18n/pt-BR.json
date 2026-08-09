@@ -387,5 +387,96 @@
     "payroll":       "Processamento salarial",
     "org_chart":     "Organograma",
     "performance":   "Avaliação de desempenho"
+  },
+
+  "licence": {
+    "etat": {
+      "demo": "Demonstração pública",
+      "free": "Descoberta",
+      "trial": "Avaliação",
+      "active": "Plano ativo",
+      "grace": "Período de carência",
+      "expired": "Expirado — somente leitura"
+    },
+    "banniere": {
+      "demo": "Demonstração pública. Os dados são fictícios e apagados todas as noites.",
+      "trial_one": "Avaliação em curso — resta {{count}} dia no plano {{formule}}.",
+      "trial_many": "Avaliação em curso — restam {{count}} dias no plano {{formule}}.",
+      "trial_other": "Avaliação em curso — restam {{count}} dias no plano {{formule}}.",
+      "trial_dernier_jour": "Último dia de avaliação. Ative um plano para manter a exportação e o multiusuário.",
+      "free": "Nível Descoberta — {{plafond}}. Passe para um plano pago para elevar o limite.",
+      "apres_essai": "Avaliação encerrada. Seus dados são mantidos: {{plafond}} continuam editáveis, o restante fica somente leitura.",
+      "grace_one": "Assinatura vencida. Acesso mantido por {{count}} dia e depois somente leitura.",
+      "grace_many": "Assinatura vencida. Acesso mantido por {{count}} dias e depois somente leitura.",
+      "grace_other": "Assinatura vencida. Acesso mantido por {{count}} dias e depois somente leitura.",
+      "expired": "Assinatura expirada — somente leitura. Dados mantidos até {{date}}."
+    },
+    "quota": {
+      "atteint": "Limite do nível Descoberta atingido ({{plafond}}). Seus dados continuam acessíveis e editáveis. Para ir além, ative o plano {{formule_suivante}} a partir de {{prix}}.",
+      "restant": "Restante: {{restant}} {{compteur}} antes do limite."
+    },
+    "palier": {
+      "decouverte": {
+        "titre": "Descoberta",
+        "accroche": "Gratuito para sempre, sem cartão bancário.",
+        "cta": "Criar meu espaço de trabalho gratuito",
+        "note": "Acesso por OTP de e-mail. Os documentos gerados trazem a marca d'água « Gerado com {{solution}} — ibigsoft.com ».",
+        "inclus": {
+          "utilisateur": "Usuário único",
+          "fonctions_base": "Todas as funções básicas",
+          "web_pwa": "Acesso web e instalação PWA",
+          "sauvegarde": "Backup diário"
+        },
+        "exclus": {
+          "export": "Exportação CSV, Excel e PDF",
+          "multi_utilisateur": "Multiusuário e perfis",
+          "api": "API e integrações",
+          "relances": "Lembretes automáticos por WhatsApp e SMS",
+          "sara": "Assistente de IA SARA",
+          "support": "Suporte prioritário"
+        }
+      }
+    },
+    "demo": {
+      "titre": "Demonstração pública",
+      "accroche": "O software de verdade, com dados fictícios, sem cadastro. Reiniciado todas as noites.",
+      "cta": "Explorar a demonstração {{solution}}"
+    },
+    "essai": {
+      "duree_jours": "{{jours}}"
+    },
+    "email": {
+      "j1": {
+        "objet": "Seus primeiros passos no {{solution}}",
+        "corps": "Boas-vindas. Sua avaliação do plano {{formule}} está em curso. Para começar bem: crie seu primeiro documento, convide um colega e ative as notificações. A central de ajuda e nossa equipe no WhatsApp respondem a qualquer dúvida."
+      },
+      "j3": {
+        "objet_one": "Resta {{count}} dia no {{solution}}",
+        "objet_many": "Restam {{count}} dias no {{solution}}",
+        "objet_other": "Restam {{count}} dias no {{solution}}",
+        "corps": "Ao fim da avaliação, a exportação, o multiusuário, a API e o assistente SARA são fechados. Seus dados permanecem no lugar. Consulte os planos para manter todas as funções."
+      },
+      "j1_final": {
+        "objet": "Último dia de avaliação — seus dados são mantidos",
+        "corps": "Sem pressa: seu espaço de trabalho passa automaticamente para Descoberta e seus dados continuam acessíveis. Se quiser manter a exportação, o multiusuário e o assistente SARA, ative um plano quando desejar."
+      },
+      "j0": {
+        "objet": "Seu espaço de trabalho passou para Descoberta",
+        "corps": "Seu espaço de trabalho está agora no nível Descoberta: {{plafond}} continuam editáveis, o restante fica somente leitura. Nada é apagado. Ative um plano a qualquer momento para recuperar a escrita em todos os seus dados."
+      },
+      "j7": {
+        "objet": "Alguma dúvida sobre o {{solution}}?",
+        "corps": "Continuamos disponíveis para uma conversa curta, sem compromisso. Seu espaço Descoberta permanece aberto: você pode continuar usando pelo tempo que quiser."
+      },
+      "j60": {
+        "objet": "Seus dados serão excluídos em {{date}}",
+        "corps": "Seus dados serão excluídos em {{date}}. Reative sua assinatura ou solicite uma exportação em support@ibigsoft.com."
+      },
+      "j83": {
+        "objet": "Último lembrete — seus dados serão excluídos em {{date}}",
+        "corps": "Seus dados serão excluídos em {{date}}. Reative sua assinatura ou solicite uma exportação em support@ibigsoft.com."
+      }
+    },
+    "filigrane": "Gerado com {{solution}} — ibigsoft.com"
   }
 }

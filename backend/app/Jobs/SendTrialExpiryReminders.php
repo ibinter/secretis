@@ -18,6 +18,19 @@ use Illuminate\Support\Facades\Notification;
  *
  * Planifié dans : App\Console\Commands\SendTrialReminders
  * Lancer manuellement : php artisan secretis:trial-reminders
+ *
+ * @deprecated REMPLACÉ par `php artisan licence:emails` (sections 5.4, 8.6, 8.8).
+ *
+ * Trois défauts bloquants, indépendants du cahier :
+ *   — il appelle `$organisation->admin`, relation qui n'existe pas sur
+ *     App\Models\Organization : la boucle saute donc systématiquement chaque
+ *     organisation ;
+ *   — la notification qu'il déclenche rend des vues absentes du dépôt ;
+ *   — il lit `organizations.status` et `trial_ends_at`, alors que l'autorité
+ *     sur l'état est LicenceService::etat(), calculé côté serveur.
+ * Et un défaut de conception : la trace d'envoi vit dans le cache, avec une clé
+ * qui expire à minuit. Un `cache:clear` relance les envois, et la relance
+ * commerciale unique de J+7 ne peut structurellement pas être garantie.
  */
 class SendTrialExpiryReminders implements ShouldQueue
 {

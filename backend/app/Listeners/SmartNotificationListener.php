@@ -415,8 +415,14 @@ class SmartNotificationListener
             return;
         }
 
-        // WhatsApp si canal urgent
-        if (in_array($channel, ['whatsapp', 'whatsapp_push']) && $user->phone) {
+        // WhatsApp si canal urgent — et si l'état de licence l'ouvre. L'API
+        // WhatsApp Business est un coût variable fermé au palier Découverte
+        // (cahier section 3.4) : sans ce garde-fou, chaque espace gratuit
+        // devient une charge mensuelle. La notification in-app, elle, a déjà
+        // été enregistrée juste au-dessus : rien n'est perdu.
+        $licenceOuvreWhatsApp = app(\App\Services\LicenceGarde::class)->autorise('whatsapp', $user);
+
+        if ($licenceOuvreWhatsApp && in_array($channel, ['whatsapp', 'whatsapp_push']) && $user->phone) {
             $this->notificationService->sendWhatsApp(
                 phone:   $user->phone,
                 message: "{$title}\n{$body}",

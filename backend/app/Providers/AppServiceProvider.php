@@ -8,7 +8,36 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        // Le contexte d'organisation du filigrane est une pile : il doit
+        // survivre à toute la requête, donc une seule instance.
+        $this->app->singleton(\App\Services\FiligraneService::class);
+
+        // ── Filigrane sur les documents générés (cahier v1.1, §3.5 et §11.5) ──
+        //
+        // Un seul endroit, et non un pied de page recopié dans chaque vue :
+        // tous les PDF de SECRETIS sont produits par `dompdf.wrapper`, que ce
+        // soit par la facade `Pdf::` (qui résout ce même alias à chaque appel)
+        // ou par `app('dompdf.wrapper')`. En substituant le décorateur ici,
+        // aucun point de génération — présent ou futur — ne peut l'oublier.
+        //
+        // `extend()` plutôt que `bind()` : l'ordre d'enregistrement des
+        // fournisseurs ne joue pas, l'extension s'applique à la résolution.
+        $this->app->extend('dompdf.wrapper', function ($pdf, $app) {
+            if ($pdf instanceof \App\Support\PdfFiligrane) {
+                return $pdf;
+            }
+
+            return new \App\Support\PdfFiligrane(
+                $pdf->getDomPDF(),
+                $app['config'],
+                $app['files'],
+                $app['view'],
+                $app->make(\App\Services\FiligraneService::class),
+            );
+        });
+    }
 
     public function boot(): void
     {

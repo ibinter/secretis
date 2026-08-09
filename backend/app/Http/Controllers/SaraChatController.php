@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ExigeSara;
 use App\Models\SaraConversation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,14 +13,17 @@ use Illuminate\Support\Str;
 
 class SaraChatController extends Controller
 {
+    use ExigeSara;
+
     private const SYSTEM_PROMPT = <<<'PROMPT'
 Tu es SARA, l'assistante IA officielle de SECRETIS ERP, la solution de gestion de secrétariat et de courrier de IBIG Soft (https://secretis.ibigsoft.com).
 
 CONTEXTE PRODUIT :
 - SECRETIS ERP gère : courrier entrant/sortant, documents (GED), agenda/événements, réunions, visiteurs, tâches, notes de frais, RH, facturation, circulaires, annuaire de contacts.
-- Éditeur : IBIG Soft (Côte d'Ivoire), écosystème de 16 solutions métiers.
-- Essai gratuit disponible, plusieurs formules d'abonnement, support 7j/7.
+- Éditeur : IBIG Soft, écosystème de solutions métiers.
 - Contact : secretis@ibigsoft.com — WhatsApp disponible sur le site.
+- Les durées, plafonds, paliers et formules ne figurent PAS dans ce contexte :
+  ils sont lus dans licence.config.json par l'outil dédié, jamais récités ici.
 
 RÈGLES STRICTES (à respecter absolument) :
 1. Réponds uniquement en français, sauf si l'utilisateur écrit dans une autre langue.
@@ -29,13 +33,24 @@ RÈGLES STRICTES (à respecter absolument) :
 5. Ne donne aucun conseil juridique, médical ou financier.
 6. Sois concise : 2 à 5 phrases maximum par réponse.
 7. Ton professionnel, chaleureux et orienté solution.
-8. Si l'utilisateur veut essayer le produit, oriente-le vers le bouton "Essai gratuit" ou la page /login.
+8. Si l'utilisateur veut essayer le produit, oriente-le vers le bouton « Essai » ou la page /login, sans citer de durée : c'est l'outil de licence qui la donne.
 9. Ne traite jamais de données personnelles sensibles ; si l'utilisateur en partage, invite-le à ne pas le faire.
 10. En cas de problème technique client, oriente vers le support : secretis@ibigsoft.com.
 PROMPT;
 
     public function chat(Request $request): JsonResponse
     {
+        // ── Droit `sara` — en tout premier ─────────────────────────────────────
+        // Cette route était la porte ouverte du chantier : elle est déclarée
+        // publique dans routes/api.php (« throttle:30,1 », sans authentification).
+        // Or un appelant non authentifié est au mieux en Démo publique, où SARA
+        // est fermée — et chaque message envoyé au fournisseur d'IA est facturé.
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus instanceof JsonResponse
+                ? $refus
+                : response()->json($this->saraLicence()->refus($request->user()), 403);
+        }
+
         $validated = $request->validate([
             'message'         => 'required|string|max:2000',
             'history'         => 'sometimes|array|max:10',
@@ -61,12 +76,31 @@ PROMPT;
         // Construit l'historique : celui fourni par le client, sinon celui de la conversation persistée
         $history = $validated['history'] ?? $this->historyFromConversation($conversation);
 
+        $licence  = $this->saraLicence();
         $reply    = null;
         $fallback = false;
+
+        // ── Court-circuit licence ──────────────────────────────────────────────
+        // Sur une question de licence, aucun appel au fournisseur d'IA n'a lieu :
+        // la réponse vient de licence.config.json, lue par l'outil dédié.
+        if ($fiche = $licence->courtCircuit($validated['message'])) {
+            $conversationId = $this->persistConversation($conversation, $validated, $fiche['reponse']);
+
+            return response()->json([
+                'reply'           => $fiche['reponse'],
+                'response'        => $fiche['reponse'],
+                'conversation_id' => $conversationId,
+                'faq_suggestions' => [],
+                'fallback'        => false,
+                'source'          => $fiche['source'],
+                'fiche'           => $fiche['cle'],
+            ]);
+        }
+
         $apiKey   = config('services.groq.key', env('GROQ_API_KEY'));
 
         if ($apiKey) {
-            $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT]];
+            $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT . $licence->invite()]];
             foreach ($history as $h) {
                 $messages[] = ['role' => $h['role'], 'content' => $h['content']];
             }
@@ -97,6 +131,12 @@ PROMPT;
             $reply    = $this->fallback();
             $fallback = true;
         }
+
+        // ── Filtre de sortie ───────────────────────────────────────────────────
+        // Relu systématiquement : terme banni, promesse commerciale ou chiffre
+        // de licence absent de la configuration → la réponse est remplacée par
+        // le renvoi officiel, pas rapiécée.
+        $reply = $licence->filtrer($reply, $validated['message']);
 
         // Persiste la conversation si l'utilisateur est authentifié
         $conversationId = $this->persistConversation($conversation, $validated, $reply);
@@ -180,8 +220,12 @@ PROMPT;
     /**
      * Page SARA standalone (iframe / accès public).
      */
-    public function chatPage()
+    public function chatPage(Request $request)
     {
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus;
+        }
+
         return response()->view('sara-chat-standalone');
     }
 

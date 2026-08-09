@@ -1,453 +1,460 @@
-import { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
-import axios from 'axios';
-
 /**
- * Page Abonnement/Index — Tableau de bord de l'abonnement
+ * Abonnement/Index.jsx — état de l'espace, plafonds et formules.
  *
- * Affiche :
- * - Plan actuel avec jauge circulaire SVG des jours restants
- * - Alertes colorées selon l'urgence (< 7j = orange, expiré = rouge)
- * - Historique des paiements paginé
- * - Actions : Renouveler / Changer de plan / Télécharger facture
+ * Reprise complète pour les six états du cahier IBIG SOFT v1.1
+ * (DEMO · Découverte · Essai · Formule active · Période de grâce · Lecture
+ * seule). L'ancienne page ne connaissait que quatre statuts hérités, appelait
+ * deux points d'API dont un inexistant (`/api/payments/history`), et annonçait
+ * un accès « suspendu » — vocabulaire banni par la section 12.3, et faux : à
+ * l'échéance l'espace passe en lecture seule, il n'est jamais coupé.
  *
- * SÉCURITÉ : Toutes les dates affichées viennent du serveur.
- * Aucune logique de calcul de date côté client.
+ * ─── Deux règles tiennent tout le fichier ─────────────────────────────────
+ *
+ * 1. AUCUN CHIFFRE EN DUR. Ni durée d'essai, ni plafond, ni prix, ni durée de
+ *    grâce, ni durée de conservation. Tout vient des props serveur, elles-mêmes
+ *    lues dans `config/licence.config.json` et dans la table `plans`. Une
+ *    mention dont le nombre n'est pas fourni n'est pas affichée avec une valeur
+ *    devinée : elle n'est pas affichée du tout.
+ *
+ * 2. AUCUNE RÈGLE MÉTIER. L'état, les droits, les quotas et le message de
+ *    bandeau sont calculés côté serveur. Cette page les met en page.
+ *
+ * ─── Props ────────────────────────────────────────────────────────────────
+ *
+ *   licence     prop Inertia PARTAGÉE (`LicenceService::etatComplet()`), lue
+ *               via `useLicence()`. Voir le contrat dans `@/hooks/useLicence`.
+ *
+ *   palier      Le palier gratuit, tel que décrit en section 8.1 :
+ *               { nom, prix, devise, resume, inclus[], exclus[],
+ *                 utilisateurs, note }
+ *
+ *   formules    Grille payante INCHANGÉE (décision D1), lue dans `plans` :
+ *               [{ slug, nom, prix, devise, periode, populaire, inclus[] }]
+ *
+ *   mentions    Les valeurs de la section C7, jamais recopiées ici :
+ *               { essai_jours, grace_jours, retention_jours, filigrane }
+ *
+ *   formuleSuivante  { slug, nom, prix } — la formule immédiatement supérieure.
  */
-export default function AbonnementIndex() {
-    const [subscription, setSubscription] = useState(null);
-    const [payments, setPayments]         = useState([]);
-    const [pagination, setPagination]     = useState({});
-    const [loading, setLoading]           = useState(true);
-    const [page, setPage]                 = useState(1);
-    const [downloadingId, setDownloadingId] = useState(null);
 
-    // -------------------------------------------------------------------------
-    // Chargement des données
-    // -------------------------------------------------------------------------
+import React from 'react';
+import { Head, Link } from '@inertiajs/react';
+import {
+  BadgeCheck, Clock, ShieldCheck, AlertTriangle, Lock, Info,
+  Check, Minus, CreditCard, Gauge,
+} from 'lucide-react';
+import AuthLayout from '@/Layouts/AuthLayout';
+import useLicence, { ETATS } from '@/hooks/useLicence';
+import {
+  PageHeader, Button, Badge, Card, StatCard, EmptyState,
+  cx, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, BORDER, NUM, TONES,
+} from '@/Components/UI';
 
-    useEffect(() => {
-        loadSubscription();
-    }, []);
+/* ─── Présentation des six états ───────────────────────────────────────────── */
+/* Uniquement du ton et de l'étiquette : le texte affiché reste celui du
+   serveur. Les libellés viennent du glossaire canonique (section 12.3).      */
 
-    useEffect(() => {
-        loadHistory();
-    }, [page]);
+const ETAT_PRESENTATION = {
+  [ETATS.DEMO]:    { etiquette: 'Démo publique',    ton: 'info',    icone: Info },
+  [ETATS.FREE]:    { etiquette: 'Découverte',       ton: 'neutral', icone: ShieldCheck },
+  [ETATS.TRIAL]:   { etiquette: 'Essai',            ton: 'info',    icone: Clock },
+  [ETATS.ACTIVE]:  { etiquette: 'Formule active',   ton: 'success', icone: BadgeCheck },
+  [ETATS.GRACE]:   { etiquette: 'Période de grâce', ton: 'warning', icone: AlertTriangle },
+  [ETATS.EXPIRED]: { etiquette: 'Lecture seule',    ton: 'warning', icone: Lock },
+};
 
-    const loadSubscription = async () => {
-        try {
-            const { data } = await axios.get('/api/subscription/current');
-            setSubscription(data);
-        } catch (err) {
-            console.error('Erreur chargement abonnement', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+/** Libellés des droits — noms de fonctions, aucune valeur chiffrée. */
+const DROITS_LIBELLES = {
+  ecriture:          'Création et modification',
+  export:            'Export CSV, Excel et PDF',
+  multi_utilisateur: 'Multi-utilisateur et rôles',
+  api:               'API et intégrations',
+  whatsapp:          'Relances automatiques WhatsApp',
+  sms:               'Relances automatiques SMS',
+  sara:              'Assistant IA SARA',
+};
 
-    const loadHistory = async () => {
-        try {
-            const { data } = await axios.get(`/api/payments/history?page=${page}`);
-            setPayments(data.data);
-            setPagination(data.meta);
-        } catch (err) {
-            console.error('Erreur historique paiements', err);
-        }
-    };
+/** L'ordre d'affichage des droits, pour ne pas dépendre de l'ordre du JSON. */
+const DROITS_ORDRE = [
+  'ecriture', 'export', 'multi_utilisateur', 'api', 'whatsapp', 'sms', 'sara',
+];
 
-    // -------------------------------------------------------------------------
-    // Téléchargement facture
-    // -------------------------------------------------------------------------
+/* ─── Formatage ────────────────────────────────────────────────────────────── */
 
-    const downloadInvoice = async (paymentId, invoiceNumber) => {
-        setDownloadingId(paymentId);
-        try {
-            const response = await axios.get(`/api/payments/${paymentId}/invoice`, {
-                responseType: 'blob',
-            });
-            const url  = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href  = url;
-            link.setAttribute('download', `${invoiceNumber}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            alert('Erreur lors du téléchargement de la facture.');
-        } finally {
-            setDownloadingId(null);
-        }
-    };
+const nombre = (n) => Number(n ?? 0).toLocaleString('fr-FR', { maximumFractionDigits: 0 });
 
-    // -------------------------------------------------------------------------
-    // Calcul de la jauge circulaire SVG
-    // -------------------------------------------------------------------------
+/** Un prix ne s'affiche que si le serveur l'a fourni : jamais de « 0 » deviné. */
+const prix = (montant, devise) =>
+  montant === null || montant === undefined
+    ? null
+    : `${nombre(montant)} ${devise ?? ''}`.trim();
 
-    const CircularGauge = ({ percent, daysRemaining, daysTotal, status }) => {
-        const radius      = 54;
-        const circumference = 2 * Math.PI * radius;
-        const strokeDash  = (percent / 100) * circumference;
+const dateFr = (iso) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString('fr-FR');
+};
 
-        const color = status === 'expired' ? '#ef4444'
-                    : daysRemaining <= 7    ? '#f97316'
-                    : '#22c55e';
+/* ─── Ligne « inclus / exclus » ────────────────────────────────────────────── */
 
-        return (
-            <div className="flex flex-col items-center">
-                <svg width="140" height="140" viewBox="0 0 140 140">
-                    {/* Piste de fond */}
-                    <circle
-                        cx="70" cy="70" r={radius}
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="10"
-                    />
-                    {/* Arc de progression */}
-                    <circle
-                        cx="70" cy="70" r={radius}
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="10"
-                        strokeDasharray={`${strokeDash} ${circumference}`}
-                        strokeLinecap="round"
-                        transform="rotate(-90 70 70)"
-                        style={{ transition: 'stroke-dasharray 0.5s ease' }}
-                    />
-                    {/* Texte centré */}
-                    <text x="70" y="65" textAnchor="middle" fontSize="22" fontWeight="800" fill={color}>
-                        {status === 'expired' ? '!' : daysRemaining}
-                    </text>
-                    <text x="70" y="82" textAnchor="middle" fontSize="10" fill="#6b7280">
-                        {status === 'expired' ? 'Expiré' : 'jours'}
-                    </text>
-                </svg>
-                <p className="text-xs text-gray-500 mt-1">
-                    {daysRemaining} / {daysTotal} jours
-                </p>
-            </div>
-        );
-    };
-
-    // -------------------------------------------------------------------------
-    // Bandeau d'alerte selon l'urgence
-    // -------------------------------------------------------------------------
-
-    const AlertBanner = ({ status, daysRemaining }) => {
-        if (status === 'expired') {
-            return (
-                <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-                    <span className="text-xl">🚨</span>
-                    <div>
-                        <p className="font-semibold text-red-800">Votre abonnement a expiré</p>
-                        <p className="text-sm text-red-600">
-                            L'accès à SECRETIS ERP est suspendu. Renouvelez maintenant pour retrouver l'accès.
-                        </p>
-                    </div>
-                    <Link
-                        href="/abonnement/paiement"
-                        className="ml-auto rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition"
-                    >
-                        Renouveler
-                    </Link>
-                </div>
-            );
-        }
-
-        if (status !== 'expired' && daysRemaining <= 7 && daysRemaining > 0) {
-            return (
-                <div className="mb-4 flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3">
-                    <span className="text-xl">⚠️</span>
-                    <div>
-                        <p className="font-semibold text-orange-800">
-                            Votre abonnement expire dans {daysRemaining} jour{daysRemaining > 1 ? 's' : ''}
-                        </p>
-                        <p className="text-sm text-orange-600">
-                            Renouvelez maintenant pour éviter toute interruption de service.
-                        </p>
-                    </div>
-                    <Link
-                        href="/abonnement/paiement"
-                        className="ml-auto rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 transition"
-                    >
-                        Renouveler
-                    </Link>
-                </div>
-            );
-        }
-
-        return null;
-    };
-
-    // -------------------------------------------------------------------------
-    // Badge statut paiement
-    // -------------------------------------------------------------------------
-
-    const StatusBadge = ({ status }) => {
-        const styles = {
-            validated: 'bg-green-100 text-green-800',
-            pending:   'bg-yellow-100 text-yellow-800',
-            rejected:  'bg-red-100 text-red-800',
-            refunded:  'bg-gray-100 text-gray-600',
-        };
-        const labels = {
-            validated: 'Validé',
-            pending:   'En attente',
-            rejected:  'Refusé',
-            refunded:  'Remboursé',
-        };
-        return (
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status] ?? 'bg-gray-100 text-gray-600'}`}>
-                {labels[status] ?? status}
-            </span>
-        );
-    };
-
-    // -------------------------------------------------------------------------
-    // Rendu
-    // -------------------------------------------------------------------------
-
-    if (loading) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
-            </div>
-        );
-    }
-
-    const license = subscription?.license;
-    const status  = subscription?.computed_status ?? 'expired';
-
-    return (
-        <div className="mx-auto max-w-5xl space-y-6 p-6">
-
-            {/* Titre page */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Mon Abonnement</h1>
-                    <p className="text-sm text-gray-500">Gérez votre plan et vos paiements SECRETIS ERP</p>
-                </div>
-                <Link
-                    href="/abonnement/paiement"
-                    className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition"
-                >
-                    + Renouveler / Changer de plan
-                </Link>
-            </div>
-
-            {/* Bandeau d'alerte */}
-            <AlertBanner status={status} daysRemaining={license?.days_remaining ?? 0} />
-
-            {/* Carte plan actuel */}
-            {license ? (
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                    <div className="flex items-start gap-6">
-                        {/* Jauge circulaire */}
-                        <CircularGauge
-                            percent={license.progress_pct}
-                            daysRemaining={license.days_remaining}
-                            daysTotal={license.days_total}
-                            status={status}
-                        />
-
-                        {/* Infos plan */}
-                        <div className="flex-1 space-y-3">
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-bold text-gray-900">{license.plan_name}</h2>
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
-                                    status === 'active'  ? 'bg-green-100 text-green-800' :
-                                    status === 'trial'   ? 'bg-purple-100 text-purple-800'  :
-                                    status === 'grace'   ? 'bg-orange-100 text-orange-800' :
-                                                           'bg-red-100 text-red-800'
-                                }`}>
-                                    {status === 'active'  ? 'Actif'     :
-                                     status === 'trial'   ? 'Essai'     :
-                                     status === 'grace'   ? 'Grâce'     :
-                                                            'Expiré'}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <p className="text-gray-500">Cycle de facturation</p>
-                                    <p className="font-medium text-gray-900">
-                                        {license.billing_cycle === 'monthly' ? 'Mensuel' : 'Annuel'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-500">Utilisateurs max</p>
-                                    <p className="font-medium text-gray-900">{license.max_users}</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-500">Date de début</p>
-                                    <p className="font-medium text-gray-900">
-                                        {new Date(license.starts_at).toLocaleDateString('fr-FR')}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-500">Expiration</p>
-                                    <p className={`font-medium ${license.days_remaining <= 7 ? 'text-orange-600' : 'text-gray-900'}`}>
-                                        {new Date(license.ends_at).toLocaleDateString('fr-FR')}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Modules inclus */}
-                            {license.modules?.length > 0 && (
-                                <div>
-                                    <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-gray-500">
-                                        Modules inclus
-                                    </p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {license.modules.map(mod => (
-                                            <span key={mod} className="rounded-full bg-purple-50 px-2.5 py-0.5 text-xs text-purple-700">
-                                                {mod}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col gap-2">
-                            <Link
-                                href="/abonnement/paiement"
-                                className="rounded-lg border border-purple-600 px-4 py-2 text-center text-sm font-medium text-purple-600 hover:bg-purple-50 transition"
-                            >
-                                Renouveler
-                            </Link>
-                            <Link
-                                href="/abonnement/paiement?action=change"
-                                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
-                            >
-                                Changer de plan
-                            </Link>
-                            <Link
-                                href="/abonnement/factures"
-                                className="rounded-lg border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
-                            >
-                                Toutes les factures
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                /* Pas de licence */
-                <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 p-10 text-center">
-                    <p className="mb-2 text-lg font-semibold text-gray-700">Aucun abonnement actif</p>
-                    <p className="mb-4 text-sm text-gray-500">
-                        {subscription?.is_trial
-                            ? `Vous êtes en période d'essai — ${subscription.trial_days_left} jours restants`
-                            : 'Souscrivez à un plan pour accéder à toutes les fonctionnalités'}
-                    </p>
-                    <Link
-                        href="/abonnement/paiement"
-                        className="inline-block rounded-lg bg-purple-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-purple-700 transition"
-                    >
-                        Choisir un plan
-                    </Link>
-                </div>
-            )}
-
-            {/* Historique des paiements */}
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-                <div className="border-b border-gray-100 px-6 py-4">
-                    <h2 className="font-semibold text-gray-900">Historique des paiements</h2>
-                </div>
-
-                {payments.length === 0 ? (
-                    <div className="px-6 py-10 text-center text-sm text-gray-400">
-                        Aucun paiement enregistré
-                    </div>
-                ) : (
-                    <>
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-gray-100 bg-gray-50 text-xs font-medium uppercase tracking-wider text-gray-500">
-                                        <th className="px-6 py-3 text-left">Référence</th>
-                                        <th className="px-6 py-3 text-left">Plan</th>
-                                        <th className="px-6 py-3 text-left">Montant</th>
-                                        <th className="px-6 py-3 text-left">Méthode</th>
-                                        <th className="px-6 py-3 text-left">Date</th>
-                                        <th className="px-6 py-3 text-left">Statut</th>
-                                        <th className="px-6 py-3 text-right">Facture</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {payments.map(payment => (
-                                        <tr key={payment.id} className="hover:bg-gray-50/50 transition">
-                                            <td className="px-6 py-4 font-mono text-xs text-gray-600">
-                                                {payment.invoice_number ?? `#${payment.id}`}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                                                {payment.plan_slug}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                                                {new Intl.NumberFormat('fr-FR').format(payment.amount)} {payment.currency}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
-                                                {payment.method?.replace('_', ' ')}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
-                                                {payment.paid_at
-                                                    ? new Date(payment.paid_at).toLocaleDateString('fr-FR')
-                                                    : new Date(payment.created_at).toLocaleDateString('fr-FR')}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={payment.status} />
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                {payment.has_invoice ? (
-                                                    <button
-                                                        onClick={() => downloadInvoice(payment.id, payment.invoice_number)}
-                                                        disabled={downloadingId === payment.id}
-                                                        className="text-purple-600 hover:text-purple-800 text-sm font-medium disabled:opacity-50 transition"
-                                                    >
-                                                        {downloadingId === payment.id ? '...' : '↓ PDF'}
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-xs text-gray-400">—</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Pagination */}
-                        {pagination.last_page > 1 && (
-                            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-                                <p className="text-xs text-gray-500">
-                                    {pagination.total} paiement{pagination.total > 1 ? 's' : ''}
-                                </p>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                        className="rounded-lg border px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50 transition"
-                                    >
-                                        ← Précédent
-                                    </button>
-                                    <span className="rounded-lg bg-purple-50 px-3 py-1.5 text-xs text-purple-700">
-                                        {page} / {pagination.last_page}
-                                    </span>
-                                    <button
-                                        onClick={() => setPage(p => Math.min(pagination.last_page, p + 1))}
-                                        disabled={page === pagination.last_page}
-                                        className="rounded-lg border px-3 py-1.5 text-xs disabled:opacity-40 hover:bg-gray-50 transition"
-                                    >
-                                        Suivant →
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-        </div>
-    );
+function Ligne({ ouvert, children }) {
+  return (
+    <li className="flex items-start gap-2 text-sm">
+      {ouvert
+        ? <Check className={cx('mt-0.5 h-4 w-4 shrink-0', TONES.success.icon)} aria-hidden="true" />
+        : <Minus className={cx('mt-0.5 h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />}
+      <span className={ouvert ? TEXT_TITLE : TEXT_MUTED}>{children}</span>
+      <span className="sr-only">{ouvert ? '(inclus)' : '(non inclus)'}</span>
+    </li>
+  );
 }
+
+/* ─── Carte Découverte (texte officiel, section 8.1) ───────────────────────── */
+
+function CarteDecouverte({ palier, actuel }) {
+  if (!palier) return null;
+
+  const montant = prix(palier.prix, palier.devise);
+
+  return (
+    <Card
+      className={cx(actuel && cx('ring-2', 'ring-purple-500/40'))}
+      title={
+        <span className="flex items-center gap-2">
+          {palier.nom}
+          {actuel && <Badge variant="accent">Palier actuel</Badge>}
+        </span>
+      }
+      subtitle="Pour découvrir"
+    >
+      <div className="space-y-4">
+        <div>
+          {montant && (
+            <p className={cx('text-2xl font-semibold', TEXT_TITLE, NUM)}>{montant}</p>
+          )}
+          <p className={cx('text-sm', TEXT_MUTED)}>Gratuit à vie, sans carte bancaire</p>
+        </div>
+
+        {/* Plafond — résumé rédigé par le serveur, jamais recomposé ici. */}
+        {palier.resume && (
+          <div className={cx('flex items-center gap-2 rounded-lg px-3 py-2', TONES.neutral.soft)}>
+            <Gauge className={cx('h-4 w-4 shrink-0', TONES.neutral.icon)} aria-hidden="true" />
+            <span className={cx('text-sm font-medium', TEXT_TITLE)}>{palier.resume}</span>
+          </div>
+        )}
+
+        <ul className="space-y-1.5">
+          {(palier.inclus ?? []).map((item) => (
+            <Ligne key={item} ouvert>{item}</Ligne>
+          ))}
+          {(palier.exclus ?? []).map((item) => (
+            <Ligne key={item} ouvert={false}>{item}</Ligne>
+          ))}
+        </ul>
+
+        {palier.note && (
+          <p className={cx('text-xs leading-relaxed', TEXT_FAINT)}>{palier.note}</p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+/* ─── Carte d'une formule payante ──────────────────────────────────────────── */
+
+function CarteFormule({ formule, actuelle }) {
+  const montant = prix(formule.prix, formule.devise);
+
+  return (
+    <Card
+      className={cx(actuelle && cx('ring-2', 'ring-emerald-500/40'))}
+      title={
+        <span className="flex items-center gap-2">
+          {formule.nom}
+          {actuelle   && <Badge variant="success">Formule en cours</Badge>}
+          {formule.populaire && !actuelle && <Badge variant="accent">La plus choisie</Badge>}
+        </span>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          {montant
+            ? <p className={cx('text-2xl font-semibold', TEXT_TITLE, NUM)}>{montant}</p>
+            : <p className={cx('text-sm', TEXT_MUTED)}>Tarif communiqué sur demande</p>}
+          {formule.periode && (
+            <p className={cx('text-sm', TEXT_MUTED)}>{formule.periode}</p>
+          )}
+        </div>
+
+        {formule.inclus?.length > 0 && (
+          <ul className="space-y-1.5">
+            {formule.inclus.map((item) => <Ligne key={item} ouvert>{item}</Ligne>)}
+          </ul>
+        )}
+
+        {!actuelle && (
+          <Button
+            variant="primary"
+            block
+            icon={CreditCard}
+            href={`/abonnement/checkout?plan=${encodeURIComponent(formule.slug)}`}
+          >
+            Activer {formule.nom}
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+/* ─── Page ─────────────────────────────────────────────────────────────────── */
+
+export default function AbonnementIndex({
+  palier = null,
+  formules = [],
+  mentions = null,
+  formuleSuivante = null,
+}) {
+  const {
+    disponible, etat, formule, joursRestants, dateFin, datePurge,
+    message, droits, quotas, filigrane,
+  } = useLicence();
+
+  const presentation = ETAT_PRESENTATION[etat] ?? null;
+  const ton = TONES[presentation?.ton] ?? TONES.neutral;
+  const Icone = presentation?.icone ?? Info;
+
+  const listeQuotas = quotas ? Object.values(quotas) : [];
+  const auPalierGratuit = etat === ETATS.FREE;
+
+  return (
+    <AuthLayout>
+      <Head title="Abonnement" />
+
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+
+        <PageHeader
+          icon={BadgeCheck}
+          title="Abonnement"
+          subtitle="L'état de votre espace, ce qu'il ouvre, et les formules disponibles."
+          breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Abonnement' }]}
+        />
+
+        {/* ─── État de l'espace ─────────────────────────────────────────── */}
+
+        {!disponible ? (
+          <Card>
+            <EmptyState
+              icon={Info}
+              title="État de l'espace indisponible"
+              description="L'état de licence n'a pas été transmis par le serveur. Rechargez la page ; s'il manque toujours, contactez le support."
+            />
+          </Card>
+        ) : (
+          <Card>
+            <div className="flex flex-col gap-5">
+
+              <div className="flex flex-wrap items-start gap-4">
+                <span className={cx('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', ton.soft)}>
+                  <Icone className={cx('h-5 w-5', ton.icon)} aria-hidden="true" />
+                </span>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className={cx('text-lg font-semibold', TEXT_TITLE)}>
+                      {presentation?.etiquette ?? 'État de l\'espace'}
+                    </h2>
+                    {formule && <Badge variant="neutral">{formule}</Badge>}
+                  </div>
+                  {/* Texte officiel de la section 8.4, rédigé par le serveur. */}
+                  {message && <p className={cx('text-sm', TEXT_MUTED)}>{message}</p>}
+                </div>
+
+                {formuleSuivante?.slug && etat !== ETATS.ACTIVE && (
+                  <Button
+                    variant="primary"
+                    icon={CreditCard}
+                    href={`/abonnement/checkout?plan=${encodeURIComponent(formuleSuivante.slug)}`}
+                  >
+                    Activer {formuleSuivante.nom}
+                  </Button>
+                )}
+              </div>
+
+              {/* Repères de dates et de durées — tous fournis par le serveur. */}
+              {(joursRestants !== null || dateFin || datePurge) && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {joursRestants !== null && (
+                    <StatCard
+                      icon={Clock}
+                      label="Jours restants"
+                      value={joursRestants}
+                      unit="j"
+                      tone={presentation?.ton}
+                    />
+                  )}
+                  {dateFin && (
+                    <StatCard icon={BadgeCheck} label="Échéance" value={dateFr(dateFin)} />
+                  )}
+                  {datePurge && (
+                    <StatCard
+                      icon={ShieldCheck}
+                      label="Données conservées jusqu'au"
+                      value={dateFr(datePurge)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* ─── Compteurs métier ─────────────────────────────────────────── */}
+
+        {listeQuotas.length > 0 && (
+          <Card
+            title="Compteurs métier"
+            subtitle="Ce qui reste ouvert à l'écriture sur la période en cours. L'excédent reste consultable."
+          >
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {listeQuotas.map((q) => (
+                <div
+                  key={q.compteur}
+                  className={cx('flex items-center justify-between gap-4 rounded-xl border px-4 py-3', BORDER)}
+                >
+                  <div className="min-w-0">
+                    {/* `libelle` est fourni par le serveur quand il existe ;
+                        à défaut on affiche la clé du compteur plutôt que
+                        d'inventer un intitulé qui divergerait des autres
+                        surfaces. */}
+                    <p className={cx('text-sm font-medium', TEXT_TITLE)}>
+                      {q.libelle ?? q.compteur}
+                    </p>
+                    <p className={cx('text-xs', TEXT_MUTED, NUM)}>
+                      Période {q.periode}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={cx('text-lg font-semibold', TEXT_TITLE, NUM)}>
+                      {nombre(q.valeur)}
+                      {q.plafond !== null && q.plafond !== undefined && (
+                        <span className={cx('text-sm font-normal', TEXT_MUTED)}> / {nombre(q.plafond)}</span>
+                      )}
+                    </p>
+                    {q.autorise === false && (
+                      <Badge variant="warning" icon={Gauge}>Plafond atteint</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* ─── Ce que l'état ouvre ──────────────────────────────────────── */}
+
+        {droits && (
+          <Card
+            title="Ce que votre espace ouvre aujourd'hui"
+            subtitle="Rien n'est masqué : ce qui est fermé est indiqué, et se rouvre en activant une formule."
+          >
+            <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {DROITS_ORDRE.filter((cle) => cle in droits).map((cle) => (
+                <Ligne key={cle} ouvert={droits[cle] === true}>
+                  {DROITS_LIBELLES[cle] ?? cle}
+                </Ligne>
+              ))}
+            </ul>
+
+            {filigrane && (
+              <p className={cx('mt-4 text-xs leading-relaxed', TEXT_FAINT)}>
+                Les documents générés portent la mention «&nbsp;{filigrane}&nbsp;».
+              </p>
+            )}
+          </Card>
+        )}
+
+        {/* ─── Grille : Découverte en première position (correction C5) ──── */}
+
+        {(palier || formules.length > 0) && (
+          <section data-ibig-tarifs className="space-y-4">
+            <h2 className={cx('text-lg font-semibold', TEXT_TITLE)}>Formules</h2>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <CarteDecouverte palier={palier} actuel={auPalierGratuit} />
+              {formules.map((f) => (
+                <CarteFormule
+                  key={f.slug}
+                  formule={f}
+                  actuelle={Boolean(formule) && f.nom === formule}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Mentions de la section C7 ────────────────────────────────── */}
+        {/* Chaque mention est conditionnée à la présence de sa valeur : une
+            durée absente fait disparaître la phrase, jamais apparaître un
+            nombre choisi par le composant.                                  */}
+
+        {mentions && (
+          <Card title="Ce que vous devez savoir">
+            <ul className={cx('space-y-2 text-sm', TEXT_MUTED)}>
+              {mentions.essai_jours != null && (
+                <li className="flex items-start gap-2">
+                  <Check className={cx('mt-0.5 h-4 w-4 shrink-0', TONES.success.icon)} aria-hidden="true" />
+                  <span>
+                    Essai de <span className={NUM}>{mentions.essai_jours}</span> jours,
+                    sans carte bancaire, sans engagement.
+                  </span>
+                </li>
+              )}
+
+              {palier?.nom && (
+                <li className="flex items-start gap-2">
+                  <Check className={cx('mt-0.5 h-4 w-4 shrink-0', TONES.success.icon)} aria-hidden="true" />
+                  <span>
+                    À la fin de l'essai, votre espace bascule automatiquement en {palier.nom}.
+                    Aucune donnée n'est supprimée.
+                  </span>
+                </li>
+              )}
+
+              {mentions.grace_jours != null && mentions.retention_jours != null && (
+                <li className="flex items-start gap-2">
+                  <Check className={cx('mt-0.5 h-4 w-4 shrink-0', TONES.success.icon)} aria-hidden="true" />
+                  <span>
+                    <span className={NUM}>{mentions.grace_jours}</span> jours de grâce après
+                    échéance, puis lecture seule. Données conservées{' '}
+                    <span className={NUM}>{mentions.retention_jours}</span> jours.
+                  </span>
+                </li>
+              )}
+
+              {mentions.filigrane && palier?.nom && (
+                <li className="flex items-start gap-2">
+                  <Check className={cx('mt-0.5 h-4 w-4 shrink-0', TONES.success.icon)} aria-hidden="true" />
+                  <span>
+                    Les documents générés au palier {palier.nom} portent la mention
+                    «&nbsp;{mentions.filigrane}&nbsp;».
+                  </span>
+                </li>
+              )}
+            </ul>
+          </Card>
+        )}
+
+        <p className={cx('text-xs', TEXT_FAINT)}>
+          Une question sur votre formule ?{' '}
+          <Link href="/support/tickets/create" className="underline underline-offset-2">
+            Écrivez au support
+          </Link>
+          .
+        </p>
+      </div>
+    </AuthLayout>
+  );
+}
+
 export { AbonnementIndex };

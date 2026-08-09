@@ -118,7 +118,12 @@ const FAQ = [
   },
   {
     q: 'Y a-t-il une période d\'essai gratuite ?',
-    a: 'Oui — 14 jours gratuits sur le plan Pro, sans carte bancaire requise. À l\'expiration, votre compte passe en lecture seule jusqu\'à la souscription d\'un abonnement.',
+    // Cette réponse était fausse sur le fond, pas seulement sur le chiffre :
+    // elle annonçait un passage en lecture seule à la fin de l'essai, alors
+    // que l'espace bascule dans le palier Découverte et reste modifiable dans
+    // la limite du plafond. Promettre moins que ce qu'on livre coûte des
+    // inscriptions ; promettre autre chose coûte la confiance.
+    a: "Oui, sur la formule Pro, sans carte bancaire. À la fin de l'essai, votre espace bascule automatiquement dans le palier Découverte : vos données sont conservées, seules les fonctions avancées se ferment.",
   },
   {
     q: 'Comment fonctionne la facturation annuelle ?',

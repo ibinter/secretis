@@ -158,11 +158,15 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'L\'essai gratuit dure combien de temps ?',
-                        'answer'   => 'L\'essai gratuit dure 14 jours avec accès complet à toutes les fonctionnalités du plan Professional. Aucune carte bancaire n\'est requise à l\'inscription. À l\'issue de la période d\'essai, votre compte passe en mode limité (consultation uniquement). Vous pouvez souscrire à tout moment depuis Paramètres > Abonnement.',
+                        // Cette réponse annonçait « mode limité (consultation uniquement) ».
+                        // C'était faux : la fin d'un essai ne ferme pas l'écriture, elle
+                        // bascule l'espace au palier gratuit, qui reste modifiable dans la
+                        // limite de son plafond (décision D6 du cahier).
+                        'answer'   => 'L\'essai dure ' . app(\App\Services\LicenceService::class)->essaiJours() . ' jours, avec accès complet aux fonctions avancées. Aucune carte bancaire n\'est requise, et il n\'y a aucune reconduction automatique. À l\'échéance, votre espace bascule automatiquement au palier ' . app(\App\Services\LicenceService::class)->config()['gratuit']['nom'] . ' : aucune donnée n\'est supprimée, votre espace reste modifiable dans la limite de son plafond (' . app(\App\Services\LicenceService::class)->resumePlafond() . '), et ce qui dépasse ce plafond reste visible en lecture seule. Vous pouvez souscrire à tout moment depuis Paramètres > Abonnement.',
                     ],
                     'en' => [
                         'question' => 'How long does the free trial last?',
-                        'answer'   => 'The free trial lasts 14 days with full access to all Professional plan features. No credit card is required at sign-up. After the trial period, your account switches to limited mode (read only). You can subscribe at any time from Settings > Subscription.',
+                        'answer'   => 'The trial lasts ' . app(\App\Services\LicenceService::class)->essaiJours() . ' days with full access to advanced features. No credit card is required, and there is no automatic renewal. At the end of the trial your workspace switches automatically to the free tier: no data is deleted, your workspace stays editable within its cap (' . app(\App\Services\LicenceService::class)->resumePlafond() . '), and anything beyond the cap stays visible in read-only. You can subscribe at any time from Settings > Subscription.',
                     ],
                 ],
             ],

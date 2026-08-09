@@ -83,6 +83,9 @@ class ParametresController extends Controller
 
     public function inviteUtilisateur(Request $request): JsonResponse
     {
+        // Multi-utilisateur fermé au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('multi_utilisateur', $request->user());
+
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'name'  => ['required', 'string', 'max:255'],

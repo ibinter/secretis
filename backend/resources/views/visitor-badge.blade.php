@@ -129,6 +129,10 @@
             et etre restitue a l'accueil au depart.
         </div>
 
+        {{-- Seul document généré qui ne passe pas par dompdf : le badge est
+             imprimé depuis le navigateur. --}}
+        @include('partials.filigrane', ['orgFiligrane' => $visit->organization_id])
+
     </div>
 </div>
 

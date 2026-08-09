@@ -1446,3 +1446,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [\App\Http\Controllers\Auth\AuthController::class, 'resetPassword'])
         ->middleware('throttle:10,1')->name('password.update');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Licence — raccordement des chantiers
+|--------------------------------------------------------------------------
+| Chaque chantier a écrit ses routes dans son propre fichier plutôt que dans
+| celui-ci : dix chantiers modifiant le même fichier de routes en parallèle
+| auraient produit autant de conflits que de lignes. Le raccordement est donc
+| centralisé ici, en fin de fichier — après toutes les routes existantes, pour
+| qu'aucun nom déclaré plus haut ne soit écrasé par une URI identique (piège
+| déjà rencontré sur `rh.frais`).
+*/
+require __DIR__ . '/licence-admin.php';
+require __DIR__ . '/licence-legal.php';
+Route::middleware('web')->group(base_path('routes/licence-sara.php'));

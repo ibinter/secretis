@@ -7,6 +7,24 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * @deprecated REMPLACÉ par App\Mail\LicenceSequenceMail + `php artisan licence:emails`.
+ *
+ * Cette notification est inopérante : elle rend `emails.trial_expiring_7`,
+ * `_3` et `_1`, trois vues qui n'existent pas dans resources/views/emails.
+ * Tout envoi lève donc une InvalidArgumentException — la séquence d'essai
+ * n'était pas « à corriger », elle n'a jamais fonctionné.
+ *
+ * Elle contrevient par ailleurs aux sections 5.4 et 8.6 du cahier IBIG SOFT
+ * v1.1 : jalon J-7 inexistant dans la séquence, durées écrites en dur dans les
+ * objets (« 7 jours »), vocabulaire banni (« essai gratuit »), et un « URGENT —
+ * votre accès expire » qui est exactement l'urgence artificielle que la
+ * section 8.6 interdit au jalon J-1.
+ *
+ * Conservée le temps que la planification (App\Console\Kernel) soit reprise ;
+ * à supprimer avec App\Jobs\SendTrialExpiryReminders et la commande
+ * `secretis:trial-reminders`.
+ */
 class TrialExpiringNotification extends Notification implements ShouldQueue
 {
     use Queueable;

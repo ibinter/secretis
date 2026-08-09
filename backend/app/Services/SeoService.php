@@ -6,6 +6,22 @@ use Illuminate\Support\Facades\Cache;
 
 class SeoService
 {
+    /**
+     * Durée d'essai — lue dans la source unique de vérité.
+     *
+     * Les méta-descriptions annonçaient « Essai gratuit 30 jours » alors que la
+     * configuration en fixe 14. C'est la pire place possible pour une
+     * contradiction : ce texte est ce que le moteur de recherche affiche, donc
+     * la première phrase que lit un prospect — et il la lira avant la page qui
+     * dit autre chose. Le prix « à partir de 29 000 XOF/mois » a été retiré
+     * pour la même raison : il ne correspondait à aucune ligne de `plans`, et
+     * la correction C2 n'admet qu'une seule vérité tarifaire par page.
+     */
+    private function essaiJours(): int
+    {
+        return app(\App\Services\LicenceService::class)->essaiJours();
+    }
+
     private const BASE_URL   = 'https://secretis.ibigsoft.com';
     private const OG_IMAGE   = 'https://secretis.ibigsoft.com/images/og-secretis.jpg';
     private const TWITTER_HANDLE = '@IBIGSoft';
@@ -82,7 +98,7 @@ class SeoService
                 '@type'           => 'Offer',
                 'priceCurrency'   => 'XOF',
                 'price'           => '0',
-                'description'     => 'Essai gratuit 30 jours, sans carte bancaire.',
+                'description'     => 'Essai de ' . $this->essaiJours() . ' jours, sans carte bancaire.',
                 'url'             => self::BASE_URL . '/tarifs',
             ],
             'aggregateRating'     => [
@@ -174,7 +190,7 @@ class SeoService
     {
         $map = [
             '/' => [
-                'title'       => 'IBIG SECRETIS — ERP cloud pour l\'Afrique | Essai gratuit 30 jours',
+                'title'       => 'IBIG SECRETIS — ERP cloud pour l\'Afrique | Essai de ' . $this->essaiJours() . ' jours',
                 'description' => 'Gérez votre entreprise avec le premier ERP pensé pour l\'Afrique : comptabilité SYSCOHADA, RH, CRM, GED, projets. Démarrez gratuitement.',
                 'keywords'    => 'ERP Afrique, logiciel gestion entreprise, SYSCOHADA, comptabilité Côte d\'Ivoire, CRM Afrique',
             ],
@@ -189,7 +205,7 @@ class SeoService
             ],
             '/tarifs' => [
                 'title'       => 'Tarifs — IBIG SECRETIS ERP | Plans Starter, Pro, Enterprise',
-                'description' => 'Des tarifs transparents adaptés à votre taille. Essai gratuit 30 jours, sans carte bancaire. Plans à partir de 29 000 XOF/mois.',
+                'description' => 'Des tarifs transparents adaptés à votre taille. Essai de ' . $this->essaiJours() . ' jours, sans carte bancaire.',
                 'keywords'    => 'tarifs ERP Afrique, prix logiciel gestion, abonnement ERP',
             ],
             '/demonstration' => [

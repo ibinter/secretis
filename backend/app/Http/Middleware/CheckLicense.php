@@ -2,144 +2,129 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\LicenceService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * CheckLicense — Middleware de vérification de licence SECRETIS ERP
+ * CheckLicense — contrôle d'accès par état de licence.
  *
- * RÈGLES DE SÉCURITÉ ABSOLUES :
+ * CE MIDDLEWARE PRÉCÉDAIT LE MODÈLE À SIX ÉTATS, et le contredisait sur trois
+ * points qui rendaient le palier Découverte inutilisable :
  *
- * 1. DATE SERVEUR : La date d'expiration est comparée à Carbon::now() côté serveur.
- *    Jamais de date provenant du client ou de l'URL.
+ *  1. UN ESPACE SANS LICENCE ÉTAIT RENVOYÉ VERS L'ÉCRAN D'EXPIRATION, y compris
+ *     en LECTURE (« Aucune licence active »). Or un espace Découverte n'a
+ *     précisément pas de licence payante : tout le palier gratuit était donc
+ *     fermé avant d'avoir servi. La section 2 interdit explicitement « tout
+ *     blocage sec en écriture ET en lecture ».
  *
- * 2. AUCUNE LOGIQUE DE LICENCE EN JAVASCRIPT : Ce middleware est le seul
- *    point de vérification. Aucune logique d'accès n'est déléguée au frontend.
+ *  2. IL LISAIT `status === 'grace'`, valeur qui n'existe dans aucune
+ *     énumération du projet (`trial|active|suspended|expired|cancelled`). Cette
+ *     branche n'a jamais pu s'exécuter ; la période de grâce n'était honorée
+ *     que par la seconde branche, plus bas, avec une durée tirée d'une
+ *     configuration différente de celle du cahier.
  *
- * 3. MODE GRÂCE : Licence expirée → accès en lecture seule pendant 7 jours.
- *    Après 7 jours → 402 Payment Required.
+ *  3. LA DURÉE DE GRÂCE VENAIT DE `config('payment.grace_period_days', 7)`,
+ *     une seconde source de vérité concurrente de licence.config.json.
  *
- * 4. MODULES : Certaines routes nécessitent un module actif.
- *    Si le module n'est pas dans le plan → 403.
- *
- * Statuts de licence :
- *   active  → accès normal
- *   grace   → accès en lecture seule (7 jours après expiration)
- *   expired → 402 Payment Required
- *   trial   → accès limité selon le plan trial
+ * Il ne décide donc plus rien par lui-même : l'état vient du moteur, qui est
+ * la seule autorité. Ce middleware ne fait plus qu'appliquer une règle simple —
+ * la lecture reste ouverte partout, l'écriture se ferme en lecture seule.
  */
 class CheckLicense
 {
+    /** Méthodes qui ne modifient rien. La lecture n'est jamais refusée. */
+    private const LECTURE = ['GET', 'HEAD', 'OPTIONS'];
+
+    /**
+     * Chemins qui restent ouverts même en lecture seule.
+     *
+     * Fermer le paiement à un espace échu en ferait une impasse : l'utilisateur
+     * ne pourrait plus payer pour en sortir. C'est la première chose à laisser
+     * ouverte, pas la dernière.
+     */
+    private const TOUJOURS_OUVERTS = [
+        'abonnement', 'subscription', 'payment', 'paiement',
+        'licence', 'logout', 'deconnexion', 'superadmin',
+        'profil', 'profile', 'notifications',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        // Pas d'utilisateur → laisser passer (auth middleware gérera)
         if (! $user) {
             return $next($request);
         }
 
-        // SuperAdmin IBIG Soft : jamais soumis à la licence
+        // Super-admin de l'éditeur : jamais soumis à la licence. Sans cette
+        // exception, l'expiration d'un espace fermerait la console qui sert à
+        // la corriger.
         if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['super_admin', 'superadmin'])) {
             return $next($request);
         }
 
-        $org = $user->organization;
+        $orgId = $user->organization_id;
 
-        // Pas d'organisation → laisser passer (onboarding)
-        if (! $org) {
+        if (! $orgId) {
+            return $next($request);   // parcours d'inscription
+        }
+
+        // La lecture reste ouverte, quel que soit l'état. Toujours.
+        if (in_array($request->method(), self::LECTURE, true)) {
             return $next($request);
         }
 
-        // =====================================================================
-        // Vérification Trial
-        // =====================================================================
-        if ($org->trial_ends_at && $org->trial_ends_at->isFuture()) {
-            // Trial valide → accès complet
+        if ($this->cheminToujoursOuvert($request)) {
             return $next($request);
         }
 
-        // =====================================================================
-        // Vérification Licence (DATE SERVEUR UNIQUEMENT)
-        // =====================================================================
-        $license = $org->activeLicense ?? $org->latestLicense ?? null;
+        $licence = app(LicenceService::class);
+        $etat    = $licence->etat($orgId);
 
-        if (! $license) {
-            // Aucune licence jamais activée
-            return $this->respondExpired($request, 'Aucune licence active.');
-        }
-
-        // SÉCURITÉ : comparaison avec now() côté serveur — jamais le client
-        $now = now();
-
-        if ($license->status === 'active' && $license->expires_at > $now) {
-            // Licence valide — vérification des modules si nécessaire
-            $requiredModule = $request->route()?->getAction('module');
-            if ($requiredModule && ! in_array($requiredModule, $license->active_modules ?? [], true)) {
-                return $this->respondModuleNotAvailable($request, $requiredModule);
-            }
-
+        if ($licence->droits($etat)['ecriture'] ?? true) {
             return $next($request);
         }
 
-        if ($license->status === 'grace') {
-            // Période de grâce : accès limité en lecture seule
-            session(['license_grace_mode' => true]);
-            Log::info('Accès en mode grâce', [
-                'org_id'     => $org->id,
-                'expires_at' => $license->expires_at,
-            ]);
-            return $next($request); // les policies géreront l'accès en lecture seule
-        }
-
-        // =====================================================================
-        // Licence expirée
-        // =====================================================================
-        if ($license->expires_at <= $now) {
-            $graceDays  = config('payment.grace_period_days', 7);
-            $graceUntil = $license->expires_at->copy()->addDays($graceDays);
-
-            if ($now < $graceUntil && $license->status !== 'expired') {
-                // Encore dans la période de grâce
-                session(['license_grace_mode' => true]);
-                return $next($request);
-            }
-        }
-
-        return $this->respondExpired($request, 'Licence expirée.');
+        return $this->refuserEcriture($request, $licence, $etat);
     }
 
-    // =========================================================================
-    // Réponses
-    // =========================================================================
-
-    private function respondExpired(Request $request, string $message): Response
+    private function cheminToujoursOuvert(Request $request): bool
     {
+        $chemin = ltrim($request->path(), '/');
+
+        foreach (self::TOUJOURS_OUVERTS as $prefixe) {
+            if ($chemin === $prefixe || str_starts_with($chemin, $prefixe . '/')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Refus d'écriture en lecture seule.
+     *
+     * Le message vient du moteur : il dit jusqu'à quand les données sont
+     * conservées. On n'écrit ni « compte suspendu », ni « accès révoqué », ni
+     * « données supprimées » — trois termes bannis par le glossaire, et trois
+     * façons de faire croire à une perte qui n'a pas lieu.
+     */
+    private function refuserEcriture(Request $request, LicenceService $licence, string $etat): Response
+    {
+        $message = $licence->etatComplet($request->user()->organization_id)['message']
+            ?? 'Votre espace est en lecture seule. Vos données sont conservées.';
+
         if ($request->expectsJson()) {
             return response()->json([
                 'error'   => $message,
-                'code'    => 'LICENSE_EXPIRED',
-                'action'  => 'redirect_to_subscription',
-            ], 402);
-        }
-
-        return redirect()->route('subscription.expired')
-                         ->with('error', $message);
-    }
-
-    private function respondModuleNotAvailable(Request $request, string $module): Response
-    {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'error'  => "Le module '{$module}' n'est pas inclus dans votre formule.",
-                'code'   => 'MODULE_NOT_AVAILABLE',
-                'action' => 'redirect_to_upgrade',
+                'code'    => 'ETAT_LECTURE_SEULE',
+                'etat'    => $etat,
+                'action'  => 'voir_les_formules',
             ], 403);
         }
 
-        return redirect()->route('subscription.upgrade')
-                         ->with('info', "Ce module nécessite une mise à niveau de votre formule.");
+        return back()->withErrors(['licence' => $message]);
     }
 }

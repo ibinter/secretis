@@ -1181,3 +1181,12 @@ Route::prefix('v1/legal')->name('api.v1.legal.')->group(function () {
     Route::get('/{slug}',     [\App\Http\Controllers\LegalPagesController::class, 'apiShow'])->name('show');
     Route::get('/{slug}/pdf', [\App\Http\Controllers\LegalPagesController::class, 'apiPdf'])->name('pdf');
 });
+
+/*
+|--------------------------------------------------------------------------
+| API de licence — section 9.4 du cahier
+|--------------------------------------------------------------------------
+| Chemins NON versionnés, volontairement : une installation on-premise vérifie
+| sa clé contre ces adresses et ne saura jamais qu'on a changé de préfixe.
+*/
+require __DIR__ . '/licence-api.php';

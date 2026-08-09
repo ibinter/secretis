@@ -181,6 +181,9 @@ class SettingsController extends Controller
      */
     public function inviteUser(Request $request): \Illuminate\Http\RedirectResponse
     {
+        // Multi-utilisateur fermé au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('multi_utilisateur', $request->user());
+
         $validated = $request->validate([
             'email'   => ['required', 'email', 'max:255'],
             'role'    => ['required', 'in:admin,manager,employe,consultant'],

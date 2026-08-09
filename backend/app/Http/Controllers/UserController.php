@@ -67,6 +67,10 @@ class UserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Multi-utilisateur fermé au palier Découverte (section 3.3) : l'espace
+        // gratuit compte un utilisateur, celui qui l'a ouvert.
+        app(\App\Services\LicenceGarde::class)->exiger('multi_utilisateur');
+
         $validated = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
@@ -186,6 +190,9 @@ class UserController extends Controller
      */
     public function invite(Request $request): JsonResponse
     {
+        // Multi-utilisateur fermé au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('multi_utilisateur', $request->user());
+
         $validated = $request->validate([
             'name'          => ['required', 'string', 'max:255'],
             'email'         => ['required', 'email', 'max:255', Rule::unique('users', 'email')],

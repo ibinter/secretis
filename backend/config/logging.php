@@ -135,6 +135,79 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // ── Canaux appelés par le code mais jamais déclarés ─────────────────
+        // `Log::channel('x')` sur un canal absent lève InvalidArgumentException.
+        // Ces sept canaux étaient utilisés dans l'application sans exister :
+        // billing, errors, gdpr, notifications, payments, security, support.
+        //
+        // Le piège tient à l'endroit où ils sont appelés : presque toujours
+        // dans un `catch`. La tentative de journaliser une erreur levait donc
+        // une SECONDE erreur, qui remplaçait la première — on perdait
+        // exactement le diagnostic qu'on cherchait à conserver.
+        //
+        // Chacun écrit dans son propre fichier : mêler la sécurité et les
+        // paiements au journal applicatif rend l'un et l'autre illisibles.
+        // Les durées de rétention diffèrent selon l'enjeu : une trace de
+        // sécurité ou de paiement se conserve plus longtemps qu'un avis de
+        // notification.
+        'security' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/security.log'),
+            'level'  => 'debug',
+            'days'   => 365,
+            'replace_placeholders' => true,
+        ],
+
+        'payments' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/payments.log'),
+            'level'  => 'debug',
+            'days'   => 365,
+            'replace_placeholders' => true,
+        ],
+
+        'billing' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/billing.log'),
+            'level'  => 'debug',
+            'days'   => 365,
+            'replace_placeholders' => true,
+        ],
+
+        // Traces de traitement de données personnelles : la durée de
+        // conservation relève du registre RGPD, pas du confort d'exploitation.
+        'gdpr' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/gdpr.log'),
+            'level'  => 'debug',
+            'days'   => 365,
+            'replace_placeholders' => true,
+        ],
+
+        'notifications' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/notifications.log'),
+            'level'  => 'debug',
+            'days'   => 30,
+            'replace_placeholders' => true,
+        ],
+
+        'support' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/support.log'),
+            'level'  => 'debug',
+            'days'   => 90,
+            'replace_placeholders' => true,
+        ],
+
+        'errors' => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/errors.log'),
+            'level'  => 'error',
+            'days'   => 90,
+            'replace_placeholders' => true,
+        ],
+
         'audit_fallback' => [
             'driver' => 'single',
             'path' => storage_path('logs/audit_fallback.log'),

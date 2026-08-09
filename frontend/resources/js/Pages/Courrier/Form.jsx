@@ -21,6 +21,7 @@ import {
     PageHeader, Button, Card,
     cx, CONTROL, BORDER, SURFACE_SUNK, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
 } from '@/Components/UI';
+import { PlafondAtteintModal } from '@/Components/Licence/PlafondAtteint';
 
 // ---------------------------------------------------------------------------
 // Constantes
@@ -183,6 +184,9 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
     const [files, setFiles] = useState([]);
     const [submitted, setSubmitted] = useState(false);
     const [saving, setSaving] = useState(false);
+    // Refus d'écriture au plafond (section 8.5). Le texte vient du serveur :
+    // le contrôle se fait à l'écriture, pas en masquant le bouton d'ici.
+    const [refusPlafond, setRefusPlafond] = useState(null);
 
     const { data, setData, post, processing, errors, reset, transform } = useForm({
         type:                  defaultType,
@@ -249,6 +253,11 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                 });
                 setSubmitted(true);
             } catch (err) {
+                const statut = err.response?.status;
+                if (statut === 402 || statut === 403 || statut === 423) {
+                    setRefusPlafond(err.response?.data?.message ?? null);
+                    return;
+                }
                 alert(err.response?.data?.message ?? 'Erreur lors de la mise à jour du courrier.');
             } finally {
                 setSaving(false);
@@ -260,6 +269,13 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
         post('/courrier', {
             forceFormData: true,
             onSuccess: () => setSubmitted(true),
+            // Un refus de licence revient dans le sac d'erreurs sous la clé
+            // `licence` : c'est le seul canal qu'Inertia laisse à une
+            // redirection en arrière. Le texte, lui, reste celui du serveur.
+            onError: (erreurs) => {
+                const refus = erreurs?.licence ?? erreurs?.plafond;
+                if (refus) setRefusPlafond(refus);
+            },
         });
     };
 
@@ -539,6 +555,13 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                     </Card>
                 </form>
             </div>
+
+            {/* Refus d'écriture au plafond — texte officiel 8.5 */}
+            <PlafondAtteintModal
+                open={refusPlafond !== null}
+                message={refusPlafond}
+                onClose={() => setRefusPlafond(null)}
+            />
         </AppLayout>
     );
 }
