@@ -8,25 +8,32 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->text('body')->nullable();
-            $table->enum('type', ['text', 'file', 'image', 'system'])->default('text');
-            $table->json('attachments')->nullable();
-            $table->foreignId('reply_to_id')->nullable()->constrained('messages')->nullOnDelete();
-            $table->timestamp('read_at')->nullable();
-            $table->boolean('is_edited')->default(false);
-            $table->timestamp('edited_at')->nullable();
-            $table->boolean('is_deleted')->default(false);
-            $table->timestamps();
+        if (! Schema::hasTable('messages')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('messages', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->text('body')->nullable();
+                $table->enum('type', ['text', 'file', 'image', 'system'])->default('text');
+                $table->json('attachments')->nullable();
+                $table->foreignId('reply_to_id')->nullable()->constrained('messages')->nullOnDelete();
+                $table->timestamp('read_at')->nullable();
+                $table->boolean('is_edited')->default(false);
+                $table->timestamp('edited_at')->nullable();
+                $table->boolean('is_deleted')->default(false);
+                $table->timestamps();
 
-            $table->index('conversation_id');
-            $table->index('user_id');
-            $table->index('read_at');
-            $table->index('created_at');
-        });
+                $table->index('conversation_id');
+                $table->index('user_id');
+                $table->index('read_at');
+                $table->index('created_at');
+            });
+        }
 
         // Update conversations to add FK for last_message_id after messages table exists
         Schema::table('conversations', function (Blueprint $table) {

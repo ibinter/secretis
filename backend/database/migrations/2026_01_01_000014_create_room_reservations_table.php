@@ -8,30 +8,37 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('room_reservations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('event_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('title');
-            $table->text('purpose')->nullable();
-            $table->timestamp('starts_at');
-            $table->timestamp('ends_at');
-            $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('approved_at')->nullable();
-            $table->text('rejection_reason')->nullable();
-            $table->integer('attendees_count')->default(1);
-            $table->timestamps();
+        if (! Schema::hasTable('room_reservations')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('room_reservations', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('room_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('event_id')->nullable()->constrained()->nullOnDelete();
+                $table->string('title');
+                $table->text('purpose')->nullable();
+                $table->timestamp('starts_at');
+                $table->timestamp('ends_at');
+                $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
+                $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->timestamp('approved_at')->nullable();
+                $table->text('rejection_reason')->nullable();
+                $table->integer('attendees_count')->default(1);
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('room_id');
-            $table->index('user_id');
-            $table->index('starts_at');
-            $table->index('ends_at');
-            $table->index('status');
-        });
+                $table->index('organization_id');
+                $table->index('room_id');
+                $table->index('user_id');
+                $table->index('starts_at');
+                $table->index('ends_at');
+                $table->index('status');
+            });
+        }
     }
 
     public function down(): void

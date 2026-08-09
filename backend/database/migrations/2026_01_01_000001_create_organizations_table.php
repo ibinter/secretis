@@ -8,31 +8,38 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('organizations', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('domain')->nullable()->unique();
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('country', 2)->default('CI');
-            $table->string('timezone')->default('Africa/Abidjan');
-            $table->string('locale', 10)->default('fr');
-            $table->string('logo_path')->nullable();
-            $table->string('tax_number')->nullable();
-            $table->json('settings')->nullable();
-            $table->json('modules_enabled')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('trial_ends_at')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+        if (! Schema::hasTable('organizations')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('organizations', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('slug')->unique();
+                $table->string('domain')->nullable()->unique();
+                $table->string('email')->unique();
+                $table->string('phone')->nullable();
+                $table->string('address')->nullable();
+                $table->string('city')->nullable();
+                $table->string('country', 2)->default('CI');
+                $table->string('timezone')->default('Africa/Abidjan');
+                $table->string('locale', 10)->default('fr');
+                $table->string('logo_path')->nullable();
+                $table->string('tax_number')->nullable();
+                $table->json('settings')->nullable();
+                $table->json('modules_enabled')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamp('trial_ends_at')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
 
-            $table->index('slug');
-            $table->index('is_active');
-            $table->index('trial_ends_at');
-        });
+                $table->index('slug');
+                $table->index('is_active');
+                $table->index('trial_ends_at');
+            });
+        }
     }
 
     public function down(): void

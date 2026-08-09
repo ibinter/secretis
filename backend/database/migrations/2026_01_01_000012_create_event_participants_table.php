@@ -8,21 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('event_participants', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('event_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('status', ['pending', 'accepted', 'declined', 'tentative'])->default('pending');
-            $table->enum('role', ['organizer', 'attendee', 'optional'])->default('attendee');
-            $table->timestamp('responded_at')->nullable();
-            $table->text('response_note')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('event_participants')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('event_participants', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('event_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->enum('status', ['pending', 'accepted', 'declined', 'tentative'])->default('pending');
+                $table->enum('role', ['organizer', 'attendee', 'optional'])->default('attendee');
+                $table->timestamp('responded_at')->nullable();
+                $table->text('response_note')->nullable();
+                $table->timestamps();
 
-            $table->unique(['event_id', 'user_id']);
-            $table->index('event_id');
-            $table->index('user_id');
-            $table->index('status');
-        });
+                $table->unique(['event_id', 'user_id']);
+                $table->index('event_id');
+                $table->index('user_id');
+                $table->index('status');
+            });
+        }
     }
 
     public function down(): void

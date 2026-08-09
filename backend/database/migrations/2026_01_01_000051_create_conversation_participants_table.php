@@ -8,21 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('conversation_participants', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('role', ['admin', 'member'])->default('member');
-            $table->timestamp('joined_at')->nullable();
-            $table->timestamp('left_at')->nullable();
-            $table->timestamp('last_read_at')->nullable();
-            $table->boolean('is_muted')->default(false);
-            $table->timestamps();
+        if (! Schema::hasTable('conversation_participants')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('conversation_participants', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('conversation_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->enum('role', ['admin', 'member'])->default('member');
+                $table->timestamp('joined_at')->nullable();
+                $table->timestamp('left_at')->nullable();
+                $table->timestamp('last_read_at')->nullable();
+                $table->boolean('is_muted')->default(false);
+                $table->timestamps();
 
-            $table->unique(['conversation_id', 'user_id']);
-            $table->index('conversation_id');
-            $table->index('user_id');
-        });
+                $table->unique(['conversation_id', 'user_id']);
+                $table->index('conversation_id');
+                $table->index('user_id');
+            });
+        }
     }
 
     public function down(): void

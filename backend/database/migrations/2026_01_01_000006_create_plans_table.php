@@ -8,26 +8,33 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('plans', function (Blueprint $table) {
-            $table->id();
-            $table->string('slug')->unique(); // starter, pro, enterprise
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('price_xof', 10, 2)->default(0); // Franc CFA BCEAO
-            $table->decimal('price_eur', 10, 2)->default(0); // Euro
-            $table->decimal('price_usd', 10, 2)->default(0); // Dollar US
-            $table->integer('max_users')->default(5);
-            $table->integer('duration_months')->default(1);
-            $table->json('features')->nullable();
-            $table->json('modules')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_public')->default(true);
-            $table->integer('sort_order')->default(0);
-            $table->timestamps();
+        if (! Schema::hasTable('plans')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('plans', function (Blueprint $table) {
+                $table->id();
+                $table->string('slug')->unique(); // starter, pro, enterprise
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->decimal('price_xof', 10, 2)->default(0); // Franc CFA BCEAO
+                $table->decimal('price_eur', 10, 2)->default(0); // Euro
+                $table->decimal('price_usd', 10, 2)->default(0); // Dollar US
+                $table->integer('max_users')->default(5);
+                $table->integer('duration_months')->default(1);
+                $table->json('features')->nullable();
+                $table->json('modules')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->boolean('is_public')->default(true);
+                $table->integer('sort_order')->default(0);
+                $table->timestamps();
 
-            $table->index('slug');
-            $table->index('is_active');
-        });
+                $table->index('slug');
+                $table->index('is_active');
+            });
+        }
 
         // Seeder initial des plans
         DB::table('plans')->insert([

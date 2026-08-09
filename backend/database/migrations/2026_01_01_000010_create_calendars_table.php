@@ -8,23 +8,30 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('calendars', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->string('color', 7)->default('#1E3A5F');
-            $table->enum('type', ['personal', 'team', 'organization', 'public'])->default('personal');
-            $table->boolean('is_default')->default(false);
-            $table->boolean('is_shared')->default(false);
-            $table->json('shared_with')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('calendars')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('calendars', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+                $table->string('name');
+                $table->string('description')->nullable();
+                $table->string('color', 7)->default('#1E3A5F');
+                $table->enum('type', ['personal', 'team', 'organization', 'public'])->default('personal');
+                $table->boolean('is_default')->default(false);
+                $table->boolean('is_shared')->default(false);
+                $table->json('shared_with')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('user_id');
-            $table->index('type');
-        });
+                $table->index('organization_id');
+                $table->index('user_id');
+                $table->index('type');
+            });
+        }
     }
 
     public function down(): void

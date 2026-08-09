@@ -8,28 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('convocations', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('organization_id');
-            $table->unsignedBigInteger('meeting_id');
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('sent_by')->nullable();
-            $table->timestamp('sent_at')->nullable();
-            $table->enum('status', ['pending', 'sent', 'delivered', 'accepted', 'declined'])
-                  ->default('pending');
-            $table->timestamp('response_at')->nullable();
-            $table->text('response_note')->nullable();
-            $table->string('pdf_path')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('convocations')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('convocations', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('organization_id');
+                $table->unsignedBigInteger('meeting_id');
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('sent_by')->nullable();
+                $table->timestamp('sent_at')->nullable();
+                $table->enum('status', ['pending', 'sent', 'delivered', 'accepted', 'declined'])
+                      ->default('pending');
+                $table->timestamp('response_at')->nullable();
+                $table->text('response_note')->nullable();
+                $table->string('pdf_path')->nullable();
+                $table->timestamps();
 
-            $table->foreign('organization_id')->references('id')->on('organizations')->cascadeOnDelete();
-            $table->foreign('meeting_id')->references('id')->on('meetings')->cascadeOnDelete();
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('sent_by')->references('id')->on('users')->nullOnDelete();
+                $table->foreign('organization_id')->references('id')->on('organizations')->cascadeOnDelete();
+                $table->foreign('meeting_id')->references('id')->on('meetings')->cascadeOnDelete();
+                $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+                $table->foreign('sent_by')->references('id')->on('users')->nullOnDelete();
 
-            $table->unique(['meeting_id', 'user_id']);
-            $table->index(['organization_id', 'meeting_id']);
-        });
+                $table->unique(['meeting_id', 'user_id']);
+                $table->index(['organization_id', 'meeting_id']);
+            });
+        }
     }
 
     public function down(): void

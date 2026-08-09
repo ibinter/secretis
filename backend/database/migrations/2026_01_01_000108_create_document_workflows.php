@@ -71,72 +71,93 @@ return new class extends Migration
         // ------------------------------------------------------------------
         // Templates de workflow
         // ------------------------------------------------------------------
-        Schema::create('document_workflow_templates', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->string('name', 150);
-            $table->text('description')->nullable();
-            // Catégorie de document déclenchant ce template (nullable = tous)
-            $table->string('category', 30)->nullable()->index();
-            // JSON : [{step_name, approver_role, approver_id, is_required, timeout_hours}]
-            $table->json('steps');
-            $table->boolean('is_active')->default(true);
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
+        if (! Schema::hasTable('document_workflow_templates')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('document_workflow_templates', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->string('name', 150);
+                $table->text('description')->nullable();
+                // Catégorie de document déclenchant ce template (nullable = tous)
+                $table->string('category', 30)->nullable()->index();
+                // JSON : [{step_name, approver_role, approver_id, is_required, timeout_hours}]
+                $table->json('steps');
+                $table->boolean('is_active')->default(true);
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->timestamps();
 
-            $table->index(['organization_id', 'category']);
-            $table->index(['organization_id', 'is_active']);
-        });
+                $table->index(['organization_id', 'category']);
+                $table->index(['organization_id', 'is_active']);
+            });
+        }
 
         // ------------------------------------------------------------------
         // Instances de workflow (une par document démarré)
         // ------------------------------------------------------------------
-        Schema::create('document_workflow_instances', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('document_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('template_id')->constrained('document_workflow_templates')->cascadeOnDelete();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->enum('status', [
-                'pending', 'in_progress', 'approved', 'rejected', 'cancelled',
-            ])->default('pending')->index();
-            $table->unsignedSmallInteger('current_step')->default(1);
-            $table->foreignId('started_by')->constrained('users')->cascadeOnDelete();
-            $table->timestamp('started_at')->nullable();
-            $table->timestamp('completed_at')->nullable();
-            $table->text('rejection_reason')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('document_workflow_instances')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('document_workflow_instances', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('document_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('template_id')->constrained('document_workflow_templates')->cascadeOnDelete();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->enum('status', [
+                    'pending', 'in_progress', 'approved', 'rejected', 'cancelled',
+                ])->default('pending')->index();
+                $table->unsignedSmallInteger('current_step')->default(1);
+                $table->foreignId('started_by')->constrained('users')->cascadeOnDelete();
+                $table->timestamp('started_at')->nullable();
+                $table->timestamp('completed_at')->nullable();
+                $table->text('rejection_reason')->nullable();
+                $table->timestamps();
 
-            $table->index(['document_id', 'status']);
-            $table->index(['organization_id', 'status']);
-        });
+                $table->index(['document_id', 'status']);
+                $table->index(['organization_id', 'status']);
+            });
+        }
 
         // ------------------------------------------------------------------
         // Étapes individuelles d'une instance
         // ------------------------------------------------------------------
-        Schema::create('document_workflow_steps', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('instance_id')
-                ->constrained('document_workflow_instances')
-                ->cascadeOnDelete();
-            $table->string('step_name', 150);
-            $table->unsignedSmallInteger('step_order');
-            $table->foreignId('approver_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('approver_role', 80)->nullable(); // Rôle si pas d'utilisateur fixe
-            $table->enum('status', [
-                'pending', 'in_progress', 'approved', 'rejected', 'sent_back', 'skipped',
-            ])->default('pending')->index();
-            $table->boolean('is_required')->default(true);
-            $table->unsignedSmallInteger('timeout_hours')->default(72);
-            $table->timestamp('assigned_at')->nullable();
-            $table->timestamp('action_at')->nullable();
-            $table->text('comment')->nullable();
-            $table->timestamp('reminded_at')->nullable();
-            $table->unsignedTinyInteger('reminder_count')->default(0);
-            $table->timestamps();
+        if (! Schema::hasTable('document_workflow_steps')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('document_workflow_steps', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('instance_id')
+                    ->constrained('document_workflow_instances')
+                    ->cascadeOnDelete();
+                $table->string('step_name', 150);
+                $table->unsignedSmallInteger('step_order');
+                $table->foreignId('approver_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->string('approver_role', 80)->nullable(); // Rôle si pas d'utilisateur fixe
+                $table->enum('status', [
+                    'pending', 'in_progress', 'approved', 'rejected', 'sent_back', 'skipped',
+                ])->default('pending')->index();
+                $table->boolean('is_required')->default(true);
+                $table->unsignedSmallInteger('timeout_hours')->default(72);
+                $table->timestamp('assigned_at')->nullable();
+                $table->timestamp('action_at')->nullable();
+                $table->text('comment')->nullable();
+                $table->timestamp('reminded_at')->nullable();
+                $table->unsignedTinyInteger('reminder_count')->default(0);
+                $table->timestamps();
 
-            $table->index(['instance_id', 'step_order']);
-            $table->index(['approver_id', 'status']);
-        });
+                $table->index(['instance_id', 'step_order']);
+                $table->index(['approver_id', 'status']);
+            });
+        }
     }
 
     public function down(): void

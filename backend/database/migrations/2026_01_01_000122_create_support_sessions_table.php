@@ -14,56 +14,63 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('support_sessions', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('support_sessions')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('support_sessions', function (Blueprint $table) {
+                $table->id();
 
-            // ── Parties prenantes ─────────────────────────────────────────────
-            $table->foreignId('organization_id')
-                  ->constrained()
-                  ->cascadeOnDelete()
-                  ->comment('Organisation cliente concernée');
+                // ── Parties prenantes ─────────────────────────────────────────────
+                $table->foreignId('organization_id')
+                      ->constrained()
+                      ->cascadeOnDelete()
+                      ->comment('Organisation cliente concernée');
 
-            $table->foreignId('support_user_id')
-                  ->constrained('users')
-                  ->cascadeOnDelete()
-                  ->comment('Agent IBIG Soft (rôle superadmin_ibig)');
+                $table->foreignId('support_user_id')
+                      ->constrained('users')
+                      ->cascadeOnDelete()
+                      ->comment('Agent IBIG Soft (rôle superadmin_ibig)');
 
-            $table->foreignId('authorized_by_id')
-                  ->nullable()
-                  ->constrained('users')
-                  ->nullOnDelete()
-                  ->comment('Admin client qui a approuvé la session');
+                $table->foreignId('authorized_by_id')
+                      ->nullable()
+                      ->constrained('users')
+                      ->nullOnDelete()
+                      ->comment('Admin client qui a approuvé la session');
 
-            // ── Contexte de la demande ────────────────────────────────────────
-            $table->string('reason')->comment('Motif obligatoire de la prise en main');
-            $table->string('ticket_reference')->nullable()->comment('Référence du ticket support lié');
-            $table->enum('status', ['pending', 'active', 'expired', 'ended', 'rejected'])
-                  ->default('pending')
-                  ->comment('pending: demandée; active: approuvée; ended: terminée manuellement');
+                // ── Contexte de la demande ────────────────────────────────────────
+                $table->string('reason')->comment('Motif obligatoire de la prise en main');
+                $table->string('ticket_reference')->nullable()->comment('Référence du ticket support lié');
+                $table->enum('status', ['pending', 'active', 'expired', 'ended', 'rejected'])
+                      ->default('pending')
+                      ->comment('pending: demandée; active: approuvée; ended: terminée manuellement');
 
-            // ── Temporalité ───────────────────────────────────────────────────
-            $table->timestamp('requested_at')->useCurrent()->comment('Date de la demande');
-            $table->timestamp('approved_at')->nullable()->comment('Date d\'approbation par l\'admin client');
-            $table->timestamp('started_at')->nullable()->comment('Date de début effectif de la session');
-            $table->timestamp('expires_at')->nullable()->comment('Expiration automatique (max 4 heures)');
-            $table->timestamp('ended_at')->nullable()->comment('Fin manuelle par l\'agent ou l\'admin client');
+                // ── Temporalité ───────────────────────────────────────────────────
+                $table->timestamp('requested_at')->useCurrent()->comment('Date de la demande');
+                $table->timestamp('approved_at')->nullable()->comment('Date d\'approbation par l\'admin client');
+                $table->timestamp('started_at')->nullable()->comment('Date de début effectif de la session');
+                $table->timestamp('expires_at')->nullable()->comment('Expiration automatique (max 4 heures)');
+                $table->timestamp('ended_at')->nullable()->comment('Fin manuelle par l\'agent ou l\'admin client');
 
-            // ── Statut et traçabilité ─────────────────────────────────────────
-            $table->boolean('is_active')->default(false)->comment('Session actuellement en cours');
-            $table->boolean('client_notified')->default(false)->comment('Notification envoyée à l\'admin client');
-            $table->json('actions_log')->nullable()
-                  ->comment('Journal des actions sensibles effectuées pendant la session');
-            $table->string('ended_by')->nullable()->comment('Qui a terminé : support, client, system (expiration)');
-            $table->text('end_notes')->nullable()->comment('Notes de clôture de la session');
+                // ── Statut et traçabilité ─────────────────────────────────────────
+                $table->boolean('is_active')->default(false)->comment('Session actuellement en cours');
+                $table->boolean('client_notified')->default(false)->comment('Notification envoyée à l\'admin client');
+                $table->json('actions_log')->nullable()
+                      ->comment('Journal des actions sensibles effectuées pendant la session');
+                $table->string('ended_by')->nullable()->comment('Qui a terminé : support, client, system (expiration)');
+                $table->text('end_notes')->nullable()->comment('Notes de clôture de la session');
 
-            $table->timestamps();
+                $table->timestamps();
 
-            // ── Index ─────────────────────────────────────────────────────────
-            $table->index(['organization_id', 'is_active']);
-            $table->index(['support_user_id', 'is_active']);
-            $table->index(['status', 'expires_at']);
-            $table->index('requested_at');
-        });
+                // ── Index ─────────────────────────────────────────────────────────
+                $table->index(['organization_id', 'is_active']);
+                $table->index(['support_user_id', 'is_active']);
+                $table->index(['status', 'expires_at']);
+                $table->index('requested_at');
+            });
+        }
     }
 
     public function down(): void

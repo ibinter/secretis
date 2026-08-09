@@ -8,28 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('visitor_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('visitor_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('host_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('appointment_id')->nullable(); // FK added after appointments table
-            $table->string('purpose');
-            $table->string('badge_number')->nullable();
-            $table->timestamp('checked_in_at');
-            $table->timestamp('checked_out_at')->nullable();
-            $table->foreignId('checked_in_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('checked_out_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('vehicle_plate')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('visitor_logs')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('visitor_logs', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('visitor_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('host_id')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('appointment_id')->nullable(); // FK added after appointments table
+                $table->string('purpose');
+                $table->string('badge_number')->nullable();
+                $table->timestamp('checked_in_at');
+                $table->timestamp('checked_out_at')->nullable();
+                $table->foreignId('checked_in_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('checked_out_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->string('vehicle_plate')->nullable();
+                $table->text('notes')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('visitor_id');
-            $table->index('host_id');
-            $table->index('checked_in_at');
-            $table->index('checked_out_at');
-        });
+                $table->index('organization_id');
+                $table->index('visitor_id');
+                $table->index('host_id');
+                $table->index('checked_in_at');
+                $table->index('checked_out_at');
+            });
+        }
     }
 
     public function down(): void

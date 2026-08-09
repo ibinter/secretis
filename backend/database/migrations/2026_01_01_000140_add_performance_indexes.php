@@ -35,29 +35,27 @@ return new class extends Migration
         // AGENDA — table events
         // =====================================================================
 
+        // `events.start_at` N'EXISTE PAS sur une base neuve : la table est creee
+        // avec `starts_at` (000011). La colonne `start_at` est presente en
+        // PRODUCTION, posee hors migration — la base de production porte donc
+        // les DEUX, ce qui est un defaut a arbitrer et non a trancher ici.
+        //
+        // On indexe ce qui existe. Indexer une colonne absente faisait echouer
+        // la migration et tout ce qui la suivait.
         Schema::table('events', function (Blueprint $table) {
             // Requêtes calendrier : "événements de l'org entre date A et date B"
-            if (! $this->indexExists('events', 'events_org_dates_idx')) {
-                $table->index(
-                    ['organization_id', 'start_at', 'end_at'],
-                    'events_org_dates_idx'
-                );
+            if ($this->indexable('events', ['organization_id', 'start_at', 'end_at'], 'events_org_dates_idx')) {
+                $table->index(['organization_id', 'start_at', 'end_at'], 'events_org_dates_idx');
             }
 
             // Requêtes "mes événements créés" : filtre org + créateur + statut
-            if (! $this->indexExists('events', 'events_org_creator_idx')) {
-                $table->index(
-                    ['organization_id', 'created_by', 'status'],
-                    'events_org_creator_idx'
-                );
+            if ($this->indexable('events', ['organization_id', 'created_by', 'status'], 'events_org_creator_idx')) {
+                $table->index(['organization_id', 'created_by', 'status'], 'events_org_creator_idx');
             }
 
             // Tri par date de début (dashboard, vue semaine)
-            if (! $this->indexExists('events', 'events_org_start_deleted_idx')) {
-                $table->index(
-                    ['organization_id', 'start_at', 'deleted_at'],
-                    'events_org_start_deleted_idx'
-                );
+            if ($this->indexable('events', ['organization_id', 'start_at', 'deleted_at'], 'events_org_start_deleted_idx')) {
+                $table->index(['organization_id', 'start_at', 'deleted_at'], 'events_org_start_deleted_idx');
             }
         });
 
@@ -67,27 +65,18 @@ return new class extends Migration
 
         Schema::table('tasks', function (Blueprint $table) {
             // "Tâches à traiter" : filtré par org + statut + date limite
-            if (! $this->indexExists('tasks', 'tasks_org_status_due_idx')) {
-                $table->index(
-                    ['organization_id', 'status', 'due_date'],
-                    'tasks_org_status_due_idx'
-                );
+            if ($this->indexable('tasks', ['organization_id', 'status', 'due_date'], 'tasks_org_status_due_idx')) {
+                $table->index(['organization_id', 'status', 'due_date'], 'tasks_org_status_due_idx');
             }
 
             // "Mes tâches" : org + assigné + statut (via table pivot task_user)
-            if (! $this->indexExists('tasks', 'tasks_org_assigned_idx')) {
-                $table->index(
-                    ['organization_id', 'assigned_to', 'status'],
-                    'tasks_org_assigned_idx'
-                );
+            if ($this->indexable('tasks', ['organization_id', 'assigned_to', 'status'], 'tasks_org_assigned_idx')) {
+                $table->index(['organization_id', 'assigned_to', 'status'], 'tasks_org_assigned_idx');
             }
 
             // Tâches urgentes/haute priorité en dashboard
-            if (! $this->indexExists('tasks', 'tasks_org_priority_status_idx')) {
-                $table->index(
-                    ['organization_id', 'priority', 'status', 'deleted_at'],
-                    'tasks_org_priority_status_idx'
-                );
+            if ($this->indexable('tasks', ['organization_id', 'priority', 'status', 'deleted_at'], 'tasks_org_priority_status_idx')) {
+                $table->index(['organization_id', 'priority', 'status', 'deleted_at'], 'tasks_org_priority_status_idx');
             }
         });
 
@@ -97,27 +86,18 @@ return new class extends Migration
 
         Schema::table('documents', function (Blueprint $table) {
             // Navigation dans un dossier : org + dossier + date création
-            if (! $this->indexExists('documents', 'docs_org_folder_date_idx')) {
-                $table->index(
-                    ['organization_id', 'folder_id', 'created_at'],
-                    'docs_org_folder_date_idx'
-                );
+            if ($this->indexable('documents', ['organization_id', 'folder_id', 'created_at'], 'docs_org_folder_date_idx')) {
+                $table->index(['organization_id', 'folder_id', 'created_at'], 'docs_org_folder_date_idx');
             }
 
             // Documents expirés / en attente de signature : org + statut + expiry
-            if (! $this->indexExists('documents', 'docs_org_status_expires_idx')) {
-                $table->index(
-                    ['organization_id', 'status', 'expires_at'],
-                    'docs_org_status_expires_idx'
-                );
+            if ($this->indexable('documents', ['organization_id', 'status', 'expires_at'], 'docs_org_status_expires_idx')) {
+                $table->index(['organization_id', 'status', 'expires_at'], 'docs_org_status_expires_idx');
             }
 
             // Documents récents (dashboard) : org + updated_at + deleted_at
-            if (! $this->indexExists('documents', 'docs_org_updated_deleted_idx')) {
-                $table->index(
-                    ['organization_id', 'updated_at', 'deleted_at'],
-                    'docs_org_updated_deleted_idx'
-                );
+            if ($this->indexable('documents', ['organization_id', 'updated_at', 'deleted_at'], 'docs_org_updated_deleted_idx')) {
+                $table->index(['organization_id', 'updated_at', 'deleted_at'], 'docs_org_updated_deleted_idx');
             }
         });
 
@@ -127,27 +107,18 @@ return new class extends Migration
 
         Schema::table('audit_logs', function (Blueprint $table) {
             // Filtrage par event + date : "qui a fait quoi ce mois-ci"
-            if (! $this->indexExists('audit_logs', 'audit_org_event_date_idx')) {
-                $table->index(
-                    ['organization_id', 'event', 'created_at'],
-                    'audit_org_event_date_idx'
-                );
+            if ($this->indexable('audit_logs', ['organization_id', 'event', 'created_at'], 'audit_org_event_date_idx')) {
+                $table->index(['organization_id', 'event', 'created_at'], 'audit_org_event_date_idx');
             }
 
             // Historique d'un utilisateur : org + user + date
-            if (! $this->indexExists('audit_logs', 'audit_org_user_date_idx')) {
-                $table->index(
-                    ['organization_id', 'user_id', 'created_at'],
-                    'audit_org_user_date_idx'
-                );
+            if ($this->indexable('audit_logs', ['organization_id', 'user_id', 'created_at'], 'audit_org_user_date_idx')) {
+                $table->index(['organization_id', 'user_id', 'created_at'], 'audit_org_user_date_idx');
             }
 
             // Lookup polymorphique : "audit d'une entité précise"
-            if (! $this->indexExists('audit_logs', 'audit_morphs_idx')) {
-                $table->index(
-                    ['auditable_type', 'auditable_id'],
-                    'audit_morphs_idx'
-                );
+            if ($this->indexable('audit_logs', ['auditable_type', 'auditable_id'], 'audit_morphs_idx')) {
+                $table->index(['auditable_type', 'auditable_id'], 'audit_morphs_idx');
             }
         });
 
@@ -157,11 +128,8 @@ return new class extends Migration
 
         Schema::table('notifications', function (Blueprint $table) {
             // "Notifications non lues" : notifiable_type + notifiable_id + read_at
-            if (! $this->indexExists('notifications', 'notif_notifiable_read_idx')) {
-                $table->index(
-                    ['notifiable_type', 'notifiable_id', 'read_at'],
-                    'notif_notifiable_read_idx'
-                );
+            if ($this->indexable('notifications', ['notifiable_type', 'notifiable_id', 'read_at'], 'notif_notifiable_read_idx')) {
+                $table->index(['notifiable_type', 'notifiable_id', 'read_at'], 'notif_notifiable_read_idx');
             }
         });
 
@@ -171,19 +139,13 @@ return new class extends Migration
 
         Schema::table('support_tickets', function (Blueprint $table) {
             // Liste des tickets ouverts triée par date : org + statut + date
-            if (! $this->indexExists('support_tickets', 'tickets_org_status_date_idx')) {
-                $table->index(
-                    ['organization_id', 'status', 'created_at'],
-                    'tickets_org_status_date_idx'
-                );
+            if ($this->indexable('support_tickets', ['organization_id', 'status', 'created_at'], 'tickets_org_status_date_idx')) {
+                $table->index(['organization_id', 'status', 'created_at'], 'tickets_org_status_date_idx');
             }
 
             // File d'un agent support : assigned_to + statut
-            if (! $this->indexExists('support_tickets', 'tickets_assigned_status_idx')) {
-                $table->index(
-                    ['assigned_to', 'status'],
-                    'tickets_assigned_status_idx'
-                );
+            if ($this->indexable('support_tickets', ['assigned_to', 'status'], 'tickets_assigned_status_idx')) {
+                $table->index(['assigned_to', 'status'], 'tickets_assigned_status_idx');
             }
         });
 
@@ -193,11 +155,8 @@ return new class extends Migration
 
         Schema::table('mail_registry', function (Blueprint $table) {
             // Courriers en attente : org + statut + urgence + received_at
-            if (! $this->indexExists('mail_registry', 'mail_org_status_urgency_idx')) {
-                $table->index(
-                    ['organization_id', 'status', 'urgency'],
-                    'mail_org_status_urgency_idx'
-                );
+            if ($this->indexable('mail_registry', ['organization_id', 'status', 'urgency'], 'mail_org_status_urgency_idx')) {
+                $table->index(['organization_id', 'status', 'urgency'], 'mail_org_status_urgency_idx');
             }
         });
 
@@ -207,11 +166,8 @@ return new class extends Migration
 
         Schema::table('visitors', function (Blueprint $table) {
             // Visiteurs du jour : org + check_in_at
-            if (! $this->indexExists('visitors', 'visitors_org_checkin_idx')) {
-                $table->index(
-                    ['organization_id', 'check_in_at', 'deleted_at'],
-                    'visitors_org_checkin_idx'
-                );
+            if ($this->indexable('visitors', ['organization_id', 'check_in_at', 'deleted_at'], 'visitors_org_checkin_idx')) {
+                $table->index(['organization_id', 'check_in_at', 'deleted_at'], 'visitors_org_checkin_idx');
             }
         });
     }
@@ -248,6 +204,38 @@ return new class extends Migration
      * Vérifie si un index existe déjà (PostgreSQL) pour éviter l'erreur
      * "duplicate key value violates unique constraint" lors d'une re-migration.
      */
+    /**
+     * Un index est posable si son nom est libre ET si TOUTES ses colonnes
+     * existent.
+     *
+     * Le garde-fou ne testait que le nom de l'index. Or plusieurs colonnes
+     * visées ici n'existent pas sur une base neuve — `documents.status` et
+     * `events.start_at` sont présentes en PRODUCTION mais créées par aucune
+     * migration du dépôt. La migration échouait donc sur « column does not
+     * exist », et bloquait toutes celles qui suivaient.
+     *
+     * On n'indexe que ce qui existe : un index de performance absent ralentit,
+     * une migration en échec arrête tout.
+     */
+    private function indexable(string $table, array $colonnes, string $index): bool
+    {
+        if (! Schema::hasTable($table) || $this->indexExists($table, $index)) {
+            return false;
+        }
+
+        foreach ($colonnes as $colonne) {
+            if (! Schema::hasColumn($table, $colonne)) {
+                \Illuminate\Support\Facades\Log::info(
+                    "Index {$index} non pose : la colonne {$table}.{$colonne} n'existe pas."
+                );
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function indexExists(string $table, string $indexName): bool
     {
         $result = \DB::selectOne(
