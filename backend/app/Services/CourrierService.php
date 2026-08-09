@@ -116,26 +116,45 @@ class CourrierService
      * La séquence est calculée par organisation + type + année civile.
      * Utilise une transaction + SELECT FOR UPDATE pour éviter les doublons concurrents.
      */
+    /**
+     * Référence du registre : REF-{ENTRANT|SORTANT}-{année}-{numéro}.
+     *
+     * Le numéro était obtenu par un `count()` des courriers de l'organisation,
+     * ce qui posait trois problèmes à la fois :
+     *
+     *   — il IGNORAIT LES SUPPRIMÉS (`whereNull('deleted_at')`), donc archiver
+     *     une pièce faisait retomber le compte et le courrier suivant
+     *     réutilisait un numéro déjà pris : violation d'unicité, erreur 500 ;
+     *   — il était SUJET À COURSE, ce que le code reconnaissait lui-même dans
+     *     un commentaire sans y remédier — deux enregistrements simultanés
+     *     recevaient le même numéro ;
+     *   — et l'unicité en base portait sur la référence SEULE, alors que la
+     *     numérotation repart à 1 par organisation : la première pièce de tout
+     *     nouvel espace entrait en collision avec celle de l'organisation 4.
+     *
+     * Le numéro vient désormais d'un compteur dédié, incrémenté par
+     * `ON CONFLICT … RETURNING` : une seule requête, atomique, sans lecture
+     * préalable ni verrou explicite. Un numéro attribué ne revient jamais —
+     * c'est ce qu'on attend d'un registre.
+     */
     public function generateReference(string $type, int|string $organizationId): string
     {
-        return DB::transaction(function () use ($type, $organizationId) {
-            $year   = Carbon::now()->year;
-            $prefix = $type === 'incoming' ? 'ENTRANT' : 'SORTANT';
+        $annee  = Carbon::now()->year;
+        $prefix = $type === 'incoming' ? 'ENTRANT' : 'SORTANT';
 
-            // Compte les courriers de cette org/type/année pour calculer le prochain numéro
-            // Note: lockForUpdate() ne fonctionne pas avec count() sur PostgreSQL.
-            // On utilise une sous-requête pour serialiser l'accès.
-            $count = DB::table('mail_registry')
-                ->where('organization_id', $organizationId)
-                ->where('type', $type)
-                ->whereYear('created_at', $year)
-                ->whereNull('deleted_at')
-                ->count();
+        // Volontairement HORS transaction applicative : le compteur doit
+        // avancer même si l'enregistrement du courrier échoue ensuite. Un trou
+        // dans la numérotation est sans conséquence ; un numéro réattribué en
+        // a une.
+        $numero = DB::selectOne('
+            INSERT INTO mail_registry_counters (organization_id, type, year, last_number, created_at, updated_at)
+            VALUES (?, ?, ?, 1, NOW(), NOW())
+            ON CONFLICT (organization_id, type, year)
+            DO UPDATE SET last_number = mail_registry_counters.last_number + 1, updated_at = NOW()
+            RETURNING last_number
+        ', [$organizationId, $type, $annee])->last_number;
 
-            $sequence = str_pad($count + 1, 5, '0', STR_PAD_LEFT);
-
-            return "REF-{$prefix}-{$year}-{$sequence}";
-        });
+        return sprintf('REF-%s-%d-%05d', $prefix, $annee, $numero);
     }
 
     // -------------------------------------------------------------------------
