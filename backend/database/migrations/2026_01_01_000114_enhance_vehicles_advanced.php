@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * AJOUTS DE COLONNES RENDUS IDEMPOTENTS.
+ *
+ * Cette migration a echoue A MI-PARCOURS en production, puis a ete marquee
+ * comme jouee : une partie de ses colonnes existe, une autre non. La rejouer
+ * pour completer ce qui manque exige que chaque ajout sache ne rien faire
+ * quand la colonne est deja la.
+ *
+ * Les `->change()`, index, cles etrangeres et suppressions ne sont PAS
+ * touches : ce ne sont pas des ajouts, et les garder tels quels evite de
+ * modifier un comportement en corrigeant une idempotence.
+ */
+
 declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
@@ -24,15 +37,33 @@ return new class extends Migration
         // 1. Colonnes GPS sur la table vehicles existante
         // -----------------------------------------------------------------
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->string('gps_device_id')->nullable()->after('fuel_type');
-            $table->string('gps_provider')->nullable()->comment('traccar|wialon|custom')->after('gps_device_id');
-            $table->decimal('current_lat', 10, 7)->nullable()->after('gps_provider');
-            $table->decimal('current_lng', 10, 7)->nullable()->after('current_lat');
-            $table->unsignedSmallInteger('current_speed')->default(0)->after('current_lng');
-            $table->boolean('engine_on')->default(false)->after('current_speed');
-            $table->unsignedTinyInteger('fuel_level_percent')->nullable()->after('engine_on');
-            $table->unsignedInteger('odometer_km')->nullable()->after('fuel_level_percent');
-            $table->timestamp('last_gps_update')->nullable()->after('odometer_km');
+            if (! Schema::hasColumn('vehicles', 'gps_device_id')) {
+                $table->string('gps_device_id')->nullable()->after('fuel_type');
+            }
+            if (! Schema::hasColumn('vehicles', 'gps_provider')) {
+                $table->string('gps_provider')->nullable()->comment('traccar|wialon|custom')->after('gps_device_id');
+            }
+            if (! Schema::hasColumn('vehicles', 'current_lat')) {
+                $table->decimal('current_lat', 10, 7)->nullable()->after('gps_provider');
+            }
+            if (! Schema::hasColumn('vehicles', 'current_lng')) {
+                $table->decimal('current_lng', 10, 7)->nullable()->after('current_lat');
+            }
+            if (! Schema::hasColumn('vehicles', 'current_speed')) {
+                $table->unsignedSmallInteger('current_speed')->default(0)->after('current_lng');
+            }
+            if (! Schema::hasColumn('vehicles', 'engine_on')) {
+                $table->boolean('engine_on')->default(false)->after('current_speed');
+            }
+            if (! Schema::hasColumn('vehicles', 'fuel_level_percent')) {
+                $table->unsignedTinyInteger('fuel_level_percent')->nullable()->after('engine_on');
+            }
+            if (! Schema::hasColumn('vehicles', 'odometer_km')) {
+                $table->unsignedInteger('odometer_km')->nullable()->after('fuel_level_percent');
+            }
+            if (! Schema::hasColumn('vehicles', 'last_gps_update')) {
+                $table->timestamp('last_gps_update')->nullable()->after('odometer_km');
+            }
         });
 
         // -----------------------------------------------------------------
