@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\Room;
 use App\Models\RoomReservation;
 use App\Models\Supply;
+use App\Services\StockService;
 use App\Models\SupplyMovement;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -128,6 +129,16 @@ class ResourceService
      *
      * @throws \InvalidArgumentException Si la sortie excède le stock disponible.
      */
+    /**
+     * Mouvement de stock.
+     *
+     * Le calcul vivait ici, sans verrou : la quantité était lue avant la
+     * transaction, le contrôle « stock suffisant » portait donc sur une valeur
+     * déjà périmée, et deux sorties simultanées se perdaient l'une l'autre.
+     * Toute la logique — verrou, coût moyen, alerte de seuil — est passée dans
+     * StockService ; cette méthode reste comme point d'entrée des appels
+     * existants.
+     */
     public function processSupplyMovement(
         Supply $supply,
         string $type,
@@ -135,33 +146,11 @@ class ResourceService
         string $reason,
         User   $user
     ): void {
-        if ($type === 'out' && $supply->quantity < $qty) {
-            throw new \InvalidArgumentException(
-                "Stock insuffisant : {$supply->quantity} {$supply->unit}(s) disponible(s), {$qty} demandé(s)."
-            );
-        }
+        $stock = app(StockService::class);
 
-        DB::transaction(function () use ($supply, $type, $qty, $reason, $user) {
-            $newQuantity = $type === 'in'
-                ? $supply->quantity + $qty
-                : $supply->quantity - $qty;
-
-            $supply->update(['quantity' => $newQuantity]);
-
-            SupplyMovement::create([
-                'supply_id'   => $supply->id,
-                'user_id'     => $user->id,
-                'type'        => $type,
-                'quantity'    => $qty,
-                'reason'      => $reason,
-                'stock_after' => $newQuantity,
-            ]);
-        });
-
-        // Alerte si passage sous le seuil minimum
-        if ($type === 'out' && $supply->fresh()->needsReorder()) {
-            Log::info("Alerte stock bas : {$supply->name} (org #{$supply->organization_id})");
-        }
+        $type === 'in'
+            ? $stock->entrer($supply, $qty, $reason, $user)
+            : $stock->sortir($supply, $qty, $reason, $user);
     }
 
     /**

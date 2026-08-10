@@ -323,7 +323,8 @@ class TrainingService
 
         $verifyUrl = config('app.url') . '/verify/certificate/' . $cert->verification_token;
 
-        $pdf = Pdf::loadView('training.certificate', [
+        $pdf = Pdf::pourOrganisation($course->organization_id)
+        ->loadView('training.certificate', [
             'certificate' => $cert,
             'user'        => $user,
             'course'      => $course,

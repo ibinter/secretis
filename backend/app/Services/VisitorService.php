@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Services;
 
@@ -17,39 +17,59 @@ use Illuminate\Support\Str;
 class VisitorService
 {
     // Enregistrer ou retrouver un visiteur par N° de pièce
+    /**
+     * Retrouve ou crée un visiteur.
+     * Colonnes réelles de `visitors` : first_name / last_name (pas full_name),
+     * pas de badge_number ni visit_count (le badge vit sur visitor_logs).
+     */
     public function registerVisitor(array $data): Visitor
     {
-        $visitor = Visitor::where('organization_id', $data['organization_id'])
-            ->where('id_number', $data['id_number'])
-            ->first();
+        $query = Visitor::where('organization_id', $data['organization_id']);
+
+        // Dédoublonnage : par pièce d'identité si fournie, sinon par nom + téléphone/email.
+        if (! empty($data['id_number'])) {
+            $query->where('id_number', $data['id_number']);
+        } else {
+            $query->where('first_name', $data['first_name'] ?? '')
+                  ->where('last_name', $data['last_name'] ?? '')
+                  ->where(function ($q) use ($data) {
+                      $q->where('phone', $data['phone'] ?? null)
+                        ->orWhere('email', $data['email'] ?? null);
+                  });
+        }
+
+        $visitor = $query->first();
+
+        $attributes = array_filter([
+            'first_name' => $data['first_name'] ?? null,
+            'last_name'  => $data['last_name']  ?? null,
+            'company'    => $data['company']    ?? null,
+            'phone'      => $data['phone']      ?? null,
+            'email'      => $data['email']      ?? null,
+            'id_type'    => $data['id_type']    ?? null,
+            'id_number'  => $data['id_number']  ?? null,
+            'photo_path' => $data['photo_path'] ?? null,
+        ], fn ($v) => $v !== null);
 
         if ($visitor) {
-            $visitor->update([
-                'full_name'  => $data['full_name'],
-                'id_type'    => $data['id_type'],
-                'company'    => $data['company']    ?? $visitor->company,
-                'phone'      => $data['phone']      ?? $visitor->phone,
-                'email'      => $data['email']      ?? $visitor->email,
-                'photo_path' => $data['photo_path'] ?? $visitor->photo_path,
-            ]);
+            $visitor->update($attributes);
+
             return $visitor;
         }
 
-        return Visitor::create([
+        return Visitor::create($attributes + [
             'organization_id' => $data['organization_id'],
-            'full_name'       => $data['full_name'],
-            'id_type'         => $data['id_type'],
-            'id_number'       => $data['id_number'],
-            'company'         => $data['company']    ?? null,
-            'phone'           => $data['phone']      ?? null,
-            'email'           => $data['email']      ?? null,
-            'photo_path'      => $data['photo_path'] ?? null,
-            'badge_number'    => $this->generateBadgeNumber($data['organization_id']),
-            'visit_count'     => 0,
+            'type'            => $data['type']   ?? 'visitor',
+            'status'          => 'active',
+            'is_blacklisted'  => false,
         ]);
     }
 
-    // Enregistrer l arrivee, generer le badge, notifier l hote
+    /**
+     * Enregistre l'arrivée d'un visiteur.
+     * Table réelle : `visitor_logs` (visitor_id, host_id, purpose, badge_number,
+     * checked_in_at, checked_in_by, vehicle_plate, notes, appointment_id).
+     */
     public function checkIn(Visitor $visitor, array $visitData): VisitLog
     {
         if ($visitor->is_blacklisted) {
@@ -60,70 +80,46 @@ class VisitorService
 
         return DB::transaction(function () use ($visitor, $visitData) {
             $visit = VisitLog::create([
-                'organization_id'   => $visitor->organization_id,
-                'visitor_id'        => $visitor->id,
-                'host_user_id'      => $visitData['host_user_id'],
-                'purpose'           => $visitData['purpose']          ?? 'reunion',
-                'purpose_detail'    => $visitData['purpose_detail']   ?? null,
-                'scheduled_at'      => $visitData['scheduled_at']     ?? null,
-                'check_in_at'       => now(),
-                'badge_issued'      => true,
-                'location'          => $visitData['location']         ?? null,
-                'equipment_brought' => $visitData['equipment_brought'] ?? null,
-                'status'            => 'checked_in',
-                'floor'             => $visitData['floor']            ?? null,
-                'created_by'        => $visitData['created_by'],
-                'access_zone_id'    => $visitData['access_zone_id']   ?? null,
-                'parking_spot_id'   => $visitData['parking_spot_id']  ?? null,
+                'organization_id' => $visitor->organization_id,
+                'visitor_id'      => $visitor->id,
+                'host_id'         => $visitData['host_id'] ?? $visitData['host_user_id'] ?? null,
+                'appointment_id'  => $visitData['appointment_id'] ?? null,
+                'purpose'         => $visitData['purpose'] ?? 'Visite',
+                'badge_number'    => $this->generateBadgeNumber($visitor->organization_id),
+                'checked_in_at'   => now(),
+                'checked_in_by'   => $visitData['created_by'] ?? null,
+                'vehicle_plate'   => $visitData['vehicle_plate'] ?? null,
+                'notes'           => $visitData['notes'] ?? null,
             ]);
 
-            if (!empty($visitData['parking_spot_id'])) {
-                ParkingSpot::where('id', $visitData['parking_spot_id'])->update([
-                    'is_available'       => false,
-                    'current_visitor_id' => $visitor->id,
-                ]);
-            }
+            // Trace sur la fiche visiteur (colonnes réelles).
+            $visitor->update(['check_in_at' => now(), 'status' => 'active']);
 
-            $visitor->increment('visit_count');
-            $visitor->update(['last_visit_at' => now()]);
-
-            if (!empty($visitData['invitation_code'])) {
-                VisitorInvitation::where('access_code', $visitData['invitation_code'])->update([
-                    'is_used'     => true,
-                    'used_at'     => now(),
-                    'visit_log_id'=> $visit->id,
-                ]);
-            }
-
-            NotifyHostVisitorArrived::dispatch($visit);
-            broadcast(new VisitorCheckedIn($visit))->toOthers();
-
-            return $visit->load(['visitor', 'host', 'accessZone']);
+            return $visit;
         });
     }
 
-    // Enregistrer la sortie, liberer le badge et le parking
+    /**
+     * Enregistre le départ d'un visiteur (colonnes réelles de `visitor_logs`).
+     */
     public function checkOut(VisitLog $visit): void
     {
         DB::transaction(function () use ($visit) {
             $visit->update([
-                'check_out_at'   => now(),
-                'badge_returned' => true,
-                'status'         => 'checked_out',
+                'checked_out_at' => now(),
+                'checked_out_by' => auth()->id(),
             ]);
 
-            if ($visit->parking_spot_id) {
-                ParkingSpot::where('id', $visit->parking_spot_id)->update([
-                    'is_available'       => true,
-                    'current_visitor_id' => null,
-                ]);
-            }
+            $visit->visitor?->update(['check_out_at' => now()]);
 
-            broadcast(new \App\Events\VisitorCheckedOut($visit))->toOthers();
+            try {
+                broadcast(new \App\Events\VisitorCheckedOut($visit))->toOthers();
+            } catch (\Throwable) {
+                // La diffusion temps réel ne doit jamais bloquer un départ.
+            }
         });
     }
 
-    // Creer une invitation avec code QR unique
     public function createInvitation(User $host, array $data): VisitorInvitation
     {
         $invitation = VisitorInvitation::create([
@@ -188,30 +184,30 @@ class VisitorService
     public function getDailyReport(Organization $org, Carbon $date): array
     {
         $visits = VisitLog::where('organization_id', $org->id)
-            ->whereDate('check_in_at', $date)
+            ->whereDate('checked_in_at', $date)
             ->with(['visitor', 'host'])
             ->get();
 
-        $checkedOut  = $visits->where('status', 'checked_out');
-        $durations   = $checkedOut->map(fn ($v) => $v->check_out_at->diffInMinutes($v->check_in_at));
+        $checkedOut  = $visits->filter(fn ($v) => $v->checked_out_at !== null);
+        $durations   = $checkedOut->map(fn ($v) => \Carbon\Carbon::parse($v->checked_out_at)->diffInMinutes(\Carbon\Carbon::parse($v->checked_in_at)));
         $avgDuration = $durations->avg() ?? 0;
 
-        $byHour = $visits->groupBy(fn ($v) => $v->check_in_at->format('H'))
+        $byHour = $visits->groupBy(fn ($v) => \Carbon\Carbon::parse($v->checked_in_at)->format('H'))
             ->map->count()->sortKeys();
 
         $byPurpose = $visits->groupBy('purpose')->map->count();
 
-        $topHosts = $visits->groupBy('host_user_id')
+        $topHosts = $visits->groupBy('host_id')
             ->map(fn ($g) => ['host' => optional($g->first()->host)->name ?? 'Inconnu', 'count' => $g->count()])
             ->sortByDesc('count')->take(10)->values();
 
         return [
             'date'                 => $date->toDateString(),
             'total_visits'         => $visits->count(),
-            'checked_in'           => $visits->where('status', 'checked_in')->count(),
+            'checked_in'           => $visits->filter(fn ($v) => $v->checked_out_at === null)->count(),
             'checked_out'          => $checkedOut->count(),
-            'no_show'              => $visits->where('status', 'no_show')->count(),
-            'cancelled'            => $visits->where('status', 'cancelled')->count(),
+            'no_show'              => 0, // pas de colonne status sur visitor_logs
+            'cancelled'            => 0,
             'average_duration_min' => round($avgDuration),
             'peak_hours'           => $byHour,
             'by_purpose'           => $byPurpose,
@@ -222,13 +218,13 @@ class VisitorService
     // Visiteurs presents depuis plus de 4 heures
     public function getOverstayingVisitors(): array
     {
-        return VisitLog::where('status', 'checked_in')
-            ->where('check_in_at', '<=', now()->subHours(4))
+        return VisitLog::whereNull('checked_out_at')
+            ->where('checked_in_at', '<=', now()->subHours(4))
             ->with(['visitor', 'host', 'organization'])
             ->get()
             ->map(fn ($v) => [
                 'visit'        => $v,
-                'duration_min' => $v->check_in_at->diffInMinutes(now()),
+                'duration_min' => \Carbon\Carbon::parse($v->checked_in_at)->diffInMinutes(now()),
             ])
             ->toArray();
     }
@@ -236,23 +232,28 @@ class VisitorService
     // Generer le badge HTML/PNG du visiteur
     public function generateBadge(VisitLog $visit): string
     {
-        $visit->load(['visitor', 'host', 'organization', 'accessZone']);
+        // `accessZone` n'existe pas (table access_zones absente) → non chargée.
+        $visit->load(['visitor', 'host', 'organization']);
 
         $qrContent = route('visits.scan', ['id' => $visit->id]);
-        $qrCode    = base64_encode(
-            \QrCode::format('png')->size(150)->generate($qrContent)
-        );
 
-        $badgeColor = '#27AE60';
-        if ($visit->accessZone) {
-            $badgeColor = match ($visit->accessZone->access_level) {
-                'confidential' => '#E74C3C',
-                'restricted'   => '#F39C12',
-                default        => '#27AE60',
-            };
+        // Le paquet QR (simplesoftwareio/simple-qrcode) n'est pas installé sur
+        // toutes les instances : le badge doit rester imprimable sans le QR.
+        $qrCode = null;
+        if (class_exists(\SimpleSoftwareIO\QrCode\Facades\QrCode::class)) {
+            try {
+                $qrCode = base64_encode(
+                    \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(150)->generate($qrContent)
+                );
+            } catch (\Throwable $e) {
+                Log::warning('QR du badge visiteur non généré', ['error' => $e->getMessage()]);
+            }
         }
 
-        return view('visitor-badge', compact('visit', 'qrCode', 'badgeColor'))->render();
+        // Couleur unique : les zones d'accès ne sont pas gérées (table access_zones absente).
+        $badgeColor = '#27AE60';
+
+        return view('visitor-badge', compact('visit', 'qrCode', 'badgeColor', 'qrContent'))->render();
     }
 
     private function generateBadgeNumber(int $organizationId): string

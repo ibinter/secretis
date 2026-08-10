@@ -115,13 +115,13 @@ class BudgetAlertJob implements ShouldQueue
     {
         try {
             // Recalculer les réels depuis les journaux comptables pour ce mois
-            $rows = DB::table('accounting_journal_lines as jl')
-                ->join('accounting_journal_entries as je', 'je.id', '=', 'jl.entry_id')
+            $rows = DB::table('journal_lines as jl')
+                ->join('journal_entries as je', 'je.id', '=', 'jl.journal_entry_id')
                 ->where('je.organization_id', $budget->organization_id)
                 ->whereYear('je.entry_date', $year)
                 ->whereMonth('je.entry_date', $month)
                 ->whereNotNull('jl.account_number')
-                ->selectRaw('jl.account_number, SUM(jl.debit - jl.credit) AS net_amount')
+                ->selectRaw('jl.account_number, SUM(jl.debit_amount - jl.credit_amount) AS net_amount')
                 ->groupBy('jl.account_number')
                 ->get();
 

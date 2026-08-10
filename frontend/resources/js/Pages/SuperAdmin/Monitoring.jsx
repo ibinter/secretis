@@ -1,357 +1,409 @@
+/**
+ * SuperAdmin/Monitoring.jsx — Supervision temps réel de la plateforme
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes appels réseau (`/health/detailed` et
+ * `/api/superadmin/monitoring/metrics` toutes les 30 s), mêmes états locaux.
+ *
+ * Corrections d'affichage :
+ *   - imports `LineChart` / `Line` inutilisés supprimés ;
+ *   - les tuiles KPI utilisaient des classes Tailwind construites
+ *     dynamiquement (`text-${color}-600`) que le compilateur purge : la
+ *     couleur ne s'affichait jamais. Remplacées par `StatCard` + tons
+ *     sémantiques.
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, AreaChart, Area, Legend
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart, Area, Legend,
 } from 'recharts';
-
-// ─── Constantes ───────────────────────────────────────────────────────────────
+import {
+  Activity, Gauge, AlertTriangle, Layers, RefreshCw, X, ShieldCheck, Hourglass,
+} from 'lucide-react';
+import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout';
+import {
+  PageHeader, Button, Badge, Card, StatCard, DataTable, EmptyState, Skeleton,
+  cx, SURFACE, SURFACE_SUNK, BORDER, TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
 const POLL_INTERVAL_MS = 30_000; // 30 secondes
 
-const STATUS_COLORS = {
-    healthy:   { bg: 'bg-green-500',  text: 'text-green-700',  ring: 'ring-green-400' },
-    degraded:  { bg: 'bg-yellow-400', text: 'text-yellow-700', ring: 'ring-yellow-400' },
-    unhealthy: { bg: 'bg-red-500',    text: 'text-red-700',    ring: 'ring-red-500' },
-    unknown:   { bg: 'bg-gray-400',   text: 'text-gray-600',   ring: 'ring-gray-400' },
+/* ─── Sémantique d'état ────────────────────────────────────────────────────── */
+
+const STATUS_META = {
+  healthy:   { tone: 'success', label: 'Opérationnel' },
+  degraded:  { tone: 'warning', label: 'Dégradé' },
+  unhealthy: { tone: 'danger',  label: 'Hors service' },
+  unknown:   { tone: 'neutral', label: 'Inconnu' },
 };
 
-// ─── Composants UI ────────────────────────────────────────────────────────────
+const statusMeta = (s) => STATUS_META[s] ?? STATUS_META.unknown;
 
-function LedIndicator({ status }) {
-    const c = STATUS_COLORS[status] ?? STATUS_COLORS.unknown;
-    return (
-        <span className={`inline-block w-3 h-3 rounded-full ${c.bg} ring-2 ${c.ring} ring-offset-1`} />
-    );
-}
+/* Axes et grilles neutres : lisibles en thème clair comme en thème sombre. */
+const AXIS_COLOR = '#94A3B8';
+const axisProps = {
+  tick: { fontSize: 10, fill: AXIS_COLOR },
+  tickLine: { stroke: AXIS_COLOR },
+  axisLine: { stroke: AXIS_COLOR, strokeOpacity: 0.35 },
+};
 
-function KpiCard({ label, value, unit = '', trend = null, color = 'indigo' }) {
-    return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5 flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{label}</span>
-            <div className="flex items-end gap-1">
-                <span className={`text-3xl font-bold text-${color}-600 dark:text-${color}-400`}>{value}</span>
-                {unit && <span className="text-sm text-gray-500 mb-1">{unit}</span>}
-            </div>
-            {trend !== null && (
-                <span className={`text-xs ${trend >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                    {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}% vs heure précédente
-                </span>
-            )}
-        </div>
-    );
-}
+/* ─── Ligne de service ─────────────────────────────────────────────────────── */
 
 function ServiceStatus({ name, status, latencyMs }) {
-    const c = STATUS_COLORS[status] ?? STATUS_COLORS.unknown;
-    return (
-        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
-            <div className="flex items-center gap-2">
-                <LedIndicator status={status} />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{name}</span>
-            </div>
-            <div className="flex items-center gap-3">
-                {latencyMs != null && (
-                    <span className="text-xs text-gray-500">{latencyMs} ms</span>
-                )}
-                <span className={`text-xs font-semibold ${c.text}`}>{status}</span>
-            </div>
-        </div>
-    );
+  const meta = statusMeta(status);
+  return (
+    <div className={cx('flex items-center justify-between gap-3 rounded-lg px-3 py-2.5', SURFACE_SUNK)}>
+      <span className={cx('text-sm font-medium', TEXT_BODY)}>{name}</span>
+      <div className="flex items-center gap-3">
+        {latencyMs != null && (
+          <span className={cx('text-xs', TEXT_MUTED, NUM)}>{latencyMs} ms</span>
+        )}
+        <Badge variant={meta.tone} dot>{meta.label}</Badge>
+      </div>
+    </div>
+  );
 }
 
-function ErrorRow({ error, onClick }) {
-    return (
-        <div
-            className="border border-red-100 dark:border-red-900 rounded-xl p-3 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-            onClick={() => onClick(error)}
-        >
-            <div className="flex items-start justify-between gap-2">
-                <span className="text-sm font-mono text-red-700 dark:text-red-400 truncate">{error.message}</span>
-                <span className="text-xs text-gray-400 whitespace-nowrap">{error.time}</span>
-            </div>
-            <div className="flex gap-2 mt-1">
-                <span className="text-xs text-gray-500">{error.route}</span>
-                <span className="text-xs font-bold text-red-500">HTTP {error.status}</span>
-            </div>
-        </div>
-    );
-}
+/* ─── Détail d'erreur ──────────────────────────────────────────────────────── */
 
 function ErrorDetailModal({ error, onClose }) {
-    if (!error) return null;
-    return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-auto"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between">
-                    <h3 className="font-bold text-gray-800 dark:text-white">Détail de l'erreur</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
-                </div>
-                <div className="p-5 space-y-3">
-                    <div><span className="text-xs text-gray-400">Message</span>
-                        <p className="text-sm font-mono text-red-600">{error.message}</p></div>
-                    <div><span className="text-xs text-gray-400">Route</span>
-                        <p className="text-sm">{error.route}</p></div>
-                    <div><span className="text-xs text-gray-400">Status HTTP</span>
-                        <p className="text-sm font-bold">{error.status}</p></div>
-                    <div><span className="text-xs text-gray-400">Heure</span>
-                        <p className="text-sm">{error.time}</p></div>
-                    {error.trace && (
-                        <div>
-                            <span className="text-xs text-gray-400">Stack trace</span>
-                            <pre className="text-xs bg-gray-900 text-green-400 rounded-lg p-3 overflow-auto max-h-60 mt-1">{error.trace}</pre>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+  if (!error) return null;
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+    >
+      <div onClick={e => e.stopPropagation()} className="max-h-[85vh] w-full max-w-2xl overflow-y-auto">
+        <Card
+          padded={false}
+          className="shadow-xl"
+          title="Détail de l'erreur"
+          actions={<Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer" onClick={onClose} />}
+        >
+          <div className="space-y-4 px-4 py-5 sm:px-6">
+            {[
+              ['Message', <span className="font-mono text-red-600 dark:text-red-400">{error.message}</span>],
+              ['Route', error.route],
+              ['Statut HTTP', <span className={cx('font-semibold', NUM)}>{error.status}</span>],
+              ['Heure', error.time],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <p className={cx('text-xs font-medium uppercase tracking-wide', TEXT_MUTED)}>{label}</p>
+                <p className={cx('mt-0.5 break-words text-sm', TEXT_BODY)}>{value}</p>
+              </div>
+            ))}
+
+            {error.trace && (
+              <div>
+                <p className={cx('text-xs font-medium uppercase tracking-wide', TEXT_MUTED)}>Stack trace</p>
+                <pre className="mt-1 max-h-60 overflow-auto rounded-lg bg-gray-900 p-3 text-xs text-emerald-300">
+                  {error.trace}
+                </pre>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
 }
 
-// ─── Page principale ──────────────────────────────────────────────────────────
+/* ─── Page principale ──────────────────────────────────────────────────────── */
 
 export default function Monitoring() {
-    const [metrics, setMetrics]         = useState(null);
-    const [health, setHealth]           = useState(null);
-    const [timeline, setTimeline]       = useState([]);
-    const [errors, setErrors]           = useState([]);
-    const [slowRoutes, setSlowRoutes]   = useState([]);
-    const [trials, setTrials]           = useState([]);
-    const [selectedError, setSelectedError] = useState(null);
-    const [loading, setLoading]         = useState(true);
-    const [lastUpdate, setLastUpdate]   = useState(null);
+  const [metrics, setMetrics]     = useState(null);
+  const [health, setHealth]       = useState(null);
+  const [timeline, setTimeline]   = useState([]);
+  const [errors, setErrors]       = useState([]);
+  const [slowRoutes, setSlowRoutes] = useState([]);
+  const [trials, setTrials]       = useState([]);
+  const [selectedError, setSelectedError] = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
 
-    const fetchAll = useCallback(async () => {
-        try {
-            const [healthRes, metricsRes] = await Promise.all([
-                fetch('/health/detailed', { headers: { Accept: 'application/json' } }),
-                fetch('/api/superadmin/monitoring/metrics', { headers: { Accept: 'application/json' } }),
-            ]);
+  const fetchAll = useCallback(async () => {
+    try {
+      const [healthRes, metricsRes] = await Promise.all([
+        fetch('/health/detailed', { headers: { Accept: 'application/json' } }),
+        fetch('/api/superadmin/monitoring/metrics', { headers: { Accept: 'application/json' } }),
+      ]);
 
-            if (healthRes.ok) {
-                const h = await healthRes.json();
-                setHealth(h);
-            }
+      if (healthRes.ok) {
+        const h = await healthRes.json();
+        setHealth(h);
+      }
 
-            if (metricsRes.ok) {
-                const m = await metricsRes.json();
-                setMetrics(m.summary ?? null);
-                setTimeline(m.timeline ?? []);
-                setErrors(m.recent_errors ?? []);
-                setSlowRoutes(m.slow_routes ?? []);
-                setTrials(m.trial_organizations ?? []);
-            }
+      if (metricsRes.ok) {
+        const m = await metricsRes.json();
+        setMetrics(m.summary ?? null);
+        setTimeline(m.timeline ?? []);
+        setErrors(m.recent_errors ?? []);
+        setSlowRoutes(m.slow_routes ?? []);
+        setTrials(m.trial_organizations ?? []);
+      }
 
-            setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
-        } catch (err) {
-            console.error('Monitoring fetch error:', err);
-        } finally {
-            setLoading(false);
+      setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
+    } catch (err) {
+      console.error('Monitoring fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAll();
+    const interval = setInterval(fetchAll, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchAll]);
+
+  const globalStatus = health?.status ?? 'unknown';
+  const globalMeta   = statusMeta(globalStatus);
+  const checks       = health?.checks ?? {};
+  const detailed     = health?.detailed ?? {};
+
+  const errorRate = parseFloat(metrics?.error_rate_pct);
+  const queueSize = parseInt(metrics?.queue_pending, 10);
+
+  const slowColumns = [
+    { key: 'route', label: 'Route', className: cx('font-mono text-xs', TEXT_BODY) },
+    {
+      key: 'avg_ms',
+      label: 'Moyenne',
+      numeric: true,
+      nowrap: true,
+      render: (v) => (
+        <span className={cx(
+          'font-semibold',
+          v > 1000 ? 'text-red-600 dark:text-red-400'
+            : v > 500 ? 'text-amber-600 dark:text-amber-400'
+            : 'text-emerald-600 dark:text-emerald-400',
+        )}>
+          {v} ms
+        </span>
+      ),
+    },
+    { key: 'total_calls', label: 'Appels', numeric: true, nowrap: true },
+  ];
+
+  return (
+    <SuperAdminLayout title="Monitoring temps réel">
+      <Head title="Monitoring — SECRETIS" />
+
+      <PageHeader
+        icon={Activity}
+        title="Monitoring temps réel"
+        subtitle={
+          lastUpdate
+            ? `Rafraîchissement toutes les 30 s · dernière mise à jour à ${lastUpdate}`
+            : 'Rafraîchissement toutes les 30 secondes'
         }
-    }, []);
+        breadcrumbs={[{ label: 'Console', href: '/superadmin' }, { label: 'Monitoring' }]}
+        meta={<Badge variant={globalMeta.tone} size="md" dot>{globalMeta.label}</Badge>}
+        actions={
+          <Button variant="secondary" icon={RefreshCw} onClick={fetchAll}>
+            Actualiser
+          </Button>
+        }
+      />
 
-    useEffect(() => {
-        fetchAll();
-        const interval = setInterval(fetchAll, POLL_INTERVAL_MS);
-        return () => clearInterval(interval);
-    }, [fetchAll]);
+      {loading ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+          </div>
+          <Skeleton className="h-64 rounded-xl" />
+        </div>
+      ) : (
+        <div className="space-y-6">
 
-    const globalStatus = health?.status ?? 'unknown';
-    const checks       = health?.checks ?? {};
-    const detailed     = health?.detailed ?? {};
+          {/* ── Indicateurs ─────────────────────────────────────────────────── */}
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon={Activity} tone="accent" label="Requêtes / min"
+              value={metrics?.requests_per_minute ?? '—'}
+            />
+            <StatCard
+              icon={Gauge} tone="info" label="Temps de réponse"
+              value={metrics?.avg_response_ms ?? '—'} unit="ms"
+            />
+            <StatCard
+              icon={AlertTriangle}
+              tone={Number.isFinite(errorRate) && errorRate > 5 ? 'danger' : 'success'}
+              label="Taux d'erreur"
+              value={metrics?.error_rate_pct ?? '—'} unit="%"
+            />
+            <StatCard
+              icon={Layers}
+              tone={Number.isFinite(queueSize) && queueSize > 500 ? 'warning' : 'success'}
+              label="Jobs en file"
+              value={metrics?.queue_pending ?? '—'}
+            />
+          </section>
 
-    return (
-        <>
-            <Head title="Monitoring — SECRETIS" />
+          {/* ── Timeline ────────────────────────────────────────────────────── */}
+          <Card title="Activité des 60 dernières minutes" subtitle="Requêtes servies et erreurs rencontrées">
+            {timeline.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={timeline} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="monReqGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#9333EA" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="#9333EA" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="monErrGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#EF4444" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={AXIS_COLOR} strokeOpacity={0.2} vertical={false} />
+                  <XAxis dataKey="minute" {...axisProps} />
+                  <YAxis {...axisProps} width={38} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgba(22,32,50,0.96)', border: '1px solid #1E3048',
+                      borderRadius: 8, fontSize: 12, color: '#fff',
+                    }}
+                    labelStyle={{ color: '#94A3B8' }}
+                    cursor={{ stroke: AXIS_COLOR, strokeOpacity: 0.3 }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11, color: AXIS_COLOR }} />
+                  <Area type="monotone" dataKey="requests" stroke="#9333EA" fill="url(#monReqGrad)" name="Requêtes" strokeWidth={2} />
+                  <Area type="monotone" dataKey="errors"   stroke="#EF4444" fill="url(#monErrGrad)" name="Erreurs"  strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyState compact variant="no-data" title="Pas encore de données" description="La chronologie se remplit au fil des requêtes servies." />
+            )}
+          </Card>
 
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 space-y-6">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
-                {/* ── En-tête ───────────────────────────────────────────── */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            Monitoring Temps Réel
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            Rafraîchissement toutes les 30 s
-                            {lastUpdate && ` · Dernière mise à jour : ${lastUpdate}`}
-                        </p>
+            {/* ── Services ──────────────────────────────────────────────────── */}
+            <Card title="État des services" icon={ShieldCheck}>
+              <div className="space-y-2">
+                <ServiceStatus name="Base de données"    status={checks.database?.status} latencyMs={checks.database?.latency_ms} />
+                <ServiceStatus name="Redis"              status={checks.redis?.status}    latencyMs={checks.redis?.latency_ms} />
+                <ServiceStatus name="Queue worker"       status={checks.queue?.status} />
+                <ServiceStatus name="WebSocket (Reverb)" status={checks.reverb?.status} />
+                <ServiceStatus name="Disque"             status={checks.disk?.status} />
+              </div>
+
+              {Object.keys(detailed).length > 0 && (
+                <dl className={cx('mt-4 grid grid-cols-1 gap-x-6 gap-y-2 border-t pt-4 text-xs sm:grid-cols-2', BORDER, TEXT_MUTED)}>
+                  {[
+                    ['Organisations actives', detailed.active_organizations],
+                    ['Mémoire PHP', `${detailed.memory_used_mb} Mo`],
+                    ['PHP', detailed.php_version],
+                    ['Laravel', detailed.laravel_version],
+                    ['Taille base', `${detailed.database_size_mb} Mo`],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between gap-2">
+                      <dt>{label}</dt>
+                      <dd className={cx('font-medium', TEXT_TITLE, NUM)}>{value ?? '—'}</dd>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <LedIndicator status={globalStatus} />
-                        <span className={`font-semibold text-sm ${STATUS_COLORS[globalStatus]?.text ?? 'text-gray-600'}`}>
-                            {globalStatus.toUpperCase()}
-                        </span>
-                        <button
-                            onClick={fetchAll}
-                            className="ml-4 px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
-                        >
-                            Actualiser
-                        </button>
-                    </div>
-                </div>
+                  ))}
+                  <div className="flex items-center justify-between gap-2">
+                    <dt>Jobs échoués</dt>
+                    <dd className={cx(
+                      'font-medium', NUM,
+                      detailed.failed_jobs_count > 0 ? 'text-red-600 dark:text-red-400' : TEXT_TITLE,
+                    )}>
+                      {detailed.failed_jobs_count ?? 0}
+                    </dd>
+                  </div>
+                </dl>
+              )}
+            </Card>
 
-                {loading && (
-                    <div className="text-center py-20 text-gray-400">Chargement des métriques…</div>
-                )}
-
-                {!loading && (
-                    <>
-                        {/* ── KPIs ───────────────────────────────────────── */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <KpiCard
-                                label="Requêtes / min"
-                                value={metrics?.requests_per_minute ?? '—'}
-                                color="indigo"
-                            />
-                            <KpiCard
-                                label="Temps de réponse"
-                                value={metrics?.avg_response_ms ?? '—'}
-                                unit="ms"
-                                color="blue"
-                            />
-                            <KpiCard
-                                label="Taux d'erreur"
-                                value={metrics?.error_rate_pct ?? '—'}
-                                unit="%"
-                                color={parseFloat(metrics?.error_rate_pct) > 5 ? 'red' : 'green'}
-                            />
-                            <KpiCard
-                                label="Jobs en queue"
-                                value={metrics?.queue_pending ?? '—'}
-                                color={parseInt(metrics?.queue_pending) > 500 ? 'orange' : 'emerald'}
-                            />
-                        </div>
-
-                        {/* ── Graphique timeline (60 dernières minutes) ───── */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
-                            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                                Activité des 60 dernières minutes
-                            </h2>
-                            {timeline.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={200}>
-                                    <AreaChart data={timeline} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
-                                        <defs>
-                                            <linearGradient id="reqGrad" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                            </linearGradient>
-                                            <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%"  stopColor="#ef4444" stopOpacity={0.3} />
-                                                <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis dataKey="minute" tick={{ fontSize: 10 }} />
-                                        <YAxis tick={{ fontSize: 10 }} />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Area type="monotone" dataKey="requests" stroke="#6366f1" fill="url(#reqGrad)" name="Requêtes" strokeWidth={2} />
-                                        <Area type="monotone" dataKey="errors"   stroke="#ef4444" fill="url(#errGrad)" name="Erreurs"   strokeWidth={2} />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <p className="text-sm text-gray-400 text-center py-10">Pas encore de données timeline.</p>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                            {/* ── Services ─────────────────────────────────── */}
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
-                                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">État des services</h2>
-                                <div className="space-y-2">
-                                    <ServiceStatus name="Base de données"     status={checks.database?.status}  latencyMs={checks.database?.latency_ms} />
-                                    <ServiceStatus name="Redis"               status={checks.redis?.status}     latencyMs={checks.redis?.latency_ms} />
-                                    <ServiceStatus name="Queue Worker"        status={checks.queue?.status}     />
-                                    <ServiceStatus name="WebSocket (Reverb)"  status={checks.reverb?.status}    />
-                                    <ServiceStatus name="Disque"              status={checks.disk?.status}      />
-                                </div>
-
-                                {/* Infos détaillées */}
-                                {Object.keys(detailed).length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-2 text-xs text-gray-500">
-                                        <span>Organisations actives : <strong>{detailed.active_organizations}</strong></span>
-                                        <span>Mémoire PHP : <strong>{detailed.memory_used_mb} Mo</strong></span>
-                                        <span>PHP : <strong>{detailed.php_version}</strong></span>
-                                        <span>Laravel : <strong>{detailed.laravel_version}</strong></span>
-                                        <span>Jobs échoués : <strong className={detailed.failed_jobs_count > 0 ? 'text-red-500' : ''}>{detailed.failed_jobs_count}</strong></span>
-                                        <span>Taille DB : <strong>{detailed.database_size_mb} Mo</strong></span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* ── Routes lentes ────────────────────────────── */}
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
-                                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Top 5 routes les plus lentes</h2>
-                                {slowRoutes.length > 0 ? (
-                                    <table className="w-full text-xs">
-                                        <thead>
-                                            <tr className="text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                                                <th className="text-left pb-2">Route</th>
-                                                <th className="text-right pb-2">Moy (ms)</th>
-                                                <th className="text-right pb-2">Appels</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {slowRoutes.slice(0, 5).map((r, i) => (
-                                                <tr key={i} className="border-b border-gray-50 dark:border-gray-700/50">
-                                                    <td className="py-2 font-mono text-gray-700 dark:text-gray-300 truncate max-w-[180px]">{r.route}</td>
-                                                    <td className={`py-2 text-right font-bold ${r.avg_ms > 1000 ? 'text-red-500' : r.avg_ms > 500 ? 'text-yellow-500' : 'text-green-600'}`}>
-                                                        {r.avg_ms}
-                                                    </td>
-                                                    <td className="py-2 text-right text-gray-500">{r.total_calls}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                ) : (
-                                    <p className="text-sm text-gray-400 text-center py-6">Aucune donnée disponible.</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* ── Erreurs récentes ──────────────────────────────── */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
-                            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                                10 dernières erreurs <span className="text-xs text-gray-400 ml-1">(cliquez pour le stack trace)</span>
-                            </h2>
-                            {errors.length > 0 ? (
-                                <div className="space-y-2">
-                                    {errors.map((e, i) => (
-                                        <ErrorRow key={i} error={e} onClick={setSelectedError} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-green-600 text-center py-6">✅ Aucune erreur récente.</p>
-                            )}
-                        </div>
-
-                        {/* ── Organisations en trial ────────────────────────── */}
-                        {trials.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-5">
-                                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                                    Organisations en période d'essai ({trials.length})
-                                </h2>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {trials.map((org) => (
-                                        <div key={org.id} className="border border-yellow-200 dark:border-yellow-800 rounded-xl p-3">
-                                            <p className="text-sm font-medium text-gray-800 dark:text-white">{org.name}</p>
-                                            <p className="text-xs text-gray-500">Expire le : <strong>{org.trial_ends_at}</strong></p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
+            {/* ── Routes lentes ─────────────────────────────────────────────── */}
+            <div className="space-y-3">
+              <div>
+                <h2 className={cx('text-base font-semibold', TEXT_TITLE)}>Routes les plus lentes</h2>
+                <p className={cx('mt-0.5 text-sm', TEXT_MUTED)}>Cinq points de contention à surveiller en priorité.</p>
+              </div>
+              <DataTable
+                columns={slowColumns}
+                data={slowRoutes.slice(0, 5)}
+                rowKey="route"
+                compact
+                pageSize={5}
+                emptyMessage="Aucune mesure de latence disponible."
+              />
             </div>
+          </div>
 
-            {/* ── Modal erreur ────────────────────────────────────────── */}
-            <ErrorDetailModal error={selectedError} onClose={() => setSelectedError(null)} />
-        </>
-    );
+          {/* ── Erreurs récentes ────────────────────────────────────────────── */}
+          <Card
+            title="Dernières erreurs"
+            subtitle="Sélectionnez une ligne pour afficher la trace complète."
+            icon={AlertTriangle}
+          >
+            {errors.length > 0 ? (
+              <ul className="space-y-2">
+                {errors.map((e, i) => (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedError(e)}
+                      className={cx(
+                        'w-full rounded-lg border border-red-200 p-3 text-left transition-colors',
+                        'hover:bg-red-50 dark:border-red-500/30 dark:hover:bg-red-500/10',
+                        FOCUS_RING,
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="truncate font-mono text-sm text-red-700 dark:text-red-300">{e.message}</span>
+                        <span className={cx('whitespace-nowrap text-xs', TEXT_FAINT, NUM)}>{e.time}</span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <span className={cx('text-xs', TEXT_MUTED)}>{e.route}</span>
+                        <Badge variant="danger">HTTP {e.status}</Badge>
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                compact
+                icon={ShieldCheck}
+                title="Aucune erreur récente"
+                description="Aucune exception n'a été journalisée sur la période observée."
+              />
+            )}
+          </Card>
+
+          {/* ── Organisations en essai ──────────────────────────────────────── */}
+          {trials.length > 0 && (
+            <Card
+              title="Organisations en période d'essai"
+              subtitle={`${trials.length} organisation${trials.length > 1 ? 's' : ''} en cours d'évaluation`}
+              icon={Hourglass}
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {trials.map((org) => (
+                  <div
+                    key={org.id}
+                    className={cx(SURFACE, 'rounded-lg border border-amber-200 p-3 dark:border-amber-500/30')}
+                  >
+                    <p className={cx('truncate text-sm font-medium', TEXT_TITLE)}>{org.name}</p>
+                    <p className={cx('mt-0.5 text-xs', TEXT_MUTED)}>
+                      Expire le <span className={cx('font-medium', TEXT_BODY, NUM)}>{org.trial_ends_at}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+        </div>
+      )}
+
+      <ErrorDetailModal error={selectedError} onClose={() => setSelectedError(null)} />
+    </SuperAdminLayout>
+  );
 }
+
+export { Monitoring };

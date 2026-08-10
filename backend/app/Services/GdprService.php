@@ -69,9 +69,11 @@ class GdprService
         $mails = DB::table('mail_registry')
             ->where('organization_id', $org->id)
             ->where(function ($q) use ($user) {
-                $q->where('created_by', $user->id)->orWhere('assigned_to', $user->id);
+                // Colonnes réelles de mail_registry : registered_by (pas created_by),
+                // sender_name / recipient_name (pas sender / recipient).
+                $q->where('registered_by', $user->id)->orWhere('assigned_to', $user->id);
             })
-            ->select(['id', 'reference', 'subject', 'sender', 'recipient', 'type', 'status', 'received_at', 'created_at'])
+            ->select(['id', 'reference', 'subject', 'sender_name', 'recipient_name', 'type', 'status', 'received_at', 'created_at'])
             ->get();
         $data['data']['mail_registry'] = $mails->toArray();
 
@@ -79,27 +81,38 @@ class GdprService
         $documents = DB::table('documents')
             ->where('organization_id', $org->id)
             ->where('created_by', $user->id)
-            ->select(['id', 'name', 'type', 'size', 'path', 'created_at'])
+            // Colonnes réelles de `documents` : title / mime_type / file_size / file_path.
+            ->select(['id', 'title', 'mime_type', 'file_size', 'file_path', 'created_at'])
             ->get();
         $data['data']['documents'] = $documents->toArray();
 
         // --- Messages internes ---
+        // Colonnes réelles de `messages` : conversation_id, user_id, body, type, read_at.
+        // (Pas de organization_id / subject / sender_id / recipient_id / sent_at :
+        // le cloisonnement se fait par la conversation.)
         $messages = DB::table('messages')
-            ->where('organization_id', $org->id)
-            ->where(function ($q) use ($user) {
-                $q->where('sender_id', $user->id)->orWhere('recipient_id', $user->id);
-            })
-            ->select(['id', 'subject', 'body', 'sender_id', 'recipient_id', 'sent_at', 'read_at'])
-            ->orderBy('sent_at', 'desc')
+            ->join('conversations', 'conversations.id', '=', 'messages.conversation_id')
+            ->where('conversations.organization_id', $org->id)
+            ->where('messages.user_id', $user->id)
+            ->select([
+                'messages.id',
+                'messages.conversation_id',
+                'messages.body',
+                'messages.type',
+                'messages.read_at',
+                'messages.created_at',
+            ])
+            ->orderByDesc('messages.created_at')
             ->limit(1000)
             ->get();
         $data['data']['messages'] = $messages->toArray();
 
         // --- Activités (audit) ---
+        // Colonnes réelles : resource_type / resource_id (pas model_type / model_id).
         $activities = DB::table('audit_logs')
             ->where('organization_id', $org->id)
             ->where('user_id', $user->id)
-            ->select(['id', 'action', 'model_type', 'model_id', 'ip_address', 'created_at'])
+            ->select(['id', 'action', 'module', 'resource_type', 'resource_id', 'ip_address', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->limit(500)
             ->get();
@@ -112,10 +125,13 @@ class GdprService
         $data['data']['consents'] = $consents->toArray();
 
         // --- Visites portail ---
+        // Colonnes réelles de `visitor_logs` : host_id, checked_in_at/checked_out_at
+        // (pas email / host_name / check_in_at). On rattache les visites dont
+        // l'utilisateur était l'hôte.
         $visits = DB::table('visitor_logs')
             ->where('organization_id', $org->id)
-            ->where('email', $user->email)
-            ->select(['id', 'purpose', 'host_name', 'check_in_at', 'check_out_at', 'ip_address'])
+            ->where('host_id', $user->id)
+            ->select(['id', 'visitor_id', 'purpose', 'badge_number', 'checked_in_at', 'checked_out_at'])
             ->get();
         $data['data']['visits'] = $visits->toArray();
 
@@ -149,7 +165,10 @@ class GdprService
 
         // Fichiers attachés (documents)
         foreach ($documents as $doc) {
-            $filePath = storage_path('app/' . ($doc->path ?? ''));
+            // La requête ci-dessus sélectionne `file_path` (colonne réelle de
+            // `documents`) : `$doc->path` était toujours nul, aucune pièce
+            // jointe n'était donc jamais ajoutée à l'archive.
+            $filePath = storage_path('app/' . ($doc->file_path ?? ''));
             if (file_exists($filePath)) {
                 $zip->addFile($filePath, 'documents/' . basename($filePath));
             }
@@ -194,11 +213,16 @@ class GdprService
                 'remember_token' => null,
             ]);
 
-            // Anonymiser les messages (corps + expéditeur)
+            // Anonymiser les messages de l'intéressé.
+            // `messages` n'a NI `organization_id`, NI `sender_id`, NI `subject` :
+            // ses colonnes réelles sont `conversation_id`, `user_id`, `body`.
+            // Le cloisonnement par organisation passe donc par `conversations`.
             DB::table('messages')
-                ->where('organization_id', $org->id)
-                ->where('sender_id', $user->id)
-                ->update(['body' => '[Message anonymisé]', 'subject' => '[Objet anonymisé]']);
+                ->where('user_id', $user->id)
+                ->whereIn('conversation_id', function ($q) use ($org) {
+                    $q->select('id')->from('conversations')->where('organization_id', $org->id);
+                })
+                ->update(['body' => '[Message anonymisé]']);
 
             // Supprimer les tokens de session
             DB::table('personal_access_tokens')
@@ -211,8 +235,11 @@ class GdprService
                 'organization_id' => $org->id,
                 'user_id'         => null,
                 'action'          => 'gdpr.anonymization',
-                'model_type'      => 'User',
-                'model_id'        => $user->id,
+                // `module` est NOT NULL : l'insert échouait sans lui.
+                'module'          => 'rgpd',
+                // Colonnes réelles : resource_type / resource_id.
+                'resource_type'   => 'users',
+                'resource_id'     => (string) $user->id,
                 'old_values'      => json_encode(['email' => $originalEmail]),
                 'new_values'      => json_encode(['status' => 'anonymized', 'anonymized_at' => now()->toIso8601String()]),
                 'ip_address'      => request()->ip(),
@@ -237,11 +264,13 @@ class GdprService
             // Supprimer les consentements
             ConsentRecord::where('user_id', $user->id)->delete();
 
-            // Supprimer les messages personnels
+            // Supprimer les messages écrits par l'intéressé.
+            // Mêmes colonnes fantômes que ci-dessus : on passe par
+            // `conversations` pour rester dans son organisation.
             DB::table('messages')
-                ->where('organization_id', $org->id)
-                ->where(function ($q) use ($user) {
-                    $q->where('sender_id', $user->id)->orWhere('recipient_id', $user->id);
+                ->where('user_id', $user->id)
+                ->whereIn('conversation_id', function ($q) use ($org) {
+                    $q->select('id')->from('conversations')->where('organization_id', $org->id);
                 })
                 ->delete();
 
@@ -249,24 +278,45 @@ class GdprService
             DB::table('events')
                 ->where('organization_id', $org->id)
                 ->where('created_by', $user->id)
-                ->whereNull('recurring_parent_id')
+                // La colonne réelle est `parent_event_id`.
+                ->whereNull('parent_event_id')
                 ->delete();
 
             // Supprimer les documents personnels non-partagés
+            // `documents` n'a ni colonne `is_shared` ni table `document_shares` :
+            // la portée se lit dans `access_level`, et le partage externe dans
+            // `document_share_tokens` / `portal_shared_documents`. Un document
+            // diffusé n'est pas une donnée purement personnelle — on ne
+            // supprime que ceux qui sont restés privés et non partagés.
             $privateDocs = DB::table('documents')
                 ->where('organization_id', $org->id)
                 ->where('created_by', $user->id)
-                ->where('is_shared', false)
+                ->where(function ($q) {
+                    $q->where('access_level', 'private')->orWhereNull('access_level');
+                })
+                ->whereNotExists(function ($q) {
+                    $q->select(DB::raw(1))
+                      ->from('document_share_tokens')
+                      ->whereColumn('document_share_tokens.document_id', 'documents.id');
+                })
+                ->whereNotExists(function ($q) {
+                    $q->select(DB::raw(1))
+                      ->from('portal_shared_documents')
+                      ->whereColumn('portal_shared_documents.document_id', 'documents.id');
+                })
                 ->get();
 
             foreach ($privateDocs as $doc) {
-                Storage::delete($doc->path ?? '');
+                // La colonne est `file_path`, pas `path` : sans cela, aucun
+                // fichier n'était réellement effacé du disque — le document
+                // disparaissait de la base mais restait sur le serveur.
+                if (! empty($doc->file_path)) {
+                    Storage::delete($doc->file_path);
+                }
                 DB::table('document_versions')->where('document_id', $doc->id)->delete();
             }
             DB::table('documents')
-                ->where('organization_id', $org->id)
-                ->where('created_by', $user->id)
-                ->where('is_shared', false)
+                ->whereIn('id', collect($privateDocs)->pluck('id'))
                 ->delete();
 
             // Pseudonymiser les audit_logs (conserver sans identification)
@@ -288,8 +338,10 @@ class GdprService
                 'organization_id' => $org->id,
                 'user_id'         => null,
                 'action'          => 'gdpr.erasure',
-                'model_type'      => 'User',
-                'model_id'        => $user->id,
+                'module'          => 'rgpd',
+                // Colonnes réelles : resource_type / resource_id.
+                'resource_type'   => 'users',
+                'resource_id'     => (string) $user->id,
                 'old_values'      => null,
                 'new_values'      => json_encode(['erased_at' => now()->toIso8601String()]),
                 'ip_address'      => request()->ip(),
@@ -399,8 +451,9 @@ class GdprService
     public function generateDataInventory(Organization $org): array
     {
         $records = DB::table('data_processing_records')
-            ->where('organization_id', $org->id)
-            ->where('is_active', true)
+            // Colonnes qualifiées : `users` possède aussi organization_id (sinon « ambiguous »).
+            ->where('data_processing_records.organization_id', $org->id)
+            ->where('data_processing_records.is_active', true)
             ->join('users', 'data_processing_records.created_by', '=', 'users.id')
             ->select([
                 'data_processing_records.*',

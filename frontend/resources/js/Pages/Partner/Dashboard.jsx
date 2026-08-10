@@ -50,15 +50,15 @@ function MiniLineChart({ data }) {
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-32" preserveAspectRatio="none">
       <defs>
         <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2E86C1" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#2E86C1" stopOpacity="0.02" />
+          <stop offset="0%" stopColor="#7e22ce" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#7e22ce" stopOpacity="0.02" />
         </linearGradient>
       </defs>
       <path d={areaPath} fill="url(#chartGrad)" />
-      <polyline points={polyline} fill="none" stroke="#2E86C1" strokeWidth="2.5" strokeLinejoin="round" />
+      <polyline points={polyline} fill="none" stroke="#7e22ce" strokeWidth="2.5" strokeLinejoin="round" />
       {pts.map((pt, i) => {
         const [x, y] = pt.split(',');
-        return <circle key={i} cx={x} cy={y} r="3.5" fill="#2E86C1" />;
+        return <circle key={i} cx={x} cy={y} r="3.5" fill="#7e22ce" />;
       })}
     </svg>
   );
@@ -99,19 +99,19 @@ export default function PartnerDashboard({
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Hero */}
-        <div className="bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] rounded-2xl p-6 text-white">
+        <div className="bg-gradient-to-br from-[#9333EA] to-[#7e22ce] rounded-2xl p-6 text-white">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <span className="inline-block px-2.5 py-1 bg-white/20 rounded-full text-xs font-medium mb-2">
                 {typeLabel}
               </span>
               <h1 className="text-2xl font-bold">{partner.company_name}</h1>
-              <p className="text-blue-100 mt-1">
+              <p className="text-purple-100 mt-1">
                 Commission : <strong>{partner.commission_rate}%</strong> récurrente à vie
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-blue-200 mb-1">Votre code de parrainage</p>
+              <p className="text-xs text-purple-200 mb-1">Votre code de parrainage</p>
               <div className="flex items-center gap-2">
                 <code className="text-lg font-mono font-bold tracking-wider bg-white/20 px-3 py-1.5 rounded-lg">
                   {partner.referral_code}
@@ -129,7 +129,7 @@ export default function PartnerDashboard({
 
           {/* Lien de parrainage */}
           <div className="mt-5 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3">
-            <span className="text-xs text-blue-100 shrink-0">Lien de parrainage :</span>
+            <span className="text-xs text-purple-100 shrink-0">Lien de parrainage :</span>
             <span className="text-xs font-mono text-white truncate flex-1">{referralLink}</span>
             <button
               onClick={copyLink}
@@ -152,7 +152,7 @@ export default function PartnerDashboard({
             label="Commissions ce mois"
             value={fmt(thisMonthCommissions)}
             icon="📆"
-            color="text-[#2E86C1]"
+            color="text-[#7e22ce]"
           />
           <StatCard
             label="En attente de paiement"
@@ -164,7 +164,7 @@ export default function PartnerDashboard({
             label="Total perçu"
             value={fmt(partner.total_commissions)}
             icon="💰"
-            color="text-[#1A3A5C] dark:text-blue-300"
+            color="text-[#9333EA] dark:text-purple-300"
           />
         </div>
 
@@ -174,7 +174,7 @@ export default function PartnerDashboard({
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Commissions sur 12 mois</h2>
             <Link
               href={route('partner.commissions')}
-              className="text-xs text-[#2E86C1] hover:underline"
+              className="text-xs text-[#7e22ce] hover:underline"
             >
               Voir tout →
             </Link>
@@ -195,7 +195,7 @@ export default function PartnerDashboard({
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
             <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-700">
               <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Derniers clients référés</h2>
-              <Link href={route('partner.clients')} className="text-xs text-[#2E86C1] hover:underline">
+              <Link href={route('partner.clients')} className="text-xs text-[#7e22ce] hover:underline">
                 Voir tous →
               </Link>
             </div>
@@ -241,7 +241,7 @@ export default function PartnerDashboard({
                 { n: 4, text: 'Vous percevez votre commission chaque mois tant que le client reste actif.' },
               ].map((step) => (
                 <li key={step.n} className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#2E86C1] text-white text-xs flex items-center justify-center font-bold">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#7e22ce] text-white text-xs flex items-center justify-center font-bold">
                     {step.n}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-300">{step.text}</span>
@@ -251,7 +251,7 @@ export default function PartnerDashboard({
             <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
               <a
                 href="mailto:partners@ibigsoft.com"
-                className="text-sm text-[#2E86C1] hover:underline"
+                className="text-sm text-[#7e22ce] hover:underline"
               >
                 📧 Contacter votre responsable partenaire
               </a>
@@ -263,13 +263,13 @@ export default function PartnerDashboard({
         <div className="flex flex-wrap gap-4 justify-center">
           <Link
             href={route('partner.clients')}
-            className="px-6 py-3 bg-[#1A3A5C] hover:bg-[#2E86C1] text-white rounded-xl font-medium transition-colors"
+            className="px-6 py-3 bg-[#9333EA] hover:bg-[#7e22ce] text-white rounded-xl font-medium transition-colors"
           >
             Voir tous mes clients
           </Link>
           <Link
             href={route('partner.commissions')}
-            className="px-6 py-3 border border-[#2E86C1] text-[#2E86C1] hover:bg-[#2E86C1] hover:text-white rounded-xl font-medium transition-colors"
+            className="px-6 py-3 border border-[#7e22ce] text-[#7e22ce] hover:bg-[#7e22ce] hover:text-white rounded-xl font-medium transition-colors"
           >
             Voir mes commissions
           </Link>
@@ -278,3 +278,4 @@ export default function PartnerDashboard({
     </AppLayout>
   );
 }
+export { PartnerDashboard };

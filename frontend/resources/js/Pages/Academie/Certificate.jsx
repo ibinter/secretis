@@ -1,3 +1,19 @@
+/**
+ * Academie/Certificate.jsx — Affichage d'un certificat (GET /academie/certificat/{uuid})
+ *
+ * Présentation migrée sur `@/Components/UI`. Logique métier STRICTEMENT
+ * inchangée : mêmes props Inertia, même route PDF
+ * (`route('api.academy.certificate.pdf')`), même partage LinkedIn,
+ * même `navigator.clipboard.writeText`.
+ *
+ * Props réelles (AcademyController@certificate → Inertia::render('Academie/Certificate')) :
+ *   certificate : { uuid, user_name, course_title, score, issued_at, verify_url }
+ *
+ * Note : le VISUEL du certificat reste volontairement sur fond clair et en
+ * serif — c'est un document destiné à l'impression / au PDF, pas un écran de
+ * l'ERP. Le reste de la page suit le design system (dark mode inclus).
+ */
+
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/Components/Layout/AppLayout';
 import {
@@ -5,7 +21,12 @@ import {
     ShareIcon,
     LinkIcon,
     CheckBadgeIcon,
+    TrophyIcon,
 } from '@heroicons/react/24/outline';
+import {
+    PageHeader, Button, EmptyState,
+    cx, SURFACE_SUNK, BORDER, TEXT_MUTED, NUM,
+} from '@/Components/UI';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -19,122 +40,112 @@ function formatDate(str) {
     });
 }
 
-// ─── Certificat SVG / HTML ────────────────────────────────────────────────────
+// ─── Visuel du certificat ─────────────────────────────────────────────────────
 
 function CertificateVisual({ certificate }) {
     const { user_name, course_title, score, issued_at, uuid } = certificate;
     const verifyUrl = certificate.verify_url;
     const date      = formatDate(issued_at);
-    const certNum   = `IBIG-${uuid.substring(0, 8).toUpperCase()}`;
+    const certNum   = `IBIG-${String(uuid ?? '').substring(0, 8).toUpperCase()}`;
 
-    // QR Code : on utilise une URL publique de génération de QR (hébergement local simulé)
-    // En production, utiliser qrcode.react ou une lib inlinée
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(verifyUrl)}`;
+    // QR de vérification — service externe (voir rapport : à internaliser).
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(verifyUrl ?? '')}`;
 
     return (
         <div
             id="certificate-visual"
-            className="relative bg-white rounded-3xl overflow-hidden border-4 border-amber-300 shadow-2xl"
+            className="relative overflow-hidden rounded-xl border-2 border-amber-300 bg-white shadow-sm"
             style={{ fontFamily: '"Georgia", serif', minHeight: 520 }}
         >
-            {/* Bandeau doré haut */}
-            <div className="h-2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400" />
+            {/* Filet haut */}
+            <div className="h-1.5 bg-amber-400" />
 
-            {/* Corps */}
-            <div className="px-10 py-8 flex flex-col items-center text-center">
-
-                {/* Logos */}
-                <div className="w-full flex items-center justify-between mb-6">
+            <div className="flex flex-col items-center px-10 py-8 text-center">
+                {/* En-têtes */}
+                <div className="mb-6 flex w-full items-start justify-between gap-4">
                     <div className="flex flex-col items-start">
-                        <span className="text-2xl font-extrabold text-blue-800 tracking-tight">IBIG SECRETIS</span>
-                        <span className="text-xs text-gray-400 tracking-widest uppercase">ERP Platform</span>
+                        <span className="text-xl font-semibold tracking-tight text-purple-800">IBIG SECRETIS</span>
+                        <span className="text-[11px] uppercase tracking-widest text-gray-400">ERP Platform</span>
                     </div>
                     <div className="flex flex-col items-end">
-                        <span className="text-lg font-bold text-gray-700">IBIG Soft</span>
-                        <span className="text-xs text-amber-600 italic">L'excellence est notre passion</span>
+                        <span className="text-base font-semibold text-gray-700">IBIG Soft</span>
+                        <span className="text-[11px] italic text-amber-600">L'excellence est notre passion</span>
                     </div>
                 </div>
 
-                {/* Médaille décorative */}
-                <div className="relative w-20 h-20 mb-5">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-300 via-yellow-200 to-amber-400 rounded-full flex items-center justify-center shadow-lg border-4 border-amber-100">
-                        <CheckBadgeIcon className="w-10 h-10 text-amber-700" />
-                    </div>
+                {/* Sceau */}
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-300 bg-amber-50">
+                    <CheckBadgeIcon className="h-8 w-8 text-amber-600" aria-hidden="true" />
                 </div>
 
-                {/* Titre principal */}
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gray-400 mb-2">
-                    Certificat d'Accomplissement
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
+                    Certificat d'accomplissement
                 </p>
-                <p className="text-sm text-gray-500 mb-4">Décerné à</p>
+                <p className="mb-4 text-sm text-gray-500">Décerné à</p>
 
-                {/* Nom */}
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-1" style={{ fontFamily: '"Georgia", serif' }}>
+                <h2 className="mb-1 text-3xl font-semibold tracking-tight text-gray-900">
                     {user_name}
                 </h2>
 
-                {/* Séparateur décoratif */}
-                <div className="flex items-center gap-3 my-3 w-full max-w-sm">
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
-                    <span className="text-amber-400 text-lg">✦</span>
-                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
-                </div>
+                {/* Filet séparateur */}
+                <div className="my-4 h-px w-full max-w-sm bg-amber-200" />
 
-                <p className="text-sm text-gray-500 mb-2">Pour avoir complété avec succès</p>
-                <h3 className="text-xl font-bold text-blue-800 mb-3 text-balance leading-snug max-w-md">
+                <p className="mb-2 text-sm text-gray-500">Pour avoir complété avec succès</p>
+                <h3 className="mb-3 max-w-md text-xl font-semibold leading-snug text-purple-800">
                     {course_title}
                 </h3>
 
                 {/* Score et date */}
-                <div className="flex items-center gap-6 mt-1 mb-6">
+                <div className="mb-6 mt-1 flex items-start gap-8">
                     {score != null && (
                         <div className="flex flex-col items-center">
-                            <span className="text-2xl font-extrabold text-emerald-600 tabular-nums">{score}%</span>
-                            <span className="text-xs text-gray-400 uppercase tracking-wide">Score obtenu</span>
+                            <span className={cx('text-2xl font-semibold tracking-tight text-emerald-600', NUM)}>{score}%</span>
+                            <span className="text-[11px] uppercase tracking-wide text-gray-400">Score obtenu</span>
                         </div>
                     )}
                     <div className="flex flex-col items-center">
-                        <span className="text-sm font-bold text-gray-800">{date}</span>
-                        <span className="text-xs text-gray-400 uppercase tracking-wide">Date d'obtention</span>
+                        <span className={cx('text-sm font-semibold text-gray-800', NUM)}>{date}</span>
+                        <span className="text-[11px] uppercase tracking-wide text-gray-400">Date d'obtention</span>
                     </div>
                 </div>
 
-                {/* Signature */}
-                <div className="w-full flex items-end justify-between mt-2">
+                {/* Pied : QR, signature, sceau */}
+                <div className="mt-2 flex w-full items-end justify-between gap-4">
                     <div className="flex flex-col items-start gap-1">
-                        {/* QR Code de vérification */}
                         <img
                             src={qrSrc}
-                            alt="QR de vérification"
-                            className="w-16 h-16 rounded-lg border border-gray-200"
+                            alt="QR de vérification du certificat"
+                            className="h-16 w-16 rounded-lg border border-gray-200"
                         />
-                        <span className="text-[10px] text-gray-400 max-w-[100px] leading-tight">Scanner pour vérifier</span>
+                        <span className="max-w-[100px] text-[10px] leading-tight text-gray-400">
+                            Scanner pour vérifier
+                        </span>
                     </div>
 
                     <div className="flex flex-col items-center">
-                        <div className="w-32 border-b-2 border-gray-300 mb-1" />
-                        <span className="text-xs font-bold text-gray-700">Directeur IBIG Soft</span>
-                        <span className="text-[10px] text-gray-400">{certNum}</span>
+                        <div className="mb-1 w-32 border-b border-gray-300" />
+                        <span className="text-xs font-semibold text-gray-700">Directeur IBIG Soft</span>
+                        <span className={cx('text-[10px] text-gray-400', NUM)}>{certNum}</span>
                     </div>
 
                     <div className="flex flex-col items-end gap-1">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center">
-                            <span className="text-blue-700 text-xs font-extrabold">IS</span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-purple-300 bg-purple-50">
+                            <span className="text-xs font-semibold text-purple-700">IS</span>
                         </div>
                         <span className="text-[10px] text-gray-400">Sceau IBIG Soft</span>
                     </div>
                 </div>
             </div>
 
-            {/* Bandeau doré bas */}
-            <div className="h-2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400" />
+            {/* Filet bas */}
+            <div className="h-1.5 bg-amber-400" />
 
-            {/* Watermark léger */}
+            {/* Filigrane */}
             <div
-                className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] select-none"
+                className="pointer-events-none absolute inset-0 flex select-none items-center justify-center opacity-[0.03]"
                 aria-hidden="true"
             >
-                <span className="text-9xl font-extrabold text-gray-900 rotate-45 tracking-widest">IBIG SECRETIS</span>
+                <span className="rotate-45 text-8xl font-semibold tracking-widest text-gray-900">IBIG SECRETIS</span>
             </div>
         </div>
     );
@@ -145,7 +156,7 @@ function CertificateVisual({ certificate }) {
 export default function AcademieCertificate({ certificate }) {
     function shareOnLinkedIn() {
         const text = encodeURIComponent(
-            `Je viens d'obtenir le certificat "${certificate.course_title}" sur l'Académie IBIG SECRETIS ! 🎓`
+            `Je viens d'obtenir le certificat "${certificate.course_title}" sur l'Académie IBIG SECRETIS !`
         );
         const url = encodeURIComponent(certificate.verify_url);
         window.open(
@@ -164,64 +175,65 @@ export default function AcademieCertificate({ certificate }) {
         window.location.href = route('api.academy.certificate.pdf', { uuid: certificate.uuid });
     }
 
+    if (!certificate) {
+        return (
+            <AppLayout>
+                <Head title="Certificat — Académie" />
+                <EmptyState
+                    bordered
+                    variant="error"
+                    title="Certificat introuvable"
+                    description="Ce certificat n'existe pas ou ne vous appartient pas."
+                    action={
+                        <Button as={Link} href={route('academie.mon-espace')} variant="primary">
+                            Retour à mon espace
+                        </Button>
+                    }
+                />
+            </AppLayout>
+        );
+    }
+
     return (
         <AppLayout>
             <Head title={`Certificat — ${certificate.course_title}`} />
 
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="mx-auto max-w-3xl">
+                <PageHeader
+                    title="Votre certificat d'accomplissement"
+                    subtitle={certificate.course_title}
+                    icon={TrophyIcon}
+                    breadcrumbs={[
+                        { label: 'Académie', href: route('academie.index') },
+                        { label: 'Mon espace', href: route('academie.mon-espace', { '#': 'certificats' }) },
+                        { label: 'Certificat' },
+                    ]}
+                />
 
-                {/* Fil d'Ariane */}
-                <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    <Link href={route('academie.index')} className="hover:text-blue-600">Académie</Link>
-                    <span className="mx-2">/</span>
-                    <Link href={route('academie.mon-espace', { '#': 'certificats' })} className="hover:text-blue-600">Mon espace</Link>
-                    <span className="mx-2">/</span>
-                    <span>Certificat</span>
-                </nav>
-
-                <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-6">
-                    Votre certificat d'accomplissement
-                </h1>
-
-                {/* Visuel du certificat */}
                 <CertificateVisual certificate={certificate} />
 
-                {/* Boutons d'action */}
-                <div className="flex flex-wrap gap-3 mt-6 justify-center">
-                    <button
-                        onClick={downloadPdf}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors shadow-md"
-                    >
-                        <DocumentArrowDownIcon className="w-5 h-5" />
+                {/* Actions */}
+                <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    <Button variant="primary" icon={DocumentArrowDownIcon} onClick={downloadPdf}>
                         Télécharger en PDF
-                    </button>
-
-                    <button
-                        onClick={shareOnLinkedIn}
-                        className="flex items-center gap-2 bg-[#0077B5] hover:bg-[#005885] text-white font-semibold text-sm px-5 py-3 rounded-xl transition-colors"
-                    >
-                        <ShareIcon className="w-5 h-5" />
+                    </Button>
+                    <Button variant="secondary" icon={ShareIcon} onClick={shareOnLinkedIn}>
                         Partager sur LinkedIn
-                    </button>
-
-                    <button
-                        onClick={copyVerifyLink}
-                        className="flex items-center gap-2 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-sm px-5 py-3 rounded-xl transition-colors"
-                    >
-                        <LinkIcon className="w-5 h-5" />
+                    </Button>
+                    <Button variant="secondary" icon={LinkIcon} onClick={copyVerifyLink}>
                         Copier le lien de vérification
-                    </button>
+                    </Button>
                 </div>
 
-                {/* Info vérification */}
-                <div className="mt-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                {/* Vérification publique */}
+                <div className={cx('mt-6 rounded-xl border p-4 text-center', BORDER, SURFACE_SUNK)}>
+                    <p className={cx('text-xs leading-5', TEXT_MUTED)}>
                         Ce certificat est vérifiable publiquement à l'adresse :{' '}
                         <a
                             href={certificate.verify_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 underline break-all"
+                            className="break-all font-medium text-purple-700 underline dark:text-purple-300"
                         >
                             {certificate.verify_url}
                         </a>
@@ -231,3 +243,4 @@ export default function AcademieCertificate({ certificate }) {
         </AppLayout>
     );
 }
+export { AcademieCertificate };

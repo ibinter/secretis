@@ -22,7 +22,7 @@ import { CheckCircleIcon as CheckSolid, StarIcon as StarSolid } from '@heroicons
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const LEVEL_LABEL = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
+const LEVEL_LABEL = { beginner: 'Débutant', intermediate: 'Intermédiaire', advanced: 'Avancé' };
 
 const MODULE_ICONS = {
     video:  VideoCameraIcon,
@@ -434,3 +434,4 @@ export default function CourseDetail({ course, modules = [], enrollment, ratings
         </AppLayout>
     );
 }
+export { CourseDetail };

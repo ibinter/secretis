@@ -5,22 +5,36 @@
  *   data        : résultat du SyscohadaService::generateIncomeStatement()
  *   fiscalYears : liste exercices
  *   selectedFY  : exercice courant
+ *
+ * Présentation migrée sur `@/Components/UI` + socle comptable partagé.
+ * Aucun solde n'est recalculé : tous les montants proviennent de `data`.
+ * Convention comptable conservée : un montant négatif s'affiche entre
+ * parenthèses, et en rouge sémantique sur les soldes de gestion.
  */
 
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend, ReferenceLine,
+  ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import { ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import {
+  ArrowDownTrayIcon, ChevronDownIcon, ChevronRightIcon, ChartBarIcon,
+} from '@heroicons/react/24/outline';
 import AuthLayout from '@/Layouts/AuthLayout';
+import {
+  PageHeader, Button, Card, StatCard, EmptyState,
+  cx, CONTROL, SURFACE_SUNK, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI';
+import {
+  amount, money, balanceTone, TABLE_HEAD, TH_CELL, TFOOT,
+} from '@/Components/Comptabilite/accounting';
 
-const fcfa = (v) => {
-  if (v == null) return '—';
-  const abs = Math.abs(Number(v));
-  const fmt = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(abs);
-  return (v < 0 ? '(' + fmt + ')' : fmt) + ' FCFA';
+/** Montant de compte de résultat : négatif entre parenthèses. */
+const cr = (v) => {
+  if (v == null || Number.isNaN(Number(v))) return '—';
+  const a = amount(Math.abs(Number(v)));
+  return Number(v) < 0 ? `(${a})` : a;
 };
 
 const pct = (v, base) => {
@@ -29,25 +43,28 @@ const pct = (v, base) => {
 };
 
 // Ligne du tableau CR
-function CRRow({ label, value, base, isTotal, indent = 0, bold, positive, negative, highlight }) {
-  const isPositive = value >= 0;
-  const valueColor = highlight
-    ? (isPositive ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400')
-    : 'text-gray-800 dark:text-gray-200';
+function CRRow({ label, value, base, isTotal, indent = 0, bold, highlight }) {
+  const strong = bold || isTotal;
 
   return (
-    <tr className={`
-      ${isTotal ? 'bg-gray-50 dark:bg-gray-800/50 border-t border-b border-gray-200 dark:border-gray-700' : ''}
-      ${highlight ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}
-    `}>
-      <td className={`px-4 py-2 ${bold || isTotal ? 'font-semibold' : 'font-normal'} text-gray-700 dark:text-gray-300`}
-        style={{ paddingLeft: `${16 + indent * 20}px` }}>
+    <tr className={cx(
+      isTotal && cx(SURFACE_SUNK, 'border-y border-gray-200 dark:border-[#1E3048]'),
+      highlight && !isTotal && 'bg-gray-50/60 dark:bg-white/[0.02]',
+    )}>
+      <td
+        className={cx('py-2 pr-4 text-sm', strong ? cx('font-semibold', TEXT_TITLE) : TEXT_MUTED)}
+        style={{ paddingLeft: `${16 + indent * 20}px` }}
+      >
         {label}
       </td>
-      <td className={`px-4 py-2 text-right font-mono ${valueColor} ${bold || isTotal ? 'font-semibold' : ''}`}>
-        {fcfa(value)}
+      <td className={cx(
+        'px-4 py-2 text-right whitespace-nowrap', NUM,
+        strong && 'font-semibold',
+        highlight ? balanceTone(value) : TEXT_TITLE,
+      )}>
+        {cr(value)}
       </td>
-      <td className="px-4 py-2 text-right text-xs text-gray-400 dark:text-gray-500 font-mono">
+      <td className={cx('px-4 py-2 text-right text-xs whitespace-nowrap', NUM, TEXT_FAINT)}>
         {pct(value, base)}
       </td>
     </tr>
@@ -59,11 +76,12 @@ function Section({ title, children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <>
-      <tr className="bg-gray-100 dark:bg-gray-800 cursor-pointer select-none"
-        onClick={() => setOpen(o => !o)}>
-        <td colSpan={3} className="px-4 py-2.5 font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wide text-xs flex items-center gap-2">
-          {open ? <ChevronDownIcon className="w-4 h-4 inline" /> : <ChevronRightIcon className="w-4 h-4 inline" />}
-          {title}
+      <tr className={cx(SURFACE_SUNK, 'cursor-pointer select-none')} onClick={() => setOpen(o => !o)}>
+        <td colSpan={3} className="px-4 py-2.5">
+          <span className={cx('flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider', TEXT_MUTED)}>
+            {open ? <ChevronDownIcon className="h-3.5 w-3.5" /> : <ChevronRightIcon className="h-3.5 w-3.5" />}
+            {title}
+          </span>
         </td>
       </tr>
       {open && children}
@@ -76,11 +94,11 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
 
   const handleFYChange = (id) => {
     setSelectedId(id);
-    router.get('/comptabilite/generale/compte-de-resultat', { fiscal_year_id: id });
+    router.get('/comptabilite/compte-de-resultat', { fiscal_year_id: id });
   };
 
   const exportPdf = () => {
-    window.open(`/comptabilite/generale/income-statement/pdf?fiscal_year_id=${selectedId}`, '_blank');
+    window.open(`/comptabilite/compte-de-resultat/pdf?fiscal_year_id=${selectedId}`, '_blank');
   };
 
   const ca = data?.chiffre_affaires || 0;
@@ -99,53 +117,62 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
     <AuthLayout>
       <Head title="Compte de résultat SYSCOHADA" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Compte de résultat</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">SYSCOHADA Révisé 2017 (BCEAO)</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <select className="input-sm" value={selectedId}
-              onChange={e => handleFYChange(e.target.value)}>
-              <option value="">Sélectionner un exercice</option>
-              {fiscalYears.map(fy => (
-                <option key={fy.id} value={fy.id}>{fy.name}</option>
-              ))}
-            </select>
-            {data && (
-              <button onClick={exportPdf} className="btn-secondary flex items-center gap-2 text-sm">
-                <ArrowDownTrayIcon className="w-4 h-4" /> PDF
-              </button>
-            )}
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+        <PageHeader
+          icon={ChartBarIcon}
+          title="Compte de résultat"
+          breadcrumbs={[{ label: 'Comptabilité', href: '/comptabilite' }, { label: 'Compte de résultat' }]}
+          subtitle="SYSCOHADA Révisé 2017 (BCEAO) — montants en FCFA (XOF)"
+          actions={
+            <>
+              <select
+                className={cx(CONTROL, 'h-10 w-auto min-w-[200px]')}
+                value={selectedId}
+                onChange={e => handleFYChange(e.target.value)}
+                aria-label="Exercice fiscal"
+              >
+                <option value="">Sélectionner un exercice</option>
+                {fiscalYears.map(fy => (
+                  <option key={fy.id} value={fy.id}>{fy.name}</option>
+                ))}
+              </select>
+              {data && (
+                <Button variant="secondary" icon={ArrowDownTrayIcon} onClick={exportPdf}>
+                  PDF
+                </Button>
+              )}
+            </>
+          }
+        />
 
         {!data ? (
-          <div className="text-center py-24 text-gray-400 dark:text-gray-500">
-            Sélectionnez un exercice fiscal pour afficher le compte de résultat
-          </div>
+          <EmptyState
+            bordered
+            icon={ChartBarIcon}
+            title="Aucun exercice sélectionné"
+            description="Choisissez un exercice fiscal pour afficher le compte de résultat et les soldes intermédiaires de gestion."
+          />
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Tableau CR */}
-            <div className="xl:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-semibold text-gray-700 dark:text-gray-300 text-sm uppercase tracking-wide">
-                  {selectedFY?.name} — Exercice clos le {data.period?.end}
-                </h2>
-              </div>
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
 
+            {/* Tableau CR */}
+            <Card
+              className="xl:col-span-2"
+              flush
+              title={selectedFY?.name ?? 'Exercice'}
+              subtitle={data.period?.end ? `Exercice clos le ${data.period.end}` : undefined}
+            >
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                <table className="w-full border-collapse text-sm">
+                  <thead className={TABLE_HEAD}>
                     <tr>
-                      <th className="px-4 py-2 text-left">Intitulé</th>
-                      <th className="px-4 py-2 text-right">Exercice N</th>
-                      <th className="px-4 py-2 text-right">% CA</th>
+                      <th scope="col" className={cx(TH_CELL, 'text-left')}>Intitulé</th>
+                      <th scope="col" className={cx(TH_CELL, 'text-right w-44')}>Exercice N</th>
+                      <th scope="col" className={cx(TH_CELL, 'text-right w-24')}>% CA</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  <tbody className="divide-y divide-gray-100 dark:divide-[#1E3048]">
 
                     <Section title="Produits d'activités ordinaires">
                       <CRRow label="Ventes de marchandises et services (701-707)" value={data.chiffre_affaires} base={ca} />
@@ -162,86 +189,100 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
                     </Section>
 
                     {/* SIG */}
-                    <tr className="bg-indigo-50 dark:bg-indigo-900/20">
-                      <td className="px-4 py-3 font-bold text-indigo-700 dark:text-indigo-300 text-sm uppercase tracking-wide" colSpan={3}>
+                    <tr className={SURFACE_SUNK}>
+                      <td colSpan={3} className={cx('px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider', TEXT_MUTED)}>
                         Soldes intermédiaires de gestion
                       </td>
                     </tr>
 
-                    <CRRow label="VALEUR AJOUTÉE (VA)" value={data.valeur_ajoutee} base={ca} isTotal highlight bold />
+                    <CRRow label="Valeur ajoutée (VA)" value={data.valeur_ajoutee} base={ca} isTotal highlight bold />
                     <CRRow label="Charges de personnel (661-668)" value={-data.charges_personnel} base={ca} indent={1} />
                     <CRRow label="Impôts et taxes (641-648)" value={-data.impots_taxes} base={ca} indent={1} />
-                    <CRRow label="EXCÉDENT BRUT D'EXPLOITATION (EBE)" value={data.ebe} base={ca} isTotal highlight bold />
+                    <CRRow label="Excédent brut d'exploitation (EBE)" value={data.ebe} base={ca} isTotal highlight bold />
                     <CRRow label="Reprises d'amortissements (781-782)" value={data.reprises} base={ca} indent={1} />
                     <CRRow label="Dotations amortissements (681-682)" value={-data.dotations_amort} base={ca} indent={1} />
                     <CRRow label="Autres charges (651-658)" value={-data.autres_charges} base={ca} indent={1} />
-                    <CRRow label="RÉSULTAT D'EXPLOITATION (REX)" value={data.rex} base={ca} isTotal highlight bold />
+                    <CRRow label="Résultat d'exploitation (REX)" value={data.rex} base={ca} isTotal highlight bold />
 
                     <Section title="Résultat financier">
                       <CRRow label="Revenus financiers (771-778)" value={data.produits_financiers} base={ca} indent={1} />
                       <CRRow label="Frais financiers (671-678)" value={-data.charges_financieres} base={ca} indent={1} />
-                      <CRRow label="RÉSULTAT FINANCIER" value={data.resultat_financier} base={ca} isTotal highlight bold />
+                      <CRRow label="Résultat financier" value={data.resultat_financier} base={ca} isTotal highlight bold />
                     </Section>
 
-                    <CRRow label="RÉSULTAT DES ACTIVITÉS ORDINAIRES (RAO)" value={data.rao} base={ca} isTotal bold highlight />
+                    <CRRow label="Résultat des activités ordinaires (RAO)" value={data.rao} base={ca} isTotal highlight bold />
 
                     <Section title="Éléments hors activités ordinaires (HAO)" defaultOpen={false}>
                       <CRRow label="Produits HAO (82, 84, 86, 88)" value={data.produits_hao} base={ca} indent={1} />
                       <CRRow label="Charges HAO (81, 83, 85, 87)" value={-data.charges_hao} base={ca} indent={1} />
-                      <CRRow label="RÉSULTAT HAO" value={data.resultat_hao} base={ca} isTotal />
+                      <CRRow label="Résultat HAO" value={data.resultat_hao} base={ca} isTotal />
                     </Section>
 
                     <CRRow label="Impôts sur le résultat (695)" value={-data.impots_sur_resultat} base={ca} />
+                  </tbody>
 
-                    <tr className={`border-t-2 border-gray-800 dark:border-gray-200 ${data.resultat_net >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                      <td className="px-4 py-4 font-bold text-lg text-gray-900 dark:text-gray-100 uppercase">
-                        RÉSULTAT NET DE L'EXERCICE
+                  <tfoot className={TFOOT}>
+                    <tr>
+                      <td className={cx('px-4 py-4 text-sm font-semibold uppercase tracking-wide', TEXT_TITLE)}>
+                        Résultat net de l'exercice
                       </td>
-                      <td className={`px-4 py-4 text-right font-bold text-lg font-mono ${data.resultat_net >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
-                        {fcfa(data.resultat_net)}
+                      <td className={cx(
+                        'px-4 py-4 text-right text-base font-semibold whitespace-nowrap',
+                        NUM, balanceTone(data.resultat_net),
+                      )}>
+                        {cr(data.resultat_net)}
                       </td>
-                      <td className="px-4 py-4 text-right text-sm text-gray-500">
+                      <td className={cx('px-4 py-4 text-right text-sm whitespace-nowrap', NUM, TEXT_MUTED)}>
                         {pct(data.resultat_net, ca)}
                       </td>
                     </tr>
-                  </tbody>
+                  </tfoot>
                 </table>
               </div>
-            </div>
+            </Card>
 
             {/* Graphique + KPI */}
             <div className="space-y-4">
-              {/* KPI cards */}
-              {[
-                { label: 'Chiffre d\'affaires', value: data.chiffre_affaires, color: 'text-blue-600' },
-                { label: 'Valeur ajoutée',      value: data.valeur_ajoutee, color: 'text-indigo-600' },
-                { label: 'EBE',                 value: data.ebe, color: 'text-purple-600' },
-                { label: 'Résultat net',        value: data.resultat_net,
-                  color: data.resultat_net >= 0 ? 'text-green-600' : 'text-red-600' },
-              ].map(k => (
-                <div key={k.label} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{k.label}</p>
-                  <p className={`text-xl font-bold mt-1 font-mono ${k.color}`}>{fcfa(k.value)}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{pct(k.value, ca)} du CA</p>
-                </div>
-              ))}
+              <StatCard
+                label="Chiffre d'affaires"
+                value={amount(data.chiffre_affaires)} unit="FCFA"
+                hint={`${pct(data.chiffre_affaires, ca)} du CA`}
+              />
+              <StatCard
+                label="Valeur ajoutée"
+                value={amount(data.valeur_ajoutee)} unit="FCFA"
+                hint={`${pct(data.valeur_ajoutee, ca)} du CA`}
+              />
+              <StatCard
+                label="EBE"
+                value={amount(data.ebe)} unit="FCFA"
+                hint={`${pct(data.ebe, ca)} du CA`}
+              />
+              <StatCard
+                label="Résultat net"
+                unit="FCFA"
+                tone={data.resultat_net < 0 ? 'danger' : 'neutral'}
+                value={<span className={balanceTone(data.resultat_net)}>{cr(data.resultat_net)}</span>}
+                hint={`${pct(data.resultat_net, ca)} du CA`}
+              />
 
-              {/* Graphique SIG */}
-              <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">
-                  Soldes intermédiaires
-                </h3>
+              <Card title="Soldes intermédiaires">
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 4 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${(v/1000000).toFixed(0)}M`} />
-                    <Tooltip formatter={v => fcfa(v)} />
-                    <ReferenceLine y={0} stroke="#9ca3af" />
-                    <Bar dataKey="valeur" fill="#3B82F6" radius={[3, 3, 0, 0]} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-200 dark:text-white/10" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="currentColor" className="text-gray-400" />
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={v => `${(v / 1000000).toFixed(0)}M`}
+                      stroke="currentColor"
+                      className="text-gray-400"
+                    />
+                    <Tooltip formatter={v => money(v)} contentStyle={{ fontSize: 12 }} />
+                    <ReferenceLine y={0} stroke="#9CA3AF" />
+                    <Bar dataKey="valeur" fill="#9333EA" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </Card>
             </div>
           </div>
         )}
@@ -249,3 +290,4 @@ export default function IncomeStatement({ data, fiscalYears, selectedFY }) {
     </AuthLayout>
   );
 }
+export { IncomeStatement };

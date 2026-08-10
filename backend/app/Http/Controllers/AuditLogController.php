@@ -117,6 +117,9 @@ class AuditLogController extends Controller
      */
     public function export(Request $request): StreamedResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $this->authorize('export.audit_logs');
 
         $validated = $request->validate([

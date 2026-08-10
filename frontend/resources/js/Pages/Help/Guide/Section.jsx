@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 const Icon = {
     Clock: () => (
@@ -45,13 +46,13 @@ export default function GuideSection({ section, articles = [] }) {
     const totalTime = articles.reduce((acc, a) => acc + (a.read_time_minutes || 0), 0);
 
     return (
-        <>
+        <AppLayout>
             <Head title={`${sectionTitle} | Guide | IBIG SECRETIS`} />
 
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
                 {/* Header de section */}
-                <div className="text-white py-12 px-4" style={{ background: `linear-gradient(135deg, #1A3A5C, ${section.color})` }}>
+                <div className="text-white py-12 px-4" style={{ background: `linear-gradient(135deg, #9333EA, ${section.color})` }}>
                     <div className="max-w-3xl mx-auto">
                         {/* Breadcrumb */}
                         <nav className="flex items-center gap-2 text-sm text-white/70 mb-6">
@@ -131,7 +132,7 @@ export default function GuideSection({ section, articles = [] }) {
 
                                     {/* Contenu */}
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-gray-900 dark:text-white mb-0.5 group-hover:text-[#2E86C1] transition-colors truncate">
+                                        <h3 className="font-semibold text-gray-900 dark:text-white mb-0.5 group-hover:text-[#7e22ce] transition-colors truncate">
                                             {title}
                                         </h3>
                                         {summary && (
@@ -161,6 +162,7 @@ export default function GuideSection({ section, articles = [] }) {
                     )}
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }
+export { GuideSection };

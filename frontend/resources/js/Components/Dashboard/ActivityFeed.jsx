@@ -31,8 +31,8 @@ import clsx from 'clsx';
 // ============================================================================
 
 const MODULE_META = {
-    courrier:   { Icon: EnvelopeIcon,                 color: 'text-[#2E86C1] bg-blue-50',    label: 'Courrier' },
-    agenda:     { Icon: CalendarDaysIcon,              color: 'text-[#1A3A5C] bg-indigo-50',  label: 'Agenda' },
+    courrier:   { Icon: EnvelopeIcon,                 color: 'text-[#7e22ce] bg-purple-50',    label: 'Courrier' },
+    agenda:     { Icon: CalendarDaysIcon,              color: 'text-[#9333EA] bg-indigo-50',  label: 'Agenda' },
     taches:     { Icon: ClipboardDocumentListIcon,     color: 'text-emerald-600 bg-emerald-50',label: 'Tâches' },
     reunions:   { Icon: UserGroupIcon,                 color: 'text-purple-600 bg-purple-50', label: 'Réunions' },
     accueil:    { Icon: BuildingOfficeIcon,            color: 'text-[#F39C12] bg-amber-50',   label: 'Accueil' },
@@ -188,7 +188,7 @@ export default function ActivityFeed({ activities = [], loading = false, maxItem
                                     {/* Texte */}
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm text-gray-700 leading-snug">
-                                            <span className="font-semibold text-[#1A3A5C]">
+                                            <span className="font-semibold text-[#9333EA]">
                                                 {activity.user_name ?? 'Système'}
                                             </span>{' '}
                                             {actionLabel}{' '}
@@ -215,3 +215,4 @@ export default function ActivityFeed({ activities = [], loading = false, maxItem
         </div>
     );
 }
+export { ActivityFeed };

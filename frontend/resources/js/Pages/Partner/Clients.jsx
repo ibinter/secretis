@@ -31,7 +31,7 @@ export default function PartnerClients({ partner, referrals }) {
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-500 dark:text-gray-400">Code de parrainage</p>
-            <code className="text-sm font-mono font-bold text-[#2E86C1]">{partner.referral_code}</code>
+            <code className="text-sm font-mono font-bold text-[#7e22ce]">{partner.referral_code}</code>
           </div>
         </div>
 
@@ -113,3 +113,4 @@ export default function PartnerClients({ partner, referrals }) {
     </AppLayout>
   );
 }
+export { PartnerClients };

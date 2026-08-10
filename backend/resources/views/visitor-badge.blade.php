@@ -1,203 +1,140 @@
-﻿<!DOCTYPE html>
+{{--
+    Badge visiteur — rendu HTML imprimable.
+    Appelé par : App\Services\VisitorService::generateBadge() (ligne 246) via view(...)->render()
+    Variables :
+      $visit       App\Models\VisitLog (table visitor_logs) — relations chargées : visitor, host, organization
+                   colonnes : badge_number, purpose, checked_in_at, checked_out_at, vehicle_plate, notes
+      $qrCode      string  PNG encodé en base64 (QrCode::format('png')->size(150))
+      $badgeColor  string  couleur hexadécimale de la bande d'accès (ex. '#27AE60')
+--}}
+@php
+    $visitor    = $visit->visitor ?? null;
+    $fullName   = trim(($visitor->first_name ?? '') . ' ' . ($visitor->last_name ?? ''));
+    $fullName   = $fullName !== '' ? $fullName : 'Visiteur';
+    $checkedIn  = $visit->checked_in_at ? \Carbon\Carbon::parse($visit->checked_in_at) : null;
+    $color      = $badgeColor ?? '#9333EA';
+@endphp
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badge Visiteur — {{ $visitor->full_name }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Badge visiteur {{ $visit->badge_number ?? '' }}</title>
+<style>
+    @page { size: 90mm 130mm; margin: 0; }
+    * { box-sizing: border-box; font-family: "DejaVu Sans", Arial, Helvetica, sans-serif; }
+    body { margin: 0; padding: 12px; background: #f3f4f6; color: #1f2937; }
 
-        .badge {
-            width: 105mm;
-            height: 148mm; /* A6 */
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,.2);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+    .badge {
+        width: 90mm; height: 130mm; margin: 0 auto; background: #ffffff;
+        border: 1px solid #e5e7eb; border-top: 4px solid #9333EA;
+        page-break-inside: avoid;
+    }
+    .badge-inner { padding: 6mm 5mm; }
 
-        /* Bandeau couleur en haut */
-        .badge-header {
-            background: {{ $badgeColor }};
-            color: #fff;
-            padding: 12px 14px 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .badge-header .org-logo {
-            width: 44px;
-            height: 44px;
-            object-fit: contain;
-            background: rgba(255,255,255,.2);
-            border-radius: 6px;
-            padding: 3px;
-        }
-        .badge-header .org-name {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-        }
-        .badge-type {
-            background: {{ $badgeColor }};
-            color: #fff;
-            font-size: 26px;
-            font-weight: 900;
-            letter-spacing: 6px;
-            text-align: center;
-            padding: 6px 0;
-            border-bottom: 3px solid rgba(0,0,0,.1);
-        }
+    .org { font-size: 13px; font-weight: bold; color: #111827; text-align: center; }
+    .org-sub { font-size: 8px; color: #6b7280; text-align: center; letter-spacing: 1px;
+               text-transform: uppercase; margin-top: 1px; }
 
-        /* Corps du badge */
-        .badge-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .band { margin: 4mm 0 3mm; padding: 3px 0; text-align: center;
+            font-size: 9px; font-weight: bold; letter-spacing: 2px;
+            text-transform: uppercase; color: #ffffff; }
 
-        .visitor-photo {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid {{ $badgeColor }};
-            align-self: center;
-        }
-        .visitor-photo-placeholder {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            align-self: center;
-            border: 3px solid {{ $badgeColor }};
-        }
+    .name { font-size: 17px; font-weight: bold; color: #111827; text-align: center;
+            line-height: 1.2; word-wrap: break-word; }
+    .company { font-size: 11px; color: #4b5563; text-align: center; margin-top: 2px; }
 
-        .visitor-name {
-            font-size: 16px;
-            font-weight: 800;
-            color: #1a1a2e;
-            text-align: center;
-        }
-        .visitor-company {
-            font-size: 11px;
-            color: #666;
-            text-align: center;
-        }
+    table.info { width: 100%; border-collapse: collapse; margin-top: 4mm; font-size: 10px; }
+    table.info th { text-align: left; padding: 3px 0; color: #6b7280; font-weight: normal;
+                    font-size: 8px; text-transform: uppercase; width: 38%; vertical-align: top; }
+    table.info td { text-align: left; padding: 3px 0; color: #111827; font-weight: bold;
+                    vertical-align: top; }
 
-        .info-row { display: flex; align-items: flex-start; gap: 6px; font-size: 10px; }
-        .info-row .label { color: #888; min-width: 68px; font-weight: 600; }
-        .info-row .value { color: #1a1a2e; font-weight: 500; }
+    .qr { text-align: center; margin-top: 4mm; }
+    .qr img { width: 28mm; height: 28mm; }
+    .badge-no { text-align: center; font-size: 13px; font-weight: bold;
+                letter-spacing: 1px; color: #111827; margin-top: 2mm; }
+    .rule { border: 0; border-top: 1px solid #e5e7eb; margin: 3mm 0; }
+    .notice { font-size: 7px; color: #9ca3af; text-align: center; line-height: 1.4; margin-top: 2mm; }
+    .muted { color: #9ca3af; font-weight: normal; }
 
-        .divider { border: none; border-top: 1px dashed #ddd; margin: 4px 0; }
-
-        /* QR code */
-        .qr-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: auto;
-        }
-        .qr-section img { width: 64px; height: 64px; }
-        .qr-info { font-size: 9px; color: #888; }
-        .qr-info .badge-num { font-size: 12px; font-weight: 800; color: {{ $badgeColor }}; }
-
-        /* Pied de page */
-        .badge-footer {
-            background: #1A3A5C;
-            color: rgba(255,255,255,.7);
-            font-size: 8px;
-            text-align: center;
-            padding: 5px;
-        }
-        .badge-footer strong { color: #F39C12; }
-
-        @media print {
-            body { background: none; }
-            .badge { box-shadow: none; }
-        }
-    </style>
+    .toolbar { text-align: center; margin: 0 0 10px; }
+    .toolbar button { background: #9333EA; color: #fff; border: 0; border-radius: 6px;
+                      padding: 8px 18px; font-size: 13px; cursor: pointer; }
+    @media print {
+        body { background: #ffffff; padding: 0; }
+        .toolbar { display: none; }
+        .badge { border: 0; margin: 0; }
+    }
+</style>
 </head>
 <body>
+
+<div class="toolbar">
+    <button type="button" onclick="window.print()">Imprimer le badge</button>
+</div>
+
 <div class="badge">
-    <!-- En-tête organisation -->
-    <div class="badge-header">
-        @if($org->logo_path)
-            <img src="{{ asset('storage/' . $org->logo_path) }}" alt="Logo" class="org-logo">
-        @endif
-        <div>
-            <div class="org-name">{{ $org->name }}</div>
-            <div style="font-size:9px;opacity:.8;">{{ $org->address ?? '' }}</div>
-        </div>
-    </div>
+    <div class="badge-inner">
 
-    <!-- Type de badge -->
-    <div class="badge-type">VISITEUR</div>
+        <div class="org">{{ $visit->organization->name ?? 'SECRETIS ERP' }}</div>
+        <div class="org-sub">Badge visiteur</div>
 
-    <!-- Corps -->
-    <div class="badge-body">
-        <!-- Photo visiteur -->
-        @if($visitor->photo_path)
-            <img src="{{ asset('storage/' . $visitor->photo_path) }}" alt="Photo" class="visitor-photo">
-        @else
-            <div class="visitor-photo-placeholder">👤</div>
+        <div class="band" style="background: {{ $color }};">Acces visiteur</div>
+
+        <div class="name">{{ $fullName }}</div>
+        @if (!empty($visitor->company))
+            <div class="company">{{ $visitor->company }}</div>
         @endif
 
-        <!-- Nom et société -->
-        <div class="visitor-name">{{ $visitor->full_name }}</div>
-        @if($visitor->company)
-            <div class="visitor-company">{{ $visitor->company }}</div>
-        @endif
+        <hr class="rule">
 
-        <hr class="divider">
+        <table class="info">
+            <tr>
+                <th>Personne visitee</th>
+                <td>{{ $visit->host->name ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th>Motif</th>
+                <td>{{ $visit->purpose ?: '—' }}</td>
+            </tr>
+            <tr>
+                <th>Date d'arrivee</th>
+                <td>{{ $checkedIn?->format('d/m/Y') ?? '—' }}</td>
+            </tr>
+            <tr>
+                <th>Heure d'arrivee</th>
+                <td>{{ $checkedIn?->format('H:i') ?? '—' }}</td>
+            </tr>
+            @if (!empty($visit->vehicle_plate))
+            <tr>
+                <th>Vehicule</th>
+                <td>{{ $visit->vehicle_plate }}</td>
+            </tr>
+            @endif
+        </table>
 
-        <!-- Informations visite -->
-        <div class="info-row">
-            <span class="label">Hôte :</span>
-            <span class="value">{{ $visit->host->name ?? 'N/A' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="label">Motif :</span>
-            <span class="value">{{ ucfirst($visit->purpose) }}{{ $visit->purpose_detail ? ' — ' . $visit->purpose_detail : '' }}</span>
-        </div>
-        <div class="info-row">
-            <span class="label">Arrivée :</span>
-            <span class="value">{{ $visit->check_in_at?->format('H:i') }}</span>
-        </div>
-        @if($visit->location)
-        <div class="info-row">
-            <span class="label">Lieu :</span>
-            <span class="value">{{ $visit->location }}{{ $visit->floor ? ', Étage ' . $visit->floor : '' }}</span>
-        </div>
-        @endif
+        <hr class="rule">
 
-        <hr class="divider">
-
-        <!-- QR Code pour check-out rapide -->
-        <div class="qr-section">
-            <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code">
-            <div class="qr-info">
-                <div class="badge-num">{{ $visitor->badge_number }}</div>
-                <div>Scannez pour<br>le check-out</div>
-                <div style="margin-top:4px;">
-                    <strong>Valable :</strong> {{ $visit->check_in_at?->format('d/m/Y') }} uniquement
-                </div>
+        @if (!empty($qrCode))
+            <div class="qr">
+                <img src="data:image/png;base64,{{ $qrCode }}" alt="QR code de controle du badge">
             </div>
-        </div>
-    </div>
+        @endif
 
-    <!-- Pied de page -->
-    <div class="badge-footer">
-        Ce badge est personnel et non transmissible — <strong>IBIG SECRETIS</strong>
+        <div class="badge-no">{{ $visit->badge_number ?: 'SANS NUMERO' }}</div>
+
+        <div class="notice">
+            Ce badge doit rester visible pendant toute la duree de la visite
+            et etre restitue a l'accueil au depart.
+        </div>
+
+        {{-- Seul document généré qui ne passe pas par dompdf : le badge est
+             imprimé depuis le navigateur. --}}
+        @include('partials.filigrane', ['orgFiligrane' => $visit->organization_id])
+
     </div>
 </div>
+
 </body>
 </html>

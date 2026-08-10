@@ -1,11 +1,28 @@
+/**
+ * SuperAdmin/MrrAnalysis.jsx — Analyse détaillée du revenu récurrent
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes props Inertia (`breakdown`, `forecasts`,
+ * `mrr_history`, `top_orgs`), même état local `scenario`.
+ *
+ * Corrections d'affichage : import `ReferenceLine` inutilisé supprimé,
+ * axes et grilles neutres pour rester lisibles en thème sombre.
+ */
+
 import React, { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine,
+  Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts';
+import { CircleDollarSign } from 'lucide-react';
+import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout';
+import {
+  PageHeader, Badge, Card, DataTable,
+  cx, SURFACE, BORDER, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
-// ─── Mock ─────────────────────────────────────────────────────────────────────
+/* ─── Données de démonstration (repli historique, conservées) ──────────────── */
 const MOCK_HISTORY = [
   { month: 'Jan 26', mrr: 5100000, new_mrr: 300000, expansion_mrr: 75000, churned_mrr: 75000 },
   { month: 'Fév 26', mrr: 5400000, new_mrr: 225000, expansion_mrr: 150000, churned_mrr: 75000 },
@@ -36,249 +53,313 @@ const MOCK_TOP_ORGS = [
   { name: 'Pharmaci Pro',        plan: 'pro',        mrr: 75000,  health_score: 67, months_active: 21 },
 ];
 
-const fmtXOF = (v) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(v);
-const fmtM = (v) =>
-  v >= 1_000_000 ? `${(v/1_000_000).toFixed(2)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : String(v);
+/* ─── Formatage ────────────────────────────────────────────────────────────── */
 
-function CustomTooltip({ active, payload, label }) {
+const fmtXOF = (v) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(v ?? 0);
+
+const fmtM = (v) =>
+  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)}M`
+    : v >= 1000 ? `${(v / 1000).toFixed(0)}K`
+    : String(v ?? 0);
+
+/* Axes et grilles neutres : lisibles en thème clair comme en thème sombre. */
+const AXIS_COLOR = '#94A3B8';
+const axisProps = {
+  tick: { fontSize: 10, fill: AXIS_COLOR },
+  tickLine: { stroke: AXIS_COLOR },
+  axisLine: { stroke: AXIS_COLOR, strokeOpacity: 0.35 },
+};
+
+function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-xs min-w-[160px]">
-      <p className="font-semibold text-gray-700 mb-1.5">{label}</p>
+    <div className={cx(SURFACE, 'border', BORDER, 'min-w-[160px] rounded-lg px-3 py-2 text-xs shadow-lg')}>
+      <p className={cx('mb-1 font-semibold', TEXT_TITLE)}>{label}</p>
       {payload.map((p, i) => (
-        <div key={i} className="flex items-center gap-2 mb-0.5">
-          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
-          <span className="text-gray-600">{p.name} : <strong>{fmtM(p.value)} XOF</strong></span>
+        <div key={i} className="mb-0.5 flex items-center gap-2">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: p.color }} />
+          <span className={TEXT_MUTED}>
+            {p.name} : <span className={cx('font-semibold', TEXT_TITLE, NUM)}>{fmtM(p.value)} XOF</span>
+          </span>
         </div>
       ))}
     </div>
   );
 }
 
-// ─── Waterfall MRR ────────────────────────────────────────────────────────────
+const PLAN_COLORS = { starter: '#64748B', pro: '#0EA5E9', enterprise: '#9333EA', on_premise: '#F59E0B' };
+const PLAN_LABELS = { starter: 'Starter', pro: 'Pro', enterprise: 'Enterprise', on_premise: 'On-Premise' };
+const PLAN_TONE   = { enterprise: 'accent', pro: 'info', starter: 'neutral', on_premise: 'warning' };
+
+const SCENARIOS = [
+  { key: 'bear', label: 'Pessimiste', stroke: '#EF4444' },
+  { key: 'base', label: 'Réaliste',   stroke: '#0EA5E9' },
+  { key: 'bull', label: 'Optimiste',  stroke: '#10B981' },
+];
+
+const scoreTone = (s) => (s >= 70 ? 'success' : s >= 50 ? 'warning' : 'danger');
+
+/* ─── Waterfall MRR ────────────────────────────────────────────────────────── */
+
 function WaterfallMrr({ breakdown }) {
-  const start   = breakdown.mrr - breakdown.net_new_mrr;
+  const start = (breakdown.mrr ?? 0) - (breakdown.net_new_mrr ?? 0);
   const items = [
-    { name: 'MRR début',    value: start,                 type: 'base',      color: '#64748b' },
-    { name: '+ New',        value: breakdown.new_mrr,     type: 'positive',  color: '#10b981' },
-    { name: '+ Expansion',  value: breakdown.expansion_mrr, type: 'positive', color: '#3b82f6' },
-    { name: '- Churn',      value: -breakdown.churned_mrr, type: 'negative', color: '#ef4444' },
-    { name: 'MRR fin',      value: breakdown.mrr,         type: 'total',     color: '#1e3a5f' },
+    { name: 'MRR début',   value: start,                         color: '#64748B' },
+    { name: '+ New',       value: breakdown.new_mrr ?? 0,        color: '#10B981' },
+    { name: '+ Expansion', value: breakdown.expansion_mrr ?? 0,  color: '#0EA5E9' },
+    { name: '− Churn',     value: -(breakdown.churned_mrr ?? 0), color: '#EF4444' },
+    { name: 'MRR fin',     value: breakdown.mrr ?? 0,            color: '#9333EA' },
   ];
+  const maxVal = breakdown.mrr || 1;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-      <h3 className="font-semibold text-gray-900 mb-1">Waterfall MRR — Ce mois</h3>
-      <p className="text-xs text-gray-400 mb-5">Décomposition du mouvement MRR</p>
-      <div className="flex items-end gap-3 h-48 px-2">
-        {items.map((item, i) => {
-          const maxVal = breakdown.mrr;
-          const heightPct = Math.abs(item.value) / maxVal;
-          const barH = Math.max(8, Math.round(heightPct * 160));
+    <Card title="Décomposition du MRR — ce mois" subtitle="Mouvement du revenu récurrent sur la période">
+      <div className="flex h-48 items-end gap-3 px-2">
+        {items.map((item) => {
+          const barH = Math.max(8, Math.round((Math.abs(item.value) / maxVal) * 160));
           return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <span className="text-xs font-semibold text-gray-700">{fmtM(Math.abs(item.value))}</span>
+            <div key={item.name} className="flex flex-1 flex-col items-center gap-1">
+              <span className={cx('text-xs font-semibold', TEXT_TITLE, NUM)}>{fmtM(Math.abs(item.value))}</span>
               <div
                 className="w-full rounded-t-lg transition-all"
-                style={{ height: barH, background: item.color, opacity: item.type === 'negative' ? 0.85 : 1 }}
+                style={{ height: barH, background: item.color }}
               />
-              <span className="text-[10px] text-gray-500 text-center leading-tight">{item.name}</span>
+              <span className={cx('text-center text-[10px] leading-tight', TEXT_MUTED)}>{item.name}</span>
             </div>
           );
         })}
       </div>
+    </Card>
+  );
+}
+
+/* ─── Tuile chiffre ────────────────────────────────────────────────────────── */
+
+function MetricTile({ label, value, tone = 'neutral' }) {
+  const toneText = {
+    neutral: TEXT_TITLE,
+    success: 'text-emerald-700 dark:text-emerald-300',
+    danger:  'text-red-700 dark:text-red-300',
+    accent:  'text-purple-700 dark:text-purple-300',
+    info:    'text-sky-700 dark:text-sky-300',
+  }[tone] ?? TEXT_TITLE;
+
+  return (
+    <div className={cx(SURFACE, 'border', BORDER, 'rounded-xl p-4 text-center shadow-sm')}>
+      <p className={cx('mb-1 text-xs font-medium uppercase tracking-wide', TEXT_MUTED)}>{label}</p>
+      <p className={cx('text-lg font-semibold tracking-tight', toneText, NUM)}>{value}</p>
     </div>
   );
 }
 
-// ─── Composant principal ──────────────────────────────────────────────────────
-export default function MrrAnalysis({ breakdown: propBd, forecasts: propFc, mrr_history: propHist, top_orgs: propTop }) {
-  const breakdown = propBd   || MOCK_BREAKDOWN;
-  const forecasts = propFc   || MOCK_FORECASTS;
-  const history   = propHist || MOCK_HISTORY;
-  const topOrgs   = propTop  || MOCK_TOP_ORGS;
+/* ─── Composant principal ──────────────────────────────────────────────────── */
+
+export default function MrrAnalysis({
+  breakdown: propBd,
+  forecasts: propFc,
+  mrr_history: propHist,
+  top_orgs: propTop,
+}) {
+  const breakdown = propBd   ?? MOCK_BREAKDOWN;
+  const forecasts = propFc   ?? MOCK_FORECASTS;
+  const history   = propHist ?? MOCK_HISTORY;
+  const topOrgs   = propTop  ?? MOCK_TOP_ORGS;
 
   const [scenario, setScenario] = useState('base');
 
-  // Fusion historique + prévisions pour le graphique de forecast
-  const forecastData = forecasts[scenario] || [];
+  const forecastData  = forecasts[scenario] ?? [];
+  const scenarioMeta  = SCENARIOS.find(s => s.key === scenario) ?? SCENARIOS[1];
 
-  const planColors = { starter: '#64748b', pro: '#6366f1', enterprise: '#f59e0b', on_premise: '#8b5cf6' };
-  const planLabels = { starter: 'Starter', pro: 'Pro', enterprise: 'Enterprise', on_premise: 'On-Premise' };
-  const planData   = Object.entries(breakdown.by_plan || {}).map(([plan, mrr]) => ({
-    plan: planLabels[plan] || plan,
+  const planData = Object.entries(breakdown.by_plan ?? {}).map(([plan, mrr]) => ({
+    plan:  PLAN_LABELS[plan] ?? plan,
     mrr,
-    color: planColors[plan] || '#64748b',
+    color: PLAN_COLORS[plan] ?? '#64748B',
   }));
 
+  const topColumns = [
+    {
+      key: '__rank',
+      label: '#',
+      width: '56px',
+      numeric: true,
+      render: (_v, _row, i) => <span className={TEXT_FAINT}>{i + 1}</span>,
+      noExport: true,
+    },
+    {
+      key: 'name',
+      label: 'Organisation',
+      render: (v) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-xs font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
+            {String(v ?? '?').charAt(0).toUpperCase()}
+          </span>
+          <span className={cx('truncate font-medium', TEXT_TITLE)}>{v}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'plan',
+      label: 'Plan',
+      nowrap: true,
+      render: (v) => (
+        <Badge variant={PLAN_TONE[v] ?? 'neutral'}>
+          {v ? v.charAt(0).toUpperCase() + v.slice(1) : '—'}
+        </Badge>
+      ),
+    },
+    { key: 'mrr', label: 'MRR', numeric: true, nowrap: true, render: (v) => fmtXOF(v) },
+    {
+      key: 'health_score',
+      label: 'Score santé',
+      align: 'center',
+      nowrap: true,
+      render: (v) => <Badge variant={scoreTone(v)}>{v}/100</Badge>,
+    },
+    { key: 'months_active', label: 'Ancienneté', numeric: true, nowrap: true, render: (v) => `${v ?? 0} mois` },
+  ];
+
   return (
-    <>
+    <SuperAdminLayout title="Analyse MRR">
       <Head title="Analyse MRR — SuperAdmin IBIG Soft" />
-      <div className="min-h-screen bg-gray-50">
 
-        {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
-          <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm flex items-center gap-1">← Dashboard SaaS</button>
-              <span className="text-blue-400">/</span>
-              <h1 className="text-lg font-bold">Analyse MRR</h1>
-              <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
-            </div>
-          </div>
-        </header>
+      <PageHeader
+        icon={CircleDollarSign}
+        title="Analyse MRR"
+        subtitle="Décomposition, historique et prévisions du revenu récurrent mensuel."
+        breadcrumbs={[
+          { label: 'Console', href: '/superadmin' },
+          { label: 'Métriques SaaS', href: '/superadmin/saas/dashboard' },
+          { label: 'Analyse MRR' },
+        ]}
+      />
 
-        <main className="max-w-screen-2xl mx-auto px-6 py-8 space-y-6">
+      <div className="space-y-6">
 
-          {/* KPIs MRR */}
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-            {[
-              { label: 'MRR',            value: fmtM(breakdown.mrr) + ' XOF',            color: 'text-blue-900 bg-blue-50' },
-              { label: 'ARR',            value: fmtM(breakdown.arr) + ' XOF',            color: 'text-teal-800 bg-teal-50' },
-              { label: 'New MRR',        value: '+' + fmtM(breakdown.new_mrr) + ' XOF',  color: 'text-green-800 bg-green-50' },
-              { label: 'Expansion MRR',  value: '+' + fmtM(breakdown.expansion_mrr) + ' XOF', color: 'text-blue-700 bg-blue-50' },
-              { label: 'Churned MRR',    value: '-' + fmtM(breakdown.churned_mrr) + ' XOF',  color: 'text-red-700 bg-red-50' },
-              { label: 'Net New MRR',    value: (breakdown.net_new_mrr >= 0 ? '+' : '') + fmtM(breakdown.net_new_mrr) + ' XOF', color: breakdown.net_new_mrr >= 0 ? 'text-green-800 bg-green-50' : 'text-red-700 bg-red-50' },
-            ].map(k => (
-              <div key={k.label} className={`${k.color} rounded-xl p-4 border border-white shadow-sm text-center`}>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">{k.label}</p>
-                <p className="text-lg font-bold">{k.value}</p>
-              </div>
-            ))}
-          </div>
+        {/* ── Chiffres clés ─────────────────────────────────────────────────── */}
+        <section className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+          <MetricTile label="MRR"           value={`${fmtM(breakdown.mrr)} XOF`} tone="accent" />
+          <MetricTile label="ARR"           value={`${fmtM(breakdown.arr)} XOF`} tone="accent" />
+          <MetricTile label="New MRR"       value={`+${fmtM(breakdown.new_mrr)} XOF`} tone="success" />
+          <MetricTile label="Expansion MRR" value={`+${fmtM(breakdown.expansion_mrr)} XOF`} tone="info" />
+          <MetricTile label="Churned MRR"   value={`−${fmtM(breakdown.churned_mrr)} XOF`} tone="danger" />
+          <MetricTile
+            label="Net New MRR"
+            value={`${(breakdown.net_new_mrr ?? 0) >= 0 ? '+' : '−'}${fmtM(Math.abs(breakdown.net_new_mrr ?? 0))} XOF`}
+            tone={(breakdown.net_new_mrr ?? 0) >= 0 ? 'success' : 'danger'}
+          />
+        </section>
 
-          {/* Waterfall + Plan breakdown */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <WaterfallMrr breakdown={breakdown} />
+        {/* ── Waterfall + répartition par plan ──────────────────────────────── */}
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <WaterfallMrr breakdown={breakdown} />
 
-            {/* BarChart par plan */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="font-semibold text-gray-900 mb-1">MRR par plan</h3>
-              <p className="text-xs text-gray-400 mb-5">Répartition du revenu par niveau d'abonnement</p>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={planData} layout="vertical" margin={{ left: 20, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
-                  <XAxis type="number" tickFormatter={fmtM} tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                  <YAxis type="category" dataKey="plan" tick={{ fontSize: 11, fill: '#374151' }} width={80} />
-                  <Tooltip formatter={(v) => fmtXOF(v)} content={<CustomTooltip />} />
-                  <Bar dataKey="mrr" name="MRR" radius={[0,4,4,0]} isAnimationActive>
-                    {planData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Évolution MRR historique */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-1">Évolution MRR — 7 mois</h3>
-            <p className="text-xs text-gray-400 mb-5">Décomposition New + Expansion - Churn</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={history} margin={{ top: 5, right: 5, bottom: 0, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                <YAxis tickFormatter={fmtM} tick={{ fontSize: 10, fill: '#9ca3af' }} width={50} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="new_mrr"       name="New MRR"       fill="#10b981" radius={[3,3,0,0]} stackId="a" />
-                <Bar dataKey="expansion_mrr" name="Expansion MRR" fill="#3b82f6" radius={[3,3,0,0]} stackId="a" />
-                <Bar dataKey="churned_mrr"   name="Churned MRR"   fill="#ef4444" radius={[3,3,0,0]} />
+          <Card title="MRR par plan" subtitle="Répartition du revenu par niveau d'abonnement">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={planData} layout="vertical" margin={{ left: 8, right: 16 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={AXIS_COLOR} strokeOpacity={0.2} horizontal={false} />
+                <XAxis type="number" tickFormatter={fmtM} {...axisProps} />
+                <YAxis type="category" dataKey="plan" {...axisProps} tick={{ fontSize: 11, fill: AXIS_COLOR }} width={86} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: AXIS_COLOR, fillOpacity: 0.12 }} />
+                <Bar dataKey="mrr" name="MRR" radius={[0, 4, 4, 0]}>
+                  {planData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </Card>
+        </section>
+
+        {/* ── Historique ────────────────────────────────────────────────────── */}
+        <Card title="Évolution du MRR" subtitle="Décomposition New + Expansion − Churn">
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={history} margin={{ top: 5, right: 5, bottom: 0, left: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={AXIS_COLOR} strokeOpacity={0.2} vertical={false} />
+              <XAxis dataKey="month" {...axisProps} />
+              <YAxis tickFormatter={fmtM} {...axisProps} width={50} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: AXIS_COLOR, fillOpacity: 0.12 }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: AXIS_COLOR }} />
+              <Bar dataKey="new_mrr"       name="New MRR"       fill="#10B981" radius={[3, 3, 0, 0]} stackId="a" />
+              <Bar dataKey="expansion_mrr" name="Expansion MRR" fill="#0EA5E9" radius={[3, 3, 0, 0]} stackId="a" />
+              <Bar dataKey="churned_mrr"   name="Churned MRR"   fill="#EF4444" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* ── Prévisions ────────────────────────────────────────────────────── */}
+        <Card
+          title="Prévisions MRR — 6 mois"
+          subtitle="Extrapolation du taux de croissance des 6 derniers mois"
+          actions={
+            <div
+              role="tablist"
+              aria-label="Scénario de prévision"
+              className="inline-flex items-center gap-1 rounded-lg bg-gray-100 p-1 dark:bg-white/[0.06]"
+            >
+              {SCENARIOS.map(s => (
+                <button
+                  key={s.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={scenario === s.key}
+                  onClick={() => setScenario(s.key)}
+                  className={cx(
+                    'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                    scenario === s.key
+                      ? cx(SURFACE, 'shadow-sm', TEXT_TITLE)
+                      : cx(TEXT_MUTED, 'hover:text-gray-700 dark:hover:text-gray-200'),
+                    FOCUS_RING,
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          }
+        >
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={AXIS_COLOR} strokeOpacity={0.2} vertical={false} />
+              <XAxis dataKey="month" {...axisProps} />
+              <YAxis tickFormatter={fmtM} {...axisProps} width={55} />
+              <Tooltip content={<ChartTooltip />} cursor={{ stroke: AXIS_COLOR, strokeOpacity: 0.3 }} />
+              <Line
+                type="monotone"
+                dataKey="mrr"
+                name="MRR prévu"
+                stroke={scenarioMeta.stroke}
+                strokeWidth={2.5}
+                strokeDasharray="6 3"
+                dot={{ r: 4, fill: scenarioMeta.stroke, strokeWidth: 0 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* ── Top clients ───────────────────────────────────────────────────── */}
+        <section className="space-y-3">
+          <div>
+            <h2 className={cx('text-base font-semibold', TEXT_TITLE)}>Top clients par MRR</h2>
+            <p className={cx('mt-0.5 text-sm', TEXT_MUTED)}>
+              Organisations générant le plus de revenus récurrents.
+            </p>
           </div>
 
-          {/* Prévisions 6 mois */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="font-semibold text-gray-900">Prévisions MRR — 6 mois</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Basé sur le taux de croissance des 6 derniers mois</p>
-              </div>
-              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-                {['bear', 'base', 'bull'].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setScenario(s)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      scenario === s ? 'bg-white shadow text-blue-900' : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    {s === 'bear' ? 'Pessimiste' : s === 'base' ? 'Réaliste' : 'Optimiste'}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={forecastData} margin={{ top: 5, right: 5, bottom: 0, left: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                <YAxis tickFormatter={fmtM} tick={{ fontSize: 10, fill: '#9ca3af' }} width={55} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="mrr"
-                  name="MRR prévu"
-                  stroke={scenario === 'bear' ? '#ef4444' : scenario === 'base' ? '#3b82f6' : '#10b981'}
-                  strokeWidth={2.5}
-                  strokeDasharray="6 3"
-                  dot={{ r: 4, fill: 'white', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <DataTable
+            columns={topColumns}
+            data={topOrgs}
+            rowKey="name"
+            pageSize={20}
+            searchable
+            exportable
+            filename="top-clients-mrr"
+            emptyMessage="Aucune organisation facturée sur la période."
+          />
+        </section>
 
-          {/* Top 20 clients */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div className="p-5 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-900">Top clients par MRR</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Organisations générant le plus de revenus récurrents</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr className="text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-3 text-left font-semibold">#</th>
-                    <th className="px-6 py-3 text-left font-semibold">Organisation</th>
-                    <th className="px-6 py-3 text-left font-semibold">Plan</th>
-                    <th className="px-6 py-3 text-right font-semibold">MRR</th>
-                    <th className="px-6 py-3 text-center font-semibold">Health Score</th>
-                    <th className="px-6 py-3 text-left font-semibold">Ancienneté</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {topOrgs.map((org, i) => {
-                    const planColors2 = { enterprise: 'bg-yellow-100 text-yellow-800', pro: 'bg-indigo-100 text-indigo-700', starter: 'bg-gray-100 text-gray-700' };
-                    const sc = org.health_score >= 70 ? 'text-green-700 bg-green-50' : org.health_score >= 50 ? 'text-amber-700 bg-amber-50' : 'text-red-700 bg-red-50';
-                    return (
-                      <tr key={i} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-3 text-sm text-gray-400 font-medium">{i + 1}</td>
-                        <td className="px-6 py-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-900 text-white rounded-lg flex items-center justify-center text-sm font-bold">{org.name.charAt(0)}</div>
-                            <span className="font-medium text-gray-900 text-sm">{org.name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${planColors2[org.plan] || 'bg-gray-100 text-gray-700'}`}>
-                            {org.plan.charAt(0).toUpperCase() + org.plan.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3 text-right text-sm font-bold text-gray-900">{fmtXOF(org.mrr)}</td>
-                        <td className="px-6 py-3 text-center">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${sc}`}>{org.health_score}/100</span>
-                        </td>
-                        <td className="px-6 py-3 text-sm text-gray-500">{org.months_active} mois</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </main>
       </div>
-    </>
+    </SuperAdminLayout>
   );
 }
+
+export { MrrAnalysis };

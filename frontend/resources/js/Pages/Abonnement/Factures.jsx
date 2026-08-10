@@ -136,7 +136,7 @@ export default function Factures() {
                 {payments.length > 0 && (
                     <div className="text-right">
                         <p className="text-xs text-gray-500">Total sur la période</p>
-                        <p className="text-xl font-bold text-blue-700">
+                        <p className="text-xl font-bold text-purple-700">
                             {new Intl.NumberFormat('fr-FR').format(total)} XOF
                         </p>
                     </div>
@@ -152,7 +152,7 @@ export default function Factures() {
                             onClick={() => { setFilter(f.id); setPage(1); }}
                             className={`rounded-lg px-3.5 py-1.5 text-sm transition ${
                                 filter === f.id
-                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    ? 'bg-purple-600 text-white shadow-sm'
                                     : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                             }`}
                         >
@@ -197,7 +197,7 @@ export default function Factures() {
             <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                 {loading ? (
                     <div className="flex h-48 items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
                     </div>
                 ) : payments.length === 0 ? (
                     <div className="px-6 py-16 text-center">
@@ -234,7 +234,7 @@ export default function Factures() {
                                 {payments.map(payment => (
                                     <tr key={payment.id} className="hover:bg-gray-50/50 transition">
                                         <td className="px-6 py-4">
-                                            <span className="font-mono text-sm font-medium text-blue-700">
+                                            <span className="font-mono text-sm font-medium text-purple-700">
                                                 {payment.invoice_number}
                                             </span>
                                         </td>
@@ -263,11 +263,11 @@ export default function Factures() {
                                             <button
                                                 onClick={() => downloadPDF(payment.id, payment.invoice_number)}
                                                 disabled={downloading === payment.id}
-                                                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 transition"
+                                                className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-100 disabled:opacity-50 transition"
                                             >
                                                 {downloading === payment.id ? (
                                                     <>
-                                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-purple-600 border-t-transparent" />
                                                         Téléchargement...
                                                     </>
                                                 ) : (
@@ -339,7 +339,7 @@ export default function Factures() {
 function MethodBadge({ method }) {
     const config = {
         mobile_money:  { label: 'Mobile Money', color: 'bg-orange-50 text-orange-700' },
-        bank_transfer: { label: 'Virement',      color: 'bg-blue-50 text-blue-700' },
+        bank_transfer: { label: 'Virement',      color: 'bg-purple-50 text-purple-700' },
         card:          { label: 'Carte',          color: 'bg-purple-50 text-purple-700' },
         cash:          { label: 'Espèces',        color: 'bg-green-50 text-green-700' },
         other:         { label: 'Autre',          color: 'bg-gray-100 text-gray-600' },
@@ -351,3 +351,4 @@ function MethodBadge({ method }) {
         </span>
     );
 }
+export { Factures };

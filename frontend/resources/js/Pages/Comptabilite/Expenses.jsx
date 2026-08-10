@@ -6,29 +6,29 @@
  *   categories     : ExpenseCategory[]
  *   budgetOverview : { id, name, color, icon, budget_monthly, current_spend, usage_percent }[]
  *   filters        : { status, category_id }
+ *
+ * Présentation migrée sur `@/Components/UI` + socle comptable partagé.
+ * Logique métier inchangée (routes, axios, FormData, états).
  */
 
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   PlusIcon, CheckCircleIcon, XCircleIcon,
-  PaperClipIcon, ReceiptPercentIcon, FunnelIcon,
-  CloudArrowUpIcon,
+  PaperClipIcon, ReceiptPercentIcon, CloudArrowUpIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import AuthLayout from '@/Layouts/AuthLayout';
+import {
+  PageHeader, Button, Card, DataTable, EmptyState,
+  cx, CONTROL, BORDER, SURFACE, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, FOCUS_RING, NUM,
+} from '@/Components/UI';
+import { Money, StatusBadge, statusOptions, money } from '@/Components/Comptabilite/accounting';
 
-const fcfa = (v) =>
-  new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(v ?? 0) + ' FCFA';
-
-const STATUS_CONFIG = {
-  pending:  { label: 'En attente', classes: 'bg-yellow-100 text-yellow-700' },
-  approved: { label: 'Approuvée',  classes: 'bg-emerald-100 text-emerald-700' },
-  rejected: { label: 'Refusée',    classes: 'bg-red-100 text-red-700' },
-};
+const STATUS_OPTIONS = statusOptions('expense');
 
 const EMPTY_FORM = {
   category_id:  '',
@@ -38,6 +38,11 @@ const EMPTY_FORM = {
   vendor:       '',
   notes:        '',
   receipt:      null,
+};
+
+const fmtDate = (d) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'dd MMM yyyy', { locale: fr }); } catch { return d; }
 };
 
 // =============================================================================
@@ -61,7 +66,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
     });
 
     try {
-      await axios.post('/comptabilite/expenses', payload, {
+      await axios.post('/comptabilite/depenses', payload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Dépense créée.');
@@ -82,7 +87,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
   const handleApprove = async (id) => {
     setApproving(id + '-approve');
     try {
-      await axios.post(`/comptabilite/expenses/${id}/approve`);
+      await axios.post(`/comptabilite/depenses/${id}/approve`);
       toast.success('Dépense approuvée.');
       router.reload({ only: ['expenses'] });
     } catch {
@@ -95,7 +100,7 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
   const handleReject = async (id) => {
     setApproving(id + '-reject');
     try {
-      await axios.post(`/comptabilite/expenses/${id}/reject`);
+      await axios.post(`/comptabilite/depenses/${id}/reject`);
       toast.success('Dépense refusée.');
       router.reload({ only: ['expenses'] });
     } catch {
@@ -106,369 +111,404 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
   };
 
   const applyFilter = (key, value) => {
-    router.get('/comptabilite/expenses', { ...filters, [key]: value || undefined }, {
+    router.get('/comptabilite/depenses', { ...filters, [key]: value || undefined }, {
       preserveState: true, replace: true,
     });
+  };
+
+  const isFiltered = Boolean(filters?.status || filters?.category_id);
+
+  const resetFilters = () => {
+    router.get('/comptabilite/depenses', {}, { preserveState: true, replace: true });
   };
 
   // Total dépenses approuvées du mois
   const totalMonthApproved = budgetOverview.reduce((acc, c) => acc + c.current_spend, 0);
 
+  /* ─── Colonnes ───────────────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'title',
+      label: 'Titre',
+      render: (v, exp) => (
+        <div className="min-w-0">
+          <p className={cx('font-medium truncate', TEXT_TITLE)}>{v}</p>
+          {exp.notes && <p className={cx('text-xs truncate max-w-xs', TEXT_MUTED)}>{exp.notes}</p>}
+        </div>
+      ),
+    },
+    {
+      key: 'category',
+      label: 'Catégorie',
+      nowrap: true,
+      render: (_v, exp) => exp.category ? (
+        <span className="inline-flex items-center gap-2">
+          <span
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ background: exp.category.color }}
+            aria-hidden="true"
+          />
+          <span className={TEXT_TITLE}>{exp.category.name}</span>
+        </span>
+      ) : <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'expense_date',
+      label: 'Date',
+      nowrap: true,
+      render: (v) => (
+        <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+          {fmtDate(v) ?? <span className={TEXT_FAINT}>—</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'vendor',
+      label: 'Fournisseur',
+      render: (v) => v || <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'amount',
+      label: 'Montant',
+      numeric: true,
+      width: '160px',
+      render: (v) => <Money value={v} />,
+    },
+    {
+      key: 'receipt_path',
+      label: 'Pièce',
+      align: 'center',
+      width: '80px',
+      render: (v) => v ? (
+        <a
+          href={`/storage/${v}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Voir le justificatif"
+          className={cx(
+            'inline-flex h-8 w-8 items-center justify-center rounded-lg',
+            'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors',
+            FOCUS_RING,
+          )}
+        >
+          <PaperClipIcon className="h-4 w-4" />
+        </a>
+      ) : <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'status',
+      label: 'Statut',
+      nowrap: true,
+      render: (v) => <StatusBadge kind="expense" status={v} />,
+    },
+  ];
+
+  /* ─── Rendu ──────────────────────────────────────────────────────────────── */
+
   return (
     <AuthLayout>
       <Head title="Dépenses" />
 
-      <div className="p-6 space-y-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* En-tête */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dépenses</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Total du mois (approuvé) : <strong>{fcfa(totalMonthApproved)}</strong>
-            </p>
-          </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Nouvelle dépense
-          </button>
-        </div>
+        <PageHeader
+          icon={ReceiptPercentIcon}
+          title="Dépenses"
+          breadcrumbs={[{ label: 'Comptabilité', href: '/comptabilite' }, { label: 'Dépenses' }]}
+          subtitle={`Total du mois (approuvé) : ${money(totalMonthApproved)}`}
+          actions={
+            <Button variant="primary" icon={PlusIcon} onClick={() => setShowForm(true)}>
+              Nouvelle dépense
+            </Button>
+          }
+        />
 
         {/* Budget par catégorie */}
         {budgetOverview.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {budgetOverview.map((cat) => (
-              <div key={cat.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white text-sm"
-                      style={{ background: cat.color }}
-                    >
-                      <ReceiptPercentIcon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-gray-800">{cat.name}</div>
-                      <div className="text-xs text-gray-400">
-                        {cat.budget_monthly ? `Budget : ${fcfa(cat.budget_monthly)}` : 'Pas de budget défini'}
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {budgetOverview.map((cat) => {
+              const over = cat.usage_percent >= 90;
+              const warn = !over && cat.usage_percent >= 70;
+              return (
+                <div key={cat.id} className={cx(SURFACE, 'border', BORDER, 'rounded-xl p-4 shadow-sm')}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span
+                        className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"
+                        style={{ background: cat.color }}
+                      >
+                        <ReceiptPercentIcon className="h-4 w-4 text-white" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className={cx('text-sm font-medium truncate', TEXT_TITLE)}>{cat.name}</p>
+                        <p className={cx('text-xs', TEXT_MUTED)}>
+                          {cat.budget_monthly ? `Budget ${money(cat.budget_monthly)}` : 'Pas de budget défini'}
+                        </p>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-bold" style={{ color: cat.color }}>
-                      {fcfa(cat.current_spend)}
+                    <div className="text-right shrink-0">
+                      <p className={cx('text-sm font-semibold', NUM, TEXT_TITLE)}>{money(cat.current_spend)}</p>
+                      <p className={cx('text-xs', TEXT_MUTED)}>ce mois</p>
                     </div>
-                    <div className="text-xs text-gray-400">ce mois</div>
                   </div>
+
+                  {cat.budget_monthly > 0 && (
+                    <div className="mt-3">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
+                        <div
+                          className="h-2 rounded-full transition-all"
+                          style={{
+                            width: `${Math.min(cat.usage_percent, 100)}%`,
+                            background: over ? '#DC2626' : warn ? '#F59E0B' : cat.color,
+                          }}
+                        />
+                      </div>
+                      <div className={cx('mt-1.5 flex items-center justify-between text-xs', TEXT_MUTED, NUM)}>
+                        <span>{cat.usage_percent}% utilisé</span>
+                        <span>Reste {money(Math.max(0, cat.budget_monthly - cat.current_spend))}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {cat.budget_monthly > 0 && (
-                  <div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(cat.usage_percent, 100)}%`,
-                          background: cat.usage_percent >= 90
-                            ? '#E74C3C'
-                            : cat.usage_percent >= 70
-                            ? '#F39C12'
-                            : cat.color,
-                        }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                      <span>{cat.usage_percent}% utilisé</span>
-                      <span>Reste : {fcfa(Math.max(0, cat.budget_monthly - cat.current_spend))}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* Filtres */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="flex items-center gap-3">
-            <FunnelIcon className="h-4 w-4 text-gray-400" />
-            <select
-              defaultValue={filters.status}
-              onChange={(e) => applyFilter('status', e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
-            >
-              <option value="">Tous les statuts</option>
-              {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
-              ))}
-            </select>
-            <select
-              defaultValue={filters.category_id}
-              onChange={(e) => applyFilter('category_id', e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
-            >
-              <option value="">Toutes les catégories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <select
+            defaultValue={filters.status}
+            onChange={(e) => applyFilter('status', e.target.value)}
+            className={cx(CONTROL, 'h-10 w-auto min-w-[180px]')}
+          >
+            <option value="">Tous les statuts</option>
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <select
+            defaultValue={filters.category_id}
+            onChange={(e) => applyFilter('category_id', e.target.value)}
+            className={cx(CONTROL, 'h-10 w-auto min-w-[200px]')}
+          >
+            <option value="">Toutes les catégories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          {isFiltered && <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>}
         </div>
 
         {/* Liste dépenses */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Titre</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Catégorie</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Fournisseur</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Pièce</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {expenses.data.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-gray-400 text-sm">
-                      Aucune dépense enregistrée.
-                    </td>
-                  </tr>
-                )}
-                {expenses.data.map((exp) => {
-                  const statusCfg = STATUS_CONFIG[exp.status] ?? { label: exp.status, classes: 'bg-gray-100 text-gray-500' };
-                  return (
-                    <tr key={exp.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{exp.title}</div>
-                        {exp.notes && (
-                          <div className="text-xs text-gray-400 truncate max-w-xs">{exp.notes}</div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        {exp.category && (
-                          <span
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-white"
-                            style={{ background: exp.category.color }}
-                          >
-                            {exp.category.name}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
-                        {exp.expense_date
-                          ? format(parseISO(exp.expense_date), 'dd MMM yyyy', { locale: fr })
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{exp.vendor ?? '—'}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                        {fcfa(exp.amount)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {exp.receipt_path ? (
-                          <a
-                            href={`/storage/${exp.receipt_path}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center p-1 text-blue-500 hover:text-blue-700"
-                            title="Voir le justificatif"
-                          >
-                            <PaperClipIcon className="h-4 w-4" />
-                          </a>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.classes}`}>
-                          {statusCfg.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {exp.status === 'pending' && (
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              onClick={() => handleApprove(exp.id)}
-                              disabled={approving === exp.id + '-approve'}
-                              title="Approuver"
-                              className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition disabled:opacity-40"
-                            >
-                              <CheckCircleIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleReject(exp.id)}
-                              disabled={approving === exp.id + '-reject'}
-                              title="Refuser"
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-40"
-                            >
-                              <XCircleIcon className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {expenses.last_page > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-500">
-              <span>{expenses.from}–{expenses.to} sur {expenses.total}</span>
-              <div className="flex gap-2">
+        <DataTable
+          columns={columns}
+          data={expenses.data}
+          rowKey="id"
+          pageSize={expenses.per_page ?? 15}
+          totalItems={expenses.total ?? expenses.data.length}
+          actions={(exp) => exp.status === 'pending' ? (
+            <>
+              <Button
+                variant="ghost" size="sm" iconOnly icon={CheckCircleIcon}
+                title="Approuver"
+                className="hover:text-emerald-600 dark:hover:text-emerald-400"
+                loading={approving === exp.id + '-approve'}
+                onClick={() => handleApprove(exp.id)}
+              />
+              <Button
+                variant="ghost" size="sm" iconOnly icon={XCircleIcon}
+                title="Refuser"
+                className="hover:text-red-600 dark:hover:text-red-400"
+                loading={approving === exp.id + '-reject'}
+                onClick={() => handleReject(exp.id)}
+              />
+            </>
+          ) : (
+            <span className={cx('text-xs', TEXT_FAINT)}>—</span>
+          )}
+          empty={
+            isFiltered ? (
+              <EmptyState
+                variant="no-results"
+                title="Aucune dépense ne correspond"
+                description="Aucun résultat pour ces critères. Changez de statut ou de catégorie."
+                action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>}
+              />
+            ) : (
+              <EmptyState
+                icon={ReceiptPercentIcon}
+                title="Aucune dépense"
+                description="Enregistrez votre première dépense pour suivre les budgets par catégorie et conserver les justificatifs."
+                hints={[
+                  'Joignez le reçu (PDF, JPG, PNG) dès la saisie.',
+                  'Une dépense doit être approuvée avant d\'entrer au budget.',
+                ]}
+                action={
+                  <Button variant="primary" icon={PlusIcon} onClick={() => setShowForm(true)}>
+                    Créer votre première dépense
+                  </Button>
+                }
+              />
+            )
+          }
+          footer={expenses.last_page > 1 && expenses.links ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+                {expenses.from}–{expenses.to} sur {expenses.total}
+              </span>
+              <div className="flex flex-wrap items-center gap-1">
                 {expenses.links.map((link, i) => (
                   <button
                     key={i}
+                    type="button"
                     disabled={!link.url}
                     onClick={() => link.url && router.get(link.url)}
                     dangerouslySetInnerHTML={{ __html: link.label }}
-                    className={`px-3 py-1 rounded-lg text-xs transition ${
+                    className={cx(
+                      'min-w-[32px] rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
                       link.active
-                        ? 'bg-[#1A3A5C] text-white'
-                        : link.url
-                        ? 'bg-white border border-gray-200 hover:bg-gray-50'
-                        : 'opacity-40 cursor-not-allowed'
-                    }`}
+                        ? 'border-transparent bg-purple-600 text-white'
+                        : cx(BORDER, SURFACE, 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                      !link.url && 'pointer-events-none opacity-40',
+                      FOCUS_RING,
+                    )}
                   />
                 ))}
               </div>
             </div>
-          )}
-        </div>
-
+          ) : null}
+        />
       </div>
 
-      {/* ===== Drawer création dépense ===== */}
+      {/* ===== Modal création dépense ===== */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg p-6 mx-0 sm:mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-gray-900 mb-5">Nouvelle dépense</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Catégorie <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={form.category_id}
-                  onChange={(e) => setField('category_id', e.target.value)}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.category_id ? 'border-red-400' : 'border-gray-200'}`}
-                >
-                  <option value="">— Sélectionner une catégorie —</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-                {errors.category_id && <p className="text-xs text-red-500 mt-1">{errors.category_id[0]}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Titre / Libellé <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setField('title', e.target.value)}
-                  placeholder="Ex: Achat fournitures bureau"
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.title ? 'border-red-400' : 'border-gray-200'}`}
-                />
-                {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title[0]}</p>}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Montant (FCFA) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={form.amount}
-                    onChange={(e) => setField('amount', e.target.value)}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.amount ? 'border-red-400' : 'border-gray-200'}`}
-                  />
-                  {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount[0]}</p>}
+        <div
+          onClick={() => setShowForm(false)}
+          className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg">
+            <Card
+              padded={false}
+              className="shadow-xl max-h-[90vh] overflow-y-auto"
+              title="Nouvelle dépense"
+              subtitle="Les champs marqués d'un astérisque sont obligatoires."
+              actions={
+                <Button variant="ghost" size="sm" iconOnly icon={XMarkIcon}
+                        title="Fermer" onClick={() => setShowForm(false)} />
+              }
+              footer={
+                <div className="flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setShowForm(false)}>Annuler</Button>
+                  <Button variant="primary" loading={saving} onClick={handleSubmit}>
+                    Créer la dépense
+                  </Button>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={form.expense_date}
-                    onChange={(e) => setField('expense_date', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Fournisseur</label>
-                <input
-                  type="text"
-                  value={form.vendor}
-                  onChange={(e) => setField('vendor', e.target.value)}
-                  placeholder="Nom du fournisseur / prestataire"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                <textarea
-                  rows={2}
-                  value={form.notes}
-                  onChange={(e) => setField('notes', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
-                />
-              </div>
-
-              {/* Upload justificatif */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Justificatif (reçu, facture)
+              }
+            >
+              <div className="px-4 py-4 sm:px-6 space-y-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Catégorie *</span>
+                  <select
+                    value={form.category_id}
+                    onChange={(e) => setField('category_id', e.target.value)}
+                    className={cx(CONTROL, 'h-10', errors.category_id && 'border-red-400 dark:border-red-500/60')}
+                  >
+                    <option value="">— Sélectionner une catégorie —</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  {errors.category_id && (
+                    <span className="text-xs text-red-600 dark:text-red-400">{errors.category_id[0]}</span>
+                  )}
                 </label>
-                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                  <div className="flex flex-col items-center text-gray-400">
-                    <CloudArrowUpIcon className="h-6 w-6 mb-1" />
-                    <span className="text-xs">
-                      {form.receipt ? form.receipt.name : 'Cliquer pour uploader (PDF, JPG, PNG — max 5 Mo)'}
+
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Titre / Libellé *</span>
+                  <input
+                    type="text"
+                    value={form.title}
+                    onChange={(e) => setField('title', e.target.value)}
+                    placeholder="Ex : Achat fournitures bureau"
+                    className={cx(CONTROL, 'h-10', errors.title && 'border-red-400 dark:border-red-500/60')}
+                  />
+                  {errors.title && (
+                    <span className="text-xs text-red-600 dark:text-red-400">{errors.title[0]}</span>
+                  )}
+                </label>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>Montant (FCFA) *</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={form.amount}
+                      onChange={(e) => setField('amount', e.target.value)}
+                      className={cx(CONTROL, 'h-10 text-right tabular-nums', errors.amount && 'border-red-400 dark:border-red-500/60')}
+                    />
+                    {errors.amount && (
+                      <span className="text-xs text-red-600 dark:text-red-400">{errors.amount[0]}</span>
+                    )}
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>Date *</span>
+                    <input
+                      type="date"
+                      value={form.expense_date}
+                      onChange={(e) => setField('expense_date', e.target.value)}
+                      className={cx(CONTROL, 'h-10')}
+                    />
+                  </label>
+                </div>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Fournisseur</span>
+                  <input
+                    type="text"
+                    value={form.vendor}
+                    onChange={(e) => setField('vendor', e.target.value)}
+                    placeholder="Nom du fournisseur / prestataire"
+                    className={cx(CONTROL, 'h-10')}
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Notes</span>
+                  <textarea
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) => setField('notes', e.target.value)}
+                    className={cx(CONTROL, 'resize-none')}
+                  />
+                </label>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Justificatif (reçu, facture)</span>
+                  <label className={cx(
+                    'flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg',
+                    'border-2 border-dashed', BORDER,
+                    'hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors',
+                  )}>
+                    <CloudArrowUpIcon className={cx('h-6 w-6', TEXT_FAINT)} />
+                    <span className={cx('px-4 text-center text-xs', TEXT_MUTED)}>
+                      {form.receipt ? form.receipt.name : 'Cliquer pour téléverser (PDF, JPG, PNG — max 5 Mo)'}
                     </span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="hidden"
-                    onChange={(e) => setField('receipt', e.target.files[0] || null)}
-                  />
-                </label>
-                {errors.receipt && <p className="text-xs text-red-500 mt-1">{errors.receipt[0]}</p>}
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(e) => setField('receipt', e.target.files[0] || null)}
+                    />
+                  </label>
+                  {errors.receipt && (
+                    <span className="text-xs text-red-600 dark:text-red-400">{errors.receipt[0]}</span>
+                  )}
+                </div>
               </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={saving}
-                className="flex-1 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
-              >
-                {saving ? 'Enregistrement...' : 'Créer la dépense'}
-              </button>
-            </div>
+            </Card>
           </div>
         </div>
       )}
@@ -476,3 +516,4 @@ export default function Expenses({ expenses, categories, budgetOverview, filters
     </AuthLayout>
   );
 }
+export { Expenses };

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_STORE" value="array"/>
+        <!--
+            BASE DE RECETTE — declaration OBLIGATOIRE.
+
+            Ces deux lignes etaient EN COMMENTAIRE. Les tests visaient donc la
+            base de `.env`, c'est-a-dire la PRODUCTION : le premier test
+            utilisant RefreshDatabase l'aurait effacee. C'est pourquoi aucun
+            test Feature n'avait jamais ete execute.
+
+            SQLite ne convient pas ici : les migrations du projet contiennent du
+            PostgreSQL explicite — `ALTER TABLE ... NOT VALID`, fonctions et
+            declencheurs PL/pgSQL, `ON CONFLICT ... RETURNING`. Une recette sur
+            SQLite ne testerait pas le schema reellement deploye.
+
+            `force="true"` : sans lui, une variable deja presente dans
+            l'environnement l'emporterait — y compris celle qui designe la
+            production.
+
+            Creation de la base :
+                createdb -O secretis_db secretis_test
+                DB_DATABASE=secretis_test php artisan migrate (option force)
+        -->
+        <env name="DB_CONNECTION" value="pgsql" force="true"/>
+        <env name="DB_DATABASE" value="secretis_test" force="true"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+    </php>
+</phpunit>

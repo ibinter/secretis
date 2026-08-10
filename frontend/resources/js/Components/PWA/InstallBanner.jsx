@@ -98,7 +98,7 @@ export default function InstallBanner() {
         // Desktop : centré, max-width, bottom-right
         'sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-sm sm:rounded-2xl',
         // Fond + couleur
-        'bg-[#1A3A5C] dark:bg-[#0F2337] text-white',
+        'bg-[#9333EA] dark:bg-[#0F2337] text-white',
         // Ombre
         'shadow-2xl',
         // Animation
@@ -164,7 +164,7 @@ export default function InstallBanner() {
           {!isIos && (
             <button
               onClick={handleInstall}
-              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-accent hover:bg-accent/90 active:bg-accent/80 text-white text-sm font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-[#1A3A5C]"
+              className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-accent hover:bg-accent/90 active:bg-accent/80 text-white text-sm font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 focus:ring-offset-[#9333EA]"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4" aria-hidden="true">
                 <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
@@ -192,3 +192,4 @@ export default function InstallBanner() {
     </div>
   );
 }
+export { InstallBanner };

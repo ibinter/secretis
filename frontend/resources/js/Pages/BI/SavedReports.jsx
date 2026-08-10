@@ -115,7 +115,7 @@ function ReportCard({ report, onRun, onDuplicate, onDelete }) {
                         <span>Dernière exécution : {formatDate(report.last_run_at)}</span>
                     </div>
                     {nextRun && (
-                        <div className="flex items-center gap-1.5 text-xs text-blue-600">
+                        <div className="flex items-center gap-1.5 text-xs text-purple-600">
                             <Calendar size={11} />
                             <span>Prochaine : {nextRun}</span>
                         </div>
@@ -129,7 +129,7 @@ function ReportCard({ report, onRun, onDuplicate, onDelete }) {
             {/* Actions */}
             <div className="border-t border-slate-100 px-5 py-3 flex items-center gap-2">
                 <button onClick={handleRun} disabled={running}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-700 text-white rounded-lg hover:bg-blue-800 disabled:opacity-60 font-medium">
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-purple-700 text-white rounded-lg hover:bg-purple-800 disabled:opacity-60 font-medium">
                     <Play size={11} /> {running ? 'Exécution…' : 'Exécuter'}
                 </button>
 
@@ -205,7 +205,7 @@ export default function SavedReports() {
                     <div className="flex items-center gap-3">
                         <Link href="/bi" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><ArrowLeft size={16} /></Link>
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-blue-700 rounded-xl"><BarChart2 size={18} className="text-white" /></div>
+                            <div className="p-2 bg-purple-700 rounded-xl"><BarChart2 size={18} className="text-white" /></div>
                             <div>
                                 <h1 className="text-lg font-bold text-slate-900">Rapports sauvegardés</h1>
                                 <p className="text-xs text-slate-500">{reports.length} rapport{reports.length > 1 ? 's' : ''} au total</p>
@@ -214,7 +214,7 @@ export default function SavedReports() {
                     </div>
 
                     <Link href="/bi/reports/build"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-700 text-white text-sm rounded-xl hover:bg-blue-800 font-medium">
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white text-sm rounded-xl hover:bg-purple-800 font-medium">
                         <Plus size={15} /> Nouveau rapport
                     </Link>
                 </div>
@@ -227,7 +227,7 @@ export default function SavedReports() {
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Rechercher un rapport…"
-                            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400" />
                     </div>
 
                     <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
@@ -237,7 +237,7 @@ export default function SavedReports() {
                             { value: 'public', label: 'Publics' },
                         ].map(f => (
                             <button key={f.value} onClick={() => setFilter(f.value)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f.value ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f.value ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
                                 {f.label}
                             </button>
                         ))}
@@ -268,3 +268,4 @@ export default function SavedReports() {
         </div>
     );
 }
+export { SavedReports };

@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, useLocation } from 'react-router-dom';
+import { usePage } from '@inertiajs/react';
 
 // ─── Icônes ──────────────────────────────────────────────────────────────────
 const Icons = {
@@ -153,11 +153,10 @@ function CancelModal({ onClose, onConfirm, cancelling }) {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function AppointmentConfirmation() {
-  const { token } = useParams();
-  const location  = useLocation();
+  const { token } = usePage().props;
 
-  const [appointment, setAppointment] = useState(location.state?.appointment || null);
-  const [loading, setLoading]         = useState(!appointment);
+  const [appointment, setAppointment] = useState(null);
+  const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
   const [showCancel, setShowCancel]   = useState(false);
   const [cancelling, setCancelling]   = useState(false);
@@ -197,7 +196,7 @@ export default function AppointmentConfirmation() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-gray-500">Chargement…</p>
         </div>
       </div>
@@ -351,9 +350,9 @@ export default function AppointmentConfirmation() {
 
         {/* ── Instructions d'arrivée ── */}
         {org?.arrival_instructions && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">📍 Instructions d'arrivée</h3>
-            <p className="text-sm text-blue-700 whitespace-pre-line">{org.arrival_instructions}</p>
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-5">
+            <h3 className="text-sm font-semibold text-purple-800 mb-2">📍 Instructions d'arrivée</h3>
+            <p className="text-sm text-purple-700 whitespace-pre-line">{org.arrival_instructions}</p>
           </div>
         )}
 
@@ -392,3 +391,4 @@ export default function AppointmentConfirmation() {
     </div>
   );
 }
+export { AppointmentConfirmation };

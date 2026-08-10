@@ -221,7 +221,7 @@ function CompletionModal({ onClose }) {
         </p>
         <div className="space-y-3">
           <a href="/aide/guide"
-            className="block w-full bg-[#1A3A5C] hover:bg-[#2E86C1] text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+            className="block w-full bg-[#9333EA] hover:bg-[#7e22ce] text-white font-semibold py-3 rounded-xl transition-colors text-sm">
             📖 Explorer le guide complet
           </a>
           <a href="/aide/cas-pratiques"
@@ -250,12 +250,12 @@ function TourTooltip({ step, stepIndex, total, rect, onNext, onPrev, onSkip }) {
     >
       {/* Progress bar */}
       <div className="h-1 bg-gray-100 dark:bg-gray-800">
-        <div className="h-1 bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] transition-all duration-400"
+        <div className="h-1 bg-gradient-to-r from-[#9333EA] to-[#7e22ce] transition-all duration-400"
           style={{ width: `${percent}%` }} />
       </div>
 
       {/* En-tête */}
-      <div className="bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] px-4 py-3 flex items-center gap-2">
+      <div className="bg-gradient-to-r from-[#9333EA] to-[#7e22ce] px-4 py-3 flex items-center gap-2">
         <span className="text-base">{step.emoji}</span>
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold text-sm">{step.title}</p>
@@ -280,7 +280,7 @@ function TourTooltip({ step, stepIndex, total, rect, onNext, onPrev, onSkip }) {
             <div key={i}
               className={`rounded-full transition-all duration-200 ${
                 i === stepIndex
-                  ? 'w-4 h-1.5 bg-[#2E86C1]'
+                  ? 'w-4 h-1.5 bg-[#7e22ce]'
                   : i < stepIndex
                   ? 'w-1.5 h-1.5 bg-[#1E8449]'
                   : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600'
@@ -297,7 +297,7 @@ function TourTooltip({ step, stepIndex, total, rect, onNext, onPrev, onSkip }) {
             </button>
           )}
           <button onClick={onNext}
-            className="text-xs bg-[#1A3A5C] hover:bg-[#2E86C1] text-white px-4 py-2 rounded-xl font-semibold transition-colors">
+            className="text-xs bg-[#9333EA] hover:bg-[#7e22ce] text-white px-4 py-2 rounded-xl font-semibold transition-colors">
             {stepIndex === total - 1 ? 'Terminer ✓' : 'Suivant →'}
           </button>
         </div>
@@ -475,3 +475,4 @@ function KeyboardHandler({ onNext, onPrev, onSkip }) {
 
   return null;
 }
+export { GuidedTour };

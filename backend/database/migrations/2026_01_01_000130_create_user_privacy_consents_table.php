@@ -14,27 +14,34 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_privacy_consents', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+        if (! Schema::hasTable('user_privacy_consents')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('user_privacy_consents', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')
+                      ->constrained()
+                      ->cascadeOnDelete();
 
-            // Catégories de consentement
-            $table->boolean('preferences')->default(false)->comment('Cookies de préférences (langue, thème, fuseau)');
-            $table->boolean('statistics')->default(false)->comment('Cookies statistiques anonymisés');
-            $table->boolean('marketing')->default(false)->comment('Cookies de marketing et retargeting');
-            $table->boolean('ai_sara')->default(false)->comment('Cookies IA SARA (contexte conversationnel)');
+                // Catégories de consentement
+                $table->boolean('preferences')->default(false)->comment('Cookies de préférences (langue, thème, fuseau)');
+                $table->boolean('statistics')->default(false)->comment('Cookies statistiques anonymisés');
+                $table->boolean('marketing')->default(false)->comment('Cookies de marketing et retargeting');
+                $table->boolean('ai_sara')->default(false)->comment('Cookies IA SARA (contexte conversationnel)');
 
-            // Métadonnées de consentement (audit RGPD)
-            $table->timestamp('consented_at')->nullable()->comment('Date du dernier choix explicite');
-            $table->string('ip_address', 45)->nullable()->comment('Adresse IP au moment du consentement (IPv4/IPv6)');
+                // Métadonnées de consentement (audit RGPD)
+                $table->timestamp('consented_at')->nullable()->comment('Date du dernier choix explicite');
+                $table->string('ip_address', 45)->nullable()->comment('Adresse IP au moment du consentement (IPv4/IPv6)');
 
-            $table->timestamps();
+                $table->timestamps();
 
-            // Un seul enregistrement par utilisateur
-            $table->unique('user_id');
-        });
+                // Un seul enregistrement par utilisateur
+                $table->unique('user_id');
+            });
+        }
     }
 
     /**

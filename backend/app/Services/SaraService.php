@@ -17,10 +17,14 @@ class SaraService
      * FAQs internes pour RAG basique.
      */
     protected array $faqs = [
-        [
-            'keywords' => ['prix', 'tarif', 'cout', 'plan', 'abonnement', 'payer', 'price', 'pricing'],
-            'answer'   => "IBIG SECRETIS propose 3 plans : **Starter** (25 000 XOF/mois, 5 utilisateurs), **Pro** (75 000 XOF/mois, 50 utilisateurs) et **Enterprise** (150 000 XOF/mois, utilisateurs illimités). Un essai gratuit de 14 jours est disponible sans carte bancaire.",
-        ],
+        // ── FICHE SUPPRIMÉE — réindexation licence, section 12.5.1 ───────────
+        // Une fiche « prix / tarif / abonnement » vivait ici avec trois prix,
+        // un nombre d'utilisateurs et une durée d'essai écrits en dur. Elle
+        // contredisait licence.config.json et employait « illimités » et
+        // « essai gratuit », tous deux hors glossaire (section 12.3).
+        // Elle n'est pas corrigée mais RETIRÉE : ces questions sont désormais
+        // servies par App\Services\Sara\OutilLicence, qui lit la source unique
+        // de vérité. La compléter aurait laissé deux réponses concurrentes.
         [
             'keywords' => ['module', 'fonctionnalit', 'inclus', 'disponible', 'features'],
             'answer'   => "IBIG SECRETIS inclut : Calendrier & Réservations, Courrier & Documents (GED), Réunions & Décisions, Projets & Tâches, Messagerie interne, Gestion des visiteurs, RH & Congés, Comptabilité SYSCOHADA. Les modules actifs dépendent de votre plan.",
@@ -115,11 +119,25 @@ class SaraService
             ];
         }
 
+        // Licence : l'outil dédié répond seul, le modèle n'est pas consulté.
+        // Placé AVANT la recherche FAQ : une fiche FAQ qui parlerait encore de
+        // licence ne doit plus jamais prendre la main (section 12.5.1).
+        $licence = app(\App\Services\Sara\SaraLicence::class);
+
+        if ($fiche = $licence->courtCircuit($lastUserMessage)) {
+            return [
+                'content'      => $fiche['reponse'],
+                'tokens_used'  => 0,
+                'provider'     => 'licence',
+                'model'        => $fiche['source'],
+            ];
+        }
+
         // RAG : chercher dans les FAQs si question documentaire
         $faqAnswer = $this->searchFaqs($lastUserMessage);
         if ($faqAnswer) {
             return [
-                'content'      => $faqAnswer,
+                'content'      => $licence->filtrer($faqAnswer, $lastUserMessage),
                 'tokens_used'  => 0,
                 'provider'     => 'faq',
                 'model'        => 'local-faq',
@@ -129,7 +147,14 @@ class SaraService
         $systemPrompt = $this->getSystemPrompt($user, $contextModule);
 
         try {
-            return $this->callAI($systemPrompt, $messages, $user);
+            $reponse = $this->callAI($systemPrompt, $messages, $user);
+
+            // Filtre de sortie — appliqué quelle que soit l'origine.
+            if (isset($reponse['content']) && is_string($reponse['content'])) {
+                $reponse['content'] = $licence->filtrer($reponse['content'], $lastUserMessage);
+            }
+
+            return $reponse;
         } catch (\Throwable $e) {
             Log::error('SaraService::chat error', [
                 'provider'   => $this->provider,
@@ -247,7 +272,8 @@ Règles absolues (garde-fous) :
 {$moduleContext}
 
 Réponds toujours en français par défaut, en anglais si l'utilisateur écrit en anglais.
-PROMPT;
+PROMPT
+        . app(\App\Services\Sara\SaraLicence::class)->invite();
     }
 
     /**
@@ -316,7 +342,7 @@ PROMPT;
     {
         $model = config('secretis.ai.groq_model', 'llama-3.3-70b-versatile');
 
-        $response = Http::withToken(config('secretis.ai.groq_key'))
+        $response = Http::withToken(config('secretis.ai.groq_key', env('GROQ_API_KEY')))
             ->timeout(30)
             ->post('https://api.groq.com/openai/v1/chat/completions', [
                 'model'       => $model,

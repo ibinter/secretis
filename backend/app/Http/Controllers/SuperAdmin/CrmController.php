@@ -6,591 +6,645 @@ use App\Http\Controllers\Controller;
 use App\Models\Crm\CrmActivity;
 use App\Models\Crm\CrmContact;
 use App\Models\Crm\CrmDeal;
-use App\Models\Crm\CrmEmailSequence;
+use App\Models\Crm\CrmEmailLog;
 use App\Models\Crm\CrmEmailTemplate;
 use App\Models\Crm\CrmPipelineStage;
-use App\Services\CrmService;
-use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
- * CrmController — Console SuperAdmin IBIG Soft
+ * CRM commercial d'IBIG Soft (prospection SECRETIS), côté SuperAdmin.
  *
- * Toutes les routes sont protégées par :
- *   middleware(['auth', 'superadmin'])
+ * ⚠️ Ce contrôleur était un mannequin de 35 lignes, avec deux défauts sérieux :
  *
- * Préfixe : /superadmin/crm
+ *  1. `contacts()` interrogeait la table **`contacts`** — celle des carnets
+ *     d'adresses DES CLIENTS — au lieu de `crm_contacts`. L'écran de prospection
+ *     d'IBIG affichait donc les contacts métier de toutes les organisations
+ *     locataires : une fuite inter-tenants doublée d'une donnée fausse.
+ *  2. `pipeline()` groupait `crm_prospects`, table qui **n'existe pas** ; le
+ *     garde `Schema::hasTable()` renvoyait toujours false et le pipeline restait
+ *     désespérément vide. Les vraies tables sont `crm_deals` + `crm_pipeline_stages`.
  *
- * Routes disponibles :
- *   GET    /pipeline               — Vue kanban pipeline
- *   GET    /forecast               — Prévisions revenus
- *   GET    /analytics              — Dashboard analytique
- *   GET    /contacts               — Liste contacts
- *   POST   /contacts               — Créer un contact
- *   GET    /contacts/{id}          — Fiche contact
- *   PUT    /contacts/{id}          — Modifier un contact
- *   DELETE /contacts/{id}          — Supprimer un contact
- *   POST   /contacts/{id}/convert  — Convertir → client SECRETIS
- *   GET    /deals                  — Liste deals
- *   POST   /deals                  — Créer un deal
- *   PUT    /deals/{id}             — Modifier un deal
- *   POST   /deals/{id}/stage       — Changer le stage
- *   GET    /activities             — Liste activités
- *   POST   /activities             — Créer une activité
- *   PUT    /activities/{id}        — Modifier une activité
- *   POST   /activities/{id}/complete — Marquer comme terminée
- *   GET    /email-templates        — Liste templates
- *   POST   /email-templates        — Créer un template
- *   PUT    /email-templates/{id}   — Modifier un template
- *   POST   /emails/send            — Envoyer un email
- *   GET    /sequences              — Liste séquences
- *   POST   /sequences              — Créer une séquence
- *   PUT    /sequences/{id}         — Modifier une séquence
+ * Par ailleurs les deux écrans rechargent leurs données en axios (JSON) après le
+ * premier rendu : chaque méthode de liste répond donc en Inertia OU en JSON.
  */
 class CrmController extends Controller
 {
-    public function __construct(private CrmService $crmService)
-    {
-    }
+    /** Valeurs admises par les contraintes CHECK de `crm_contacts` et `crm_deals`. */
+    private const SOURCES = ['web', 'referral', 'partner', 'event', 'cold', 'social', 'inbound'];
+    private const STATUTS = ['new', 'contacted', 'qualified', 'demo', 'proposal', 'negotiation', 'won', 'lost', 'inactive'];
+    private const TYPES   = ['prospect', 'client', 'partner', 'lead'];
+    private const PLANS   = ['starter', 'pro', 'enterprise'];
+    /** `crm_activities.type` est lui aussi sous contrainte CHECK. */
+    private const TYPES_ACTIVITE = ['call', 'email', 'meeting', 'demo', 'proposal', 'follow_up', 'note', 'task'];
 
     // =========================================================================
-    // PIPELINE
+    // Pipeline
     // =========================================================================
 
-    /**
-     * GET /superadmin/crm/pipeline
-     * Retourne toutes les deals groupées par stage.
-     */
-    public function pipeline(Request $request): JsonResponse
+    public function pipeline(Request $request): Response|JsonResponse
     {
-        $data = $this->crmService->getPipelineData();
-        return response()->json($data);
-    }
+        $etapes = CrmPipelineStage::orderBy('order')->get();
 
-    /**
-     * GET /superadmin/crm/forecast
-     * Prévisions de revenus sur N mois.
-     */
-    public function forecast(Request $request): JsonResponse
-    {
-        $months = (int) $request->get('months', 3);
-        $months = min(12, max(1, $months));
+        $affaires = CrmDeal::with(['contact:id,company_name,contact_name,email,phone', 'assignedUser:id,name'])
+            ->when($request->filled('assigned_to'), fn ($q) => $q->where('assigned_to', $request->input('assigned_to')))
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $terme = '%' . $request->input('search') . '%';
+                $q->where(fn ($s) => $s->where('title', 'ilike', $terme)
+                    ->orWhereHas('contact', fn ($c) => $c->where('company_name', 'ilike', $terme)));
+            })
+            ->orderByDesc('updated_at')
+            ->get();
 
-        $data = $this->crmService->getForecast($months);
-        return response()->json($data);
-    }
+        $parEtape = $affaires->groupBy('stage_id');
 
-    /**
-     * GET /superadmin/crm/analytics
-     * Dashboard analytique complet.
-     */
-    public function analytics(Request $request): JsonResponse
-    {
-        $start = Carbon::parse($request->get('start', now()->subMonths(6)->startOfMonth()));
-        $end   = Carbon::parse($request->get('end', now()->endOfMonth()));
+        $donnees = [
+            'stages' => $etapes->map(fn ($e) => [
+                'id'          => $e->id,
+                'name'        => $e->name,
+                'color'       => $e->color,
+                'probability' => $e->probability_percent,
+                'is_won'      => $e->is_closed_won,
+                'is_lost'     => $e->is_closed_lost,
+                'deals'       => ($parEtape[$e->id] ?? collect())->map(fn ($d) => $this->ligneAffaire($d))->values(),
+                'total_value' => (int) ($parEtape[$e->id] ?? collect())->sum('value'),
+                'count'       => ($parEtape[$e->id] ?? collect())->count(),
+            ])->values(),
+            'totals' => [
+                'deals'    => $affaires->count(),
+                'value'    => (int) $affaires->sum('value'),
+                'weighted' => (int) $affaires->sum(fn ($d) => $d->value * ($d->probability ?? 0) / 100),
+            ],
+        ];
 
-        $data = $this->crmService->getSalesAnalytics($start, $end);
-        return response()->json($data);
-    }
-
-    // =========================================================================
-    // CONTACTS
-    // =========================================================================
-
-    /**
-     * GET /superadmin/crm/contacts
-     */
-    public function contacts(Request $request): JsonResponse
-    {
-        $query = CrmContact::query()->with('assignedUser');
-
-        // Filtres
-        if ($type = $request->get('type')) {
-            $query->where('type', $type);
-        }
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-        if ($country = $request->get('country')) {
-            $query->where('country', $country);
-        }
-        if ($assignedTo = $request->get('assigned_to')) {
-            $query->where('assigned_to', $assignedTo);
-        }
-        if ($source = $request->get('source')) {
-            $query->where('source', $source);
-        }
-        if ($search = $request->get('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('company_name', 'LIKE', "%{$search}%")
-                  ->orWhere('contact_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%");
-            });
+        if ($request->expectsJson()) {
+            return response()->json($donnees);
         }
 
-        $contacts = $query
-            ->withCount('deals')
-            ->orderByDesc('created_at')
-            ->paginate(50);
-
-        return response()->json($contacts);
-    }
-
-    /**
-     * POST /superadmin/crm/contacts
-     */
-    public function storeContact(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'type'           => ['required', Rule::in(['prospect', 'client', 'partner', 'lead'])],
-            'company_name'   => ['required', 'string', 'max:255'],
-            'contact_name'   => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', 'unique:crm_contacts,email'],
-            'phone'          => ['nullable', 'string', 'max:30'],
-            'country'        => ['nullable', 'string', 'size:2'],
-            'city'           => ['nullable', 'string', 'max:100'],
-            'sector'         => ['nullable', 'string', 'max:100'],
-            'employee_count' => ['nullable', 'integer', 'min:1'],
-            'annual_revenue' => ['nullable', 'integer', 'min:0'],
-            'source'         => ['nullable', Rule::in(['web', 'referral', 'partner', 'event', 'cold', 'social', 'inbound'])],
-            'notes'          => ['nullable', 'string'],
-            'assigned_to'    => ['nullable', 'integer', 'exists:users,id'],
-            'tags'           => ['nullable', 'array'],
+        return Inertia::render('SuperAdmin/Crm/Pipeline', [
+            'initialData' => $donnees,
+            'commerciaux' => $this->commerciaux(),
         ]);
-
-        $validated['status']      = 'new';
-        $validated['assigned_to'] = $validated['assigned_to'] ?? Auth::id();
-
-        $contact = CrmContact::create($validated);
-
-        // Calculer le score BANT initial
-        $score = $this->crmService->qualifyLead($contact);
-        $contact->update(['bant_score' => $score]);
-
-        return response()->json($contact->fresh(), 201);
     }
 
     /**
-     * GET /superadmin/crm/contacts/{id}
-     */
-    public function showContact(int $id): JsonResponse
-    {
-        $contact = CrmContact::with([
-            'deals.stage',
-            'activities' => fn($q) => $q->orderByDesc('created_at')->limit(50),
-            'emailLogs'  => fn($q) => $q->orderByDesc('sent_at')->limit(20),
-            'assignedUser',
-        ])->findOrFail($id);
-
-        return response()->json($contact);
-    }
-
-    /**
-     * PUT /superadmin/crm/contacts/{id}
-     */
-    public function updateContact(Request $request, int $id): JsonResponse
-    {
-        $contact = CrmContact::findOrFail($id);
-
-        $validated = $request->validate([
-            'type'           => [Rule::in(['prospect', 'client', 'partner', 'lead'])],
-            'company_name'   => ['string', 'max:255'],
-            'contact_name'   => ['string', 'max:255'],
-            'email'          => ['email', Rule::unique('crm_contacts', 'email')->ignore($id)],
-            'phone'          => ['nullable', 'string', 'max:30'],
-            'country'        => ['nullable', 'string', 'size:2'],
-            'city'           => ['nullable', 'string', 'max:100'],
-            'sector'         => ['nullable', 'string', 'max:100'],
-            'employee_count' => ['nullable', 'integer', 'min:1'],
-            'annual_revenue' => ['nullable', 'integer', 'min:0'],
-            'source'         => ['nullable', Rule::in(['web', 'referral', 'partner', 'event', 'cold', 'social', 'inbound'])],
-            'status'         => ['nullable', Rule::in(['new', 'contacted', 'qualified', 'demo', 'proposal', 'negotiation', 'won', 'lost', 'inactive'])],
-            'notes'          => ['nullable', 'string'],
-            'assigned_to'    => ['nullable', 'integer', 'exists:users,id'],
-            'tags'           => ['nullable', 'array'],
-        ]);
-
-        $contact->update($validated);
-
-        // Recalculer BANT
-        $score = $this->crmService->qualifyLead($contact->fresh());
-        $contact->update(['bant_score' => $score]);
-
-        return response()->json($contact->fresh());
-    }
-
-    /**
-     * DELETE /superadmin/crm/contacts/{id}
-     */
-    public function destroyContact(int $id): JsonResponse
-    {
-        $contact = CrmContact::findOrFail($id);
-        $contact->delete();
-
-        return response()->json(['message' => 'Contact supprimé.']);
-    }
-
-    /**
-     * POST /superadmin/crm/contacts/{id}/convert
-     * Convertit un prospect CRM en organisation SECRETIS.
-     */
-    public function convertContact(Request $request, int $id): JsonResponse
-    {
-        $contact = CrmContact::findOrFail($id);
-
-        $validated = $request->validate([
-            'timezone' => ['nullable', 'string', 'timezone'],
-        ]);
-
-        $organization = $this->crmService->convertToClient($contact, $validated);
-
-        return response()->json([
-            'message'      => "Contact converti en client. Organisation #{$organization->id} créée.",
-            'organization' => $organization,
-        ], 201);
-    }
-
-    // =========================================================================
-    // DEALS
-    // =========================================================================
-
-    /**
-     * GET /superadmin/crm/deals
-     */
-    public function deals(Request $request): JsonResponse
-    {
-        $query = CrmDeal::with('contact', 'stage', 'assignedUser');
-
-        if ($stageId = $request->get('stage_id')) {
-            $query->where('stage_id', $stageId);
-        }
-        if ($plan = $request->get('plan')) {
-            $query->where('plan', $plan);
-        }
-        if ($assignedTo = $request->get('assigned_to')) {
-            $query->where('assigned_to', $assignedTo);
-        }
-
-        $deals = $query->orderByDesc('value')->paginate(50);
-        return response()->json($deals);
-    }
-
-    /**
-     * POST /superadmin/crm/deals
-     */
-    public function storeDeal(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'contact_id'          => ['required', 'integer', 'exists:crm_contacts,id'],
-            'stage_id'            => ['nullable', 'integer', 'exists:crm_pipeline_stages,id'],
-            'title'               => ['required', 'string', 'max:255'],
-            'value'               => ['required', 'integer', 'min:0'],
-            'currency'            => ['nullable', 'string', 'size:3'],
-            'plan'                => ['nullable', Rule::in(['starter', 'pro', 'enterprise'])],
-            'users_count'         => ['nullable', 'integer', 'min:1'],
-            'close_date_expected' => ['nullable', 'date'],
-            'probability'         => ['nullable', 'integer', 'min:0', 'max:100'],
-            'notes'               => ['nullable', 'string'],
-            'assigned_to'         => ['nullable', 'integer', 'exists:users,id'],
-        ]);
-
-        $validated['assigned_to'] = $validated['assigned_to'] ?? Auth::id();
-
-        $deal = $this->crmService->createDeal($validated);
-
-        return response()->json($deal, 201);
-    }
-
-    /**
-     * PUT /superadmin/crm/deals/{id}
-     */
-    public function updateDeal(Request $request, int $id): JsonResponse
-    {
-        $deal = CrmDeal::findOrFail($id);
-
-        $validated = $request->validate([
-            'title'               => ['string', 'max:255'],
-            'value'               => ['integer', 'min:0'],
-            'plan'                => ['nullable', Rule::in(['starter', 'pro', 'enterprise'])],
-            'users_count'         => ['nullable', 'integer', 'min:1'],
-            'close_date_expected' => ['nullable', 'date'],
-            'probability'         => ['nullable', 'integer', 'min:0', 'max:100'],
-            'lost_reason'         => ['nullable', 'string', 'max:500'],
-            'notes'               => ['nullable', 'string'],
-            'assigned_to'         => ['nullable', 'integer', 'exists:users,id'],
-        ]);
-
-        $deal->update($validated);
-
-        return response()->json($deal->fresh(['contact', 'stage']));
-    }
-
-    /**
-     * POST /superadmin/crm/deals/{id}/stage
-     * Change le stage d'un deal.
+     * POST /superadmin/crm/deals/{id}/stage — déplacement par glisser-déposer.
      */
     public function moveDealStage(Request $request, int $id): JsonResponse
     {
-        $deal = CrmDeal::with('stage', 'contact')->findOrFail($id);
-
-        $request->validate([
-            'stage_id'    => ['required', 'integer', 'exists:crm_pipeline_stages,id'],
-            'lost_reason' => ['nullable', 'string', 'max:500'],
+        $valide = $request->validate([
+            'stage_id' => ['required', 'integer', 'exists:crm_pipeline_stages,id'],
         ]);
 
-        if ($request->filled('lost_reason')) {
-            $deal->update(['lost_reason' => $request->input('lost_reason')]);
-        }
+        $affaire = CrmDeal::findOrFail($id);
+        $ancienne = $affaire->stage_id;
+        $etape = CrmPipelineStage::findOrFail($valide['stage_id']);
 
-        $this->crmService->moveDeal($deal, $request->integer('stage_id'));
+        DB::transaction(function () use ($affaire, $etape, $ancienne) {
+            $affaire->stage_id = $etape->id;
+            // La probabilité suit l'étape, sauf si elle a été forcée à la main.
+            $affaire->probability = $etape->probability_percent;
+
+            if ($etape->is_closed_won || $etape->is_closed_lost) {
+                $affaire->close_date_actual = now()->toDateString();
+            }
+
+            $affaire->save();
+
+            CrmActivity::create([
+                'contact_id' => $affaire->contact_id,
+                'deal_id'    => $affaire->id,
+                // `type` est contraint en base : un changement d'étape se
+                // consigne comme une note, pas comme un type inventé.
+                'type'       => 'note',
+                'subject'    => "Étape : {$etape->name}",
+                'notes'      => "Affaire déplacée vers « {$etape->name} » (étape précédente : #{$ancienne}).",
+                'created_by' => auth()->id(),
+            ]);
+        });
 
         return response()->json([
-            'message' => 'Stage mis à jour.',
-            'deal'    => $deal->fresh(['stage', 'contact']),
+            'success' => true,
+            'message' => "Affaire déplacée vers « {$etape->name} ».",
+            'deal'    => $this->ligneAffaire($affaire->fresh(['contact', 'assignedUser'])),
         ]);
     }
 
     // =========================================================================
-    // ACTIVITÉS
+    // Contacts
     // =========================================================================
 
-    /**
-     * GET /superadmin/crm/activities
-     */
-    public function activities(Request $request): JsonResponse
+    public function contacts(Request $request): Response|JsonResponse
     {
-        $query = CrmActivity::with('contact', 'deal');
+        $requete = CrmContact::with('assignedUser:id,name')
+            ->withCount('deals')
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $terme = '%' . $request->input('search') . '%';
+                $q->where(fn ($s) => $s->where('company_name', 'ilike', $terme)
+                    ->orWhere('contact_name', 'ilike', $terme)
+                    ->orWhere('email', 'ilike', $terme));
+            })
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->input('type')))
+            ->when($request->filled('assigned_to'), fn ($q) => $q->where('assigned_to', $request->input('assigned_to')))
+            ->orderByDesc('created_at');
 
-        if ($contactId = $request->get('contact_id')) {
-            $query->where('contact_id', $contactId);
-        }
-        if ($type = $request->get('type')) {
-            $query->where('type', $type);
-        }
-        if ($request->boolean('pending')) {
-            $query->whereNull('completed_at');
-        }
-        if ($request->boolean('today')) {
-            $query->whereDate('scheduled_at', today());
+        $contacts = $requete->limit(200)->get()->map(fn ($c) => $this->ligneContact($c));
+
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $contacts]);
         }
 
-        $activities = $query->orderByDesc('created_at')->paginate(50);
-        return response()->json($activities);
+        return Inertia::render('SuperAdmin/Crm/Contacts', [
+            'contacts'    => $contacts,
+            'commerciaux' => $this->commerciaux(),
+            'referentiel' => [
+                'sources' => self::SOURCES,
+                'statuts' => self::STATUTS,
+                'types'   => self::TYPES,
+            ],
+        ]);
     }
 
     /**
-     * POST /superadmin/crm/activities
+     * GET /superadmin/crm/contacts/create
+     * La création se fait dans une modale de la liste : on y renvoie.
+     */
+    public function createContact(): RedirectResponse
+    {
+        return redirect()->route('superadmin.crm.contacts', ['nouveau' => 1]);
+    }
+
+    public function storeContact(Request $request): JsonResponse
+    {
+        $contact = CrmContact::create($this->valider($request));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact enregistré.',
+            'data'    => $this->ligneContact($contact),
+        ], 201);
+    }
+
+    public function showContact(Request $request, int $id): Response|JsonResponse
+    {
+        $contact = CrmContact::with([
+            'assignedUser:id,name',
+            'deals.stage:id,name,color',
+            'activities' => fn ($q) => $q->orderByDesc('created_at')->limit(50),
+        ])->findOrFail($id);
+
+        $donnees = $this->ligneContact($contact) + [
+            'notes'      => $contact->notes,
+            'deals'      => $contact->deals->map(fn ($d) => $this->ligneAffaire($d))->values(),
+            'activities' => $contact->activities->map(fn ($a) => [
+                'id'         => $a->id,
+                'type'       => $a->type,
+                'subject'    => $a->subject,
+                'notes'      => $a->notes,
+                'created_at' => optional($a->created_at)->format('d/m/Y H:i'),
+            ])->values(),
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $donnees]);
+        }
+
+        return Inertia::render('SuperAdmin/Crm/ContactDetail', [
+            'contact'     => $donnees,
+            'commerciaux' => $this->commerciaux(),
+        ]);
+    }
+
+    public function updateContact(Request $request, int $id): JsonResponse
+    {
+        $contact = CrmContact::findOrFail($id);
+        $contact->update($this->valider($request, partiel: true));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact mis à jour.',
+            'data'    => $this->ligneContact($contact->fresh('assignedUser')),
+        ]);
+    }
+
+    public function destroyContact(int $id): JsonResponse
+    {
+        $contact = CrmContact::withCount('deals')->findOrFail($id);
+
+        if ($contact->deals_count > 0) {
+            return response()->json([
+                'message' => "Ce contact porte {$contact->deals_count} affaire(s) : archivez-les avant de le supprimer.",
+            ], 422);
+        }
+
+        $contact->delete();
+
+        return response()->json(['success' => true, 'message' => 'Contact supprimé.']);
+    }
+
+    /**
+     * POST /superadmin/crm/contacts/import — import CSV.
+     * Colonnes attendues (en-tête, séparateur « ; » ou « , ») :
+     * company_name, contact_name, email, phone, country, city, sector, source.
+     */
+    public function importContacts(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
+        ]);
+
+        $chemin = $request->file('file')->getRealPath();
+        $flux   = fopen($chemin, 'r');
+
+        if (! $flux) {
+            return response()->json(['message' => 'Fichier illisible.'], 422);
+        }
+
+        // Le séparateur se déduit de la première ligne : les exports Excel
+        // francophones utilisent « ; », les autres « , ».
+        $premiere  = fgets($flux);
+        $separateur = substr_count($premiere, ';') >= substr_count($premiere, ',') ? ';' : ',';
+        rewind($flux);
+
+        $entetes = array_map(
+            fn ($h) => strtolower(trim(str_replace("\xEF\xBB\xBF", '', $h))),
+            fgetcsv($flux, 0, $separateur) ?: []
+        );
+
+        $connues = ['company_name', 'contact_name', 'email', 'phone', 'country', 'city', 'sector', 'source', 'notes'];
+        $importes = 0;
+        $ignorees = [];
+        $ligne = 1;
+
+        while (($donnees = fgetcsv($flux, 0, $separateur)) !== false) {
+            $ligne++;
+            $brut = array_combine(
+                array_slice($entetes, 0, count($donnees)),
+                array_slice($donnees, 0, count($entetes))
+            ) ?: [];
+
+            $attributs = array_intersect_key($brut, array_flip($connues));
+            $attributs = array_filter($attributs, fn ($v) => $v !== null && trim((string) $v) !== '');
+
+            // `company_name`, `contact_name` et `email` sont NOT NULL : sans
+            // l'un des trois, la ligne est inexploitable. On complète le nom du
+            // contact par celui de la société plutôt que de perdre la ligne.
+            if (empty($attributs['company_name']) || empty($attributs['email'])) {
+                $ignorees[] = "ligne {$ligne} : société ou email manquant";
+                continue;
+            }
+
+            $attributs['contact_name'] = $attributs['contact_name'] ?? $attributs['company_name'];
+
+            // Dédoublonnage sur l'email quand il est fourni.
+            if (! empty($attributs['email'])
+                && CrmContact::where('email', $attributs['email'])->exists()) {
+                $ignorees[] = "ligne {$ligne} : {$attributs['email']} déjà présent";
+                continue;
+            }
+
+            // `source` porte une contrainte CHECK : toute valeur libre du CSV
+            // ferait échouer l'insertion. On retombe sur « inbound ».
+            $source = strtolower(trim((string) ($attributs['source'] ?? '')));
+            $attributs['source'] = in_array($source, self::SOURCES, true) ? $source : 'inbound';
+
+            CrmContact::create($attributs + [
+                'type'   => 'prospect',
+                'status' => 'new',
+            ]);
+            $importes++;
+        }
+
+        fclose($flux);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => "{$importes} contact(s) importé(s)."
+                          . (count($ignorees) ? ' ' . count($ignorees) . ' ligne(s) ignorée(s).' : ''),
+            'imported' => $importes,
+            'skipped'  => array_slice($ignorees, 0, 20),
+        ]);
+    }
+
+    /**
+     * POST /superadmin/crm/contacts/{id}/convert — transformer en affaire.
+     */
+    public function convertContact(Request $request, int $id): JsonResponse
+    {
+        $valide = $request->validate([
+            'title'       => ['nullable', 'string', 'max:255'],
+            'value'       => ['nullable', 'integer', 'min:0'],
+            'plan'        => ['nullable', 'in:' . implode(',', self::PLANS)],
+            'users_count' => ['nullable', 'integer', 'min:1'],
+            'close_date_expected' => ['nullable', 'date'],
+        ]);
+
+        $contact = CrmContact::findOrFail($id);
+        $premiere = CrmPipelineStage::orderBy('order')->first();
+
+        if (! $premiere) {
+            return response()->json(['message' => 'Aucune étape de pipeline configurée.'], 422);
+        }
+
+        $affaire = CrmDeal::create([
+            'contact_id'  => $contact->id,
+            'stage_id'    => $premiere->id,
+            'title'       => $valide['title'] ?? ('Opportunité — ' . ($contact->company_name ?: $contact->contact_name)),
+            'value'       => $valide['value'] ?? 0,
+            // IBIG Soft vend hors zone XOF : la devise de l'affaire suit le
+            // pays du prospect plutôt qu'un repli ivoirien.
+            'currency'    => $contact->country
+                ? (app(\App\Services\CurrencyService::class)->currencyForCountry($contact->country) ?? 'XOF')
+                : 'XOF',
+            'plan'        => $valide['plan'] ?? null,
+            'users_count' => $valide['users_count'] ?? null,
+            'probability' => $premiere->probability_percent,
+            'close_date_expected' => $valide['close_date_expected'] ?? now()->addMonth()->toDateString(),
+            'assigned_to' => $contact->assigned_to ?? auth()->id(),
+        ]);
+
+        $contact->update(['status' => 'qualified', 'last_contact_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Affaire créée dans le pipeline.',
+            'data'    => $this->ligneAffaire($affaire->fresh('contact')),
+        ], 201);
+    }
+
+    /**
+     * POST /superadmin/crm/activities — consigner un échange.
      */
     public function storeActivity(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'contact_id'   => ['required', 'integer', 'exists:crm_contacts,id'],
-            'deal_id'      => ['nullable', 'integer', 'exists:crm_deals,id'],
-            'type'         => ['required', Rule::in(['call', 'email', 'meeting', 'demo', 'proposal', 'follow_up', 'note', 'task'])],
-            'subject'      => ['required', 'string', 'max:255'],
-            'notes'        => ['nullable', 'string'],
-            'scheduled_at' => ['nullable', 'date'],
-            'outcome'      => ['nullable', 'string', 'max:500'],
+        $valide = $request->validate([
+            'contact_id' => ['required', 'integer', 'exists:crm_contacts,id'],
+            'deal_id'    => ['nullable', 'integer', 'exists:crm_deals,id'],
+            'type'       => ['required', 'in:' . implode(',', self::TYPES_ACTIVITE)],
+            'subject'    => ['required', 'string', 'max:255'],
+            'notes'      => ['nullable', 'string', 'max:5000'],
         ]);
 
-        $validated['created_by'] = Auth::id();
+        $activite = CrmActivity::create($valide + ['created_by' => auth()->id()]);
 
-        $activity = CrmActivity::create($validated);
+        // Un échange consigné vaut prise de contact.
+        CrmContact::whereKey($valide['contact_id'])->update(['last_contact_at' => now()]);
 
-        // Mettre à jour last_contact_at du contact
-        CrmContact::where('id', $validated['contact_id'])
-            ->update(['last_contact_at' => now()]);
-
-        return response()->json($activity->load('contact', 'deal'), 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Échange consigné.',
+            'data'    => [
+                'id'         => $activite->id,
+                'type'       => $activite->type,
+                'subject'    => $activite->subject,
+                'notes'      => $activite->notes,
+                'created_at' => $activite->created_at->format('d/m/Y H:i'),
+            ],
+        ], 201);
     }
 
-    /**
-     * PUT /superadmin/crm/activities/{id}
-     */
-    public function updateActivity(Request $request, int $id): JsonResponse
+    public function analytics(Request $request): Response
     {
-        $activity = CrmActivity::findOrFail($id);
+        $etapes = CrmPipelineStage::orderBy('order')->get();
+        $affaires = CrmDeal::get(['stage_id', 'value', 'probability', 'created_at', 'close_date_actual']);
 
-        $validated = $request->validate([
-            'type'         => [Rule::in(['call', 'email', 'meeting', 'demo', 'proposal', 'follow_up', 'note', 'task'])],
-            'subject'      => ['string', 'max:255'],
-            'notes'        => ['nullable', 'string'],
-            'scheduled_at' => ['nullable', 'date'],
-            'outcome'      => ['nullable', 'string', 'max:500'],
+        return Inertia::render('SuperAdmin/Crm/Analytics', [
+            'stats' => [
+                'contacts'      => CrmContact::count(),
+                'deals'         => $affaires->count(),
+                'pipeline_value'=> (int) $affaires->sum('value'),
+                'weighted_value'=> (int) $affaires->sum(fn ($d) => $d->value * ($d->probability ?? 0) / 100),
+                'won'           => $affaires->whereIn('stage_id', $etapes->where('is_closed_won', true)->pluck('id'))->count(),
+                'lost'          => $affaires->whereIn('stage_id', $etapes->where('is_closed_lost', true)->pluck('id'))->count(),
+                'par_etape'     => $etapes->map(fn ($e) => [
+                    'name'  => $e->name,
+                    'count' => $affaires->where('stage_id', $e->id)->count(),
+                    'value' => (int) $affaires->where('stage_id', $e->id)->sum('value'),
+                ])->values(),
+            ],
         ]);
-
-        $activity->update($validated);
-        return response()->json($activity->fresh());
     }
 
-    /**
-     * POST /superadmin/crm/activities/{id}/complete
-     */
-    public function completeActivity(Request $request, int $id): JsonResponse
+    // ─── Utilitaires ────────────────────────────────────────────────────────
+
+    private function valider(Request $request, bool $partiel = false): array
     {
-        $activity = CrmActivity::findOrFail($id);
+        $regle = fn (array $r) => $partiel ? array_merge(['sometimes'], $r) : $r;
 
-        $activity->update([
-            'completed_at' => now(),
-            'outcome'      => $request->input('outcome', $activity->outcome),
+        return $request->validate([
+            // NOT NULL en base : les rendre facultatifs produisait une 500
+            // au lieu d'un message de formulaire lisible.
+            'company_name'   => $regle(['required', 'string', 'max:255']),
+            'contact_name'   => $regle(['required', 'string', 'max:255']),
+            'email'          => $regle(['required', 'email', 'max:255']),
+            'phone'          => $regle(['nullable', 'string', 'max:40']),
+            'country'        => $regle(['nullable', 'string', 'max:80']),
+            'city'           => $regle(['nullable', 'string', 'max:120']),
+            'sector'         => $regle(['nullable', 'string', 'max:120']),
+            'employee_count' => $regle(['nullable', 'integer', 'min:0']),
+            'annual_revenue' => $regle(['nullable', 'integer', 'min:0']),
+            // Ces trois colonnes portent une contrainte CHECK en base : valider
+            // en `string` laissait passer des valeurs que PostgreSQL rejetait
+            // ensuite par une 500 illisible.
+            'source'         => $regle(['nullable', 'in:' . implode(',', self::SOURCES)]),
+            'status'         => $regle(['nullable', 'in:' . implode(',', self::STATUTS)]),
+            'type'           => $regle(['nullable', 'in:' . implode(',', self::TYPES)]),
+            'assigned_to'    => $regle(['nullable', 'integer', 'exists:users,id']),
+            'notes'          => $regle(['nullable', 'string', 'max:5000']),
+            'bant_score'     => $regle(['nullable', 'integer', 'min:0', 'max:100']),
+            'tags'           => $regle(['nullable', 'array']),
         ]);
+    }
 
-        return response()->json(['message' => 'Activité marquée comme terminée.', 'activity' => $activity->fresh()]);
+    private function ligneContact(CrmContact $c): array
+    {
+        return [
+            'id'             => $c->id,
+            'type'           => $c->type,
+            'company_name'   => $c->company_name,
+            'contact_name'   => $c->contact_name,
+            'email'          => $c->email,
+            'phone'          => $c->phone,
+            'country'        => $c->country,
+            'city'           => $c->city,
+            'sector'         => $c->sector,
+            'employee_count' => $c->employee_count,
+            'annual_revenue' => $c->annual_revenue,
+            'source'         => $c->source,
+            'status'         => $c->status,
+            'bant_score'     => $c->bant_score,
+            'tags'           => $c->tags ?? [],
+            'assigned_to'    => $c->assigned_to,
+            'assignee_name'  => $c->assignedUser->name ?? null,
+            'deals_count'    => $c->deals_count ?? null,
+            'last_contact_at'=> optional($c->last_contact_at)->format('d/m/Y'),
+            'created_at'     => optional($c->created_at)->format('d/m/Y'),
+        ];
+    }
+
+    private function ligneAffaire(CrmDeal $d): array
+    {
+        return [
+            'id'          => $d->id,
+            'title'       => $d->title,
+            'value'       => (int) $d->value,
+            'currency'    => $d->currency ?: 'XOF',
+            'plan'        => $d->plan,
+            'stage_id'    => $d->stage_id,
+            'probability' => $d->probability,
+            'close_date_expected' => optional($d->close_date_expected)->format('d/m/Y'),
+            'assignee_name' => $d->assignedUser->name ?? null,
+            'contact'     => $d->relationLoaded('contact') && $d->contact ? [
+                'id'           => $d->contact->id,
+                'company_name' => $d->contact->company_name,
+                'contact_name' => $d->contact->contact_name,
+                'email'        => $d->contact->email,
+                'phone'        => $d->contact->phone,
+            ] : null,
+        ];
+    }
+
+    /** Les comptes IBIG susceptibles de porter un dossier commercial. */
+    private function commerciaux(): array
+    {
+        return User::whereHas('roles', fn ($q) => $q->whereIn('name', ['super_admin', 'commercial', 'admin']))
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])
+            ->all();
     }
 
     // =========================================================================
-    // EMAIL TEMPLATES
+    // Modèles d'email & envois
     // =========================================================================
 
-    /**
-     * GET /superadmin/crm/email-templates
-     */
-    public function emailTemplates(Request $request): JsonResponse
-    {
-        $query = CrmEmailTemplate::query();
+    /** Catégories admises par la contrainte CHECK de `crm_email_templates`. */
+    private const CATEGORIES_EMAIL = ['outreach', 'follow_up', 'demo', 'proposal', 'onboarding', 'churn_prevention'];
 
-        if ($category = $request->get('category')) {
-            $query->where('category', $category);
+    public function emailTemplates(Request $request): Response|JsonResponse
+    {
+        $modeles = CrmEmailTemplate::where('is_active', true)
+            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->input('category')))
+            ->orderBy('name')
+            ->get(['id', 'name', 'subject', 'body_html', 'body_text', 'category', 'variables']);
+
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $modeles, 'categories' => self::CATEGORIES_EMAIL]);
         }
 
-        $templates = $query->withCount([
-            'emailLogs',
-            'emailLogs as opened_count' => fn($q) => $q->whereNotNull('opened_at'),
-        ])->orderByDesc('created_at')->get();
-
-        return response()->json($templates);
+        return Inertia::render('SuperAdmin/Crm/EmailTemplates', [
+            'templates'  => $modeles,
+            'categories' => self::CATEGORIES_EMAIL,
+        ]);
     }
 
-    /**
-     * POST /superadmin/crm/email-templates
-     */
     public function storeEmailTemplate(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $valide = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
             'subject'   => ['required', 'string', 'max:255'],
             'body_html' => ['required', 'string'],
             'body_text' => ['nullable', 'string'],
-            'category'  => ['required', Rule::in(['outreach', 'follow_up', 'demo', 'proposal', 'onboarding', 'churn_prevention'])],
+            'category'  => ['required', 'in:' . implode(',', self::CATEGORIES_EMAIL)],
             'variables' => ['nullable', 'array'],
         ]);
 
-        $validated['created_by'] = Auth::id();
+        $modele = CrmEmailTemplate::create($valide + [
+            'created_by' => auth()->id(),
+            'is_active'  => true,
+        ]);
 
-        $template = CrmEmailTemplate::create($validated);
-        return response()->json($template, 201);
+        return response()->json(['success' => true, 'message' => 'Modèle enregistré.', 'data' => $modele], 201);
     }
 
-    /**
-     * PUT /superadmin/crm/email-templates/{id}
-     */
     public function updateEmailTemplate(Request $request, int $id): JsonResponse
     {
-        $template = CrmEmailTemplate::findOrFail($id);
-
-        $validated = $request->validate([
-            'name'      => ['string', 'max:255'],
-            'subject'   => ['string', 'max:255'],
-            'body_html' => ['string'],
+        $valide = $request->validate([
+            'name'      => ['sometimes', 'required', 'string', 'max:255'],
+            'subject'   => ['sometimes', 'required', 'string', 'max:255'],
+            'body_html' => ['sometimes', 'required', 'string'],
             'body_text' => ['nullable', 'string'],
-            'category'  => [Rule::in(['outreach', 'follow_up', 'demo', 'proposal', 'onboarding', 'churn_prevention'])],
+            'category'  => ['sometimes', 'required', 'in:' . implode(',', self::CATEGORIES_EMAIL)],
             'variables' => ['nullable', 'array'],
-            'is_active' => ['boolean'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        $template->update($validated);
-        return response()->json($template->fresh());
+        $modele = CrmEmailTemplate::findOrFail($id);
+        $modele->update($valide);
+
+        return response()->json(['success' => true, 'message' => 'Modèle mis à jour.', 'data' => $modele->fresh()]);
     }
 
     /**
-     * POST /superadmin/crm/emails/send
-     * Envoie un email de template à un contact.
+     * POST /superadmin/crm/emails/send — envoi d'un email à un contact.
+     *
+     * L'envoi est journalisé dans `crm_email_logs` AVANT d'être tenté : un
+     * message parti sans trace vaut moins qu'une trace sans message, la
+     * relance commerciale s'appuyant sur cet historique.
      */
     public function sendEmail(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $valide = $request->validate([
             'contact_id'  => ['required', 'integer', 'exists:crm_contacts,id'],
-            'template_id' => ['required', 'integer', 'exists:crm_email_templates,id'],
-            'variables'   => ['nullable', 'array'],
+            'template_id' => ['nullable', 'integer', 'exists:crm_email_templates,id'],
+            'subject'     => ['required', 'string', 'max:255'],
+            'body'        => ['required', 'string'],
         ]);
 
-        $contact = CrmContact::findOrFail($validated['contact_id']);
+        $contact = CrmContact::findOrFail($valide['contact_id']);
 
-        $this->crmService->sendEmailFromTemplate(
-            $contact,
-            $validated['template_id'],
-            $validated['variables'] ?? []
-        );
+        // Substitution des variables du modèle par les données du contact.
+        $substitutions = [
+            '{{company_name}}' => $contact->company_name ?: '',
+            '{{contact_name}}' => $contact->contact_name ?: '',
+            '{{city}}'         => $contact->city ?: '',
+            '{{sector}}'       => $contact->sector ?: '',
+        ];
+        $objet = strtr($valide['subject'], $substitutions);
+        $corps = strtr($valide['body'], $substitutions);
 
-        return response()->json(['message' => "Email envoyé à {$contact->email}."]);
-    }
-
-    // =========================================================================
-    // SÉQUENCES
-    // =========================================================================
-
-    /**
-     * GET /superadmin/crm/sequences
-     */
-    public function sequences(): JsonResponse
-    {
-        $sequences = CrmEmailSequence::with('steps')->orderByDesc('created_at')->get();
-        return response()->json($sequences);
-    }
-
-    /**
-     * POST /superadmin/crm/sequences
-     */
-    public function storeSequence(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name'             => ['required', 'string', 'max:255'],
-            'trigger'          => ['required', Rule::in(['manual', 'deal_stage_change', 'trial_start', 'trial_expiry', 'demo_done', 'proposal_sent'])],
-            'trigger_stage_id' => ['nullable', 'integer', 'exists:crm_pipeline_stages,id'],
-            'steps'            => ['required', 'array', 'min:1'],
-            'steps.*.delay_days'  => ['required', 'integer', 'min:0'],
-            'steps.*.template_id' => ['required', 'integer', 'exists:crm_email_templates,id'],
-            'is_active'        => ['boolean'],
+        $journal = CrmEmailLog::create([
+            'contact_id'  => $contact->id,
+            'template_id' => $valide['template_id'] ?? null,
+            'subject'     => $objet,
+            'to_email'    => $contact->email,
         ]);
 
-        $sequence = CrmEmailSequence::create($validated);
-        return response()->json($sequence, 201);
-    }
+        try {
+            Mail::html($corps, function ($message) use ($contact, $objet) {
+                $message->to($contact->email, $contact->contact_name)->subject($objet);
+            });
 
-    /**
-     * PUT /superadmin/crm/sequences/{id}
-     */
-    public function updateSequence(Request $request, int $id): JsonResponse
-    {
-        $sequence = CrmEmailSequence::findOrFail($id);
+            $journal->update(['sent_at' => now()]);
+        } catch (\Throwable $e) {
+            $journal->update(['bounced_at' => now(), 'bounce_reason' => substr($e->getMessage(), 0, 500)]);
 
-        $validated = $request->validate([
-            'name'             => ['string', 'max:255'],
-            'trigger'          => [Rule::in(['manual', 'deal_stage_change', 'trial_start', 'trial_expiry', 'demo_done', 'proposal_sent'])],
-            'trigger_stage_id' => ['nullable', 'integer', 'exists:crm_pipeline_stages,id'],
-            'steps'            => ['array', 'min:1'],
-            'steps.*.delay_days'  => ['integer', 'min:0'],
-            'steps.*.template_id' => ['integer', 'exists:crm_email_templates,id'],
-            'is_active'        => ['boolean'],
+            return response()->json([
+                'message' => "L'envoi a échoué : " . $e->getMessage(),
+            ], 502);
+        }
+
+        CrmActivity::create([
+            'contact_id' => $contact->id,
+            'type'       => 'email',
+            'subject'    => $objet,
+            'notes'      => 'Email envoyé à ' . $contact->email,
+            'created_by' => auth()->id(),
         ]);
 
-        $sequence->update($validated);
-        return response()->json($sequence->fresh());
-    }
+        $contact->update(['last_contact_at' => now()]);
 
-    // =========================================================================
-    // PIPELINE STAGES
-    // =========================================================================
-
-    /**
-     * GET /superadmin/crm/stages
-     */
-    public function stages(): JsonResponse
-    {
-        $stages = CrmPipelineStage::orderBy('order')->get();
-        return response()->json($stages);
+        return response()->json([
+            'success' => true,
+            'message' => "Email envoyé à {$contact->email}.",
+            'data'    => ['id' => $journal->id, 'sent_at' => $journal->fresh()->sent_at],
+        ], 201);
     }
 }

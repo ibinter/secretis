@@ -108,3 +108,4 @@ export default function AppSuspense({ fallback = 'page', children }) {
 
 // Exports nommés des skeletons (réutilisables hors Suspense)
 export { PageSkeleton, CardSkeleton, TableSkeleton, ChartSkeleton }
+export { AppSuspense };

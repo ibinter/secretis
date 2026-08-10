@@ -159,7 +159,8 @@ class PartnerApiController extends Controller
         $org = $this->resolveOrganization($request);
 
         $request->validate([
-            'file'        => 'required|file|max:51200', // 50MB
+            // Whitelist stricte : empêche le dépôt de html/svg/php (XSS stocké / exécution).
+            'file'        => 'required|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,png,jpg,jpeg,gif,webp,zip', // 50MB
             'title'       => 'required|string|max:255',
             'folder_id'   => 'nullable|integer',
             'description' => 'nullable|string|max:2000',
@@ -167,7 +168,8 @@ class PartnerApiController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store("documents/{$org->id}/partner", 'public');
+        // Disque PRIVÉ : les documents ne doivent jamais être servis par une URL publique non authentifiée.
+        $path = $file->store("documents/{$org->id}/partner", 'private');
 
         $document = Document::create([
             'organization_id' => $org->id,
@@ -186,7 +188,8 @@ class PartnerApiController extends Controller
             'data'    => [
                 'id'       => $document->id,
                 'title'    => $document->title,
-                'url'      => Storage::url($path),
+                // Téléchargement authentifié (plus d'URL publique permanente).
+                'url'      => url("/api/ged/documents/{$document->id}/download"),
                 'size'     => $document->file_size,
             ],
             'message' => 'Document uploadé.',
@@ -366,5 +369,25 @@ class PartnerApiController extends Controller
               ?? $request->user()?->organization_id;
 
         return Organization::findOrFail($orgId);
+    }
+
+    // ─── Alias API (voir routes/api.php, prefix partner/v1) ────────────────────
+
+    /** Alias route POST /partner/v1/events → createEvent(). */
+    public function storeEvent(Request $request): JsonResponse
+    {
+        return $this->createEvent($request);
+    }
+
+    /** Alias route GET /partner/v1/contacts → getContacts(). */
+    public function contacts(Request $request): JsonResponse
+    {
+        return $this->getContacts($request);
+    }
+
+    /** Alias route POST /partner/v1/webhook-subscribe → createWebhook(). */
+    public function subscribeWebhook(Request $request): JsonResponse
+    {
+        return $this->createWebhook($request);
     }
 }

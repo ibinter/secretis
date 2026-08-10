@@ -1,67 +1,72 @@
-@extends('emails.layouts.base')
-
-@section('title', 'Bienvenue sur IBIG SECRETIS !')
-@section('header-tagline', 'Votre essai gratuit est activé · 14 jours')
+{{--
+    Email de bienvenue (démarrage de l'essai 14 jours).
+    Appelé par : App\Notifications\WelcomeNotification::toMail() (ligne 41) -> ->view('emails.welcome', [...])
+    Variables :
+      $organisationName  string  nom de l'organisation créée
+      $adminName         string  nom de l'administrateur destinataire
+      $trialEndsAt       string  date de fin d'essai (déjà formatée par l'appelant)
+      $loginUrl          string  URL de connexion (config('app.url').'/dashboard' par défaut)
+    NB : le layout affiche $unsubscribe_email ?? '' dans le pied de page (non fourni ici).
+--}}
+@extends('emails.layout')
 
 @section('content')
-<h1>Bienvenue sur IBIG SECRETIS, {{ $adminName }} !</h1>
+
+<h2 style="color:#9333EA;margin:0 0 14px;">Bienvenue sur SECRETIS ERP</h2>
+
+<p>Bonjour {{ $adminName ?? '' }},</p>
 
 <p>
-  L'espace de <strong>{{ $organisationName }}</strong> est prêt. Votre essai gratuit de <strong>14 jours</strong>
-  est activé dès aujourd'hui — sans carte bancaire, sans engagement.
+    Votre espace <strong>{{ $organisationName ?? 'votre organisation' }}</strong> est desormais actif.
+    Vous beneficiez d'un <strong>essai gratuit de 14 jours</strong>, sans engagement et sans
+    saisie de moyen de paiement.
 </p>
 
-<div class="info-box">
-  <p>
-    <strong>Organisation :</strong> {{ $organisationName }}<br>
-    <strong>Administrateur :</strong> {{ $adminName }}<br>
-    <strong>Essai gratuit jusqu'au :</strong> {{ $trialEndsAt }}
-  </p>
-</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+       style="background:#faf5ff;border-radius:8px;margin:18px 0;">
+    <tr>
+        <td style="padding:16px 20px;font-size:14px;line-height:1.9;color:#1f2937;">
+            <strong>Organisation :</strong> {{ $organisationName ?? '—' }}<br>
+            <strong>Administrateur :</strong> {{ $adminName ?? '—' }}<br>
+            <strong>Fin de la periode d'essai :</strong> {{ $trialEndsAt ?? '—' }}
+        </td>
+    </tr>
+</table>
 
-<h2>3 étapes pour bien démarrer</h2>
+<p style="margin-bottom:8px;"><strong>Pour bien demarrer :</strong></p>
+<ol style="padding-left:20px;margin:0 0 16px;">
+    <li>Completez la fiche de votre organisation (logo, adresse, coordonnees).</li>
+    <li>Invitez vos collaborateurs et attribuez-leur les bons roles.</li>
+    <li>Enregistrez vos premiers courriers entrants et sortants.</li>
+    <li>Centralisez vos documents dans la GED et planifiez vos reunions.</li>
+</ol>
 
-<ul class="steps">
-  <li>
-    <div class="step-num">1</div>
-    <div class="step-content">
-      <strong>Configurez votre organisation</strong>
-      <span>Renseignez le logo, les informations légales et les départements de votre structure.</span>
-    </div>
-  </li>
-  <li>
-    <div class="step-num">2</div>
-    <div class="step-content">
-      <strong>Invitez votre équipe</strong>
-      <span>Ajoutez vos collaborateurs et définissez leurs rôles et permissions.</span>
-    </div>
-  </li>
-  <li>
-    <div class="step-num">3</div>
-    <div class="step-content">
-      <strong>Activez vos modules</strong>
-      <span>Courrier, Agenda, Tâches, RH… activez uniquement ce dont vous avez besoin.</span>
-    </div>
-  </li>
-</ul>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px auto;">
+    <tr>
+        <td style="background:#9333EA;border-radius:8px;">
+            <a href="{{ $loginUrl ?? '#' }}"
+               style="display:inline-block;padding:13px 34px;color:#ffffff;font-weight:bold;
+                      text-decoration:none;font-size:15px;">
+                Acceder a mon espace
+            </a>
+        </td>
+    </tr>
+</table>
 
-<div class="btn-wrapper">
-  <a href="{{ $loginUrl }}" class="btn btn-primary">Ouvrir mon espace SECRETIS</a>
-</div>
-
-<hr class="divider">
-
-<div class="warning-box">
-  <p>
-    <strong>SARA est là pour vous guider.</strong><br>
-    Notre assistante IA intégrée répond à vos questions, vous aide à configurer vos modules
-    et vous accompagne à chaque étape. Cliquez sur l'icône SARA dans votre espace.
-  </p>
-</div>
-
-<p style="font-size: 14px; color: #777;">
-  Besoin d'aide supplémentaire ? Écrivez-nous à
-  <a href="mailto:support@secretis.app">support@secretis.app</a>
-  ou consultez notre <a href="{{ config('app.url') }}/docs">documentation en ligne</a>.
+<p style="font-size:12px;color:#6b7280;text-align:center;margin:0 0 18px;word-break:break-all;">
+    Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br>
+    <a href="{{ $loginUrl ?? '#' }}" style="color:#9333EA;">{{ $loginUrl ?? '' }}</a>
 </p>
+
+<p style="color:#6b7280;font-size:13px;">
+    Une question pour demarrer ? Notre assistante <strong>SARA</strong> est disponible
+    directement dans l'application, et notre equipe vous repond a
+    <a href="mailto:secretis@ibigsoft.com" style="color:#9333EA;">secretis@ibigsoft.com</a>.
+</p>
+
+<p style="color:#6b7280;font-size:13px;margin-bottom:0;">
+    A l'issue des 14 jours, vous pourrez choisir la formule adaptee a votre structure.
+    Vos donnees restent conservees pendant la periode de transition.
+</p>
+
 @endsection

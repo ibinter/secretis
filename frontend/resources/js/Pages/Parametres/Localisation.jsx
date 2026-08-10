@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/UI/card';
-import { Button } from '@/Components/UI/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button, Badge, Select } from '@/Components/UI';
 import { Label } from '@/Components/UI/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/UI/select';
 import { Switch } from '@/Components/UI/switch';
 import { Separator } from '@/Components/UI/separator';
-import { Badge } from '@/Components/UI/badge';
 import CurrencySelector from '@/Components/UI/CurrencySelector';
 import { Globe, Clock, Calendar, DollarSign, FileText, Check, AlertCircle } from 'lucide-react';
 
@@ -133,45 +130,30 @@ const Localisation = ({ organization }) => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Pays</Label>
-              <Select value={data.country} onValueChange={handleCountryChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un pays" />
-                </SelectTrigger>
-                <SelectContent className="max-h-80">
-                  <SelectItem value="" disabled className="text-muted-foreground text-xs font-semibold">
-                    — États membres OHADA (17) —
-                  </SelectItem>
-                  {OHADA_COUNTRIES.slice(0, 17).map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      <span className="flex items-center gap-2">
-                        <span>{country.flag}</span>
-                        <span>{country.name}</span>
-                        <Badge variant="outline" className="text-[10px] ml-auto">
-                          OHADA
-                        </Badge>
-                      </span>
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="" disabled className="text-muted-foreground text-xs font-semibold mt-2">
-                    — Autres pays —
-                  </SelectItem>
-                  {OHADA_COUNTRIES.slice(17).map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      <span className="flex items-center gap-2">
-                        <span>{country.flag}</span>
-                        <span>{country.name}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Select
+                value={data.country}
+                onChange={handleCountryChange}
+                placeholder="Sélectionner un pays"
+                options={[
+                  ...OHADA_COUNTRIES.slice(0, 17).map((c) => ({
+                    value: c.code,
+                    label: `${c.flag} ${c.name}`,
+                    group: 'États membres OHADA (17)',
+                  })),
+                  ...OHADA_COUNTRIES.slice(17).map((c) => ({
+                    value: c.code,
+                    label: `${c.flag} ${c.name}`,
+                    group: 'Autres pays',
+                  })),
+                ]}
+              />
 
               {selectedCountry && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Badge variant="secondary">{selectedCountry.flag} {selectedCountry.name}</Badge>
-                  <Badge variant="outline">Devise : {selectedCountry.currency}</Badge>
-                  <Badge variant="outline">TVA : {selectedCountry.vat}%</Badge>
-                  <Badge variant="outline">{selectedCountry.tz}</Badge>
+                  <Badge variant="neutral">Devise : {selectedCountry.currency}</Badge>
+                  <Badge variant="neutral">TVA : {selectedCountry.vat}%</Badge>
+                  <Badge variant="neutral">{selectedCountry.tz}</Badge>
                   {isOhada && <Badge className="bg-green-600">✓ Membre OHADA</Badge>}
                 </div>
               )}
@@ -241,37 +223,23 @@ const Localisation = ({ organization }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Format de date</Label>
-                <Select value={data.date_format} onValueChange={(v) => setData('date_format', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DATE_FORMATS.map((fmt) => (
-                      <SelectItem key={fmt.value} value={fmt.value}>
-                        <div>
-                          <div className="font-mono text-sm">{fmt.label}</div>
-                          <div className="text-xs text-muted-foreground">{fmt.region}</div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Select
+                  value={data.date_format}
+                  onChange={(v) => setData('date_format', v)}
+                  options={DATE_FORMATS.map((f) => ({
+                    value: f.value,
+                    label: `${f.label} — ${f.region}`,
+                  }))}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>Langue de l'interface</Label>
-                <Select value={data.language} onValueChange={(v) => setData('language', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Select
+                  value={data.language}
+                  onChange={(v) => setData('language', v)}
+                  options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
+                />
               </div>
             </div>
 
@@ -314,39 +282,26 @@ const Localisation = ({ organization }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Select value={data.timezone} onValueChange={(v) => setData('timezone', v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  <SelectItem value="" disabled className="text-xs font-semibold text-muted-foreground">
-                    — Afrique de l'Ouest (UTC+0) —
-                  </SelectItem>
-                  {['Africa/Abidjan', 'Africa/Dakar', 'Africa/Bamako', 'Africa/Ouagadougou',
-                    'Africa/Lome', 'Africa/Bissau', 'Africa/Conakry', 'Africa/Accra'].map(tz => (
-                    <SelectItem key={tz} value={tz}>{tz.replace('Africa/', '')} (UTC+0)</SelectItem>
-                  ))}
-                  <SelectItem value="" disabled className="text-xs font-semibold text-muted-foreground mt-1">
-                    — Afrique Centrale (UTC+1) —
-                  </SelectItem>
-                  {['Africa/Douala', 'Africa/Libreville', 'Africa/Brazzaville', 'Africa/Bangui',
-                    'Africa/Ndjamena', 'Africa/Malabo', 'Africa/Porto-Novo', 'Africa/Niamey'].map(tz => (
-                    <SelectItem key={tz} value={tz}>{tz.replace('Africa/', '')} (UTC+1)</SelectItem>
-                  ))}
-                  <SelectItem value="" disabled className="text-xs font-semibold text-muted-foreground mt-1">
-                    — Afrique Est (UTC+3) —
-                  </SelectItem>
-                  {['Africa/Nairobi', 'Indian/Comoro'].map(tz => (
-                    <SelectItem key={tz} value={tz}>{tz.replace('Africa/', '')} (UTC+3)</SelectItem>
-                  ))}
-                  <SelectItem value="" disabled className="text-xs font-semibold text-muted-foreground mt-1">
-                    — Autres —
-                  </SelectItem>
-                  {['Europe/Paris', 'Europe/London', 'UTC'].map(tz => (
-                    <SelectItem key={tz} value={tz}>{tz}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Select
+                value={data.timezone}
+                onChange={(v) => setData('timezone', v)}
+                options={[
+                  ...['Africa/Abidjan', 'Africa/Dakar', 'Africa/Bamako', 'Africa/Ouagadougou',
+                      'Africa/Lome', 'Africa/Bissau', 'Africa/Conakry', 'Africa/Accra'].map((tz) => ({
+                    value: tz, label: `${tz.replace('Africa/', '')} (UTC+0)`, group: "Afrique de l'Ouest (UTC+0)",
+                  })),
+                  ...['Africa/Douala', 'Africa/Libreville', 'Africa/Brazzaville', 'Africa/Bangui',
+                      'Africa/Ndjamena', 'Africa/Malabo', 'Africa/Porto-Novo', 'Africa/Niamey'].map((tz) => ({
+                    value: tz, label: `${tz.replace('Africa/', '')} (UTC+1)`, group: 'Afrique Centrale (UTC+1)',
+                  })),
+                  ...['Africa/Nairobi', 'Indian/Comoro'].map((tz) => ({
+                    value: tz, label: `${tz.replace('Africa/', '')} (UTC+3)`, group: "Afrique de l'Est (UTC+3)",
+                  })),
+                  ...['Europe/Paris', 'Europe/London', 'UTC'].map((tz) => ({
+                    value: tz, label: tz, group: 'Autres',
+                  })),
+                ]}
+              />
             </div>
           </CardContent>
         </Card>
@@ -375,17 +330,16 @@ const Localisation = ({ organization }) => {
               </div>
               <div className="space-y-2">
                 <Label>Plan comptable</Label>
-                <Select value={data.plan_comptable} onValueChange={(v) => setData('plan_comptable', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SYSCOHADA">SYSCOHADA Révisé (2017)</SelectItem>
-                    <SelectItem value="PCG">Plan Comptable Général (France)</SelectItem>
-                    <SelectItem value="IFRS">IFRS</SelectItem>
-                    <SelectItem value="US_GAAP">US GAAP</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Select
+                  value={data.plan_comptable}
+                  onChange={(v) => setData('plan_comptable', v)}
+                  options={[
+                    { value: 'SYSCOHADA', label: 'SYSCOHADA Révisé (2017)' },
+                    { value: 'PCG',       label: 'Plan Comptable Général (France)' },
+                    { value: 'IFRS',      label: 'IFRS' },
+                    { value: 'US_GAAP',   label: 'US GAAP' },
+                  ]}
+                />
               </div>
             </div>
 

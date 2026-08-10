@@ -48,7 +48,7 @@ function RatingStars({ value }) {
 }
 
 const STATUS_LIVE = {
-    scheduled:  { label: 'Planifiée', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+    scheduled:  { label: 'Planifiée', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
     live:       { label: 'En direct', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' },
     completed:  { label: 'Terminée',  color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
     cancelled:  { label: 'Annulée',   color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
@@ -280,3 +280,4 @@ export default function InstructorDashboard({ myCourses = [], myLiveSessions = [
         </AppLayout>
     );
 }
+export { InstructorDashboard };

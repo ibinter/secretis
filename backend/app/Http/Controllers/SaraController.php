@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ExigeSara;
 use App\Services\SaraService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,8 @@ use Illuminate\Support\Str;
 
 class SaraController extends Controller
 {
+    use ExigeSara;
+
     public function __construct(protected SaraService $sara)
     {
     }
@@ -22,6 +25,12 @@ class SaraController extends Controller
      */
     public function chat(Request $request): JsonResponse
     {
+        // ── Droit `sara` — AVANT toute construction de contexte et tout appel
+        //    réseau : un refus ne doit consommer aucun jeton (section 3.4).
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus;
+        }
+
         $request->validate([
             'message' => ['required', 'string', 'min:2', 'max:2000'],
             'mode'    => ['sometimes', 'string', 'in:public,internal'],
@@ -65,9 +74,36 @@ class SaraController extends Controller
             }
         }
 
+        // ── Court-circuit licence ──────────────────────────────────────────────
+        // Une question de licence n'atteint JAMAIS le modèle : l'outil dédié
+        // répond seul, à partir de licence.config.json (section 12.5.2).
+        $licence = $this->saraLicence();
+
+        if ($fiche = $licence->courtCircuit($message)) {
+            return response()->json([
+                'success'  => true,
+                'response' => [
+                    'content'     => $fiche['reponse'],
+                    'tokens_used' => 0,
+                    'provider'    => 'licence',
+                    'model'       => $fiche['source'],
+                    'fiche'       => $fiche['cle'],
+                ],
+                'remaining_requests' => max(0, 20 - RateLimiter::attempts($rateLimitKey)),
+            ]);
+        }
+
         // ── Appel SARA ─────────────────────────────────────────────────────────
         try {
-            $response = $this->sara->chat($message, $context, $user ?? $this->getGuestUser());
+            // Build messages array for SaraService (expects array of [{role, content}])
+            $messages = [['role' => 'user', 'content' => $message]];
+            $response = $this->sara->chat($messages, $user ?? $this->getGuestUser(), $context['module'] ?? null);
+
+            // Filtre de sortie : tout ce qui vient du modèle est relu avant
+            // diffusion. Une consigne d'invite n'est pas un garde-fou.
+            if (isset($response['content']) && is_string($response['content'])) {
+                $response['content'] = $licence->filtrer($response['content'], $message);
+            }
 
             return response()->json([
                 'success'  => true,
@@ -75,6 +111,7 @@ class SaraController extends Controller
                 'remaining_requests' => max(0, 20 - RateLimiter::attempts($rateLimitKey)),
             ]);
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SaraController::chat error', ['msg' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()]);
             return response()->json([
                 'success' => false,
                 'error'   => 'service_error',
@@ -89,6 +126,12 @@ class SaraController extends Controller
      */
     public function getQuickQuestions(Request $request): JsonResponse
     {
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus instanceof JsonResponse
+                ? $refus
+                : response()->json($this->saraLicence()->refus($request->user()), 403);
+        }
+
         $mode = $request->query('mode', 'internal');
         $user = $request->user();
 
@@ -109,12 +152,20 @@ class SaraController extends Controller
      * GET /api/sara/status
      * Statut public de disponibilité de SARA (pour afficher le badge "En ligne").
      */
-    public function status(): JsonResponse
+    public function status(Request $request): JsonResponse
     {
+        // « En ligne » ne dépend pas que du fournisseur : SARA est fermée au
+        // palier Découverte, en Démo publique et à l'expiration. Annoncer
+        // « En ligne » à un espace où elle est fermée fait cliquer pour rien.
+        $autorisee = $this->saraLicence()->autorisee($request->user());
+
         return response()->json([
-            'online'   => true,
-            'provider' => config('secretis.ai.provider', 'groq'),
-            'version'  => '1.0',
+            'online'    => $autorisee,
+            'autorisee' => $autorisee,
+            'etat'      => $this->saraLicence()->etat($request->user()),
+            'message'   => $autorisee ? null : $this->saraLicence()->messageIndisponible($request->user()),
+            'provider'  => $autorisee ? config('secretis.ai.provider', 'groq') : null,
+            'version'   => '1.0',
         ]);
     }
 
@@ -133,5 +184,42 @@ class SaraController extends Controller
             public string $locale = 'fr';
             public ?object $organization = null;
         };
+    }
+
+    /**
+     * GET /sara
+     * Page SARA Chat (Inertia).
+     */
+    public function index(\Illuminate\Http\Request $request)
+    {
+        // La page elle-même est fermée, pas seulement l'API : une page ouverte
+        // sur un service fermé n'est qu'une promesse non tenue.
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus;
+        }
+
+        return \Inertia\Inertia::render('Sara/Chat', [
+            'quickQuestions' => $this->sara->getQuickQuestions('internal', []),
+        ]);
+    }
+
+        /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    // ─── Alias API (routes/api.php) → méthode réelle ───────────────────────────
+
+    /** GET /api/sara/suggestions → getQuickQuestions() */
+    public function suggestions(Request $request): JsonResponse
+    {
+        return $this->getQuickQuestions($request);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

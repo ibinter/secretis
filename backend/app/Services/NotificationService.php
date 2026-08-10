@@ -41,18 +41,30 @@ class NotificationService
      * @param  string $body    Corps du message
      * @param  array  $data    Données contextuelles (IDs de ressources, liens, etc.)
      */
+    /**
+     * @param bool $silent Enregistre et diffuse la notification in-app, mais
+     *                     n'emprunte aucun canal intrusif (email, SMS, push).
+     *                     Utilisé quand le filtre intelligent a jugé le moment
+     *                     inopportun : l'information reste consultable dans la
+     *                     cloche sans déranger le destinataire.
+     */
     public function send(
         User   $user,
         string $type,
         string $title,
         string $body,
         array  $data = [],
+        bool   $silent = false,
     ): void {
         // 1. Toujours créer la notification en base (canal "app")
         $notification = $this->createDbNotification($user, $type, $title, $body, $data);
 
         // 2. Broadcast Reverb si l'utilisateur est connecté
         $this->broadcastToUser($notification, $user);
+
+        if ($silent) {
+            return;
+        }
 
         // 3. Email — si l'utilisateur a activé les emails de notifications
         if ($this->userWantsEmail($user, $type)) {
@@ -319,6 +331,15 @@ class NotificationService
     private function userWantsSms(User $user, string $type): bool
     {
         if (!config('secretis.sms.driver') || config('secretis.sms.driver') === 'none') {
+            return false;
+        }
+
+        // Coût variable fermé au palier Découverte (cahier section 3.4) : chaque
+        // SMS coûte de l'argent réel. On ne lève pas d'exception — un envoi de
+        // notification n'est pas une requête utilisateur, et faire échouer le
+        // traitement métier parce qu'un canal est fermé serait disproportionné.
+        // Le canal est simplement omis ; la notification in-app reste écrite.
+        if (! app(\App\Services\LicenceGarde::class)->autorise('sms', $user)) {
             return false;
         }
 

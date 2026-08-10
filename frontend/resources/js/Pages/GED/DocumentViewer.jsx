@@ -25,10 +25,10 @@ import {
 
 const ACCESS_CONFIG = {
     public:       { label: 'Public',         color: 'bg-green-100 text-green-700' },
-    organization: { label: 'Organisation',   color: 'bg-blue-100 text-blue-700' },
+    organization: { label: 'Organisation',   color: 'bg-purple-100 text-purple-700' },
     department:   { label: 'Département',    color: 'bg-purple-100 text-purple-700' },
     private:      { label: 'Privé',          color: 'bg-red-100 text-red-700' },
-    internal:     { label: 'Interne',        color: 'bg-blue-100 text-blue-700' },
+    internal:     { label: 'Interne',        color: 'bg-purple-100 text-purple-700' },
     confidential: { label: 'Confidentiel',   color: 'bg-orange-100 text-orange-700' },
     top_secret:   { label: 'Secret',         color: 'bg-red-100 text-red-700' },
 };
@@ -149,10 +149,10 @@ export default function DocumentViewer({ document, documentUrl, searchTerm = '' 
                             title="Texte OCR"
                             className={`p-2 rounded-xl border transition-colors flex items-center gap-1.5 text-xs font-medium
                                 ${rightPanel === 'ocr' && panelOpen
-                                    ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                    ? 'border-purple-500 bg-purple-50 text-purple-600'
                                     : fullscreen
                                         ? 'border-gray-600 text-gray-300 hover:border-gray-400'
-                                        : 'border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600'
+                                        : 'border-gray-200 text-gray-500 hover:border-purple-300 hover:text-purple-600'
                                 }`}
                         >
                             <DocumentTextIcon className="w-4 h-4" />
@@ -168,10 +168,10 @@ export default function DocumentViewer({ document, documentUrl, searchTerm = '' 
                             title="Métadonnées"
                             className={`p-2 rounded-xl border transition-colors
                                 ${rightPanel === 'meta' && panelOpen
-                                    ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                    ? 'border-purple-500 bg-purple-50 text-purple-600'
                                     : fullscreen
                                         ? 'border-gray-600 text-gray-300 hover:border-gray-400'
-                                        : 'border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600'
+                                        : 'border-gray-200 text-gray-500 hover:border-purple-300 hover:text-purple-600'
                                 }`}
                         >
                             <InformationCircleIcon className="w-4 h-4" />
@@ -193,7 +193,7 @@ export default function DocumentViewer({ document, documentUrl, searchTerm = '' 
                         <button onClick={handleShare}
                             className={`p-2 rounded-xl border transition-colors
                                 ${fullscreen ? 'border-gray-600 text-gray-300 hover:border-gray-400' :
-                                  'border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600'}`}
+                                  'border-gray-200 text-gray-500 hover:border-purple-300 hover:text-purple-600'}`}
                             title="Partager"
                         >
                             <ShareIcon className="w-4 h-4" />
@@ -255,8 +255,8 @@ export default function DocumentViewer({ document, documentUrl, searchTerm = '' 
                                 </div>
                                 <button
                                     onClick={handleDownload}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm
-                                               font-medium hover:bg-blue-700 transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm
+                                               font-medium hover:bg-purple-700 transition-colors"
                                 >
                                     <ArrowDownTrayIcon className="w-4 h-4" />
                                     Télécharger le fichier
@@ -391,7 +391,7 @@ function MetadataPanel({ document: doc, onClose, onSign, fullscreen }) {
                         ${{
                             none:       'bg-gray-100 text-gray-500',
                             pending:    'bg-yellow-100 text-yellow-700',
-                            processing: 'bg-blue-100 text-blue-700',
+                            processing: 'bg-purple-100 text-purple-700',
                             done:       'bg-green-100 text-green-700',
                             failed:     'bg-red-100 text-red-700',
                         }[doc?.ocr_status] ?? 'bg-gray-100 text-gray-500'}`}>
@@ -410,8 +410,8 @@ function MetadataPanel({ document: doc, onClose, onSign, fullscreen }) {
             <div className={`p-4 border-t flex-shrink-0 space-y-2 ${fullscreen ? 'border-gray-700' : 'border-gray-100'}`}>
                 <button
                     onClick={onSign}
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white
-                               rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-purple-600 text-white
+                               rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
                 >
                     <DocumentCheckIcon className="w-4 h-4" />
                     Demander une signature
@@ -420,3 +420,4 @@ function MetadataPanel({ document: doc, onClose, onSign, fullscreen }) {
         </div>
     );
 }
+export { DocumentViewer };

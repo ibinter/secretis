@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/Components/UI/tooltip';
+import Tooltip from '@/Components/UI/Tooltip';
 import { formatAmount, useCurrency, useConvertedAmount } from '@/hooks/useCurrency';
 import { RefreshCw } from 'lucide-react';
 
@@ -23,7 +23,6 @@ const CurrencyAmount = ({
   size = 'md',
   muted = false,
 }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
 
   const { data: conversionData, isLoading } = useConvertedAmount(
     convertTo ? amount : null,
@@ -59,13 +58,28 @@ const CurrencyAmount = ({
   const fetchedAt  = conversionData?.updated_at;
 
   return (
-    <TooltipProvider>
-      <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
-        <TooltipTrigger asChild>
+    <Tooltip
+      disabled={!rateLabel}
+      content={
+        rateLabel ? (
+          <div className="space-y-1 text-xs max-w-xs">
+            <p className="font-medium">{rateLabel}</p>
+            {fetchedAt && (
+              <p className="opacity-80">
+                Taux mis à jour le {new Date(fetchedAt).toLocaleDateString('fr-FR', {
+                  day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
+            )}
+            <p className="opacity-70 text-[10px]">
+              Taux indicatif — peut varier selon votre banque
+            </p>
+          </div>
+        ) : null
+      }
+    >
           <span
             className={`inline-flex items-center gap-1.5 tabular-nums cursor-help ${sizeClasses[size] ?? ''} ${className}`}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
           >
             {/* Montant original */}
             {showOriginal && (
@@ -85,28 +99,7 @@ const CurrencyAmount = ({
               </span>
             ) : null}
           </span>
-        </TooltipTrigger>
-
-        {/* Tooltip : taux utilisé et date */}
-        {rateLabel && (
-          <TooltipContent side="top" className="text-xs max-w-xs">
-            <div className="space-y-1">
-              <p className="font-medium">{rateLabel}</p>
-              {fetchedAt && (
-                <p className="text-muted-foreground">
-                  Taux mis à jour le {new Date(fetchedAt).toLocaleDateString('fr-FR', {
-                    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                  })}
-                </p>
-              )}
-              <p className="text-muted-foreground text-[10px]">
-                Taux indicatif — peut varier selon votre banque
-              </p>
-            </div>
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    </Tooltip>
   );
 };
 

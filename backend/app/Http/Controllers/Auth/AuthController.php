@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\Plan;
 use App\Services\AuditService;
 use App\Services\LicenseService;
 use App\Services\PartnerService;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 /**
  * AuthController — Authentification SECRETIS ERP
@@ -77,7 +79,7 @@ class AuthController extends Controller
 
         // SECURITE : vérification uniforme pour éviter le timing attack (toujours hasher)
         if (! $user || ! Hash::check($request->input('password'), $user->password)) {
-            RateLimiter::hit($rateLimitKey, decay: 60);
+            RateLimiter::hit($rateLimitKey, 60);
 
             // Incrémenter le compteur et potentiellement verrouiller le compte
             $user?->recordFailedLogin();
@@ -189,9 +191,16 @@ class AuthController extends Controller
             'password'          => ['required', 'confirmed', PasswordRule::min(12)->mixedCase()->numbers()->symbols()->uncompromised()],
             // IBIG PARTNERS — code de parrainage optionnel
             'referral_code'     => ['nullable', 'string', 'max:12'],
+            // Formule choisie lors de l'inscription (optionnel)
+            'plan'              => ['nullable', 'string', 'in:decouverte,essentiel,pro,entreprise'],
         ]);
 
         $result = DB::transaction(function () use ($validated) {
+            // Résoudre le plan choisi lors de l'inscription
+            $planId = null;
+            if (!empty($validated['plan'])) {
+                $planId = \App\Models\Plan::where('slug', $validated['plan'])->value('id');
+            }
             // Créer l'organisation en mode trial
             $organization = Organization::create([
                 'name'         => $validated['organization_name'],
@@ -205,6 +214,7 @@ class AuthController extends Controller
                     'enabled_modules' => ['agenda', 'courrier', 'taches', 'contacts', 'reunions', 'documents'],
                     'language'        => 'fr',
                 ],
+                'plan_id'      => $planId,
             ]);
 
             // Créer l'administrateur
@@ -240,6 +250,7 @@ class AuthController extends Controller
             newValues: [
                 'organization_name' => $result['organization']->name,
                 'admin_email'       => $result['admin']->email,
+                'plan'              => $validated['plan'] ?? null,
             ],
             userId: $result['admin']->id,
             organizationId: $result['organization']->id,
@@ -281,7 +292,7 @@ class AuthController extends Controller
             ], 429);
         }
 
-        RateLimiter::hit($key, decay: 3600);
+        RateLimiter::hit($key, 3600);
 
         // SECURITE : Toujours retourner le même message quelle que soit l'existence de l'email
         // pour éviter l'énumération d'utilisateurs
@@ -357,4 +368,40 @@ class AuthController extends Controller
             default                          => route('dashboard'),
         };
     }
+
+    // -------------------------------------------------------------------------
+    // Inertia page renderers
+    // -------------------------------------------------------------------------
+
+    public function showLogin(): \Inertia\Response
+    {
+        return Inertia::render('Auth/Login');
+    }
+
+    public function showRegister(): \Inertia\Response
+    {
+        return Inertia::render('Auth/Register');
+    }
+
+    public function showForgotPassword(): \Inertia\Response
+    {
+        return Inertia::render('Auth/ForgotPassword');
+    }
+
+    public function showResetPassword(string $token): \Inertia\Response
+    {
+        return Inertia::render('Auth/ResetPassword', ['token' => $token, 'email' => request('email')]);
+    }
+
+    public function showVerifyEmail(): \Inertia\Response
+    {
+        return Inertia::render('Auth/VerifyEmail');
+    }
+
+    public function verifyEmail(\Illuminate\Foundation\Auth\EmailVerificationRequest $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->fulfill();
+        return redirect()->route('dashboard');
+    }
+
 }

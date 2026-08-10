@@ -3,7 +3,7 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 
 const STATUS_CONFIG = {
-  open:           { label: 'Ouvert',          color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  open:           { label: 'Ouvert',          color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
   in_progress:    { label: 'En cours',        color: 'bg-orange-100 text-orange-700' },
   waiting_client: { label: 'Attente client',  color: 'bg-yellow-100 text-yellow-700' },
   resolved:       { label: 'Résolu',          color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
@@ -11,7 +11,7 @@ const STATUS_CONFIG = {
 };
 const PRIORITY_CONFIG = {
   low: { label: 'Faible', color: 'text-gray-500' },
-  medium: { label: 'Moyen', color: 'text-blue-600' },
+  medium: { label: 'Moyen', color: 'text-purple-600' },
   high: { label: 'Élevé', color: 'text-orange-600' },
   urgent: { label: 'Urgent', color: 'text-red-600 font-bold' },
 };
@@ -73,7 +73,7 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <Link href={route('support.tickets.index')} className="hover:text-[#2E86C1]">Tickets</Link>
+          <Link href={route('support.tickets.index')} className="hover:text-[#7e22ce]">Tickets</Link>
           <span>/</span>
           <span className="text-gray-900 dark:text-white font-mono">{ticket.ticket_number}</span>
         </nav>
@@ -127,13 +127,13 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
                 msg.is_internal
                   ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700'
                   : msg.user.role === 'support'
-                    ? 'bg-[#2E86C1] text-white'
+                    ? 'bg-[#7e22ce] text-white'
                     : 'bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700'
               }`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                      ${msg.user.role === 'support' ? 'bg-white/20 text-white' : 'bg-[#1A3A5C] text-white'}`}>
+                      ${msg.user.role === 'support' ? 'bg-white/20 text-white' : 'bg-[#9333EA] text-white'}`}>
                       {msg.user.name?.[0]?.toUpperCase()}
                     </div>
                     <span className={`text-xs font-semibold ${msg.user.role === 'support' ? 'text-white/80' : 'text-gray-600 dark:text-gray-400'}`}>
@@ -172,7 +172,7 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
             <textarea value={data.message} onChange={e => setData('message', e.target.value)} rows={4}
               placeholder="Votre message…"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700
-                text-gray-900 dark:text-white outline-none focus:border-[#2E86C1] focus:ring-1 focus:ring-[#2E86C1] resize-y mb-4" />
+                text-gray-900 dark:text-white outline-none focus:border-[#7e22ce] focus:ring-1 focus:ring-[#7e22ce] resize-y mb-4" />
             {errors.message && <p className="text-red-500 text-sm mb-3">{errors.message}</p>}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-500 dark:text-gray-400">
@@ -181,7 +181,7 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
                 📎 Joindre un fichier
               </label>
               <button type="submit" disabled={processing || !data.message.trim()}
-                className="flex items-center gap-2 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white font-semibold
+                className="flex items-center gap-2 bg-[#7e22ce] hover:bg-[#9333EA] text-white font-semibold
                   px-6 py-2.5 rounded-xl transition-colors disabled:opacity-70">
                 {processing ? 'Envoi…' : '📤 Envoyer'}
               </button>
@@ -202,7 +202,7 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
               <textarea value={ratingForm.data.comment} onChange={e => ratingForm.setData('comment', e.target.value)}
                 rows={3} placeholder="Commentaire optionnel…"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800
-                  text-gray-900 dark:text-white outline-none focus:border-[#2E86C1] resize-y mb-4" />
+                  text-gray-900 dark:text-white outline-none focus:border-[#7e22ce] resize-y mb-4" />
               <button type="submit" disabled={!ratingForm.data.rating || ratingForm.processing}
                 className="bg-[#1E8449] hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors disabled:opacity-70">
                 Soumettre l'évaluation
@@ -222,7 +222,7 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
                 <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Note laissée : {ticket.satisfaction_rating}/5</span>
               </div>
             )}
-            <Link href={route('support.tickets.create')} className="mt-4 inline-block text-sm text-[#2E86C1] hover:underline">
+            <Link href={route('support.tickets.create')} className="mt-4 inline-block text-sm text-[#7e22ce] hover:underline">
               Ouvrir un nouveau ticket
             </Link>
           </div>
@@ -231,3 +231,4 @@ export default function TicketShow({ ticket, messages = [], canClose = false, ca
     </AppLayout>
   );
 }
+export { TicketShow };

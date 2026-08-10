@@ -59,7 +59,7 @@ function ServiceStatus({ status }) {
 // ─── Jauge horizontal ─────────────────────────────────────────────────────────
 function Gauge({ value, max, unit, color }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
-  const barColor = pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-amber-400' : (color || 'bg-blue-500');
+  const barColor = pct >= 90 ? 'bg-red-500' : pct >= 70 ? 'bg-amber-400' : (color || 'bg-purple-500');
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -99,11 +99,11 @@ export default function PlatformMonitoring() {
       <div className="min-h-screen bg-gray-50">
 
         {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
+        <header className="bg-purple-900 text-white shadow-lg">
           <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-              <span className="text-blue-400">/</span>
+              <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-purple-200 hover:text-white text-sm">← Dashboard</button>
+              <span className="text-purple-400">/</span>
               <h1 className="text-lg font-bold">Monitoring plateforme</h1>
               <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
             </div>
@@ -112,7 +112,7 @@ export default function PlatformMonitoring() {
                 <StatusDot status={overallStatus === 'operational' ? 'running' : overallStatus === 'degraded' ? 'degraded' : 'stopped'} />
                 {overallStatus === 'operational' ? 'Tous systèmes opérationnels' : overallStatus === 'degraded' ? 'Service dégradé' : 'Incident en cours'}
               </div>
-              <span className="text-blue-300 text-xs">Mis à jour : {lastRefresh.toLocaleTimeString('fr-FR')}</span>
+              <span className="text-purple-300 text-xs">Mis à jour : {lastRefresh.toLocaleTimeString('fr-FR')}</span>
             </div>
           </div>
         </header>
@@ -143,11 +143,11 @@ export default function PlatformMonitoring() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /></svg>
+                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" /></svg>
                 CPU
               </h3>
               <div className="text-3xl font-black text-gray-900 mb-3">{system.cpu_pct}%</div>
-              <Gauge value={system.cpu_pct} max={100} unit="%" color="bg-blue-500" />
+              <Gauge value={system.cpu_pct} max={100} unit="%" color="bg-purple-500" />
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -244,7 +244,7 @@ export default function PlatformMonitoring() {
                   </div>
                 ))}
               </div>
-              <a href="/superadmin/logs" className="block text-center text-xs text-blue-700 font-semibold hover:underline mt-4">
+              <a href="/superadmin/logs" className="block text-center text-xs text-purple-700 font-semibold hover:underline mt-4">
                 Voir tous les logs →
               </a>
             </div>
@@ -255,3 +255,4 @@ export default function PlatformMonitoring() {
     </>
   );
 }
+export { PlatformMonitoring };

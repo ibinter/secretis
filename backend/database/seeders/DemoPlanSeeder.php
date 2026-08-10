@@ -18,7 +18,7 @@ class DemoPlanSeeder extends Seeder
             [
                 'slug'            => 'starter',
                 'name'            => 'Starter',
-                'description'     => 'Idéal pour les petites structures qui démarrent leur transformation digitale. Essai gratuit 14 jours, sans engagement.',
+                'description'     => 'Idéal pour les petites structures qui démarrent leur transformation digitale. Essai sans carte bancaire, sans engagement.',
                 'price_xof'       => 0,
                 'price_eur'       => 0,
                 'price_usd'       => 0,
@@ -123,6 +123,6 @@ class DemoPlanSeeder extends Seeder
             DB::table('plans')->insert($plan);
         }
 
-        $this->command->info('  ✅ 3 plans créés : Starter (gratuit 14j), Pro (60 000 XOF/mois), Enterprise (120 000 XOF/mois).');
+        $this->command->info('  3 plans de demonstration crees. Les prix reels vivent dans la table `plans`.');
     }
 }

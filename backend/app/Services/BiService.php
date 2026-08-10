@@ -553,15 +553,17 @@ class BiService
     public function getAccountingAnalytics(int $orgId, Carbon $start, Carbon $end): array
     {
         // Revenus mensuels (facturé, encaissé, en attente)
+        // Colonnes réelles de `invoices` : issue_date, total, payment_date
+        // (et NON issued_at / total_amount / paid_at). Statuts : draft|sent|paid|overdue|cancelled.
         $revenueByMonth = DB::table('invoices')
             ->select(
-                DB::raw("DATE_TRUNC('month', issued_at) AS month"),
-                DB::raw("SUM(total_amount) AS invoiced"),
-                DB::raw("SUM(CASE WHEN status = 'paid' THEN total_amount ELSE 0 END) AS collected"),
-                DB::raw("SUM(CASE WHEN status = 'pending' OR status = 'overdue' THEN total_amount ELSE 0 END) AS pending")
+                DB::raw("DATE_TRUNC('month', issue_date) AS month"),
+                DB::raw("SUM(total) AS invoiced"),
+                DB::raw("SUM(CASE WHEN status = 'paid' THEN total ELSE 0 END) AS collected"),
+                DB::raw("SUM(CASE WHEN status IN ('sent','overdue') THEN total ELSE 0 END) AS pending")
             )
             ->where('organization_id', $orgId)
-            ->whereBetween('issued_at', [$start, $end])
+            ->whereBetween('issue_date', [$start, $end])
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -576,19 +578,20 @@ class BiService
         // DSO (Days Sales Outstanding)
         $dso = DB::table('invoices')
             ->where('organization_id', $orgId)
-            ->whereBetween('issued_at', [$start, $end])
+            ->whereBetween('issue_date', [$start, $end])
             ->where('status', 'paid')
-            ->whereNotNull('paid_at')
-            ->selectRaw("AVG(EXTRACT(EPOCH FROM (paid_at - issued_at)) / 86400) AS avg_days")
+            ->whereNotNull('payment_date')
+            ->selectRaw("AVG(payment_date - issue_date) AS avg_days")
             ->value('avg_days');
 
-        // Top clients
+        // Top clients — la table est `accounting_clients` (il n'existe pas de table `clients`).
+        // Colonnes qualifiées : les deux tables ont organization_id (sinon « ambiguous »).
         $topClients = DB::table('invoices')
-            ->join('clients', 'invoices.client_id', '=', 'clients.id')
-            ->select('clients.name AS client', DB::raw('SUM(invoices.total_amount) AS total'))
+            ->join('accounting_clients', 'invoices.client_id', '=', 'accounting_clients.id')
+            ->select('accounting_clients.name AS client', DB::raw('SUM(invoices.total) AS total'))
             ->where('invoices.organization_id', $orgId)
-            ->whereBetween('invoices.issued_at', [$start, $end])
-            ->groupBy('clients.id', 'clients.name')
+            ->whereBetween('invoices.issue_date', [$start, $end])
+            ->groupBy('accounting_clients.id', 'accounting_clients.name')
             ->orderByDesc('total')
             ->limit(5)
             ->pluck('total', 'client')
@@ -601,11 +604,14 @@ class BiService
         ])->toArray();
 
         // Dépenses par catégorie
-        $expensesByCategory = DB::table('accounting_expenses')
-            ->select('category', DB::raw('SUM(amount) AS total'))
-            ->where('organization_id', $orgId)
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('category')
+        // Table réelle : `expenses` (pas `accounting_expenses`), catégorie via
+        // expense_categories.name, date via expense_date.
+        $expensesByCategory = DB::table('expenses')
+            ->join('expense_categories', 'expense_categories.id', '=', 'expenses.category_id')
+            ->select('expense_categories.name AS category', DB::raw('SUM(expenses.amount) AS total'))
+            ->where('expenses.organization_id', $orgId)
+            ->whereBetween('expenses.expense_date', [$start, $end])
+            ->groupBy('expense_categories.name')
             ->orderByDesc('total')
             ->pluck('total', 'category')
             ->toArray();

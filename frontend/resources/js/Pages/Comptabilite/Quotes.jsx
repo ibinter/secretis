@@ -5,29 +5,32 @@
  *   quotes  : Paginator<Quote with client>
  *   clients : AccountingClient[]
  *   filters : { status, client_id }
+ *
+ * Présentation migrée sur `@/Components/UI` + socle comptable partagé.
+ * Logique métier inchangée (routes, axios, états).
  */
 
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   DocumentArrowDownIcon, EnvelopeIcon, ArrowRightCircleIcon,
-  PlusIcon, CheckBadgeIcon, XMarkIcon,
+  PlusIcon, PencilSquareIcon, ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import AuthLayout from '@/Layouts/AuthLayout';
+import {
+  PageHeader, Button, DataTable, EmptyState,
+  cx, CONTROL, BORDER, SURFACE, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, FOCUS_RING,
+} from '@/Components/UI';
+import { Money, StatusBadge, statusOptions } from '@/Components/Comptabilite/accounting';
 
-const fcfa = (v) =>
-  new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(v ?? 0) + ' FCFA';
+const STATUS_OPTIONS = statusOptions('quote');
 
-const STATUS_CONFIG = {
-  draft:    { label: 'Brouillon', classes: 'bg-gray-100 text-gray-600' },
-  sent:     { label: 'Envoyé',    classes: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Accepté',   classes: 'bg-emerald-100 text-emerald-700' },
-  rejected: { label: 'Refusé',    classes: 'bg-red-100 text-red-700' },
-  expired:  { label: 'Expiré',    classes: 'bg-orange-100 text-orange-700' },
+const fmtDate = (d) => {
+  if (!d) return null;
+  try { return format(parseISO(d), 'dd/MM/yyyy'); } catch { return d; }
 };
 
 // =============================================================================
@@ -40,7 +43,7 @@ export default function Quotes({ quotes, clients, filters }) {
   const handleSend = async (id, number) => {
     setLoaderKey(`send-${id}`, true);
     try {
-      await axios.post(`/comptabilite/quotes/${id}/send`);
+      await axios.post(`/comptabilite/devis/${id}/send`);
       toast.success(`Devis ${number} envoyé.`);
       router.reload({ only: ['quotes'] });
     } catch (e) {
@@ -54,7 +57,7 @@ export default function Quotes({ quotes, clients, filters }) {
     if (! confirm(`Convertir le devis ${number} en facture ?`)) return;
     setLoaderKey(`convert-${id}`, true);
     try {
-      const { data } = await axios.get(`/comptabilite/quotes/${id}/convert`);
+      const { data } = await axios.get(`/comptabilite/devis/${id}/convert`);
       toast.success(data.message);
       router.reload({ only: ['quotes'] });
     } catch (e) {
@@ -65,167 +68,231 @@ export default function Quotes({ quotes, clients, filters }) {
   };
 
   const applyFilter = (key, value) => {
-    router.get('/comptabilite/quotes', { ...filters, [key]: value || undefined }, {
+    router.get('/comptabilite/devis', { ...filters, [key]: value || undefined }, {
       preserveState: true, replace: true,
     });
   };
+
+  const isFiltered = Boolean(filters?.status || filters?.client_id);
+
+  const resetFilters = () => {
+    router.get('/comptabilite/devis', {}, { preserveState: true, replace: true });
+  };
+
+  /* ─── Colonnes ───────────────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'quote_number',
+      label: 'N° Devis',
+      nowrap: true,
+      width: '150px',
+      render: (v) => (
+        <span className="font-mono text-xs font-semibold text-purple-700 dark:text-purple-400">{v}</span>
+      ),
+    },
+    {
+      key: 'client',
+      label: 'Client',
+      render: (_v, q) => (
+        <span className={cx('font-medium', TEXT_TITLE)}>
+          {q.client?.name ?? <span className={TEXT_FAINT}>—</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'title',
+      label: 'Objet',
+      render: (v) => (
+        <span className="block max-w-xs truncate">{v || <span className={TEXT_FAINT}>—</span>}</span>
+      ),
+    },
+    {
+      key: 'issue_date',
+      label: 'Émis le',
+      nowrap: true,
+      render: (v) => (
+        <span className={cx('text-xs tabular-nums', TEXT_MUTED)}>
+          {fmtDate(v) ?? <span className={TEXT_FAINT}>—</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'valid_until',
+      label: 'Valide jusqu\'au',
+      nowrap: true,
+      render: (v, q) => {
+        const d = fmtDate(v);
+        if (!d) return <span className={TEXT_FAINT}>—</span>;
+        return (
+          <span className={cx(
+            'text-xs tabular-nums',
+            q.status === 'expired'
+              ? 'font-semibold text-amber-600 dark:text-amber-400'
+              : TEXT_MUTED,
+          )}>
+            {d}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'total',
+      label: 'Total TTC',
+      numeric: true,
+      width: '160px',
+      render: (v) => <Money value={v} />,
+    },
+    {
+      key: 'status',
+      label: 'Statut',
+      nowrap: true,
+      render: (v) => <StatusBadge kind="quote" status={v} />,
+    },
+  ];
+
+  /* ─── Rendu ──────────────────────────────────────────────────────────────── */
 
   return (
     <AuthLayout>
       <Head title="Devis" />
 
-      <div className="p-6 space-y-5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
 
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Devis</h1>
-          <button
-            onClick={() => router.visit('/comptabilite/quotes/create')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Nouveau devis
-          </button>
-        </div>
+        <PageHeader
+          icon={ClipboardDocumentListIcon}
+          title="Devis"
+          breadcrumbs={[{ label: 'Comptabilité', href: '/comptabilite' }, { label: 'Devis' }]}
+          subtitle={`${quotes.total ?? quotes.data.length} devis — montants en FCFA (XOF)`}
+          actions={
+            <Button
+              variant="primary" icon={PlusIcon}
+              onClick={() => router.visit('/comptabilite/devis/create')}
+            >
+              Nouveau devis
+            </Button>
+          }
+        />
 
         {/* Filtres */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
           <select
             defaultValue={filters.status}
             onChange={(e) => applyFilter('status', e.target.value)}
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+            className={cx(CONTROL, 'h-10 w-auto min-w-[180px]')}
           >
             <option value="">Tous les statuts</option>
-            {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
+            {STATUS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
           <select
             defaultValue={filters.client_id}
             onChange={(e) => applyFilter('client_id', e.target.value)}
-            className="border border-gray-200 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+            className={cx(CONTROL, 'h-10 w-auto min-w-[180px]')}
           >
             <option value="">Tous les clients</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          {isFiltered && (
+            <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>
+          )}
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">N° Devis</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Client</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Objet</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Émis le</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Valide jusqu'au</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Total TTC</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {quotes.data.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-gray-400 text-sm">
-                      Aucun devis trouvé.
-                    </td>
-                  </tr>
-                )}
-                {quotes.data.map((quote) => {
-                  const statusCfg = STATUS_CONFIG[quote.status] ?? { label: quote.status, classes: '' };
-                  return (
-                    <tr key={quote.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 font-mono font-semibold text-[#1A3A5C] text-xs">
-                        {quote.quote_number}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{quote.client?.name}</div>
-                      </td>
-                      <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{quote.title}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
-                        {quote.issue_date ? format(parseISO(quote.issue_date), 'dd/MM/yyyy') : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-xs">
-                        {quote.valid_until ? (
-                          <span className={quote.status === 'expired' ? 'text-orange-600 font-semibold' : 'text-gray-500'}>
-                            {format(parseISO(quote.valid_until), 'dd/MM/yyyy')}
-                          </span>
-                        ) : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                        {fcfa(quote.total)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.classes}`}>
-                          {statusCfg.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-1">
-                          {/* PDF */}
-                          <button
-                            onClick={() => window.open(`/comptabilite/quotes/${quote.id}/pdf`, '_blank')}
-                            title="Télécharger PDF"
-                            className="p-1.5 text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 rounded-lg transition"
-                          >
-                            <DocumentArrowDownIcon className="h-4 w-4" />
-                          </button>
-
-                          {/* Envoyer */}
-                          {['draft', 'sent'].includes(quote.status) && (
-                            <button
-                              onClick={() => handleSend(quote.id, quote.quote_number)}
-                              disabled={loading[`send-${quote.id}`]}
-                              title="Envoyer par email"
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:opacity-40"
-                            >
-                              <EnvelopeIcon className="h-4 w-4" />
-                            </button>
-                          )}
-
-                          {/* Convertir en facture */}
-                          {['sent', 'accepted'].includes(quote.status) && (
-                            <button
-                              onClick={() => handleConvert(quote.id, quote.quote_number)}
-                              disabled={loading[`convert-${quote.id}`]}
-                              title="Convertir en facture"
-                              className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition disabled:opacity-40"
-                            >
-                              <ArrowRightCircleIcon className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {quotes.last_page > 1 && (
-            <div className="flex justify-end gap-2 px-4 py-3 border-t border-gray-100">
+        {/* Tableau */}
+        <DataTable
+          columns={columns}
+          data={quotes.data}
+          rowKey="id"
+          pageSize={quotes.per_page ?? 15}
+          totalItems={quotes.total ?? quotes.data.length}
+          actions={(quote) => (
+            <>
+              <Button
+                variant="ghost" size="sm" iconOnly icon={DocumentArrowDownIcon}
+                title="Télécharger le PDF"
+                onClick={() => window.open(`/comptabilite/devis/${quote.id}/pdf`, '_blank')}
+              />
+              {quote.status === 'draft' && (
+                <Button
+                  variant="ghost" size="sm" iconOnly icon={PencilSquareIcon}
+                  title="Modifier le devis"
+                  onClick={() => router.visit(`/comptabilite/devis/${quote.id}/edit`)}
+                />
+              )}
+              {['draft', 'sent'].includes(quote.status) && (
+                <Button
+                  variant="ghost" size="sm" iconOnly icon={EnvelopeIcon}
+                  title="Envoyer par email"
+                  loading={loading[`send-${quote.id}`]}
+                  onClick={() => handleSend(quote.id, quote.quote_number)}
+                />
+              )}
+              {['sent', 'accepted'].includes(quote.status) && (
+                <Button
+                  variant="ghost" size="sm" iconOnly icon={ArrowRightCircleIcon}
+                  title="Convertir en facture"
+                  className="hover:text-emerald-600 dark:hover:text-emerald-400"
+                  loading={loading[`convert-${quote.id}`]}
+                  onClick={() => handleConvert(quote.id, quote.quote_number)}
+                />
+              )}
+            </>
+          )}
+          empty={
+            isFiltered ? (
+              <EmptyState
+                variant="no-results"
+                title="Aucun devis ne correspond"
+                description="Aucun résultat pour ces critères. Changez de statut ou de client."
+                action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>}
+              />
+            ) : (
+              <EmptyState
+                icon={ClipboardDocumentListIcon}
+                title="Aucun devis"
+                description="Créez votre premier devis : une fois accepté, il se convertit en facture en un clic."
+                hints={[
+                  'Un devis en brouillon reste librement modifiable.',
+                  'La conversion en facture reprend les lignes et la TVA.',
+                ]}
+                action={
+                  <Button
+                    variant="primary" icon={PlusIcon}
+                    onClick={() => router.visit('/comptabilite/devis/create')}
+                  >
+                    Créer votre premier devis
+                  </Button>
+                }
+              />
+            )
+          }
+          footer={quotes.last_page > 1 && quotes.links ? (
+            <div className="flex flex-wrap items-center justify-center gap-1 px-4 py-3">
               {quotes.links.map((link, i) => (
                 <button
                   key={i}
+                  type="button"
                   disabled={!link.url}
                   onClick={() => link.url && router.get(link.url)}
                   dangerouslySetInnerHTML={{ __html: link.label }}
-                  className={`px-3 py-1 rounded-lg text-xs transition ${
-                    link.active ? 'bg-[#1A3A5C] text-white'
-                    : link.url ? 'bg-white border border-gray-200 hover:bg-gray-50'
-                    : 'opacity-40 cursor-not-allowed'
-                  }`}
+                  className={cx(
+                    'min-w-[32px] rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
+                    link.active
+                      ? 'border-transparent bg-purple-600 text-white'
+                      : cx(BORDER, SURFACE, 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                    !link.url && 'pointer-events-none opacity-40',
+                    FOCUS_RING,
+                  )}
                 />
               ))}
             </div>
-          )}
-        </div>
+          ) : null}
+        />
       </div>
     </AuthLayout>
   );
 }
+export { Quotes };

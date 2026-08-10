@@ -1,48 +1,63 @@
-import { useState, useCallback, useRef } from 'react';
-import { Head, router } from '@inertiajs/react';
-import AppLayout from '@/Components/Layout/AppLayout';
-import {
-    FolderIcon,
-    FolderOpenIcon,
-    DocumentIcon,
-    ArrowUpTrayIcon,
-    PlusIcon,
-    MagnifyingGlassIcon,
-    EllipsisVerticalIcon,
-    ArrowDownTrayIcon,
-    EyeIcon,
-    ShareIcon,
-    ArrowRightCircleIcon,
-    ChevronRightIcon,
-    Squares2X2Icon,
-    ListBulletIcon,
-    XMarkIcon,
-    CheckIcon,
-    LockClosedIcon,
-    DocumentDuplicateIcon,
-} from '@heroicons/react/24/outline';
-import { FolderIcon as FolderSolidIcon } from '@heroicons/react/24/solid';
+/**
+ * GED/Index.jsx — Gestion électronique des documents
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier STRICTEMENT inchangée : mêmes props Inertia, mêmes routes
+ * (`GET /ged`, `POST /api/ged/folders`, `POST /api/ged/documents`,
+ * `PUT /ged/documents/{id}`, `GET /api/ged/documents/{id}/preview|download`,
+ * `POST /api/ged/documents/{id}/share`), mêmes états locaux, mêmes payloads.
+ *
+ * Props (DocumentController@index) :
+ *   documents : LengthAwarePaginator<{ id, title, description, file_name, file_path,
+ *               mime_type, file_size, access_level, current_version, tags, category,
+ *               updated_at, created_at, versions_count,
+ *               author:{ id, name }, folder:{ id, name } }>
+ *   folders   : Array<{ id, name }>            (dossiers racine de l'organisation)
+ *   stats     : { total, month, shared, archived }
+ *   filters   : { folder_id, category, access_level, author_id, search }
+ */
 
-// ---------------------------------------------------------------------------
-// Constantes
-// ---------------------------------------------------------------------------
+import { useState, useEffect, useRef } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import {
+    Folder, FolderOpen, FileText, FileSpreadsheet, FileImage, FileType,
+    UploadCloud, Plus, Search, MoreVertical, Download, Eye, Share2, Move,
+    ChevronRight, LayoutGrid, List, X, Check, Lock, Copy, Archive,
+    CalendarPlus, Layers,
+} from 'lucide-react';
+import AppLayout from '@/Layouts/AppLayout';
+import {
+    PageHeader, Button, Badge, Card, DataTable, EmptyState, StatCard,
+    cx, CONTROL, CARD, SURFACE, SURFACE_SUNK, BORDER, TEXT_TITLE, TEXT_BODY,
+    TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING, TONES,
+} from '@/Components/UI';
+
+/* ─── Niveaux de confidentialité ───────────────────────────────────────────── */
+/* Un niveau d'accès est un statut : jamais l'accent violet, uniquement des
+   tons sémantiques. `outline` distingue deux paliers partageant le même ton. */
 
 const ACCESS_LEVEL_CONFIG = {
-    public:        { label: 'Public',         color: 'bg-green-100 text-green-700 border-green-200' },
-    internal:      { label: 'Interne',        color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    confidential:  { label: 'Confidentiel',   color: 'bg-orange-100 text-orange-700 border-orange-200' },
-    top_secret:    { label: 'Secret',         color: 'bg-red-100 text-red-700 border-red-200' },
+    public:       { label: 'Public',        tone: 'success', outline: false, locked: false },
+    internal:     { label: 'Interne',       tone: 'info',    outline: false, locked: false },
+    organization: { label: 'Organisation',  tone: 'info',    outline: true,  locked: false },
+    department:   { label: 'Département',   tone: 'info',    outline: true,  locked: false },
+    confidential: { label: 'Confidentiel',  tone: 'warning', outline: false, locked: true  },
+    private:      { label: 'Privé',         tone: 'warning', outline: true,  locked: true  },
+    top_secret:   { label: 'Secret',        tone: 'danger',  outline: false, locked: true  },
 };
 
-const FILE_ICON_COLORS = {
-    'application/pdf':     'text-red-500',
-    'application/msword':  'text-blue-500',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'text-blue-500',
-    'application/vnd.ms-excel': 'text-green-500',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'text-green-500',
-    'image/jpeg':          'text-purple-500',
-    'image/png':           'text-purple-500',
-};
+/** Ton d'icône par famille de fichier (tons sémantiques uniquement). */
+function fileMeta(mime = '') {
+    if (mime === 'application/pdf')
+        return { Icon: FileType, tone: TONES.danger };
+    if (mime.startsWith('image/'))
+        return { Icon: FileImage, tone: TONES.warning };
+    if (mime.includes('spreadsheet') || mime.includes('excel'))
+        return { Icon: FileSpreadsheet, tone: TONES.success };
+    if (mime.includes('word') || mime.includes('document'))
+        return { Icon: FileText, tone: TONES.info };
+    return { Icon: FileText, tone: TONES.neutral };
+}
 
 function formatBytes(bytes) {
     if (!bytes || bytes === 0) return '—';
@@ -56,228 +71,343 @@ function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// ---------------------------------------------------------------------------
-// Badge confidentialité
-// ---------------------------------------------------------------------------
+/* ─── Badge confidentialité ────────────────────────────────────────────────── */
 
 function AccessBadge({ level }) {
-    const config = ACCESS_LEVEL_CONFIG[level] || ACCESS_LEVEL_CONFIG.internal;
+    const config = ACCESS_LEVEL_CONFIG[level] ?? ACCESS_LEVEL_CONFIG.internal;
     return (
-        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${config.color}`}>
-            {level === 'top_secret' && <LockClosedIcon className="h-3 w-3" />}
+        <Badge variant={config.tone} outline={config.outline} icon={config.locked ? Lock : undefined}>
             {config.label}
-        </span>
+        </Badge>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Arborescence dossiers (panneau gauche)
-// ---------------------------------------------------------------------------
+/* ─── Coquille de modale partagée ──────────────────────────────────────────── */
 
-function FolderTreeItem({ folder, currentFolderId, onSelect, depth = 0 }) {
-    const [expanded, setExpanded] = useState(
-        currentFolderId === folder.id || folder.children?.some(c => c.id === currentFolderId)
-    );
-    const isActive   = currentFolderId === folder.id;
-    const hasChildren = folder.children?.length > 0;
+function ModalShell({ title, subtitle, onClose, closeDisabled = false, footer, size = 'md', children }) {
+    const width = size === 'sm' ? 'max-w-sm' : size === 'lg' ? 'max-w-5xl' : 'max-w-md';
 
     return (
-        <div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 dark:bg-black/70">
             <div
-                className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm transition-colors ${
-                    isActive
-                        ? 'bg-blue-50 text-blue-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                style={{ paddingLeft: `${8 + depth * 16}px` }}
-                onClick={() => { onSelect(folder.id); if (hasChildren) setExpanded(v => !v); }}
-            >
-                {hasChildren ? (
-                    <ChevronRightIcon
-                        className={`h-3.5 w-3.5 flex-shrink-0 text-gray-400 transition-transform ${expanded ? 'rotate-90' : ''}`}
-                    />
-                ) : (
-                    <span className="h-3.5 w-3.5" />
+                role="dialog"
+                aria-modal="true"
+                aria-label={title}
+                className={cx(
+                    'flex w-full flex-col overflow-hidden rounded-xl border shadow-lg',
+                    BORDER, SURFACE, width,
+                    size === 'lg' && 'h-full max-h-[90vh]',
                 )}
+            >
+                <header className={cx('flex items-start justify-between gap-3 border-b px-5 py-4', BORDER)}>
+                    <div className="min-w-0">
+                        <h2 className={cx('truncate text-base font-semibold tracking-tight', TEXT_TITLE)}>{title}</h2>
+                        {subtitle && <p className={cx('mt-0.5 truncate text-sm', TEXT_MUTED)}>{subtitle}</p>}
+                    </div>
+                    <Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer"
+                            onClick={onClose} disabled={closeDisabled} />
+                </header>
 
-                {expanded && isActive
-                    ? <FolderOpenIcon className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                    : <FolderIcon className="h-4 w-4 flex-shrink-0 text-yellow-500" />
-                }
+                <div className={cx(size === 'lg' ? 'min-h-0 flex-1 overflow-hidden' : 'px-5 py-4')}>
+                    {children}
+                </div>
 
-                <span className="truncate">{folder.name}</span>
-
-                {folder.documents_count > 0 && (
-                    <span className="ml-auto flex-shrink-0 rounded-full bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600">
-                        {folder.documents_count}
-                    </span>
+                {footer && (
+                    <footer className={cx('flex flex-wrap justify-end gap-2 border-t px-5 py-3', BORDER, SURFACE_SUNK)}>
+                        {footer}
+                    </footer>
                 )}
             </div>
-
-            {expanded && hasChildren && (
-                <div>
-                    {folder.children.map(child => (
-                        <FolderTreeItem
-                            key={child.id}
-                            folder={child}
-                            currentFolderId={currentFolderId}
-                            onSelect={onSelect}
-                            depth={depth + 1}
-                        />
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Modal nouveau dossier
-// ---------------------------------------------------------------------------
+const FIELD_LABEL = 'mb-1.5 block text-xs font-medium';
+
+function ErrorNote({ children }) {
+    if (!children) return null;
+    return (
+        <p className={cx(
+            'rounded-lg border px-3 py-2 text-xs',
+            TONES.danger.soft, TONES.danger.text, TONES.danger.border,
+        )}>
+            {children}
+        </p>
+    );
+}
+
+/* ─── Modal upload document ────────────────────────────────────────────────── */
+
+function UploadModal({ file, uploading, error, onClose, onConfirm }) {
+    const [title, setTitle]             = useState(file?.name ?? '');
+    const [accessLevel, setAccessLevel] = useState('internal');
+
+    const fmt = (bytes) => bytes < 1024 * 1024
+        ? `${(bytes / 1024).toFixed(1)} Ko`
+        : `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+
+    return (
+        <ModalShell
+            title="Uploader un document"
+            onClose={onClose}
+            closeDisabled={uploading}
+            footer={
+                <>
+                    <Button variant="secondary" onClick={onClose} disabled={uploading}>Annuler</Button>
+                    <Button
+                        variant="primary"
+                        icon={UploadCloud}
+                        loading={uploading}
+                        disabled={!title.trim()}
+                        onClick={() => onConfirm(title, accessLevel)}
+                    >
+                        {uploading ? 'Envoi…' : 'Uploader'}
+                    </Button>
+                </>
+            }
+        >
+            <div className={cx('mb-4 flex items-center gap-3 rounded-lg border px-3 py-2.5', BORDER, SURFACE_SUNK)}>
+                <span className={cx('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', TONES.info.soft)}>
+                    <FileText className={cx('h-5 w-5', TONES.info.icon)} aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                    <p className={cx('truncate text-sm font-medium', TEXT_TITLE)}>{file?.name}</p>
+                    <p className={cx('text-xs', TEXT_MUTED, NUM)}>{fmt(file?.size ?? 0)}</p>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <div>
+                    <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-upload-title">Titre du document</label>
+                    <input
+                        id="ged-upload-title"
+                        type="text"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                        disabled={uploading}
+                        className={cx(CONTROL, 'h-10')}
+                    />
+                </div>
+                <div>
+                    <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-upload-access">Niveau de confidentialité</label>
+                    <select
+                        id="ged-upload-access"
+                        value={accessLevel}
+                        onChange={e => setAccessLevel(e.target.value)}
+                        disabled={uploading}
+                        className={cx(CONTROL, 'h-10')}
+                    >
+                        <option value="public">Public</option>
+                        <option value="internal">Interne</option>
+                        <option value="confidential">Confidentiel</option>
+                        <option value="top_secret">Secret</option>
+                    </select>
+                </div>
+                <ErrorNote>{error}</ErrorNote>
+            </div>
+        </ModalShell>
+    );
+}
+
+/* ─── Modal nouveau dossier ────────────────────────────────────────────────── */
 
 function NewFolderModal({ parentId, onClose, onCreated }) {
     const [name, setName]               = useState('');
     const [accessLevel, setAccessLevel] = useState('internal');
     const [loading, setLoading]         = useState(false);
+    const [error, setError]             = useState(null);
 
     const handleCreate = async () => {
         if (!name.trim()) return;
         setLoading(true);
-
+        setError(null);
         try {
-            await router.post('/api/ged/folders', {
+            const { default: axios } = await import('axios');
+            await axios.post('/api/ged/folders', {
                 name:         name.trim(),
                 parent_id:    parentId,
                 access_level: accessLevel,
-            }, { onSuccess: onCreated });
+            });
+            onCreated?.();
+        } catch (err) {
+            setError(err?.response?.data?.message || 'Erreur lors de la création du dossier.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Nouveau dossier</h2>
-                    <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100">
-                        <XMarkIcon className="h-5 w-5" />
-                    </button>
-                </div>
-
-                <div className="space-y-4">
-                    <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Nom du dossier</label>
-                        <input
-                            autoFocus
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleCreate()}
-                            placeholder="Ex : Contrats 2026"
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Niveau de confidentialité</label>
-                        <select
-                            value={accessLevel}
-                            onChange={e => setAccessLevel(e.target.value)}
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        >
-                            <option value="public">Public</option>
-                            <option value="internal">Interne</option>
-                            <option value="confidential">Confidentiel</option>
-                            <option value="top_secret">Secret</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="mt-5 flex justify-end gap-2">
-                    <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        Annuler
-                    </button>
-                    <button
-                        onClick={handleCreate}
-                        disabled={!name.trim() || loading}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                    >
-                        {loading && <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>}
+        <ModalShell
+            title="Nouveau dossier"
+            size="sm"
+            onClose={onClose}
+            footer={
+                <>
+                    <Button variant="secondary" onClick={onClose}>Annuler</Button>
+                    <Button variant="primary" icon={Plus} loading={loading} disabled={!name.trim()} onClick={handleCreate}>
                         Créer
-                    </button>
+                    </Button>
+                </>
+            }
+        >
+            <div className="space-y-4">
+                <div>
+                    <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-folder-name">Nom du dossier</label>
+                    <input
+                        id="ged-folder-name"
+                        autoFocus
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleCreate()}
+                        placeholder="Ex : Contrats 2026"
+                        className={cx(CONTROL, 'h-10')}
+                    />
                 </div>
+
+                <div>
+                    <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-folder-access">Niveau de confidentialité</label>
+                    <select
+                        id="ged-folder-access"
+                        value={accessLevel}
+                        onChange={e => setAccessLevel(e.target.value)}
+                        className={cx(CONTROL, 'h-10')}
+                    >
+                        <option value="public">Public</option>
+                        <option value="internal">Interne</option>
+                        <option value="confidential">Confidentiel</option>
+                        <option value="top_secret">Secret</option>
+                    </select>
+                </div>
+
+                <ErrorNote>{error}</ErrorNote>
             </div>
-        </div>
+        </ModalShell>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Menu contextuel document
-// ---------------------------------------------------------------------------
+/* ─── Modal déplacer document ──────────────────────────────────────────────── */
 
-function DocumentMenu({ document, onDownload, onPreview, onShare, onMove }) {
+function MoveModal({ document, folders, onClose, onMoved }) {
+    const [target, setTarget]   = useState(document.folder?.id ?? '');
+    const [loading, setLoading] = useState(false);
+    const [error, setError]     = useState(null);
+
+    const handleMove = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { default: axios } = await import('axios');
+            await axios.put(`/ged/documents/${document.id}`, {
+                folder_id: target === '' ? null : target,
+            }, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            onMoved?.();
+        } catch (err) {
+            setError(err?.response?.data?.message || 'Erreur lors du déplacement.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="absolute right-0 top-7 z-20 w-48 rounded-xl border border-gray-200 bg-white py-1.5 shadow-xl">
-            <button
-                onClick={() => onPreview(document)}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+        <ModalShell
+            title="Déplacer le document"
+            subtitle={document.title}
+            size="sm"
+            onClose={onClose}
+            footer={
+                <>
+                    <Button variant="secondary" onClick={onClose}>Annuler</Button>
+                    <Button variant="primary" icon={Move} loading={loading} onClick={handleMove}>Déplacer</Button>
+                </>
+            }
+        >
+            <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-move-target">Dossier de destination</label>
+            <select
+                id="ged-move-target"
+                value={target}
+                onChange={e => setTarget(e.target.value)}
+                className={cx(CONTROL, 'h-10')}
             >
-                <EyeIcon className="h-4 w-4 text-gray-400" />
-                Prévisualiser
-            </button>
-            <button
-                onClick={() => onDownload(document)}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-                <ArrowDownTrayIcon className="h-4 w-4 text-gray-400" />
-                Télécharger
-            </button>
-            <button
-                onClick={() => onShare(document)}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-                <ShareIcon className="h-4 w-4 text-gray-400" />
-                Partager
-            </button>
-            <div className="my-1 border-t border-gray-100" />
-            <button
-                onClick={() => onMove(document)}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            >
-                <ArrowRightCircleIcon className="h-4 w-4 text-gray-400" />
-                Déplacer
-            </button>
-        </div>
+                <option value="">Racine (aucun dossier)</option>
+                {folders.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+            </select>
+
+            {error && <div className="mt-3"><ErrorNote>{error}</ErrorNote></div>}
+        </ModalShell>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Carte document (vue grille)
-// ---------------------------------------------------------------------------
+/* ─── Menu contextuel document ─────────────────────────────────────────────── */
+
+function DocumentMenu({ document, onClose, onDownload, onPreview, onShare, onMove }) {
+    const item = cx(
+        'flex w-full items-center gap-2.5 px-3 py-2 text-sm text-left',
+        TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.05] transition-colors',
+    );
+
+    return (
+        <>
+            {/* Zone de fermeture au clic extérieur */}
+            <button
+                type="button"
+                aria-label="Fermer le menu"
+                onClick={onClose}
+                className="fixed inset-0 z-20 cursor-default"
+            />
+            <div className={cx(
+                'absolute right-0 top-9 z-30 w-52 overflow-hidden rounded-xl border py-1 shadow-lg',
+                BORDER, SURFACE,
+            )}>
+                <button type="button" onClick={() => onPreview(document)} className={item}>
+                    <Eye className={cx('h-4 w-4', TEXT_FAINT)} aria-hidden="true" /> Prévisualiser
+                </button>
+                <button type="button" onClick={() => onDownload(document)} className={item}>
+                    <Download className={cx('h-4 w-4', TEXT_FAINT)} aria-hidden="true" /> Télécharger
+                </button>
+                <button type="button" onClick={() => onShare(document)} className={item}>
+                    <Share2 className={cx('h-4 w-4', TEXT_FAINT)} aria-hidden="true" /> Partager
+                </button>
+                <div className={cx('my-1 border-t', BORDER)} />
+                <Link href={`/ged/documents/${document.id}`} className={item}>
+                    <FileText className={cx('h-4 w-4', TEXT_FAINT)} aria-hidden="true" /> Ouvrir la fiche
+                </Link>
+                <button type="button" onClick={() => onMove(document)} className={item}>
+                    <Move className={cx('h-4 w-4', TEXT_FAINT)} aria-hidden="true" /> Déplacer
+                </button>
+            </div>
+        </>
+    );
+}
+
+/* ─── Carte document (grille) ──────────────────────────────────────────────── */
 
 function DocumentCard({ document, onDownload, onPreview, onShare, onMove }) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const iconColor = FILE_ICON_COLORS[document.mime_type] || 'text-gray-400';
+    const { Icon, tone } = fileMeta(document.mime_type);
 
     return (
-        <div className="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-            {/* Icône fichier */}
+        <div className={cx('group relative flex flex-col p-4 transition-colors',
+            CARD, 'hover:bg-gray-50 dark:hover:bg-white/[0.03]')}>
+
             <div className="mb-3 flex items-start justify-between">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gray-50 ${iconColor}`}>
-                    <DocumentIcon className="h-7 w-7" />
-                </div>
-
+                <span className={cx('flex h-11 w-11 items-center justify-center rounded-lg', tone.soft)}>
+                    <Icon className={cx('h-5 w-5', tone.icon)} aria-hidden="true" />
+                </span>
                 <div className="relative">
-                    <button
+                    <Button
+                        variant="ghost" size="sm" iconOnly icon={MoreVertical}
+                        title="Actions sur le document"
+                        aria-haspopup="menu"
+                        aria-expanded={menuOpen}
                         onClick={() => setMenuOpen(v => !v)}
-                        className="rounded p-1 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-700"
-                    >
-                        <EllipsisVerticalIcon className="h-4 w-4" />
-                    </button>
-
+                        className={cx('transition-opacity', !menuOpen && 'opacity-0 focus-visible:opacity-100 group-hover:opacity-100')}
+                    />
                     {menuOpen && (
                         <DocumentMenu
                             document={document}
+                            onClose={() => setMenuOpen(false)}
                             onDownload={(d) => { setMenuOpen(false); onDownload(d); }}
                             onPreview={(d) => { setMenuOpen(false); onPreview(d); }}
                             onShare={(d) => { setMenuOpen(false); onShare(d); }}
@@ -287,181 +417,99 @@ function DocumentCard({ document, onDownload, onPreview, onShare, onMove }) {
                 </div>
             </div>
 
-            {/* Titre */}
-            <p className="mb-1 line-clamp-2 text-sm font-medium text-gray-800" title={document.title}>
+            <Link
+                href={`/ged/documents/${document.id}`}
+                className={cx(
+                    'mb-2 line-clamp-2 rounded text-sm font-semibold transition-colors',
+                    TEXT_TITLE, 'hover:text-purple-600 dark:hover:text-purple-400', FOCUS_RING,
+                )}
+                title={document.title}
+            >
                 {document.title}
-            </p>
+            </Link>
 
-            {/* Méta */}
-            <div className="mt-auto space-y-2">
-                <div className="flex items-center justify-between">
+            <div className="mt-auto space-y-2 pt-2">
+                <div className="flex items-center justify-between gap-2">
                     <AccessBadge level={document.access_level} />
                     {document.current_version > 1 && (
-                        <span className="flex items-center gap-1 text-xs text-gray-400">
-                            <DocumentDuplicateIcon className="h-3.5 w-3.5" />
-                            v{document.current_version}
+                        <span className={cx('inline-flex shrink-0 items-center gap-1 text-xs', TEXT_MUTED, NUM)}>
+                            <Layers className="h-3.5 w-3.5" aria-hidden="true" /> v{document.current_version}
                         </span>
                     )}
                 </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-400">
+                <div className={cx('flex items-center justify-between text-xs', TEXT_MUTED, NUM)}>
                     <span>{formatBytes(document.file_size)}</span>
                     <span>{formatDate(document.updated_at)}</span>
                 </div>
-
-                {document.author && (
-                    <p className="truncate text-xs text-gray-400">{document.author.name}</p>
-                )}
+                <p className={cx('truncate text-xs', TEXT_FAINT)}>
+                    {document.author?.name || '—'}
+                </p>
             </div>
         </div>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Ligne document (vue liste)
-// ---------------------------------------------------------------------------
-
-function DocumentRow({ document, onDownload, onPreview, onShare, onMove }) {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const iconColor = FILE_ICON_COLORS[document.mime_type] || 'text-gray-400';
-
-    return (
-        <tr className="group border-b border-gray-100 hover:bg-gray-50">
-            <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                    <DocumentIcon className={`h-5 w-5 flex-shrink-0 ${iconColor}`} />
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-gray-800">{document.title}</p>
-                        {document.folder && (
-                            <p className="text-xs text-gray-400">{document.folder.name}</p>
-                        )}
-                    </div>
-                </div>
-            </td>
-            <td className="px-4 py-3">
-                <AccessBadge level={document.access_level} />
-            </td>
-            <td className="px-4 py-3 text-xs text-gray-500">{document.author?.name || '—'}</td>
-            <td className="px-4 py-3 text-xs text-gray-500">{formatBytes(document.file_size)}</td>
-            <td className="px-4 py-3 text-xs text-gray-500">{formatDate(document.updated_at)}</td>
-            <td className="px-4 py-3 text-xs text-gray-500">
-                {document.current_version > 1 && (
-                    <span className="flex items-center gap-1">
-                        <DocumentDuplicateIcon className="h-3.5 w-3.5" />
-                        v{document.current_version}
-                    </span>
-                )}
-            </td>
-            <td className="px-4 py-3">
-                <div className="relative flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onPreview(document)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="Prévisualiser">
-                        <EyeIcon className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => onDownload(document)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="Télécharger">
-                        <ArrowDownTrayIcon className="h-4 w-4" />
-                    </button>
-                    <div className="relative">
-                        <button onClick={() => setMenuOpen(v => !v)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
-                            <EllipsisVerticalIcon className="h-4 w-4" />
-                        </button>
-                        {menuOpen && (
-                            <DocumentMenu
-                                document={document}
-                                onDownload={(d) => { setMenuOpen(false); onDownload(d); }}
-                                onPreview={(d) => { setMenuOpen(false); onPreview(d); }}
-                                onShare={(d) => { setMenuOpen(false); onShare(d); }}
-                                onMove={(d) => { setMenuOpen(false); onMove(d); }}
-                            />
-                        )}
-                    </div>
-                </div>
-            </td>
-        </tr>
-    );
-}
-
-// ---------------------------------------------------------------------------
-// Modal prévisualisation
-// ---------------------------------------------------------------------------
+/* ─── Modal prévisualisation ───────────────────────────────────────────────── */
 
 function PreviewModal({ document, onClose }) {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [loading, setLoading]       = useState(true);
 
-    useState(() => {
+    useEffect(() => {
+        let active = true;
         fetch(`/api/ged/documents/${document.id}/preview`, {
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
         })
             .then(r => r.json())
-            .then(data => { setPreviewUrl(data.preview_url); setLoading(false); })
-            .catch(() => setLoading(false));
+            .then(data => { if (active) { setPreviewUrl(data.preview_url); setLoading(false); } })
+            .catch(() => { if (active) setLoading(false); });
+        return () => { active = false; };
     }, [document.id]);
 
     const isPdf   = document.mime_type === 'application/pdf';
     const isImage = document.mime_type?.startsWith('image/');
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-            <div className="flex h-full max-h-[90vh] w-full max-w-5xl flex-col rounded-xl bg-white shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-                    <div className="min-w-0">
-                        <h2 className="truncate text-base font-semibold text-gray-900">{document.title}</h2>
-                        <p className="text-xs text-gray-400">{formatBytes(document.file_size)} — v{document.current_version}</p>
+        <ModalShell
+            title={document.title}
+            subtitle={`${formatBytes(document.file_size)}${document.current_version > 1 ? ` · v${document.current_version}` : ''}`}
+            size="lg"
+            onClose={onClose}
+        >
+            <div className="h-full w-full">
+                {loading ? (
+                    <div className="flex h-full items-center justify-center">
+                        <EmptyState variant="loading" title="Chargement de l'aperçu…" description="" />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <a
-                            href={`/api/ged/documents/${document.id}/download`}
-                            className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                            <ArrowDownTrayIcon className="h-4 w-4" />
-                            Télécharger
-                        </a>
-                        <button onClick={onClose} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100">
-                            <XMarkIcon className="h-5 w-5" />
-                        </button>
+                ) : previewUrl && isPdf ? (
+                    <iframe src={previewUrl} className="h-full w-full border-0" title={document.title} />
+                ) : previewUrl && isImage ? (
+                    <div className={cx('flex h-full items-center justify-center p-4', SURFACE_SUNK)}>
+                        <img src={previewUrl} alt={document.title} className="max-h-full max-w-full rounded-lg object-contain" />
                     </div>
-                </div>
-
-                {/* Contenu */}
-                <div className="flex-1 overflow-hidden">
-                    {loading ? (
-                        <div className="flex h-full items-center justify-center">
-                            <svg className="h-8 w-8 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                        </div>
-                    ) : previewUrl && isPdf ? (
-                        <iframe src={previewUrl} className="h-full w-full" title={document.title} />
-                    ) : previewUrl && isImage ? (
-                        <div className="flex h-full items-center justify-center bg-gray-100 p-4">
-                            <img src={previewUrl} alt={document.title} className="max-h-full max-w-full rounded object-contain shadow-lg" />
-                        </div>
-                    ) : (
-                        <div className="flex h-full flex-col items-center justify-center gap-3 text-gray-400">
-                            <DocumentIcon className="h-16 w-16" />
-                            <p className="text-sm">Prévisualisation non disponible pour ce type de fichier.</p>
-                            <a
-                                href={`/api/ged/documents/${document.id}/download`}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                            >
-                                Télécharger le fichier
-                            </a>
-                        </div>
-                    )}
-                </div>
+                ) : (
+                    <div className="flex h-full items-center justify-center">
+                        <EmptyState
+                            icon={FileText}
+                            title="Aperçu non disponible"
+                            description="Ce type de fichier ne peut pas être affiché dans le navigateur. Téléchargez-le pour le consulter."
+                            action={
+                                <Button variant="primary" icon={Download} href={`/api/ged/documents/${document.id}/download`}>
+                                    Télécharger le fichier
+                                </Button>
+                            }
+                        />
+                    </div>
+                )}
             </div>
-        </div>
+        </ModalShell>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Modal partage
-// ---------------------------------------------------------------------------
+/* ─── Modal partage ────────────────────────────────────────────────────────── */
 
 function ShareModal({ document, onClose }) {
-    const [hours, setHours]   = useState(24);
+    const [hours, setHours]       = useState(24);
     const [shareUrl, setShareUrl] = useState(null);
     const [loading, setLoading]   = useState(false);
     const [copied, setCopied]     = useState(false);
@@ -488,23 +536,27 @@ function ShareModal({ document, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                <div className="mb-5 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">Partager le document</h2>
-                    <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100">
-                        <XMarkIcon className="h-5 w-5" />
-                    </button>
-                </div>
-
-                <p className="mb-4 text-sm text-gray-500 truncate">{document.title}</p>
-
-                <div className="mb-4">
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700">Durée de validité du lien</label>
+        <ModalShell
+            title="Partager le document"
+            subtitle={document.title}
+            onClose={onClose}
+            footer={
+                <>
+                    <Button variant="secondary" onClick={onClose}>Fermer</Button>
+                    <Button variant="primary" icon={Share2} loading={loading} onClick={handleGenerate}>
+                        {shareUrl ? 'Regénérer' : 'Générer le lien'}
+                    </Button>
+                </>
+            }
+        >
+            <div className="space-y-4">
+                <div>
+                    <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-share-hours">Durée de validité du lien</label>
                     <select
+                        id="ged-share-hours"
                         value={hours}
                         onChange={e => setHours(Number(e.target.value))}
-                        className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                        className={cx(CONTROL, 'h-10')}
                     >
                         <option value={1}>1 heure</option>
                         <option value={6}>6 heures</option>
@@ -515,82 +567,56 @@ function ShareModal({ document, onClose }) {
                 </div>
 
                 {shareUrl ? (
-                    <div className="mb-4">
-                        <label className="mb-1.5 block text-sm font-medium text-gray-700">Lien de partage</label>
+                    <div>
+                        <label className={cx(FIELD_LABEL, TEXT_MUTED)} htmlFor="ged-share-url">Lien de partage</label>
                         <div className="flex gap-2">
                             <input
+                                id="ged-share-url"
                                 readOnly
                                 value={shareUrl}
-                                className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs text-gray-700"
+                                onFocus={e => e.target.select()}
+                                className={cx(CONTROL, 'h-10 flex-1 text-xs')}
                             />
-                            <button
+                            <Button
+                                variant={copied ? 'secondary' : 'subtle'}
+                                icon={copied ? Check : Copy}
                                 onClick={handleCopy}
-                                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                                    copied ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                                }`}
+                                className={copied ? 'text-emerald-600 dark:text-emerald-400' : undefined}
                             >
-                                {copied ? <CheckIcon className="h-4 w-4" /> : null}
-                                {copied ? 'Copié !' : 'Copier'}
-                            </button>
+                                {copied ? 'Copié' : 'Copier'}
+                            </Button>
                         </div>
                     </div>
-                ) : null}
-
-                <div className="flex justify-end gap-2">
-                    <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        Fermer
-                    </button>
-                    <button
-                        onClick={handleGenerate}
-                        disabled={loading}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                    >
-                        {loading && <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>}
-                        {shareUrl ? 'Regénérer' : 'Générer le lien'}
-                    </button>
-                </div>
+                ) : (
+                    <p className={cx('text-xs leading-relaxed', TEXT_MUTED)}>
+                        Le lien généré donne un accès direct au document, sans authentification,
+                        jusqu'à son expiration.
+                    </p>
+                )}
             </div>
-        </div>
+        </ModalShell>
     );
 }
 
-// ---------------------------------------------------------------------------
-// Page principale GED
-// ---------------------------------------------------------------------------
+/* ─── Page principale ──────────────────────────────────────────────────────── */
 
-export default function GEDIndex({ documents, folders = [], filters: initialFilters = {} }) {
+export default function GEDIndex({ documents, folders = [], stats = {}, filters: initialFilters = {} }) {
     const [currentFolderId, setCurrentFolderId] = useState(initialFilters.folder_id || null);
-    const [viewMode, setViewMode]               = useState('grid'); // 'grid' | 'list'
+    const [viewMode, setViewMode]               = useState('grid');
     const [search, setSearch]                   = useState(initialFilters.search || '');
     const [showNewFolder, setShowNewFolder]     = useState(false);
+    const [uploadState, setUploadState]         = useState(null);
     const [previewDoc, setPreviewDoc]           = useState(null);
     const [shareDoc, setShareDoc]               = useState(null);
+    const [moveDoc, setMoveDoc]                 = useState(null);
 
     const fileInputRef = useRef(null);
 
-    // Breadcrumb : construire le chemin depuis currentFolderId
-    const buildBreadcrumb = useCallback((folderId, allFolders) => {
-        if (!folderId) return [];
-        const path = [];
-        const findFolder = (id, list) => {
-            for (const f of list) {
-                if (f.id === id) { path.unshift(f); return true; }
-                if (f.children?.length && findFolder(id, f.children)) {
-                    path.unshift(f);
-                    return true;
-                }
-            }
-            return false;
-        };
-        findFolder(folderId, allFolders);
-        return path;
-    }, []);
-
-    const breadcrumb = buildBreadcrumb(currentFolderId, folders);
+    const activeFolder = folders.find(f => f.id === currentFolderId) || null;
 
     const handleFolderSelect = (folderId) => {
         setCurrentFolderId(folderId);
-        router.get('/ged', { folder_id: folderId, search }, { preserveState: true, only: ['documents', 'filters'] });
+        router.get('/ged', { folder_id: folderId, search }, { preserveState: true, only: ['documents', 'stats', 'filters'] });
     };
 
     const handleSearch = () => {
@@ -600,236 +626,433 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
     const handleUpload = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        // Rediriger vers la page d'upload avec le dossier courant pré-sélectionné
-        router.visit(`/ged/upload?folder_id=${currentFolderId || ''}`);
+        e.target.value = '';
+        setUploadState({ file, uploading: false, error: null });
     };
 
-    const handleDownload = (doc) => {
-        window.location.href = `/api/ged/documents/${doc.id}/download`;
+    const handleUploadConfirm = async (title, accessLevel) => {
+        if (!uploadState?.file) return;
+        setUploadState(s => ({ ...s, uploading: true, error: null }));
+        try {
+            const { default: axios } = await import('axios');
+            const fd = new FormData();
+            fd.append('file', uploadState.file);
+            fd.append('title', title || uploadState.file.name);
+            fd.append('access_level', accessLevel || 'internal');
+            if (currentFolderId) fd.append('folder_id', currentFolderId);
+            await axios.post('/api/ged/documents', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setUploadState(null);
+            router.reload({ only: ['documents', 'stats'] });
+        } catch (err) {
+            const msg = err?.response?.data?.message || err.message || 'Erreur upload';
+            setUploadState(s => ({ ...s, uploading: false, error: msg }));
+        }
     };
 
-    const handlePreview = (doc) => {
-        setPreviewDoc(doc);
+    const handleDownload = (doc) => { window.location.href = `/api/ged/documents/${doc.id}/download`; };
+    const handlePreview  = (doc) => setPreviewDoc(doc);
+    const handleShare    = (doc) => setShareDoc(doc);
+    const handleMove     = (doc) => setMoveDoc(doc);
+
+    const openFilePicker = () => fileInputRef.current?.click();
+
+    // Réinitialise recherche + dossier courant (même appel que handleFolderSelect,
+    // mais avec la recherche vidée : `search` serait encore l'ancienne valeur).
+    const resetFilters = () => {
+        setSearch('');
+        setCurrentFolderId(null);
+        router.get('/ged', { folder_id: null, search: '' }, { preserveState: true, only: ['documents', 'stats', 'filters'] });
     };
 
-    const handleShare = (doc) => {
-        setShareDoc(doc);
-    };
+    const docs      = documents?.data ?? [];
+    const total     = documents?.total ?? docs.length;
+    const isFiltered = Boolean(search || currentFolderId);
 
-    const handleMove = (doc) => {
-        // TODO: ouvrir modal de déplacement avec sélecteur de dossier
-        console.log('Déplacer', doc.title);
-    };
+    /* ─── Colonnes du mode liste ───────────────────────────────────────────── */
+
+    const columns = [
+        {
+            key: 'title',
+            label: 'Document',
+            render: (v, doc) => {
+                const { Icon, tone } = fileMeta(doc.mime_type);
+                return (
+                    <div className="flex items-center gap-2.5">
+                        <span className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', tone.soft)}>
+                            <Icon className={cx('h-4 w-4', tone.icon)} aria-hidden="true" />
+                        </span>
+                        <div className="min-w-0 max-w-[280px]">
+                            <Link
+                                href={`/ged/documents/${doc.id}`}
+                                className={cx('block truncate rounded font-medium transition-colors',
+                                    TEXT_TITLE, 'hover:text-purple-600 dark:hover:text-purple-400', FOCUS_RING)}
+                                title={v}
+                            >
+                                {v}
+                            </Link>
+                            <p className={cx('truncate text-xs', TEXT_FAINT)}>
+                                {doc.folder?.name || 'Racine'}
+                            </p>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            key: 'access_level',
+            label: 'Confidentialité',
+            nowrap: true,
+            render: (v) => <AccessBadge level={v} />,
+        },
+        {
+            key: 'author',
+            label: 'Auteur',
+            nowrap: true,
+            render: (_v, doc) => doc.author?.name
+                ? <span className={cx('text-xs', TEXT_MUTED)}>{doc.author.name}</span>
+                : <span className={TEXT_FAINT}>—</span>,
+        },
+        {
+            key: 'file_size',
+            label: 'Taille',
+            nowrap: true,
+            width: '100px',
+            align: 'right',
+            render: (v) => <span className={cx('text-xs', TEXT_MUTED, NUM)}>{formatBytes(v)}</span>,
+        },
+        {
+            key: 'updated_at',
+            label: 'Modifié',
+            nowrap: true,
+            width: '130px',
+            render: (v) => <span className={cx('text-xs', TEXT_MUTED, NUM)}>{formatDate(v)}</span>,
+        },
+        {
+            key: 'current_version',
+            label: 'Version',
+            nowrap: true,
+            width: '90px',
+            render: (v) => v > 1
+                ? (
+                    <span className={cx('inline-flex items-center gap-1 text-xs', TEXT_MUTED, NUM)}>
+                        <Layers className="h-3.5 w-3.5" aria-hidden="true" /> v{v}
+                    </span>
+                )
+                : <span className={TEXT_FAINT}>—</span>,
+        },
+    ];
+
+    /* ─── États vides ──────────────────────────────────────────────────────── */
+
+    const emptyState = isFiltered ? (
+        <EmptyState
+            variant="no-results"
+            title="Aucun document ne correspond"
+            description={activeFolder
+                ? `Le dossier « ${activeFolder.name} » ne contient aucun document pour ces critères.`
+                : 'Aucun document ne correspond à cette recherche. Essayez un autre mot-clé.'}
+            action={
+                <Button variant="primary" icon={UploadCloud} onClick={openFilePicker}>
+                    Uploader un document
+                </Button>
+            }
+            secondary={
+                <Button variant="secondary" onClick={resetFilters}>
+                    Voir tous les documents
+                </Button>
+            }
+        />
+    ) : (
+        <EmptyState
+            icon={FolderOpen}
+            title="Aucun document dans la GED"
+            description="Centralisez ici les contrats, factures, comptes rendus et pièces jointes de l'organisation. Chaque dépôt est versionné et tracé."
+            hints={[
+                'Le niveau de confidentialité contrôle qui peut ouvrir le document.',
+                'Chaque nouvelle version est conservée : rien n\'est écrasé.',
+                'Un lien de partage temporaire peut être généré depuis la fiche.',
+            ]}
+            action={
+                <Button variant="primary" icon={UploadCloud} onClick={openFilePicker}>
+                    Uploader un document
+                </Button>
+            }
+            secondary={
+                <Button variant="secondary" icon={Plus} onClick={() => setShowNewFolder(true)}>
+                    Créer un dossier
+                </Button>
+            }
+        />
+    );
+
+    /* ─── Pagination serveur (partagée grille / liste) ─────────────────────── */
+
+    const pagination = documents?.last_page > 1 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <p className={cx('text-xs', TEXT_MUTED, NUM)}>
+                {documents.from}–{documents.to} sur {documents.total} documents
+            </p>
+            <div className="flex flex-wrap gap-1">
+                {documents.links?.map((link, i) => (
+                    <button
+                        key={i}
+                        type="button"
+                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
+                        disabled={!link.url}
+                        dangerouslySetInnerHTML={{ __html: link.label }}
+                        className={cx(
+                            'h-8 min-w-[32px] rounded-lg border px-2.5 text-xs font-medium transition-colors',
+                            NUM, FOCUS_RING,
+                            link.active
+                                ? 'border-transparent bg-purple-600 text-white'
+                                : cx(BORDER, SURFACE, TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                            !link.url && 'pointer-events-none opacity-40',
+                        )}
+                    />
+                ))}
+            </div>
+        </div>
+    ) : null;
+
+    const viewOptions = [
+        { key: 'grid', label: 'Grille', icon: LayoutGrid },
+        { key: 'list', label: 'Liste',  icon: List },
+    ];
+
+    /* ─── Rendu ────────────────────────────────────────────────────────────── */
 
     return (
         <AppLayout>
-            <Head title="GED — Gestion Documentaire" />
+            <Head title="GED — Gestion documentaire" />
 
-            <div className="flex h-full overflow-hidden">
-                {/* ---------------------------------------------------------------- */}
-                {/* Panneau gauche — Arborescence dossiers                          */}
-                {/* ---------------------------------------------------------------- */}
-                <aside className="flex w-64 flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between p-4">
-                        <h2 className="text-sm font-semibold text-gray-700">Dossiers</h2>
-                        <button
-                            onClick={() => setShowNewFolder(true)}
-                            className="rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-700"
-                            title="Nouveau dossier"
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+                <PageHeader
+                    icon={FolderOpen}
+                    title="Gestion documentaire"
+                    breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'GED' }]}
+                    subtitle={`${total} document${total !== 1 ? 's' : ''} · centralisez, sécurisez et partagez les documents de l'organisation`}
+                    actions={
+                        <>
+                            <Button variant="secondary" icon={Plus} onClick={() => setShowNewFolder(true)}>
+                                Nouveau dossier
+                            </Button>
+                            <Button variant="primary" icon={UploadCloud} onClick={openFilePicker}>
+                                Uploader
+                            </Button>
+                        </>
+                    }
+                />
+
+                {/* Champ fichier masqué — piloté par les boutons « Uploader » */}
+                <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
+
+                {/* Indicateurs */}
+                <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+                    <StatCard label="Documents" value={stats?.total ?? 0}    icon={FileText}     tone="accent"  hint="total dans la GED" />
+                    <StatCard label="Ce mois"   value={stats?.month ?? 0}    icon={CalendarPlus} tone="info"    hint="ajoutés ce mois-ci" />
+                    <StatCard label="Partagés"  value={stats?.shared ?? 0}   icon={Share2}       tone="success" hint="documents publics" />
+                    <StatCard label="Archivés"  value={stats?.archived ?? 0} icon={Archive}      tone="neutral" hint="sortis du circuit actif" />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+
+                    {/* Dossiers */}
+                    <aside className="lg:col-span-1">
+                        <Card
+                            title="Dossiers"
+                            icon={Folder}
+                            flush
+                            actions={
+                                <Button
+                                    variant="ghost" size="sm" iconOnly icon={Plus}
+                                    title="Nouveau dossier"
+                                    onClick={() => setShowNewFolder(true)}
+                                />
+                            }
                         >
-                            <PlusIcon className="h-4 w-4" />
-                        </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-2 pb-4">
-                        {/* Racine */}
-                        <button
-                            onClick={() => handleFolderSelect(null)}
-                            className={`mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                                !currentFolderId
-                                    ? 'bg-blue-50 text-blue-700 font-medium'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                        >
-                            <FolderSolidIcon className="h-4 w-4 flex-shrink-0 text-yellow-400" />
-                            Tous les documents
-                        </button>
-
-                        {folders.map(folder => (
-                            <FolderTreeItem
-                                key={folder.id}
-                                folder={folder}
-                                currentFolderId={currentFolderId}
-                                onSelect={handleFolderSelect}
-                            />
-                        ))}
-                    </div>
-                </aside>
-
-                {/* ---------------------------------------------------------------- */}
-                {/* Zone principale                                                  */}
-                {/* ---------------------------------------------------------------- */}
-                <main className="flex flex-1 flex-col overflow-hidden">
-                    {/* Barre d'outils */}
-                    <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-6 py-3">
-                        {/* Breadcrumb */}
-                        <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
-                            <button
-                                onClick={() => handleFolderSelect(null)}
-                                className="flex-shrink-0 text-gray-500 hover:text-gray-800"
-                            >
-                                Documents
-                            </button>
-                            {breadcrumb.map((crumb, i) => (
-                                <span key={crumb.id} className="flex items-center gap-1">
-                                    <ChevronRightIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-300" />
-                                    <button
-                                        onClick={() => handleFolderSelect(crumb.id)}
-                                        className={`max-w-[150px] truncate ${
-                                            i === breadcrumb.length - 1
-                                                ? 'font-medium text-gray-900'
-                                                : 'text-gray-500 hover:text-gray-800'
-                                        }`}
-                                    >
-                                        {crumb.name}
-                                    </button>
-                                </span>
-                            ))}
-                        </nav>
-
-                        {/* Recherche */}
-                        <div className="relative w-64">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Rechercher…"
-                                value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                                className="w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        {/* Vue */}
-                        <div className="flex rounded-lg border border-gray-200 p-0.5">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`rounded p-1.5 ${viewMode === 'grid' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
-                            >
-                                <Squares2X2Icon className="h-4 w-4" />
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`rounded p-1.5 ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
-                            >
-                                <ListBulletIcon className="h-4 w-4" />
-                            </button>
-                        </div>
-
-                        {/* Actions */}
-                        <button
-                            onClick={() => setShowNewFolder(true)}
-                            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                            <PlusIcon className="h-4 w-4" />
-                            Nouveau dossier
-                        </button>
-
-                        <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <ArrowUpTrayIcon className="h-4 w-4" />
-                            Upload
-                        </button>
-                        <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
-                    </div>
-
-                    {/* Contenu */}
-                    <div className="flex-1 overflow-auto p-6">
-                        {documents?.data?.length === 0 ? (
-                            <div className="flex h-64 flex-col items-center justify-center text-gray-400">
-                                <FolderOpenIcon className="h-16 w-16 text-gray-200" />
-                                <p className="mt-4 text-sm font-medium">Ce dossier est vide</p>
-                                <p className="mt-1 text-xs">Uploadez des documents ou créez un sous-dossier</p>
+                            <div className="max-h-[420px] overflow-y-auto p-2">
                                 <button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="mt-4 flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                    type="button"
+                                    onClick={() => handleFolderSelect(null)}
+                                    aria-current={!currentFolderId ? 'true' : undefined}
+                                    className={cx(
+                                        'mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                                        FOCUS_RING,
+                                        !currentFolderId
+                                            ? cx('font-medium', TONES.accent.soft, TONES.accent.text)
+                                            : cx(TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                    )}
                                 >
-                                    <ArrowUpTrayIcon className="h-4 w-4" />
-                                    Uploader un document
+                                    <FolderOpen className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                    Tous les documents
                                 </button>
+
+                                {folders.map(folder => {
+                                    const active = currentFolderId === folder.id;
+                                    return (
+                                        <button
+                                            key={folder.id}
+                                            type="button"
+                                            onClick={() => handleFolderSelect(folder.id)}
+                                            aria-current={active ? 'true' : undefined}
+                                            className={cx(
+                                                'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                                                FOCUS_RING,
+                                                active
+                                                    ? cx('font-medium', TONES.accent.soft, TONES.accent.text)
+                                                    : cx(TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                            )}
+                                        >
+                                            <Folder className={cx('h-4 w-4 shrink-0', active ? '' : TEXT_FAINT)} aria-hidden="true" />
+                                            <span className="truncate">{folder.name}</span>
+                                            {folder.documents_count > 0 && (
+                                                <Badge variant="neutral" className={cx('ml-auto shrink-0', NUM)}>
+                                                    {folder.documents_count}
+                                                </Badge>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+
+                                {folders.length === 0 && (
+                                    <EmptyState
+                                        compact
+                                        icon={Folder}
+                                        title="Aucun dossier"
+                                        description="Rangez les documents par dossier pour retrouver l'essentiel plus vite."
+                                        action={
+                                            <Button variant="secondary" size="sm" icon={Plus} onClick={() => setShowNewFolder(true)}>
+                                                Créer un dossier
+                                            </Button>
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </Card>
+                    </aside>
+
+                    {/* Documents */}
+                    <main className="space-y-4 lg:col-span-3">
+
+                        {/* Barre d'outils */}
+                        <div className={cx('flex flex-col gap-3 rounded-xl border px-4 py-3 shadow-sm sm:flex-row sm:items-center',
+                            BORDER, SURFACE)}>
+
+                            <nav aria-label="Fil d'ariane des dossiers" className="flex min-w-0 flex-1 items-center gap-1 text-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => handleFolderSelect(null)}
+                                    className={cx('shrink-0 rounded px-0.5 transition-colors',
+                                        TEXT_MUTED, 'hover:text-purple-600 dark:hover:text-purple-400', FOCUS_RING)}
+                                >
+                                    Documents
+                                </button>
+                                {activeFolder && (
+                                    <span className="flex min-w-0 items-center gap-1">
+                                        <ChevronRight className={cx('h-3.5 w-3.5 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+                                        <span className={cx('max-w-[180px] truncate font-medium', TEXT_TITLE)}>
+                                            {activeFolder.name}
+                                        </span>
+                                    </span>
+                                )}
+                            </nav>
+
+                            <div className="relative sm:w-64">
+                                <Search className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
+                                <input
+                                    type="search"
+                                    placeholder="Rechercher un document…"
+                                    value={search}
+                                    onChange={e => setSearch(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                    aria-label="Rechercher un document"
+                                    className={cx(CONTROL, 'h-10 pl-9')}
+                                />
+                            </div>
+
+                            <div
+                                role="tablist"
+                                aria-label="Mode d'affichage"
+                                className={cx('flex shrink-0 rounded-lg border p-1', BORDER)}
+                            >
+                                {viewOptions.map(opt => {
+                                    const active = viewMode === opt.key;
+                                    return (
+                                        <button
+                                            key={opt.key}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={active}
+                                            title={opt.label}
+                                            onClick={() => setViewMode(opt.key)}
+                                            className={cx(
+                                                'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
+                                                FOCUS_RING,
+                                                active
+                                                    ? 'bg-purple-600 text-white'
+                                                    : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                            )}
+                                        >
+                                            <opt.icon className="h-4 w-4" aria-hidden="true" />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Contenu */}
+                        {docs.length === 0 ? (
+                            <div className={cx('border border-dashed rounded-xl', BORDER, SURFACE)}>
+                                {emptyState}
                             </div>
                         ) : viewMode === 'grid' ? (
-                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                                {documents.data.map(doc => (
-                                    <DocumentCard
-                                        key={doc.id}
-                                        document={doc}
-                                        onDownload={handleDownload}
-                                        onPreview={handlePreview}
-                                        onShare={handleShare}
-                                        onMove={handleMove}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className="border-b border-gray-100 bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Document</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Confidentialité</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Auteur</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Taille</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Modifié</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Version</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {documents.data.map(doc => (
-                                            <DocumentRow
-                                                key={doc.id}
-                                                document={doc}
-                                                onDownload={handleDownload}
-                                                onPreview={handlePreview}
-                                                onShare={handleShare}
-                                                onMove={handleMove}
-                                            />
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-
-                        {/* Pagination */}
-                        {documents?.last_page > 1 && (
-                            <div className="mt-4 flex items-center justify-between">
-                                <p className="text-xs text-gray-500">
-                                    {documents.from}–{documents.to} sur {documents.total} documents
-                                </p>
-                                <div className="flex gap-1">
-                                    {documents.links?.map((link, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => link.url && router.get(link.url)}
-                                            disabled={!link.url}
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                            className={`rounded px-3 py-1 text-xs ${
-                                                link.active
-                                                    ? 'bg-blue-600 text-white'
-                                                    : link.url
-                                                        ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
-                                                        : 'text-gray-300 cursor-not-allowed'
-                                            }`}
+                            <>
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                                    {docs.map(doc => (
+                                        <DocumentCard
+                                            key={doc.id}
+                                            document={doc}
+                                            onDownload={handleDownload}
+                                            onPreview={handlePreview}
+                                            onShare={handleShare}
+                                            onMove={handleMove}
                                         />
                                     ))}
                                 </div>
-                            </div>
+                                {pagination && (
+                                    <div className={cx('rounded-xl border shadow-sm', BORDER, SURFACE)}>
+                                        {pagination}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <DataTable
+                                columns={columns}
+                                data={docs}
+                                rowKey="id"
+                                pageSize={documents?.per_page ?? 24}
+                                totalItems={total}
+                                empty={emptyState}
+                                footer={pagination}
+                                actions={(doc) => (
+                                    <>
+                                        <Button variant="ghost" size="sm" iconOnly icon={Eye}
+                                                title="Prévisualiser" onClick={() => handlePreview(doc)} />
+                                        <Button variant="ghost" size="sm" iconOnly icon={Download}
+                                                title="Télécharger" onClick={() => handleDownload(doc)} />
+                                        <Button variant="ghost" size="sm" iconOnly icon={Share2}
+                                                title="Partager" onClick={() => handleShare(doc)} />
+                                        <Button variant="ghost" size="sm" iconOnly icon={Move}
+                                                title="Déplacer" onClick={() => handleMove(doc)} />
+                                        <Button as={Link} variant="ghost" size="sm" iconOnly icon={FileText}
+                                                title="Ouvrir la fiche" href={`/ged/documents/${doc.id}`} />
+                                    </>
+                                )}
+                            />
                         )}
-                    </div>
-                </main>
+                    </main>
+                </div>
             </div>
 
             {/* Modales */}
@@ -837,23 +1060,32 @@ export default function GEDIndex({ documents, folders = [], filters: initialFilt
                 <NewFolderModal
                     parentId={currentFolderId}
                     onClose={() => setShowNewFolder(false)}
-                    onCreated={() => { setShowNewFolder(false); router.reload({ only: ['folders', 'documents'] }); }}
+                    onCreated={() => { setShowNewFolder(false); router.reload({ only: ['folders', 'documents', 'stats'] }); }}
                 />
             )}
 
-            {previewDoc && (
-                <PreviewModal
-                    document={previewDoc}
-                    onClose={() => setPreviewDoc(null)}
+            {uploadState && (
+                <UploadModal
+                    file={uploadState.file}
+                    uploading={uploadState.uploading}
+                    error={uploadState.error}
+                    onClose={() => setUploadState(null)}
+                    onConfirm={handleUploadConfirm}
                 />
             )}
 
-            {shareDoc && (
-                <ShareModal
-                    document={shareDoc}
-                    onClose={() => setShareDoc(null)}
+            {previewDoc && <PreviewModal document={previewDoc} onClose={() => setPreviewDoc(null)} />}
+            {shareDoc && <ShareModal document={shareDoc} onClose={() => setShareDoc(null)} />}
+            {moveDoc && (
+                <MoveModal
+                    document={moveDoc}
+                    folders={folders}
+                    onClose={() => setMoveDoc(null)}
+                    onMoved={() => { setMoveDoc(null); router.reload({ only: ['documents', 'stats'] }); }}
                 />
             )}
         </AppLayout>
     );
 }
+
+export { GEDIndex };

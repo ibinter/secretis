@@ -1,195 +1,119 @@
+@php
+    /**
+     * Rapport personnalisé (Report Builder) — SECRETIS ERP
+     * Appelée par App\Jobs\GenerateReportJob::generatePdf() — A4 paysage
+     * Variables : $reportName (string), $columns (array<array{field,label,type?,visible?,width?}>),
+     *             $rows (Illuminate\Support\Collection), $generatedAt (string 'd/m/Y H:i'), $rowCount (int)
+     */
+    $cols = array_values($columns ?? []);
+
+    $toArray = function ($item): array {
+        if ($item instanceof \Illuminate\Database\Eloquent\Model) {
+            return $item->getAttributes();
+        }
+        if ($item instanceof \Illuminate\Contracts\Support\Arrayable) {
+            return $item->toArray();
+        }
+        return (array) $item;
+    };
+
+    $render = function ($value, string $type) {
+        if ($value === null || $value === '') {
+            return $type === 'boolean' ? 'Non' : '—';
+        }
+        return match ($type) {
+            'datetime' => \Carbon\Carbon::parse($value)->format('d/m/Y H:i'),
+            'date'     => \Carbon\Carbon::parse($value)->format('d/m/Y'),
+            'boolean'  => $value ? 'Oui' : 'Non',
+            'currency' => number_format((float) $value, 0, ',', ' '),
+            'number', 'integer', 'decimal' => is_numeric($value) ? number_format((float) $value, 0, ',', ' ') : (string) $value,
+            default    => is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE),
+        };
+    };
+
+    $alignRight = ['currency', 'number', 'integer', 'decimal'];
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ $reportName }}</title>
+    <meta charset="utf-8">
+    <title>{{ $reportName ?? 'Rapport' }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { margin: 12mm 10mm 14mm 10mm; }
+        * { font-family: 'DejaVu Sans', sans-serif; }
+        body { margin: 0; color: #1f2937; font-size: 10px; }
 
-        body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 9pt;
-            color: #1a1a2e;
-            background: #fff;
-        }
+        .header { border-bottom: 2px solid #9333EA; padding-bottom: 8px; margin-bottom: 12px; }
+        .brand { font-size: 15px; font-weight: bold; color: #111827; }
+        .title { font-size: 12px; color: #4b5563; margin-top: 3px; }
+        .meta { font-size: 9px; color: #6b7280; margin-top: 3px; }
 
-        /* ── En-tête ── */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 20px;
-            background: linear-gradient(135deg, #2E86C1 0%, #1a5276 100%);
-            color: #fff;
-            margin-bottom: 16px;
-        }
-
-        .header-left h1 {
-            font-size: 14pt;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        .header-left .subtitle {
-            font-size: 8pt;
-            opacity: 0.8;
-            margin-top: 3px;
-        }
-
-        .header-right {
-            text-align: right;
-            font-size: 8pt;
-            opacity: 0.9;
-        }
-
-        /* ── Méta ── */
-        .meta {
-            padding: 0 20px 10px;
-            display: flex;
-            gap: 24px;
-            font-size: 8pt;
-            color: #555;
-        }
-
-        .meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* ── Tableau ── */
-        .table-wrap {
-            padding: 0 20px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 8pt;
-        }
-
-        thead tr {
-            background: #2E86C1;
-            color: #fff;
-        }
-
-        thead th {
-            padding: 7px 8px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 7.5pt;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-
-        tbody tr:nth-child(even) {
-            background: #f0f7ff;
-        }
-
-        tbody tr:nth-child(odd) {
-            background: #fff;
-        }
-
-        tbody tr td {
-            padding: 5px 8px;
-            border-bottom: 1px solid #e8edf3;
-            vertical-align: top;
-            max-width: 180px;
-            overflow: hidden;
-        }
-
-        /* ── Pied de page ── */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 8px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #e0e6ed;
-            font-size: 7pt;
-            color: #888;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .footer .brand {
-            color: #2E86C1;
-            font-weight: bold;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-            font-style: italic;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        table.data { table-layout: fixed; }
+        table.data th { background: #f5f3ff; color: #5b21b6; text-align: left; padding: 5px 6px;
+                        font-size: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd6fe; }
+        table.data th.num { text-align: right; }
+        table.data td { padding: 4px 6px; border-bottom: 1px solid #f3f4f6; font-size: 9px;
+                        word-wrap: break-word; overflow-wrap: break-word; }
+        .num { text-align: right; }
+        .ctr { text-align: center; }
+        .muted { color: #9ca3af; }
+        .footer { margin-top: 16px; font-size: 8px; color: #9ca3af; text-align: center; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-    <!-- En-tête -->
-    <div class="header">
-        <div class="header-left">
-            <h1>{{ $reportName }}</h1>
-            <div class="subtitle">SECRETIS ERP — Rapport personnalisé</div>
-        </div>
-        <div class="header-right">
-            <div>Généré le {{ $generatedAt }}</div>
-            <div>{{ number_format($rowCount, 0, ',', ' ') }} ligne{{ $rowCount > 1 ? 's' : '' }}</div>
-        </div>
+<div class="header">
+    <div class="brand">SECRETIS ERP</div>
+    <div class="title">{{ $reportName ?? 'Rapport personnalisé' }}</div>
+    <div class="meta">
+        {{ $rowCount ?? 0 }} enregistrement(s) — {{ count($cols) }} colonne(s)
+        — Généré le {{ $generatedAt ?? now()->format('d/m/Y H:i') }}
     </div>
+</div>
 
-    <!-- Tableau des données -->
-    <div class="table-wrap">
-        @if(count($rows) === 0)
-            <div class="no-data">Aucune donnée à afficher pour ce rapport.</div>
-        @else
-            <table>
-                <thead>
-                    <tr>
-                        @foreach($columns as $col)
-                            @if($col['visible'] ?? true)
-                                <th style="width: {{ ($col['width'] ?? 150) }}px">{{ $col['label'] }}</th>
-                            @endif
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($rows as $row)
-                        <tr>
-                            @php
-                                $record = is_object($row) ? (array) $row->getAttributes() : (array) $row;
-                            @endphp
-                            @foreach($columns as $col)
-                                @if($col['visible'] ?? true)
-                                    @php
-                                        $value = $record[$col['field']] ?? null;
-                                        $formatted = match($col['type'] ?? 'string') {
-                                            'datetime' => $value ? \Carbon\Carbon::parse($value)->format('d/m/Y H:i') : '—',
-                                            'date'     => $value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '—',
-                                            'boolean'  => $value ? 'Oui' : 'Non',
-                                            'number'   => $value !== null ? number_format((float)$value, 0, ',', ' ') : '—',
-                                            default    => $value ?? '—',
-                                        };
-                                    @endphp
-                                    <td>{{ $formatted }}</td>
-                                @endif
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
+<table class="data">
+    <thead>
+        <tr>
+            @forelse($cols as $col)
+                <th class="{{ in_array($col['type'] ?? 'string', $alignRight, true) ? 'num' : '' }}">
+                    {{ $col['label'] ?? ($col['field'] ?? '') }}
+                </th>
+            @empty
+                <th>Colonne</th>
+            @endforelse
+        </tr>
+    </thead>
+    <tbody>
+        @forelse(($rows ?? []) as $item)
+            @php $record = $toArray($item); @endphp
+            <tr>
+                @forelse($cols as $col)
+                    @php
+                        $type  = $col['type'] ?? 'string';
+                        $value = $record[$col['field'] ?? ''] ?? null;
+                    @endphp
+                    <td class="{{ in_array($type, $alignRight, true) ? 'num' : '' }}">
+                        {{ $render($value, $type) }}
+                    </td>
+                @empty
+                    <td class="muted">—</td>
+                @endforelse
+            </tr>
+        @empty
+            <tr>
+                <td class="muted ctr" colspan="{{ max(count($cols), 1) }}" style="padding:20px;">
+                    Aucun élément
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
 
-    <!-- Pied de page -->
-    <div class="footer">
-        <div><span class="brand">IBIG SECRETIS ERP</span> — Rapport confidentiel</div>
-        <div>{{ $reportName }} — {{ $generatedAt }}</div>
-        <div>Page <span class="pagenum"></span></div>
-    </div>
+<div class="footer">
+    {{ $reportName ?? 'Rapport personnalisé' }} — {{ $rowCount ?? 0 }} enregistrement(s)<br>
+    Document généré le {{ $generatedAt ?? now()->format('d/m/Y H:i') }} — SECRETIS ERP · IBIG Soft
+</div>
 
 </body>
 </html>

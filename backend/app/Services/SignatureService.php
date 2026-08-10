@@ -314,7 +314,14 @@ class SignatureService
             'documentHash' => $this->hashDocument($request->document->file_path),
         ];
 
-        $pdf = app('dompdf.wrapper');
+        // ARBITRAGE EN ATTENTE — cahier §6, note SANTAREX : le filigrane ne
+        // doit pas figurer sur une pièce à valeur opposable remise à un tiers.
+        // Ce certificat est un dossier de preuve de signature électronique. Le
+        // choix n'appartient pas à ce chantier : la règle générale de §3.5
+        // s'applique donc par défaut. Pour l'en dispenser, il suffira d'un
+        // `->sansFiligrane('pièce à valeur probatoire')` ici, et de nulle part
+        // ailleurs.
+        $pdf = app('dompdf.wrapper')->pourOrganisation($request->organization_id);
         $pdf->loadView('signatures.certificate', $data);
         $pdf->setPaper('A4', 'portrait');
 

@@ -162,7 +162,7 @@ export default function VarianceAnalysis({ budget, departments }) {
               <button
                 key={v}
                 onClick={() => setPeriod(v)}
-                className={`px-3 py-1.5 transition ${period === v ? 'bg-[#1A3A5C] text-white' : 'hover:bg-gray-50 text-gray-600'}`}
+                className={`px-3 py-1.5 transition ${period === v ? 'bg-[#9333EA] text-white' : 'hover:bg-gray-50 text-gray-600'}`}
               >
                 {l}
               </button>
@@ -249,7 +249,7 @@ export default function VarianceAnalysis({ budget, departments }) {
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); setExpandedLine(isExpanded ? null : line.id); }}
-                            className="text-gray-400 hover:text-[#1A3A5C] transition"
+                            className="text-gray-400 hover:text-[#9333EA] transition"
                           >
                             <ChatBubbleLeftIcon className="h-4 w-4" />
                           </button>
@@ -275,7 +275,7 @@ export default function VarianceAnalysis({ budget, departments }) {
                                   value={comments[line.id] ?? ''}
                                   onChange={(e) => setComments({ ...comments, [line.id]: e.target.value })}
                                   placeholder="Ex : Dépassement dû à un appel d'offres exceptionnel..."
-                                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#1A3A5C] resize-none"
+                                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#9333EA] resize-none"
                                 />
                               </div>
                             </div>
@@ -327,3 +327,4 @@ export default function VarianceAnalysis({ budget, departments }) {
     </AuthLayout>
   );
 }
+export { VarianceAnalysis };

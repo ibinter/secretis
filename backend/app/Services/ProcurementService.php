@@ -8,9 +8,11 @@ use App\Models\PurchaseRequest;
 use App\Models\Quotation;
 use App\Models\Rfq;
 use App\Models\RfqSupplier;
+use App\Models\Supply;
 use App\Models\Supplier;
 use App\Models\SupplierEvaluation;
 use App\Models\User;
+use App\Services\StockService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -31,7 +33,6 @@ class ProcurementService
 
             $last   = PurchaseRequest::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('DA-%d-%05d', $year, $last + 1);
@@ -113,7 +114,6 @@ class ProcurementService
 
             $last   = Rfq::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('AO-%d-%05d', $year, $last + 1);
@@ -178,7 +178,6 @@ class ProcurementService
 
             $last   = Quotation::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('DEV-%d-%05d', $year, $last + 1);
@@ -317,7 +316,6 @@ class ProcurementService
 
             $last   = PurchaseOrder::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('BC-%d-%05d', $year, $last + 1);
@@ -383,7 +381,6 @@ class ProcurementService
 
             $last   = GoodsReceipt::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count();
 
             $number = sprintf('BR-%d-%05d', $year, $last + 1);
@@ -423,8 +420,66 @@ class ProcurementService
                 'actual_delivery_date' => $gr->received_date,
             ]);
 
+            // -- Entree en stock ------------------------------------------
+            // La reception enregistrait la livraison sans jamais toucher au
+            // stock : les cartons arrivaient, l'ERP le notait, et
+            // `supplies.quantity` ne bougeait pas. Deux silos, exactement
+            // comme la facturation et la comptabilite l'etaient.
+            //
+            // Seules les lignes rattachees a une fourniture entrent en stock :
+            // une prestation ou un consommable non suivi n'a rien a y faire.
+            $this->entrerEnStock($gr, $receipts['items_received'], $receipts['received_by']);
+
             return $gr;
         });
+    }
+
+    /**
+     * Alimente le stock a partir des lignes receptionnees.
+     *
+     * La quantite retenue est celle REELLEMENT acceptee : `qty_received` moins
+     * `qty_rejected`. Faire entrer la quantite recue sans deduire les rebuts
+     * gonflerait le stock d'articles qu'on s'apprete a retourner.
+     */
+    private function entrerEnStock(GoodsReceipt $gr, array $lignes, int $userId): void
+    {
+        $auteur = User::find($userId);
+
+        if (! $auteur) {
+            return;
+        }
+
+        $stock = app(StockService::class);
+
+        foreach ($lignes as $ligne) {
+            $supplyId = $ligne['supply_id'] ?? null;
+
+            if (! $supplyId) {
+                continue;
+            }
+
+            $acceptee = (int) round(($ligne['qty_received'] ?? 0) - ($ligne['qty_rejected'] ?? 0));
+
+            if ($acceptee <= 0) {
+                continue;
+            }
+
+            $supply = Supply::where('organization_id', $gr->organization_id)->find($supplyId);
+
+            if (! $supply) {
+                continue;
+            }
+
+            $stock->entrer(
+                $supply,
+                $acceptee,
+                'Reception ' . $gr->receipt_number,
+                $auteur,
+                isset($ligne['unit_price']) ? (float) $ligne['unit_price'] : null,
+                'goods_receipt',
+                $gr->id,
+            );
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -569,7 +624,7 @@ class ProcurementService
         $monthly = PurchaseOrder::where('organization_id', $organizationId)
             ->whereYear('created_at', $year)
             ->whereNotIn('status', ['annule', 'brouillon'])
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount_xof) as total')
+            ->selectRaw('EXTRACT(MONTH FROM created_at) as month, SUM(total_amount_xof) as total')
             ->groupBy('month')
             ->pluck('total', 'month')
             ->toArray();

@@ -298,4 +298,40 @@ class ReportController extends Controller
             default => response()->json(['data' => $data]),
         };
     }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+
+    // ── Alias / stubs pour routes web.php ─────────────────────────────────────
+    public function builder(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        return $this->viewer($request);
+    }
+
+    public function generate(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['message' => 'Génération démarrée.', 'stub' => true], 202);
+    }
+
+    public function show(\Illuminate\Http\Request $request, $id): \Inertia\Response|\Illuminate\Http\JsonResponse
+    {
+        // TODO: charger le rapport réel depuis la base
+        return \Inertia\Inertia::render('Rapports/Viewer', ['report_id' => $id]);
+    }
+
+    public function export(\Illuminate\Http\Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['url' => null, 'stub' => true, 'report_id' => $id]);
+    }
+
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
 }

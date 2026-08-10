@@ -564,21 +564,31 @@ class SyscohadaService
         $totals = $this->getAccountTotals($org->id, $start, $end);
 
         return match ($type) {
-            'TVA'     => $this->calcTva($totals, $start, $end),
+            'TVA'     => $this->calcTva($totals, $org, $start, $end),
             'IS'      => $this->calcIs($totals, $org, $start, $end),
             'PATENTE' => $this->calcPatente($totals, $org),
-            'CNPS'    => $this->calcCnps($totals, $start, $end),
+            'CNPS'    => $this->calcCotisationsSociales($totals, $org, $start, $end),
             default   => throw new RuntimeException("Type de déclaration inconnu : {$type}"),
         };
     }
 
-    private function calcTva(array $totals, Carbon $start, Carbon $end): array
+    /**
+     * Déclaration de TVA.
+     *
+     * ⚠️ Les comptes venaient d'une liste EN DUR (`4431`/`443` pour la collecte,
+     * `4441`/`444` pour la déduction) qui ne correspondait pas au plan
+     * réellement semé : la TVA déductible remontait donc à ZÉRO même quand les
+     * écritures d'achat étaient correctement passées au 4451. Les comptes sont
+     * désormais lus dans `accounting_mappings`, comme partout ailleurs — un
+     * plan subdivisé différemment reste ainsi exploitable.
+     */
+    private function calcTva(array $totals, Organization $org, Carbon $start, Carbon $end): array
     {
-        // TVA collectée : comptes 4431 (TVA sur ventes)
-        $tvaCollectee = $this->sumAccounts($totals, ['4431', '443']);
+        $collecte   = $this->comptesTva($org->id, 'vat_collected',  ['4431', '443']);
+        $deductible = $this->comptesTva($org->id, 'vat_deductible', ['4451', '445']);
 
-        // TVA déductible : comptes 4441 (TVA sur achats)
-        $tvaDeductible = $this->sumAccounts($totals, ['4441', '444']);
+        $tvaCollectee  = $this->sumAccounts($totals, $collecte);
+        $tvaDeductible = $this->sumAccounts($totals, $deductible);
 
         $tvaNette = $tvaCollectee - $tvaDeductible;
 
@@ -590,12 +600,42 @@ class SyscohadaService
             'tva_nette'     => $tvaNette,
             'a_payer'       => max(0, $tvaNette),
             'credit_report' => max(0, -$tvaNette),
-            'taux'          => 0.18,
             'breakdown'     => [
-                'comptes_collecte'  => ['4431', '443'],
-                'comptes_deductible'=> ['4441', '444'],
+                'comptes_collecte'   => $collecte,
+                'comptes_deductible' => $deductible,
             ],
         ];
+    }
+
+    /**
+     * Comptes de TVA d'une organisation : celui paramétré, plus ses
+     * subdivisions éventuelles. Le repli n'est utilisé qu'à défaut de
+     * paramétrage.
+     *
+     * @return array<int, string>
+     */
+    private function comptesTva(int $orgId, string $purpose, array $repli): array
+    {
+        $compte = DB::table('accounting_mappings')
+            ->where('organization_id', $orgId)
+            ->where('purpose', $purpose)
+            ->value('account_number');
+
+        if (! $compte) {
+            return $repli;
+        }
+
+        // Une organisation peut ventiler sa TVA sur plusieurs sous-comptes
+        // (44521, 44522…) : on retient le compte paramétré et tous ceux qui en
+        // découlent, sinon une partie de la taxe échapperait à la déclaration.
+        return DB::table('chart_of_accounts')
+            ->where('organization_id', $orgId)
+            ->where(function ($q) use ($compte) {
+                $q->where('account_number', $compte)
+                  ->orWhere('account_number', 'like', $compte . '%');
+            })
+            ->pluck('account_number')
+            ->all();
     }
 
     private function calcIs(array $totals, Organization $org, Carbon $start, Carbon $end): array
@@ -643,23 +683,45 @@ class SyscohadaService
         ];
     }
 
-    private function calcCnps(array $totals, Carbon $start, Carbon $end): array
+    /**
+     * Cotisations sociales dues sur la masse salariale de la période.
+     *
+     * ⚠️ Cette méthode s'appelait `calcCnps()` et appliquait **les taux CNPS
+     * ivoiriens à toutes les organisations** : 15,45 % patronale et 6,3 %
+     * salariale, en dur. La base compte pourtant des clients sénégalais
+     * (IPRES + CSS) et béninois (CNSS), dont les caisses, taux et plafonds
+     * diffèrent — leur déclaration sociale était donc silencieusement fausse.
+     *
+     * Les taux viennent désormais du référentiel `payroll_contribution_rules`,
+     * par pays et par date d'effet. Si un pays n'y est pas paramétré, le calcul
+     * REFUSE de s'exécuter : une déclaration absente se corrige, une
+     * déclaration fausse se découvre au contrôle.
+     */
+    private function calcCotisationsSociales(array $totals, Organization $org, Carbon $start, Carbon $end): array
     {
         $salaireBrut = $this->sumAccounts($totals, ['661', '663']);
-        // CNPS Côte d'Ivoire :
-        //   Employeur : Retraite 7,7% + Prestations familiales 5,75% + Accidents travail 2-5%
-        //   Salarié   : Retraite 6,3%
-        $patronale  = round($salaireBrut * 0.1545, 2); // 7,7 + 5,75 + 1%
-        $salariale  = round($salaireBrut * 0.063, 2);
+
+        $referentiel = app(\App\Services\PayrollRuleService::class);
+        $pays = $referentiel->paysDe($org);
+
+        // Lève une exception explicite si le pays n'est pas couvert.
+        $calcul = $referentiel->calculerCotisations($salaireBrut, $pays, $end);
 
         return [
-            'type'          => 'CNPS',
+            'type'          => 'COTISATIONS_SOCIALES',
+            'country'       => $pays,
+            'scheme'        => $calcul['scheme'],
             'period'        => ['start' => $start->toDateString(), 'end' => $end->toDateString()],
             'salaire_brut'  => $salaireBrut,
-            'cotisation_patronale'  => $patronale,
-            'cotisation_salariale'  => $salariale,
-            'total_a_verser'=> $patronale + $salariale,
-            'note'          => 'CNPS CI — taux 2026 : patronale 15,45%, salariale 6,3%',
+            'cotisation_patronale' => $calcul['employer'],
+            'cotisation_salariale' => $calcul['employee'],
+            'total_a_verser'=> $calcul['total'],
+            'branches'      => $calcul['branches'],
+            'is_verified'   => $calcul['is_verified'],
+            'note'          => $calcul['is_verified']
+                ? "Taux {$calcul['scheme']} ({$pays}) confirmés sur texte officiel."
+                : "⚠️ Taux {$calcul['scheme']} ({$pays}) NON confirmés sur texte officiel : "
+                  . "à vérifier avant dépôt de la déclaration.",
         ];
     }
 

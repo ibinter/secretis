@@ -1,14 +1,27 @@
+/**
+ * Courrier/Form.jsx — Enregistrement / modification d'un courrier
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier STRICTEMENT inchangée : mêmes champs `useForm`, même
+ * `transform()` (renommage sender_org → sender_organization,
+ * assigned_to_id → assigned_to), même `POST /courrier` en création
+ * (forceFormData pour les pièces jointes) et même `PUT /courrier/{id}`
+ * via axios en édition.
+ */
+
 import { useState, useRef, useCallback } from 'react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import AppLayout from '@/Components/Layout/AppLayout';
 import {
-    PaperClipIcon,
-    XMarkIcon,
-    CloudArrowUpIcon,
-    ArrowLeftIcon,
-    CheckCircleIcon,
-    ExclamationCircleIcon,
-} from '@heroicons/react/24/outline';
+    Paperclip, X, UploadCloud, CheckCircle2, AlertCircle, Plus,
+    ArrowDownLeft, ArrowUpRight, Mail, FileText, Users,
+} from 'lucide-react';
+import {
+    PageHeader, Button, Card,
+    cx, CONTROL, BORDER, SURFACE_SUNK, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
+import { PlafondAtteintModal } from '@/Components/Licence/PlafondAtteint';
 
 // ---------------------------------------------------------------------------
 // Constantes
@@ -30,20 +43,21 @@ const ACCEPTED_MIME_TYPES = [
 ].join(',');
 
 // ---------------------------------------------------------------------------
-// Composants réutilisables
+// Champs de formulaire
 // ---------------------------------------------------------------------------
 
-function FormField({ label, required, error, children }) {
+function Field({ label, required, error, hint, children }) {
     return (
         <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
                 {label}
-                {required && <span className="ml-1 text-red-500">*</span>}
+                {required && <span className="ml-0.5 text-red-500">*</span>}
             </label>
             {children}
+            {hint && !error && <p className={cx('mt-1 text-xs', TEXT_FAINT)}>{hint}</p>}
             {error && (
-                <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                    <ExclamationCircleIcon className="h-3.5 w-3.5" />
+                <p className="mt-1 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     {error}
                 </p>
             )}
@@ -51,50 +65,32 @@ function FormField({ label, required, error, children }) {
     );
 }
 
-function Input({ className = '', ...props }) {
-    return (
-        <input
-            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
-            {...props}
-        />
-    );
-}
-
-function Select({ children, className = '', ...props }) {
-    return (
-        <select
-            className={`w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${className}`}
-            {...props}
-        >
-            {children}
-        </select>
-    );
-}
+const Input  = ({ className = '', ...props }) => <input  className={cx(CONTROL, 'h-10', className)} {...props} />;
+const Select = ({ className = '', ...props }) => <select className={cx(CONTROL, 'h-10', className)} {...props} />;
 
 function FileItem({ file, onRemove }) {
     const sizeKB = (file.size / 1024).toFixed(0);
     const sizeMB = (file.size / 1024 / 1024).toFixed(1);
 
     return (
-        <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
-            <PaperClipIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+        <li className={cx('flex items-center gap-3 rounded-lg border px-3 py-2.5', BORDER, SURFACE_SUNK)}>
+            <Paperclip className={cx('h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
             <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-gray-700">{file.name}</p>
-                <p className="text-xs text-gray-400">{sizeMB > 1 ? `${sizeMB} Mo` : `${sizeKB} Ko`}</p>
+                <p className={cx('truncate text-sm font-medium', TEXT_TITLE)}>{file.name}</p>
+                <p className={cx('text-xs', TEXT_MUTED, NUM)}>{sizeMB > 1 ? `${sizeMB} Mo` : `${sizeKB} Ko`}</p>
             </div>
-            <button
-                type="button"
+            <Button
+                type="button" variant="ghost" size="sm" iconOnly icon={X}
+                title={`Retirer ${file.name}`}
                 onClick={onRemove}
-                className="rounded p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-700"
-            >
-                <XMarkIcon className="h-4 w-4" />
-            </button>
-        </div>
+                className="hover:text-red-600 dark:hover:text-red-400"
+            />
+        </li>
     );
 }
 
 // ---------------------------------------------------------------------------
-// Zone de drop de fichiers
+// Zone de dépôt de fichiers
 // ---------------------------------------------------------------------------
 
 function DropZone({ files, onChange }) {
@@ -126,42 +122,44 @@ function DropZone({ files, onChange }) {
 
     return (
         <div>
-            {/* Zone de drop */}
-            <div
+            <button
+                type="button"
                 onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => inputRef.current?.click()}
-                className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                className={cx(
+                    'w-full rounded-xl border border-dashed px-6 py-8 text-center transition-colors',
+                    FOCUS_RING,
                     isDragging
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-blue-50'
-                }`}
+                        ? 'border-purple-400 bg-purple-50 dark:border-purple-500/60 dark:bg-purple-500/10'
+                        : cx(BORDER, SURFACE_SUNK, 'hover:border-purple-300 dark:hover:border-purple-500/40'),
+                )}
             >
-                <CloudArrowUpIcon className="mx-auto h-10 w-10 text-gray-300" />
-                <p className="mt-2 text-sm font-medium text-gray-600">
+                <UploadCloud className={cx('mx-auto h-8 w-8', TEXT_FAINT)} strokeWidth={1.75} aria-hidden="true" />
+                <span className={cx('mt-3 block text-sm font-medium', TEXT_TITLE)}>
                     Glissez-déposez vos fichiers ici
-                </p>
-                <p className="mt-1 text-xs text-gray-400">
-                    ou <span className="text-blue-600 underline">parcourir</span> — PDF, Word, Excel, images
-                </p>
-                <p className="mt-1 text-xs text-gray-400">
-                    Max {MAX_FILE_SIZE_MB} Mo par fichier — {MAX_FILES} fichiers max
-                </p>
+                </span>
+                <span className={cx('mt-1 block text-xs', TEXT_MUTED)}>
+                    ou <span className="font-medium text-purple-600 dark:text-purple-400">parcourez votre ordinateur</span>
+                    {' '}— PDF, Word, Excel, images
+                </span>
+                <span className={cx('mt-1 block text-xs', TEXT_FAINT, NUM)}>
+                    {MAX_FILE_SIZE_MB} Mo maximum par fichier · {MAX_FILES} fichiers au total
+                </span>
+            </button>
 
-                <input
-                    ref={inputRef}
-                    type="file"
-                    multiple
-                    accept={ACCEPTED_MIME_TYPES}
-                    className="hidden"
-                    onChange={e => handleFiles(e.target.files)}
-                />
-            </div>
+            <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept={ACCEPTED_MIME_TYPES}
+                className="hidden"
+                onChange={e => handleFiles(e.target.files)}
+            />
 
-            {/* Liste des fichiers sélectionnés */}
             {files.length > 0 && (
-                <div className="mt-3 space-y-2">
+                <ul className="mt-3 space-y-2">
                     {files.map((file, index) => (
                         <FileItem
                             key={`${file.name}-${index}`}
@@ -169,7 +167,7 @@ function DropZone({ files, onChange }) {
                             onRemove={() => handleRemove(index)}
                         />
                     ))}
-                </div>
+                </ul>
             )}
         </div>
     );
@@ -185,8 +183,12 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
 
     const [files, setFiles] = useState([]);
     const [submitted, setSubmitted] = useState(false);
+    const [saving, setSaving] = useState(false);
+    // Refus d'écriture au plafond (section 8.5). Le texte vient du serveur :
+    // le contrôle se fait à l'écriture, pas en masquant le bouton d'ici.
+    const [refusPlafond, setRefusPlafond] = useState(null);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset, transform } = useForm({
         type:                  defaultType,
         sender_name:           courrier?.sender_name || '',
         sender_org:            courrier?.sender_org || '',
@@ -204,125 +206,211 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
 
     const isIncoming = data.type === 'incoming';
 
-    const handleSubmit = (e) => {
+    // Le contrôleur attend `sender_organization` / `recipient_organization` /
+    // `assigned_to` : on renomme ici. `department_id` est désormais une vraie
+    // colonne (migration 2026_08_08_000005) — il était jusqu'ici supprimé de la
+    // charge utile, si bien que le champ « Service destinataire » de l'écran
+    // n'était jamais enregistré.
+    transform((d) => ({
+        type:                  d.type,
+        subject:               d.subject,
+        urgency:               d.urgency,
+        sender_name:           d.sender_name,
+        sender_organization:   d.sender_org,
+        recipient_name:        d.recipient_name,
+        recipient_organization: d.recipient_org,
+        received_at:           d.received_at || null,
+        sent_at:               d.sent_at || null,
+        assigned_to:           d.assigned_to_id || null,
+        department_id:         d.department_id || null,
+        notes:                 d.notes,
+        processing_delay_days: d.processing_delay_days,
+        attachments:           files,
+    }));
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const formData = new FormData();
-
-        // Ajouter les champs
-        Object.entries(data).forEach(([key, val]) => {
-            if (val !== '' && val !== null) formData.append(key, val);
-        });
-
-        // Ajouter les fichiers
-        files.forEach(file => formData.append('attachments[]', file));
-
         if (editMode && courrier?.id) {
-            post(`/courrier/${courrier.id}`, {
-                data: formData,
-                onSuccess: () => setSubmitted(true),
-            });
-        } else {
-            post('/courrier', {
-                data: formData,
-                onSuccess: () => setSubmitted(true),
-            });
+            // PUT /courrier/{id} renvoie du JSON → axios plutôt qu'Inertia.
+            setSaving(true);
+            try {
+                await axios.put(`/courrier/${courrier.id}`, {
+                    subject:      data.subject,
+                    urgency:      data.urgency,
+                    sender_name:  data.sender_name,
+                    sender_organization: data.sender_org,
+                    recipient_name: data.recipient_name,
+                    recipient_organization: data.recipient_org,
+                    received_at:  data.received_at || null,
+                    sent_at:      data.sent_at || null,
+                    notes:        data.notes,
+                    // Champs éditables à l'écran : ils étaient jusqu'ici perdus à l'enregistrement.
+                    type:         data.type,
+                    assigned_to:  data.assigned_to_id || null,
+                    department_id: data.department_id || null,
+                    processing_delay_days: data.processing_delay_days || null,
+                });
+                setSubmitted(true);
+            } catch (err) {
+                const statut = err.response?.status;
+                if (statut === 402 || statut === 403 || statut === 423) {
+                    setRefusPlafond(err.response?.data?.message ?? null);
+                    return;
+                }
+                alert(err.response?.data?.message ?? 'Erreur lors de la mise à jour du courrier.');
+            } finally {
+                setSaving(false);
+            }
+            return;
         }
+
+        // Création : POST /courrier renvoie une redirection Inertia.
+        post('/courrier', {
+            forceFormData: true,
+            onSuccess: () => setSubmitted(true),
+            // Un refus de licence revient dans le sac d'erreurs sous la clé
+            // `licence` : c'est le seul canal qu'Inertia laisse à une
+            // redirection en arrière. Le texte, lui, reste celui du serveur.
+            onError: (erreurs) => {
+                const refus = erreurs?.licence ?? erreurs?.plafond;
+                if (refus) setRefusPlafond(refus);
+            },
+        });
     };
+
+    /* ─── Écran de confirmation ─────────────────────────────────────────────── */
 
     if (submitted) {
         return (
             <AppLayout>
-                <div className="flex min-h-[60vh] items-center justify-center">
-                    <div className="text-center">
-                        <CheckCircleIcon className="mx-auto h-16 w-16 text-green-500" />
-                        <h2 className="mt-4 text-xl font-semibold text-gray-800">Courrier enregistré !</h2>
-                        <p className="mt-2 text-sm text-gray-500">Le courrier a été ajouté au registre avec succès.</p>
-                        <div className="mt-6 flex justify-center gap-3">
-                            <a href="/courrier" className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                Retour au registre
-                            </a>
-                            <button
-                                onClick={() => { setSubmitted(false); reset(); setFiles([]); }}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                            >
-                                Nouveau courrier
-                            </button>
+                <Head title={editMode ? 'Courrier mis à jour' : 'Courrier enregistré'} />
+
+                <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+                    <Card>
+                        <div className="flex flex-col items-center px-2 py-6 text-center">
+                            <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+                                <CheckCircle2
+                                    className="h-6 w-6 text-emerald-600 dark:text-emerald-400"
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                />
+                            </span>
+
+                            <h2 className={cx('mt-4 text-lg font-semibold tracking-tight', TEXT_TITLE)}>
+                                {editMode ? 'Courrier mis à jour' : 'Courrier enregistré'}
+                            </h2>
+                            <p className={cx('mt-1.5 max-w-sm text-sm leading-relaxed', TEXT_MUTED)}>
+                                {editMode
+                                    ? 'Les modifications ont bien été enregistrées dans le registre.'
+                                    : 'Le courrier a été ajouté au registre. Sa référence a été générée automatiquement.'}
+                            </p>
+
+                            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                                <Button variant="secondary" href="/courrier">Retour au registre</Button>
+                                {!editMode && (
+                                    <Button
+                                        variant="primary"
+                                        icon={Plus}
+                                        onClick={() => { setSubmitted(false); reset(); setFiles([]); }}
+                                    >
+                                        Enregistrer un autre courrier
+                                    </Button>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </Card>
                 </div>
             </AppLayout>
         );
     }
 
+    /* ─── Formulaire ────────────────────────────────────────────────────────── */
+
+    const typeOptions = [
+        { value: 'incoming', label: 'Courrier entrant', desc: "Reçu d'un expéditeur externe", icon: ArrowDownLeft },
+        { value: 'outgoing', label: 'Courrier sortant', desc: 'Envoyé à un destinataire externe', icon: ArrowUpRight },
+    ];
+
+    const busy = processing || saving;
+
     return (
         <AppLayout>
             <Head title={editMode ? 'Modifier le courrier' : 'Nouveau courrier'} />
 
-            <div className="mx-auto max-w-3xl p-6">
-                {/* En-tête */}
-                <div className="mb-6 flex items-center gap-4">
-                    <a href="/courrier" className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
-                        <ArrowLeftIcon className="h-5 w-5" />
-                    </a>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            {editMode ? 'Modifier le courrier' : 'Enregistrer un courrier'}
-                        </h1>
-                        <p className="mt-0.5 text-sm text-gray-500">
-                            {editMode ? `Référence : ${courrier?.reference}` : 'La référence sera générée automatiquement'}
-                        </p>
-                    </div>
-                </div>
+            <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+
+                <PageHeader
+                    icon={Mail}
+                    title={editMode ? 'Modifier le courrier' : 'Enregistrer un courrier'}
+                    breadcrumbs={[
+                        { label: 'Courrier', href: '/courrier' },
+                        { label: editMode ? (courrier?.reference || 'Modification') : 'Nouveau' },
+                    ]}
+                    subtitle={editMode
+                        ? `Référence ${courrier?.reference ?? '—'}`
+                        : 'La référence du courrier sera générée automatiquement à l\'enregistrement.'}
+                />
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Sélecteur de type */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            Type de courrier
-                        </h2>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { value: 'incoming', label: '← Courrier entrant', desc: 'Reçu d\'un expéditeur externe' },
-                                { value: 'outgoing', label: '→ Courrier sortant', desc: 'Envoyé à un destinataire externe' },
-                            ].map(opt => (
-                                <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => setData('type', opt.value)}
-                                    disabled={editMode}
-                                    className={`rounded-lg border-2 p-4 text-left transition-colors ${
-                                        data.type === opt.value
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
-                                    } ${editMode ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                                >
-                                    <p className="font-semibold">{opt.label}</p>
-                                    <p className="mt-0.5 text-xs opacity-75">{opt.desc}</p>
-                                </button>
-                            ))}
+                    {/* Type de courrier */}
+                    <Card title="Type de courrier" subtitle={editMode ? 'Le sens du courrier ne peut plus être modifié.' : "Choisissez le sens du courrier à enregistrer."}>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {typeOptions.map(({ value, label, desc, icon: Icon }) => {
+                                const active = data.type === value;
+                                return (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        onClick={() => setData('type', value)}
+                                        disabled={editMode}
+                                        aria-pressed={active}
+                                        className={cx(
+                                            'flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
+                                            FOCUS_RING,
+                                            active
+                                                ? 'border-purple-300 bg-purple-50 dark:border-purple-500/50 dark:bg-purple-500/10'
+                                                : cx(BORDER, SURFACE_SUNK, 'hover:bg-gray-100 dark:hover:bg-white/[0.05]'),
+                                            editMode && 'cursor-not-allowed opacity-60',
+                                        )}
+                                    >
+                                        <Icon
+                                            className={cx(
+                                                'mt-0.5 h-4 w-4 shrink-0',
+                                                active ? 'text-purple-600 dark:text-purple-400' : TEXT_FAINT,
+                                            )}
+                                            aria-hidden="true"
+                                        />
+                                        <span className="min-w-0">
+                                            <span className={cx(
+                                                'block text-sm font-medium',
+                                                active ? 'text-purple-700 dark:text-purple-300' : TEXT_TITLE,
+                                            )}>
+                                                {label}
+                                            </span>
+                                            <span className={cx('mt-0.5 block text-xs', TEXT_MUTED)}>{desc}</span>
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Informations principales */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            Informations du courrier
-                        </h2>
-
+                    <Card title="Informations du courrier" icon={FileText}>
                         <div className="space-y-4">
-                            <FormField label="Objet" required error={errors.subject}>
+                            <Field label="Objet" required error={errors.subject}>
                                 <Input
                                     value={data.subject}
                                     onChange={e => setData('subject', e.target.value)}
                                     placeholder="Objet du courrier"
                                     required
                                 />
-                            </FormField>
+                            </Field>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <FormField label="Urgence" required error={errors.urgency}>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <Field label="Urgence" required error={errors.urgency}>
                                     <Select
                                         value={data.urgency}
                                         onChange={e => setData('urgency', e.target.value)}
@@ -332,30 +420,32 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                         <option value="high">Élevée</option>
                                         <option value="urgent">Urgente</option>
                                     </Select>
-                                </FormField>
+                                </Field>
 
-                                <FormField
+                                <Field
                                     label={isIncoming ? 'Date de réception' : 'Date d\'envoi'}
                                     error={errors.received_at || errors.sent_at}
                                 >
                                     <Input
                                         type="date"
+                                        className={NUM}
                                         value={isIncoming ? data.received_at : data.sent_at}
                                         onChange={e => setData(isIncoming ? 'received_at' : 'sent_at', e.target.value)}
                                     />
-                                </FormField>
+                                </Field>
                             </div>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Correspondant */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            {isIncoming ? 'Expéditeur' : 'Destinataire'}
-                        </h2>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
+                    <Card
+                        title={isIncoming ? 'Expéditeur' : 'Destinataire'}
+                        subtitle={isIncoming
+                            ? "Qui vous a adressé ce courrier ?"
+                            : 'À qui ce courrier est-il adressé ?'}
+                    >
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <Field
                                 label={isIncoming ? 'Nom de l\'expéditeur' : 'Nom du destinataire'}
                                 error={errors.sender_name || errors.recipient_name}
                             >
@@ -364,9 +454,9 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                     onChange={e => setData(isIncoming ? 'sender_name' : 'recipient_name', e.target.value)}
                                     placeholder="Prénom NOM"
                                 />
-                            </FormField>
+                            </Field>
 
-                            <FormField
+                            <Field
                                 label="Organisation"
                                 error={errors.sender_org || errors.recipient_org}
                             >
@@ -375,18 +465,14 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                     onChange={e => setData(isIncoming ? 'sender_org' : 'recipient_org', e.target.value)}
                                     placeholder="Nom de l'organisation"
                                 />
-                            </FormField>
+                            </Field>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Affectation interne */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            Affectation interne
-                        </h2>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField label="Service destinataire" error={errors.department_id}>
+                    <Card title="Affectation interne" icon={Users}>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <Field label="Service destinataire" error={errors.department_id}>
                                 <Select
                                     value={data.department_id}
                                     onChange={e => setData('department_id', e.target.value)}
@@ -396,9 +482,9 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                         <option key={dept.id} value={dept.id}>{dept.name}</option>
                                     ))}
                                 </Select>
-                            </FormField>
+                            </Field>
 
-                            <FormField label="Assigné à" error={errors.assigned_to_id}>
+                            <Field label="Assigné à" error={errors.assigned_to_id}>
                                 <Select
                                     value={data.assigned_to_id}
                                     onChange={e => setData('assigned_to_id', e.target.value)}
@@ -408,78 +494,75 @@ export default function CourrierForm({ departments = [], users = [], editMode = 
                                         <option key={user.id} value={user.id}>{user.name}</option>
                                     ))}
                                 </Select>
-                            </FormField>
-                        </div>
+                            </Field>
 
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                            <FormField label="Délai de traitement (jours)" error={errors.processing_delay_days}>
+                            <Field
+                                label="Délai de traitement"
+                                hint="En jours ouvrés — sert à calculer l'échéance."
+                                error={errors.processing_delay_days}
+                            >
                                 <Input
                                     type="number"
                                     min={1}
                                     max={90}
+                                    className={NUM}
                                     value={data.processing_delay_days}
                                     onChange={e => setData('processing_delay_days', parseInt(e.target.value))}
                                 />
-                            </FormField>
+                            </Field>
                         </div>
-                    </div>
+                    </Card>
 
                     {/* Notes */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            Notes et observations
-                        </h2>
-
-                        <textarea
-                            value={data.notes}
-                            onChange={e => setData('notes', e.target.value)}
-                            placeholder="Notes internes, observations particulières…"
-                            rows={4}
-                            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-
-                        {errors.notes && (
-                            <p className="mt-1 text-xs text-red-600">{errors.notes}</p>
-                        )}
-                    </div>
+                    <Card title="Notes et observations">
+                        <Field label="Notes internes" error={errors.notes}>
+                            <textarea
+                                value={data.notes}
+                                onChange={e => setData('notes', e.target.value)}
+                                placeholder="Notes internes, observations particulières…"
+                                rows={4}
+                                className={cx(CONTROL, 'resize-y')}
+                            />
+                        </Field>
+                    </Card>
 
                     {/* Pièces jointes */}
-                    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500">
-                            Pièces jointes
-                        </h2>
-
+                    <Card
+                        title="Pièces jointes"
+                        icon={Paperclip}
+                        subtitle={files.length > 0
+                            ? `${files.length} fichier${files.length > 1 ? 's' : ''} sélectionné${files.length > 1 ? 's' : ''}`
+                            : 'Numérisations, annexes et justificatifs du courrier.'}
+                    >
                         <DropZone files={files} onChange={setFiles} />
 
                         {errors.attachments && (
-                            <p className="mt-2 text-xs text-red-600">{errors.attachments}</p>
+                            <p className="mt-2 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                                {errors.attachments}
+                            </p>
                         )}
-                    </div>
+                    </Card>
 
-                    {/* Boutons */}
-                    <div className="flex items-center justify-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                        <a
-                            href="/courrier"
-                            className="rounded-lg border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            Annuler
-                        </a>
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-                        >
-                            {processing && (
-                                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                                </svg>
-                            )}
-                            {editMode ? 'Enregistrer les modifications' : 'Enregistrer le courrier'}
-                        </button>
-                    </div>
+                    {/* Barre d'actions */}
+                    <Card padded={false}>
+                        <div className="flex flex-wrap items-center justify-end gap-2 px-4 py-3 sm:px-6">
+                            <Button variant="secondary" href="/courrier">Annuler</Button>
+                            <Button type="submit" variant="primary" loading={busy}>
+                                {editMode ? 'Enregistrer les modifications' : 'Enregistrer le courrier'}
+                            </Button>
+                        </div>
+                    </Card>
                 </form>
             </div>
+
+            {/* Refus d'écriture au plafond — texte officiel 8.5 */}
+            <PlafondAtteintModal
+                open={refusPlafond !== null}
+                message={refusPlafond}
+                onClose={() => setRefusPlafond(null)}
+            />
         </AppLayout>
     );
 }
+export { CourrierForm };

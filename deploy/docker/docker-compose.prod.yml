@@ -10,7 +10,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/secretis.conf:/etc/nginx/conf.d/secretis.conf:ro
+      # Config nginx non versionnée : voir deploy/nginx/LISEZ-MOI.md.
+      - ${NGINX_CONF:-/etc/nginx/sites-enabled/secretis}:/etc/nginx/conf.d/secretis.conf:ro
       - ../../backend/public:/var/www/html/public:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./logs/nginx:/var/log/nginx

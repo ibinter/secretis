@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string      $status              active|inactive|on_leave
  * @property Carbon      $hire_date
  * @property Carbon|null $end_date
- * @property array       $leave_balances      { annual: int, sick: int, recovery: int, ... }
+ * @property array       $leave_balance      { annual: int, sick: int, recovery: int, ... }
  * @property array|null  $emergency_contact   { name, phone, relation }
  * @property string|null $notes               Notes RH internes
  * @property Carbon      $created_at
@@ -53,21 +53,44 @@ class Employee extends Model
         'last_name',
         'email',
         'phone',
-        'avatar',
         'contract_type',
-        'position',
+        'job_title',
         'status',
         'hire_date',
-        'end_date',
-        'leave_balances',
+        'termination_date',
+        // Données RH sensibles : enregistrables, mais masquées par $hidden
+        // et rendues visibles uniquement à la RH / à l'intéressé.
+        'base_salary',
+        'bank_account',
+        'tax_id',
+        'social_security_number',
+        'birth_date',
+        'nationality',
+        'address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'leave_balance',
         'emergency_contact',
         'notes',
+    ];
+
+    /**
+     * Données personnelles sensibles (loi ivoirienne 2013-450 sur la protection
+     * des données) : masquées par défaut. Rendues visibles explicitement par
+     * `makeVisible()` pour la RH et pour l'employé lui-même.
+     */
+    protected $hidden = [
+        'base_salary',
+        'bank_account',
+        'social_security_number',
+        'tax_id',
+        'birth_date',
     ];
 
     protected $casts = [
         'hire_date'         => 'date',
         'end_date'          => 'date',
-        'leave_balances'    => 'array',
+        'leave_balance'     => 'array',
         'emergency_contact' => 'array',
     ];
 
@@ -163,13 +186,23 @@ class Employee extends Model
      */
     public function getLeaveBalance(): array
     {
-        return $this->leave_balances ?? [
+        $defaults = [
             'annual'    => 0,
             'sick'      => 0,
             'maternity' => 0,
             'unpaid'    => 0,
             'recovery'  => 0,
         ];
+
+        $stored = $this->leave_balance;
+
+        // La colonne est en JSON mais peut contenir un scalaire hérité
+        // (ex. un simple nombre de jours) : on le rattache au congé annuel.
+        if (is_numeric($stored)) {
+            return ['annual' => (int) $stored] + $defaults;
+        }
+
+        return is_array($stored) ? $stored + $defaults : $defaults;
     }
 
     /**
@@ -185,10 +218,10 @@ class Employee extends Model
 
         // Déduire les congés approuvés non encore consommés
         $approved = $this->leaveRequests()
-            ->where('leave_type', $type)
+            ->where('type', $type)
             ->whereIn('status', ['approved_n1', 'approved_hr'])
             ->where('end_date', '>=', now())
-            ->sum('days_count');
+            ->sum('working_days');
 
         return max(0, $available - $approved);
     }
@@ -219,6 +252,6 @@ class Employee extends Model
     {
         $balances = $this->getLeaveBalance();
         $balances[$type] = max(0, ($balances[$type] ?? 0) - $days);
-        $this->update(['leave_balances' => $balances]);
+        $this->update(['leave_balance' => $balances]);
     }
 }

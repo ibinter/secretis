@@ -19,14 +19,14 @@ import React, { useState, useRef, useCallback, useId } from 'react';
 const SortIcon = ({ direction }) => {
   if (direction === 'ascending') {
     return (
-      <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+      <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
         <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
       </svg>
     );
   }
   if (direction === 'descending') {
     return (
-      <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+      <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
       </svg>
     );
@@ -178,7 +178,7 @@ export default function AccessibleTable({
           <span>
             {displayTotal} {resultsLabel}
             {selectable && selected.length > 0 && (
-              <span className="ml-2 font-medium text-blue-600 dark:text-blue-400">
+              <span className="ml-2 font-medium text-purple-600 dark:text-purple-400">
                 ({selected.length} sélectionné{selected.length > 1 ? 's' : ''})
               </span>
             )}
@@ -221,8 +221,8 @@ export default function AccessibleTable({
                     onChange={handleSelectAll}
                     aria-label={allSelected ? 'Désélectionner tout' : 'Sélectionner tout'}
                     className="w-4 h-4 rounded border-gray-300 dark:border-[#2A3F55]
-                      text-blue-600 dark:text-blue-500
-                      focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#2E86C1]
+                      text-purple-600 dark:text-purple-500
+                      focus:ring-2 focus:ring-purple-500 dark:focus:ring-[#7e22ce]
                       focus:ring-offset-0 cursor-pointer
                       bg-white dark:bg-[#162230]"
                   />
@@ -315,7 +315,7 @@ export default function AccessibleTable({
                     className={`
                       transition-colors
                       ${isSelected
-                        ? 'bg-blue-50 dark:bg-[#0D1E30]'
+                        ? 'bg-purple-50 dark:bg-[#0D1E30]'
                         : 'hover:bg-gray-50 dark:hover:bg-[#162230]'
                       }
                     `}
@@ -329,8 +329,8 @@ export default function AccessibleTable({
                           onChange={() => onSelect?.(rowId)}
                           aria-label={`Sélectionner la ligne ${rowIdx + 1}`}
                           className="w-4 h-4 rounded border-gray-300 dark:border-[#2A3F55]
-                            text-blue-600 dark:text-blue-500
-                            focus:ring-2 focus:ring-blue-500 dark:focus:ring-[#2E86C1]
+                            text-purple-600 dark:text-purple-500
+                            focus:ring-2 focus:ring-purple-500 dark:focus:ring-[#7e22ce]
                             focus:ring-offset-0 cursor-pointer
                             bg-white dark:bg-[#162230]"
                         />
@@ -354,8 +354,8 @@ export default function AccessibleTable({
                           ${col.truncate ? 'max-w-xs truncate' : ''}
                           text-gray-700 dark:text-[#A8C0D6]
                           outline-none
-                          focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:focus:ring-[#2E86C1]
-                          ${isFocused ? 'ring-2 ring-inset ring-blue-500 dark:ring-[#2E86C1]' : ''}
+                          focus:ring-2 focus:ring-inset focus:ring-purple-500 dark:focus:ring-[#7e22ce]
+                          ${isFocused ? 'ring-2 ring-inset ring-purple-500 dark:ring-[#7e22ce]' : ''}
                         `,
                       };
 
@@ -392,3 +392,4 @@ export default function AccessibleTable({
     </div>
   );
 }
+export { AccessibleTable };

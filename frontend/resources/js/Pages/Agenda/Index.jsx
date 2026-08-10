@@ -1,22 +1,15 @@
 /**
  * Agenda/Index.jsx — Page principale du module Agenda & Planning
  *
- * Fonctionnalités :
- *  - Calendrier FullCalendar avec vues : mois, semaine, jour, liste
- *  - Toolbar : sélecteur de vue, navigateur de dates, bouton "Nouvel événement"
- *  - Sidebar : mini-calendrier + liste des événements du jour
- *  - Clic sur créneau vide → ouvre EventModal en mode création
- *  - Clic sur événement → ouvre EventModal en mode édition/détail
- *  - Couleurs par type d'événement
- *  - Données initiales via Inertia (SSR-friendly)
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier STRICTEMENT inchangée :
+ *  - même configuration et mêmes handlers passés au composant calendrier
+ *    (fetchEvents, dateClick, eventClick, eventDrop, datesSet)
+ *  - mêmes appels API (`GET /api/agenda/calendar`, `PATCH /api/agenda/events/{id}`)
+ *  - mêmes clés TanStack Query, mêmes props transmises à EventModal
  *
  * Dépendances NPM requises :
- *  - @fullcalendar/react
- *  - @fullcalendar/daygrid    (vue mois)
- *  - @fullcalendar/timegrid   (vue semaine/jour)
- *  - @fullcalendar/list       (vue liste)
- *  - @fullcalendar/interaction (clic sur créneau)
- *  - @fullcalendar/core
+ *  - Components/Agenda/CalendarWrapper (react-big-calendar, API compatible FullCalendar)
  *
  * Props Inertia (envoyées par AgendaController::index) :
  *  - calendars    : Array<Calendar>
@@ -25,18 +18,23 @@
  *  - timezone     : string
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, lazy, Suspense } from "react";
 import PropTypes from 'prop-types';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import frLocale from '@fullcalendar/core/locales/fr';
 import { Head } from '@inertiajs/react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+    CalendarDays, ChevronLeft, ChevronRight, Plus,
+    Clock, MapPin, Loader2, CalendarRange, Layers,
+} from 'lucide-react';
+import AppLayout from '@/Layouts/AppLayout';
 import EventModal from '../../Components/Agenda/EventModal';
 import { AGENDA_KEYS } from '../../hooks/useAgenda';
+import {
+    PageHeader, Button, Card, EmptyState,
+    cx, SURFACE, BORDER, TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
+
+const LazyCalendar = lazy(() => import("../../Components/Agenda/CalendarWrapper"));
 
 // -----------------------------------------------------------------------
 // Constantes
@@ -49,7 +47,7 @@ const VIEW_OPTIONS = [
     { value: 'listWeek',      label: 'Liste' },
 ];
 
-/** Couleurs par type d'événement — cohérentes avec le backend */
+/** Couleurs par type d'événement — cohérentes avec le backend et CalendarWrapper */
 const TYPE_COLORS = {
     event:    '#3B82F6',
     meeting:  '#8B5CF6',
@@ -57,30 +55,40 @@ const TYPE_COLORS = {
     reminder: '#EF4444',
 };
 
+const TYPE_LABELS = { event: 'Événement', meeting: 'Réunion', task: 'Tâche', reminder: 'Rappel' };
+
+const longDate = () =>
+    new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
 // -----------------------------------------------------------------------
-// Sous-composants de la Sidebar
+// Sous-composants de la barre latérale
 // -----------------------------------------------------------------------
 
 /**
- * Carte d'un événement dans la sidebar "Aujourd'hui".
+ * Carte d'un événement dans la liste « Aujourd'hui ».
  */
 function TodayEventCard({ event }) {
-    const color     = event.color || TYPE_COLORS[event.extendedProps?.type] || '#3B82F6';
+    const color     = event.color || TYPE_COLORS[event.extendedProps?.type] || TYPE_COLORS.event;
     const startTime = event.allDay
         ? 'Toute la journée'
         : new Date(event.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
     return (
-        <div className="flex items-start gap-3 py-2">
-            <div
-                className="w-1 rounded-full self-stretch flex-shrink-0"
+        <div className="flex items-start gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]">
+            <span
+                className="w-1 shrink-0 self-stretch rounded-full"
                 style={{ backgroundColor: color }}
+                aria-hidden="true"
             />
             <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{event.title}</p>
-                <p className="text-xs text-gray-400">{startTime}</p>
+                <p className={cx('truncate text-sm font-medium', TEXT_TITLE)}>{event.title}</p>
+                <p className={cx('mt-0.5 flex items-center gap-1.5 text-xs', TEXT_MUTED, NUM)}>
+                    <Clock className="h-3 w-3 shrink-0" aria-hidden="true" /> {startTime}
+                </p>
                 {event.extendedProps?.location && (
-                    <p className="text-xs text-gray-400 truncate">{event.extendedProps.location}</p>
+                    <p className={cx('flex items-center gap-1.5 truncate text-xs', TEXT_FAINT)}>
+                        <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" /> {event.extendedProps.location}
+                    </p>
                 )}
             </div>
         </div>
@@ -99,23 +107,22 @@ TodayEventCard.propTypes = {
 };
 
 /**
- * Badge de légende des types d'événements.
+ * Légende des types d'événements.
  */
 function TypeLegend() {
     return (
-        <div className="space-y-1.5">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Types
-            </h4>
+        <ul className="space-y-2">
             {Object.entries(TYPE_COLORS).map(([type, color]) => (
-                <div key={type} className="flex items-center gap-2 text-xs text-gray-600">
-                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                    <span className="capitalize">
-                        {{ event: 'Événement', meeting: 'Réunion', task: 'Tâche', reminder: 'Rappel' }[type] ?? type}
-                    </span>
-                </div>
+                <li key={type} className={cx('flex items-center gap-2.5 text-sm', TEXT_BODY)}>
+                    <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: color }}
+                        aria-hidden="true"
+                    />
+                    <span>{TYPE_LABELS[type] ?? type}</span>
+                </li>
             ))}
-        </div>
+        </ul>
     );
 }
 
@@ -140,7 +147,7 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
     });
 
     // -----------------------------------------------------------------------
-    // Navigation dans FullCalendar
+    // Navigation dans le calendrier
     // -----------------------------------------------------------------------
 
     const navigateCalendar = useCallback((action) => {
@@ -162,11 +169,11 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
     }, []);
 
     // -----------------------------------------------------------------------
-    // Gestionnaires FullCalendar
+    // Gestionnaires du calendrier
     // -----------------------------------------------------------------------
 
     /**
-     * Invoqué par FullCalendar lors d'un changement de plage visible.
+     * Invoqué lors d'un changement de plage visible.
      * Récupère les événements via l'API et met à jour le cache TanStack Query.
      */
     const fetchEvents = useCallback(async (fetchInfo, successCallback, failureCallback) => {
@@ -251,8 +258,10 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
      * Mise à jour de l'en-tête de navigation lors du changement de vue.
      */
     const handleDatesSet = useCallback((dateInfo) => {
-        const api = calendarRef.current?.getApi();
-        setCurrentTitle(api?.view?.title ?? '');
+        const title = dateInfo?.view?.title
+            ?? calendarRef.current?.getApi()?.view?.title
+            ?? '';
+        setCurrentTitle(title);
     }, []);
 
     // -----------------------------------------------------------------------
@@ -264,10 +273,10 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
     }, []);
 
     const handleEventSaved = useCallback((savedEvent) => {
-        // Invalider le cache pour que FullCalendar recharge les événements
+        // Invalider le cache pour que le calendrier recharge les événements
         queryClient.invalidateQueries({ queryKey: AGENDA_KEYS.events() });
 
-        // Forcer le rechargement du calendrier FullCalendar
+        // Forcer le rechargement du calendrier
         calendarRef.current?.getApi()?.refetchEvents();
     }, [queryClient]);
 
@@ -276,222 +285,231 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
         calendarRef.current?.getApi()?.refetchEvents();
     }, [queryClient]);
 
+    const openCreate = useCallback(() => {
+        setModalState({ isOpen: true, event: null, initialDate: null });
+    }, []);
+
     // -----------------------------------------------------------------------
     // Rendu
     // -----------------------------------------------------------------------
 
+    const events    = todayEvents ?? [];
+    const calendarList = calendars ?? [];
+
     return (
-        <>
+        <AppLayout>
             <Head title="Agenda & Planning — SECRETIS ERP" />
 
-            <div className="flex h-screen overflow-hidden bg-gray-50">
+            <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
 
-                {/* ═══════════════════════════════════════════════════════════
-                    SIDEBAR
-                ═══════════════════════════════════════════════════════════ */}
-                <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
-
-                    {/* Bouton Nouvel événement */}
-                    <div className="p-4">
-                        <button
-                            type="button"
-                            onClick={() => setModalState({ isOpen: true, event: null, initialDate: null })}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-sm transition-colors"
-                        >
-                            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd"
-                                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                    clipRule="evenodd" />
-                            </svg>
+                <PageHeader
+                    icon={CalendarDays}
+                    title="Agenda & Planning"
+                    breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Agenda' }]}
+                    subtitle={`${longDate()} · événements, réunions et rappels de l'organisation`}
+                    actions={
+                        <Button variant="primary" icon={Plus} onClick={openCreate}>
                             Nouvel événement
-                        </button>
-                    </div>
+                        </Button>
+                    }
+                />
 
-                    {/* Séparateur */}
-                    <hr className="border-gray-100 mx-4" />
-
-                    {/* Événements du jour */}
-                    <div className="flex-1 overflow-y-auto p-4">
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                {/* ─── Barre de contrôle : navigation + période + vue ─────────── */}
+                <div className={cx(
+                    'mb-6 flex flex-col gap-3 rounded-xl border px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between',
+                    BORDER, SURFACE,
+                )}>
+                    {/* Navigation : ← Aujourd'hui → */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="secondary" size="sm" iconOnly icon={ChevronLeft}
+                            title="Période précédente" aria-label="Période précédente"
+                            onClick={() => navigateCalendar('prev')}
+                        />
+                        <Button variant="secondary" size="sm" onClick={() => navigateCalendar('today')}>
                             Aujourd'hui
-                        </h3>
-
-                        {todayEvents.length === 0 ? (
-                            <p className="text-xs text-gray-400 italic">
-                                Aucun événement aujourd'hui.
-                            </p>
-                        ) : (
-                            <div className="divide-y divide-gray-100">
-                                {todayEvents.map((event) => (
-                                    <TodayEventCard key={event.id} event={event} />
-                                ))}
-                            </div>
-                        )}
+                        </Button>
+                        <Button
+                            variant="secondary" size="sm" iconOnly icon={ChevronRight}
+                            title="Période suivante" aria-label="Période suivante"
+                            onClick={() => navigateCalendar('next')}
+                        />
                     </div>
 
-                    {/* Légende des types */}
-                    <div className="p-4 border-t border-gray-100">
-                        <TypeLegend />
-                    </div>
+                    {/* Titre de la période courante */}
+                    <h2 className={cx(
+                        'flex min-w-0 items-center gap-2 text-base font-semibold capitalize tracking-tight sm:text-lg',
+                        TEXT_TITLE,
+                    )}>
+                        <CalendarRange className="h-5 w-5 shrink-0 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+                        <span className="truncate">{currentTitle}</span>
+                    </h2>
 
-                    {/* Calendriers visibles */}
-                    {calendars.length > 0 && (
-                        <div className="p-4 border-t border-gray-100">
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                Mes calendriers
-                            </h4>
-                            <div className="space-y-1.5">
-                                {calendars.map((cal) => (
-                                    <div key={cal.id} className="flex items-center gap-2 text-xs text-gray-600">
-                                        <span
-                                            className="w-3 h-3 rounded-sm flex-shrink-0"
-                                            style={{ backgroundColor: cal.color }}
-                                        />
-                                        <span className="truncate">{cal.name}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </aside>
-
-                {/* ═══════════════════════════════════════════════════════════
-                    ZONE PRINCIPALE — Calendrier
-                ═══════════════════════════════════════════════════════════ */}
-                <main className="flex-1 flex flex-col overflow-hidden">
-
-                    {/* Toolbar */}
-                    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between gap-4 flex-shrink-0">
-
-                        {/* Navigation : ← Aujourd'hui → */}
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => navigateCalendar('prev')}
-                                className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
-                                aria-label="Période précédente"
-                            >
-                                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clipRule="evenodd" />
-                                </svg>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => navigateCalendar('today')}
-                                className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                            >
-                                Aujourd'hui
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => navigateCalendar('next')}
-                                className="p-1.5 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
-                                aria-label="Période suivante"
-                            >
-                                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clipRule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        {/* Titre de la vue courante */}
-                        <h1 className="text-lg font-semibold text-gray-800 flex-1 text-center">
-                            {currentTitle}
-                        </h1>
-
-                        {/* Sélecteur de vue */}
-                        <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
-                            {VIEW_OPTIONS.map((opt) => (
+                    {/* Sélecteur de vue */}
+                    <div
+                        role="tablist"
+                        aria-label="Vue du calendrier"
+                        className={cx('flex shrink-0 rounded-lg border p-1', BORDER)}
+                    >
+                        {VIEW_OPTIONS.map((opt) => {
+                            const active = currentView === opt.value;
+                            return (
                                 <button
                                     key={opt.value}
                                     type="button"
+                                    role="tab"
+                                    aria-selected={active}
                                     onClick={() => changeView(opt.value)}
-                                    className={[
-                                        'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
-                                        currentView === opt.value
-                                            ? 'bg-white text-gray-900 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900',
-                                    ].join(' ')}
-                                    aria-pressed={currentView === opt.value}
+                                    className={cx(
+                                        'h-8 rounded-md px-3 text-sm font-medium transition-colors',
+                                        FOCUS_RING,
+                                        active
+                                            ? 'bg-purple-600 text-white'
+                                            : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                                    )}
                                 >
                                     {opt.label}
                                 </button>
-                            ))}
-                        </div>
-                    </header>
+                            );
+                        })}
+                    </div>
+                </div>
 
-                    {/* Calendrier FullCalendar */}
-                    <div className="flex-1 overflow-auto p-4">
-                        <div className="h-full">
-                            <FullCalendar
-                                ref={calendarRef}
-                                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                                initialView={currentView}
-                                locale={frLocale}
-                                timeZone={timezone}
-                                headerToolbar={false}  // On utilise notre propre toolbar
-                                height="100%"
+                {/* ─── Calendrier + barre latérale ────────────────────────────── */}
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
 
-                                // Chargement des événements via l'API
-                                events={fetchEvents}
-                                lazyFetching={true}
+                    <div className="xl:col-span-3">
+                        <div className={cx('rounded-xl border p-3 shadow-sm sm:p-4', BORDER, SURFACE)}>
+                            <div className="h-[calc(100vh-320px)] min-h-[520px]">
+                                <Suspense fallback={
+                                    <div className="flex h-full items-center justify-center">
+                                        <Loader2 className="h-8 w-8 animate-spin text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                }>
+                                    <LazyCalendar
+                                        ref={calendarRef}
+                                        initialView={currentView}
+                                        timeZone={timezone}
+                                        headerToolbar={false}  // On utilise notre propre toolbar
+                                        height="100%"
 
-                                // Interactivité
-                                selectable={true}
-                                selectMirror={true}
-                                editable={true}            // Permet le drag & drop
-                                droppable={false}
+                                        // Chargement des événements via l'API
+                                        events={fetchEvents}
+                                        lazyFetching={true}
 
-                                // Gestionnaires d'événements
-                                dateClick={handleDateClick}
-                                eventClick={handleEventClick}
-                                eventDrop={handleEventDrop}
-                                datesSet={handleDatesSet}
+                                        // Interactivité
+                                        selectable={true}
+                                        selectMirror={true}
+                                        editable={true}            // Permet le drag & drop
+                                        droppable={false}
 
-                                // Style des événements
-                                eventDisplay="block"
-                                eventColor="#3B82F6"
-                                eventTextColor="#FFFFFF"
-                                eventBorderColor="transparent"
-                                eventClassNames="rounded-md text-xs font-medium shadow-sm"
+                                        // Gestionnaires d'événements
+                                        dateClick={handleDateClick}
+                                        eventClick={handleEventClick}
+                                        eventDrop={handleEventDrop}
+                                        datesSet={handleDatesSet}
 
-                                // Configuration de la vue semaine
-                                slotMinTime="07:00:00"
-                                slotMaxTime="21:00:00"
-                                allDaySlot={true}
-                                nowIndicator={true}
-                                weekNumbers={false}
-                                businessHours={{
-                                    daysOfWeek: [1, 2, 3, 4, 5],
-                                    startTime: '08:00',
-                                    endTime: '18:00',
-                                }}
+                                        // Style des événements
+                                        eventDisplay="block"
+                                        eventColor="#3B82F6"
+                                        eventTextColor="#FFFFFF"
+                                        eventBorderColor="transparent"
+                                        eventClassNames="rounded-md text-xs font-medium shadow-sm"
 
-                                // Vue liste
-                                listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
-                                noEventsText="Aucun événement à afficher."
+                                        // Configuration de la vue semaine
+                                        slotMinTime="07:00:00"
+                                        slotMaxTime="21:00:00"
+                                        allDaySlot={true}
+                                        nowIndicator={true}
+                                        weekNumbers={false}
+                                        businessHours={{
+                                            daysOfWeek: [1, 2, 3, 4, 5],
+                                            startTime: '08:00',
+                                            endTime: '18:00',
+                                        }}
 
-                                // Nombre d'événements affichés avant "et X de plus"
-                                dayMaxEvents={4}
+                                        // Vue liste
+                                        listDayFormat={{ weekday: 'long', month: 'long', day: 'numeric' }}
+                                        noEventsText="Aucun événement à afficher."
 
-                                // Tooltips : afficher le titre en hover (via eventDidMount)
-                                eventDidMount={(info) => {
-                                    // Ajouter le type comme attribut data pour le CSS
-                                    info.el.dataset.eventType = info.event.extendedProps?.type ?? 'event';
-                                }}
-                            />
+                                        // Nombre d'événements affichés avant "et X de plus"
+                                        dayMaxEvents={4}
+
+                                        // Tooltips : afficher le titre en hover (via eventDidMount)
+                                        eventDidMount={(info) => {
+                                            // Ajouter le type comme attribut data pour le CSS
+                                            info.el.dataset.eventType = info.event.extendedProps?.type ?? 'event';
+                                        }}
+                                    />
+                                </Suspense>
+                            </div>
                         </div>
                     </div>
-                </main>
+
+                    {/* Barre latérale : Aujourd'hui + Légende + Calendriers */}
+                    <aside className="space-y-6 xl:col-span-1">
+
+                        {/* Événements du jour */}
+                        <Card
+                            title="Aujourd'hui"
+                            icon={CalendarDays}
+                            subtitle={events.length > 0
+                                ? `${events.length} événement${events.length > 1 ? 's' : ''} programmé${events.length > 1 ? 's' : ''}`
+                                : undefined}
+                            flush
+                        >
+                            {events.length === 0 ? (
+                                <EmptyState
+                                    compact
+                                    icon={CalendarDays}
+                                    title="Journée libre"
+                                    description="Aucun événement n'est programmé aujourd'hui."
+                                    action={
+                                        <Button variant="secondary" size="sm" icon={Plus} onClick={openCreate}>
+                                            Planifier un événement
+                                        </Button>
+                                    }
+                                />
+                            ) : (
+                                <div className="space-y-0.5 p-2">
+                                    {events.map((event) => (
+                                        <TodayEventCard key={event.id} event={event} />
+                                    ))}
+                                </div>
+                            )}
+                        </Card>
+
+                        {/* Légende des types */}
+                        <Card title="Légende" icon={Layers}>
+                            <TypeLegend />
+                        </Card>
+
+                        {/* Calendriers visibles */}
+                        <Card title="Mes calendriers" icon={CalendarRange}>
+                            {calendarList.length === 0 ? (
+                                <p className={cx('text-sm', TEXT_MUTED)}>
+                                    Aucun calendrier n'est encore rattaché à votre compte.
+                                </p>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {calendarList.map((cal) => (
+                                        <li key={cal.id} className={cx('flex items-center gap-2.5 text-sm', TEXT_BODY)}>
+                                            <span
+                                                className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                                                style={{ backgroundColor: cal.color }}
+                                                aria-hidden="true"
+                                            />
+                                            <span className="truncate">{cal.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </Card>
+                    </aside>
+                </div>
             </div>
 
-            {/* ═══ MODALE CRÉATION / ÉDITION ═══ */}
+            {/* ─── Modale création / édition ─────────────────────────────────── */}
             <EventModal
                 isOpen={modalState.isOpen}
                 onClose={handleModalClose}
@@ -501,7 +519,7 @@ function AgendaIndex({ calendars, todayEvents, orgUsers, timezone }) {
                 onSaved={handleEventSaved}
                 onDeleted={handleEventDeleted}
             />
-        </>
+        </AppLayout>
     );
 }
 
@@ -514,7 +532,7 @@ AgendaIndex.propTypes = {
         type:       PropTypes.string.isRequired,
         is_default: PropTypes.bool,
     })),
-    /** Événements d'aujourd'hui (pour la sidebar) */
+    /** Événements d'aujourd'hui (pour la barre latérale) */
     todayEvents: PropTypes.arrayOf(PropTypes.shape({
         id:            PropTypes.string.isRequired,
         title:         PropTypes.string.isRequired,

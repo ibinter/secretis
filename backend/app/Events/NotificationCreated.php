@@ -37,6 +37,16 @@ class NotificationCreated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
+     * L'événement est diffusé de façon asynchrone : entre la mise en file et le
+     * traitement, la notification peut avoir été supprimée (lecture puis purge,
+     * politique de rétention). `SerializesModels` tentait alors de la recharger
+     * et le job échouait définitivement — 11 échecs constatés en une journée,
+     * tous pour ce motif. Une diffusion devenue sans objet doit simplement être
+     * abandonnée, pas remplir la table des échecs.
+     */
+    public bool $deleteWhenMissingModels = true;
+
+    /**
      * @param  AppNotification $notification La notification créée en base
      * @param  User            $user         L'utilisateur destinataire
      */

@@ -80,7 +80,7 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
           <div className="px-4 pt-3">
             <div className="bg-slate-700 rounded-full h-1.5">
               <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full rounded-full transition-all duration-700"
+                className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-700"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -103,7 +103,7 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
                     ${step.status === 'completed' ? 'bg-green-500 border-green-500'
                     : step.status === 'skipped'   ? 'bg-slate-700 border-slate-600'
-                    : 'border-white/20 group-hover:border-blue-400'}`}
+                    : 'border-white/20 group-hover:border-purple-400'}`}
                   >
                     {step.status === 'completed' ? <span className="text-white text-xs font-black">✓</span>
                     : step.status === 'skipped'  ? <span className="text-slate-400 text-xs">⏭</span>
@@ -117,7 +117,7 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
                     {step.label}
                   </span>
                   {step.status === 'pending' && (
-                    <span className="text-xs text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    <span className="text-xs text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                   )}
                 </button>
               ))
@@ -127,7 +127,7 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
           <div className="px-4 pb-4">
             <button
               onClick={() => router.visit('/onboarding')}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-2.5 rounded-xl transition-all active:scale-95"
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold py-2.5 rounded-xl transition-all active:scale-95"
             >
               Continuer la configuration →
             </button>
@@ -138,7 +138,7 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
       {/* Bubble trigger */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="relative flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-3 rounded-2xl shadow-lg shadow-blue-600/30 transition-all active:scale-95"
+        className="relative flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-3 rounded-2xl shadow-lg shadow-blue-600/30 transition-all active:scale-95"
       >
         <span className="text-lg">📋</span>
         <span className="text-sm">{completed}/{total} étapes</span>
@@ -153,3 +153,4 @@ export default function ChecklistWidget({ organizationCreatedAt }) {
     </div>
   );
 }
+export { ChecklistWidget };

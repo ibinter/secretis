@@ -1,11 +1,9 @@
 /**
  * Components/RH/OrgChart.jsx — Organigramme interactif SECRETIS ERP
  *
- * Fonctionnalités :
- *   - Rendu SVG/HTML avec zoom et pan à la souris/tactile
- *   - Nœuds cliquables → navigation vers la fiche employé
- *   - Export PNG via canvas
- *   - Arbre récursif à partir du JSON { id, name, position, department, avatar, children[] }
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * La logique (mise en page Reingold-Tilford simplifiée, pan/zoom, export SVG,
+ * navigation `rh.employes.show`) est strictement inchangée.
  *
  * Usage :
  *   <OrgChart tree={treeArray} />
@@ -16,7 +14,11 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import PropTypes from 'prop-types';
-import { ZoomIn, ZoomOut, RotateCcw, Download, User } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Users } from 'lucide-react';
+import {
+  Button, EmptyState,
+  cx, SURFACE_SUNK, BORDER, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI';
 
 // ---------------------------------------------------------------------------
 // Constantes de mise en page
@@ -27,8 +29,14 @@ const NODE_H   = 80;   // hauteur d'un nœud
 const H_GAP    = 40;   // espace horizontal entre nœuds
 const V_GAP    = 80;   // espace vertical entre niveaux
 
+/** Palette d'identification par département — sobre, sans dégradé. */
+const DEPT_COLORS = ['#0284C7', '#9333EA', '#059669', '#D97706', '#E11D48', '#4F46E5', '#0D9488'];
+
+const deptColorOf = (department) =>
+  DEPT_COLORS[(department?.charCodeAt(0) || 0) % DEPT_COLORS.length];
+
 // ---------------------------------------------------------------------------
-// Calcul de la taille et position de chaque nœud (algorithme Reingold-Tilford simplifié)
+// Calcul de la taille et position de chaque nœud
 // ---------------------------------------------------------------------------
 
 function measureTree(node) {
@@ -98,10 +106,7 @@ function OrgNode({ node, onNodeClick, hoveredId, setHoveredId }) {
   const isHover = hoveredId === node.id;
 
   const initials = node.name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '?';
-
-  // Couleur selon le département (hash simple)
-  const deptColors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#6366f1','#14b8a6'];
-  const deptColor  = deptColors[(node.department?.charCodeAt(0) || 0) % deptColors.length] || '#3b82f6';
+  const deptColor = deptColorOf(node.department);
 
   return (
     <g
@@ -110,62 +115,69 @@ function OrgNode({ node, onNodeClick, hoveredId, setHoveredId }) {
       onMouseLeave={() => setHoveredId(null)}
       style={{ cursor: 'pointer' }}
     >
-      {/* Ombre */}
-      <rect
-        x={x + 2} y={y + 2}
-        width={NODE_W} height={NODE_H}
-        rx={10} ry={10}
-        fill="rgba(0,0,0,0.06)"
-      />
-      {/* Fond nœud */}
+      {/* Fond du nœud — surface et bordure alignées sur les tokens */}
       <rect
         x={x} y={y}
         width={NODE_W} height={NODE_H}
-        rx={10} ry={10}
-        fill={isHover ? '#eff6ff' : 'white'}
-        stroke={isHover ? '#3b82f6' : '#e5e7eb'}
-        strokeWidth={isHover ? 2 : 1}
+        rx={12} ry={12}
+        className={cx(
+          'transition-colors',
+          isHover
+            ? 'fill-purple-50 dark:fill-purple-500/10 stroke-purple-400 dark:stroke-purple-500/60'
+            : 'fill-white dark:fill-[#162032] stroke-gray-200 dark:stroke-[#1E3048]',
+        )}
+        strokeWidth={isHover ? 1.5 : 1}
       />
-      {/* Barre de couleur haut */}
+
+      {/* Liseré de département */}
       <rect
         x={x} y={y}
-        width={NODE_W} height={5}
-        rx={10} ry={10}
+        width={NODE_W} height={4}
+        rx={2} ry={2}
         fill={deptColor}
-        clipPath={`inset(0 0 -10px 0)`}
       />
+
       {/* Avatar / initiales */}
       {node.avatar ? (
         <image
           href={node.avatar}
-          x={x + 10} y={y + 14}
+          x={x + 10} y={y + 16}
           width={32} height={32}
           clipPath="circle(16px at 16px 16px)"
-          style={{ borderRadius: '50%' }}
         />
       ) : (
         <>
-          <circle cx={x + 26} cy={y + 30} r={16} fill={deptColor} opacity={0.2} />
-          <text x={x + 26} y={y + 35} textAnchor="middle" fontSize={11} fontWeight="700" fill={deptColor}>
+          <circle cx={x + 26} cy={y + 32} r={16} fill={deptColor} opacity={0.15} />
+          <text x={x + 26} y={y + 37} textAnchor="middle" fontSize={11} fontWeight="600" fill={deptColor}>
             {initials}
           </text>
         </>
       )}
+
       {/* Nom */}
-      <text x={x + 50} y={y + 25} fontSize={11} fontWeight="600" fill="#111827">
+      <text
+        x={x + 50} y={y + 27} fontSize={11} fontWeight="600"
+        className="fill-gray-900 dark:fill-white"
+      >
         {node.name?.length > 18 ? node.name.slice(0, 16) + '…' : node.name}
       </text>
+
       {/* Poste */}
-      <text x={x + 50} y={y + 40} fontSize={9.5} fill="#6b7280">
+      <text
+        x={x + 50} y={y + 42} fontSize={9.5}
+        className="fill-gray-500 dark:fill-gray-400"
+      >
         {(node.position || '').length > 20 ? (node.position || '').slice(0, 18) + '…' : (node.position || '')}
       </text>
+
       {/* Département */}
       {node.department && (
-        <text x={x + 50} y={y + 55} fontSize={9} fill={deptColor}>
+        <text x={x + 50} y={y + 57} fontSize={9} fill={deptColor}>
           {node.department.length > 22 ? node.department.slice(0, 20) + '…' : node.department}
         </text>
       )}
-      {/* Indicateur enfants */}
+
+      {/* Indicateur de subordonnés */}
       {node.children?.length > 0 && (
         <circle cx={x + NODE_W / 2} cy={y + NODE_H - 4} r={3} fill={deptColor} />
       )}
@@ -195,9 +207,8 @@ function OrgEdge({ from, to }) {
     <path
       d={`M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`}
       fill="none"
-      stroke="#d1d5db"
       strokeWidth={1.5}
-      strokeDasharray="none"
+      className="stroke-gray-300 dark:stroke-[#1E3048]"
     />
   );
 }
@@ -212,13 +223,13 @@ OrgEdge.propTypes = {
 // ---------------------------------------------------------------------------
 
 export default function OrgChart({ tree }) {
-  const svgRef     = useRef();
+  const svgRef       = useRef();
   const containerRef = useRef();
 
-  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [transform, setTransform]   = useState({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [hoveredId, setHoveredId] = useState(null);
+  const [dragStart, setDragStart]   = useState({ x: 0, y: 0 });
+  const [hoveredId, setHoveredId]   = useState(null);
 
   // ---------------------------------------------------------------------------
   // Calcul de la disposition
@@ -316,7 +327,7 @@ export default function OrgChart({ tree }) {
   };
 
   // ---------------------------------------------------------------------------
-  // Export PNG
+  // Export SVG
   // ---------------------------------------------------------------------------
 
   const exportPng = () => {
@@ -354,59 +365,49 @@ export default function OrgChart({ tree }) {
 
   if (nodes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400 dark:text-gray-500">
-        <User className="w-10 h-10 mb-3" />
-        <p className="text-sm">Aucun employé dans l'organigramme</p>
+      <div className="flex h-full items-center justify-center">
+        <EmptyState
+          icon={Users}
+          title="Organigramme vide"
+          description="Aucun employé n'est rattaché à cette structure pour le moment."
+          hints={[
+            'Renseignez le responsable hiérarchique (N+1) sur chaque fiche employé.',
+            "Les collaborateurs sans responsable apparaissent comme racines de l'arbre.",
+          ]}
+        />
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full flex flex-col">
+    <div className="relative flex h-full w-full flex-col">
+
       {/* Barre de contrôles */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-        <button
-          onClick={zoomIn}
-          className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          title="Zoom avant"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
-        <button
-          onClick={zoomOut}
-          className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          title="Zoom arrière"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={reset}
-          className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          title="Réinitialiser la vue"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
-        <div className="h-4 w-px bg-gray-200 dark:bg-gray-700" />
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {Math.round(transform.scale * 100)}%
+      <div className={cx('flex items-center gap-2 border-b px-4 py-2.5', BORDER, SURFACE_SUNK)}>
+        <Button variant="ghost" size="sm" iconOnly icon={ZoomIn}  title="Zoom avant"          onClick={zoomIn} />
+        <Button variant="ghost" size="sm" iconOnly icon={ZoomOut} title="Zoom arrière"        onClick={zoomOut} />
+        <Button variant="ghost" size="sm" iconOnly icon={RotateCcw} title="Réinitialiser la vue" onClick={reset} />
+
+        <span className={cx('h-4 w-px', 'bg-gray-200 dark:bg-[#1E3048]')} aria-hidden="true" />
+
+        <span className={cx('text-xs', TEXT_MUTED, NUM)}>
+          {Math.round(transform.scale * 100)} %
         </span>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
-            {nodes.length} employé{nodes.length > 1 ? 's' : ''} • Cliquer sur un nœud pour voir la fiche
+
+        <div className="ml-auto flex items-center gap-3">
+          <span className={cx('hidden text-xs sm:block', TEXT_FAINT, NUM)}>
+            {nodes.length} employé{nodes.length > 1 ? 's' : ''}
           </span>
-          <button
-            onClick={exportPng}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" /> Exporter SVG
-          </button>
+          <Button variant="secondary" size="sm" icon={Download} onClick={exportPng}>
+            Exporter SVG
+          </Button>
         </div>
       </div>
 
       {/* Zone SVG interactive */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-gray-100/50 dark:bg-gray-900/50"
+        className={cx('flex-1 overflow-hidden', SURFACE_SUNK)}
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -448,10 +449,10 @@ export default function OrgChart({ tree }) {
         </svg>
       </div>
 
-      {/* Aide tactile */}
-      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/30 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-          Molette pour zoomer • Glisser pour naviguer • Clic sur un employé pour voir sa fiche
+      {/* Aide */}
+      <div className={cx('border-t px-4 py-2', BORDER, SURFACE_SUNK)}>
+        <p className={cx('text-center text-xs', TEXT_FAINT)}>
+          Molette pour zoomer · Glisser pour naviguer · Clic sur un employé pour ouvrir sa fiche
         </p>
       </div>
     </div>
@@ -468,3 +469,4 @@ OrgChart.propTypes = {
     children:   PropTypes.array,
   })).isRequired,
 };
+export { OrgChart };

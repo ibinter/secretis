@@ -10,9 +10,40 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
 
 class BiController extends Controller
 {
+    // -------------------------------------------------------------------------
+    // Page Inertia — Dashboard BI
+    // -------------------------------------------------------------------------
+
+    public function index(Request $request): InertiaResponse
+    {
+        return Inertia::render('BI/Dashboard', [
+            'preset' => $request->input('preset', 'month'),
+        ]);
+    }
+
+    public function kpis(Request $request): JsonResponse
+    {
+        [$start, $end] = $this->parsePeriod($request);
+        $orgId = $this->orgId();
+
+        try {
+            return response()->json([
+                'correspondence' => $this->bi->getCorrespondenceAnalytics($orgId, $start, $end),
+                'tasks'          => $this->bi->getTaskAnalytics($orgId, $start, $end),
+                'meetings'       => $this->bi->getMeetingAnalytics($orgId, $start, $end),
+                'hr'             => $this->bi->getHrAnalytics($orgId, $start, $end),
+            ]);
+        } catch (\Throwable) {
+            return response()->json(['data' => [], 'error' => 'Analytics indisponibles.']);
+        }
+    }
+
+
     public function __construct(
         private readonly BiService           $bi,
         private readonly ReportExportService $exporter
@@ -199,6 +230,9 @@ class BiController extends Controller
 
     public function export(Request $request): Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $request->validate([
             'format'    => 'required|string|in:pdf,excel,csv',
             'report_id' => 'nullable|integer|exists:saved_reports,id',
@@ -225,5 +259,17 @@ class BiController extends Controller
             'csv'   => $this->exporter->downloadCsv($data),
             default => abort(400, 'Format non supporté.'),
         };
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

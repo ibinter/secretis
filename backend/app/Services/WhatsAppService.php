@@ -34,8 +34,8 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->phoneNumberId = config('services.whatsapp.phone_number_id');
-        $this->accessToken   = config('services.whatsapp.access_token');
+        $this->phoneNumberId = (string) config('services.whatsapp.phone_number_id', '');
+        $this->accessToken   = (string) config('services.whatsapp.access_token', '');
         $this->apiUrl        = sprintf(
             '%s/%s/%s/messages',
             self::BASE_URL,

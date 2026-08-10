@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Jobs\RecalculateProjectHealth;
 use App\Models\Project;
+use App\Models\User;
 use App\Models\ProjectMilestone;
 use App\Models\ProjectRisk;
 use App\Models\ProjectTimesheet;
@@ -30,7 +31,7 @@ class ProjectController extends Controller
         $org = Auth::user()->organization_id;
 
         $projects = Project::where('organization_id', $org)
-            ->with(['manager:id,name,avatar_url', 'client:id,name', 'milestones'])
+            ->with(['manager:id,name,avatar'])
             ->withCount(['tasks', 'tasks as completed_tasks_count' => fn($q) => $q->where('status', 'completed')])
             ->orderByDesc('updated_at')
             ->get()
@@ -49,7 +50,7 @@ class ProjectController extends Controller
         $this->authorize('view', $project);
 
         return Inertia::render('Projets/ProjectDashboard', [
-            'project'   => $project->load(['manager:id,name', 'client:id,name']),
+            'project'   => $project->load(['manager:id,name']),
             'dashboard' => $this->projectService->getProjectDashboard($project),
         ]);
     }
@@ -70,6 +71,103 @@ class ProjectController extends Controller
 
         return Inertia::render('Projets/TimesheetView', [
             'project' => $project->only(['id', 'name']),
+        ]);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    //  CRUD PROJET (web /projets + API /api/v1/projects)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * POST /projets  |  POST /api/v1/projects
+     * Crée un projet dans l'organisation de l'utilisateur courant.
+     */
+    public function store(Request $request)
+    {
+        $org  = Auth::user()->organization_id;
+        $data = $this->validateProject($request, false);
+
+        $project = Project::create(array_merge($data, [
+            'organization_id' => $org,
+            'created_by'      => Auth::id(),
+        ]));
+
+        if ($this->expectsJson($request)) {
+            return response()->json($project, 201);
+        }
+
+        return redirect()->route('projets.show', $project->id)
+            ->with('success', 'Projet créé avec succès.');
+    }
+
+    /**
+     * PUT/PATCH /projets/{id}  |  PUT /api/v1/projects/{id}
+     */
+    public function update(Request $request, $id)
+    {
+        $project = $this->findOrgProject($id);
+        $data    = $this->validateProject($request, true);
+
+        $project->update($data);
+
+        if ($this->expectsJson($request)) {
+            return response()->json($project->fresh());
+        }
+
+        return redirect()->back()->with('success', 'Projet mis à jour.');
+    }
+
+    /**
+     * DELETE /projets/{id}  |  DELETE /api/v1/projects/{id}
+     */
+    public function destroy(Request $request, $id)
+    {
+        $project = $this->findOrgProject($id);
+        $project->delete();
+
+        if ($this->expectsJson($request)) {
+            return response()->json(['message' => 'Projet supprimé.']);
+        }
+
+        return redirect()->route('projets.index')->with('success', 'Projet supprimé.');
+    }
+
+    /** Récupère un projet borné à l'organisation courante (404 sinon). */
+    private function findOrgProject($id): Project
+    {
+        return Project::where('organization_id', Auth::user()->organization_id)
+            ->findOrFail($id);
+    }
+
+    /** Vrai appel API JSON (et non requête Inertia, qui attend une redirection). */
+    private function expectsJson(Request $request): bool
+    {
+        return $request->wantsJson() && ! $request->header('X-Inertia');
+    }
+
+    /**
+     * Règles de validation alignées sur les colonnes réelles de la table projects.
+     * $partial = true → règles "sometimes" pour update.
+     */
+    private function validateProject(Request $request, bool $partial): array
+    {
+        $req = $partial ? 'sometimes|required' : 'required';
+        $opt = $partial ? 'sometimes|nullable' : 'nullable';
+
+        return $request->validate([
+            'name'            => "$req|string|max:255",
+            'code'            => "$opt|string|max:50",
+            'description'     => "$opt|string",
+            'status'          => "$opt|in:planning,active,on_hold,completed,cancelled",
+            'priority'        => "$opt|in:low,medium,high,critical",
+            'visibility'      => "$opt|in:private,team,public",
+            'start_date'      => "$opt|date",
+            'end_date'        => "$opt|date|after_or_equal:start_date",
+            'budget'          => "$opt|numeric|min:0",
+            'budget_currency' => "$opt|string|size:3",
+            'color'           => "$opt|string|max:7",
+            'manager_id'      => "$opt|exists:users,id",
+            'client_id'       => "$opt|exists:accounting_clients,id",
         ]);
     }
 
@@ -211,6 +309,7 @@ class ProjectController extends Controller
 
         $data = $request->validate([
             'task_id'     => 'nullable|exists:tasks,id',
+            'user_id'     => 'nullable|integer|exists:users,id',
             'date'        => 'required|date',
             'hours'       => 'required|numeric|min:0.25|max:24',
             'description' => 'nullable|string|max:500',
@@ -218,9 +317,29 @@ class ProjectController extends Controller
             'hourly_rate' => 'nullable|numeric|min:0',
         ]);
 
+        // Saisir le temps d'un collaborateur n'est permis qu'au chef de projet
+        // (ou à un gestionnaire) : sinon la saisie est TOUJOURS imputée à soi-même.
+        $targetUserId = Auth::id();
+
+        if (! empty($data['user_id']) && (int) $data['user_id'] !== Auth::id()) {
+            $canLogForOthers = $project->manager_id === Auth::id()
+                || Auth::user()->hasPermissionForModule('projets', 'manage');
+
+            abort_unless($canLogForOthers, 403, 'Vous ne pouvez saisir du temps que sur votre propre ligne.');
+
+            $sameOrg = User::where('id', $data['user_id'])
+                ->where('organization_id', $project->organization_id)
+                ->exists();
+            abort_unless($sameOrg, 403, 'Collaborateur invalide.');
+
+            $targetUserId = (int) $data['user_id'];
+        }
+
+        unset($data['user_id']);
+
         $timesheet = ProjectTimesheet::create(array_merge($data, [
             'project_id'      => $project->id,
-            'user_id'         => Auth::id(),
+            'user_id'         => $targetUserId,
             'organization_id' => $project->organization_id,
             'is_billable'     => $data['is_billable'] ?? true,
             'hourly_rate'     => $data['hourly_rate'] ?? 0,
@@ -236,7 +355,7 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        $query = $project->timesheets()->with(['user:id,name,avatar_url', 'task:id,title']);
+        $query = $project->timesheets()->with(['user:id,name,avatar', 'task:id,title']);
 
         if ($request->filled('start_date')) $query->where('date', '>=', $request->start_date);
         if ($request->filled('end_date'))   $query->where('date', '<=', $request->end_date);
@@ -334,5 +453,21 @@ class ProjectController extends Controller
         RecalculateProjectHealth::dispatch($task->project)->afterCommit();
 
         return response()->json($task->only(['id', 'start_date', 'due_date', 'progress']));
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    //  ALIAS API (routes api.php → méthodes réelles)
+    // ────────────────────────────────────────────────────────────────────────
+
+    /** GET /projects/{id}/risk-matrix → indexRisks */
+    public function riskMatrix(Project $project): JsonResponse
+    {
+        return $this->indexRisks($project);
+    }
+
+    /** GET /projects/{id}/timesheets → indexTimesheets */
+    public function timesheets(Request $request, Project $project): JsonResponse
+    {
+        return $this->indexTimesheets($request, $project);
     }
 }

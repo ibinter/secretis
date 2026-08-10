@@ -13,6 +13,7 @@ import { useState, useEffect, useMemo }  from 'react';
 import { router, usePage }               from '@inertiajs/react';
 import { useTranslation }                from '../../hooks/useTranslation';
 import { useDirection }                  from '../../hooks/useDirection';
+import AppLayout                         from '@/Layouts/AppLayout';
 
 // ─── Données statiques ────────────────────────────────────────────────────────
 
@@ -184,6 +185,7 @@ export default function LangueRegion() {
   const formDir      = selectedLang?.dir || 'ltr';
 
   return (
+    <AppLayout>
     <div className="max-w-4xl mx-auto py-8 px-4">
       {/* En-tête */}
       <div className="mb-8">
@@ -494,5 +496,7 @@ export default function LangueRegion() {
         )}
       </div>
     </div>
+    </AppLayout>
   );
 }
+export { LangueRegion };

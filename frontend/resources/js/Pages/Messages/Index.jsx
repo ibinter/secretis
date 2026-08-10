@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 import {
     ChatBubbleLeftRightIcon,
     MagnifyingGlassIcon,
@@ -312,7 +313,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
     // ─── Rendu ───────────────────────────────────────────────────────────────
 
     return (
-        <>
+        <AppLayout>
             <Head title="Messagerie interne" />
 
             <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
@@ -326,7 +327,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                     <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-600" />
+                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-600" />
                                 Messages
                             </h2>
                             <button
@@ -346,7 +347,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                                 placeholder="Rechercher..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white"
                             />
                         </div>
                     </div>
@@ -414,7 +415,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                                         <button
                                             onClick={loadMoreMessages}
                                             disabled={loadingMore}
-                                            className="text-xs text-blue-600 hover:underline disabled:opacity-50"
+                                            className="text-xs text-purple-600 hover:underline disabled:opacity-50"
                                         >
                                             {loadingMore ? 'Chargement...' : 'Voir les messages précédents'}
                                         </button>
@@ -423,7 +424,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
 
                                 {loadingMessages ? (
                                     <div className="flex-1 flex items-center justify-center py-20">
-                                        <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+                                        <div className="animate-spin h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full" />
                                     </div>
                                 ) : (
                                     <>
@@ -462,18 +463,18 @@ export default function MessagesIndex({ conversations: initialConversations = []
 
                             {/* Zone de réponse */}
                             {replyTo && (
-                                <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800 flex items-center gap-2">
-                                    <ArrowUturnLeftIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                <div className="px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border-t border-purple-100 dark:border-purple-800 flex items-center gap-2">
+                                    <ArrowUturnLeftIcon className="h-4 w-4 text-purple-500 flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                                        <p className="text-xs font-medium text-purple-700 dark:text-purple-300">
                                             {replyTo.sender?.name}
                                         </p>
-                                        <p className="text-xs text-blue-600 dark:text-blue-400 truncate">
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 truncate">
                                             {replyTo.content}
                                         </p>
                                     </div>
                                     <button onClick={() => setReplyTo(null)} className="p-1">
-                                        <XMarkIcon className="h-4 w-4 text-blue-500" />
+                                        <XMarkIcon className="h-4 w-4 text-purple-500" />
                                     </button>
                                 </div>
                             )}
@@ -521,7 +522,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                                     <button
                                         onClick={sendMessage}
                                         disabled={!inputText.trim() || sending}
-                                        className="flex-shrink-0 p-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 rounded-xl transition-all"
+                                        className="flex-shrink-0 p-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 rounded-xl transition-all"
                                     >
                                         <PaperAirplaneIcon className="h-4 w-4 text-white" />
                                     </button>
@@ -536,7 +537,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                             <p className="text-sm">ou démarrez-en une nouvelle</p>
                             <button
                                 onClick={() => setShowNewConv(true)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
                             >
                                 Nouvelle conversation
                             </button>
@@ -569,7 +570,7 @@ export default function MessagesIndex({ conversations: initialConversations = []
                     }}
                 />
             )}
-        </>
+        </AppLayout>
     );
 }
 
@@ -596,7 +597,7 @@ function ConversationItem({ conversation, isActive, currentUserId, onClick }) {
         <button
             onClick={onClick}
             className={`w-full flex items-start gap-3 px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left border-b border-gray-50 dark:border-gray-700/50 ${
-                isActive ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-r-blue-600' : ''
+                isActive ? 'bg-purple-50 dark:bg-purple-900/20 border-r-2 border-r-blue-600' : ''
             }`}
         >
             {/* Avatar */}
@@ -605,7 +606,7 @@ function ConversationItem({ conversation, isActive, currentUserId, onClick }) {
             {/* Contenu */}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-1">
-                    <span className={`text-sm font-medium truncate ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>
+                    <span className={`text-sm font-medium truncate ${isActive ? 'text-purple-700 dark:text-purple-300' : 'text-gray-900 dark:text-white'}`}>
                         {conversation.name}
                     </span>
                     <span className="text-[10px] text-gray-400 flex-shrink-0">
@@ -623,7 +624,7 @@ function ConversationItem({ conversation, isActive, currentUserId, onClick }) {
 
                     {/* Badge non lus */}
                     {conversation.unread_count > 0 && (
-                        <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 bg-blue-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                             {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
                         </span>
                     )}
@@ -677,8 +678,8 @@ function MessageBubble({ message, isMine, showAvatar, onReply, onDelete }) {
 
                 {/* Réponse à */}
                 {message.reply_to && (
-                    <div className={`px-2 py-1 text-xs rounded-lg border-l-2 border-blue-400 bg-gray-100 dark:bg-gray-700 mb-0.5 ${isMine ? 'self-end' : 'self-start'}`}>
-                        <span className="font-medium text-blue-600">{message.reply_to.sender_name}</span>
+                    <div className={`px-2 py-1 text-xs rounded-lg border-l-2 border-purple-400 bg-gray-100 dark:bg-gray-700 mb-0.5 ${isMine ? 'self-end' : 'self-start'}`}>
+                        <span className="font-medium text-purple-600">{message.reply_to.sender_name}</span>
                         <p className="text-gray-500 truncate">{message.reply_to.content}</p>
                     </div>
                 )}
@@ -687,7 +688,7 @@ function MessageBubble({ message, isMine, showAvatar, onReply, onDelete }) {
                 <div
                     className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed shadow-sm ${
                         isMine
-                            ? 'bg-blue-600 text-white rounded-br-sm'
+                            ? 'bg-purple-600 text-white rounded-br-sm'
                             : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-sm border border-gray-100 dark:border-gray-600'
                     } ${message.is_optimistic ? 'opacity-70' : ''}`}
                 >
@@ -714,7 +715,7 @@ function MessageBubble({ message, isMine, showAvatar, onReply, onDelete }) {
                     {/* Statut lu (côté envoyeur uniquement) */}
                     {isMine && !message.is_optimistic && (
                         message.reads?.length > 0
-                            ? <span title="Lu"><CheckCheckIcon className="h-3 w-3 text-blue-400" /></span>
+                            ? <span title="Lu"><CheckCheckIcon className="h-3 w-3 text-purple-400" /></span>
                             : <span title="Envoyé"><CheckIcon className="h-3 w-3 text-gray-400" /></span>
                     )}
                 </div>
@@ -763,7 +764,7 @@ function ConversationAvatar({ conversation, size = 'md' }) {
     }
 
     return (
-        <div className={`${sizeClass} rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center flex-shrink-0 text-white font-semibold`}>
+        <div className={`${sizeClass} rounded-full bg-gradient-to-br from-purple-500 to-cyan-600 flex items-center justify-center flex-shrink-0 text-white font-semibold`}>
             {conversation.name?.charAt(0)?.toUpperCase()}
         </div>
     );
@@ -827,14 +828,24 @@ function ContactInfoPanel({ conversation, currentUserId, onClose }) {
                 {contact && (
                     <div className="space-y-2">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</p>
-                        <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                        <a
+                            href={contact.phone ? `tel:${contact.phone}` : undefined}
+                            aria-disabled={!contact.phone}
+                            title={contact.phone ?? 'Numéro non renseigné'}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 ${contact.phone ? 'hover:bg-gray-50 dark:hover:bg-gray-700' : 'opacity-50 pointer-events-none'}`}
+                        >
                             <PhoneIcon className="h-4 w-4 text-gray-400" />
                             Appeler
-                        </button>
-                        <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm text-gray-700 dark:text-gray-300">
+                        </a>
+                        <a
+                            href={contact.email ? `mailto:${contact.email}` : undefined}
+                            aria-disabled={!contact.email}
+                            title={contact.email ?? 'Email non renseigné'}
+                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 ${contact.email ? 'hover:bg-gray-50 dark:hover:bg-gray-700' : 'opacity-50 pointer-events-none'}`}
+                        >
                             <EnvelopeIcon className="h-4 w-4 text-gray-400" />
                             Envoyer un email
-                        </button>
+                        </a>
                     </div>
                 )}
             </div>
@@ -909,7 +920,7 @@ function NewConversationModal({ onClose, onCreated }) {
                 {selected.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-3">
                         {selected.map(u => (
-                            <span key={u.id} className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+                            <span key={u.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
                                 {u.name}
                                 <button onClick={() => toggleUser(u)}>
                                     <XMarkIcon className="h-3 w-3" />
@@ -926,7 +937,7 @@ function NewConversationModal({ onClose, onCreated }) {
                         placeholder="Nom du groupe (optionnel)"
                         value={groupName}
                         onChange={e => setGroupName(e.target.value)}
-                        className="w-full mb-3 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        className="w-full mb-3 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
                     />
                 )}
 
@@ -939,7 +950,7 @@ function NewConversationModal({ onClose, onCreated }) {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         autoFocus
-                        className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
 
@@ -949,7 +960,7 @@ function NewConversationModal({ onClose, onCreated }) {
                         <button
                             key={u.id}
                             onClick={() => toggleUser(u)}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${selected.find(s => s.id === u.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${selected.find(s => s.id === u.id) ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
                         >
                             <img
                                 src={u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=32`}
@@ -961,7 +972,7 @@ function NewConversationModal({ onClose, onCreated }) {
                                 <p className="text-xs text-gray-500">{u.job_title}</p>
                             </div>
                             {selected.find(s => s.id === u.id) && (
-                                <CheckIcon className="ml-auto h-4 w-4 text-blue-600" />
+                                <CheckIcon className="ml-auto h-4 w-4 text-purple-600" />
                             )}
                         </button>
                     ))}
@@ -974,7 +985,7 @@ function NewConversationModal({ onClose, onCreated }) {
                     <button
                         onClick={create}
                         disabled={!selected.length || creating}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-40"
+                        className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-40"
                     >
                         {creating ? 'Création…' : 'Démarrer'}
                     </button>
@@ -983,3 +994,4 @@ function NewConversationModal({ onClose, onCreated }) {
         </div>
     );
 }
+export { MessagesIndex };

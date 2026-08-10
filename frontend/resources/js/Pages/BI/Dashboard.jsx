@@ -17,6 +17,7 @@ import {
     XAxis, YAxis, Tooltip,
 } from 'recharts';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ---------------------------------------------------------------------------
 // Données mock — développement
@@ -109,7 +110,7 @@ function MiniDashboard({ title, icon: Icon, color, children, href }) {
                     <span className="p-1.5 rounded-lg" style={{ background: color + '20' }}><Icon size={15} style={{ color }} /></span>
                     <span className="font-semibold text-sm text-slate-800">{title}</span>
                 </div>
-                <Link href={href} className="text-xs text-blue-600 hover:underline font-medium">Voir détail →</Link>
+                <Link href={href} className="text-xs text-purple-600 hover:underline font-medium">Voir détail →</Link>
             </div>
             <div className="p-4 flex-1">{children}</div>
         </div>
@@ -155,12 +156,13 @@ export default function BIDashboard() {
     const leaveData = (allData.hr?.by_leave_type ?? []).map(l => ({ name: l.type, value: l.total_days }));
 
     return (
+        <AppLayout>
         <div className="min-h-screen bg-slate-50">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 px-6 py-4">
                 <div className="max-w-screen-2xl mx-auto flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-700 rounded-xl"><BarChart2 size={20} className="text-white" /></div>
+                        <div className="p-2 bg-purple-700 rounded-xl"><BarChart2 size={20} className="text-white" /></div>
                         <div>
                             <h1 className="text-lg font-bold text-slate-900">Business Intelligence</h1>
                             <p className="text-xs text-slate-500">Tableau de bord analytique — IBIG SECRETIS</p>
@@ -174,7 +176,7 @@ export default function BIDashboard() {
                                 <button
                                     key={p.value}
                                     onClick={() => setPeriod(p.value)}
-                                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${period === p.value ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${period === p.value ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
                                 >
                                     {p.label}
                                 </button>
@@ -197,7 +199,7 @@ export default function BIDashboard() {
                             <Plus size={13} /> Construire un rapport
                         </Link>
 
-                        <button onClick={handleExport} disabled={exporting} className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-700 text-white rounded-lg hover:bg-blue-800 disabled:opacity-60">
+                        <button onClick={handleExport} disabled={exporting} className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-purple-700 text-white rounded-lg hover:bg-purple-800 disabled:opacity-60">
                             <Download size={13} /> {exporting ? 'Export…' : 'Rapport PDF'}
                         </button>
                     </div>
@@ -223,7 +225,7 @@ export default function BIDashboard() {
                     {/* Courrier */}
                     <MiniDashboard title="Courrier" icon={Mail} color="#1d4ed8" href="/bi/correspondence">
                         <div className="mb-3 flex gap-3">
-                            <div className="text-center"><p className="text-2xl font-bold text-blue-700">{allData.correspondence?.summary?.sla_rate}%</p><p className="text-xs text-slate-500">Taux SLA</p></div>
+                            <div className="text-center"><p className="text-2xl font-bold text-purple-700">{allData.correspondence?.summary?.sla_rate}%</p><p className="text-xs text-slate-500">Taux SLA</p></div>
                             <div className="text-center"><p className="text-2xl font-bold text-slate-700">{Math.round((allData.correspondence?.summary?.avg_processing_min ?? 0) / 60)}h</p><p className="text-xs text-slate-500">Délai moy.</p></div>
                         </div>
                         <ResponsiveContainer width="100%" height={90}>
@@ -307,5 +309,7 @@ export default function BIDashboard() {
                 </div>
             </div>
         </div>
+        </AppLayout>
     );
 }
+export { BIDashboard };

@@ -1,122 +1,44 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Relance facture impayée</title>
-    <style>
-        body { font-family: Arial, sans-serif; font-size: 14px; color: #2d3748; margin: 0; padding: 0; background: #f7fafc; }
-        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
-        .header { background: #1A3A5C; padding: 30px 40px; text-align: center; }
-        .header h1 { color: #fff; margin: 0; font-size: 22px; }
-        .header p  { color: #a8c5e0; margin: 6px 0 0; font-size: 13px; }
-        .body { padding: 36px 40px; }
-        .alert-box {
-            background: #fff5f5; border: 1px solid #fed7d7; border-left: 4px solid #e53e3e;
-            border-radius: 8px; padding: 16px 20px; margin: 20px 0;
-        }
-        .alert-box .label { font-size: 11px; text-transform: uppercase; color: #c53030; letter-spacing: 1px; margin-bottom: 4px; }
-        .amount { font-size: 28px; font-weight: bold; color: #e53e3e; }
-        .invoice-meta { background: #f7fafc; border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
-        .invoice-meta table { width: 100%; border-collapse: collapse; }
-        .invoice-meta td { padding: 4px 0; font-size: 13px; }
-        .invoice-meta td:first-child { color: #718096; width: 40%; }
-        .invoice-meta td:last-child { font-weight: 600; color: #2d3748; }
-        .cta { text-align: center; margin: 28px 0; }
-        .cta a {
-            display: inline-block; background: #1A3A5C; color: #fff;
-            padding: 12px 32px; border-radius: 8px; text-decoration: none;
-            font-weight: bold; font-size: 14px;
-        }
-        .footer { background: #f7fafc; border-top: 1px solid #e2e8f0; padding: 20px 40px; text-align: center; font-size: 12px; color: #a0aec0; }
-        p { line-height: 1.7; color: #4a5568; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h1>{{ $org->name }}</h1>
-        <p>Rappel de paiement — Facture impayée</p>
-    </div>
+@extends('emails.layout')
 
-    <div class="body">
-        <p>Bonjour <strong>{{ $client->name }}</strong>,</p>
+{{-- Relance de facture impayée. Variables : invoice, client, org, days_overdue. --}}
 
-        <p>
-            Sauf erreur de notre part, nous n'avons pas encore reçu le règlement
-            de la facture mentionnée ci-dessous, dont l'échéance est dépassée depuis
-            <strong>{{ $days_overdue }} jour{{ $days_overdue > 1 ? 's' : '' }}</strong>.
-        </p>
+@php
+    // SECRETIS est déployé dans plusieurs zones monétaires : la devise
+    // vient du document, sinon de l'organisation émettrice — jamais d'un
+    // repli codé en dur.
+    $devise = $invoice->currency
+        ?: ($org ? app(\App\Services\CurrencyService::class)->getOrganizationCurrency($org) : 'XOF');
+    $fmt    = fn ($m) => number_format((float) $m, 0, ',', ' ');
+    $jours  = (int) ($days_overdue ?? 0);
 
-        <div class="alert-box">
-            <div class="label">Solde restant dû</div>
-            <div class="amount">{{ number_format($invoice->balance_due, 0, ',', ' ') }} FCFA</div>
-        </div>
+    // Le ton monte avec l'ancienneté de l'impayé, sans jamais devenir comminatoire.
+    $ton = $jours >= 60
+        ? ['#DC2626', 'Relance — facture impayée depuis ' . $jours . ' jours']
+        : ($jours >= 15
+            ? ['#D97706', 'Rappel — facture échue depuis ' . $jours . ' jours']
+            : ['#9333EA', 'Rappel d\'échéance']);
+    [$couleur, $titre] = $ton;
+@endphp
 
-        <div class="invoice-meta">
-            <table>
-                <tr>
-                    <td>Numéro de facture</td>
-                    <td>{{ $invoice->invoice_number }}</td>
-                </tr>
-                <tr>
-                    <td>Objet</td>
-                    <td>{{ $invoice->title }}</td>
-                </tr>
-                <tr>
-                    <td>Date d'émission</td>
-                    <td>{{ $invoice->issue_date?->format('d/m/Y') }}</td>
-                </tr>
-                <tr>
-                    <td>Date d'échéance</td>
-                    <td>{{ $invoice->due_date?->format('d/m/Y') }}</td>
-                </tr>
-                <tr>
-                    <td>Total facturé</td>
-                    <td>{{ number_format($invoice->total, 0, ',', ' ') }} FCFA</td>
-                </tr>
-                <tr>
-                    <td>Déjà réglé</td>
-                    <td>{{ number_format($invoice->paid_amount, 0, ',', ' ') }} FCFA</td>
-                </tr>
-            </table>
-        </div>
+@section('content')
 
-        <p>
-            Nous vous remercions de bien vouloir procéder au règlement dans les
-            meilleurs délais. Si vous avez déjà effectué le paiement, veuillez
-            ignorer ce message ou nous transmettre votre preuve de paiement.
-        </p>
+<h2 style="color:{{ $couleur }};margin:0 0 14px;">{{ $titre }}</h2>
 
-        @if($org->getSetting('bank_details'))
-        <p>
-            <strong>Coordonnées bancaires :</strong><br>
-            {!! nl2br(e($org->getSetting('bank_details'))) !!}
-        </p>
-        @endif
+<p>Bonjour{{ $client?->name ? ' ' . $client->name : '' }},</p>
 
-        <div class="cta">
-            <a href="mailto:{{ $org->email }}?subject=Paiement facture {{ $invoice->invoice_number }}">
-                Confirmer mon paiement
-            </a>
-        </div>
+<p>Sauf erreur de notre part, la facture <strong>{{ $invoice->invoice_number }}</strong> demeure impayée à ce jour.</p>
 
-        <p>
-            Pour toute question ou litige, n'hésitez pas à nous contacter à
-            <a href="mailto:{{ $org->email }}">{{ $org->email }}</a>.
-        </p>
+<table role="presentation" width="100%" style="background:#fff7ed;border-left:3px solid {{ $couleur }};border-radius:6px;margin:18px 0;"><tr><td style="padding:18px 20px;font-size:14px;line-height:1.8;">
+  <strong>Facture :</strong> {{ $invoice->invoice_number }}<br>
+  <strong>Échéance :</strong> {{ optional($invoice->due_date)->format('d/m/Y') }}<br>
+  <strong>Retard :</strong> {{ $jours }} jour(s)<br>
+  <span style="display:inline-block;margin-top:8px;padding-top:8px;border-top:1px solid #fed7aa;font-size:17px;color:{{ $couleur }};"><strong>Montant dû : {{ $fmt($invoice->total) }} {{ $devise }}</strong></span>
+</td></tr></table>
 
-        <p>
-            Cordialement,<br>
-            <strong>L'équipe {{ $org->name }}</strong>
-        </p>
-    </div>
+<p>Si le règlement a été effectué entre-temps, merci de ne pas tenir compte de ce message et de nous transmettre la preuve de paiement.</p>
 
-    <div class="footer">
-        {{ $org->name }}
-        @if($org->address) — {{ $org->address }}@endif
-        @if($org->phone) — Tél : {{ $org->phone }}@endif<br>
-        Ce message a été généré automatiquement par IBIG SECRETIS ERP.
-    </div>
-</div>
-</body>
-</html>
+<p>Dans le cas contraire, nous vous remercions de bien vouloir procéder au règlement dans les meilleurs délais. Notre service comptable se tient à votre disposition pour convenir d'un échéancier si nécessaire.</p>
+
+<p style="margin-top:24px;">Cordialement,<br><strong>{{ $org?->name ?? config('app.name') }}</strong></p>
+
+@endsection

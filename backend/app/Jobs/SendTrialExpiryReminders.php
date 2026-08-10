@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Organisation;
+use App\Models\Organization;
 use App\Notifications\TrialExpiringNotification;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -18,6 +18,19 @@ use Illuminate\Support\Facades\Notification;
  *
  * Planifié dans : App\Console\Commands\SendTrialReminders
  * Lancer manuellement : php artisan secretis:trial-reminders
+ *
+ * @deprecated REMPLACÉ par `php artisan licence:emails` (sections 5.4, 8.6, 8.8).
+ *
+ * Trois défauts bloquants, indépendants du cahier :
+ *   — il appelle `$organisation->admin`, relation qui n'existe pas sur
+ *     App\Models\Organization : la boucle saute donc systématiquement chaque
+ *     organisation ;
+ *   — la notification qu'il déclenche rend des vues absentes du dépôt ;
+ *   — il lit `organizations.status` et `trial_ends_at`, alors que l'autorité
+ *     sur l'état est LicenceService::etat(), calculé côté serveur.
+ * Et un défaut de conception : la trace d'envoi vit dans le cache, avec une clé
+ * qui expire à minuit. Un `cache:clear` relance les envois, et la relance
+ * commerciale unique de J+7 ne peut structurellement pas être garantie.
  */
 class SendTrialExpiryReminders implements ShouldQueue
 {
@@ -49,7 +62,7 @@ class SendTrialExpiryReminders implements ShouldQueue
             $targetDate = Carbon::today()->addDays($days)->toDateString();
 
             // Récupère les organisations dont l'essai expire exactement dans $days jours
-            $organisations = Organisation::query()
+            $organisations = Organization::query()
                 ->where('status', 'trial')
                 ->whereDate('trial_ends_at', $targetDate)
                 ->whereNull('subscription_activated_at')
@@ -114,7 +127,7 @@ class SendTrialExpiryReminders implements ShouldQueue
     /**
      * Récupère les fonctionnalités utilisées par l'organisation (pour J-7)
      */
-    protected function getUsedFeatures(Organisation $organisation): array
+    protected function getUsedFeatures(Organization $organisation): array
     {
         $features = [];
 

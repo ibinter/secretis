@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Head, router } from '@inertiajs/react';
+import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
     RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -107,18 +108,18 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
         const scores = {};
         quotations.forEach(q => { scores[q.id] = technicalScores[q.id] ?? 0; });
 
-        router.post(
-            `/procurement/rfqs/${rfq.id}/evaluate`,
-            { technical_scores: scores },
-            {
-                onSuccess: (page) => {
-                    setResults(page.props.results ?? []);
-                    setIsEvaluating(false);
-                },
-                onError: () => setIsEvaluating(false),
-                preserveState: true,
-            }
-        );
+        // rfqEvaluate renvoie du JSON ({ results: [...] }) → requête axios, pas Inertia.
+        try {
+            const res = await axios.post(
+                `/achats/appels-offres/${rfq.id}/evaluer`,
+                { technical_scores: scores }
+            );
+            setResults(res.data?.results ?? []);
+        } catch (e) {
+            // silencieux : les scores restent inchangés en cas d'erreur
+        } finally {
+            setIsEvaluating(false);
+        }
     };
 
     // Sélectionner le gagnant
@@ -126,7 +127,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
         if (!selectedId || !justification.trim()) return;
         setIsSelecting(true);
         router.post(
-            `/procurement/rfqs/${rfq.id}/select`,
+            `/achats/appels-offres/${rfq.id}/selectionner`,
             { quotation_id: selectedId, justification },
             { onFinish: () => setIsSelecting(false) }
         );
@@ -142,7 +143,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <a href="/procurement/rfqs" className="text-blue-600 hover:underline text-sm">
+                            <a href="/achats/appels-offres" className="text-purple-600 hover:underline text-sm">
                                 ← Appels d'offres
                             </a>
                         </div>
@@ -215,8 +216,8 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                             ))}
                                         </tr>
                                         {/* Score financier */}
-                                        <tr className="border-t border-gray-100 bg-blue-50/30">
-                                            <td className="py-3 px-4 font-semibold text-blue-700">📊 Score financier</td>
+                                        <tr className="border-t border-gray-100 bg-purple-50/30">
+                                            <td className="py-3 px-4 font-semibold text-purple-700">📊 Score financier</td>
                                             {quotations.map((q, idx) => {
                                                 const res = results.find(r => r.quotation_id === q.id);
                                                 return (
@@ -278,7 +279,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                 <button
                                     onClick={evaluate}
                                     disabled={isEvaluating}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                                    className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
                                 >
                                     {isEvaluating ? 'Calcul en cours…' : '🔄 Calculer les scores'}
                                 </button>
@@ -376,7 +377,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                             value={justification}
                                             onChange={e => setJustification(e.target.value)}
                                             rows={6}
-                                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                             placeholder="Expliquez les raisons de ce choix (qualité technique, rapport qualité/prix, délais, références…)"
                                         />
                                         <button
@@ -397,7 +398,7 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
                                     ✅ Appel d'offres clôturé — Fournisseur sélectionné et notifié.
                                 </p>
                                 <a
-                                    href="/procurement/purchase-orders"
+                                    href="/achats/commandes"
                                     className="mt-3 inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
                                 >
                                     Créer le bon de commande →
@@ -410,3 +411,4 @@ export default function QuotationComparator({ rfq, quotations: initialQuotations
         </AuthenticatedLayout>
     );
 }
+export { QuotationComparator };

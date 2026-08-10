@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Faq;
-use App\Models\FaqCategory;
-use App\Models\FaqRating;
 use App\Models\SupportTicket;
 use App\Services\SaraAiService;
 use Illuminate\Http\JsonResponse;
@@ -316,5 +314,57 @@ class HelpController extends Controller
                 'message'    => 'SARA est indisponible pour le moment. Veuillez soumettre votre ticket.',
             ]);
         }
+    }
+
+
+    /**
+     * Page d'aide principale.
+     */
+    public function index(): \Inertia\Response
+    {
+        $categories = collect();
+        $recent     = collect();
+        $featured   = collect();
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('help_categories')) {
+                $categories = \Illuminate\Support\Facades\DB::table('help_categories')
+                    ->orderBy('sort_order')
+                    ->get(['id', 'name', 'slug', 'icon']);
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('help_articles')) {
+                $recent = \Illuminate\Support\Facades\DB::table('help_articles')
+                    ->where('published', true)
+                    ->orderByDesc('published_at')
+                    ->limit(5)
+                    ->get(['id', 'title', 'slug', 'published_at']);
+
+                $featured = \Illuminate\Support\Facades\DB::table('help_articles')
+                    ->where('published', true)
+                    ->where('is_featured', true)
+                    ->limit(3)
+                    ->get(['id', 'title', 'slug', 'excerpt']);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('HelpController::index: ' . $e->getMessage());
+        }
+
+        return \Inertia\Inertia::render('Help/Index', [
+            'categories' => $categories,
+            'recent'     => $recent,
+            'featured'   => $featured,
+        ]);
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

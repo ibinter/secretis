@@ -1,109 +1,41 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $isReminder ? '[Rappel] ' : '' }}Signature requise — {{ $request->title }}</title>
-    <style>
-        body { margin: 0; padding: 0; background: #F1F5F9; font-family: 'Segoe UI', Arial, sans-serif; }
-        .wrapper { max-width: 580px; margin: 32px auto; }
-        .card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.08); }
-        .header { background: #1E3A5F; padding: 28px 32px; text-align: center; }
-        .header h1 { color: white; margin: 0; font-size: 22px; font-weight: 700; }
-        .header p  { color: rgba(255,255,255,.7); margin: 6px 0 0; font-size: 14px; }
-        .body { padding: 32px; }
-        .body p { color: #374151; font-size: 15px; line-height: 1.7; margin: 0 0 16px; }
-        .doc-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 20px; margin: 20px 0; }
-        .doc-box h3 { margin: 0 0 6px; font-size: 16px; color: #1E3A5F; }
-        .doc-box p  { margin: 0; font-size: 13px; color: #64748B; }
-        .message-box { background: #EFF6FF; border-left: 4px solid #2563EB; padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 20px 0; font-size: 14px; color: #1E40AF; }
-        .btn { display: block; width: fit-content; margin: 28px auto; padding: 16px 40px; background: #2563EB; color: white; text-decoration: none; border-radius: 12px; font-size: 16px; font-weight: 700; letter-spacing: .3px; }
-        .reminder-banner { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #92400E; text-align: center; font-weight: 600; }
-        .expiry { text-align: center; color: #D97706; font-size: 13px; margin-top: -12px; margin-bottom: 20px; }
-        .footer { background: #F8FAFC; padding: 20px 32px; text-align: center; }
-        .footer p { font-size: 12px; color: #94A3B8; margin: 4px 0; }
-        .url-fallback { word-break: break-all; font-size: 11px; color: #94A3B8; margin-top: 16px; }
-    </style>
-</head>
-<body>
-<div class="wrapper">
-    <div class="card">
+@extends('emails.layout')
 
-        <!-- Header -->
-        <div class="header">
-            <h1>SECRETIS ERP</h1>
-            <p>Signature électronique sécurisée</p>
-        </div>
+{{-- Invitation à signer électroniquement un document.
+     Variables : request (SignatureRequest), signer, signUrl, isReminder. --}}
 
-        <!-- Corps -->
-        <div class="body">
+@php
+    $relance = (bool) ($isReminder ?? false);
+    $couleur = $relance ? '#D97706' : '#9333EA';
+@endphp
 
-            @if($isReminder)
-            <div class="reminder-banner">
-                ⏰ RAPPEL — Ce document attend toujours votre signature
-            </div>
-            @endif
+@section('content')
 
-            <p>Bonjour <strong>{{ $signer->name }}</strong>,</p>
+<div style="display:inline-block;padding:4px 12px;border-radius:999px;background:{{ $couleur }}1a;color:{{ $couleur }};font-size:12px;font-weight:bold;letter-spacing:.04em;text-transform:uppercase;">{{ $relance ? 'Rappel' : 'Signature électronique' }}</div>
 
-            <p>
-                @if($isReminder)
-                    Nous vous rappelons qu'une signature électronique est attendue de votre part sur le document suivant.
-                @else
-                    Vous êtes invité(e) à signer électroniquement le document suivant.
-                @endif
-            </p>
+<h2 style="color:#111827;margin:14px 0 12px;font-size:20px;line-height:1.35;">{{ $request->title }}</h2>
 
-            <!-- Informations du document -->
-            <div class="doc-box">
-                <h3>{{ $request->title }}</h3>
-                <p>Document : <strong>{{ $request->document->title ?? 'N/A' }}</strong></p>
-                @if($request->signing_order === 'sequential')
-                <p>Ordre de signature : Séquentiel — votre tour est venu.</p>
-                @endif
-            </div>
+<p>Bonjour {{ $signer->name ?? '' }},</p>
 
-            <!-- Message personnalisé de l'expéditeur -->
-            @if($request->message)
-            <div class="message-box">
-                <strong>Message :</strong><br>
-                {{ $request->message }}
-            </div>
-            @endif
+@if($relance)
+<p>Ce document attend toujours votre signature. Il vous suffit de quelques secondes pour la déposer en ligne.</p>
+@else
+<p>Un document vous est adressé pour signature électronique.</p>
+@endif
 
-            <!-- Expiration -->
-            @if($request->expires_at)
-            <p class="expiry">
-                ⚠ Ce lien de signature expire le
-                <strong>{{ \Carbon\Carbon::parse($request->expires_at)->format('d/m/Y à H:i') }}</strong>.
-            </p>
-            @endif
+@if(!empty($request->message))
+<table role="presentation" width="100%" style="background:#faf5ff;border-left:3px solid {{ $couleur }};border-radius:6px;margin:18px 0;"><tr><td style="padding:16px 20px;font-size:15px;color:#1f2937;line-height:1.6;">{!! nl2br(e($request->message)) !!}</td></tr></table>
+@endif
 
-            <!-- Bouton CTA -->
-            <a href="{{ $signUrl }}" class="btn">
-                ✍ Signer le document
-            </a>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px auto;"><tr><td style="background:{{ $couleur }};border-radius:8px;">
+  <a href="{{ $signUrl }}" style="display:inline-block;padding:14px 38px;color:#ffffff;font-weight:bold;text-decoration:none;font-size:15px;">Signer le document</a>
+</td></tr></table>
 
-            <p style="font-size:13px;color:#64748B;text-align:center">
-                En cliquant sur ce bouton, vous accéderez à une page sécurisée.<br>
-                Aucun compte SECRETIS n'est requis pour signer.
-            </p>
-        </div>
+@if($request->expires_at)
+<p style="text-align:center;font-size:13px;color:#6b7280;">Ce lien expire le <strong>{{ \Carbon\Carbon::parse($request->expires_at)->format('d/m/Y à H\hi') }}</strong>.</p>
+@endif
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Cet email a été envoyé automatiquement par <strong>IBIG SECRETIS ERP</strong>.</p>
-            <p>Si vous ne souhaitez pas signer, vous pouvez ignorer cet email ou refuser via le lien ci-dessus.</p>
-            <p class="url-fallback">
-                Si le bouton ne fonctionne pas, copiez ce lien : {{ $signUrl }}
-            </p>
-        </div>
+<p style="font-size:13px;color:#6b7280;margin-top:22px;border-top:1px solid #f3e8ff;padding-top:16px;">
+  Ce lien de signature vous est personnel : ne le transmettez pas. Chaque action est horodatée et consignée dans un journal d'audit conservé avec le document.
+</p>
 
-    </div>
-
-    <p style="text-align:center;font-size:11px;color:#94A3B8;margin-top:16px">
-        SECRETIS ERP — Gestion documentaire sécurisée pour l'Afrique francophone
-    </p>
-</div>
-</body>
-</html>
+@endsection

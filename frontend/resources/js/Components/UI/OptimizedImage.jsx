@@ -248,7 +248,7 @@ export function AvatarImage({ src, name, size = 40, className = '' }) {
   if (!src) {
     return (
       <div
-        className={`rounded-full flex items-center justify-center bg-blue-600 dark:bg-[#1565c0]
+        className={`rounded-full flex items-center justify-center bg-purple-600 dark:bg-[#1565c0]
           text-white font-semibold flex-shrink-0 ${className}`}
         style={{ width: size, height: size, fontSize: size * 0.4 }}
         aria-label={name}
@@ -273,3 +273,4 @@ export function AvatarImage({ src, name, size = 40, className = '' }) {
     />
   );
 }
+export { OptimizedImage };

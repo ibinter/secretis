@@ -34,7 +34,7 @@ export default function SearchInput({
         onChange={e => debouncedChange(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className={`w-full ${sizeCls} rounded-lg border border-gray-200 dark:border-[#1E3048] bg-white dark:bg-[#0F1923] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2E86C1] transition-shadow`}
+        className={`w-full ${sizeCls} rounded-lg border border-gray-200 dark:border-[#1E3048] bg-white dark:bg-[#0F1923] text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#7e22ce] transition-shadow`}
       />
       {value && (
         <button
@@ -48,3 +48,4 @@ export default function SearchInput({
     </div>
   )
 }
+export { SearchInput };

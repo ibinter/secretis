@@ -372,6 +372,30 @@ class SyscohadaController extends Controller
         ]);
     }
 
+    /** PDF Grand livre d'un compte (DomPDF) */
+    public function generalLedgerPdf(Request $request): Response
+    {
+        $user    = Auth::user();
+        $org     = Organization::findOrFail($user->organization_id);
+        $account = $request->input('account');
+
+        abort_if(! $account, 422, 'Le numéro de compte est requis.');
+
+        $start = Carbon::parse($request->input('start', now()->startOfYear()));
+        $end   = Carbon::parse($request->input('end',   now()->endOfYear()));
+
+        $data = $this->syscohada->generateGeneralLedger($org, $account, $start, $end);
+
+        $pdf = app('dompdf.wrapper')->loadView('accounting.general-ledger-pdf', compact('data', 'org'));
+        $pdf->setPaper('A4', 'landscape');
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+
+        return response($pdf->output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"grand-livre-{$account}.pdf\"",
+        ]);
+    }
+
     // =========================================================================
     // PLAN COMPTABLE
     // =========================================================================
@@ -629,4 +653,28 @@ class SyscohadaController extends Controller
             'result'  => $result,
         ]);
     }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    // ── Alias routes ──────────────────────────────────────────────────────────
+    public function index(Request $request)   { return $this->journalIndex($request); }
+    public function journal(Request $request) { return $this->journalIndex($request); }
+
+    /** POST /accounting/journal/entries → journalStore() */
+    public function storeEntry(Request $request): JsonResponse { return $this->journalStore($request); }
+
+    /** POST /accounting/journal/entries/{id}/validate → journalValidate() */
+    public function validateEntry(int $id): JsonResponse { return $this->journalValidate($id); }
+
+
 }

@@ -3,7 +3,7 @@
  *
  * Données initiales via Inertia SSR + rafraîchissement TanStack Query toutes les 5 min.
  * Bibliothèque graphiques : Recharts
- * Charte SECRETIS : #1A3A5C (navy), #2E86C1 (bleu), #F39C12 (ambre)
+ * Charte SECRETIS : #9333EA (navy), #7e22ce (bleu), #F39C12 (ambre)
  */
 
 import { useState } from 'react';
@@ -35,8 +35,8 @@ import { useExecutiveKpis, useTrends, useInvalidateOnWebsocketEvent } from '@/ho
 // ============================================================================
 
 const C = {
-    navy:  '#1A3A5C',
-    blue:  '#2E86C1',
+    navy:  '#9333EA',
+    blue:  '#7e22ce',
     amber: '#F39C12',
     green: '#27AE60',
     red:   '#E74C3C',
@@ -58,7 +58,7 @@ const PERIODS = [
 
 function SectionTitle({ children }) {
     return (
-        <h2 className="text-base font-semibold text-[#1A3A5C] mb-4">{children}</h2>
+        <h2 className="text-base font-semibold text-[#9333EA] mb-4">{children}</h2>
     );
 }
 
@@ -79,7 +79,7 @@ function PeriodSelector({ value, onChange }) {
                     onClick={() => onChange(p)}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                         value === p.value
-                            ? 'bg-white shadow text-[#1A3A5C]'
+                            ? 'bg-white shadow text-[#9333EA]'
                             : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
@@ -110,7 +110,7 @@ function TopServicesTable({ departments = [] }) {
                             : 0;
                         return (
                             <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                                <td className="py-2.5 font-medium text-[#1A3A5C]">{d.department}</td>
+                                <td className="py-2.5 font-medium text-[#9333EA]">{d.department}</td>
                                 <td className="py-2.5 text-right text-gray-600">{d.total_tasks}</td>
                                 <td className="py-2.5 text-right text-emerald-600">{d.done_tasks}</td>
                                 <td className="py-2.5 text-right text-red-500">{d.overdue_tasks}</td>
@@ -192,7 +192,7 @@ export default function Executive() {
                 <div className="bg-white border-b border-gray-100 px-6 py-4">
                     <div className="max-w-screen-2xl mx-auto flex items-center justify-between flex-wrap gap-3">
                         <div>
-                            <h1 className="text-xl font-bold text-[#1A3A5C]">
+                            <h1 className="text-xl font-bold text-[#9333EA]">
                                 Tableau de bord Dirigeant
                             </h1>
                             <p className="text-sm text-gray-500 mt-0.5">
@@ -419,3 +419,4 @@ export default function Executive() {
         </>
     );
 }
+export { Executive };

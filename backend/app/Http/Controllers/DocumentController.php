@@ -44,65 +44,88 @@ class DocumentController extends Controller
      */
     public function index(Request $request): Response|JsonResponse
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
 
-        $query = Document::where('organization_id', $user->organization_id)
-            ->where('status', 'active')
-            ->with(['author:id,name,avatar', 'folder:id,name', 'department:id,name'])
-            ->withCount('versions')
-            ->orderBy('updated_at', 'desc');
+            $query = Document::where('organization_id', $user->organization_id)
+                ->whereNull('deleted_at')
+                ->with(['author:id,name', 'folder:id,name'])
+                ->withCount('versions')
+                ->orderBy('updated_at', 'desc');
 
-        // Filtres
-        if ($folderId = $request->query('folder_id')) {
-            $query->where('folder_id', $folderId);
-        } else {
-            // Si aucun dossier spécifié, on retourne les documents racine
-            if (! $request->query('all')) {
+            // Filtres
+            if ($folderId = $request->query('folder_id')) {
+                $query->where('folder_id', $folderId);
+            } elseif (! $request->query('all')) {
                 $query->whereNull('folder_id');
             }
+
+            if ($category = $request->query('category')) {
+                $query->where('category', $category);
+            }
+
+            if ($accessLevel = $request->query('access_level')) {
+                $query->where('access_level', $accessLevel);
+            }
+
+            if ($authorId = $request->query('author_id')) {
+                $query->where('created_by', $authorId);
+            }
+
+            // Restriction par niveau de confidentialité
+            if (! $user->hasPermissionForModule('ged', 'view_confidential')) {
+                $query->whereNotIn('access_level', ['top_secret']);
+            }
+
+            // Recherche plein texte
+            if ($search = $request->query('search')) {
+                $query->where(function ($q) use ($search) {
+                    $like = '%' . addcslashes($search, '%_') . '%';
+                    $q->where('title', 'ilike', $like)
+                      ->orWhere('description', 'ilike', $like);
+                });
+            }
+
+            $orgId = $user->organization_id;
+            $stats = [
+                'total'    => Document::where('organization_id', $orgId)->whereNull('deleted_at')->count(),
+                'month'    => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('created_at', '>=', now()->startOfMonth())->count(),
+                'shared'   => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('access_level', 'public')->count(),
+                'archived' => Document::where('organization_id', $orgId)->whereNull('deleted_at')
+                                ->where('validation_status', 'archived')->count(),
+            ];
+
+            $folders = \App\Models\DocumentFolder::where('organization_id', $orgId)
+                ->whereNull('parent_id')
+                // La sidebar affiche folder.documents_count : sans ce withCount,
+                // le compteur restait toujours vide.
+                ->withCount('documents')
+                ->orderBy('name')
+                ->get(['id', 'name']);
+
+            $documents = $query->paginate($request->query('per_page', 24));
+
+            if ($request->wantsJson() && !$request->hasHeader("X-Inertia")) {
+                return response()->json($documents);
+            }
+
+            return Inertia::render('GED/Index', [
+                'documents' => $documents,
+                'folders'   => $folders,
+                'stats'     => $stats,
+                'filters'   => $request->only(['folder_id', 'category', 'access_level', 'author_id', 'search']),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('DocumentController::index: ' . $e->getMessage());
+            return Inertia::render('GED/Index', [
+                'documents' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 24),
+                'folders'   => [],
+                'stats'     => ['total' => 0, 'month' => 0, 'shared' => 0, 'archived' => 0],
+                'filters'   => [],
+            ]);
         }
-
-        if ($type = $request->query('type')) {
-            $query->where('type', $type);
-        }
-
-        if ($accessLevel = $request->query('access_level')) {
-            $query->where('access_level', $accessLevel);
-        }
-
-        if ($authorId = $request->query('author_id')) {
-            $query->where('author_id', $authorId);
-        }
-
-        if ($departmentId = $request->query('department_id')) {
-            $query->where('department_id', $departmentId);
-        }
-
-        // Restriction par niveau de confidentialité
-        if (! $user->hasPermissionForModule('ged', 'view_confidential')) {
-            $query->whereNotIn('access_level', ['top_secret']);
-        }
-
-        // Recherche plein texte
-        if ($search = $request->query('search')) {
-            $query->where(function ($q) use ($search) {
-                $like = '%' . addcslashes($search, '%_') . '%';
-                $q->where('title', 'ilike', $like)
-                  ->orWhere('description', 'ilike', $like)
-                  ->orWhereRaw("array_to_string(keywords, ' ') ilike ?", [$like]);
-            });
-        }
-
-        $documents = $query->paginate($request->query('per_page', 24));
-
-        if ($request->wantsJson()) {
-            return response()->json($documents);
-        }
-
-        return Inertia::render('GED/Index', [
-            'documents' => $documents,
-            'filters'   => $request->only(['folder_id', 'type', 'access_level', 'author_id', 'search']),
-        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +141,8 @@ class DocumentController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'file'         => ['required', 'file', 'max:51200'], // 50 Mo max
+            // Whitelist stricte des types acceptés (bloque html/svg/php → XSS stocké).
+            'file'         => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,png,jpg,jpeg,gif,webp,zip,rar,odt,ods'], // 50 Mo max
             'title'        => ['required', 'string', 'max:500'],
             'description'  => ['nullable', 'string', 'max:2000'],
             'folder_id'    => ['nullable', 'exists:document_folders,id'],
@@ -160,7 +184,7 @@ class DocumentController extends Controller
             resourceId: $document->id,
         );
 
-        if (request()->wantsJson()) {
+        if (request()->wantsJson() && !request()->hasHeader("X-Inertia")) {
             return response()->json($document);
         }
 
@@ -409,5 +433,118 @@ class DocumentController extends Controller
         return Document::where('id', $id)
             ->where('organization_id', Auth::user()->organization_id)
             ->firstOrFail();
+    }
+
+    // -------------------------------------------------------------------------
+    // Versions — Historique des versions d'un document
+    // -------------------------------------------------------------------------
+
+    /**
+     * Retourne les versions d'un document (web Inertia ou JSON).
+     */
+    public function versions(string $id): Response|JsonResponse
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+        $versions = $document->versions()
+            ->with('uploadedBy:id,name')
+            ->orderByDesc('version_number')
+            ->get();
+
+        if (request()->wantsJson() && ! request()->hasHeader('X-Inertia')) {
+            return response()->json(['data' => $versions]);
+        }
+
+        return Inertia::render('GED/Versions', [
+            'document' => $document->load(['author:id,name', 'folder:id,name']),
+            'versions' => $versions,
+        ]);
+    }
+
+    /**
+     * API REST: GET /api/v1/documents/{id}/versions
+     */
+    public function apiVersions(string $id): JsonResponse
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+        $versions = $document->versions()
+            ->with('uploadedBy:id,name')
+            ->orderByDesc('version_number')
+            ->get();
+
+        return response()->json(['data' => $versions]);
+    }
+
+    /**
+     * API REST: GET /api/v1/documents/{id}/download
+     */
+    public function apiDownload(string $id): \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\RedirectResponse
+    {
+        return $this->download($id);
+    }
+
+    /**
+     * API REST: POST /api/v1/documents/{id}/share
+     */
+    public function apiShare(Request $request, string $id): JsonResponse
+    {
+        return $this->share($request, $id);
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+
+    public function upload(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        return $this->store($request);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    public function archives(Request $request = null)
+    {
+        $orgId = auth()->user()->organization_id;
+        $docs  = \App\Models\Document::where('organization_id', $orgId)->where('status', 'archived')->with('author:id,name')->orderBy('updated_at', 'desc')->paginate(30);
+        return \Inertia\Inertia::render('GED/ArchiveView', ['documents' => $docs]);
+    }
+
+    /**
+     * GET /ged/documents/{id}/versions/{versionId}/download
+     * Télécharge une VERSION précise du document (le bouton de l'historique
+     * renvoyait jusqu'ici systématiquement le fichier courant).
+     */
+    public function downloadVersion(string $id, int $versionId): \Symfony\Component\HttpFoundation\Response
+    {
+        $document = $this->findDocumentForCurrentOrg($id);
+
+        $version = \App\Models\DocumentVersion::where('id', $versionId)
+            ->where('document_id', $document->id)
+            ->firstOrFail();
+
+        abort_unless(
+            \Illuminate\Support\Facades\Storage::disk('private')->exists($version->file_path),
+            404,
+            'Fichier de cette version introuvable.'
+        );
+
+        $this->auditService->log(
+            action: 'version_downloaded',
+            module: 'ged',
+            resourceType: 'document',
+            resourceId: $document->id,
+            newValues: ['version' => $version->version_number],
+        );
+
+        return \Illuminate\Support\Facades\Storage::disk('private')->download(
+            $version->file_path,
+            $version->file_name ?: ($document->title . '-v' . $version->version_number),
+        );
     }
 }

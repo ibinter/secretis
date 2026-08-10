@@ -8,8 +8,8 @@ import { debounce } from '../../utils/helpers'
 
 const TYPE_META = {
   // Types hérités (rétrocompatibilité)
-  courrier:    { label: 'Courrier',         icon: Mail,         color: 'text-[#2E86C1]' },
-  document:    { label: 'Document',         icon: FileText,     color: 'text-[#1A3A5C]' },
+  courrier:    { label: 'Courrier',         icon: Mail,         color: 'text-[#7e22ce]' },
+  document:    { label: 'Document',         icon: FileText,     color: 'text-[#9333EA]' },
   contact:     { label: 'Contact',          icon: Users,        color: 'text-[#1E8449]' },
   evenement:   { label: 'Événement',        icon: Calendar,     color: 'text-[#F39C12]' },
   tache:       { label: 'Tâche',            icon: CheckSquare,  color: 'text-purple-500' },
@@ -17,7 +17,7 @@ const TYPE_META = {
   fournisseur: { label: 'Fournisseur',      icon: ShoppingCart, color: 'text-gray-500'  },
   // Nouveaux types (API v2)
   events:      { label: 'Événements',       icon: Calendar,     color: 'text-[#F39C12]' },
-  documents:   { label: 'Documents',        icon: FileText,     color: 'text-[#1A3A5C]' },
+  documents:   { label: 'Documents',        icon: FileText,     color: 'text-[#9333EA]' },
   contacts:    { label: 'Contacts',         icon: Users,        color: 'text-[#1E8449]' },
   tasks:       { label: 'Tâches',           icon: CheckSquare,  color: 'text-purple-500' },
   visitors:    { label: 'Visiteurs',        icon: UserCheck,    color: 'text-[#C0392B]' },
@@ -206,7 +206,7 @@ export default function GlobalSearch({ open, onClose }) {
             <div className="flex flex-col items-center py-12 text-center text-sm text-gray-400">
               <Search size={36} className="mb-3 opacity-30" />
               <p>Aucun résultat pour <strong className="text-gray-600 dark:text-gray-300">"{query}"</strong></p>
-              <a href="/help" className="mt-3 text-xs text-[#2E86C1] hover:underline">Consulter l'aide</a>
+              <a href="/aide" className="mt-3 text-xs text-[#7e22ce] hover:underline">Consulter l'aide</a>
             </div>
           )}
 
@@ -230,7 +230,7 @@ export default function GlobalSearch({ open, onClose }) {
                           onClick={() => handleSelect({ ...item, _type: type })}
                           className={[
                             'flex items-center gap-3 w-full px-2 py-2.5 rounded-lg transition-colors text-left group',
-                            isActive ? 'bg-[#1A3A5C]/10 dark:bg-white/10' : 'hover:bg-gray-50 dark:hover:bg-white/5',
+                            isActive ? 'bg-[#9333EA]/10 dark:bg-white/10' : 'hover:bg-gray-50 dark:hover:bg-white/5',
                           ].join(' ')}
                         >
                           <Icon size={16} className={`shrink-0 ${meta.color}`} />
@@ -264,3 +264,4 @@ export default function GlobalSearch({ open, onClose }) {
     document.body
   )
 }
+export { GlobalSearch };

@@ -29,82 +29,96 @@ return new class extends Migration
         // Une organisation peut avoir plusieurs providers mais un seul actif
         // par type à la fois (géré au niveau applicatif).
         // ------------------------------------------------------------------
-        Schema::create('sso_providers', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('sso_providers')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('sso_providers', function (Blueprint $table) {
+                $table->id();
 
-            $table->foreignId('organization_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                $table->foreignId('organization_id')
+                      ->constrained()
+                      ->cascadeOnDelete();
 
-            // Nom lisible par l'admin (ex: "Azure AD Production", "OpenLDAP Serveur 1")
-            $table->string('name', 100);
+                // Nom lisible par l'admin (ex: "Azure AD Production", "OpenLDAP Serveur 1")
+                $table->string('name', 100);
 
-            // Type de protocole SSO
-            $table->enum('type', ['saml', 'ldap', 'oidc']);
+                // Type de protocole SSO
+                $table->enum('type', ['saml', 'ldap', 'oidc']);
 
-            $table->boolean('is_active')->default(false);
+                $table->boolean('is_active')->default(false);
 
-            // Configuration spécifique au type, chiffrée côté application
-            // (AES-256-GCM via encrypt()/decrypt() Laravel)
-            // SAML  : entity_id, idp_sso_url, idp_cert, sp_cert, sp_key, attribute_mapping, ...
-            // LDAP  : host, port, base_dn, bind_dn, bind_password, user_filter, group_filter, ...
-            // OIDC  : client_id, client_secret, discovery_url, scopes, redirect_uri, ...
-            $table->json('config');
+                // Configuration spécifique au type, chiffrée côté application
+                // (AES-256-GCM via encrypt()/decrypt() Laravel)
+                // SAML  : entity_id, idp_sso_url, idp_cert, sp_cert, sp_key, attribute_mapping, ...
+                // LDAP  : host, port, base_dn, bind_dn, bind_password, user_filter, group_filter, ...
+                // OIDC  : client_id, client_secret, discovery_url, scopes, redirect_uri, ...
+                $table->json('config');
 
-            // Domaines email gérés par ce provider (ex: ["acme.com", "acme.fr"])
-            // Utilisé pour la détection automatique du SSO
-            $table->json('email_domains')->nullable();
+                // Domaines email gérés par ce provider (ex: ["acme.com", "acme.fr"])
+                // Utilisé pour la détection automatique du SSO
+                $table->json('email_domains')->nullable();
 
-            // Métadonnées de synchronisation (LDAP uniquement)
-            $table->timestamp('last_sync_at')->nullable();
-            $table->json('last_sync_stats')->nullable();  // {created, updated, disabled}
+                // Métadonnées de synchronisation (LDAP uniquement)
+                $table->timestamp('last_sync_at')->nullable();
+                $table->json('last_sync_stats')->nullable();  // {created, updated, disabled}
 
-            $table->timestamps();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index(['organization_id', 'type', 'is_active']);
-            $table->index('is_active');
-        });
+                $table->index('organization_id');
+                $table->index(['organization_id', 'type', 'is_active']);
+                $table->index('is_active');
+            });
+        }
 
         // ------------------------------------------------------------------
         // TABLE sso_sessions
         // Trace chaque session SSO initiée (SAML Assertion ou OIDC token).
         // Permet : audit de sécurité, invalidation ciblée, détection d'anomalies.
         // ------------------------------------------------------------------
-        Schema::create('sso_sessions', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('sso_sessions')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('sso_sessions', function (Blueprint $table) {
+                $table->id();
 
-            $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                $table->foreignId('user_id')
+                      ->constrained()
+                      ->cascadeOnDelete();
 
-            $table->foreignId('provider_id')
-                  ->constrained('sso_providers')
-                  ->cascadeOnDelete();
+                $table->foreignId('provider_id')
+                      ->constrained('sso_providers')
+                      ->cascadeOnDelete();
 
-            // Identifiant de l'utilisateur côté IdP (NameID SAML, sub OIDC, dn LDAP)
-            $table->string('external_id', 255);
+                // Identifiant de l'utilisateur côté IdP (NameID SAML, sub OIDC, dn LDAP)
+                $table->string('external_id', 255);
 
-            // Token de session hashé (SHA-256) — jamais stocké en clair
-            $table->string('session_token', 64)->unique();
+                // Token de session hashé (SHA-256) — jamais stocké en clair
+                $table->string('session_token', 64)->unique();
 
-            // Contexte réseau pour la détection d'anomalies
-            $table->string('ip_address', 45)->nullable();
-            $table->string('user_agent', 500)->nullable();
+                // Contexte réseau pour la détection d'anomalies
+                $table->string('ip_address', 45)->nullable();
+                $table->string('user_agent', 500)->nullable();
 
-            // Dates de validité
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('expires_at');
+                // Dates de validité
+                $table->timestamp('created_at')->useCurrent();
+                $table->timestamp('expires_at');
 
-            // Révocation manuelle (déconnexion SSO / admin)
-            $table->timestamp('revoked_at')->nullable();
+                // Révocation manuelle (déconnexion SSO / admin)
+                $table->timestamp('revoked_at')->nullable();
 
-            $table->index('user_id');
-            $table->index('provider_id');
-            $table->index(['session_token']);
-            $table->index('expires_at');
-            $table->index(['user_id', 'provider_id', 'expires_at']);
-        });
+                $table->index('user_id');
+                $table->index('provider_id');
+                $table->index(['session_token']);
+                $table->index('expires_at');
+                $table->index(['user_id', 'provider_id', 'expires_at']);
+            });
+        }
 
         // ------------------------------------------------------------------
         // COLONNES SSO sur la table users

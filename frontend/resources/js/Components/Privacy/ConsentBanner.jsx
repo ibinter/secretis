@@ -100,8 +100,8 @@ export default function ConsentBanner({ orgId }) {
                             (essentiels), mesurer les performances (analytiques) et personnaliser
                             certaines fonctionnalités (marketing). Vous pouvez personnaliser vos choix.{' '}
                             <a
-                                href="/privacy"
-                                className="underline text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                                href="/confidentialite"
+                                className="underline text-purple-600 hover:text-purple-800 dark:text-purple-400"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
@@ -141,7 +141,7 @@ export default function ConsentBanner({ orgId }) {
                     <button
                         onClick={acceptAll}
                         disabled={saving}
-                        className="flex-1 min-w-[140px] rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                        className="flex-1 min-w-[140px] rounded-lg bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
                     >
                         {saving ? 'Enregistrement…' : 'Tout accepter'}
                     </button>
@@ -182,7 +182,7 @@ function ConsentToggle({ id, label, description, checked, onChange, disabled = f
             htmlFor={`consent-${id}`}
             className={`flex items-start gap-4 rounded-lg border p-4 transition-colors
                 ${disabled ? 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700 cursor-not-allowed' :
-                  'border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-500 cursor-pointer'}
+                  'border-gray-200 hover:border-purple-300 dark:border-gray-700 dark:hover:border-purple-500 cursor-pointer'}
             `}
         >
             <input
@@ -191,7 +191,7 @@ function ConsentToggle({ id, label, description, checked, onChange, disabled = f
                 checked={checked}
                 disabled={disabled}
                 onChange={(e) => onChange?.(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50"
                 aria-describedby={`desc-${id}`}
             />
             <div className="flex-1 min-w-0">
@@ -210,3 +210,4 @@ function ConsentToggle({ id, label, description, checked, onChange, disabled = f
         </label>
     );
 }
+export { ConsentBanner };

@@ -237,21 +237,21 @@ class BudgetService
     }
 
     /**
-     * Lit les réels depuis accounting_journal_lines (structure SYSCOHADA).
+     * Lit les réels depuis journal_lines / journal_entries (structure SYSCOHADA).
      * Adapte la requête à votre schéma comptable réel.
      */
     private function fetchActualsFromJournal(Budget $budget, int $year): array
     {
         // Requête générique — adapte les noms de table/colonnes à votre schéma
-        $rows = DB::table('accounting_journal_lines as jl')
-            ->join('accounting_journal_entries as je', 'je.id', '=', 'jl.entry_id')
+        $rows = DB::table('journal_lines as jl')
+            ->join('journal_entries as je', 'je.id', '=', 'jl.journal_entry_id')
             ->where('je.organization_id', $budget->organization_id)
             ->whereYear('je.entry_date', $year)
             ->whereNotNull('jl.account_number')
             ->selectRaw('
                 jl.account_number,
                 EXTRACT(MONTH FROM je.entry_date) AS period_month,
-                SUM(jl.debit - jl.credit) AS net_amount
+                SUM(jl.debit_amount - jl.credit_amount) AS net_amount
             ')
             ->groupByRaw('jl.account_number, EXTRACT(MONTH FROM je.entry_date)')
             ->get();

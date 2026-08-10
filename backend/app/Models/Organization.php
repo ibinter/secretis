@@ -44,6 +44,7 @@ class Organization extends Model
         'settings',
         'status',
         'trial_ends_at',
+        'plan_id',
     ];
 
     protected $casts = [
@@ -66,9 +67,20 @@ class Organization extends Model
         return $this->hasMany(User::class);
     }
 
+
+    public function activeLicense(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(License::class)->where('status', 'active')->latestOfMany();
+    }
+
+    public function latestLicense(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(License::class)->latestOfMany("ends_at");
+    }
+
     public function license(): HasOne
     {
-        return $this->hasOne(License::class)->latestOfMany();
+        return $this->hasOne(License::class)->latestOfMany("ends_at");
     }
 
     public function licenses(): HasMany

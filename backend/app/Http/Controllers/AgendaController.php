@@ -41,6 +41,7 @@ class AgendaController extends Controller
      */
     public function index(Request $request): InertiaResponse
     {
+        try {
         $user = $request->user();
 
         // Calendriers de l'utilisateur pour la sidebar
@@ -61,17 +62,83 @@ class AgendaController extends Controller
             ->map(fn(Event $e) => $e->toCalendarFormat());
 
         // Utilisateurs de l'organisation pour le sélecteur de participants
-        $orgUsers = $user->organization->users()
-            ->active()
-            ->select(['id', 'name', 'email', 'avatar', 'department_id'])
-            ->orderBy('name')
-            ->get();
+        $orgUsers = $user->organization
+            ? $user->organization->users()
+                ->active()
+                ->select(['id', 'name', 'email', 'avatar', 'department_id'])
+                ->orderBy('name')
+                ->get()
+            : collect();
 
         return Inertia::render('Agenda/Index', [
             'calendars'   => $calendars,
             'todayEvents' => $todayEvents,
             'orgUsers'    => $orgUsers,
             'timezone'    => $user->organization?->timezone ?? 'UTC',
+        ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('AgendaController::index: ' . $e->getMessage());
+            return Inertia::render('Agenda/Index', [
+                'calendars'   => [],
+                'todayEvents' => [],
+                'orgUsers'    => [],
+                'timezone'    => 'UTC',
+            ]);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // day / week — Vues Jour et Semaine
+    // -------------------------------------------------------------------------
+
+    public function day(Request $request): InertiaResponse
+    {
+        $user  = $request->user();
+        $tz    = $user->organization?->timezone ?? 'UTC';
+        $date  = $request->query('date')
+            ? Carbon::parse($request->query('date'), $tz)->startOfDay()
+            : Carbon::today($tz);
+
+        $events = Event::forOrganization($user->organization_id)
+            ->inDateRange($date, $date->copy()->endOfDay())
+            ->with('participants:id,name,avatar')
+            ->orderBy('start_at')
+            ->get()
+            ->map(fn(Event $e) => $e->toCalendarFormat());
+
+        return Inertia::render('Agenda/Day', [
+            'date'     => $date->toDateString(),
+            'events'   => $events,
+            'timezone' => $tz,
+            'orgUsers' => $user->organization
+                ? $user->organization->users()->active()->select(['id', 'name', 'email', 'avatar'])->orderBy('name')->get()
+                : collect(),
+        ]);
+    }
+
+    public function week(Request $request): InertiaResponse
+    {
+        $user  = $request->user();
+        $tz    = $user->organization?->timezone ?? 'UTC';
+        $date  = $request->query('date')
+            ? Carbon::parse($request->query('date'), $tz)->startOfWeek()
+            : Carbon::now($tz)->startOfWeek();
+
+        $events = Event::forOrganization($user->organization_id)
+            ->inDateRange($date, $date->copy()->endOfWeek())
+            ->with('participants:id,name,avatar')
+            ->orderBy('start_at')
+            ->get()
+            ->map(fn(Event $e) => $e->toCalendarFormat());
+
+        return Inertia::render('Agenda/Week', [
+            'weekStart' => $date->toDateString(),
+            'weekEnd'   => $date->copy()->endOfWeek()->toDateString(),
+            'events'    => $events,
+            'timezone'  => $tz,
+            'orgUsers'  => $user->organization
+                ? $user->organization->users()->active()->select(['id', 'name', 'email', 'avatar'])->orderBy('name')->get()
+                : collect(),
         ]);
     }
 
@@ -97,7 +164,7 @@ class AgendaController extends Controller
             'start'       => 'nullable|date',
             'end'         => 'nullable|date|after_or_equal:start',
             'calendar_id' => 'nullable|uuid',
-            'type'        => 'nullable|in:event,meeting,task,reminder',
+            'type'        => 'nullable|in:meeting,task,reminder,holiday,other',
             'per_page'    => 'nullable|integer|min:1|max:100',
         ]);
 
@@ -189,7 +256,7 @@ class AgendaController extends Controller
             'is_all_day'       => 'boolean',
             'recurrence_rule'  => 'nullable|string|max:500',
             'color'            => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'type'             => 'nullable|in:event,meeting,task,reminder',
+            'type'             => 'nullable|in:meeting,task,reminder,holiday,other',
             'meet_link'        => 'nullable|url',
             'participants'     => 'nullable|array',
             'participants.*'   => 'uuid',
@@ -304,5 +371,115 @@ class AgendaController extends Controller
                 'end'   => $end->toIso8601String(),
             ],
         ]);
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    // -------------------------------------------------------------------------
+    // month() — Vue Mois
+    // -------------------------------------------------------------------------
+
+    public function month(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $user  = $request->user();
+        $tz    = $user->organization?->timezone ?? 'UTC';
+        $month = $request->query('month')
+            ? \Carbon\Carbon::parse($request->query('month') . '-01', $tz)->startOfMonth()
+            : \Carbon\Carbon::now($tz)->startOfMonth();
+
+        $events = \App\Models\Event::forOrganization($user->organization_id)
+            ->inDateRange($month, $month->copy()->endOfMonth())
+            ->with('participants:id,name,avatar')
+            ->orderBy('start_at')
+            ->get()
+            ->map(fn(\App\Models\Event $e) => $e->toCalendarFormat());
+
+        return \Inertia\Inertia::render('Agenda/Month', [
+            'month'    => $month->format('Y-m'),
+            'events'   => $events,
+            'timezone' => $tz,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // availability() — Page de vérification des disponibilités
+    // -------------------------------------------------------------------------
+
+    public function availability(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $user = $request->user();
+
+        $orgUsers = $user->organization
+            ? $user->organization->users()
+                ->active()
+                ->select(['id', 'name', 'email', 'avatar'])
+                ->orderBy('name')
+                ->get()
+            : collect();
+
+        return \Inertia\Inertia::render('Agenda/Availability', [
+            'orgUsers' => $orgUsers,
+            'timezone' => $user->organization?->timezone ?? 'UTC',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // smartScheduler() — Planificateur intelligent
+    // -------------------------------------------------------------------------
+
+    public function smartScheduler(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $user = $request->user();
+
+        $orgUsers = $user->organization
+            ? $user->organization->users()
+                ->active()
+                ->select(['id', 'name', 'email', 'avatar'])
+                ->orderBy('name')
+                ->get()
+            : collect();
+
+        return \Inertia\Inertia::render('Agenda/SmartScheduler', [
+            'orgUsers' => $orgUsers,
+            'timezone' => $user->organization?->timezone ?? 'UTC',
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // respond() — Répondre à une invitation (accepter/refuser)
+    // -------------------------------------------------------------------------
+
+    public function respond(\Illuminate\Http\Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'response' => 'required|in:accepted,declined,tentative',
+        ]);
+
+        $user  = $request->user();
+        $event = \App\Models\Event::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        // Mettre à jour le statut du participant
+        $event->participants()->updateExistingPivot($user->id, [
+            'status' => $request->input('response'),
+        ]);
+
+        return response()->json([
+            'message'  => 'Réponse enregistrée avec succès.',
+            'response' => $request->input('response'),
+            'event_id' => $id,
+        ]);
+    }
+
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

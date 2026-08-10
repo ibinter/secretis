@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ──────────────────────────────────────────────────────────────────
 const Ico = {
@@ -163,7 +164,7 @@ export default function OrderStatus({ order: initialOrder }) {
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c, maximumFractionDigits: 0 }).format(n);
 
   return (
-    <>
+    <AppLayout>
       <Head title={`Commande ${order?.reference ?? '—'} — SECRETIS ERP`} />
 
       <div className="min-h-screen bg-gray-50">
@@ -268,9 +269,9 @@ export default function OrderStatus({ order: initialOrder }) {
 
               {/* Proof pending */}
               {order?.status === 'proof_submitted' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <h3 className="text-sm font-semibold text-blue-800 mb-1">En cours de vérification</h3>
-                  <p className="text-xs text-blue-700">
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-purple-800 mb-1">En cours de vérification</h3>
+                  <p className="text-xs text-purple-700">
                     Votre preuve a bien été reçue. La validation prend généralement 2–24h ouvrables.
                     Vous recevrez un email de confirmation.
                   </p>
@@ -281,6 +282,7 @@ export default function OrderStatus({ order: initialOrder }) {
           </div>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
+export { OrderStatus };

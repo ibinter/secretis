@@ -47,7 +47,7 @@ const FormInput = forwardRef(function FormInput({
             suffix ? 'rounded-r-none' : '',
             hasError
               ? 'border-[#C0392B] focus:ring-[#C0392B]/30'
-              : 'border-gray-300 dark:border-gray-600 focus:ring-[#2E86C1]/30 focus:border-[#2E86C1]',
+              : 'border-gray-300 dark:border-gray-600 focus:ring-[#7e22ce]/30 focus:border-[#7e22ce]',
             as === 'textarea' ? 'min-h-[100px] resize-y' : 'h-10',
             inputClass,
           ].filter(Boolean).join(' ')}

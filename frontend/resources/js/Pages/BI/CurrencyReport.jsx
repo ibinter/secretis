@@ -5,9 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, ReferenceLine,
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/UI/card';
-import { Button } from '@/Components/UI/button';
-import { Badge } from '@/Components/UI/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, Button, Badge } from '@/Components/UI';
 import CurrencySelector from '@/Components/UI/CurrencySelector';
 import { formatAmount } from '@/hooks/useCurrency';
 import { Download, RefreshCw, TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -110,7 +108,7 @@ const CurrencyReport = () => {
             ))}
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleExport}>
+          <Button variant="secondary" size="sm" onClick={handleExport}>
             <Download className="h-4 w-4 mr-1.5" />
             Export CSV
           </Button>
@@ -298,7 +296,7 @@ const CurrencyReport = () => {
 
 const SummaryCard = ({ title, value, sub, icon, color }) => {
   const colors = {
-    blue:   'text-blue-600 bg-blue-50 dark:bg-blue-950',
+    blue:   'text-purple-600 bg-purple-50 dark:bg-purple-950',
     violet: 'text-violet-600 bg-violet-50 dark:bg-violet-950',
     green:  'text-green-600 bg-green-50 dark:bg-green-950',
     red:    'text-red-600 bg-red-50 dark:bg-red-950',

@@ -35,7 +35,7 @@ class LeaveService
         return DB::transaction(function () use ($data, $employee) {
             $start = Carbon::parse($data['start_date']);
             $end   = Carbon::parse($data['end_date']);
-            $type  = $data['leave_type'];
+            $type  = $data['type'] ?? $data['leave_type']; // le front peut encore envoyer leave_type
 
             // Calcul des jours (hors weekends et jours fériés)
             $publicHolidays = $this->getPublicHolidays($employee->organization_id, (int) $start->year);
@@ -69,11 +69,11 @@ class LeaveService
             $leave = LeaveRequest::create([
                 'organization_id' => $employee->organization_id,
                 'employee_id'     => $employee->id,
-                'leave_type'      => $type,
+                'type'            => $type, // colonne réelle : `type`
                 'status'          => 'pending',
                 'start_date'      => $start->toDateString(),
                 'end_date'        => $end->toDateString(),
-                'days_count'      => $days,
+                'working_days'    => $days, // colonne réelle : `working_days`
                 'reason'          => $data['reason'] ?? null,
             ]);
 
@@ -126,7 +126,7 @@ class LeaveService
 
                 // Déduire du solde de l'employé
                 $employee = $request->employee;
-                $employee->deductLeaveBalance($request->leave_type, $request->days_count);
+                $employee->deductLeaveBalance($request->type, (int) $request->working_days);
 
                 // Notifier l'employé
                 $this->notifyEmployee($request, 'approved');
@@ -234,19 +234,19 @@ class LeaveService
             ->whereIn('status', ['approved_n1', 'approved_hr'])
             ->where('start_date', '<=', $end->toDateString())
             ->where('end_date', '>=', $start->toDateString())
-            ->with(['employee:id,first_name,last_name,avatar,department_id', 'employee.department:id,name'])
+            ->with(['employee:id,first_name,last_name,department_id,user_id', 'employee.department:id,name'])
             ->get()
             ->map(fn($leave) => [
                 'id'          => $leave->id,
                 'employee_id' => $leave->employee_id,
                 'name'        => $leave->employee->full_name,
-                'avatar'      => $leave->employee->avatar,
+                'avatar'      => $leave->employee?->user?->avatar, // l'avatar vit sur users
                 'department'  => $leave->employee->department?->name,
-                'type'        => $leave->leave_type,
-                'type_label'  => $leave->leave_type_label,
+                'type'        => $leave->type,
+                'type_label'  => $leave->type_label ?? $leave->type,
                 'start'       => $leave->start_date->toDateString(),
                 'end'         => $leave->end_date->toDateString(),
-                'days'        => $leave->days_count,
+                'days'        => $leave->working_days,
                 'status'      => $leave->status,
             ]);
     }

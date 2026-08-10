@@ -19,17 +19,17 @@ export default function Tabs({
   const variantStyles = {
     underline: {
       nav:    'flex border-b border-gray-200 dark:border-[#1E3048] gap-0',
-      active: 'text-[#1A3A5C] dark:text-blue-300 border-b-2 border-[#1A3A5C] dark:border-blue-400 -mb-px',
+      active: 'text-[#9333EA] dark:text-purple-300 border-b-2 border-[#9333EA] dark:border-purple-400 -mb-px',
       idle:   'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent',
     },
     pills: {
       nav:    'flex gap-1 p-1 bg-gray-100 dark:bg-[#0F1923] rounded-xl',
-      active: 'bg-white dark:bg-[#162032] text-[#1A3A5C] dark:text-blue-300 shadow-sm rounded-lg',
+      active: 'bg-white dark:bg-[#162032] text-[#9333EA] dark:text-purple-300 shadow-sm rounded-lg',
       idle:   'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg',
     },
     bordered: {
       nav:    'flex gap-0 border border-gray-200 dark:border-[#1E3048] rounded-xl overflow-hidden',
-      active: 'bg-[#1A3A5C] text-white',
+      active: 'bg-[#9333EA] text-white',
       idle:   'bg-white dark:bg-[#162032] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 border-r border-gray-200 dark:border-[#1E3048] last:border-0',
     },
   }
@@ -65,3 +65,4 @@ export default function Tabs({
     </div>
   )
 }
+export { Tabs };

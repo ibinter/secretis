@@ -22,7 +22,7 @@ const STATUTS = [
 const ROLE_COLORS = {
     purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
     red:    'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border-red-200 dark:border-red-800',
-    blue:   'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    blue:   'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
     green:  'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border-green-200 dark:border-green-800',
     gray:   'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700',
 };
@@ -34,7 +34,7 @@ function initials(nom, prenom) {
 }
 
 function avatarColor(email = '') {
-    const colors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
+    const colors = ['bg-purple-500', 'bg-purple-500', 'bg-green-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
     const idx = email.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
     return colors[idx];
 }
@@ -109,7 +109,7 @@ function InviterModal({ open, onClose, services }) {
                         onChange={(e) => setData('email', e.target.value)}
                         placeholder="prenom.nom@organisation.ci"
                         required
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition"
                     />
                     {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
                 </div>
@@ -121,7 +121,7 @@ function InviterModal({ open, onClose, services }) {
                     <select
                         value={data.role}
                         onChange={(e) => setData('role', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition"
                     >
                         {ROLES.filter(r => r.value !== 'super_admin').map(r => (
                             <option key={r.value} value={r.value}>{r.label}</option>
@@ -135,7 +135,7 @@ function InviterModal({ open, onClose, services }) {
                     <select
                         value={data.service}
                         onChange={(e) => setData('service', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition"
                     >
                         <option value="">— Aucun service —</option>
                         {(services || []).map(s => (
@@ -144,7 +144,7 @@ function InviterModal({ open, onClose, services }) {
                     </select>
                 </div>
 
-                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-xs text-blue-700 dark:text-blue-300">
+                <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-xs text-purple-700 dark:text-purple-300">
                     Un email d'invitation sera envoyé. Le lien est valable <strong>72 heures</strong>.
                 </div>
 
@@ -154,7 +154,7 @@ function InviterModal({ open, onClose, services }) {
                         Annuler
                     </button>
                     <button type="submit" disabled={processing}
-                        className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition flex items-center gap-2">
+                        className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition flex items-center gap-2">
                         {processing && <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>}
                         Envoyer l'invitation
                     </button>
@@ -194,7 +194,7 @@ function ModifierRoleModal({ open, onClose, utilisateur, services }) {
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rôle</label>
                     <select value={data.role} onChange={(e) => setData('role', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition">
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition">
                         {ROLES.filter(r => r.value !== 'super_admin').map(r => (
                             <option key={r.value} value={r.value}>{r.label}</option>
                         ))}
@@ -204,7 +204,7 @@ function ModifierRoleModal({ open, onClose, utilisateur, services }) {
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Service</label>
                     <select value={data.service} onChange={(e) => setData('service', e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition">
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition">
                         <option value="">— Aucun service —</option>
                         {(services || []).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -216,7 +216,7 @@ function ModifierRoleModal({ open, onClose, utilisateur, services }) {
                         Annuler
                     </button>
                     <button type="submit" disabled={processing}
-                        className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition">
+                        className="px-5 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg transition">
                         Enregistrer
                     </button>
                 </div>
@@ -369,7 +369,7 @@ export default function Utilisateurs({ utilisateurs = [], services = [], flash }
                     </div>
                     <button
                         onClick={() => setShowInviter(true)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition shadow-sm"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-xl transition shadow-sm"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -395,21 +395,21 @@ export default function Utilisateurs({ utilisateurs = [], services = [], flash }
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Rechercher un utilisateur…"
-                            className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition"
+                            className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition"
                         />
                     </div>
                     <select value={filtreRole} onChange={(e) => setFiltreRole(e.target.value)}
-                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none transition">
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none transition">
                         <option value="">Tous les rôles</option>
                         {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                     <select value={filtreService} onChange={(e) => setFiltreService(e.target.value)}
-                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none transition">
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none transition">
                         <option value="">Tous les services</option>
                         {services.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                     <select value={filtreStatut} onChange={(e) => setFiltreStatut(e.target.value)}
-                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-blue-500 outline-none transition">
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:border-purple-500 outline-none transition">
                         {STATUTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                     </select>
                 </div>
@@ -488,3 +488,4 @@ export default function Utilisateurs({ utilisateurs = [], services = [], flash }
         </AppLayout>
     );
 }
+export { Utilisateurs };

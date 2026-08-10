@@ -273,6 +273,9 @@ class ExpenseController extends Controller
 
     public function exportForAccounting(Request $request): JsonResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         if (! Auth::user()->hasAnyRole(['admin_org', 'accountant'])) {
             abort(403);
         }
@@ -319,5 +322,22 @@ class ExpenseController extends Controller
     private function authorizeExpense(ExpenseReport $expense): void
     {
         abort_if($expense->organization_id !== Auth::user()->organization_id, 403);
+    }
+
+    // -------------------------------------------------------------------------
+    // ALIAS API (routes api.php → méthodes réelles)
+    // -------------------------------------------------------------------------
+
+    /**
+     * GET /expenses/{id}/export → exportForAccounting
+     *
+     * ATTENTION sémantique : exportForAccounting() exporte TOUTES les notes de frais
+     * d'une période (paramètre requis `period` au format Y-m) pour l'organisation.
+     * Le paramètre {id} de la route est donc ignoré. À revoir si un export
+     * par note unique est réellement attendu.
+     */
+    public function export(Request $request, $id): JsonResponse
+    {
+        return $this->exportForAccounting($request);
     }
 }

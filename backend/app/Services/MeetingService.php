@@ -315,7 +315,8 @@ PROMPT;
         $meeting->load(['organizer', 'participants', 'president']);
 
         // Génération via barryvdh/laravel-dompdf
-        $pdf = Pdf::loadView('pdf.meeting-minutes', [
+        $pdf = Pdf::pourOrganisation($meeting->organization_id)
+        ->loadView('pdf.meeting-minutes', [
             'meeting'     => $meeting,
             'agendaItems' => $meeting->getSortedAgendaItems(),
             'decisions'   => $meeting->decisions ?? [],

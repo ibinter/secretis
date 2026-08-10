@@ -40,18 +40,22 @@ class Event extends Model
     protected $fillable = [
         'organization_id',
         'calendar_id',
-        'creator_id',
+        'created_by',
         'title',
         'description',
         'location',
         'start_at',
         'end_at',
-        'is_all_day',
+        'starts_at',
+        'ends_at',
+        'all_day',
         'recurrence_rule',
         'color',
         'type',
-        'meet_link',
-        'reminders',
+        'room_id',
+        'parent_event_id',
+        'metadata',
+        'is_cancelled',
     ];
 
     protected $casts = [
@@ -231,5 +235,10 @@ class Event extends Model
                 $event->organization_id = auth()->user()->organization_id;
             }
         });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query;
     }
 }

@@ -487,4 +487,194 @@ class PaymentAdminController extends Controller
 
         return $masked;
     }
+
+    // =========================================================================
+    // Écran SuperAdmin « Paiements » (Inertia)
+    // =========================================================================
+
+    /**
+     * GET /superadmin/paiements
+     *
+     * Cette page était rendue par une closure inline dans `routes/web.php`
+     * (`fn () => Inertia::render('SuperAdmin/Payments')`), SANS aucune prop :
+     * `SuperAdmin/Payments.jsx` retombait donc intégralement sur sa constante
+     * `MOCK_PAYMENTS`. L'écran de validation des paiements de la plateforme
+     * affichait dix règlements fictifs — et aucun règlement réel.
+     *
+     * Ce contrôleur, lui, existait déjà mais n'était routé nulle part.
+     */
+    public function index(Request $request): \Inertia\Response
+    {
+        return \Inertia\Inertia::render('SuperAdmin/Payments', [
+            'payments' => ['data' => $this->lignesPaiement($request)->values()->all()],
+        ]);
+    }
+
+    /**
+     * GET /superadmin/payments/export — export CSV du journal des règlements.
+     */
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $lignes = $this->lignesPaiement($request);
+        $nom    = 'paiements-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($lignes) {
+            $sortie = fopen('php://output', 'w');
+            // BOM UTF-8 : sans lui, Excel en environnement francophone casse les accents.
+            fwrite($sortie, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($sortie, ['Référence', 'Organisation', 'Formule', 'Période', 'Montant', 'Devise', 'Méthode', 'Statut', 'Date'], ';');
+
+            foreach ($lignes as $l) {
+                fputcsv($sortie, [
+                    $l['reference'], $l['org_name'], $l['plan'], $l['period'],
+                    $l['amount'], $l['currency'], $l['method'], $l['status'], $l['created_at'],
+                ], ';');
+            }
+            fclose($sortie);
+        }, $nom, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * POST /superadmin/payments/{order}/validate
+     * `{order}` est l'identifiant de la COMMANDE affichée dans la liste.
+     */
+    public function validatePayment(Request $request, int $order): \Illuminate\Http\RedirectResponse|JsonResponse
+    {
+        $request->validate(['notes' => ['nullable', 'string', 'max:1000']]);
+
+        $commande = Order::findOrFail($order);
+        $preuve   = PaymentProof::where('order_id', $commande->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        try {
+            if ($preuve) {
+                $this->manualPaymentService->approveProof($preuve, $request->user());
+                $message = "Paiement {$commande->reference} validé : la licence est activée.";
+            } else {
+                // Règlement encaissé sans preuve jointe (virement rapproché en
+                // banque, espèces au bureau). L'activation reste possible, mais
+                // elle est tracée comme une validation manuelle.
+                $this->paymentService->processWebhookPayment($commande, [
+                    'source' => 'validation_manuelle_superadmin',
+                    'notes'  => $request->input('notes'),
+                ]);
+                $message = "Paiement {$commande->reference} activé manuellement (aucune preuve jointe).";
+            }
+        } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
+            return back()->withErrors(['payment' => $e->getMessage()]);
+        }
+
+        $this->auditService->log(
+            action: 'payment_validated',
+            module: 'superadmin',
+            resourceType: 'orders',
+            resourceId: (string) $commande->id,
+            newValues: ['reference' => $commande->reference, 'notes' => $request->input('notes')],
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * POST /superadmin/payments/{order}/reject
+     */
+    public function rejectPayment(Request $request, int $order): \Illuminate\Http\RedirectResponse|JsonResponse
+    {
+        $request->validate(['reason' => ['required', 'string', 'min:10', 'max:1000']]);
+
+        $commande = Order::findOrFail($order);
+        $preuve   = PaymentProof::where('order_id', $commande->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if (! $preuve) {
+            $message = 'Aucune preuve en attente pour cette commande.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->withErrors(['payment' => $message]);
+        }
+
+        try {
+            $this->manualPaymentService->rejectProof($preuve, $request->user(), $request->input('reason'));
+        } catch (\Throwable $e) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->withErrors(['payment' => $e->getMessage()]);
+        }
+
+        $message = "Paiement {$commande->reference} rejeté. Le client a été notifié.";
+
+        return $request->expectsJson()
+            ? response()->json(['success' => true, 'message' => $message])
+            : back()->with('success', $message);
+    }
+
+    /**
+     * Forme exacte attendue par `SuperAdmin/Payments.jsx`.
+     */
+    private function lignesPaiement(Request $request): \Illuminate\Support\Collection
+    {
+        $requete = Order::with(['organization:id,name'])->latest();
+
+        if ($request->filled('status')) {
+            $requete->where('status', $request->input('status'));
+        }
+
+        $preuves = PaymentProof::get(['id', 'order_id', 'status'])->groupBy('order_id');
+
+        return $requete->limit(200)->get()->map(function (Order $o) use ($preuves) {
+            $preuve = optional($preuves->get($o->id))->last();
+
+            return [
+                'id'         => $o->id,
+                'org_name'   => $o->organization->name ?? '—',
+                'amount'     => (float) ($o->amount_xof ?? $o->amount),
+                'currency'   => $o->currency ?: 'XOF',
+                'method'     => $this->methodeLisible($o),
+                'status'     => $this->statutEcran($o->status),
+                'plan'       => $o->plan_code ?: '—',
+                'period'     => $o->quantity_months ? $o->quantity_months . ' mois' : ($o->period ?: '—'),
+                'reference'  => $o->reference,
+                'created_at' => optional($o->created_at)->format('Y-m-d'),
+                'proof_url'  => $preuve ? route('superadmin.payments.proof', $preuve->id) : null,
+            ];
+        });
+    }
+
+    /** La page n'affiche que trois statuts : pending / validated / rejected. */
+    private function statutEcran(?string $statut): string
+    {
+        return match ($statut) {
+            'paid'                => 'validated',
+            'failed', 'cancelled' => 'rejected',
+            default               => 'pending',
+        };
+    }
+
+    private function methodeLisible(Order $o): string
+    {
+        $type = strtolower((string) ($o->payment_method_type ?: ''));
+
+        return match (true) {
+            str_contains($type, 'mobile')   => 'mobile_money',
+            str_contains($type, 'transfer') => 'bank_transfer',
+            str_contains($type, 'virement') => 'bank_transfer',
+            str_contains($type, 'card')     => 'card',
+            str_contains($type, 'carte')    => 'card',
+            $type !== ''                    => $type,
+            default                         => 'other',
+        };
+    }
 }

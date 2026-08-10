@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Card, CardHeader, CardContent } from '@/Components/ui/card';
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Badge } from '@/Components/ui/badge';
-import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { Progress } from '@/Components/ui/progress';
+import { Card, CardHeader, CardContent, Button, Input, Badge, Alert } from '@/Components/UI';
 import {
     ShieldCheck, ShieldX, AlertTriangle, RefreshCw,
     Users, Calendar, Star, ExternalLink, Key, Copy, CheckCircle2
@@ -119,9 +114,9 @@ export default function LicenseInfo({ license: initialLicense }) {
 
                 {/* ---- Alerte expiration ---- */}
                 {license?.warning && (
-                    <Alert variant={license.in_grace_period ? 'destructive' : 'warning'}>
+                    <Alert variant={license.in_grace_period ? 'danger' : 'warning'}>
                         <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription className="flex items-center justify-between">
+                        <div className="flex items-center justify-between">
                             <span>{license.warning}</span>
                             <a
                                 href={license.renewal_url}
@@ -131,7 +126,7 @@ export default function LicenseInfo({ license: initialLicense }) {
                             >
                                 Renouveler <ExternalLink className="w-3 h-3" />
                             </a>
-                        </AlertDescription>
+                        </div>
                     </Alert>
                 )}
 
@@ -205,15 +200,12 @@ export default function LicenseInfo({ license: initialLicense }) {
                                     </p>
                                     {license.max_users > 0 && (
                                         <>
-                                            <Progress
-                                                value={userPct}
-                                                className="h-1.5 mt-2"
-                                                indicatorClassName={
-                                                    userPct >= 90 ? 'bg-red-500' :
-                                                    userPct >= 75 ? 'bg-amber-500' :
-                                                    'bg-green-500'
-                                                }
-                                            />
+                                            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                <div
+                                                    className="h-full rounded-full bg-purple-600 transition-all"
+                                                    style={{ width: `${Math.min(100, Math.max(0, userPct))}%` }}
+                                                />
+                                            </div>
                                             <p className="text-xs text-gray-400 mt-1">{userPct}% utilisé</p>
                                         </>
                                     )}
@@ -276,7 +268,7 @@ export default function LicenseInfo({ license: initialLicense }) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <Button variant="outline" size="sm" className="gap-2">
+                                    <Button variant="secondary" size="sm" className="gap-2">
                                         <ExternalLink className="w-4 h-4" />
                                         Portail IBIG Soft
                                     </Button>
@@ -304,16 +296,16 @@ export default function LicenseInfo({ license: initialLicense }) {
                         {activationSuccess && (
                             <Alert className="mb-4 border-green-200 bg-green-50 dark:bg-green-900/20">
                                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                <AlertDescription className="text-green-700 dark:text-green-300">
+                                <div className="text-green-700 dark:text-green-300">
                                     Licence activée avec succès !
-                                </AlertDescription>
+                                </div>
                             </Alert>
                         )}
 
                         {activationError && (
-                            <Alert variant="destructive" className="mb-4">
+                            <Alert variant="danger" className="mb-4">
                                 <AlertTriangle className="h-4 w-4" />
-                                <AlertDescription>{activationError}</AlertDescription>
+                                <div>{activationError}</div>
                             </Alert>
                         )}
 
@@ -345,3 +337,4 @@ export default function LicenseInfo({ license: initialLicense }) {
         </AdminLayout>
     );
 }
+export { LicenseInfo };

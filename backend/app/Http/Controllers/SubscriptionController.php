@@ -374,6 +374,79 @@ class SubscriptionController extends Controller
     }
 
     // =========================================================================
+    // Alias API (routes api.php → méthodes réelles)
+    // =========================================================================
+
+    /** Alias : GET /api/subscription (route subscription.current) → currentPlan() */
+    public function current(Request $request): JsonResponse
+    {
+        return $this->currentPlan($request);
+    }
+
+    /** Alias : POST /api/subscription/upgrade (route subscription.upgrade) → changePlan() */
+    public function upgrade(Request $request): JsonResponse
+    {
+        return $this->changePlan($request);
+    }
+
+    /** Alias : POST /api/subscription/cancel (route subscription.cancel) → cancelSubscription() */
+    public function cancel(Request $request): JsonResponse
+    {
+        return $this->cancelSubscription($request);
+    }
+
+    // =========================================================================
+    // Factures
+    // =========================================================================
+
+    /**
+     * GET /api/v1/subscription/invoices
+     * Liste les factures (paiements) de l'organisation courante.
+     */
+    public function invoices(Request $request): JsonResponse
+    {
+        $org = $request->user()->organization;
+
+        $payments = Payment::where('organization_id', $org->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'data' => $payments->map(fn (Payment $p) => [
+                'id'             => $p->id,
+                'invoice_number' => $p->invoice_number,
+                'reference'      => $p->reference,
+                'amount'         => $p->amount,
+                'currency'       => $p->currency,
+                'status'         => $p->status,
+                'plan_name'      => $p->plan_name,
+                'has_pdf'        => ! empty($p->invoice_path),
+                'paid_at'        => $p->paid_at?->toIso8601String(),
+                'created_at'     => $p->created_at?->toIso8601String(),
+            ])->values(),
+        ]);
+    }
+
+    /**
+     * GET /api/v1/subscription/invoices/{id}
+     * Télécharge le PDF de facture d'un paiement de l'organisation.
+     */
+    public function downloadInvoice(Request $request, string $id): mixed
+    {
+        $org     = $request->user()->organization;
+        $payment = Payment::where('organization_id', $org->id)->findOrFail($id);
+
+        if (empty($payment->invoice_path)
+            || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($payment->invoice_path)) {
+            return response()->json(['message' => 'Facture indisponible.'], 404);
+        }
+
+        $filename = ($payment->invoice_number ?? 'facture-' . $payment->id) . '.pdf';
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($payment->invoice_path, $filename);
+    }
+
+    // =========================================================================
     // Helpers
     // =========================================================================
 

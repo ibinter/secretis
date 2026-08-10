@@ -35,7 +35,7 @@ class TrialService
         $admin = $org->owner ?? $org->users()->first();
         if ($admin) {
             Mail::to($admin->email)->send(
-                new \App\Mail\Onboarding\WelcomeMail($org, $admin, $activation)
+                new \App\Mail\WelcomeMail($admin, $org, self::TRIAL_DAYS)
             );
         }
 
@@ -84,7 +84,7 @@ class TrialService
         $admin = $org->owner ?? $org->users()->first();
         if ($admin) {
             Mail::to($admin->email)->send(
-                new \App\Mail\Onboarding\TrialConverted($org, $admin, $activation)
+                new \App\Mail\WelcomeMail($admin, $org, 0)
             );
         }
     }
@@ -111,13 +111,10 @@ class TrialService
 
         match ($remaining) {
             7 => Mail::to($admin->email)->send(
-                    new \App\Mail\Onboarding\TrialExpiry7($org, $admin, $activation, $featuresUsed)
                 ),
             3 => Mail::to($admin->email)->send(
-                    new \App\Mail\Onboarding\TrialExpiry3($org, $admin, $activation, $featuresUsed)
                 ),
             1 => Mail::to($admin->email)->send(
-                    new \App\Mail\Onboarding\TrialExpiry1($org, $admin, $activation, $featuresUsed)
                 ),
             default => null,
         };

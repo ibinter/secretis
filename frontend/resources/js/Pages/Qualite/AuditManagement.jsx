@@ -13,7 +13,7 @@ const AUDIT_TYPE_LABELS = {
 
 const STATUS_BADGE = {
     planifie:            'bg-gray-100 text-gray-700',
-    en_cours:            'bg-blue-100 text-blue-700',
+    en_cours:            'bg-purple-100 text-purple-700',
     rapport_en_attente:  'bg-yellow-100 text-yellow-700',
     clos:                'bg-green-100 text-green-700',
 };
@@ -68,7 +68,7 @@ function AuditForm({ onClose, onSuccess }) {
                             value={form.title}
                             onChange={e => setForm({ ...form, title: e.target.value })}
                             placeholder="Ex: Audit interne processus achats"
-                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none"
                         />
                     </div>
                     <div>
@@ -139,7 +139,7 @@ function AuditForm({ onClose, onSuccess }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50"
                         >
                             {loading ? 'Création...' : 'Planifier l\'audit'}
                         </button>
@@ -244,10 +244,10 @@ function FindingPanel({ audit, onClose, onAdded }) {
 
                     {/* Checklist ISO auto */}
                     {checklist.length > 0 && (
-                        <div className="bg-blue-50 rounded-lg p-3 space-y-1">
-                            <p className="text-xs font-semibold text-blue-700 mb-2">Questions de référence (clause {form.clause_iso})</p>
+                        <div className="bg-purple-50 rounded-lg p-3 space-y-1">
+                            <p className="text-xs font-semibold text-purple-700 mb-2">Questions de référence (clause {form.clause_iso})</p>
                             {checklist.map((q, i) => (
-                                <p key={i} className="text-xs text-blue-600">• {q}</p>
+                                <p key={i} className="text-xs text-purple-600">• {q}</p>
                             ))}
                         </div>
                     )}
@@ -290,7 +290,7 @@ function FindingPanel({ audit, onClose, onAdded }) {
                         <button
                             onClick={submit}
                             disabled={!form.description || loading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50"
                         >
                             {loading ? 'Ajout...' : 'Ajouter'}
                         </button>
@@ -311,7 +311,7 @@ export default function AuditManagement() {
     const refresh = () => router.reload({ only: ['audits'] });
 
     const updateStatus = async (auditId, status) => {
-        await axios.patch(`/qualite/audits/${auditId}`, { status });
+        await axios.put(`/qualite/audits/${auditId}`, { status });
         refresh();
     };
 
@@ -328,7 +328,7 @@ export default function AuditManagement() {
                     </div>
                     <button
                         onClick={() => setShowCreate(true)}
-                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+                        className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition"
                     >
                         + Planifier un audit
                     </button>
@@ -389,7 +389,7 @@ export default function AuditManagement() {
                                         <td className="px-4 py-3 text-right">
                                             <button
                                                 onClick={() => setActiveFinding(audit)}
-                                                className="text-blue-600 hover:underline text-xs mr-3"
+                                                className="text-purple-600 hover:underline text-xs mr-3"
                                             >
                                                 + Constatation
                                             </button>
@@ -418,3 +418,4 @@ export default function AuditManagement() {
         </AppLayout>
     );
 }
+export { AuditManagement };

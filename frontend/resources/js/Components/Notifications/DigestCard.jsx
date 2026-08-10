@@ -83,8 +83,8 @@ export default function DigestCard({ className = '' }) {
     if (!digest) return null;
 
     return (
-        <div className={`relative bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800/50
-            rounded-2xl border border-blue-100 dark:border-blue-900/30 overflow-hidden ${className}`}
+        <div className={`relative bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800/50
+            rounded-2xl border border-purple-100 dark:border-purple-900/30 overflow-hidden ${className}`}
         >
             {/* Bouton fermer */}
             <button
@@ -99,7 +99,7 @@ export default function DigestCard({ className = '' }) {
             <div className="p-5">
                 {/* ── En-tête ──────────────────────────────────────────────────── */}
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
                         <SparklesIcon className="h-5 w-5 text-white" />
                     </div>
                     <div>
@@ -117,7 +117,7 @@ export default function DigestCard({ className = '' }) {
                     <DigestSection
                         icon={CalendarIcon}
                         title="Agenda du jour"
-                        color="text-blue-600"
+                        color="text-purple-600"
                         empty={digest.today_events?.length === 0}
                         emptyText="Aucun événement"
                     >
@@ -182,10 +182,10 @@ export default function DigestCard({ className = '' }) {
                 </div>
 
                 {/* ── Pied de carte ─────────────────────────────────────────────── */}
-                <div className="mt-4 pt-3 border-t border-blue-100 dark:border-blue-900/30 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-purple-100 dark:border-purple-900/30 flex items-center justify-between">
                     <Link
-                        href="/notifications/center"
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        href="/notifications"
+                        className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                     >
                         Voir toutes les notifications
                         <ArrowRightIcon className="h-3 w-3" />
@@ -226,7 +226,7 @@ function EventLine({ event }) {
     const start = event.start_at ? new Date(event.start_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
     return (
         <div className="flex items-start gap-2">
-            <span className="flex-shrink-0 text-[10px] font-mono text-blue-600 dark:text-blue-400 mt-0.5 w-10">{start}</span>
+            <span className="flex-shrink-0 text-[10px] font-mono text-purple-600 dark:text-purple-400 mt-0.5 w-10">{start}</span>
             <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-1">{event.title}</p>
         </div>
     );
@@ -253,3 +253,4 @@ function MailLine({ mail }) {
         </div>
     );
 }
+export { DigestCard };

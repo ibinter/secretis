@@ -28,8 +28,8 @@ import KpiTile from '@/Components/Dashboard/KpiTile';
 // ============================================================================
 
 const EVENT_TYPE_COLORS = {
-    meeting:     'bg-[#1A3A5C] text-white',
-    appointment: 'bg-[#2E86C1] text-white',
+    meeting:     'bg-[#9333EA] text-white',
+    appointment: 'bg-[#7e22ce] text-white',
     task:        'bg-emerald-600 text-white',
     reminder:    'bg-[#F39C12] text-white',
     other:       'bg-gray-500 text-white',
@@ -38,7 +38,7 @@ const EVENT_TYPE_COLORS = {
 const PRIORITY_COLORS = {
     urgent: 'bg-red-100 text-red-700 border border-red-200',
     high:   'bg-amber-100 text-amber-700 border border-amber-200',
-    normal: 'bg-blue-100 text-blue-700 border border-blue-200',
+    normal: 'bg-purple-100 text-purple-700 border border-purple-200',
     low:    'bg-gray-100 text-gray-600 border border-gray-200',
 };
 
@@ -62,8 +62,8 @@ function CardHeader({ title, icon: Icon, action }) {
     return (
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-50">
             <div className="flex items-center gap-2">
-                {Icon && <Icon className="h-4.5 w-4.5 text-[#2E86C1]" />}
-                <h2 className="text-sm font-semibold text-[#1A3A5C]">{title}</h2>
+                {Icon && <Icon className="h-4.5 w-4.5 text-[#7e22ce]" />}
+                <h2 className="text-sm font-semibold text-[#9333EA]">{title}</h2>
             </div>
             {action}
         </div>
@@ -113,8 +113,8 @@ function AgendaTimeline({ events = [] }) {
                             </div>
 
                             {/* Contenu */}
-                            <div className={`flex-1 rounded-lg px-3 py-2 ${active ? 'ring-2 ring-[#2E86C1] ring-offset-1' : 'bg-gray-50'}`}>
-                                <p className="text-sm font-semibold text-[#1A3A5C] leading-snug">
+                            <div className={`flex-1 rounded-lg px-3 py-2 ${active ? 'ring-2 ring-[#7e22ce] ring-offset-1' : 'bg-gray-50'}`}>
+                                <p className="text-sm font-semibold text-[#9333EA] leading-snug">
                                     {event.title}
                                 </p>
                                 {event.location && (
@@ -171,7 +171,7 @@ function WeekCalendar({ weekEvents = [] }) {
                         <div
                             className={`h-8 w-8 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                                 isToday
-                                    ? 'bg-[#1A3A5C] text-white'
+                                    ? 'bg-[#9333EA] text-white'
                                     : 'text-gray-600 hover:bg-gray-100'
                             }`}
                         >
@@ -180,7 +180,7 @@ function WeekCalendar({ weekEvents = [] }) {
                         {count > 0 && (
                             <div className="flex gap-0.5">
                                 {Array.from({ length: Math.min(count, 3) }, (_, j) => (
-                                    <span key={j} className="h-1 w-1 rounded-full bg-[#2E86C1]" />
+                                    <span key={j} className="h-1 w-1 rounded-full bg-[#7e22ce]" />
                                 ))}
                             </div>
                         )}
@@ -247,8 +247,8 @@ function NextVisitorsList({ visitors = [] }) {
         <ul className="divide-y divide-gray-50">
             {visitors.map((v) => (
                 <li key={v.id} className="flex items-center gap-3 px-5 py-3">
-                    <div className="h-9 w-9 rounded-full bg-[#2E86C1]/10 flex items-center justify-center shrink-0">
-                        <UserGroupIcon className="h-4 w-4 text-[#2E86C1]" />
+                    <div className="h-9 w-9 rounded-full bg-[#7e22ce]/10 flex items-center justify-center shrink-0">
+                        <UserGroupIcon className="h-4 w-4 text-[#7e22ce]" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-800 truncate">{v.visitor_name}</p>
@@ -257,7 +257,7 @@ function NextVisitorsList({ visitors = [] }) {
                         )}
                     </div>
                     <div className="text-right shrink-0">
-                        <p className="text-sm font-medium text-[#1A3A5C]">
+                        <p className="text-sm font-medium text-[#9333EA]">
                             {format(parseISO(v.scheduled_at), 'HH:mm')}
                         </p>
                         {v.host_name && (
@@ -274,7 +274,7 @@ function NextVisitorsList({ visitors = [] }) {
 
 function RecentDocsList({ docs = [] }) {
     const FILE_TYPE_COLORS = {
-        pdf: 'text-red-500', docx: 'text-blue-600', xlsx: 'text-green-600', pptx: 'text-orange-500',
+        pdf: 'text-red-500', docx: 'text-purple-600', xlsx: 'text-green-600', pptx: 'text-orange-500',
     };
 
     return (
@@ -288,7 +288,7 @@ function RecentDocsList({ docs = [] }) {
                             {doc.updated_by} · {format(parseISO(doc.updated_at), 'd MMM', { locale: fr })}
                         </p>
                     </div>
-                    <Link href={`/ged?doc=${doc.id}`} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#2E86C1] transition-colors">
+                    <Link href={`/ged?doc=${doc.id}`} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#7e22ce] transition-colors">
                         <ArrowRightIcon className="h-3.5 w-3.5" />
                     </Link>
                 </li>
@@ -315,7 +315,7 @@ export default function Secretariat() {
                 {/* En-tête */}
                 <div className="bg-white border-b border-gray-100 px-6 py-4">
                     <div className="max-w-screen-2xl mx-auto">
-                        <h1 className="text-xl font-bold text-[#1A3A5C] capitalize">{today}</h1>
+                        <h1 className="text-xl font-bold text-[#9333EA] capitalize">{today}</h1>
                         <p className="text-sm text-gray-500 mt-0.5">Tableau de bord Secrétariat</p>
                     </div>
                 </div>
@@ -362,7 +362,7 @@ export default function Secretariat() {
                                     title="Agenda du jour"
                                     icon={CalendarDaysIcon}
                                     action={
-                                        <Link href="/agenda" className="text-xs text-[#2E86C1] hover:underline">
+                                        <Link href="/agenda" className="text-xs text-[#7e22ce] hover:underline">
                                             Voir tout
                                         </Link>
                                     }
@@ -383,7 +383,7 @@ export default function Secretariat() {
                                     title="Tâches urgentes"
                                     icon={BellAlertIcon}
                                     action={
-                                        <Link href="/taches" className="text-xs text-[#2E86C1] hover:underline">
+                                        <Link href="/taches" className="text-xs text-[#7e22ce] hover:underline">
                                             Kanban
                                         </Link>
                                     }
@@ -398,7 +398,7 @@ export default function Secretariat() {
                                     title="Prochains visiteurs"
                                     icon={UserGroupIcon}
                                     action={
-                                        <Link href="/accueil" className="text-xs text-[#2E86C1] hover:underline">
+                                        <Link href="/accueil" className="text-xs text-[#7e22ce] hover:underline">
                                             Accueil
                                         </Link>
                                     }
@@ -431,7 +431,7 @@ export default function Secretariat() {
                                     title="Documents récents"
                                     icon={DocumentTextIcon}
                                     action={
-                                        <Link href="/ged" className="text-xs text-[#2E86C1] hover:underline">
+                                        <Link href="/ged" className="text-xs text-[#7e22ce] hover:underline">
                                             GED
                                         </Link>
                                     }
@@ -448,3 +448,4 @@ export default function Secretariat() {
         </>
     );
 }
+export { Secretariat };

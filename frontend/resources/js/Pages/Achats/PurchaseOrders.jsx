@@ -17,7 +17,7 @@ const STATUS_STEPS = [
 
 const STATUS_BADGE = {
     brouillon:     'bg-gray-100 text-gray-600',
-    approuve:      'bg-blue-100 text-blue-700',
+    approuve:      'bg-purple-100 text-purple-700',
     envoye:        'bg-indigo-100 text-indigo-700',
     accuse:        'bg-yellow-100 text-yellow-800',
     livre_partiel: 'bg-orange-100 text-orange-700',
@@ -40,15 +40,15 @@ function PoStepper({ status }) {
             {STATUS_STEPS.map((step, i) => (
                 <React.Fragment key={step.key}>
                     <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition ${
-                        i < idx  ? 'text-blue-600 font-medium' :
-                        i === idx ? 'bg-blue-600 text-white font-semibold' :
+                        i < idx  ? 'text-purple-600 font-medium' :
+                        i === idx ? 'bg-purple-600 text-white font-semibold' :
                                     'text-gray-300'
                     }`}>
                         <span>{step.icon}</span>
                         <span className="hidden md:inline">{step.label}</span>
                     </div>
                     {i < STATUS_STEPS.length - 1 && (
-                        <span className={`text-xs ${i < idx ? 'text-blue-300' : 'text-gray-200'}`}>›</span>
+                        <span className={`text-xs ${i < idx ? 'text-purple-300' : 'text-gray-200'}`}>›</span>
                     )}
                 </React.Fragment>
             ))}
@@ -85,7 +85,7 @@ function CreatePoModal({ suppliers, onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/purchase-orders', { onSuccess: () => onClose() });
+        post('/achats/commandes', { onSuccess: () => onClose() });
     };
 
     return (
@@ -104,7 +104,7 @@ function CreatePoModal({ suppliers, onClose }) {
                             <select
                                 value={data.supplier_id}
                                 onChange={e => setData('supplier_id', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                             >
                                 <option value="">Sélectionner un fournisseur…</option>
@@ -118,7 +118,7 @@ function CreatePoModal({ suppliers, onClose }) {
                             <select
                                 value={data.payment_terms_days}
                                 onChange={e => setData('payment_terms_days', parseInt(e.target.value))}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             >
                                 {[30, 45, 60, 90].map(d => (
                                     <option key={d} value={d}>{d} jours</option>
@@ -134,7 +134,7 @@ function CreatePoModal({ suppliers, onClose }) {
                                 type="date"
                                 value={data.expected_delivery_date}
                                 onChange={e => setData('expected_delivery_date', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
                         <div>
@@ -143,7 +143,7 @@ function CreatePoModal({ suppliers, onClose }) {
                                 type="text"
                                 value={data.delivery_address}
                                 onChange={e => setData('delivery_address', e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
                     </div>
@@ -152,7 +152,7 @@ function CreatePoModal({ suppliers, onClose }) {
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <label className="text-sm font-semibold text-gray-700">Articles *</label>
-                            <button type="button" onClick={addItem} className="text-blue-600 text-sm font-medium">
+                            <button type="button" onClick={addItem} className="text-purple-600 text-sm font-medium">
                                 + Ajouter
                             </button>
                         </div>
@@ -207,12 +207,12 @@ function CreatePoModal({ suppliers, onClose }) {
                     <div>
                         <label className="text-sm font-medium text-gray-700">Notes</label>
                         <textarea value={data.notes} onChange={e => setData('notes', e.target.value)} rows={2}
-                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                     </div>
 
                     <div className="flex justify-end gap-3">
                         <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600">Annuler</button>
-                        <button type="submit" disabled={processing} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+                        <button type="submit" disabled={processing} className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
                             {processing ? 'Création…' : 'Créer le BC'}
                         </button>
                     </div>
@@ -247,7 +247,7 @@ function GoodsReceiptModal({ po, onClose }) {
 
     const submit = () => {
         setLoading(true);
-        router.post(`/procurement/purchase-orders/${po.id}/receive`, {
+        router.post(`/achats/commandes/${po.id}/reception`, {
             received_date: receivedDate,
             notes,
             items_received: items,
@@ -266,7 +266,7 @@ function GoodsReceiptModal({ po, onClose }) {
                         <div>
                             <label className="text-sm font-medium text-gray-700">Date de réception *</label>
                             <input type="date" value={receivedDate} onChange={e => setReceivedDate(e.target.value)}
-                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                         </div>
                     </div>
 
@@ -324,7 +324,7 @@ function GoodsReceiptModal({ po, onClose }) {
                     <div>
                         <label className="text-sm font-medium text-gray-700">Observations</label>
                         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
-                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                     </div>
 
                     <div className="flex justify-end gap-3">
@@ -361,7 +361,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                         <p className="text-sm text-gray-500 mt-1">{purchase_orders?.total ?? 0} BC au total</p>
                     </div>
                     <button onClick={() => setShowCreate(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
                         + Nouveau BC
                     </button>
                 </div>
@@ -370,7 +370,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                 <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl border border-gray-200">
                     <select
                         value={filters?.status ?? ''}
-                        onChange={e => router.get('/procurement/purchase-orders', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
+                        onChange={e => router.get('/achats/commandes', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     >
                         <option value="">Tous les statuts</option>
@@ -380,7 +380,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                     </select>
                     <select
                         value={filters?.supplier_id ?? ''}
-                        onChange={e => router.get('/procurement/purchase-orders', { ...filters, supplier_id: e.target.value || undefined }, { preserveState: true, replace: true })}
+                        onChange={e => router.get('/achats/commandes', { ...filters, supplier_id: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     >
                         <option value="">Tous les fournisseurs</option>
@@ -414,9 +414,9 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                                         && !['livre', 'facture', 'clos', 'annule'].includes(po.status);
 
                                     return (
-                                        <tr key={po.id} className={`border-b border-gray-100 hover:bg-blue-50/20 ${isLate ? 'bg-red-50/20' : ''}`}>
+                                        <tr key={po.id} className={`border-b border-gray-100 hover:bg-purple-50/20 ${isLate ? 'bg-red-50/20' : ''}`}>
                                             <td className="py-3 px-4">
-                                                <div className="font-mono font-medium text-blue-600">{po.po_number}</div>
+                                                <div className="font-mono font-medium text-purple-600">{po.po_number}</div>
                                                 {isLate && <span className="text-xs text-red-500 font-medium">⚠ En retard</span>}
                                             </td>
                                             <td className="py-3 px-4">
@@ -440,13 +440,13 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                                             <td className="py-3 px-4">
                                                 <div className="flex gap-1.5 justify-center flex-wrap">
                                                     {po.status === 'brouillon' && (
-                                                        <button onClick={() => router.post(`/procurement/purchase-orders/${po.id}/approve`)}
-                                                            className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                                        <button onClick={() => router.post(`/achats/commandes/${po.id}/approuver`)}
+                                                            className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">
                                                             Approuver
                                                         </button>
                                                     )}
                                                     {po.status === 'approuve' && (
-                                                        <button onClick={() => router.post(`/procurement/purchase-orders/${po.id}/send`)}
+                                                        <button onClick={() => router.post(`/achats/commandes/${po.id}/envoyer`)}
                                                             className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200">
                                                             Envoyer
                                                         </button>
@@ -457,7 +457,7 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                                                             Réception
                                                         </button>
                                                     )}
-                                                    <a href={`/procurement/purchase-orders/${po.id}/pdf`}
+                                                    <a href={`/achats/commandes/${po.id}/pdf`}
                                                         className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
                                                         target="_blank">
                                                         PDF
@@ -477,8 +477,8 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
                     <div className="flex justify-center gap-2">
                         {Array.from({ length: purchase_orders.last_page }, (_, i) => i + 1).map(page => (
                             <button key={page}
-                                onClick={() => router.get('/procurement/purchase-orders', { ...filters, page })}
-                                className={`w-8 h-8 rounded text-sm ${page === purchase_orders.current_page ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
+                                onClick={() => router.get('/achats/commandes', { ...filters, page })}
+                                className={`w-8 h-8 rounded text-sm ${page === purchase_orders.current_page ? 'bg-purple-600 text-white' : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'}`}>
                                 {page}
                             </button>
                         ))}
@@ -491,3 +491,4 @@ export default function PurchaseOrders({ purchase_orders, filters, suppliers }) 
         </AuthenticatedLayout>
     );
 }
+export { PurchaseOrders };

@@ -379,3 +379,4 @@ export default function LandingDashboard({ initialData = {}, flash = {} }) {
         </SuperAdminLayout>
     );
 }
+export { LandingDashboard };

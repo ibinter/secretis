@@ -290,5 +290,93 @@
     "error_generic":    "Hitilafu imetokea. Tafadhali jaribu tena.",
     "error_network":    "Hitilafu ya mtandao. Angalia muunganiko wako.",
     "session_expired":  "Kipindi chako kimeisha. Tafadhali ingia tena."
+  },
+
+  "licence": {
+    "etat": {
+      "demo": "Onyesho la umma",
+      "free": "Kigunduzi",
+      "trial": "Jaribio",
+      "active": "Mpango unaotumika",
+      "grace": "Kipindi cha neema",
+      "expired": "Imeisha — kusoma tu"
+    },
+    "banniere": {
+      "demo": "Onyesho la umma. Data ni ya kubuni na hufutwa kila usiku.",
+      "trial_one": "Jaribio linaendelea — imebaki siku {{count}} kwenye mpango wa {{formule}}.",
+      "trial_other": "Jaribio linaendelea — zimebaki siku {{count}} kwenye mpango wa {{formule}}.",
+      "trial_dernier_jour": "Siku ya mwisho ya jaribio. Washa mpango ili kuhifadhi uhamishaji wa data na watumiaji wengi.",
+      "free": "Kiwango cha Kigunduzi — {{plafond}}. Hamia mpango unaolipiwa ili kuondoa kikomo.",
+      "apres_essai": "Jaribio limekwisha. Data yako imehifadhiwa: {{plafond}} zinabaki kuhaririwa, nyingine ni za kusoma tu.",
+      "grace_one": "Usajili umeisha muda. Ufikiaji unaendelea kwa siku {{count}}, kisha kubadilika kuwa kusoma tu.",
+      "grace_other": "Usajili umeisha muda. Ufikiaji unaendelea kwa siku {{count}}, kisha kubadilika kuwa kusoma tu.",
+      "expired": "Usajili umeisha — kusoma tu. Data imehifadhiwa hadi {{date}}."
+    },
+    "quota": {
+      "atteint": "Kikomo cha kiwango cha Kigunduzi kimefikiwa ({{plafond}}). Data yako inabaki kupatikana na kuhaririwa. Ili kwenda mbali zaidi, washa mpango wa {{formule_suivante}} kuanzia {{prix}}.",
+      "restant": "Zilizobaki: {{restant}} {{compteur}} kabla ya kikomo."
+    },
+    "palier": {
+      "decouverte": {
+        "titre": "Kigunduzi",
+        "accroche": "Bure milele, bila kadi ya benki.",
+        "cta": "Fungua nafasi yangu ya kazi bure",
+        "note": "Kuingia kwa OTP ya barua pepe. Hati zinazozalishwa hubeba alama ya maji « Imezalishwa na {{solution}} — ibigsoft.com ».",
+        "inclus": {
+          "utilisateur": "Mtumiaji mmoja",
+          "fonctions_base": "Vipengele vyote vya msingi",
+          "web_pwa": "Ufikiaji wa wavuti na usakinishaji wa PWA",
+          "sauvegarde": "Nakala rudufu ya kila siku"
+        },
+        "exclus": {
+          "export": "Uhamishaji wa CSV, Excel na PDF",
+          "multi_utilisateur": "Watumiaji wengi na majukumu",
+          "api": "API na miunganisho",
+          "relances": "Vikumbusho vya kiotomatiki vya WhatsApp na SMS",
+          "sara": "Msaidizi wa AI SARA",
+          "support": "Msaada wa kipaumbele"
+        }
+      }
+    },
+    "demo": {
+      "titre": "Onyesho la umma",
+      "accroche": "Programu halisi, data ya kubuni, bila kujisajili. Hurejeshwa upya kila usiku.",
+      "cta": "Chunguza onyesho la {{solution}}"
+    },
+    "essai": {
+      "duree_jours": "{{jours}}"
+    },
+    "email": {
+      "j1": {
+        "objet": "Hatua zako za kwanza kwenye {{solution}}",
+        "corps": "Karibu. Jaribio lako la mpango wa {{formule}} linaendelea. Ili kuanza vizuri: tengeneza hati yako ya kwanza, mwalike mfanyakazi mwenzako, kisha washa arifa. Kituo cha msaada na timu yetu ya WhatsApp hujibu swali lolote."
+      },
+      "j3": {
+        "objet_one": "Imebaki siku {{count}} kwenye {{solution}}",
+        "objet_other": "Zimebaki siku {{count}} kwenye {{solution}}",
+        "corps": "Jaribio likiisha, uhamishaji wa data, watumiaji wengi, API na msaidizi SARA hufungwa. Data yako yenyewe inabaki mahali pake. Angalia mipango ili kuhifadhi vipengele vyote."
+      },
+      "j1_final": {
+        "objet": "Siku ya mwisho ya jaribio — data yako imehifadhiwa",
+        "corps": "Hakuna haraka: nafasi yako ya kazi inahamia kiotomatiki kwenye Kigunduzi na data yako inabaki kupatikana. Ukitaka kuhifadhi uhamishaji wa data, watumiaji wengi na msaidizi SARA, washa mpango wakati wowote."
+      },
+      "j0": {
+        "objet": "Nafasi yako ya kazi imehamia Kigunduzi",
+        "corps": "Nafasi yako ya kazi sasa iko kwenye kiwango cha Kigunduzi: {{plafond}} zinabaki kuhaririwa, nyingine ni za kusoma tu. Hakuna kilichofutwa. Washa mpango wakati wowote ili kurejesha uandishi kwenye data yako yote."
+      },
+      "j7": {
+        "objet": "Una swali kuhusu {{solution}}?",
+        "corps": "Tunapatikana kwa mazungumzo mafupi, bila masharti. Nafasi yako ya Kigunduzi inabaki wazi: unaweza kuendelea kuitumia kwa muda wowote unaotaka."
+      },
+      "j60": {
+        "objet": "Data yako itafutwa tarehe {{date}}",
+        "corps": "Data yako itafutwa tarehe {{date}}. Washa upya usajili wako au omba uhamishaji kupitia support@ibigsoft.com."
+      },
+      "j83": {
+        "objet": "Kumbusho la mwisho — data yako itafutwa tarehe {{date}}",
+        "corps": "Data yako itafutwa tarehe {{date}}. Washa upya usajili wako au omba uhamishaji kupitia support@ibigsoft.com."
+      }
+    },
+    "filigrane": "Imezalishwa na {{solution}} — ibigsoft.com"
   }
 }

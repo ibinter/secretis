@@ -4,26 +4,37 @@
  * Props Inertia :
  *   clients : Paginator<AccountingClient with invoices_count>
  *   filters : { search }
+ *
+ * Présentation migrée sur `@/Components/UI`. Logique métier inchangée
+ * (routes `/comptabilite/clients`, axios, états locaux).
  */
 
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-  PlusIcon, MagnifyingGlassIcon, PencilIcon,
-  TrashIcon, UserGroupIcon, CheckBadgeIcon,
+  PlusIcon, MagnifyingGlassIcon, PencilSquareIcon,
+  TrashIcon, UserGroupIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import AuthLayout from '@/Layouts/AuthLayout';
 import debounce from 'lodash/debounce';
-
-const fcfa = (v) =>
-  new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(v ?? 0) + ' FCFA';
+import {
+  PageHeader, Button, Badge, Card, EmptyState,
+  cx, CONTROL, BORDER, SURFACE, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, FOCUS_RING, NUM,
+} from '@/Components/UI';
 
 const EMPTY_FORM = {
   name: '', email: '', phone: '', address: '',
   tax_number: '', currency: 'XOF', notes: '',
 };
+
+const CURRENCIES = [
+  ['XOF', 'FCFA (XOF)'],
+  ['EUR', 'Euro (EUR)'],
+  ['USD', 'Dollar (USD)'],
+  ['XAF', 'CFA BEAC (XAF)'],
+];
 
 // =============================================================================
 
@@ -96,114 +107,139 @@ export default function Clients({ clients, filters }) {
 
   const setField = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
+  const isFiltered = Boolean(filters?.search);
+
+  const resetFilters = () => {
+    router.get('/comptabilite/clients', {}, { preserveState: true, replace: true });
+  };
+
+  /* ─── Rendu ──────────────────────────────────────────────────────────────── */
+
   return (
     <AuthLayout>
       <Head title="Clients comptables" />
 
-      <div className="p-6 space-y-5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* En-tête */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {clients.total} client{clients.total > 1 ? 's' : ''}
-            </p>
-          </div>
-          <button
-            onClick={openCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Nouveau client
-          </button>
-        </div>
+        <PageHeader
+          icon={UserGroupIcon}
+          title="Clients"
+          breadcrumbs={[{ label: 'Comptabilité', href: '/comptabilite' }, { label: 'Clients' }]}
+          subtitle={`${clients.total} client${clients.total > 1 ? 's' : ''} facturable${clients.total > 1 ? 's' : ''}`}
+          actions={
+            <Button variant="primary" icon={PlusIcon} onClick={openCreate}>
+              Nouveau client
+            </Button>
+          }
+        />
 
         {/* Recherche */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-          <div className="relative max-w-sm">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px] flex-1 sm:max-w-sm sm:flex-none">
+            <MagnifyingGlassIcon className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
             <input
               type="text"
-              placeholder="Nom, email, NIF..."
+              placeholder="Nom, email, NIF…"
               defaultValue={filters.search}
               onChange={(e) => applySearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30"
+              className={cx(CONTROL, 'h-10 pl-9')}
             />
           </div>
+          {isFiltered && <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>}
         </div>
 
         {/* Grille clients */}
         {clients.data.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
-            <UserGroupIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucun client trouvé.</p>
-            <button onClick={openCreate} className="mt-4 text-sm text-[#1A3A5C] font-medium hover:underline">
-              Créer le premier client
-            </button>
-          </div>
+          isFiltered ? (
+            <EmptyState
+              bordered
+              variant="no-results"
+              title="Aucun client ne correspond"
+              description="Aucun résultat pour cette recherche. Essayez un autre nom, email ou NIF."
+              action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser la recherche</Button>}
+            />
+          ) : (
+            <EmptyState
+              bordered
+              icon={UserGroupIcon}
+              title="Aucun client"
+              description="Créez votre premier client : il pourra ensuite recevoir devis et factures."
+              hints={[
+                'Le NIF apparaît sur les factures émises.',
+                'La devise du client détermine celle de ses documents.',
+              ]}
+              action={
+                <Button variant="primary" icon={PlusIcon} onClick={openCreate}>
+                  Créer votre premier client
+                </Button>
+              }
+            />
+          )
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {clients.data.map((client) => (
               <div
                 key={client.id}
-                className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition"
+                className={cx(SURFACE, 'border', BORDER, 'rounded-xl p-5 shadow-sm transition-colors',
+                              'hover:bg-gray-50 dark:hover:bg-white/[0.03]')}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar initiales */}
-                    <div className="h-10 w-10 rounded-full bg-[#1A3A5C] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-50 text-sm font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
                       {client.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm leading-tight">{client.name}</div>
+                    </span>
+                    <div className="min-w-0">
+                      <p className={cx('text-sm font-medium leading-tight truncate', TEXT_TITLE)}>{client.name}</p>
                       {client.email && (
-                        <div className="text-xs text-gray-400 mt-0.5">{client.email}</div>
+                        <p className={cx('mt-0.5 text-xs truncate', TEXT_MUTED)}>{client.email}</p>
                       )}
                     </div>
                   </div>
-                  {client.is_active ? (
-                    <CheckBadgeIcon className="h-5 w-5 text-emerald-500 flex-shrink-0" title="Actif" />
-                  ) : (
-                    <span className="text-xs text-gray-400">Inactif</span>
-                  )}
+                  <Badge variant={client.is_active ? 'success' : 'neutral'} dot>
+                    {client.is_active ? 'Actif' : 'Inactif'}
+                  </Badge>
                 </div>
 
-                <div className="space-y-1 text-xs text-gray-500 mb-4">
-                  {client.phone && <div>Tél : {client.phone}</div>}
-                  {client.tax_number && <div>NIF : {client.tax_number}</div>}
-                  {client.address && (
-                    <div className="truncate">{client.address}</div>
+                <dl className={cx('mt-4 space-y-1 text-xs', TEXT_MUTED)}>
+                  {client.phone && (
+                    <div className="flex gap-1.5">
+                      <dt className={TEXT_FAINT}>Tél.</dt>
+                      <dd className="tabular-nums">{client.phone}</dd>
+                    </div>
                   )}
-                </div>
+                  {client.tax_number && (
+                    <div className="flex gap-1.5">
+                      <dt className={TEXT_FAINT}>NIF</dt>
+                      <dd className="tabular-nums">{client.tax_number}</dd>
+                    </div>
+                  )}
+                  {client.address && <p className="truncate">{client.address}</p>}
+                </dl>
 
-                {/* Stats */}
-                <div className="flex items-center justify-between border-t border-gray-50 pt-3">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-[#1A3A5C]">{client.invoices_count ?? 0}</div>
-                    <div className="text-xs text-gray-400">Factures</div>
-                  </div>
+                <div className={cx('mt-4 flex items-center justify-between border-t pt-3', BORDER)}>
+                  <p className={cx('text-xs', TEXT_MUTED)}>
+                    <span className={cx('text-sm font-semibold', NUM, TEXT_TITLE)}>
+                      {client.invoices_count ?? 0}
+                    </span>
+                    {' '}facture{(client.invoices_count ?? 0) > 1 ? 's' : ''}
+                  </p>
                   <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => openEdit(client)}
-                      className="p-1.5 text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 rounded-lg transition"
-                      title="Modifier"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(client)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    <Button
+                      variant="ghost" size="sm" iconOnly icon={PencilSquareIcon}
+                      title="Modifier" onClick={() => openEdit(client)}
+                    />
+                    <Button
+                      variant="ghost" size="sm" iconOnly icon={TrashIcon}
                       title="Supprimer"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                    <a
-                      href={`/comptabilite/invoices?client_id=${client.id}`}
-                      className="px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition"
+                      className="hover:text-red-600 dark:hover:text-red-400"
+                      onClick={() => handleDelete(client)}
+                    />
+                    <Button
+                      variant="subtle" size="sm"
+                      onClick={() => router.visit(`/comptabilite/factures?client_id=${client.id}`)}
                     >
                       Factures
-                    </a>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -212,21 +248,23 @@ export default function Clients({ clients, filters }) {
         )}
 
         {/* Pagination */}
-        {clients.last_page > 1 && (
-          <div className="flex justify-center gap-2">
+        {clients.last_page > 1 && clients.links && (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
             {clients.links.map((link, i) => (
               <button
                 key={i}
+                type="button"
                 disabled={!link.url}
                 onClick={() => link.url && router.get(link.url)}
                 dangerouslySetInnerHTML={{ __html: link.label }}
-                className={`px-3 py-1.5 rounded-lg text-xs transition ${
+                className={cx(
+                  'min-w-[32px] rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
                   link.active
-                    ? 'bg-[#1A3A5C] text-white'
-                    : link.url
-                    ? 'bg-white border border-gray-200 hover:bg-gray-50'
-                    : 'opacity-40 cursor-not-allowed'
-                }`}
+                    ? 'border-transparent bg-purple-600 text-white'
+                    : cx(BORDER, SURFACE, 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                  !link.url && 'pointer-events-none opacity-40',
+                  FOCUS_RING,
+                )}
               />
             ))}
           </div>
@@ -235,88 +273,109 @@ export default function Clients({ clients, filters }) {
 
       {/* ===== Modal création / édition ===== */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-gray-900 mb-5">
-              {modal.mode === 'create' ? 'Nouveau client' : `Modifier — ${modal.client.name}`}
-            </h3>
-
-            <div className="space-y-4">
-              {/* Nom */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Nom / Raison sociale <span className="text-red-500">*</span>
+        <div
+          onClick={() => setModal(null)}
+          className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg">
+            <Card
+              padded={false}
+              className="shadow-xl max-h-[90vh] overflow-y-auto"
+              title={modal.mode === 'create' ? 'Nouveau client' : `Modifier — ${modal.client.name}`}
+              subtitle="Les champs marqués d'un astérisque sont obligatoires."
+              actions={
+                <Button variant="ghost" size="sm" iconOnly icon={XMarkIcon}
+                        title="Fermer" onClick={() => setModal(null)} />
+              }
+              footer={
+                <div className="flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setModal(null)}>Annuler</Button>
+                  <Button variant="primary" loading={saving} onClick={handleSave}>
+                    {modal.mode === 'create' ? 'Créer' : 'Mettre à jour'}
+                  </Button>
+                </div>
+              }
+            >
+              <div className="px-4 py-4 sm:px-6 space-y-4">
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Nom / Raison sociale *</span>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setField('name', e.target.value)}
+                    className={cx(CONTROL, 'h-10', errors.name && 'border-red-400 dark:border-red-500/60')}
+                  />
+                  {errors.name && <span className="text-xs text-red-600 dark:text-red-400">{errors.name[0]}</span>}
                 </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setField('name', e.target.value)}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
-                />
-                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name[0]}</p>}
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" value={form.email} onChange={(e) => setField('email', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
-                  {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email[0]}</p>}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>Email</span>
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => setField('email', e.target.value)}
+                      className={cx(CONTROL, 'h-10')}
+                    />
+                    {errors.email && <span className="text-xs text-red-600 dark:text-red-400">{errors.email[0]}</span>}
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>Téléphone</span>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => setField('phone', e.target.value)}
+                      className={cx(CONTROL, 'h-10')}
+                    />
+                  </label>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Téléphone</label>
-                  <input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
+
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Adresse</span>
+                  <textarea
+                    rows={2}
+                    value={form.address}
+                    onChange={(e) => setField('address', e.target.value)}
+                    className={cx(CONTROL, 'resize-none')}
+                  />
+                </label>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>NIF / Identifiant fiscal</span>
+                    <input
+                      type="text"
+                      value={form.tax_number}
+                      onChange={(e) => setField('tax_number', e.target.value)}
+                      className={cx(CONTROL, 'h-10')}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className={cx('text-xs font-medium', TEXT_MUTED)}>Devise</span>
+                    <select
+                      value={form.currency}
+                      onChange={(e) => setField('currency', e.target.value)}
+                      className={cx(CONTROL, 'h-10')}
+                    >
+                      {CURRENCIES.map(([val, lbl]) => (
+                        <option key={val} value={val}>{lbl}</option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Adresse</label>
-                <textarea rows={2} value={form.address} onChange={(e) => setField('address', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none" />
+                <label className="flex flex-col gap-1.5">
+                  <span className={cx('text-xs font-medium', TEXT_MUTED)}>Notes</span>
+                  <textarea
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) => setField('notes', e.target.value)}
+                    placeholder="Informations internes sur ce client…"
+                    className={cx(CONTROL, 'resize-none')}
+                  />
+                </label>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">NIF / Identifiant fiscal</label>
-                  <input type="text" value={form.tax_number} onChange={(e) => setField('tax_number', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Devise</label>
-                  <select value={form.currency} onChange={(e) => setField('currency', e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30">
-                    <option value="XOF">FCFA (XOF)</option>
-                    <option value="EUR">Euro (EUR)</option>
-                    <option value="USD">Dollar (USD)</option>
-                    <option value="XAF">CFA BEAC (XAF)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                <textarea rows={2} value={form.notes} onChange={(e) => setField('notes', e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A3A5C]/30 resize-none"
-                  placeholder="Informations internes sur ce client..." />
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setModal(null)}
-                className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm font-medium hover:bg-[#16324e] disabled:opacity-50 transition"
-              >
-                {saving ? 'Enregistrement...' : modal.mode === 'create' ? 'Créer' : 'Mettre à jour'}
-              </button>
-            </div>
+            </Card>
           </div>
         </div>
       )}
@@ -324,3 +383,4 @@ export default function Clients({ clients, filters }) {
     </AuthLayout>
   );
 }
+export { Clients };

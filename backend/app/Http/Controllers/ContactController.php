@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Reader;
 use League\Csv\Writer;
+use Inertia\Inertia;
 
 /**
  * ContactController — Annuaire interne et externe
@@ -39,12 +40,11 @@ class ContactController extends Controller
      * Retourne l'annuaire paginé avec recherche full-text rapide.
      * Peut filtrer par type (interne/externe), département, entreprise.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): \Illuminate\Http\Response|JsonResponse|\Inertia\Response
     {
         $user = Auth::user();
 
         $query = Contact::where('organization_id', $user->organization_id)
-            ->with(['department:id,name', 'linkedUser:id,name,avatar,status'])
             ->orderBy('last_name')
             ->orderBy('first_name');
 
@@ -61,13 +61,21 @@ class ContactController extends Controller
         });
 
         $query->when($request->type, fn ($q, $t) => $q->where('type', $t));
-        $query->when($request->department_id, fn ($q, $d) => $q->where('department_id', $d));
         $query->when($request->company, fn ($q, $c) => $q->where('company', 'ilike', "%{$c}%"));
         $query->when($request->has('active_only'), fn ($q) => $q->where('is_active', true));
 
-        $contacts = $query->paginate(50);
+        if ($request->expectsJson() && !$request->hasHeader("X-Inertia")) {
+            return response()->json($query->paginate(50));
+        }
 
-        return response()->json($contacts);
+        $contacts = $query->paginate(25);
+        $total = Contact::where('organization_id', $user->organization_id)->count();
+
+        return Inertia::render('Annuaire/Index', [
+            'contacts' => $contacts,
+            'stats'    => ['total' => $total],
+            'filters'  => $request->only(['search', 'type']),
+        ]);
     }
 
     // -------------------------------------------------------------------------
@@ -96,7 +104,7 @@ class ContactController extends Controller
             'name' => "{$contact->first_name} {$contact->last_name}",
         ]);
 
-        return response()->json($contact->load('department:id,name'), 201);
+        return response()->json($contact, 201);
     }
 
     // -------------------------------------------------------------------------
@@ -122,7 +130,7 @@ class ContactController extends Controller
 
         $this->auditService->logUpdated('contacts', 'contact', $contact->id, $original, $validated);
 
-        return response()->json($contact->load('department:id,name'));
+        return response()->json($contact);
     }
 
     // -------------------------------------------------------------------------
@@ -141,12 +149,6 @@ class ContactController extends Controller
             return response()->json(['message' => 'Permission refusée.'], 403);
         }
 
-        // Interdit de supprimer un contact lié à un utilisateur actif
-        if ($contact->linked_user_id && $contact->linkedUser?->isActive()) {
-            return response()->json([
-                'message' => 'Ce contact est lié à un utilisateur actif. Désactivez l\'utilisateur d\'abord.',
-            ], 422);
-        }
 
         $this->auditService->logDeleted('contacts', 'contact', $contact->id, $contact->toArray());
         $contact->delete();
@@ -259,11 +261,13 @@ class ContactController extends Controller
      */
     public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user = Auth::user();
 
         $contacts = Contact::where('organization_id', $user->organization_id)
-            ->with('department:id,name')
-            ->when($request->type, fn ($q, $t) => $q->where('type', $t))
+                        ->when($request->type, fn ($q, $t) => $q->where('type', $t))
             ->when($request->department_id, fn ($q, $d) => $q->where('department_id', $d))
             ->orderBy('last_name')
             ->get();
@@ -292,7 +296,7 @@ class ContactController extends Controller
                 $c->company,
                 $c->job_title,
                 $c->type === 'internal' ? 'Interne' : 'Externe',
-                $c->department?->name ?? '',
+                '',
                 $c->is_active ? 'Oui' : 'Non',
             ]);
         }
@@ -320,8 +324,8 @@ class ContactController extends Controller
             'mobile'         => ['nullable', 'string', 'max:30'],
             'company'        => ['nullable', 'string', 'max:255'],
             'job_title'      => ['nullable', 'string', 'max:255'],
-            'type'           => ['nullable', 'in:internal,external'],
-            'department_id'  => ['nullable', 'integer'],
+            'type'           => ['nullable', 'in:person,organization,supplier,partner,other'],
+            // 'department_id' removed — column not in schema
             'address'        => ['nullable', 'string', 'max:500'],
             'notes'          => ['nullable', 'string', 'max:2000'],
             'avatar'         => ['nullable', 'string', 'max:500'],

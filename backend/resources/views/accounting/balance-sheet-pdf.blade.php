@@ -1,430 +1,224 @@
+@php
+    /**
+     * Bilan SYSCOHADA — SECRETIS ERP
+     * Appelée par App\Http\Controllers\SyscohadaController::balanceSheetPdf() — A4 paysage
+     * Variables : $data (array, cf. SyscohadaService::generateBalanceSheet), $org (Organization), $fy (FiscalYear)
+     */
+    $fmt = fn ($v) => number_format((float) ($v ?? 0), 0, ',', ' ');
+
+    $actif   = $data['actif']  ?? [];
+    $passif  = $data['passif'] ?? [];
+    $immo    = $actif['immobilisations'] ?? [];
+    $circ    = $actif['circulant'] ?? [];
+    $cp      = $passif['capitaux_propres'] ?? [];
+    $pcirc   = $passif['passif_circulant'] ?? [];
+
+    $immoRows = [
+        'Immobilisations incorporelles'        => $immo['incorporelles'] ?? [],
+        'Terrains'                             => $immo['terrains'] ?? [],
+        'Bâtiments'                            => $immo['batiments'] ?? [],
+        'Autres immobilisations corporelles'   => $immo['autres_corporelles'] ?? [],
+        'Immobilisations financières'          => $immo['financieres'] ?? [],
+    ];
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Bilan SYSCOHADA — {{ $fy->name }}</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'DejaVu Sans', Arial, sans-serif;
-    font-size: 9pt;
-    color: #1a1a1a;
-    background: #fff;
-  }
+    <meta charset="utf-8">
+    <title>Bilan SYSCOHADA — {{ $fy->name ?? '' }}</title>
+    <style>
+        @page { margin: 12mm 10mm 14mm 10mm; }
+        * { font-family: 'DejaVu Sans', sans-serif; }
+        body { margin: 0; color: #1f2937; font-size: 10px; }
 
-  /* En-tête */
-  .header {
-    border-bottom: 3px solid #1A3A5C;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-  }
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .org-name {
-    font-size: 13pt;
-    font-weight: bold;
-    color: #1A3A5C;
-  }
-  .org-info {
-    font-size: 8pt;
-    color: #555;
-    margin-top: 2px;
-  }
-  .doc-title {
-    text-align: right;
-  }
-  .doc-title h1 {
-    font-size: 14pt;
-    font-weight: bold;
-    color: #1A3A5C;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-  .doc-title .subtitle {
-    font-size: 8pt;
-    color: #777;
-    margin-top: 2px;
-  }
+        .header { border-bottom: 2px solid #9333EA; padding-bottom: 8px; margin-bottom: 10px; }
+        .org-name { font-size: 15px; font-weight: bold; color: #111827; }
+        .org-meta { font-size: 9px; color: #6b7280; margin-top: 2px; }
+        h1 { font-size: 14px; margin: 10px 0 2px; }
+        .sub { font-size: 10px; color: #4b5563; margin-bottom: 10px; }
+        .sub strong { color: #111827; }
 
-  /* Métadonnées */
-  .meta-bar {
-    background: #f5f7fa;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    font-size: 8.5pt;
-    display: flex;
-    gap: 30px;
-  }
-  .meta-bar span { color: #555; }
-  .meta-bar strong { color: #1A3A5C; }
+        table { width: 100%; border-collapse: collapse; }
+        .cols td { vertical-align: top; width: 50%; padding: 0; }
 
-  /* Layout bilan 2 colonnes */
-  .bilan-wrapper {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-  }
-  .bilan-col {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    overflow: hidden;
-  }
+        table.bs { border: 1px solid #e5e7eb; }
+        table.bs caption { caption-side: top; text-align: left; background: #9333EA; color: #ffffff;
+                           font-size: 10px; font-weight: bold; padding: 5px 8px; letter-spacing: .5px; }
+        table.bs th { background: #f5f3ff; color: #5b21b6; font-size: 8px; text-transform: uppercase;
+                      padding: 4px 6px; border-bottom: 1px solid #ddd6fe; text-align: right; }
+        table.bs th.lbl { text-align: left; }
+        table.bs td { padding: 4px 6px; border-bottom: 1px solid #f3f4f6; font-size: 9px; }
+        .num { text-align: right; }
+        .grp td { background: #fafafa; font-weight: bold; font-size: 9px; text-transform: uppercase; color: #4b5563; }
+        .sub-total td { background: #f7f5ff; font-weight: bold; border-top: 1px solid #ddd6fe; }
+        .total td { background: #f5f3ff; font-weight: bold; font-size: 11px; border-top: 2px solid #9333EA; }
+        .muted { color: #9ca3af; }
 
-  /* Tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .section-header {
-    background: #1A3A5C;
-    color: #fff;
-    font-size: 8.5pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 6px 8px;
-  }
-  .col-header {
-    background: #e8ecf0;
-    font-size: 7.5pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: #555;
-    padding: 4px 6px;
-    border-bottom: 1px solid #d1d5db;
-  }
-  td {
-    padding: 3px 6px;
-    vertical-align: top;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .lbl { font-size: 8.5pt; color: #2d3748; }
-  .lbl-indent { padding-left: 16px !important; }
-  .lbl-indent2 { padding-left: 28px !important; }
-  .num { font-family: 'Courier New', monospace; font-size: 8pt; text-align: right; }
-  .num-bold { font-family: 'Courier New', monospace; font-size: 8pt; text-align: right; font-weight: bold; color: #1A3A5C; }
-  .row-total {
-    background: #f0f4f8;
-    border-top: 1px solid #c8d0da;
-  }
-  .row-total td { font-weight: bold; }
-  .row-grand-total {
-    background: #1A3A5C;
-  }
-  .row-grand-total td {
-    color: #fff !important;
-    font-weight: bold;
-    font-size: 9pt;
-    padding: 6px 8px;
-    border: none;
-  }
-  .subsection {
-    background: #2E86C1;
-    color: #fff;
-    font-size: 7.5pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .subsection td { color: #fff; padding: 3px 8px; border: none; }
-
-  /* Équilibre */
-  .balance-check {
-    text-align: center;
-    padding: 8px;
-    margin-bottom: 12px;
-    border-radius: 4px;
-    font-size: 9pt;
-    font-weight: bold;
-  }
-  .balanced { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-  .unbalanced { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-  /* Signatures */
-  .signatures {
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-  }
-  .sig-box {
-    flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    padding: 10px;
-    min-height: 70px;
-  }
-  .sig-title {
-    font-size: 8pt;
-    font-weight: bold;
-    color: #555;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 4px;
-    margin-bottom: 4px;
-  }
-
-  /* Footer */
-  .footer {
-    margin-top: 15px;
-    border-top: 1px solid #d1d5db;
-    padding-top: 6px;
-    font-size: 7pt;
-    color: #999;
-    text-align: center;
-  }
-
-  @page { size: A4 landscape; margin: 1cm 1.2cm; }
-</style>
+        .balance { margin-top: 10px; border: 1px solid #e5e7eb; padding: 6px 8px; font-size: 9px; }
+        .footer { margin-top: 14px; font-size: 8px; color: #9ca3af; text-align: center; line-height: 1.5; }
+    </style>
 </head>
 <body>
 
-{{-- En-tête --}}
 <div class="header">
-  <div class="header-top">
-    <div>
-      <div class="org-name">{{ $org->name ?? 'Organisation' }}</div>
-      <div class="org-info">
-        RCCM : {{ $org->rccm ?? '—' }} &nbsp;|&nbsp;
-        NIF : {{ $org->nif ?? '—' }} &nbsp;|&nbsp;
-        {{ $org->address ?? '' }}
-      </div>
+    <div class="org-name">{{ $org->name ?? 'Organisation' }}</div>
+    <div class="org-meta">
+        @if(!empty($org?->address)){{ $org->address }}@endif
+        @if(!empty($org?->city)), {{ $org->city }}@endif
+        @if(!empty($org?->phone)) — Tél. {{ $org->phone }}@endif
+        @if(!empty($org?->tax_number)) — N° contribuable : {{ $org->tax_number }}@endif
     </div>
-    <div class="doc-title">
-      <h1>Bilan</h1>
-      <div class="subtitle">SYSCOHADA Révisé 2017 — Norme OHADA</div>
-      <div class="subtitle">Exercice : {{ $fy->name }}</div>
-      <div class="subtitle">Arrêté au {{ \Carbon\Carbon::parse($data['period']['end'])->format('d/m/Y') }}</div>
-    </div>
-  </div>
 </div>
 
-{{-- Vérification équilibre --}}
-@if($data['is_balanced'])
-<div class="balance-check balanced">
-  ✓ Bilan équilibré — Total Actif = Total Passif =
-  {{ number_format($data['total_actif'], 0, ',', ' ') }} FCFA
+<h1>Bilan — Référentiel SYSCOHADA révisé</h1>
+<div class="sub">
+    Exercice <strong>{{ $data['fiscal_year'] ?? ($fy->name ?? '—') }}</strong>
+    @if(!empty($data['period']['start']) && !empty($data['period']['end']))
+        — Période du <strong>{{ \Carbon\Carbon::parse($data['period']['start'])->format('d/m/Y') }}</strong>
+        au <strong>{{ \Carbon\Carbon::parse($data['period']['end'])->format('d/m/Y') }}</strong>
+    @endif
+    — Montants en {{ $org->currency ?? 'XOF' }}
 </div>
-@else
-<div class="balance-check unbalanced">
-  ⚠ Bilan déséquilibré — Écart : {{ number_format($data['ecart'], 0, ',', ' ') }} FCFA
-</div>
-@endif
 
-{{-- Corps du bilan : 2 colonnes --}}
-<div class="bilan-wrapper">
+<table class="cols">
+    <tr>
+        <td style="padding-right:6px;">
 
-  {{-- === ACTIF === --}}
-  <div class="bilan-col">
-    <div class="section-header">ACTIF</div>
-    <table>
-      <tr>
-        <td class="col-header" style="width:45%">Désignation</td>
-        <td class="col-header num" style="width:18%">Brut</td>
-        <td class="col-header num" style="width:18%">Amort/Prov</td>
-        <td class="col-header num" style="width:19%">Net</td>
-      </tr>
+            <table class="bs">
+                <caption>ACTIF</caption>
+                <thead>
+                    <tr>
+                        <th class="lbl">Rubrique</th>
+                        <th style="width:20%;">Brut</th>
+                        <th style="width:20%;">Amort. / Prov.</th>
+                        <th style="width:20%;">Net (N)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="grp"><td colspan="4">Actif immobilisé</td></tr>
+                    @forelse($immoRows as $label => $row)
+                        <tr>
+                            <td>{{ $label }}</td>
+                            <td class="num">{{ $fmt($row['brut'] ?? 0) }}</td>
+                            <td class="num">{{ $fmt($row['amort'] ?? 0) }}</td>
+                            <td class="num">{{ $fmt($row['net'] ?? 0) }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="muted">Aucun élément</td></tr>
+                    @endforelse
+                    <tr class="sub-total">
+                        <td>Total actif immobilisé</td>
+                        <td class="num">{{ $fmt($immo['total_brut'] ?? 0) }}</td>
+                        <td class="num">{{ $fmt($immo['total_amort'] ?? 0) }}</td>
+                        <td class="num">{{ $fmt($immo['total_net'] ?? 0) }}</td>
+                    </tr>
 
-      @php
-        $actif = $data['actif'];
-        $fmt = fn($v) => $v > 0 ? number_format($v, 0, ',', ' ') : '—';
-      @endphp
+                    <tr class="grp"><td colspan="4">Actif circulant</td></tr>
+                    <tr>
+                        <td>Stocks et en-cours</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($circ['stocks'] ?? 0) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Créances clients</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($circ['creances_clients'] ?? 0) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Autres créances</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($circ['autres_creances'] ?? 0) }}</td>
+                    </tr>
+                    <tr class="sub-total">
+                        <td>Total actif circulant</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($circ['total'] ?? 0) }}</td>
+                    </tr>
 
-      {{-- Actif immobilisé --}}
-      <tr class="subsection"><td colspan="4">Actif immobilisé</td></tr>
+                    <tr class="grp"><td colspan="4">Trésorerie - Actif</td></tr>
+                    <tr>
+                        <td>Banques, caisses et assimilés</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($actif['tresorerie'] ?? 0) }}</td>
+                    </tr>
 
-      <tr>
-        <td class="lbl lbl-indent">Immobilisations incorporelles</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['incorporelles']['brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['incorporelles']['amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['incorporelles']['net']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Terrains</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['terrains']['brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['terrains']['amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['terrains']['net']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Bâtiments et ouvrages</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['batiments']['brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['batiments']['amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['batiments']['net']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Autres immob. corporelles</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['autres_corporelles']['brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['autres_corporelles']['amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['autres_corporelles']['net']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Immobilisations financières</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['financieres']['brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['financieres']['amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['financieres']['net']) }}</td>
-      </tr>
-      <tr class="row-total">
-        <td class="lbl">TOTAL ACTIF IMMOBILISÉ</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['total_brut']) }}</td>
-        <td class="num">{{ $fmt($actif['immobilisations']['total_amort']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['immobilisations']['total_net']) }}</td>
-      </tr>
+                    <tr class="total">
+                        <td>TOTAL ACTIF</td>
+                        <td class="num muted">—</td><td class="num muted">—</td>
+                        <td class="num">{{ $fmt($data['total_actif'] ?? ($actif['total'] ?? 0)) }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-      {{-- Actif circulant --}}
-      <tr class="subsection"><td colspan="4">Actif circulant</td></tr>
-      <tr>
-        <td class="lbl lbl-indent">Stocks et encours (30-38)</td>
-        <td class="num" colspan="2">{{ $fmt($actif['circulant']['stocks']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['circulant']['stocks']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Créances clients (411-416)</td>
-        <td class="num" colspan="2">{{ $fmt($actif['circulant']['creances_clients']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['circulant']['creances_clients']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Autres créances</td>
-        <td class="num" colspan="2">{{ $fmt($actif['circulant']['autres_creances']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['circulant']['autres_creances']) }}</td>
-      </tr>
-      <tr class="row-total">
-        <td class="lbl">TOTAL ACTIF CIRCULANT</td>
-        <td class="num" colspan="2">{{ $fmt($actif['circulant']['total']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['circulant']['total']) }}</td>
-      </tr>
-
-      {{-- Trésorerie Actif --}}
-      <tr class="subsection"><td colspan="4">Trésorerie-Actif</td></tr>
-      <tr>
-        <td class="lbl lbl-indent">Banques et caisses (51-57)</td>
-        <td class="num" colspan="2">{{ $fmt($actif['tresorerie']) }}</td>
-        <td class="num-bold">{{ $fmt($actif['tresorerie']) }}</td>
-      </tr>
-
-      {{-- Total général Actif --}}
-      <tr class="row-grand-total">
-        <td>TOTAL ACTIF</td>
-        <td class="num" colspan="2"></td>
-        <td class="num-bold" style="color:#fff !important;font-size:10pt">
-          {{ number_format($data['total_actif'], 0, ',', ' ') }}
         </td>
-      </tr>
-    </table>
-  </div>
+        <td style="padding-left:6px;">
 
-  {{-- === PASSIF === --}}
-  <div class="bilan-col">
-    <div class="section-header" style="background:#C0392B">PASSIF</div>
-    <table>
-      <tr>
-        <td class="col-header" style="width:55%">Désignation</td>
-        <td class="col-header num" style="width:45%">Exercice N</td>
-      </tr>
+            <table class="bs">
+                <caption>PASSIF</caption>
+                <thead>
+                    <tr>
+                        <th class="lbl">Rubrique</th>
+                        <th style="width:30%;">Net (N)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="grp"><td colspan="2">Capitaux propres et ressources assimilées</td></tr>
+                    <tr><td>Capital</td><td class="num">{{ $fmt($cp['capital'] ?? 0) }}</td></tr>
+                    <tr><td>Réserves</td><td class="num">{{ $fmt($cp['reserves'] ?? 0) }}</td></tr>
+                    <tr><td>Report à nouveau</td><td class="num">{{ $fmt($cp['report_nouveau'] ?? 0) }}</td></tr>
+                    <tr><td>Résultat net de l'exercice</td><td class="num">{{ $fmt($cp['resultat'] ?? 0) }}</td></tr>
+                    <tr><td>Subventions d'investissement</td><td class="num">{{ $fmt($cp['subventions'] ?? 0) }}</td></tr>
+                    <tr><td>Autres capitaux propres</td><td class="num">{{ $fmt($cp['autres'] ?? 0) }}</td></tr>
+                    <tr class="sub-total">
+                        <td>Total capitaux propres</td>
+                        <td class="num">{{ $fmt($cp['total'] ?? 0) }}</td>
+                    </tr>
 
-      @php
-        $passif = $data['passif'];
-      @endphp
+                    <tr class="grp"><td colspan="2">Dettes financières et ressources assimilées</td></tr>
+                    <tr><td>Emprunts et dettes financières</td><td class="num">{{ $fmt($passif['dettes_financieres'] ?? 0) }}</td></tr>
+                    <tr><td>Provisions pour risques et charges</td><td class="num">{{ $fmt($passif['provisions'] ?? 0) }}</td></tr>
+                    <tr class="sub-total">
+                        <td>Total ressources durables</td>
+                        <td class="num">{{ $fmt($passif['ressources_durables'] ?? 0) }}</td>
+                    </tr>
 
-      {{-- Capitaux propres --}}
-      <tr class="subsection" style="background:#C0392B"><td colspan="2">Capitaux propres et ressources assimilées</td></tr>
-      <tr>
-        <td class="lbl lbl-indent">Capital social (101)</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['capital']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Réserves (104-107)</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['reserves']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Report à nouveau (110-119)</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['report_nouveau']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Résultat net (120-129)</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['resultat']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Subventions d'investissement</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['subventions']) }}</td>
-      </tr>
-      <tr class="row-total">
-        <td class="lbl">TOTAL CAPITAUX PROPRES</td>
-        <td class="num-bold">{{ $fmt($passif['capitaux_propres']['total']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Dettes financières (16-17)</td>
-        <td class="num-bold">{{ $fmt($passif['dettes_financieres']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Provisions pour risques (15)</td>
-        <td class="num-bold">{{ $fmt($passif['provisions']) }}</td>
-      </tr>
-      <tr class="row-total">
-        <td class="lbl">TOTAL RESSOURCES DURABLES</td>
-        <td class="num-bold">{{ $fmt($passif['ressources_durables']) }}</td>
-      </tr>
+                    <tr class="grp"><td colspan="2">Passif circulant</td></tr>
+                    <tr><td>Dettes fournisseurs</td><td class="num">{{ $fmt($pcirc['fournisseurs'] ?? 0) }}</td></tr>
+                    <tr><td>Dettes fiscales et sociales</td><td class="num">{{ $fmt($pcirc['dettes_fiscales'] ?? 0) }}</td></tr>
+                    <tr><td>Autres dettes</td><td class="num">{{ $fmt($pcirc['autres_dettes'] ?? 0) }}</td></tr>
+                    <tr class="sub-total">
+                        <td>Total passif circulant</td>
+                        <td class="num">{{ $fmt($pcirc['total'] ?? 0) }}</td>
+                    </tr>
 
-      {{-- Passif circulant --}}
-      <tr class="subsection" style="background:#C0392B"><td colspan="2">Passif circulant</td></tr>
-      <tr>
-        <td class="lbl lbl-indent">Fournisseurs (401-408)</td>
-        <td class="num-bold">{{ $fmt($passif['passif_circulant']['fournisseurs']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Dettes fiscales et sociales</td>
-        <td class="num-bold">{{ $fmt($passif['passif_circulant']['dettes_fiscales']) }}</td>
-      </tr>
-      <tr>
-        <td class="lbl lbl-indent">Autres dettes</td>
-        <td class="num-bold">{{ $fmt($passif['passif_circulant']['autres_dettes']) }}</td>
-      </tr>
-      <tr class="row-total">
-        <td class="lbl">TOTAL PASSIF CIRCULANT</td>
-        <td class="num-bold">{{ $fmt($passif['passif_circulant']['total']) }}</td>
-      </tr>
+                    <tr class="grp"><td colspan="2">Trésorerie - Passif</td></tr>
+                    <tr><td>Banques, crédits de trésorerie</td><td class="num">{{ $fmt($passif['tresorerie'] ?? 0) }}</td></tr>
 
-      {{-- Trésorerie Passif --}}
-      <tr class="subsection" style="background:#C0392B"><td colspan="2">Trésorerie-Passif</td></tr>
-      <tr>
-        <td class="lbl lbl-indent">Crédits de trésorerie (521-522)</td>
-        <td class="num-bold">{{ $fmt($passif['tresorerie']) }}</td>
-      </tr>
+                    <tr class="total">
+                        <td>TOTAL PASSIF</td>
+                        <td class="num">{{ $fmt($data['total_passif'] ?? ($passif['total'] ?? 0)) }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-      {{-- Total général Passif --}}
-      <tr class="row-grand-total" style="background:#C0392B">
-        <td>TOTAL PASSIF</td>
-        <td class="num-bold" style="color:#fff !important;font-size:10pt">
-          {{ number_format($data['total_passif'], 0, ',', ' ') }}
         </td>
-      </tr>
-    </table>
-  </div>
-</div>
+    </tr>
+</table>
 
-{{-- Signatures --}}
-<div class="signatures">
-  <div class="sig-box">
-    <div class="sig-title">Le Directeur Général</div>
-    <div style="font-size:8pt;color:#999;margin-top:40px">Signature et cachet</div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">L'Expert-Comptable / Commissaire aux comptes</div>
-    <div style="font-size:8pt;color:#999;margin-top:40px">Signature et cachet</div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Date d'établissement</div>
-    <div style="margin-top:8px;font-size:9pt;font-weight:bold">{{ now()->format('d/m/Y') }}</div>
-  </div>
+<div class="balance">
+    @if(($data['is_balanced'] ?? false) === true)
+        <strong>Bilan équilibré</strong> — Total actif = Total passif = {{ $fmt($data['total_actif'] ?? 0) }} {{ $org->currency ?? 'XOF' }}.
+    @else
+        <strong>Bilan non équilibré</strong> — Écart constaté : {{ $fmt($data['ecart'] ?? 0) }} {{ $org->currency ?? 'XOF' }}.
+        Vérifier l'équilibre des écritures de la période avant dépôt.
+    @endif
+    Les comparatifs de l'exercice N-1 ne sont pas repris dans cette édition.
 </div>
 
 <div class="footer">
-  Bilan établi selon les normes SYSCOHADA Révisé 2017 — Acte Uniforme OHADA relatif au droit comptable et à l'information financière
-  | Généré par IBIG SECRETIS ERP le {{ now()->format('d/m/Y à H:i') }}
+    {{ $org->name ?? '' }}@if(!empty($org?->tax_number)) — N° contribuable {{ $org->tax_number }}@endif<br>
+    États financiers établis selon le référentiel SYSCOHADA révisé (OHADA). Montants en {{ $org->currency ?? 'XOF' }}.<br>
+    Document généré le {{ now()->format('d/m/Y à H:i') }} — SECRETIS ERP · IBIG Soft
 </div>
 
 </body>

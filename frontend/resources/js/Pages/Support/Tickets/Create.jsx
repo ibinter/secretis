@@ -5,12 +5,12 @@ import axios from 'axios';
 
 const PRIORITY_COLORS = {
   low:    'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-400',
-  medium: 'border-blue-200 bg-blue-50 text-blue-600 hover:border-blue-400',
+  medium: 'border-purple-200 bg-purple-50 text-purple-600 hover:border-purple-400',
   high:   'border-orange-200 bg-orange-50 text-orange-600 hover:border-orange-400',
   urgent: 'border-red-200 bg-red-50 text-red-600 hover:border-red-400',
 };
 const PRIORITY_ACTIVE = {
-  low: 'border-gray-500 bg-gray-100', medium: 'border-blue-500 bg-blue-100',
+  low: 'border-gray-500 bg-gray-100', medium: 'border-purple-500 bg-purple-100',
   high: 'border-orange-500 bg-orange-100', urgent: 'border-red-500 bg-red-100',
 };
 
@@ -76,7 +76,7 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
         {/* En-tête */}
         <div className="mb-8">
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <Link href={route('support.tickets.index')} className="hover:text-[#2E86C1]">Tickets</Link>
+            <Link href={route('support.tickets.index')} className="hover:text-[#7e22ce]">Tickets</Link>
             <span>/</span><span className="text-gray-900 dark:text-white">Nouveau ticket</span>
           </nav>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Créer un ticket support</h1>
@@ -92,19 +92,19 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
             <input type="text" value={data.subject} onChange={handleSubjectChange}
               placeholder="Décrivez votre problème en une phrase…"
               className={`w-full px-4 py-3 rounded-xl border ${errors.subject ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'}
-                bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#2E86C1] focus:ring-1 focus:ring-[#2E86C1]`} />
+                bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#7e22ce] focus:ring-1 focus:ring-[#7e22ce]`} />
             {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
 
             {/* Suggestions */}
             {suggestions.length > 0 && (
-              <div className="mt-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 p-3">
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-2">
+              <div className="mt-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800 p-3">
+                <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mb-2">
                   📚 Ces articles peuvent répondre à votre question :
                 </p>
                 {suggestions.map(s => (
                   <Link key={s.id} href={route('help.article', { category: s.category?.slug, article: s.slug })}
                     target="_blank"
-                    className="flex items-center gap-2 py-1.5 text-sm text-[#2E86C1] hover:underline">
+                    className="flex items-center gap-2 py-1.5 text-sm text-[#7e22ce] hover:underline">
                     <span>{s.category?.icon}</span> {s.title}
                   </Link>
                 ))}
@@ -120,7 +120,7 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
               </label>
               <select value={data.category} onChange={e => setData('category', e.target.value)}
                 className={`w-full px-4 py-3 rounded-xl border ${errors.category ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'}
-                  bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#2E86C1]`}>
+                  bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#7e22ce]`}>
                 <option value="">Choisir une catégorie</option>
                 {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
@@ -152,7 +152,7 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
             <textarea value={data.message} onChange={e => setData('message', e.target.value)} rows={6}
               placeholder="Décrivez votre problème en détail. Plus vous fournissez d'informations, plus nous pourrons vous aider rapidement…"
               className={`w-full px-4 py-3 rounded-xl border ${errors.message ? 'border-red-400' : 'border-gray-200 dark:border-gray-600'}
-                bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#2E86C1] focus:ring-1 focus:ring-[#2E86C1] resize-y`} />
+                bg-white dark:bg-gray-800 text-gray-900 dark:text-white outline-none focus:border-[#7e22ce] focus:ring-1 focus:ring-[#7e22ce] resize-y`} />
             {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
           </div>
 
@@ -162,9 +162,9 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
               Pièces jointes <span className="text-gray-400 font-normal">(optionnel · max 3 fichiers · 5 Mo chacun)</span>
             </label>
             <div className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer
-              hover:border-[#2E86C1] transition-colors" onClick={() => document.getElementById('attachments').click()}>
+              hover:border-[#7e22ce] transition-colors" onClick={() => document.getElementById('attachments').click()}>
               <p className="text-gray-500 dark:text-gray-400 text-sm">
-                📎 Glissez vos fichiers ici ou <span className="text-[#2E86C1]">parcourir</span>
+                📎 Glissez vos fichiers ici ou <span className="text-[#7e22ce]">parcourir</span>
               </p>
               <p className="text-xs text-gray-400 mt-1">PDF, PNG, JPG, DOCX acceptés</p>
             </div>
@@ -194,7 +194,7 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
               ← Annuler
             </Link>
             <button type="submit" disabled={processing}
-              className="flex items-center gap-2 bg-[#2E86C1] hover:bg-[#1A3A5C] text-white font-semibold
+              className="flex items-center gap-2 bg-[#7e22ce] hover:bg-[#9333EA] text-white font-semibold
                 px-8 py-3 rounded-xl transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
               {processing ? (
                 <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Envoi…</>
@@ -206,3 +206,4 @@ export default function TicketsCreate({ categories = [], priorities = [] }) {
     </AppLayout>
   );
 }
+export { TicketsCreate };

@@ -31,6 +31,18 @@ use Inertia\Response;
  */
 class ClientPortalController extends Controller
 {
+    // ─── Page d'accueil / login portail ──────────────────────────────────────
+
+    public function loginPage(): Response
+    {
+        // Si déjà connecté, rediriger vers dashboard
+        if (session('portal_client_id')) {
+            return redirect()->route('portail.dashboard');
+        }
+
+        return Inertia::render('Portal/ClientLogin');
+    }
+
     // ─── Auth portail ─────────────────────────────────────────────────────────
 
     public function login(Request $request): JsonResponse
@@ -342,5 +354,17 @@ class ClientPortalController extends Controller
         // Placeholder — à implémenter avec CinetPay SDK ou Orange Money API
         // Retourne l'URL de paiement
         return config('app.url') . '/portal/payment/pending/' . $invoiceId;
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

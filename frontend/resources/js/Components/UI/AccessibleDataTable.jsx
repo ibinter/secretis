@@ -22,12 +22,12 @@ const Icon = {
     </svg>
   ),
   SortAsc: () => (
-    <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+    <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
       <path d="M5 8l5-5 5 5H5z" />
     </svg>
   ),
   SortDesc: () => (
-    <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+    <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
       <path d="M15 12l-5 5-5-5h10z" />
     </svg>
   ),
@@ -254,8 +254,8 @@ export default function AccessibleDataTable({
           bg-gray-50/50 dark:bg-[#162230]">
           <div className="flex items-center gap-3">
             {selectable && selected.size > 0 && (
-              <span className="text-xs font-medium text-blue-700 dark:text-blue-400
-                bg-blue-100 dark:bg-[#0a1a2e] px-2.5 py-1 rounded-full"
+              <span className="text-xs font-medium text-purple-700 dark:text-purple-400
+                bg-purple-100 dark:bg-[#0a1a2e] px-2.5 py-1 rounded-full"
                 aria-live="polite"
               >
                 {selected.size} sélectionné{selected.size > 1 ? 's' : ''}
@@ -285,8 +285,8 @@ export default function AccessibleDataTable({
                     bg-white dark:bg-[#162230]
                     text-gray-900 dark:text-[#E8F1FA]
                     placeholder-gray-400 dark:placeholder-[#6B8BA4]
-                    outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-[#2E86C1]/30
-                    focus:border-blue-400 dark:focus:border-[#2E86C1]"
+                    outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#7e22ce]/30
+                    focus:border-purple-400 dark:focus:border-[#7e22ce]"
                 />
               </div>
             )}
@@ -298,7 +298,7 @@ export default function AccessibleDataTable({
                   text-sm text-gray-600 dark:text-[#A8C0D6]
                   hover:bg-gray-100 dark:hover:bg-[#243447]
                   transition-colors flex-shrink-0
-                  focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-[#2E86C1]/30"
+                  focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-[#7e22ce]/30"
                 aria-label="Exporter le tableau en CSV"
               >
                 <Icon.Download />
@@ -345,7 +345,7 @@ export default function AccessibleDataTable({
                     onChange={toggleSelectAll}
                     aria-label={allPageSelected ? 'Désélectionner tout' : 'Sélectionner tout'}
                     className="w-4 h-4 rounded border-gray-300 dark:border-[#2A3F55]
-                      text-blue-600 focus:ring-blue-400 dark:focus:ring-[#2E86C1]/50
+                      text-purple-600 focus:ring-purple-400 dark:focus:ring-[#7e22ce]/50
                       dark:bg-[#162230]"
                   />
                 </th>
@@ -368,7 +368,7 @@ export default function AccessibleDataTable({
                     ${thPadding} text-left text-xs font-semibold uppercase tracking-wide whitespace-nowrap select-none
                     text-gray-500 dark:text-[#6B8BA4]
                     ${col.sortable
-                      ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1A2A3A] transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:focus:ring-[#2E86C1]/50'
+                      ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1A2A3A] transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-300 dark:focus:ring-[#7e22ce]/50'
                       : ''}
                     ${col.align === 'center' ? 'text-center' : ''}
                     ${col.align === 'right'  ? 'text-right'  : ''}
@@ -420,7 +420,7 @@ export default function AccessibleDataTable({
                     aria-selected={selectable ? isSelected : undefined}
                     className={`transition-colors
                       ${isSelected
-                        ? 'bg-blue-50 dark:bg-[#162230]/50'
+                        ? 'bg-purple-50 dark:bg-[#162230]/50'
                         : 'hover:bg-gray-50/50 dark:hover:bg-[#1A2A3A]'}
                     `}
                   >
@@ -440,7 +440,7 @@ export default function AccessibleDataTable({
                           onChange={() => toggleRow(rowId)}
                           aria-label={`Sélectionner la ligne ${rowIndex + 1}`}
                           className="w-4 h-4 rounded border-gray-300 dark:border-[#2A3F55]
-                            text-blue-600 focus:ring-blue-400 dark:focus:ring-[#2E86C1]/50
+                            text-purple-600 focus:ring-purple-400 dark:focus:ring-[#7e22ce]/50
                             dark:bg-[#162230]"
                         />
                       </td>
@@ -459,7 +459,7 @@ export default function AccessibleDataTable({
                           data-col={absoluteCol}
                           className={`
                             ${tdPadding} text-gray-700 dark:text-[#A8C0D6]
-                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:focus:ring-[#2E86C1]/50
+                            focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-300 dark:focus:ring-[#7e22ce]/50
                             ${col.align === 'center' ? 'text-center' : ''}
                             ${col.align === 'right'  ? 'text-right'  : ''}
                             ${col.className || ''}
@@ -513,7 +513,7 @@ export default function AccessibleDataTable({
                 onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
                 className="text-xs border border-gray-200 dark:border-[#2A3F55] rounded-md px-1.5 py-1
                   bg-white dark:bg-[#162230] text-gray-700 dark:text-[#A8C0D6]
-                  outline-none focus:ring-1 focus:ring-blue-300 dark:focus:ring-[#2E86C1]/50"
+                  outline-none focus:ring-1 focus:ring-purple-300 dark:focus:ring-[#7e22ce]/50"
               >
                 {[5, 10, 20, 50, 100].map(n => (
                   <option key={n} value={n}>{n}</option>
@@ -535,7 +535,7 @@ export default function AccessibleDataTable({
                 className="px-2 py-1.5 rounded-lg text-xs text-gray-500 dark:text-[#6B8BA4]
                   hover:bg-gray-100 dark:hover:bg-[#243447]
                   disabled:opacity-30 disabled:cursor-not-allowed transition-colors
-                  focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-[#2E86C1]/50"
+                  focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-[#7e22ce]/50"
               >
                 {btn.icon}
               </button>
@@ -557,7 +557,7 @@ export default function AccessibleDataTable({
                 className="px-2 py-1.5 rounded-lg text-xs text-gray-500 dark:text-[#6B8BA4]
                   hover:bg-gray-100 dark:hover:bg-[#243447]
                   disabled:opacity-30 disabled:cursor-not-allowed transition-colors
-                  focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-[#2E86C1]/50"
+                  focus:outline-none focus:ring-2 focus:ring-purple-300 dark:focus:ring-[#7e22ce]/50"
               >
                 {btn.icon}
               </button>
@@ -568,3 +568,4 @@ export default function AccessibleDataTable({
     </div>
   );
 }
+export { AccessibleDataTable };

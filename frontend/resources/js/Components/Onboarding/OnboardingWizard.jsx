@@ -84,7 +84,7 @@ function StepDots({ total, current }) {
   return (
     <div className="flex items-center justify-center gap-2 mb-8" aria-label="Étapes">
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={`rounded-full transition-all duration-300 ${i === current ? 'w-8 h-2.5 bg-[#2E86C1]' : i < current ? 'w-2.5 h-2.5 bg-[#1E8449]' : 'w-2.5 h-2.5 bg-gray-200 dark:bg-gray-600'}`} />
+        <span key={i} className={`rounded-full transition-all duration-300 ${i === current ? 'w-8 h-2.5 bg-[#7e22ce]' : i < current ? 'w-2.5 h-2.5 bg-[#1E8449]' : 'w-2.5 h-2.5 bg-gray-200 dark:bg-gray-600'}`} />
       ))}
     </div>
   )
@@ -143,7 +143,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
 
         {/* Barre de progression */}
         <div className="h-1 bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-          <div className="h-full bg-gradient-to-r from-[#2E86C1] to-[#1E8449] transition-all duration-500" style={{ width:`${((step + 1) / TOTAL) * 100}%` }} />
+          <div className="h-full bg-gradient-to-r from-[#7e22ce] to-[#1E8449] transition-all duration-500" style={{ width:`${((step + 1) / TOTAL) * 100}%` }} />
         </div>
 
         {/* Corps scrollable */}
@@ -154,8 +154,8 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
           {step === 0 && (
             <div className="text-center">
               <div className="relative mx-auto w-24 h-24 mb-6">
-                <div className="absolute inset-0 rounded-full bg-[#2E86C1]/20 animate-ping" aria-hidden="true" />
-                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] flex items-center justify-center shadow-xl">
+                <div className="absolute inset-0 rounded-full bg-[#7e22ce]/20 animate-ping" aria-hidden="true" />
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] flex items-center justify-center shadow-xl">
                   <span className="text-4xl font-black text-white select-none">S</span>
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Logo</label>
                   <div className="flex items-center gap-4">
                     {orgData.logoPreview
-                      ? <img src={orgData.logoPreview} alt="Logo org" className="w-14 h-14 rounded-xl object-cover border-2 border-[#2E86C1]" />
+                      ? <img src={orgData.logoPreview} alt="Logo org" className="w-14 h-14 rounded-xl object-cover border-2 border-[#7e22ce]" />
                       : <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600"><span className="text-2xl">🏢</span></div>
                     }
                     <label className="cursor-pointer px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -204,7 +204,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nom commercial <span className="text-red-500">*</span></label>
                   <input type="text" placeholder="ex : Banque Nationale CI" value={orgData.name} onChange={e => setOrgData(p => ({...p, name:e.target.value}))}
-                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#2E86C1] focus:outline-none text-sm" />
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#7e22ce] focus:outline-none text-sm" />
                 </div>
 
                 {/* Secteur + Pays */}
@@ -212,7 +212,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Secteur <span className="text-red-500">*</span></label>
                     <select value={orgData.secteur} onChange={e => setOrgData(p => ({...p, secteur:e.target.value}))}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none text-sm">
+                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none text-sm">
                       <option value="">Sélectionner...</option>
                       {SECTEURS.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -220,7 +220,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Pays</label>
                     <select value={orgData.pays} onChange={e => setOrgData(p => ({...p, pays:e.target.value}))}
-                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E86C1] focus:outline-none text-sm">
+                      className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#7e22ce] focus:outline-none text-sm">
                       {PAYS_OHADA.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
@@ -232,7 +232,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
                   <div className="grid grid-cols-4 gap-2">
                     {TAILLES.map(t => (
                       <button key={t.value} type="button" onClick={() => setOrgData(p => ({...p, taille:t.value}))}
-                        className={`py-2.5 rounded-xl border text-xs font-medium transition-all ${orgData.taille === t.value ? 'border-[#2E86C1] bg-[#2E86C1] text-white' : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#2E86C1]'}`}>
+                        className={`py-2.5 rounded-xl border text-xs font-medium transition-all ${orgData.taille === t.value ? 'border-[#7e22ce] bg-[#7e22ce] text-white' : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#7e22ce]'}`}>
                         {t.label}
                       </button>
                     ))}
@@ -250,14 +250,14 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
               <div className="grid grid-cols-2 gap-3">
                 {ROLES.map(role => (
                   <button key={role.id} type="button" onClick={() => setSelectedRole(role.id)}
-                    className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${selectedRole === role.id ? 'border-[#2E86C1] bg-blue-50 dark:bg-blue-900/20 shadow-md' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
+                    className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${selectedRole === role.id ? 'border-[#7e22ce] bg-purple-50 dark:bg-purple-900/20 shadow-md' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
                     <span className="text-2xl flex-shrink-0 mt-0.5">{role.icon}</span>
                     <div className="min-w-0">
-                      <p className={`font-semibold text-sm ${selectedRole === role.id ? 'text-[#1A3A5C] dark:text-blue-300' : 'text-gray-900 dark:text-white'}`}>{role.label}</p>
+                      <p className={`font-semibold text-sm ${selectedRole === role.id ? 'text-[#9333EA] dark:text-purple-300' : 'text-gray-900 dark:text-white'}`}>{role.label}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{role.desc}</p>
                     </div>
                     {selectedRole === role.id && (
-                      <svg className="w-5 h-5 text-[#2E86C1] flex-shrink-0 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-5 h-5 text-[#7e22ce] flex-shrink-0 ml-auto" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                       </svg>
                     )}
@@ -270,7 +270,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
           {/* ÉTAPE 4 — Démarrage */}
           {step === 3 && (
             <div className="text-center">
-              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#1E8449] to-[#2E86C1] flex items-center justify-center shadow-xl">
+              <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#1E8449] to-[#7e22ce] flex items-center justify-center shadow-xl">
                 <span className="text-4xl">🚀</span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tout est prêt !</h2>
@@ -293,7 +293,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
               <div className="space-y-2.5">
                 {ctas.map((cta, i) => (
                   <a key={i} href={cta.href}
-                    className={`flex items-center gap-3 w-full px-4 py-3.5 rounded-xl font-medium text-sm transition-all ${i === 0 ? 'bg-[#1A3A5C] hover:bg-[#2E86C1] text-white shadow-md' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-[#2E86C1] hover:text-[#2E86C1]'}`}>
+                    className={`flex items-center gap-3 w-full px-4 py-3.5 rounded-xl font-medium text-sm transition-all ${i === 0 ? 'bg-[#9333EA] hover:bg-[#7e22ce] text-white shadow-md' : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-[#7e22ce] hover:text-[#7e22ce]'}`}>
                     <span className="text-xl">{cta.icon}</span>
                     {cta.label}
                   </a>
@@ -317,7 +317,7 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
             )}
             <button type="button" onClick={handleNext}
               disabled={saving || (step === 2 && !selectedRole)}
-              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#2E86C1] hover:bg-[#1A3A5C] rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#7e22ce] hover:bg-[#9333EA] rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
               {saving ? 'Enregistrement...' : step === TOTAL - 1 ? 'Commencer !' : 'Suivant →'}
             </button>
           </div>
@@ -326,3 +326,4 @@ export default function OnboardingWizard({ user, isOrgConfigured = false, onComp
     </div>
   )
 }
+export { OnboardingWizard };

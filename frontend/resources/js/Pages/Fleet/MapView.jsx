@@ -118,7 +118,7 @@ export default function MapView({ vehicles: initialVehicles }) {
                             ${v.driver ? '👤 ' + v.driver : ''}
                             ${v.speed ? ' • ' + v.speed + ' km/h' : ''}
                         </div>
-                        <a href="/fleet/vehicles/${v.id}" class="text-blue-600 text-xs underline">Voir détail →</a>
+                        <a href="/fleet/vehicles/${v.id}" class="text-purple-600 text-xs underline">Voir détail →</a>
                     `)
                     .on('click', () => setSelected(v));
                 markersRef.current[v.id] = marker;
@@ -158,7 +158,7 @@ export default function MapView({ vehicles: initialVehicles }) {
                             Dernière MAJ : {lastUpdate.toLocaleTimeString('fr-FR')}
                             <button
                                 onClick={fetchPositions}
-                                className="ml-2 text-blue-600 hover:underline"
+                                className="ml-2 text-purple-600 hover:underline"
                             >↻ Actualiser</button>
                         </p>
 
@@ -210,7 +210,7 @@ export default function MapView({ vehicles: initialVehicles }) {
                                     }
                                 }}
                                 className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition ${
-                                    selected?.id === v.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                    selected?.id === v.id ? 'bg-purple-50 dark:bg-purple-900/20' : ''
                                 }`}
                             >
                                 <div className="flex items-center gap-2">
@@ -331,7 +331,7 @@ export default function MapView({ vehicles: initialVehicles }) {
 
                             <button
                                 onClick={() => router.visit(`/fleet/vehicles/${selected.id}`)}
-                                className="mt-3 w-full bg-blue-600 text-white text-sm py-2 rounded-lg hover:bg-blue-700 transition"
+                                className="mt-3 w-full bg-purple-600 text-white text-sm py-2 rounded-lg hover:bg-purple-700 transition"
                             >
                                 Voir la fiche complète →
                             </button>
@@ -342,3 +342,4 @@ export default function MapView({ vehicles: initialVehicles }) {
         </AppLayout>
     );
 }
+export { MapView };

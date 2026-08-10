@@ -5,13 +5,14 @@
 
 import React from 'react';
 import { Head, router } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 
 export default function PaymentCancel({ ref: propRef }) {
   const urlParams = new URLSearchParams(window.location.search);
   const ref = urlParams.get('ref') || propRef;
 
   return (
-    <>
+    <AppLayout>
       <Head title="Paiement annulé — SECRETIS" />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50 flex items-center justify-center p-4">
@@ -20,10 +21,10 @@ export default function PaymentCancel({ ref: propRef }) {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-[#1A3A5C] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#9333EA] flex items-center justify-center">
                 <span className="text-white font-black text-sm">IS</span>
               </div>
-              <span className="font-bold text-[#1A3A5C] text-lg" style={{ fontFamily: 'Georgia, serif' }}>
+              <span className="font-bold text-[#9333EA] text-lg" style={{ fontFamily: 'Georgia, serif' }}>
                 IBIG <span className="text-[#F39C12]">SECRETIS</span>
               </span>
             </div>
@@ -52,7 +53,7 @@ export default function PaymentCancel({ ref: propRef }) {
               {ref && (
                 <button
                   onClick={() => router.visit(`/abonnement/commandes/${ref}`)}
-                  className="w-full py-3 bg-[#1A3A5C] text-white font-bold rounded-xl hover:bg-[#2E86C1] transition-colors text-base shadow-lg shadow-blue-900/20"
+                  className="w-full py-3 bg-[#9333EA] text-white font-bold rounded-xl hover:bg-[#7e22ce] transition-colors text-base shadow-lg shadow-blue-900/20"
                 >
                   Reprendre le paiement
                 </button>
@@ -75,14 +76,15 @@ export default function PaymentCancel({ ref: propRef }) {
 
           {/* Aide */}
           <p className="text-center text-xs text-gray-400 mt-6">
-            Besoin d'aide ? <a href="/aide" className="text-blue-600 hover:underline">Centre d'aide</a>
+            Besoin d'aide ? <a href="/aide" className="text-purple-600 hover:underline">Centre d'aide</a>
             {' · '}
-            <a href="mailto:support@ibig-secretis.com" className="text-blue-600 hover:underline">
+            <a href="mailto:support@ibig-secretis.com" className="text-purple-600 hover:underline">
               support@ibig-secretis.com
             </a>
           </p>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
+export { PaymentCancel };

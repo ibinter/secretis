@@ -116,7 +116,7 @@ const FormField = forwardRef(function FormField({
       ? 'border-red-500 dark:border-[#a23024] focus:ring-2 focus:ring-red-200 dark:focus:ring-[#a23024]/30 focus:border-red-500 dark:focus:border-[#a23024]'
       : success
       ? 'border-green-500 dark:border-[#1a7040] focus:ring-2 focus:ring-green-200 dark:focus:ring-[#1a7040]/30 focus:border-green-500 dark:focus:border-[#1a7040]'
-      : 'border-gray-200 dark:border-[#2A3F55] focus:ring-2 focus:ring-blue-200 dark:focus:ring-[#2E86C1]/30 focus:border-blue-500 dark:focus:border-[#2E86C1]'
+      : 'border-gray-200 dark:border-[#2A3F55] focus:ring-2 focus:ring-purple-200 dark:focus:ring-[#7e22ce]/30 focus:border-purple-500 dark:focus:border-[#7e22ce]'
     }
     ${type === 'textarea' ? 'py-2.5 resize-y' : sizes[size] || sizes.md}
     ${prefix ? 'pl-9' : ''}

@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { usePage } from '@inertiajs/react';
 import { useTranslation } from '../../hooks/useTranslation';
 
 // ─── Icônes inline SVG légères ───────────────────────────────────────────────
@@ -124,7 +124,7 @@ function InputField({ label, type = 'text', value, onChange, required, placehold
         required={required}
         className={`w-full px-3 py-2.5 rounded-lg border text-sm outline-none transition-all
           focus:ring-2 focus:ring-offset-0
-          ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-blue-400'}
+          ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 focus:border-purple-400'}
         `}
       />
       {error && <p className="text-xs text-red-500">{error}</p>}
@@ -205,8 +205,7 @@ function CalendarPicker({ selectedDate, onSelect, availableDates, primary }) {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 export default function VisitorPortal() {
-  const { slug } = useParams();
-  const navigate  = useNavigate();
+  const { slug } = usePage().props;
   const { t }     = useTranslation();
 
   // Données organisation
@@ -300,7 +299,7 @@ export default function VisitorPortal() {
         slot:       selectedSlot,
         visitor:    visitorInfo,
       });
-      navigate(`/rdv/confirmation/${res.data.token}`, { state: { appointment: res.data } });
+      window.location.href = `/rdv/confirmation/${res.data.token}`;
     } catch (err) {
       const msg = err.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.';
       setErrors({ submit: msg });
@@ -314,7 +313,7 @@ export default function VisitorPortal() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-gray-500">Chargement du portail…</p>
         </div>
       </div>
@@ -374,7 +373,7 @@ export default function VisitorPortal() {
                     onClick={() => { setSelectedService(service); setStep(2); }}
                     className={`text-left p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md
                       ${selectedService?.id === service.id
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-200 hover:border-gray-300 bg-white'}
                     `}
                     style={selectedService?.id === service.id
@@ -632,3 +631,4 @@ export default function VisitorPortal() {
     </div>
   );
 }
+export { VisitorPortal };

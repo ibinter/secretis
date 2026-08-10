@@ -285,4 +285,27 @@ class SsoController extends Controller
 
         return $type; // 'saml', 'ldap', etc.
     }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    // Page SSO admin
+    public function settings(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $org      = \Illuminate\Support\Facades\Auth::user()->load('organization')->organization;
+        $provider = \App\Models\SsoProvider::where('organization_id', $org->id)->first();
+        return \Inertia\Inertia::render('Parametres/SsoConfig', [
+            'organization' => $org->only(['id', 'name', 'slug']),
+            'provider'     => $provider ? $provider->only(['id', 'type', 'name', 'is_active', 'email_domains']) : null,
+        ]);
+    }
 }

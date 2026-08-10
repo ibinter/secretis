@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\GuideSection;
 use App\Models\GuideArticle;
+use App\Models\GuideSection;
+use App\Services\LicenceService;
+use App\Support\LicenceDocuments;
+use Illuminate\Database\Seeder;
 
 class GuideSeeder extends Seeder
 {
@@ -37,12 +39,12 @@ class GuideSeeder extends Seeder
                             'fr' => [
                                 'title'   => 'Créer votre compte et configurer votre organisation',
                                 'summary' => 'Apprenez à créer votre compte SECRETIS et à effectuer la configuration initiale de votre organisation.',
-                                'content' => '<h2>Création de votre compte</h2><p>Pour commencer avec IBIG SECRETIS, rendez-vous sur <strong>app.ibig-secretis.com</strong> et cliquez sur le bouton « Démarrer gratuitement ». Vous disposez d\'un essai gratuit de 14 jours sans engagement et sans carte bancaire requise.</p><h3>Informations requises</h3><ul><li>Votre prénom et nom</li><li>Une adresse e-mail professionnelle valide</li><li>Un mot de passe d\'au moins 8 caractères (lettres, chiffres, symboles recommandés)</li><li>Le nom de votre organisation</li><li>Le pays de votre organisation</li></ul><p>Un e-mail de confirmation est envoyé immédiatement. Cliquez sur le lien dans cet e-mail pour activer votre compte. Le lien est valide 24 heures.</p><h2>Configuration initiale de l\'organisation</h2><p>Après activation, l\'assistant d\'onboarding vous guide en 5 étapes rapides :</p><ol><li><strong>Profil de l\'organisation</strong> : nom officiel, logo, secteur d\'activité, pays, devise</li><li><strong>Paramètres régionaux</strong> : fuseau horaire, langue par défaut, format de date</li><li><strong>Modules actifs</strong> : sélectionnez les modules que vous souhaitez utiliser (Agenda, GED, Tâches, Visiteurs…)</li><li><strong>Charte graphique</strong> : couleurs primaire et secondaire de votre organisation</li><li><strong>Inviter l\'équipe</strong> : ajoutez les premiers membres par e-mail</li></ol><blockquote><strong>Note :</strong> Vous pouvez revenir sur ces paramètres à tout moment depuis Administration &gt; Organisation &gt; Paramètres généraux.</blockquote><h2>Informations légales (OHADA)</h2><p>Pour que vos documents générés par SECRETIS soient conformes aux exigences OHADA, renseignez dans Administration &gt; Organisation &gt; Informations légales :</p><ul><li>Numéro RCCM (Registre du Commerce et du Crédit Mobilier)</li><li>Numéro contribuable / NIF</li><li>Adresse du siège social</li><li>Représentant légal</li><li>Capital social</li></ul><p>Ces informations apparaissent automatiquement sur toutes les factures, contrats et documents officiels générés.</p>',
+                                'content' => '<h2>Création de votre compte</h2><p>Pour commencer avec IBIG SECRETIS, rendez-vous sur <strong>app.ibig-secretis.com</strong> et cliquez sur le bouton « Démarrer gratuitement ». Vous disposez d\'un essai de \' . app(LicenceService::class)->essaiJours() . \' jours, sans engagement et sans carte bancaire. À l\'échéance, votre espace bascule automatiquement au palier gratuit : aucune donnée n\'est perdue.</p><h3>Informations requises</h3><ul><li>Votre prénom et nom</li><li>Une adresse e-mail professionnelle valide</li><li>Un mot de passe d\'au moins 8 caractères (lettres, chiffres, symboles recommandés)</li><li>Le nom de votre organisation</li><li>Le pays de votre organisation</li></ul><p>Un e-mail de confirmation est envoyé immédiatement. Cliquez sur le lien dans cet e-mail pour activer votre compte. Le lien est valide 24 heures.</p><h2>Configuration initiale de l\'organisation</h2><p>Après activation, l\'assistant d\'onboarding vous guide en 5 étapes rapides :</p><ol><li><strong>Profil de l\'organisation</strong> : nom officiel, logo, secteur d\'activité, pays, devise</li><li><strong>Paramètres régionaux</strong> : fuseau horaire, langue par défaut, format de date</li><li><strong>Modules actifs</strong> : sélectionnez les modules que vous souhaitez utiliser (Agenda, GED, Tâches, Visiteurs…)</li><li><strong>Charte graphique</strong> : couleurs primaire et secondaire de votre organisation</li><li><strong>Inviter l\'équipe</strong> : ajoutez les premiers membres par e-mail</li></ol><blockquote><strong>Note :</strong> Vous pouvez revenir sur ces paramètres à tout moment depuis Administration &gt; Organisation &gt; Paramètres généraux.</blockquote><h2>Informations légales (OHADA)</h2><p>Pour que vos documents générés par SECRETIS soient conformes aux exigences OHADA, renseignez dans Administration &gt; Organisation &gt; Informations légales :</p><ul><li>Numéro RCCM (Registre du Commerce et du Crédit Mobilier)</li><li>Numéro contribuable / NIF</li><li>Adresse du siège social</li><li>Représentant légal</li><li>Capital social</li></ul><p>Ces informations apparaissent automatiquement sur toutes les factures, contrats et documents officiels générés.</p>',
                             ],
                             'en' => [
                                 'title'   => 'Create your account and configure your organisation',
                                 'summary' => 'Learn how to create your SECRETIS account and perform the initial setup of your organisation.',
-                                'content' => '<h2>Creating your account</h2><p>To get started with IBIG SECRETIS, go to <strong>app.ibig-secretis.com</strong> and click "Start for free". You have a 14-day free trial with no commitment and no credit card required.</p><h3>Required information</h3><ul><li>Your first and last name</li><li>A valid professional email address</li><li>A password of at least 8 characters (letters, numbers, symbols recommended)</li><li>Your organisation name</li><li>Your organisation\'s country</li></ul><p>A confirmation email is sent immediately. Click the link in this email to activate your account. The link is valid for 24 hours.</p><h2>Initial organisation setup</h2><p>After activation, the onboarding assistant guides you through 5 quick steps:</p><ol><li><strong>Organisation profile</strong>: official name, logo, industry, country, currency</li><li><strong>Regional settings</strong>: time zone, default language, date format</li><li><strong>Active modules</strong>: select modules you want to use (Calendar, DMS, Tasks, Visitors…)</li><li><strong>Brand identity</strong>: primary and secondary colours for your organisation</li><li><strong>Invite your team</strong>: add first members by email</li></ol><blockquote><strong>Note:</strong> You can return to these settings at any time from Administration &gt; Organisation &gt; General settings.</blockquote>',
+                                'content' => '<h2>Creating your account</h2><p>To get started with IBIG SECRETIS, go to <strong>app.ibig-secretis.com</strong> and click "Start for free". You have a \' . app(LicenceService::class)->essaiJours() . \'-day trial, with no commitment and no credit card. At the end of it your workspace switches automatically to the free tier: no data is lost.</p><h3>Required information</h3><ul><li>Your first and last name</li><li>A valid professional email address</li><li>A password of at least 8 characters (letters, numbers, symbols recommended)</li><li>Your organisation name</li><li>Your organisation\'s country</li></ul><p>A confirmation email is sent immediately. Click the link in this email to activate your account. The link is valid for 24 hours.</p><h2>Initial organisation setup</h2><p>After activation, the onboarding assistant guides you through 5 quick steps:</p><ol><li><strong>Organisation profile</strong>: official name, logo, industry, country, currency</li><li><strong>Regional settings</strong>: time zone, default language, date format</li><li><strong>Active modules</strong>: select modules you want to use (Calendar, DMS, Tasks, Visitors…)</li><li><strong>Brand identity</strong>: primary and secondary colours for your organisation</li><li><strong>Invite your team</strong>: add first members by email</li></ol><blockquote><strong>Note:</strong> You can return to these settings at any time from Administration &gt; Organisation &gt; General settings.</blockquote>',
                             ],
                         ],
                     ],
@@ -496,12 +498,12 @@ class GuideSeeder extends Seeder
                             'fr' => [
                                 'title'   => 'Changer de formule d\'abonnement',
                                 'summary' => 'Montez ou descendez en gamme selon l\'évolution des besoins de votre organisation.',
-                                'content' => '<h2>Plans disponibles</h2><p>SECRETIS propose trois plans :</p><ul><li><strong>Starter</strong> : jusqu\'à 5 utilisateurs, 10 Go de stockage, modules essentiels</li><li><strong>Professional</strong> : jusqu\'à 25 utilisateurs, 100 Go, tous les modules + SSO + rapports avancés</li><li><strong>Enterprise</strong> : utilisateurs illimités, 1 To, hébergement personnalisé, SLA garanti, support dédié</li></ul><h2>Passer à un plan supérieur (upgrade)</h2><ol><li>Allez dans Administration &gt; Abonnement &gt; Changer de plan</li><li>Comparez les plans côte à côte</li><li>Cliquez sur « Choisir Professional » (ou Enterprise)</li><li>Vérifiez le prorata calculé pour la période restante</li><li>Confirmez le paiement</li></ol><p>Le changement est immédiat. Vous avez accès aux nouvelles fonctionnalités sans attendre le prochain cycle.</p><h2>Passer à un plan inférieur (downgrade)</h2><p>Le downgrade prend effet au début du prochain cycle de facturation. Si votre utilisation actuelle dépasse les limites du plan inférieur (ex : plus d\'utilisateurs actifs que permis), SECRETIS vous alerte et vous demande de désactiver les comptes en excès avant de confirmer.</p>',
+                                'content' => $this->contenuFormules('fr'),
                             ],
                             'en' => [
                                 'title'   => 'Change your subscription plan',
                                 'summary' => 'Upgrade or downgrade according to your organisation\'s evolving needs.',
-                                'content' => '<h2>Available plans</h2><p>Starter (up to 5 users, 10 GB), Professional (up to 25 users, 100 GB, all modules + SSO) and Enterprise (unlimited users, 1 TB, dedicated support).</p><h2>Upgrading</h2><p>Go to Administration &gt; Subscription &gt; Change plan, compare plans, select and confirm payment. The change is immediate.</p><h2>Downgrading</h2><p>Downgrade takes effect at the start of the next billing cycle. SECRETIS alerts you if current usage exceeds the lower plan\'s limits.</p>',
+                                'content' => $this->contenuFormules('en'),
                             ],
                         ],
                     ],
@@ -679,6 +681,10 @@ class GuideSeeder extends Seeder
             ],
         ];
 
+        // Chapitres imposés par la section 12.7 du cahier IBIG SOFT v1.1.
+        // Ils sont engendrés, pas écrits : voir la méthode ci-dessous.
+        $sections[] = $this->sectionFormuleEtEspace();
+
         foreach ($sections as $sectionData) {
             $articles = $sectionData['articles'];
             unset($sectionData['articles']);
@@ -689,5 +695,571 @@ class GuideSeeder extends Seeder
                 $section->articles()->create($articleData);
             }
         }
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // SECTION LICENCE — les sept chapitres de la section 12.7
+    //
+    // POURQUOI CETTE SECTION EST ENGENDRÉE ET NON ÉCRITE
+    // --------------------------------------------------
+    // Le reste de ce fichier est du texte figé, ce qui convient à un guide sur
+    // les webhooks. Ici, chaque phrase porte une durée, un plafond ou un état.
+    // Un guide qui annonce une durée d'essai différente de celle appliquée par
+    // le serveur ne se contente pas d'être faux : il donne au lecteur la
+    // certitude que l'éditeur ne connaît pas son propre produit (§12, règle
+    // fondatrice). Les chiffres viennent donc du moteur, à chaque exécution.
+    //
+    // VERSION ET DATE — exigées par la section 12.7. La version suit la
+    // rédaction ; la date suit la dernière modification de la source de vérité.
+    // ═════════════════════════════════════════════════════════════════════════
+
+    private const GUIDE_LICENCE_VERSION = '1.0';
+
+    private function sectionFormuleEtEspace(): array
+    {
+        $L    = app(LicenceService::class);
+        $docs = app(LicenceDocuments::class);
+        $c    = $L->config();
+
+        $solution  = $L->nomSolution();
+        $gratuit   = $c['gratuit']['nom'];
+        $resume    = $L->resumePlafond();
+        $essai     = $L->essaiJours();
+        $grace     = $L->graceJours();
+        $retention = $L->retentionJours();
+        $prolJ     = (int) ($c['prolongation_jours'] ?? 0);
+        $filigrane = $L->filigrane();
+        $utils     = (int) ($c['gratuit']['utilisateurs'] ?? 1);
+        $stockage  = (int) ($c['gratuit']['stockage_mo'] ?? 0);
+        $etats     = $docs->tableauEtats();
+        $plafonds  = $docs->listePlafonds();
+        $inclus    = $this->puces($c['gratuit']['inclus'] ?? []);
+        $exclus    = $this->puces($c['gratuit']['exclus'] ?? []);
+        $demoActif = ! empty($c['demo']['actif']);
+
+        $v      = self::GUIDE_LICENCE_VERSION;
+        $date   = $docs->dateMaj();
+        $entete = "<p><em>Guide version {$v} — mis à jour le {$date}. Les durées et les "
+                . "plafonds affichés ci-dessous sont ceux appliqués par le serveur aujourd'hui.</em></p>";
+
+        $demoTexte = $demoActif
+            ? "La <strong>démonstration publique</strong> est ouverte : c'est le vrai logiciel, "
+              . "rempli de données fictives, accessible sans inscription et remis à zéro chaque "
+              . "nuit. Rien de ce que vous y saisissez n'est conservé."
+            : "La <strong>démonstration publique</strong> n'est pas encore ouverte. Lorsqu'elle le "
+              . "sera, ce sera le vrai logiciel, rempli de données fictives, accessible sans "
+              . "inscription et remis à zéro chaque nuit.";
+
+        return [
+            'slug'        => 'formule-et-espace',
+            'icon'        => 'Key',
+            'color'       => '#7C3AED',
+            'order'       => 9,
+            'role_target' => 'all',
+            'translations' => [
+                'fr' => [
+                    'title'       => 'Votre formule et votre espace',
+                    'description' => "Choisir sa formule, comprendre l'état de son espace, "
+                                   . "retirer le filigrane et récupérer ses données.",
+                ],
+                'en' => [
+                    'title'       => 'Your plan and your workspace',
+                    'description' => 'Choosing a plan, understanding your workspace state, '
+                                   . 'removing the watermark and exporting your data.',
+                ],
+            ],
+            'articles' => [
+
+                // ── 12.7 §1 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'choisir-sa-formule',
+                    'order'             => 1,
+                    'read_time_minutes' => 4,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => 'Choisir sa formule',
+                            'summary' => "Démonstration publique, palier {$gratuit}, essai, formules payantes : quatre portes d'entrée, et comment choisir la bonne.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Quatre portes d'entrée</h2>
+<p>Il existe quatre façons d'accéder à {$solution}. Elles ne s'opposent pas : on passe
+naturellement de l'une à l'autre.</p>
+
+<h3>1. La démonstration publique — pour regarder</h3>
+<p>{$demoTexte} Elle sert à voir à quoi ressemble le logiciel avant de créer quoi que ce soit.
+N'y saisissez aucune donnée réelle : elle est publique.</p>
+
+<h3>2. Le palier {$gratuit} — pour commencer, sans limite de temps</h3>
+<p>Gratuit, <strong>sans date de fin</strong>, sans carte bancaire. Votre espace vous appartient
+et vous pouvez y rester aussi longtemps que vous le souhaitez. En contrepartie, un plafond
+s'applique : {$resume}. C'est le bon choix pour une petite structure, ou pour démarrer sans
+engagement.</p>
+
+<h3>3. L'essai — pour tout tester, pendant {$essai} jours</h3>
+<p>L'essai ouvre pendant <strong>{$essai} jours</strong> toutes les fonctions d'une formule
+payante : export, multi-utilisateur, interface de programmation, assistant IA, relances WhatsApp
+et SMS. Sans carte bancaire. <strong>Sans reconduction automatique</strong> : à l'échéance, rien
+n'est prélevé, votre espace bascule simplement au palier {$gratuit}.</p>
+
+<h3>4. Les formules payantes — pour travailler à plusieurs et exporter</h3>
+<p>Elles lèvent le plafond, ouvrent les fonctions avancées et retirent le filigrane des documents.
+La grille tarifaire à jour est publiée sur la page des formules.</p>
+
+<h2>Comment choisir ?</h2>
+<ul>
+  <li>Vous voulez <strong>juste regarder</strong> → la démonstration publique.</li>
+  <li>Votre volume tient dans {$resume} et vous travaillez seul → le palier {$gratuit} suffit,
+      durablement.</li>
+  <li>Vous voulez <strong>essayer les fonctions avancées</strong> avant de payer → l'essai.</li>
+  <li>Vous devez <strong>exporter</strong>, travailler <strong>à plusieurs</strong> ou dépasser le
+      plafond → une formule payante.</li>
+</ul>
+<blockquote><strong>À retenir :</strong> aucun de ces choix n'est définitif, et aucun ne fait
+perdre de données. On peut passer d'un palier à l'autre dans les deux sens.</blockquote>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'Choosing your plan',
+                            'summary' => "Public demo, {$gratuit} tier, trial and paid plans: four ways in, and how to pick the right one.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Four ways in</h2>
+<ul>
+  <li><strong>Public demo</strong> — the real software with fictional data, no sign-up, reset every night.</li>
+  <li><strong>{$gratuit} tier</strong> — free, <strong>with no end date</strong>, capped at {$resume}.</li>
+  <li><strong>Trial</strong> — <strong>{$essai} days</strong> of a paid plan, no credit card, <strong>no automatic renewal</strong>.</li>
+  <li><strong>Paid plans</strong> — no cap, advanced features, no watermark.</li>
+</ul>
+<p>None of these choices is final, and none of them causes data loss.</p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §2 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'ce-que-contient-le-palier-gratuit',
+                    'order'             => 2,
+                    'read_time_minutes' => 4,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => "Ce que contient le palier {$gratuit}",
+                            'summary' => "Le plafond exact, ce qui est inclus, ce qui ne l'est pas, et ce qui se passe quand le plafond est atteint.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Le plafond exact</h2>
+<p>Le palier {$gratuit} est gratuit et n'a pas de date de fin. Il est plafonné :</p>
+{$plafonds}
+<p>Soit, dit simplement : <strong>{$resume}</strong>. Il admet <strong>{$utils}</strong>
+utilisateur et <strong>{$stockage} Mo</strong> de stockage.</p>
+
+<h2>Ce qui est inclus</h2>
+{$inclus}
+
+<h2>Ce qui n'est pas inclus</h2>
+{$exclus}
+<p>Ces fonctions ouvrent avec une formule payante, et pendant toute la durée d'un essai.</p>
+
+<h2>Quand le plafond est atteint</h2>
+<p>Vous verrez un message vous indiquant que la limite est atteinte, avec un lien vers les
+formules. Ce qui se passe alors — et ce qui ne se passe pas :</p>
+<ul>
+  <li>la <strong>création</strong> d'un nouvel enregistrement est refusée ;</li>
+  <li><strong>rien n'est supprimé</strong> ;</li>
+  <li><strong>rien n'est masqué</strong> : tout ce que vous avez déjà reste visible ;</li>
+  <li>vos enregistrements existants restent <strong>modifiables</strong> ;</li>
+  <li>vous pouvez continuer à travailler normalement sur tout le reste.</li>
+</ul>
+
+<h2>Quand le compteur repart à zéro</h2>
+<p>Les compteurs mensuels sont remis à zéro le <strong>premier jour de chaque mois</strong>, dans
+le fuseau horaire de votre organisation. Un compteur mensuel ne reporte rien d'un mois sur
+l'autre, ni en votre faveur ni en votre défaveur.</p>
+
+<h2>Le palier {$gratuit} expire-t-il ?</h2>
+<p><strong>Non.</strong> Il n'a pas de date de fin. Un espace peut y demeurer indéfiniment.</p>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => "What the {$gratuit} tier includes",
+                            'summary' => 'The exact cap, what is included, what is not, and what happens when the cap is reached.',
+                            'content' => <<<HTML
+{$entete}
+<h2>The exact cap</h2>
+{$plafonds}
+<p>In short: <strong>{$resume}</strong>, with <strong>{$utils}</strong> user and
+<strong>{$stockage} MB</strong> of storage. The tier is free and has no end date.</p>
+<h2>When the cap is reached</h2>
+<p>Creating a new record is refused. <strong>Nothing is deleted, nothing is hidden</strong>, and
+existing records stay editable. Monthly counters reset on the first day of each month.</p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §3 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'votre-essai',
+                    'order'             => 3,
+                    'read_time_minutes' => 4,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => 'Votre essai',
+                            'summary' => "Durée, ce qui est ouvert, ce qui se passe à la fin, et dans quels cas une prolongation est possible.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Combien de temps ?</h2>
+<p><strong>{$essai} jours</strong>, à compter de l'ouverture de l'essai. Cette durée est la même
+pour tout le monde et pour toutes les formules.</p>
+
+<h2>Faut-il une carte bancaire ?</h2>
+<p><strong>Non.</strong> Aucune carte, aucun moyen de paiement, aucune empreinte bancaire. Aucun
+prélèvement n'est techniquement possible : rien n'est enregistré.</p>
+
+<h2>Qu'est-ce qui est ouvert pendant l'essai ?</h2>
+<ul>
+  <li>l'export de vos données (CSV, Excel, PDF) ;</li>
+  <li>le multi-utilisateur et les rôles ;</li>
+  <li>l'interface de programmation et les intégrations ;</li>
+  <li>l'assistant IA ;</li>
+  <li>les relances automatiques WhatsApp et SMS ;</li>
+  <li>aucun plafond, et <strong>aucun filigrane</strong> sur les documents produits.</li>
+</ul>
+
+<h2>Que se passe-t-il à la fin ?</h2>
+<p>À l'échéance, votre espace <strong>bascule automatiquement au palier {$gratuit}</strong>.
+C'est tout. En particulier :</p>
+<ul>
+  <li><strong>aucune donnée n'est supprimée</strong> ;</li>
+  <li><strong>rien n'est prélevé</strong> : l'essai ne se reconduit pas ;</li>
+  <li>votre espace reste ouvert et modifiable dans la limite du plafond : {$resume} ;</li>
+  <li>ce qui dépasse le plafond reste <strong>visible et consultable</strong>, en
+      <strong>lecture seule</strong> — ce n'est ni masqué, ni archivé, ni détruit ;</li>
+  <li>les fonctions avancées se ferment, et rouvrent intégralement dès qu'une formule est
+      activée.</li>
+</ul>
+<p>Vous recevez des messages avant l'échéance, puis un message le jour de la bascule qui décrit
+exactement l'état de votre espace.</p>
+
+<h2>Peut-on prolonger l'essai ?</h2>
+<p>Une prolongation de <strong>{$prolJ} jours</strong> peut être accordée, sous conditions
+strictes :</p>
+<ul>
+  <li>elle est accordée <strong>manuellement</strong> par notre équipe, jamais automatiquement ;</li>
+  <li><strong>une seule fois</strong> par espace ;</li>
+  <li>seulement pendant que l'essai est <strong>en cours</strong> ;</li>
+  <li>avec un <strong>motif</strong>, que nous consignons.</li>
+</ul>
+<p>Écrivez au support en expliquant votre situation. Une seconde prolongation n'est pas prévue.</p>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'Your trial',
+                            'summary' => 'Duration, what is unlocked, what happens at the end, and when an extension is possible.',
+                            'content' => <<<HTML
+{$entete}
+<h2>How long?</h2>
+<p><strong>{$essai} days</strong>, no credit card, <strong>no automatic renewal</strong>.</p>
+<h2>What happens at the end?</h2>
+<p>Your workspace switches automatically to the <strong>{$gratuit}</strong> tier.
+<strong>No data is deleted</strong> and nothing is charged. Records beyond the cap of
+{$resume} stay <strong>visible and read-only</strong> — never hidden, never destroyed.</p>
+<h2>Extension</h2>
+<p>An extension of <strong>{$prolJ} days</strong> may be granted manually, once per workspace,
+while the trial is still running, and with a stated reason.</p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §4 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'comprendre-l-etat-de-votre-espace',
+                    'order'             => 4,
+                    'read_time_minutes' => 5,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => "Comprendre l'état de votre espace",
+                            'summary' => 'Les six états possibles, expliqués simplement, et ce que chacun ouvre ou ferme.',
+                            'content' => <<<HTML
+{$entete}
+<h2>Votre espace est toujours dans un seul état</h2>
+<p>À tout instant, votre espace se trouve dans exactement un des six états ci-dessous. Le bandeau
+en haut de l'écran vous indique lequel, et ce qu'il implique. Cet état est
+<strong>calculé par nos serveurs</strong> : il ne dépend ni de votre navigateur, ni de l'horloge
+de votre ordinateur.</p>
+
+{$etats}
+
+<h2>Deux règles qui ne changent jamais</h2>
+<ul>
+  <li><strong>Aucun état ne supprime de données.</strong> Ni la fin d'un essai, ni la fin d'un
+      abonnement, ni le dépassement d'un plafond.</li>
+  <li><strong>Aucun état ne ferme la lecture.</strong> Même lorsque l'écriture est fermée, vos
+      données restent consultables et exportables sur demande.</li>
+</ul>
+
+<h2>Où voir l'état de votre espace</h2>
+<p>Dans le bandeau en haut de l'écran, et dans la page <em>Abonnement</em> de votre espace, qui
+indique en outre le nombre de jours restants, la date de fin et l'usage de vos compteurs.</p>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'Understanding your workspace state',
+                            'summary' => 'The six possible states, in plain language, and what each one opens or closes.',
+                            'content' => <<<HTML
+{$entete}
+<p>Your workspace is always in exactly one of six states, calculated by our servers.</p>
+{$etats}
+<p><strong>No state deletes data, and no state closes read access.</strong></p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §5 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'si-vous-ne-renouvelez-pas',
+                    'order'             => 5,
+                    'read_time_minutes' => 5,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => 'Si vous ne renouvelez pas',
+                            'summary' => "Période de grâce, lecture seule, conservation {$retention} jours : la chronologie exacte, étape par étape.",
+                            'content' => <<<HTML
+{$entete}
+<h2>La chronologie, étape par étape</h2>
+<p>Si un abonnement arrive à échéance sans être renouvelé, voici ce qui se passe — et rien
+d'autre.</p>
+<ol>
+  <li><strong>Jour de l'échéance — période de grâce de {$grace} jours.</strong> Votre accès reste
+      <strong>complet</strong> : écriture, export, multi-utilisateur, tout fonctionne comme avant.
+      Aucune fonction n'est fermée, aucun filigrane n'apparaît. Un paiement pendant cette période
+      rétablit l'abonnement sans aucune démarche.</li>
+  <li><strong>Fin de la période de grâce — lecture seule.</strong> L'écriture se ferme : vous ne
+      pouvez plus créer ni modifier. Mais <strong>tout reste visible</strong>, et vous pouvez
+      demander un export à tout moment. <strong>Rien n'est supprimé.</strong></li>
+  <li><strong>Conservation pendant {$retention} jours.</strong> À compter du passage en lecture
+      seule, vos données sont conservées <strong>{$retention} jours</strong>. La date exacte est
+      affichée dans votre espace.</li>
+  <li><strong>Deux avertissements.</strong> Avant toute suppression, nous vous envoyons
+      <strong>deux messages distincts</strong> à l'adresse de l'administrateur de l'espace, qui
+      indiquent la <strong>date exacte</strong> de suppression et comment l'éviter. Ces
+      avertissements s'affichent aussi dans l'espace lui-même.</li>
+  <li><strong>Suppression.</strong> À l'expiration du délai de conservation, et seulement alors,
+      les données sont supprimées de façon sécurisée.</li>
+</ol>
+
+<h2>Comment reprendre la main, à n'importe quel moment</h2>
+<ul>
+  <li><strong>Payer une formule</strong> : tout est rétabli immédiatement — l'écriture, les
+      fonctions avancées, et <strong>l'intégralité</strong> de vos données et de votre historique.
+      Rien n'est perdu du fait de l'interruption.</li>
+  <li><strong>Revenir au palier {$gratuit}</strong> : vous retrouvez le droit d'écrire dans la
+      limite du plafond ({$resume}), et la suppression est abandonnée.</li>
+  <li><strong>Demander un export</strong> : possible pendant toute cette période, y compris en
+      lecture seule. Voir le chapitre « Récupérer ou exporter vos données ».</li>
+</ul>
+
+<blockquote><strong>Ce que nous ne faisons jamais :</strong> supprimer des données sans
+avertissement préalable, fermer à la fois la lecture et l'écriture, ou prolonger automatiquement
+un abonnement que vous n'avez pas renouvelé.</blockquote>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'If you do not renew',
+                            'summary' => "Grace period, read-only, {$retention}-day retention: the exact timeline.",
+                            'content' => <<<HTML
+{$entete}
+<ol>
+  <li><strong>Grace period of {$grace} days</strong> — full access is maintained.</li>
+  <li><strong>Read-only</strong> — writing closes, everything stays visible, nothing is deleted.</li>
+  <li><strong>Retention for {$retention} days</strong> from the read-only switch.</li>
+  <li><strong>Two warnings</strong> before any deletion, stating the exact date.</li>
+  <li><strong>Secure deletion</strong> at the end of the retention period, and not before.</li>
+</ol>
+<p>Paying at any point restores everything, in full.</p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §6 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'retirer-le-filigrane',
+                    'order'             => 6,
+                    'read_time_minutes' => 3,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => 'Retirer le filigrane des documents',
+                            'summary' => "Pourquoi le filigrane apparaît, sur quels documents, et comment il disparaît.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Ce qu'est le filigrane</h2>
+<p>C'est la mention discrète apposée en pied des documents produits depuis un espace au palier
+{$gratuit}, depuis la démonstration publique, ou depuis un espace en lecture seule :</p>
+<blockquote>{$filigrane}</blockquote>
+
+<h2>Sur quels documents apparaît-il ?</h2>
+<p>Sur les documents produits par {$solution} : courriers, exports imprimables, documents PDF et
+pièces jointes engendrées par l'application. Il n'apparaît pas sur les fichiers que vous
+importez vous-même : ceux-là ne sont pas produits par le logiciel.</p>
+
+<h2>Comment le retirer</h2>
+<p><strong>Activez une formule payante.</strong> Le filigrane disparaît
+<strong>automatiquement dès le premier paiement</strong>, sans aucune démarche de votre part et
+sans réglage à modifier. Il est également absent pendant toute la durée d'un essai.</p>
+
+<h2>Les documents déjà produits</h2>
+<p>Un document produit avant le paiement conserve le filigrane qu'il portait au moment où il a été
+créé : le fichier existe déjà, nous ne le réécrivons pas. <strong>Il suffit de le régénérer depuis
+l'application</strong> après l'activation de la formule pour en obtenir une version sans
+filigrane.</p>
+
+<h2>Ce qu'il ne faut pas faire</h2>
+<p>Le filigrane ne doit pas être supprimé, masqué ou altéré par un moyen détourné : c'est
+interdit par les conditions générales d'utilisation. Et c'est inutile — une formule payante le
+retire proprement, sur tous les documents à venir.</p>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'Removing the watermark',
+                            'summary' => 'Why the watermark appears, on which documents, and how it goes away.',
+                            'content' => <<<HTML
+{$entete}
+<p>Documents produced from a {$gratuit} tier workspace, from the public demo or from a read-only
+workspace carry this line:</p>
+<blockquote>{$filigrane}</blockquote>
+<h2>How to remove it</h2>
+<p><strong>Activate a paid plan.</strong> The watermark disappears <strong>automatically from the
+first payment</strong>, with no action on your side. It is also absent throughout a trial.
+Documents produced earlier keep the watermark they were created with — simply regenerate them.</p>
+HTML,
+                        ],
+                    ],
+                ],
+
+                // ── 12.7 §7 ────────────────────────────────────────────────
+                [
+                    'slug'              => 'recuperer-ou-exporter-vos-donnees',
+                    'order'             => 7,
+                    'read_time_minutes' => 4,
+                    'translations' => [
+                        'fr' => [
+                            'title'   => 'Récupérer ou exporter vos données',
+                            'summary' => "Comment demander vos données, dans quels états c'est possible, et dans quel format.",
+                            'content' => <<<HTML
+{$entete}
+<h2>Vos données vous appartiennent</h2>
+<p>Nous n'acquérons aucun droit de propriété sur ce que vous saisissez. Vous pouvez en demander la
+restitution à tout moment.</p>
+
+<h2>Deux voies</h2>
+<h3>1. L'export depuis l'application</h3>
+<p>Disponible pendant un essai et avec une formule payante, depuis chaque module (CSV, Excel,
+PDF). C'est la voie la plus rapide. <strong>Elle est fermée au palier {$gratuit}</strong> : c'est
+l'une des fonctions que la formule payante ouvre.</p>
+
+<h3>2. La demande d'export à l'éditeur</h3>
+<p>Ouverte <strong>dans tous les états</strong>, y compris au palier {$gratuit}, pendant la période
+de grâce, en lecture seule et pendant tout le délai de conservation de {$retention} jours.
+<strong>La fermeture de l'écriture ne ferme jamais le droit à restitution.</strong></p>
+<ul>
+  <li><strong>Qui</strong> : l'administrateur de l'organisation.</li>
+  <li><strong>Comment</strong> : depuis votre espace, ou par écrit au support.</li>
+  <li><strong>Format</strong> : un format structuré et réexploitable, avec les pièces jointes et
+      les documents produits.</li>
+  <li><strong>Délai</strong> : l'archive est mise à disposition par un lien de téléchargement à
+      durée limitée.</li>
+  <li><strong>Coût</strong> : l'export de vos données à la fin du contrat n'est pas facturé.</li>
+</ul>
+
+<h2>Le filigrane sur les documents exportés</h2>
+<p>Les documents exportés depuis un espace au palier {$gratuit} ou en lecture seule portent le
+filigrane. Voir le chapitre « Retirer le filigrane des documents ».</p>
+
+<h2>Avant une suppression</h2>
+<p>Nous ne supprimons jamais de données sans vous avoir adressé <strong>deux avertissements</strong>
+indiquant la date exacte. Si vous recevez l'un de ces messages et souhaitez conserver vos données,
+demandez un export ou réactivez une formule : les deux fonctionnent jusqu'au dernier jour.</p>
+HTML,
+                        ],
+                        'en' => [
+                            'title'   => 'Retrieving or exporting your data',
+                            'summary' => 'How to request your data, in which states it is possible, and in what format.',
+                            'content' => <<<HTML
+{$entete}
+<h2>Two routes</h2>
+<p><strong>In-app export</strong> (CSV, Excel, PDF) during a trial and on paid plans; it is closed
+on the {$gratuit} tier.</p>
+<p><strong>Export on request</strong> — available in <strong>every state</strong>, including the
+{$gratuit} tier, the grace period, read-only and the whole {$retention}-day retention window.
+Closing writes never closes your right to your data. Structured, reusable format, not charged at
+the end of the contract.</p>
+HTML,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /** Liste à puces échappée — les libellés viennent de la configuration. */
+    private function puces(array $lignes): string
+    {
+        if ($lignes === []) {
+            return '';
+        }
+
+        $items = '';
+
+        foreach ($lignes as $ligne) {
+            $items .= '<li>' . e($ligne) . '</li>';
+        }
+
+        return "<ul>{$items}</ul>";
+    }
+
+    /**
+     * Description des formules, LUE dans la base et dans le moteur de licence.
+     *
+     * Les contenus d'origine decrivaient des formules « Starter / Professional
+     * / Enterprise » avec des limites d'utilisateurs et de stockage inventees.
+     * Aucune n'existe : la table `plans` porte Demarrage, Essentiel, Pro et
+     * Entreprise. Un prospect qui lisait le centre d'aide y trouvait une offre
+     * sans rapport avec celle de la page tarifs.
+     *
+     * On ne reecrit pas cette fiction avec une autre : le texte est produit a
+     * partir des formules reellement enregistrees et des reglages de
+     * licence.config.json. Il suit donc l'offre sans intervention.
+     */
+    private function contenuFormules(string $langue = 'fr'): string
+    {
+        $licence = app(\App\Services\LicenceService::class);
+        $formules = \Illuminate\Support\Facades\DB::table('plans')
+            ->where('is_active', true)->orderBy('price_xof')->get();
+
+        $gratuit = $licence->config()['gratuit'];
+
+        if ($langue === 'en') {
+            $html = '<h2>Plans</h2><p>The <b>' . e($gratuit['nom']) . '</b> plan is free for ever, capped at '
+                  . e($gratuit['resume']) . '.</p><ul>';
+            foreach ($formules as $f) {
+                $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, '.', ' ') . ' XOF/month</li>';
+            }
+
+            return $html . '</ul><p>A ' . $licence->essaiJours() . '-day trial is available on the Pro plan, no card required.</p>';
+        }
+
+        $html = '<h2>Nos formules</h2><p>Le palier <b>' . e($gratuit['nom']) . '</b> est gratuit sans limite de duree, '
+              . 'plafonne a ' . e($gratuit['resume']) . '.</p><ul>';
+
+        foreach ($formules as $f) {
+            $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, ',', ' ') . ' FCFA/mois</li>';
+        }
+
+        return $html . '</ul><p>Un essai de ' . $licence->essaiJours() . ' jours est disponible sur la formule Pro, '
+             . 'sans carte bancaire. A son terme, votre espace bascule dans le palier ' . e($gratuit['nom'])
+             . ' : vos donnees sont conservees.</p>';
     }
 }

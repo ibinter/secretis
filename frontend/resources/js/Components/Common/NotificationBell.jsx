@@ -143,7 +143,7 @@ export default function NotificationBell() {
         aria-label={count > 0 ? `${count} notification${count > 1 ? 's' : ''} non lue${count > 1 ? 's' : ''}` : 'Notifications'}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="relative p-2 rounded-xl text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E86C1]"
+        className="relative p-2 rounded-xl text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7e22ce]"
       >
         <Bell size={18} />
         {count > 0 && (
@@ -174,7 +174,7 @@ export default function NotificationBell() {
                   onClick={() => mutMarkAll.mutate()}
                   disabled={mutMarkAll.isLoading}
                   title="Tout marquer comme lu"
-                  className="flex items-center gap-1 px-2 py-1 text-[10px] text-[#2E86C1] hover:bg-[#2E86C1]/10 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1 px-2 py-1 text-[10px] text-[#7e22ce] hover:bg-[#7e22ce]/10 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <CheckCheck size={11} />
                   Tout lu
@@ -183,7 +183,7 @@ export default function NotificationBell() {
               <Link
                 href="/notifications"
                 onClick={() => setOpen(false)}
-                className="text-[10px] text-[#2E86C1] hover:underline font-medium"
+                className="text-[10px] text-[#7e22ce] hover:underline font-medium"
               >
                 Voir toutes →
               </Link>
@@ -247,7 +247,7 @@ function DropdownItem({ notif, onMarkRead, onClose }) {
       className={[
         'flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors group',
         'hover:bg-gray-50 dark:hover:bg-white/[0.03]',
-        !isRead ? 'bg-[#2E86C1]/[0.04]' : '',
+        !isRead ? 'bg-[#7e22ce]/[0.04]' : '',
       ].join(' ')}
       onClick={handleClick}
       role="button"
@@ -256,7 +256,7 @@ function DropdownItem({ notif, onMarkRead, onClose }) {
     >
       {/* Point non lu */}
       {!isRead && (
-        <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#2E86C1]" />
+        <span className="mt-2 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[#7e22ce]" />
       )}
       {isRead && <span className="mt-2 flex-shrink-0 w-1.5 h-1.5" />}
 
@@ -283,7 +283,7 @@ function DropdownItem({ notif, onMarkRead, onClose }) {
         <button
           onClick={e => { e.stopPropagation(); onMarkRead() }}
           title="Marquer comme lu"
-          className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded-lg text-gray-300 hover:text-[#2E86C1] hover:bg-[#2E86C1]/10 transition-all"
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded-lg text-gray-300 hover:text-[#7e22ce] hover:bg-[#7e22ce]/10 transition-all"
         >
           <Check size={12} />
         </button>
@@ -291,3 +291,4 @@ function DropdownItem({ notif, onMarkRead, onClose }) {
     </div>
   )
 }
+export { NotificationBell };

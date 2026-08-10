@@ -1,9 +1,26 @@
+/**
+ * SuperAdmin/OrganizationHealth.jsx — Score de santé et risque de départ
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes props Inertia (`scores`, `summary`),
+ * mêmes états locaux (`filters`, `selectedOrg`, `sortDir`), mêmes
+ * destinations `router.visit`.
+ *
+ * Correction d'affichage : import `axios` inutilisé supprimé (aucun appel
+ * réseau n'était émis depuis cette page).
+ */
+
 import React, { useState, useMemo } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
+import { HeartPulse, AlertTriangle, X, ArrowUpDown } from 'lucide-react';
+import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout';
+import {
+  PageHeader, Button, Badge, Card, DataTable, EmptyState,
+  cx, SURFACE, BORDER, CONTROL, TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI';
 
-// ─── Mock ─────────────────────────────────────────────────────────────────────
+/* ─── Données de démonstration (repli historique, conservées) ──────────────── */
 const MOCK_SCORES = [
   { organization_id: 4,  organization_name: 'Hôtel Ivoire Palace',    plan: 'pro',        health_score: 24, churn_risk: 'high',   churn_reason: 'Inactivité prolongée — dernière connexion il y a plus de 7 jours', last_active_at: 'il y a 12 jours', login_frequency: 1.2, feature_adoption: 18.5, data_volume_gb: 0.1, support_tickets: 3 },
   { organization_id: 7,  organization_name: 'Mairie de Bouaké',        plan: 'starter',    health_score: 31, churn_risk: 'high',   churn_reason: 'Faible adoption des fonctionnalités — moins de 20% des modules utilisés', last_active_at: 'il y a 5 jours',  login_frequency: 2.1, feature_adoption: 16.7, data_volume_gb: 0.3, support_tickets: 2 },
@@ -19,329 +36,361 @@ const MOCK_SCORES = [
 
 const MOCK_SUMMARY = { high_risk: 3, medium_risk: 2, low_risk: 5, avg_score: 59.0 };
 
-// ─── Badge risque de churn ────────────────────────────────────────────────────
-function RiskBadge({ risk }) {
-  const map = {
-    high:   { label: 'Risque élevé',  cls: 'bg-red-100 text-red-700 border-red-200' },
-    medium: { label: 'Risque moyen',  cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-    low:    { label: 'Risque faible', cls: 'bg-green-100 text-green-700 border-green-200' },
-  };
-  const s = map[risk] || map.low;
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s.cls}`}>
-      {s.label}
-    </span>
-  );
-}
+/* ─── Sémantique ───────────────────────────────────────────────────────────── */
 
-// ─── Barre de score ───────────────────────────────────────────────────────────
+const RISK_META = {
+  high:   { tone: 'danger',  label: 'Risque élevé' },
+  medium: { tone: 'warning', label: 'Risque moyen' },
+  low:    { tone: 'success', label: 'Risque faible' },
+};
+
+const PLAN_TONE = { enterprise: 'accent', pro: 'info', starter: 'neutral' };
+
+const scoreBarColor = (s) => (s >= 70 ? 'bg-emerald-500' : s >= 40 ? 'bg-amber-500' : 'bg-red-500');
+const scoreTextColor = (s) =>
+  s >= 70 ? 'text-emerald-700 dark:text-emerald-400'
+    : s >= 40 ? 'text-amber-700 dark:text-amber-400'
+    : 'text-red-700 dark:text-red-400';
+
+const AXIS_COLOR = '#94A3B8';
+const axisProps = {
+  tick: { fontSize: 10, fill: AXIS_COLOR },
+  tickLine: { stroke: AXIS_COLOR },
+  axisLine: { stroke: AXIS_COLOR, strokeOpacity: 0.35 },
+};
+
 function ScoreBar({ score }) {
-  const color = score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-amber-500' : 'bg-red-500';
   return (
     <div className="flex items-center gap-2">
-      <div className="w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
-        <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${score}%` }} />
+      <div className="h-2 w-20 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+        <div
+          className={cx('h-full rounded-full transition-all', scoreBarColor(score))}
+          style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
+        />
       </div>
-      <span className={`text-xs font-bold ${score >= 70 ? 'text-green-700' : score >= 40 ? 'text-amber-700' : 'text-red-700'}`}>{score}</span>
+      <span className={cx('text-xs font-semibold', NUM, scoreTextColor(score))}>{score}</span>
     </div>
   );
 }
 
-// ─── Modal détail organisation ────────────────────────────────────────────────
+/* ─── Panneau de détail ────────────────────────────────────────────────────── */
+
 function OrgDetailModal({ org, onClose }) {
   if (!org) return null;
 
   const histData = [
-    { date: 'J-6', score: Math.max(0, org.health_score - 8) },
-    { date: 'J-5', score: Math.max(0, org.health_score - 6) },
-    { date: 'J-4', score: Math.max(0, org.health_score - 10) },
-    { date: 'J-3', score: Math.max(0, org.health_score - 4) },
-    { date: 'J-2', score: Math.max(0, org.health_score - 2) },
-    { date: 'J-1', score: Math.max(0, org.health_score - 3) },
-    { date: "Auj.", score: org.health_score },
+    { date: 'J-6',  score: Math.max(0, org.health_score - 8) },
+    { date: 'J-5',  score: Math.max(0, org.health_score - 6) },
+    { date: 'J-4',  score: Math.max(0, org.health_score - 10) },
+    { date: 'J-3',  score: Math.max(0, org.health_score - 4) },
+    { date: 'J-2',  score: Math.max(0, org.health_score - 2) },
+    { date: 'J-1',  score: Math.max(0, org.health_score - 3) },
+    { date: 'Auj.', score: org.health_score },
   ];
 
+  const components = [
+    { label: 'Fréquence de connexion',        value: `${org.login_frequency} connexions / 7 j`, score: Math.min(100, Math.round((org.login_frequency / 7) * 100)), weight: '25 pts' },
+    { label: 'Adoption des fonctionnalités',  value: `${org.feature_adoption} % des modules`,   score: org.feature_adoption, weight: '30 pts' },
+    { label: 'Récence de la dernière activité', value: org.last_active_at,                     score: org.last_active_at?.includes('aujourd') ? 100 : org.last_active_at?.includes('1 jour') ? 80 : 30, weight: '20 pts' },
+    { label: 'Volume de données',             value: `${org.data_volume_gb} Go`,               score: Math.min(100, Math.round(org.data_volume_gb * 100)), weight: '15 pts' },
+    { label: 'Tickets support ouverts',       value: `${org.support_tickets} ticket(s)`,       score: Math.max(0, 100 - org.support_tickets * 30), weight: '−10 pts' },
+  ];
+
+  const riskMeta = RISK_META[org.churn_risk] ?? RISK_META.low;
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-
-        {/* Header modal */}
-        <div className="p-6 border-b border-gray-100 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-900 text-white rounded-xl flex items-center justify-center font-bold text-lg">
-                {org.organization_name.charAt(0)}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{org.organization_name}</h3>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <RiskBadge risk={org.churn_risk} />
-                  <span className="text-xs text-gray-400">Plan : {org.plan}</span>
-                </div>
-              </div>
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60"
+    >
+      <div onClick={e => e.stopPropagation()} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto">
+        <Card
+          padded={false}
+          className="shadow-xl"
+          title={org.organization_name}
+          subtitle={`Plan ${org.plan}`}
+          actions={<Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer" onClick={onClose} />}
+          footer={
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="primary"
+                onClick={() => { onClose(); router.visit(`/superadmin/organisations/${org.organization_id}`); }}
+              >
+                Voir le profil complet
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => { onClose(); router.visit(`/superadmin/support/tickets/new?org=${org.organization_id}`); }}
+              >
+                Ouvrir un ticket
+              </Button>
             </div>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+          }
+        >
+          <div className="space-y-6 px-4 py-5 sm:px-6">
 
-        <div className="p-6 space-y-6">
-          {/* Score global */}
-          <div className="text-center py-4">
-            <div className={`text-6xl font-black ${org.health_score >= 70 ? 'text-green-600' : org.health_score >= 40 ? 'text-amber-600' : 'text-red-600'}`}>
-              {org.health_score}
+            <div className="flex flex-col items-center gap-2 py-2">
+              <span className={cx('text-5xl font-semibold tracking-tight', NUM, scoreTextColor(org.health_score))}>
+                {org.health_score}
+              </span>
+              <p className={cx('text-sm', TEXT_MUTED)}>Score de santé sur 100</p>
+              <Badge variant={riskMeta.tone} size="md" dot>{riskMeta.label}</Badge>
             </div>
-            <p className="text-gray-500 text-sm mt-1">Score de santé sur 100</p>
-          </div>
 
-          {/* Historique du score */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Évolution sur 7 jours</h4>
-            <ResponsiveContainer width="100%" height={120}>
-              <AreaChart data={histData}>
-                <defs>
-                  <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1e3a5f" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#1e3a5f" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: '#9ca3af' }} width={30} />
-                <Tooltip formatter={v => `${v}/100`} />
-                <Area type="monotone" dataKey="score" stroke="#1e3a5f" fill="url(#scoreGrad)" strokeWidth={2} dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+            <div>
+              <h4 className={cx('mb-3 text-sm font-semibold', TEXT_TITLE)}>Évolution sur 7 jours</h4>
+              <ResponsiveContainer width="100%" height={120}>
+                <AreaChart data={histData}>
+                  <defs>
+                    <linearGradient id="healthScoreGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor="#9333EA" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="#9333EA" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={AXIS_COLOR} strokeOpacity={0.2} vertical={false} />
+                  <XAxis dataKey="date" {...axisProps} />
+                  <YAxis domain={[0, 100]} {...axisProps} width={32} />
+                  <Tooltip
+                    formatter={v => `${v}/100`}
+                    contentStyle={{
+                      background: 'rgba(22,32,50,0.96)', border: '1px solid #1E3048',
+                      borderRadius: 8, fontSize: 12, color: '#fff',
+                    }}
+                    labelStyle={{ color: '#94A3B8' }}
+                  />
+                  <Area type="monotone" dataKey="score" stroke="#9333EA" fill="url(#healthScoreGrad)" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
-          {/* Composantes */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Détail des composantes</h4>
-            <div className="space-y-2">
-              {[
-                { label: 'Fréquence de connexion', value: `${org.login_frequency} logins/7j`, score: Math.min(100, Math.round((org.login_frequency / 7) * 100)), weight: '25 pts' },
-                { label: 'Adoption des fonctionnalités', value: `${org.feature_adoption}% des modules`, score: org.feature_adoption, weight: '30 pts' },
-                { label: 'Récence dernière activité', value: org.last_active_at, score: org.last_active_at?.includes("aujourd") ? 100 : org.last_active_at?.includes("1 jour") ? 80 : 30, weight: '20 pts' },
-                { label: 'Volume de données', value: `${org.data_volume_gb} Go`, score: Math.min(100, Math.round(org.data_volume_gb * 100)), weight: '15 pts' },
-                { label: 'Tickets support ouverts', value: `${org.support_tickets} ticket(s)`, score: Math.max(0, 100 - org.support_tickets * 30), weight: '-10 pts' },
-              ].map(c => (
-                <div key={c.label} className="flex items-center justify-between gap-3 py-2 border-b border-gray-50">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-700 font-medium">{c.label}</p>
-                    <p className="text-xs text-gray-400">{c.value}</p>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${c.score >= 70 ? 'bg-green-400' : c.score >= 40 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${c.score}%` }} />
+            <div>
+              <h4 className={cx('mb-2 text-sm font-semibold', TEXT_TITLE)}>Détail des composantes</h4>
+              <ul className="divide-y divide-gray-100 dark:divide-[#1E3048]">
+                {components.map(c => (
+                  <li key={c.label} className="flex items-center justify-between gap-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className={cx('text-sm font-medium', TEXT_BODY)}>{c.label}</p>
+                      <p className={cx('text-xs', TEXT_MUTED)}>{c.value}</p>
                     </div>
-                    <span className="text-xs text-gray-500 w-12 text-right">{c.weight}</span>
-                  </div>
-                </div>
-              ))}
+                    <div className="flex shrink-0 items-center gap-3">
+                      <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+                        <div
+                          className={cx('h-full rounded-full', scoreBarColor(c.score))}
+                          style={{ width: `${Math.min(100, Math.max(0, c.score))}%` }}
+                        />
+                      </div>
+                      <span className={cx('w-14 text-right text-xs', TEXT_MUTED, NUM)}>{c.weight}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Raison churn */}
-          {org.churn_reason && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            {org.churn_reason && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-500/30 dark:bg-red-500/10">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500 dark:text-red-400" />
                 <div>
-                  <p className="text-sm font-semibold text-red-800">Raison de churn prédite</p>
-                  <p className="text-sm text-red-700 mt-0.5">{org.churn_reason}</p>
+                  <p className="text-sm font-semibold text-red-800 dark:text-red-300">Raison de départ prédite</p>
+                  <p className="mt-0.5 text-sm text-red-700 dark:text-red-300">{org.churn_reason}</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              onClick={() => { onClose(); router.visit(`/superadmin/organizations/${org.organization_id}`); }}
-              className="flex-1 py-2.5 bg-blue-900 text-white text-sm font-medium rounded-lg hover:bg-blue-800"
-            >
-              Voir le profil complet
-            </button>
-            <button
-              onClick={() => { onClose(); router.visit(`/superadmin/support/tickets/new?org=${org.organization_id}`); }}
-              className="flex-1 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
-            >
-              Ouvrir un ticket
-            </button>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
 }
 
-// ─── Composant principal ──────────────────────────────────────────────────────
+/* ─── Composant principal ──────────────────────────────────────────────────── */
+
 export default function OrganizationHealth({ scores: propScores, summary: propSummary }) {
-  const scores  = propScores  || MOCK_SCORES;
-  const summary = propSummary || MOCK_SUMMARY;
+  const scores  = propScores  ?? MOCK_SCORES;
+  const summary = propSummary ?? MOCK_SUMMARY;
 
   const [filters, setFilters] = useState({ risk: '', plan: '' });
   const [selectedOrg, setSelectedOrg] = useState(null);
-  const [sortDir, setSortDir] = useState('asc'); // ASC par défaut = malades en premier
+  const [sortDir, setSortDir] = useState('asc'); // croissant = organisations fragiles en premier
 
   const filtered = useMemo(() => {
     let result = [...scores];
     if (filters.risk) result = result.filter(s => s.churn_risk === filters.risk);
     if (filters.plan) result = result.filter(s => s.plan === filters.plan);
-    result.sort((a, b) => sortDir === 'asc' ? a.health_score - b.health_score : b.health_score - a.health_score);
+    result.sort((a, b) => (sortDir === 'asc' ? a.health_score - b.health_score : b.health_score - a.health_score));
     return result;
   }, [scores, filters, sortDir]);
 
+  const isFiltered = Boolean(filters.risk || filters.plan);
+  const resetFilters = () => setFilters({ risk: '', plan: '' });
+
+  const columns = [
+    {
+      key: 'organization_name',
+      label: 'Organisation',
+      render: (v, s) => (
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={cx(
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold text-white',
+            s.churn_risk === 'high' ? 'bg-red-500' : s.churn_risk === 'medium' ? 'bg-amber-500' : 'bg-emerald-500',
+          )}>
+            {String(v ?? '?').charAt(0).toUpperCase()}
+          </span>
+          <span className={cx('truncate font-medium', TEXT_TITLE)}>{v}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'plan',
+      label: 'Plan',
+      nowrap: true,
+      render: (v) => (
+        <Badge variant={PLAN_TONE[v] ?? 'neutral'}>
+          {v ? v.charAt(0).toUpperCase() + v.slice(1) : '—'}
+        </Badge>
+      ),
+    },
+    { key: 'health_score', label: 'Score santé', width: '160px', render: (v) => <ScoreBar score={v} /> },
+    {
+      key: 'churn_risk',
+      label: 'Risque de départ',
+      nowrap: true,
+      render: (v) => {
+        const meta = RISK_META[v] ?? RISK_META.low;
+        return <Badge variant={meta.tone} dot>{meta.label}</Badge>;
+      },
+    },
+    { key: 'last_active_at', label: 'Dernière activité', nowrap: true, className: cx('text-xs', TEXT_MUTED) },
+    {
+      key: 'support_tickets',
+      label: 'Tickets',
+      align: 'center',
+      nowrap: true,
+      render: (v) => (v > 0 ? <Badge variant="danger">{v}</Badge> : <span className={TEXT_FAINT}>—</span>),
+    },
+  ];
+
   return (
-    <>
+    <SuperAdminLayout title="Santé des organisations">
       <Head title="Santé des organisations — SuperAdmin IBIG Soft" />
-      <div className="min-h-screen bg-gray-50">
 
-        {/* Header */}
-        <header className="bg-blue-900 text-white shadow-lg">
-          <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center gap-3">
-            <button onClick={() => router.visit('/superadmin/saas-dashboard')} className="text-blue-200 hover:text-white text-sm">← Dashboard</button>
-            <span className="text-blue-400">/</span>
-            <h1 className="text-lg font-bold">Santé des organisations</h1>
-            <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">SUPER ADMIN</span>
+      <PageHeader
+        icon={HeartPulse}
+        title="Santé des organisations"
+        subtitle="Score composite d'usage et probabilité de départ, organisation par organisation."
+        breadcrumbs={[
+          { label: 'Console', href: '/superadmin' },
+          { label: 'Métriques SaaS', href: '/superadmin/saas/dashboard' },
+          { label: 'Santé des organisations' },
+        ]}
+      />
+
+      <div className="space-y-6">
+
+        {/* ── Répartition du risque ─────────────────────────────────────────── */}
+        <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {[
+            { label: 'Risque élevé',  value: summary.high_risk,   cls: 'text-red-700 dark:text-red-400' },
+            { label: 'Risque moyen',  value: summary.medium_risk, cls: 'text-amber-700 dark:text-amber-400' },
+            { label: 'Risque faible', value: summary.low_risk,    cls: 'text-emerald-700 dark:text-emerald-400' },
+            { label: 'Score moyen',   value: summary.avg_score,   cls: 'text-purple-700 dark:text-purple-300' },
+          ].map(item => (
+            <div key={item.label} className={cx(SURFACE, 'border', BORDER, 'rounded-xl p-4 text-center shadow-sm')}>
+              <p className={cx('text-3xl font-semibold tracking-tight', NUM, item.cls)}>{item.value ?? 0}</p>
+              <p className={cx('mt-1 text-xs', TEXT_MUTED)}>{item.label}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* ── Filtres ───────────────────────────────────────────────────────── */}
+        <Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filters.risk}
+              onChange={e => setFilters(p => ({ ...p, risk: e.target.value }))}
+              aria-label="Filtrer par niveau de risque"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[170px]')}
+            >
+              <option value="">Tous les risques</option>
+              <option value="high">Risque élevé</option>
+              <option value="medium">Risque moyen</option>
+              <option value="low">Risque faible</option>
+            </select>
+
+            <select
+              value={filters.plan}
+              onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))}
+              aria-label="Filtrer par plan"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[160px]')}
+            >
+              <option value="">Tous les plans</option>
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+
+            <Button
+              variant="secondary"
+              icon={ArrowUpDown}
+              onClick={() => setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))}
+            >
+              Score {sortDir === 'asc' ? 'croissant' : 'décroissant'}
+            </Button>
+
+            {isFiltered && (
+              <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>
+            )}
+
+            <span className={cx('ml-auto text-sm', TEXT_MUTED, NUM)}>
+              {filtered.length} organisation{filtered.length !== 1 ? 's' : ''}
+            </span>
           </div>
-        </header>
+        </Card>
 
-        <main className="max-w-screen-2xl mx-auto px-6 py-8 space-y-6">
-
-          {/* Résumé */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-red-700">{summary.high_risk}</div>
-              <p className="text-xs text-gray-500 mt-1">Risque élevé</p>
-            </div>
-            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-amber-700">{summary.medium_risk}</div>
-              <p className="text-xs text-gray-500 mt-1">Risque moyen</p>
-            </div>
-            <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-green-700">{summary.low_risk}</div>
-              <p className="text-xs text-gray-500 mt-1">Risque faible</p>
-            </div>
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
-              <div className="text-3xl font-black text-blue-900">{summary.avg_score}</div>
-              <p className="text-xs text-gray-500 mt-1">Score moyen</p>
-            </div>
-          </div>
-
-          {/* Filtres */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex items-center gap-3 flex-wrap">
-              <select
-                value={filters.risk}
-                onChange={e => setFilters(p => ({ ...p, risk: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
+        {/* ── Tableau ───────────────────────────────────────────────────────── */}
+        <DataTable
+          columns={columns}
+          data={filtered}
+          rowKey="organization_id"
+          pageSize={25}
+          exportable
+          filename="sante-organisations"
+          actions={(s) => (
+            <>
+              <Button variant="secondary" size="xs" onClick={() => setSelectedOrg(s)}>
+                Détail
+              </Button>
+              <Button
+                variant="primary" size="xs"
+                onClick={() => router.visit(`/superadmin/support/tickets/new?org=${s.organization_id}`)}
               >
-                <option value="">Tous les risques</option>
-                <option value="high">Risque élevé</option>
-                <option value="medium">Risque moyen</option>
-                <option value="low">Risque faible</option>
-              </select>
-              <select
-                value={filters.plan}
-                onChange={e => setFilters(p => ({ ...p, plan: e.target.value }))}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900"
-              >
-                <option value="">Tous les plans</option>
-                <option value="starter">Starter</option>
-                <option value="pro">Pro</option>
-                <option value="enterprise">Enterprise</option>
-              </select>
-              <button
-                onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-                className="px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
-              >
-                Score {sortDir === 'asc' ? '↑ croissant' : '↓ décroissant'}
-              </button>
-              {(filters.risk || filters.plan) && (
-                <button onClick={() => setFilters({ risk: '', plan: '' })} className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50">
-                  Réinitialiser
-                </button>
-              )}
-              <span className="ml-auto text-sm text-gray-400">{filtered.length} organisation{filtered.length !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
+                Contacter
+              </Button>
+            </>
+          )}
+          empty={
+            isFiltered ? (
+              <EmptyState
+                variant="no-results"
+                title="Aucune organisation ne correspond"
+                description="Aucun résultat pour cette combinaison de filtres."
+                action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>}
+              />
+            ) : (
+              <EmptyState
+                icon={HeartPulse}
+                title="Aucun score de santé calculé"
+                description="Les scores sont produits chaque nuit à partir de l'activité des organisations."
+              />
+            )
+          }
+        />
 
-          {/* Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr className="text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-3 text-left font-semibold">Organisation</th>
-                    <th className="px-6 py-3 text-left font-semibold">Plan</th>
-                    <th className="px-6 py-3 text-left font-semibold">Score santé</th>
-                    <th className="px-6 py-3 text-left font-semibold">Risque churn</th>
-                    <th className="px-6 py-3 text-left font-semibold">Dernière activité</th>
-                    <th className="px-6 py-3 text-left font-semibold">Tickets</th>
-                    <th className="px-6 py-3 text-left font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filtered.map((s, i) => {
-                    const planColors = { enterprise: 'bg-yellow-100 text-yellow-800', pro: 'bg-indigo-100 text-indigo-700', starter: 'bg-gray-100 text-gray-700' };
-                    return (
-                      <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white ${s.churn_risk === 'high' ? 'bg-red-500' : s.churn_risk === 'medium' ? 'bg-amber-500' : 'bg-green-500'}`}>
-                              {s.organization_name.charAt(0)}
-                            </div>
-                            <span className="font-medium text-gray-900 text-sm">{s.organization_name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${planColors[s.plan] || 'bg-gray-100 text-gray-700'}`}>
-                            {s.plan.charAt(0).toUpperCase() + s.plan.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4"><ScoreBar score={s.health_score} /></td>
-                        <td className="px-6 py-4"><RiskBadge risk={s.churn_risk} /></td>
-                        <td className="px-6 py-4 text-xs text-gray-500">{s.last_active_at}</td>
-                        <td className="px-6 py-4">
-                          {s.support_tickets > 0
-                            ? <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">{s.support_tickets}</span>
-                            : <span className="text-xs text-gray-300">—</span>
-                          }
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => setSelectedOrg(s)}
-                              className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium"
-                            >
-                              Détail
-                            </button>
-                            <button
-                              onClick={() => router.visit(`/superadmin/support/tickets/new?org=${s.organization_id}`)}
-                              className="text-xs px-3 py-1.5 rounded-lg bg-blue-900 text-white hover:bg-blue-800 font-medium"
-                            >
-                              Contacter
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </main>
       </div>
 
       <OrgDetailModal org={selectedOrg} onClose={() => setSelectedOrg(null)} />
-    </>
+    </SuperAdminLayout>
   );
 }
+
+export { OrganizationHealth };

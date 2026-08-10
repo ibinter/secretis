@@ -137,6 +137,102 @@ class QualityController extends Controller
         ]);
     }
 
+    /**
+     * GET /qualite/non-conformites/create — Formulaire de création (Inertia).
+     */
+    public function ncCreate(): InertiaResponse
+    {
+        $orgId = Auth::user()->organization_id;
+
+        $users = \App\Models\User::where('organization_id', $orgId)
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
+        $processes = QualityProcess::where('organization_id', $orgId)
+            ->select('id', 'code', 'name')
+            ->orderBy('code')
+            ->get();
+
+        return Inertia::render('Qualite/NonconformityForm', [
+            'nonconformity' => null,
+            'users'         => $users,
+            'processes'     => $processes,
+        ]);
+    }
+
+    /**
+     * GET /qualite/non-conformites/export — Export CSV des non-conformités (filtres identiques à ncIndex).
+     */
+    public function ncExport(Request $request): \Symfony\Component\HttpFoundation\Response
+    {
+        $orgId = Auth::user()->organization_id;
+
+        $query = Nonconformity::where('organization_id', $orgId)
+            ->with(['detectedByUser:id,name', 'process:id,code,name'])
+            ->orderByDesc('detected_at');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('severity')) {
+            $query->where('severity', $request->severity);
+        }
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+        if ($request->filled('process_id')) {
+            $query->where('process_id', $request->process_id);
+        }
+        if ($request->filled('date_from')) {
+            $query->where('detected_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('detected_at', '<=', $request->date_to);
+        }
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(fn($q) => $q
+                ->where('reference', 'ilike', "%{$s}%")
+                ->orWhere('title', 'ilike', "%{$s}%"));
+        }
+
+        $columns = ['Référence', 'Titre', 'Source', 'Gravité', 'Statut', 'Processus', 'Détectée par', 'Détectée le', 'Échéance', 'Clôturée le', 'Coût'];
+
+        $handle = fopen('php://temp', 'r+');
+        fputs($handle, "\xEF\xBB\xBF"); // BOM UTF-8 (Excel)
+        fputcsv($handle, $columns, ';');
+
+        $query->chunk(500, function ($rows) use ($handle) {
+            foreach ($rows as $nc) {
+                fputcsv($handle, [
+                    $nc->reference,
+                    $nc->title,
+                    $nc->source,
+                    $nc->severity,
+                    $nc->status,
+                    $nc->process?->code ? "{$nc->process->code} — {$nc->process->name}" : '',
+                    $nc->detectedByUser?->name ?? '',
+                    $nc->detected_at ? Carbon::parse($nc->detected_at)->format('d/m/Y') : '',
+                    $nc->due_date ? Carbon::parse($nc->due_date)->format('d/m/Y') : '',
+                    $nc->closed_at ? Carbon::parse($nc->closed_at)->format('d/m/Y') : '',
+                    $nc->cost_of_nonconformity !== null ? number_format((float) $nc->cost_of_nonconformity, 0, ',', ' ') : '',
+                ], ';');
+            }
+        });
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $filename = 'non-conformites-' . now()->format('Y-m-d') . '.csv';
+
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
     public function ncShow(int $id): InertiaResponse
     {
         $orgId = Auth::user()->organization_id;
@@ -190,7 +286,7 @@ class QualityController extends Controller
 
         $this->audit->log('created', 'qualite', 'nonconformity', $nc->id, [], $nc->toArray());
 
-        return redirect()->route('qualite.nc.show', $nc->id)
+        return redirect()->route('qualite.non-conformites.show', $nc->id)
             ->with('success', "Non-conformité {$nc->reference} créée avec succès.");
     }
 
@@ -293,7 +389,7 @@ class QualityController extends Controller
         $this->audit->log('deleted', 'qualite', 'nonconformity', $nc->id, $nc->toArray(), []);
         $nc->delete();
 
-        return redirect()->route('qualite.nc.index')->with('success', 'Non-conformité supprimée.');
+        return redirect()->route('qualite.non-conformites')->with('success', 'Non-conformité supprimée.');
     }
 
     // =========================================================================
@@ -766,5 +862,33 @@ class QualityController extends Controller
             'point_positif' => 'positive',
             default         => 'obs',
         };
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+
+    // ── Alias routes (noms attendus par web.php) ──────────────────────────────
+    public function nonconformities(Request $request) { return $this->ncIndex($request); }
+    public function indicators(Request $request)      { return $this->indicatorsIndex($request); }
+    public function audits(Request $request)           { return $this->auditsIndex($request); }
+    public function documents(Request $request)        { return $this->documentsIndex($request); }
+    public function complaints(Request $request)       { return $this->complaintsIndex($request); }
+    public function processMap()                        { return $this->processesIndex(); }
+
+    // ── Alias routes API (noms attendus par api.php, cibles JSON uniquement) ───
+    public function closeNc(Request $request, $id)        { return $this->ncVerify($request, (int) $id); }
+    public function storeIndicator(Request $request)      { return $this->indicatorStore($request); }
+    public function updateAudit(Request $request, $id)    { return $this->auditUpdate($request, (int) $id); }
+    public function storeComplaint(Request $request)      { return $this->complaintStore($request); }
+    public function closeComplaint(Request $request, $id) { return $this->complaintClose($request, (int) $id); }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

@@ -43,6 +43,7 @@ class User extends Authenticatable
         'password',
         'status',
         'avatar',
+        'locale',
         'preferences',
         'failed_login_attempts',
         'locked_until',
@@ -207,5 +208,10 @@ class User extends Authenticatable
         static::saving(function (self $user) {
             $user->email = strtolower(trim($user->email));
         });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

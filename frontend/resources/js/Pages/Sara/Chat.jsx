@@ -26,7 +26,7 @@ const PROVIDER_COLORS = {
   groq: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   openai: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   anthropic: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  faq: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  faq: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
 };
 
 // ─── Sous-composants ───────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ function MessageBubble({ msg, onFeedback, conversationId }) {
         <div
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
-              ? 'bg-[#1A3A5C] text-white rounded-tr-sm'
+              ? 'bg-[#9333EA] text-white rounded-tr-sm'
               : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-tl-sm shadow-sm'
           }`}
         >
@@ -114,7 +114,7 @@ function MessageBubble({ msg, onFeedback, conversationId }) {
         )}
       </div>
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-[#2E86C1] flex items-center justify-center text-white text-xs font-bold ml-2 flex-shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-[#7e22ce] flex items-center justify-center text-white text-xs font-bold ml-2 flex-shrink-0 mt-1">
           M
         </div>
       )}
@@ -128,7 +128,7 @@ function ConversationItem({ conv, isActive, onClick, onDelete }) {
       onClick={onClick}
       className={`group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
         isActive
-          ? 'bg-[#1A3A5C] text-white'
+          ? 'bg-[#9333EA] text-white'
           : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
       }`}
     >
@@ -295,7 +295,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
             </div>
             <button
               onClick={newConversation}
-              className="w-full flex items-center justify-center gap-2 bg-[#1A3A5C] hover:bg-[#2E86C1] text-white rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-[#9333EA] hover:bg-[#7e22ce] text-white rounded-lg px-3 py-2 text-sm font-medium transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -341,7 +341,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
             </div>
             <a
               href="/aide"
-              className="text-xs text-[#2E86C1] hover:underline"
+              className="text-xs text-[#7e22ce] hover:underline"
             >
               Centre d'aide →
             </a>
@@ -364,7 +364,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
                       key={i}
                       onClick={() => sendMessage(q)}
                       className="text-left px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                                 rounded-xl text-xs text-gray-700 dark:text-gray-300 hover:border-[#2E86C1] hover:text-[#2E86C1]
+                                 rounded-xl text-xs text-gray-700 dark:text-gray-300 hover:border-[#7e22ce] hover:text-[#7e22ce]
                                  transition-colors shadow-sm"
                     >
                       {q}
@@ -391,7 +391,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
                       <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
                         <ReactMarkdown>{streamText}</ReactMarkdown>
                       </div>
-                      <span className="inline-block w-0.5 h-4 bg-[#2E86C1] animate-pulse ml-0.5 align-middle" />
+                      <span className="inline-block w-0.5 h-4 bg-[#7e22ce] animate-pulse ml-0.5 align-middle" />
                     </div>
                   </div>
                 )}
@@ -411,7 +411,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
                   <div className="ml-10 mb-4">
                     <p className="text-xs text-gray-500 mb-1">Articles connexes :</p>
                     {faqSuggestions.map((s, i) => (
-                      <div key={i} className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-lg mb-1 border border-blue-200 dark:border-blue-800">
+                      <div key={i} className="text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-lg mb-1 border border-purple-200 dark:border-purple-800">
                         📖 {s.answer.slice(0, 80)}…
                       </div>
                     ))}
@@ -426,7 +426,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
           {/* Input zone */}
           <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-end gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 focus-within:border-[#2E86C1] transition-colors">
+              <div className="flex items-end gap-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 focus-within:border-[#7e22ce] transition-colors">
                 <textarea
                   ref={textareaRef}
                   value={input}
@@ -445,7 +445,7 @@ export default function SaraChat({ conversations: initialConversations = [], qui
                   <button
                     onClick={() => sendMessage()}
                     disabled={!input.trim() || sending}
-                    className="w-8 h-8 rounded-xl bg-[#1A3A5C] hover:bg-[#2E86C1] text-white flex items-center justify-center
+                    className="w-8 h-8 rounded-xl bg-[#9333EA] hover:bg-[#7e22ce] text-white flex items-center justify-center
                                transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -464,3 +464,4 @@ export default function SaraChat({ conversations: initialConversations = [], qui
     </AppLayout>
   );
 }
+export { SaraChat };

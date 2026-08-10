@@ -42,8 +42,8 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
       </div>
 
       {/* Preview */}
-      <div className="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-xl p-6 text-center">
-        <p className="text-xs text-blue-400 uppercase tracking-widest font-semibold mb-2">Aperçu du numéro</p>
+      <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 rounded-xl p-6 text-center">
+        <p className="text-xs text-purple-400 uppercase tracking-widest font-semibold mb-2">Aperçu du numéro</p>
         <p className="text-3xl font-black text-white font-mono tracking-wider">{preview}</p>
         <p className="text-slate-400 text-xs mt-2">Le numéro s'incrémente automatiquement</p>
       </div>
@@ -60,7 +60,7 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
             value={prefix}
             onChange={e => setPrefix(e.target.value.toUpperCase())}
             placeholder="CORR"
-            className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-lg tracking-wider"
+            className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-lg tracking-wider"
           />
         </div>
         <div>
@@ -71,7 +71,7 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
             value={type}
             onChange={e => setType(e.target.value.toUpperCase())}
             placeholder="ENT"
-            className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono text-lg tracking-wider"
+            className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 font-mono text-lg tracking-wider"
           />
         </div>
       </div>
@@ -87,7 +87,7 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
               key={s} type="button"
               onClick={() => setSep(s)}
               className={`w-12 h-12 rounded-lg border font-mono text-lg font-bold transition-all
-                ${separator === s ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}
+                ${separator === s ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}
             >
               {s}
             </button>
@@ -104,7 +104,7 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
               key={f} type="button"
               onClick={() => setYearFmt(f)}
               className={`px-4 py-2 rounded-lg border font-mono text-sm font-bold transition-all
-                ${yearFmt === f ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}
+                ${yearFmt === f ? 'bg-purple-600 border-purple-500 text-white' : 'bg-white/5 border-white/20 text-slate-400 hover:border-white/40'}`}
             >
               {f}
             </button>
@@ -116,7 +116,7 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
         <button
           type="submit"
           disabled={saving}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+          className="flex-1 bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
         >
           {saving ? '⏳ Enregistrement...' : 'Confirmer le préfixe →'}
         </button>
@@ -129,3 +129,4 @@ export default function SetPrefix({ step, onComplete, onSkip, saving }) {
     </form>
   );
 }
+export { SetPrefix };

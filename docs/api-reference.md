@@ -232,6 +232,25 @@ GET /api/v1/personnel/employees?fields[employees]=id,full_name,email,department
 
 ## 6. Endpoints par module
 
+### Module Licence, états et quotas — documenté à part
+
+Les endpoints de licence (section 9.4 du cahier IBIG SOFT v1.1) ne sont **pas**
+sous `/api/v1` et n'emploient **pas** les codes `SEC-0xx` de la section 7
+ci-dessous : ils sont appelés aussi par des instances on-premise, pour qui un
+changement de préfixe ou de convention d'erreur est invisible.
+
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/api/licence/etat` | État, droits, quotas et bannière officielle |
+| POST | `/api/licence/verifier` | Vérification d'une clé — publique, on-premise |
+| POST | `/api/licence/essai` | Démarrage d'un essai |
+| POST | `/api/licence/activer` | Activation par clé ou référence de paiement |
+| GET | `/api/quotas/{compteur}` | Consommation d'un compteur métier |
+| POST | `/api/paiement/callback` | Webhook passerelle (HMAC) → passage en ACTIVE |
+
+➡️ **Documentation complète : [`docs/API-LICENCE.md`](API-LICENCE.md)** —
+paramètres, réponses, codes d'erreur, comportement on-premise et sécurité.
+
 ### Module Authentification & Compte
 
 | Méthode | Route | Description | Auth | Plan min. |

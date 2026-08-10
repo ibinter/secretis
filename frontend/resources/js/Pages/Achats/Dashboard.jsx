@@ -30,7 +30,7 @@ const STATUS_LABELS = {
 
 const STATUS_COLORS = {
     brouillon: 'bg-gray-100 text-gray-700',
-    approuve: 'bg-blue-100 text-blue-700',
+    approuve: 'bg-purple-100 text-purple-700',
     envoye: 'bg-indigo-100 text-indigo-700',
     accuse: 'bg-yellow-100 text-yellow-800',
     livre_partiel: 'bg-orange-100 text-orange-800',
@@ -47,7 +47,7 @@ const fmt = (n) =>
 
 function KpiCard({ icon, label, value, sub, color = 'blue' }) {
     const colors = {
-        blue:   'bg-blue-50 text-blue-600 border-blue-200',
+        blue:   'bg-purple-50 text-purple-600 border-purple-200',
         green:  'bg-green-50 text-green-600 border-green-200',
         purple: 'bg-purple-50 text-purple-600 border-purple-200',
         amber:  'bg-amber-50 text-amber-600 border-amber-200',
@@ -106,13 +106,13 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                     </div>
                     <div className="flex gap-2">
                         <a
-                            href="/procurement/purchase-requests"
-                            className="btn btn-sm bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                            href="/achats/demandes"
+                            className="btn btn-sm bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition"
                         >
                             + Nouvelle DA
                         </a>
                         <a
-                            href="/procurement/rfqs"
+                            href="/achats/appels-offres"
                             className="btn btn-sm bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
                         >
                             + Nouvel AO
@@ -236,8 +236,8 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                                         return (
                                             <tr key={po.id} className="border-b border-gray-100 hover:bg-red-50/30">
                                                 <td className="py-2 px-3">
-                                                    <a href={`/procurement/purchase-orders/${po.id}`}
-                                                       className="text-blue-600 hover:underline font-mono font-medium">
+                                                    <a href="/achats/commandes"
+                                                       className="text-purple-600 hover:underline font-mono font-medium">
                                                         {po.po_number}
                                                     </a>
                                                 </td>
@@ -286,8 +286,8 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-baseline mb-1">
                                             <a
-                                                href={`/procurement/suppliers/${s.id}`}
-                                                className="text-sm font-medium text-gray-800 hover:text-blue-600 truncate"
+                                                href={`/achats/fournisseurs/${s.id}/scorecard`}
+                                                className="text-sm font-medium text-gray-800 hover:text-purple-600 truncate"
                                             >
                                                 {s.company_name}
                                             </a>
@@ -323,3 +323,4 @@ export default function Dashboard({ kpis, by_category, monthly, late_pos, top_su
         </AuthenticatedLayout>
     );
 }
+export { Dashboard };

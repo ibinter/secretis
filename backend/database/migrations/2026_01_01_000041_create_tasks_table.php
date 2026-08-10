@@ -8,37 +8,44 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('tasks', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('project_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('parent_task_id')->nullable()->constrained('tasks')->cascadeOnDelete();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->enum('status', ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'])->default('todo');
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
-            $table->integer('position')->default(0);
-            $table->integer('estimated_hours')->nullable();
-            $table->integer('logged_hours')->default(0);
-            $table->timestamp('starts_at')->nullable();
-            $table->timestamp('due_date')->nullable();
-            $table->timestamp('completed_at')->nullable();
-            $table->json('labels')->nullable();
-            $table->json('attachments')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+        if (! Schema::hasTable('tasks')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('tasks', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('project_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignId('parent_task_id')->nullable()->constrained('tasks')->cascadeOnDelete();
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->enum('status', ['backlog', 'todo', 'in_progress', 'review', 'done', 'cancelled'])->default('todo');
+                $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+                $table->integer('position')->default(0);
+                $table->integer('estimated_hours')->nullable();
+                $table->integer('logged_hours')->default(0);
+                $table->timestamp('starts_at')->nullable();
+                $table->timestamp('due_date')->nullable();
+                $table->timestamp('completed_at')->nullable();
+                $table->json('labels')->nullable();
+                $table->json('attachments')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
 
-            $table->index('organization_id');
-            $table->index('project_id');
-            $table->index('assigned_to');
-            $table->index('parent_task_id');
-            $table->index('status');
-            $table->index('priority');
-            $table->index('due_date');
-            $table->index('position');
-        });
+                $table->index('organization_id');
+                $table->index('project_id');
+                $table->index('assigned_to');
+                $table->index('parent_task_id');
+                $table->index('status');
+                $table->index('priority');
+                $table->index('due_date');
+                $table->index('position');
+            });
+        }
     }
 
     public function down(): void

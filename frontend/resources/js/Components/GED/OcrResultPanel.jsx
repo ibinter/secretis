@@ -76,7 +76,7 @@ export default function OcrResultPanel({
             {/* ── En-tête ── */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                    <DocumentTextIcon className="w-5 h-5 text-blue-500" />
+                    <DocumentTextIcon className="w-5 h-5 text-purple-500" />
                     <span className="font-semibold text-gray-800 text-sm">Contenu OCR</span>
                     <OcrStatusBadge status={ocrStatus} />
                 </div>
@@ -122,7 +122,7 @@ export default function OcrResultPanel({
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 py-2 text-xs font-medium transition-colors border-b-2
                                 ${activeTab === tab.id
-                                    ? 'border-blue-500 text-blue-600'
+                                    ? 'border-purple-500 text-purple-600'
                                     : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                         >
                             {tab.label}
@@ -145,8 +145,8 @@ export default function OcrResultPanel({
                         {onTriggerOcr && (
                             <button
                                 onClick={onTriggerOcr}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm
-                                           font-medium hover:bg-blue-700 transition-colors"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm
+                                           font-medium hover:bg-purple-700 transition-colors"
                             >
                                 <ArrowPathIcon className="w-4 h-4" />
                                 Lancer l'OCR
@@ -158,7 +158,7 @@ export default function OcrResultPanel({
                 {/* STATUT : pending / processing */}
                 {(ocrStatus === 'pending' || ocrStatus === 'processing') && (
                     <div className="flex flex-col items-center justify-center h-full gap-4 p-6 text-center">
-                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                        <div className="w-12 h-12 border-4 border-purple-200 border-t-blue-600 rounded-full animate-spin" />
                         <p className="text-gray-600 text-sm font-medium">
                             {ocrStatus === 'pending' ? 'En attente de traitement...' : 'Extraction du texte en cours...'}
                         </p>
@@ -204,7 +204,7 @@ export default function OcrResultPanel({
                                     onChange={e => setLocalSearch(e.target.value)}
                                     placeholder="Rechercher dans le texte..."
                                     className="w-full pl-7 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg
-                                               focus:border-blue-400 focus:ring-1 focus:ring-blue-100 outline-none"
+                                               focus:border-purple-400 focus:ring-1 focus:ring-purple-100 outline-none"
                                 />
                                 {effectiveSearch && (
                                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">
@@ -224,7 +224,7 @@ export default function OcrResultPanel({
                                     <button
                                         onClick={handleCopy}
                                         disabled={!textContent}
-                                        className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+                                        className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-purple-600 transition-colors"
                                     >
                                         {copied
                                             ? <><CheckIcon className="w-3.5 h-3.5 text-green-500" /> Copié</>
@@ -266,7 +266,7 @@ export default function OcrResultPanel({
                     <button
                         onClick={onTriggerOcr}
                         className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 text-xs text-gray-400
-                                   hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                   hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                     >
                         <ArrowPathIcon className="w-3.5 h-3.5" />
                         Relancer l'extraction
@@ -283,7 +283,7 @@ function OcrStatusBadge({ status }) {
     const config = {
         none:       { label: 'Non traité',   color: 'bg-gray-100 text-gray-500' },
         pending:    { label: 'En attente',   color: 'bg-yellow-100 text-yellow-700' },
-        processing: { label: 'En cours...',  color: 'bg-blue-100 text-blue-700' },
+        processing: { label: 'En cours...',  color: 'bg-purple-100 text-purple-700' },
         done:       { label: 'Extrait',      color: 'bg-green-100 text-green-700' },
         failed:     { label: 'Échec',        color: 'bg-red-100 text-red-700' },
     }[status] ?? { label: status, color: 'bg-gray-100 text-gray-500' };
@@ -291,7 +291,7 @@ function OcrStatusBadge({ status }) {
     return (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
             {status === 'processing' && (
-                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-1" />
+                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse mr-1" />
             )}
             {config.label}
         </span>
@@ -349,3 +349,4 @@ function StructuredDataView({ data }) {
         </div>
     );
 }
+export { OcrResultPanel };

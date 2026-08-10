@@ -107,13 +107,14 @@ class SmartNotificationListener
                 user:    $user,
                 type:    'message',
                 title:   "Nouveau message de {$message->user->name}",
-                body:    mb_substr($message->content, 0, 100) . (strlen($message->content) > 100 ? '…' : ''),
+                // Colonne réelle : `body` (pas `content`), et elle peut être nulle (message supprimé / pièce jointe seule).
+                body:    mb_substr((string) $message->body, 0, 100) . (mb_strlen((string) $message->body) > 100 ? '…' : ''),
                 data:    [
                     'action_url'      => "/messages/{$conversation->id}",
                     'conversation_id' => $conversation->id,
                     'sender_name'     => $message->user->name,
                 ],
-                context: ['mentions_user' => str_contains($message->content, "@{$user->name}")],
+                context: ['mentions_user' => str_contains((string) $message->body, "@{$user->name}")],
             );
         }
     }
@@ -294,11 +295,12 @@ class SmartNotificationListener
             'pending'  => 'en attente de validation',
         ];
 
+        $leaveStatusLabel = $statusLabels[$leave->status] ?? $leave->status;
         $this->dispatchWithSmartFilter(
             user:    $user,
             type:    'leave_status_changed',
-            title:   "Demande de congé {$statusLabels[$leave->status] ?? $leave->status}",
-            body:    "Votre demande du {$leave->start_date->format('d/m/Y')} au {$leave->end_date->format('d/m/Y')} a été {$statusLabels[$leave->status] ?? $leave->status}.",
+            title:   "Demande de congé {$leaveStatusLabel}",
+            body:    "Votre demande du {$leave->start_date->format('d/m/Y')} au {$leave->end_date->format('d/m/Y')} a été {$leaveStatusLabel}.",
             data:    [
                 'action_url' => '/rh/conges',
                 'leave_id'   => $leave->id,
@@ -389,25 +391,38 @@ class SmartNotificationListener
             'reason'  => $shouldSend ? 'Score suffisant' : 'Score insuffisant / filtré',
         ]);
 
-        if (!$shouldSend) {
-            return;
-        }
-
         // Déterminer la priorité et le canal optimal
         $priority = in_array($type, ['visitor_arrived', 'mail_urgent', 'task_overdue']) ? 'urgent' : 'normal';
         $channel  = $this->smartNotifService->getOptimalChannel($user, $priority);
 
-        // Envoyer via NotificationService
+        // La notification in-app est TOUJOURS enregistrée : la cloche est un
+        // journal consultable, pas une interruption. Le filtre intelligent ne
+        // gouverne que les canaux intrusifs (email, SMS, WhatsApp, push).
+        // Sans cette distinction, une tâche assignée le soir ou à un employé
+        // qui ne s'est pas connecté depuis 24 h disparaissait sans trace :
+        // `task_assigned` (priorité 65) est sous les seuils d'heure de silence
+        // (85) et d'inactivité (70).
         $this->notificationService->send(
-            user:  $user,
-            type:  $type,
-            title: $title,
-            body:  $body,
-            data:  array_merge($data, ['smart_channel' => $channel]),
+            user:   $user,
+            type:   $type,
+            title:  $title,
+            body:   $body,
+            data:   array_merge($data, ['smart_channel' => $shouldSend ? $channel : 'app']),
+            silent: !$shouldSend,
         );
 
-        // WhatsApp si canal urgent
-        if (in_array($channel, ['whatsapp', 'whatsapp_push']) && $user->phone) {
+        if (!$shouldSend) {
+            return;
+        }
+
+        // WhatsApp si canal urgent — et si l'état de licence l'ouvre. L'API
+        // WhatsApp Business est un coût variable fermé au palier Découverte
+        // (cahier section 3.4) : sans ce garde-fou, chaque espace gratuit
+        // devient une charge mensuelle. La notification in-app, elle, a déjà
+        // été enregistrée juste au-dessus : rien n'est perdu.
+        $licenceOuvreWhatsApp = app(\App\Services\LicenceGarde::class)->autorise('whatsapp', $user);
+
+        if ($licenceOuvreWhatsApp && in_array($channel, ['whatsapp', 'whatsapp_push']) && $user->phone) {
             $this->notificationService->sendWhatsApp(
                 phone:   $user->phone,
                 message: "{$title}\n{$body}",

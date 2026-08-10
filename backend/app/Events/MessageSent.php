@@ -46,10 +46,10 @@ class MessageSent implements ShouldBroadcast
         public readonly string       $eventType    = 'message.sent',
     ) {
         // Charger les relations nécessaires pour le broadcast payload
+        // Colonnes réelles : user_id/body ; `attachments` est une colonne JSON (pas une relation).
         $this->message->loadMissing([
             'sender:id,name,avatar',
-            'attachments',
-            'replyTo:id,content,sender_id',
+            'replyTo:id,body,user_id',
             'replyTo.sender:id,name',
         ]);
     }
@@ -105,17 +105,17 @@ class MessageSent implements ShouldBroadcast
             'message' => [
                 'id'              => $this->message->id,
                 'conversation_id' => $this->message->conversation_id,
-                'content'         => $this->eventType === 'message.deleted' ? null : $this->message->content,
+                'content'         => $this->eventType === 'message.deleted' ? null : $this->message->body,
                 'type'            => $this->message->type,
                 'is_deleted'      => $this->message->deleted_at !== null,
                 'sender'          => [
-                    'id'     => $this->message->sender_id,
+                    'id'     => $this->message->user_id,
                     'name'   => $this->message->sender?->name,
                     'avatar' => $this->message->sender?->avatar,
                 ],
                 'reply_to'    => $this->message->replyTo ? [
                     'id'          => $this->message->replyTo->id,
-                    'content'     => $this->message->replyTo->content,
+                    'content'     => $this->message->replyTo->body,
                     'sender_name' => $this->message->replyTo->sender?->name,
                 ] : null,
                 'attachments' => $this->message->attachments ?? [],

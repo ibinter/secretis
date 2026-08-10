@@ -3,8 +3,8 @@
 namespace App\Services\Integrations;
 
 use App\Models\Contact;
-use App\Models\CrmActivity;
-use App\Models\CrmDeal;
+use App\Models\Crm\CrmActivity;
+use App\Models\Crm\CrmDeal;
 use App\Models\Organization;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;

@@ -283,7 +283,7 @@ class MetricsController extends Controller
             ->get()
             ->sum(fn ($l) => $l->billing_cycle === 'yearly' ? $l->price / 12 : $l->price);
 
-        $nrr = (($mrrEnd - $churnedMrr) / $mrrStart) * 100;
+        $nrr = $mrrStart > 0 ? (($mrrEnd - $churnedMrr) / $mrrStart) * 100 : 100.0;
 
         return round($nrr, 1);
     }

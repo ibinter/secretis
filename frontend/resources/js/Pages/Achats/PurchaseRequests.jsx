@@ -23,7 +23,7 @@ const PRIORITY_LABEL = {
 
 const STATUS_BADGE = {
     brouillon: 'bg-gray-100 text-gray-600',
-    soumis:    'bg-blue-100 text-blue-700',
+    soumis:    'bg-purple-100 text-purple-700',
     approuve:  'bg-green-100 text-green-700',
     refuse:    'bg-red-100 text-red-700',
     annule:    'bg-slate-100 text-slate-600',
@@ -41,15 +41,15 @@ function StatusStepper({ currentStatus }) {
             {STATUS_STEPS.map((step, i) => (
                 <React.Fragment key={step.key}>
                     <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition ${
-                        i < idx  ? 'bg-blue-100 text-blue-700' :
-                        i === idx ? 'bg-blue-600 text-white' :
+                        i < idx  ? 'bg-purple-100 text-purple-700' :
+                        i === idx ? 'bg-purple-600 text-white' :
                                     'bg-gray-100 text-gray-400'
                     }`}>
                         <span>{step.icon}</span>
                         <span className="hidden sm:inline">{step.label}</span>
                     </div>
                     {i < STATUS_STEPS.length - 1 && (
-                        <div className={`h-0.5 w-4 ${i < idx ? 'bg-blue-300' : 'bg-gray-200'}`} />
+                        <div className={`h-0.5 w-4 ${i < idx ? 'bg-purple-300' : 'bg-gray-200'}`} />
                     )}
                 </React.Fragment>
             ))}
@@ -149,7 +149,7 @@ function CreatePrModal({ onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/purchase-requests', { onSuccess: () => onClose() });
+        post('/achats/demandes', { onSuccess: () => onClose() });
     };
 
     return (
@@ -169,7 +169,7 @@ function CreatePrModal({ onClose }) {
                                 type="text"
                                 value={data.title}
                                 onChange={e => setData('title', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                 required
                             />
                             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
@@ -179,7 +179,7 @@ function CreatePrModal({ onClose }) {
                             <select
                                 value={data.priority}
                                 onChange={e => setData('priority', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             >
                                 <option value="normale">Normale</option>
                                 <option value="urgente">Urgente</option>
@@ -196,7 +196,7 @@ function CreatePrModal({ onClose }) {
                                 type="date"
                                 value={data.needed_by_date}
                                 onChange={e => setData('needed_by_date', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
                         <div>
@@ -205,7 +205,7 @@ function CreatePrModal({ onClose }) {
                                 type="text"
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             />
                         </div>
                     </div>
@@ -217,7 +217,7 @@ function CreatePrModal({ onClose }) {
                             <button
                                 type="button"
                                 onClick={addItem}
-                                className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                                className="text-purple-600 text-sm font-medium hover:text-purple-800"
                             >
                                 + Ajouter une ligne
                             </button>
@@ -257,7 +257,7 @@ function CreatePrModal({ onClose }) {
                             value={data.justification}
                             onChange={e => setData('justification', e.target.value)}
                             rows={3}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                             placeholder="Expliquez pourquoi cette dépense est nécessaire…"
                         />
                     </div>
@@ -274,7 +274,7 @@ function CreatePrModal({ onClose }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                            className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
                         >
                             {processing ? 'Enregistrement…' : 'Créer la DA'}
                         </button>
@@ -295,11 +295,11 @@ function ApproveModal({ pr, onClose }) {
     const submit = () => {
         setLoading(true);
         if (action === 'approve') {
-            router.post(`/procurement/purchase-requests/${pr.id}/approve`, {}, {
+            router.post(`/achats/demandes/${pr.id}/approuver`, {}, {
                 onFinish: () => { setLoading(false); onClose(); },
             });
         } else {
-            router.post(`/procurement/purchase-requests/${pr.id}/refuse`, { reason }, {
+            router.post(`/achats/demandes/${pr.id}/refuser`, { reason }, {
                 onFinish: () => { setLoading(false); onClose(); },
             });
         }
@@ -382,7 +382,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
     const [search, setSearch] = useState(filters?.search ?? '');
 
     const applyFilter = (key, val) => {
-        router.get('/procurement/purchase-requests', { ...filters, [key]: val || undefined }, {
+        router.get('/achats/demandes', { ...filters, [key]: val || undefined }, {
             preserveState: true, replace: true,
         });
     };
@@ -405,7 +405,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                     </div>
                     <button
                         onClick={() => setShowCreate(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
                     >
                         + Nouvelle DA
                     </button>
@@ -419,12 +419,12 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && applyFilter('search', search)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64 focus:ring-2 focus:ring-purple-500 outline-none"
                     />
                     <select
                         value={filters?.status ?? ''}
                         onChange={e => applyFilter('status', e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                     >
                         <option value="">Tous les statuts</option>
                         <option value="brouillon">Brouillon</option>
@@ -436,7 +436,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                     <select
                         value={filters?.priority ?? ''}
                         onChange={e => applyFilter('priority', e.target.value)}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                     >
                         <option value="">Toutes les priorités</option>
                         <option value="normale">Normale</option>
@@ -453,7 +453,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                             <p>Aucune demande d'achat trouvée.</p>
                             <button
                                 onClick={() => setShowCreate(true)}
-                                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+                                className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium"
                             >
                                 Créer la première DA
                             </button>
@@ -474,8 +474,8 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                             </thead>
                             <tbody>
                                 {items.map(pr => (
-                                    <tr key={pr.id} className="border-b border-gray-100 hover:bg-blue-50/30">
-                                        <td className="py-3 px-4 font-mono font-medium text-blue-600">
+                                    <tr key={pr.id} className="border-b border-gray-100 hover:bg-purple-50/30">
+                                        <td className="py-3 px-4 font-mono font-medium text-purple-600">
                                             {pr.pr_number}
                                         </td>
                                         <td className="py-3 px-4">
@@ -507,8 +507,8 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                                             <div className="flex gap-2 justify-center">
                                                 {pr.status === 'brouillon' && (
                                                     <button
-                                                        onClick={() => router.post(`/procurement/purchase-requests/${pr.id}/submit`)}
-                                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                                        onClick={() => router.post(`/achats/demandes/${pr.id}/soumettre`)}
+                                                        className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
                                                     >
                                                         Soumettre
                                                     </button>
@@ -523,7 +523,7 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                                                 )}
                                                 {pr.status === 'approuve' && (
                                                     <a
-                                                        href={`/procurement/rfqs/create?pr_id=${pr.id}`}
+                                                        href={`/achats/appels-offres?pr_id=${pr.id}`}
                                                         className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
                                                     >
                                                         → AO
@@ -544,10 +544,10 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
                         {Array.from({ length: purchase_requests.last_page }, (_, i) => i + 1).map(page => (
                             <button
                                 key={page}
-                                onClick={() => router.get('/procurement/purchase-requests', { ...filters, page })}
+                                onClick={() => router.get('/achats/demandes', { ...filters, page })}
                                 className={`w-8 h-8 rounded text-sm ${
                                     page === purchase_requests.current_page
-                                        ? 'bg-blue-600 text-white'
+                                        ? 'bg-purple-600 text-white'
                                         : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
                                 }`}
                             >
@@ -565,3 +565,4 @@ export default function PurchaseRequests({ purchase_requests, filters }) {
         </AuthenticatedLayout>
     );
 }
+export { PurchaseRequests };

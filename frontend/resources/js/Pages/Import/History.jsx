@@ -31,7 +31,7 @@ import {
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const MODULE_CONFIG = {
-    events:     { label: 'Agenda',        icon: CalendarDaysIcon,         color: 'text-blue-500',   bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    events:     { label: 'Agenda',        icon: CalendarDaysIcon,         color: 'text-purple-500',   bg: 'bg-purple-50 dark:bg-purple-900/20' },
     tasks:      { label: 'Tâches',        icon: ClipboardDocumentListIcon, color: 'text-emerald-500',bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
     visitors:   { label: 'Visiteurs',     icon: UsersIcon,                 color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20' },
     hr:         { label: 'RH',            icon: IdentificationIcon,         color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
@@ -41,9 +41,9 @@ const MODULE_CONFIG = {
 
 const STATUS_CONFIG = {
     pending:    { label: 'En attente',   color: 'text-gray-500',   bg: 'bg-gray-100 dark:bg-gray-700' },
-    mapping:    { label: 'Mappage',      color: 'text-blue-500',   bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    mapping:    { label: 'Mappage',      color: 'text-purple-500',   bg: 'bg-purple-100 dark:bg-purple-900/30' },
     validating: { label: 'Validation',   color: 'text-amber-600',  bg: 'bg-amber-100 dark:bg-amber-900/30' },
-    importing:  { label: 'En cours',     color: 'text-blue-600',   bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    importing:  { label: 'En cours',     color: 'text-purple-600',   bg: 'bg-purple-100 dark:bg-purple-900/30' },
     completed:  { label: 'Terminé',      color: 'text-green-600',  bg: 'bg-green-100 dark:bg-green-900/30' },
     failed:     { label: 'Échec',        color: 'text-red-600',    bg: 'bg-red-100 dark:bg-red-900/30' },
 };
@@ -149,7 +149,7 @@ export default function ImportHistory({ jobs = {}, modules = {} }) {
                     </div>
                     <Link
                         href="/import"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#7e22ce] hover:bg-[#2574a9] text-white text-sm font-semibold transition-colors shadow-sm"
                     >
                         <PlusIcon className="w-4 h-4" />
                         Nouvel import
@@ -166,7 +166,7 @@ export default function ImportHistory({ jobs = {}, modules = {} }) {
                     <select
                         value={filterModule}
                         onChange={e => setFilterModule(e.target.value)}
-                        className="text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                        className="text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                     >
                         <option value="">Tous les modules</option>
                         {Object.entries(modules).map(([key, mod]) => (
@@ -177,7 +177,7 @@ export default function ImportHistory({ jobs = {}, modules = {} }) {
                     <select
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2E86C1]"
+                        className="text-sm border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#7e22ce]"
                     >
                         <option value="">Tous les statuts</option>
                         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
@@ -281,7 +281,7 @@ export default function ImportHistory({ jobs = {}, modules = {} }) {
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                         className={`px-3 py-1 text-xs rounded-lg transition-colors ${
                                             link.active
-                                                ? 'bg-[#2E86C1] text-white'
+                                                ? 'bg-[#7e22ce] text-white'
                                                 : link.url
                                                 ? 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
                                                 : 'text-gray-200 dark:text-gray-600 cursor-default'
@@ -296,3 +296,4 @@ export default function ImportHistory({ jobs = {}, modules = {} }) {
         </AppLayout>
     );
 }
+export { ImportHistory };

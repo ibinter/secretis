@@ -17,7 +17,7 @@ const CATEGORY_LABELS = {
 };
 
 const CATEGORY_COLORS = {
-    materiel: 'bg-blue-50 text-blue-700', services: 'bg-purple-50 text-purple-700',
+    materiel: 'bg-purple-50 text-purple-700', services: 'bg-purple-50 text-purple-700',
     consommables: 'bg-teal-50 text-teal-700', travaux: 'bg-amber-50 text-amber-700',
     it: 'bg-indigo-50 text-indigo-700', autre: 'bg-gray-50 text-gray-600',
 };
@@ -58,7 +58,7 @@ function CreateSupplierModal({ onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post('/procurement/suppliers', { onSuccess: () => onClose() });
+        post('/achats/fournisseurs', { onSuccess: () => onClose() });
     };
 
     return (
@@ -73,7 +73,7 @@ function CreateSupplierModal({ onClose }) {
                 <div className="flex border-b border-gray-200 px-6 pt-4">
                     {tabs.map(t => (
                         <button key={t.id} onClick={() => setTab(t.id)}
-                            className={`mr-4 pb-2 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                            className={`mr-4 pb-2 text-sm font-medium border-b-2 transition ${tab === t.id ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                             {t.label}
                         </button>
                     ))}
@@ -86,18 +86,18 @@ function CreateSupplierModal({ onClose }) {
                                 <div className="col-span-2">
                                     <label className="text-sm font-medium text-gray-700">Raison sociale *</label>
                                     <input type="text" value={data.company_name} onChange={e => setData('company_name', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" required />
                                     {errors.company_name && <p className="text-red-500 text-xs mt-1">{errors.company_name}</p>}
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Forme juridique</label>
                                     <input type="text" placeholder="SARL, SA, GIE…" value={data.legal_form} onChange={e => setData('legal_form', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Catégorie *</label>
                                     <select value={data.category} onChange={e => setData('category', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                                         {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
                                             <option key={k} value={k}>{v}</option>
                                         ))}
@@ -106,42 +106,42 @@ function CreateSupplierModal({ onClose }) {
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Pays</label>
                                     <input type="text" value={data.country} onChange={e => setData('country', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Ville</label>
                                     <input type="text" value={data.city} onChange={e => setData('city', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div className="col-span-2">
                                     <label className="text-sm font-medium text-gray-700">Adresse</label>
                                     <input type="text" value={data.address} onChange={e => setData('address', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Contact principal</label>
                                     <input type="text" value={data.contact_name} onChange={e => setData('contact_name', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Email</label>
                                     <input type="email" value={data.email} onChange={e => setData('email', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">Téléphone</label>
                                     <input type="text" value={data.phone} onChange={e => setData('phone', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">NIF</label>
                                     <input type="text" value={data.tax_number} onChange={e => setData('tax_number', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">RCCM</label>
                                     <input type="text" value={data.rccm} onChange={e => setData('rccm', e.target.value)}
-                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                                 </div>
                             </div>
                         </>
@@ -152,17 +152,17 @@ function CreateSupplierModal({ onClose }) {
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Banque</label>
                                 <input type="text" value={data.bank_name} onChange={e => setData('bank_name', e.target.value)}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700">SWIFT / BIC</label>
                                 <input type="text" value={data.bank_swift} onChange={e => setData('bank_swift', e.target.value)}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                             </div>
                             <div className="col-span-2">
                                 <label className="text-sm font-medium text-gray-700">IBAN / Numéro de compte</label>
                                 <input type="text" value={data.bank_iban} onChange={e => setData('bank_iban', e.target.value)}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-purple-500 outline-none" />
                             </div>
                         </div>
                     )}
@@ -172,21 +172,21 @@ function CreateSupplierModal({ onClose }) {
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Délai de paiement (jours)</label>
                                 <select value={data.payment_terms_days} onChange={e => setData('payment_terms_days', parseInt(e.target.value))}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                                     {[30, 45, 60, 90].map(d => <option key={d} value={d}>{d} jours</option>)}
                                 </select>
                             </div>
                             <div>
                                 <label className="text-sm font-medium text-gray-700">Devise</label>
                                 <select value={data.currency_code} onChange={e => setData('currency_code', e.target.value)}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
                                     {['XOF', 'EUR', 'USD', 'GBP', 'XAF'].map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div className="col-span-2">
                                 <label className="text-sm font-medium text-gray-700">Notes internes</label>
                                 <textarea value={data.notes} onChange={e => setData('notes', e.target.value)} rows={3}
-                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                             </div>
                         </div>
                     )}
@@ -202,7 +202,7 @@ function CreateSupplierModal({ onClose }) {
                         </div>
                         <div className="flex gap-3">
                             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600">Annuler</button>
-                            <button type="submit" disabled={processing} className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+                            <button type="submit" disabled={processing} className="px-6 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
                                 {processing ? 'Enregistrement…' : 'Créer le fournisseur'}
                             </button>
                         </div>
@@ -223,7 +223,7 @@ function EvalModal({ supplier, onClose }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(`/procurement/suppliers/${supplier.id}/evaluate`, { onSuccess: () => onClose() });
+        post(`/achats/fournisseurs/${supplier.id}/evaluer`, { onSuccess: () => onClose() });
     };
 
     const criteria = [
@@ -249,7 +249,7 @@ function EvalModal({ supplier, onClose }) {
                     <div>
                         <label className="text-sm font-medium text-gray-700">Commentaires</label>
                         <textarea value={data.comments} onChange={e => setData('comments', e.target.value)} rows={3}
-                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
                     </div>
                     <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" checked={data.recommend} onChange={e => setData('recommend', e.target.checked)} className="rounded" />
@@ -289,7 +289,7 @@ export default function SupplierBase({ suppliers, filters }) {
                     </div>
                     <div className="flex gap-2">
                         <button onClick={() => setShowCreate(true)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">
                             + Nouveau fournisseur
                         </button>
                     </div>
@@ -301,10 +301,10 @@ export default function SupplierBase({ suppliers, filters }) {
                         type="text"
                         placeholder="Rechercher…"
                         defaultValue={filters?.search ?? ''}
-                        onKeyDown={e => e.key === 'Enter' && router.get('/procurement/suppliers', { ...filters, search: e.target.value }, { preserveState: true, replace: true })}
-                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-56 focus:ring-2 focus:ring-blue-500 outline-none"
+                        onKeyDown={e => e.key === 'Enter' && router.get('/achats/fournisseurs', { ...filters, search: e.target.value }, { preserveState: true, replace: true })}
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-56 focus:ring-2 focus:ring-purple-500 outline-none"
                     />
-                    <select value={filters?.status ?? ''} onChange={e => router.get('/procurement/suppliers', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
+                    <select value={filters?.status ?? ''} onChange={e => router.get('/achats/fournisseurs', { ...filters, status: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">Tous les statuts</option>
                         <option value="prospect">Prospect</option>
@@ -312,7 +312,7 @@ export default function SupplierBase({ suppliers, filters }) {
                         <option value="suspendu">Suspendu</option>
                         <option value="blackliste">Blacklisté</option>
                     </select>
-                    <select value={filters?.category ?? ''} onChange={e => router.get('/procurement/suppliers', { ...filters, category: e.target.value || undefined }, { preserveState: true, replace: true })}
+                    <select value={filters?.category ?? ''} onChange={e => router.get('/achats/fournisseurs', { ...filters, category: e.target.value || undefined }, { preserveState: true, replace: true })}
                         className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">Toutes les catégories</option>
                         {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -342,7 +342,7 @@ export default function SupplierBase({ suppliers, filters }) {
                             </thead>
                             <tbody>
                                 {items.map(supplier => (
-                                    <tr key={supplier.id} className="border-b border-gray-100 hover:bg-blue-50/20">
+                                    <tr key={supplier.id} className="border-b border-gray-100 hover:bg-purple-50/20">
                                         <td className="py-3 px-4 font-mono text-xs text-gray-400">{supplier.supplier_number}</td>
                                         <td className="py-3 px-4">
                                             <div className="font-semibold text-gray-800">{supplier.company_name}</div>
@@ -373,8 +373,8 @@ export default function SupplierBase({ suppliers, filters }) {
                                         </td>
                                         <td className="py-3 px-4">
                                             <div className="flex gap-1.5 justify-center">
-                                                <a href={`/procurement/suppliers/${supplier.id}/scorecard`}
-                                                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                                <a href={`/achats/fournisseurs/${supplier.id}/scorecard`}
+                                                    className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">
                                                     Scorecard
                                                 </a>
                                                 <button onClick={() => setEvaluating(supplier)}
@@ -384,7 +384,7 @@ export default function SupplierBase({ suppliers, filters }) {
                                                 <button
                                                     onClick={() => {
                                                         const email = prompt('Email portail fournisseur :');
-                                                        if (email) router.post(`/procurement/suppliers/${supplier.id}/portal`, { portal_email: email });
+                                                        if (email) router.post(`/achats/fournisseurs/${supplier.id}/portail`, { portal_email: email });
                                                     }}
                                                     className={`text-xs px-2 py-1 rounded ${supplier.portal_access ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}>
                                                     {supplier.portal_access ? 'Désactiver' : 'Portail'}
@@ -404,3 +404,4 @@ export default function SupplierBase({ suppliers, filters }) {
         </AuthenticatedLayout>
     );
 }
+export { SupplierBase };

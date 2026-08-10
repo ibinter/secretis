@@ -686,7 +686,7 @@ class TrainingController extends Controller
         $user = Auth::user();
         return Inertia::render('Formation/Catalog', [
             'courses'    => $courses,
-            'filters'    => $request->only(['level', 'language', 'search', 'free', 'sort']),
+            'filters'    => (object) $request->only(['level', 'language', 'search', 'free', 'sort']),
             'userRole'   => $user?->role ?? 'guest',
         ]);
     }
@@ -932,5 +932,106 @@ class TrainingController extends Controller
             ->filter()
             ->values()
             ->toArray();
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+
+    // ── Mon Espace Formation ───────────────────────────────────────────────────
+    public function mySpace(\Illuminate\Http\Request $request): \Inertia\Response
+    {
+        $user  = Auth::user();
+        $orgId = $user->organization_id;
+
+        $enrollments = DB::table('training_enrollments as e')
+            ->join('training_courses as c', 'c.id', '=', 'e.course_id')
+            ->where('e.user_id', $user->id)
+            ->where('c.organization_id', $orgId)
+            ->select(
+                'e.id',
+                'e.status',
+                'e.enrolled_at',
+                'c.id as course_id',
+                'c.title as course_title',
+                'c.category',
+                'c.thumbnail_path'
+            )
+            ->orderBy('e.enrolled_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(fn($e) => [
+                'id'       => $e->id,
+                'status'   => $e->status,
+                'progress' => 0,
+                'course'   => [
+                    'id'        => $e->course_id,
+                    'title'     => $e->course_title,
+                    'category'  => $e->category,
+                    'thumbnail' => $e->thumbnail_path,
+                ],
+                'started_at'   => null,
+                'completed_at' => null,
+            ]);
+
+        return Inertia::render('Formation/MySpace', [
+            'enrollments' => $enrollments,
+            'user'        => $user->only(['id', 'name', 'email']),
+        ]);
+    }
+
+    // GET /training/catalog (public) → délègue vers catalog() qui gère déjà le cas invité
+    public function publicCatalog(Request $request): Response|JsonResponse
+    {
+        return $this->catalog($request);
+    }
+
+    // ─── Alias API (routes/api.php) → méthodes réelles ─────────────────────────
+    // Ces alias délèguent vers les implémentations existantes afin d'éviter
+    // le filet __call() (stub JSON). Signatures et types de retour compatibles.
+
+    /** GET /api/training/courses → index() */
+    public function courses(Request $request): Response|JsonResponse
+    {
+        return $this->index($request);
+    }
+
+    /** POST /api/training/courses → store() */
+    public function storeCourse(Request $request): JsonResponse
+    {
+        return $this->store($request);
+    }
+
+    /** GET /api/training/courses/{id} → show() */
+    public function showCourse(int $id): Response|JsonResponse
+    {
+        return $this->show($id);
+    }
+
+    /** PUT /api/training/courses/{id} → update() */
+    public function updateCourse(Request $request, int $id): JsonResponse
+    {
+        return $this->update($request, $id);
+    }
+
+    /** DELETE /api/training/courses/{id} → destroy() */
+    public function destroyCourse(int $id): JsonResponse
+    {
+        return $this->destroy($id);
+    }
+
+    /** GET /api/training/my-trainings → myCourses() */
+    public function myTrainings(Request $request): Response|JsonResponse
+    {
+        return $this->myCourses($request);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

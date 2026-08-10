@@ -100,8 +100,8 @@ function CategoryRow({ cat, value, onChange }) {
   return (
     <div className="flex items-start gap-4 py-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
       <div className="flex-shrink-0 mt-0.5">
-        <div className="w-8 h-8 rounded-lg bg-[#1A3A5C]/10 dark:bg-white/10 flex items-center justify-center">
-          <Icon className="w-4 h-4 text-[#1A3A5C] dark:text-blue-300" aria-hidden="true" />
+        <div className="w-8 h-8 rounded-lg bg-[#9333EA]/10 dark:bg-white/10 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-[#9333EA] dark:text-purple-300" aria-hidden="true" />
         </div>
       </div>
       <div className="flex-1 min-w-0">
@@ -245,8 +245,8 @@ export default function CookieConsent() {
               Nous utilisons des cookies pour améliorer votre expérience SECRETIS.
               En continuant, vous acceptez notre{' '}
               <a
-                href="/legal/politique-cookies"
-                className="text-[#2E86C1] hover:underline focus:outline-none focus:ring-1 focus:ring-[#2E86C1] rounded"
+                href="/cookies"
+                className="text-[#7e22ce] hover:underline focus:outline-none focus:ring-1 focus:ring-[#7e22ce] rounded"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -293,8 +293,8 @@ export default function CookieConsent() {
               aria-controls="cookie-preferences-panel"
               className={[
                 'px-4 py-2.5 rounded-lg text-sm font-medium',
-                'text-[#2E86C1] hover:underline',
-                'focus:outline-none focus:ring-2 focus:ring-[#2E86C1] focus:ring-offset-2',
+                'text-[#7e22ce] hover:underline',
+                'focus:outline-none focus:ring-2 focus:ring-[#7e22ce] focus:ring-offset-2',
                 'inline-flex items-center gap-1.5 transition-colors',
               ].join(' ')}
             >
@@ -333,7 +333,7 @@ export default function CookieConsent() {
 
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
               <a
-                href="/legal/politique-cookies"
+                href="/cookies"
                 className="text-xs text-gray-500 dark:text-gray-400 hover:underline focus:outline-none focus:ring-1 focus:ring-gray-400 rounded"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -347,8 +347,8 @@ export default function CookieConsent() {
                 aria-busy={saving}
                 className={[
                   'px-5 py-2.5 rounded-lg text-sm font-semibold text-white',
-                  'bg-[#1A3A5C] hover:bg-[#142d48]',
-                  'focus:outline-none focus:ring-2 focus:ring-[#1A3A5C] focus:ring-offset-2',
+                  'bg-[#9333EA] hover:bg-[#142d48]',
+                  'focus:outline-none focus:ring-2 focus:ring-[#9333EA] focus:ring-offset-2',
                   'transition-colors disabled:opacity-60',
                 ].join(' ')}
               >
@@ -361,3 +361,4 @@ export default function CookieConsent() {
     </div>
   )
 }
+export { CookieConsent };

@@ -2,208 +2,329 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ExigeSara;
 use App\Models\SaraConversation;
-use App\Services\SaraService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class SaraChatController extends Controller
 {
-    public function __construct(protected SaraService $sara) {}
+    use ExigeSara;
 
-    /**
-     * Page dédiée SARA Chat (Inertia).
-     */
-    public function index(): Response
-    {
-        $user = Auth::user();
+    private const SYSTEM_PROMPT = <<<'PROMPT'
+Tu es SARA, l'assistante IA officielle de SECRETIS ERP, la solution de gestion de secrétariat et de courrier de IBIG Soft (https://secretis.ibigsoft.com).
 
-        $conversations = SaraConversation::forOrganization($user->organization_id)
-            ->forUser($user->id)
-            ->orderByDesc('updated_at')
-            ->limit(50)
-            ->get(['id', 'title', 'context_module', 'provider', 'feedback', 'created_at', 'updated_at'])
-            ->map(fn($c) => [
-                'id'             => $c->id,
-                'title'          => $c->title,
-                'context_module' => $c->context_module,
-                'provider'       => $c->provider,
-                'feedback'       => $c->feedback,
-                'created_at'     => $c->created_at->diffForHumans(),
-                'updated_at'     => $c->updated_at->diffForHumans(),
-            ]);
+CONTEXTE PRODUIT :
+- SECRETIS ERP gère : courrier entrant/sortant, documents (GED), agenda/événements, réunions, visiteurs, tâches, notes de frais, RH, facturation, circulaires, annuaire de contacts.
+- Éditeur : IBIG Soft, écosystème de solutions métiers.
+- Contact : secretis@ibigsoft.com — WhatsApp disponible sur le site.
+- Les durées, plafonds, paliers et formules ne figurent PAS dans ce contexte :
+  ils sont lus dans licence.config.json par l'outil dédié, jamais récités ici.
 
-        $quickQuestions = $this->sara->getQuickQuestions('general');
+RÈGLES STRICTES (à respecter absolument) :
+1. Réponds uniquement en français, sauf si l'utilisateur écrit dans une autre langue.
+2. Reste dans le périmètre SECRETIS ERP et IBIG Soft. Pour toute question hors sujet, redirige poliment vers le produit.
+3. Ne divulgue jamais d'informations techniques internes (serveurs, mots de passe, code, architecture).
+4. N'invente jamais de prix précis ni de fonctionnalités inexistantes — invite à contacter l'équipe commerciale pour un devis.
+5. Ne donne aucun conseil juridique, médical ou financier.
+6. Sois concise : 2 à 5 phrases maximum par réponse.
+7. Ton professionnel, chaleureux et orienté solution.
+8. Si l'utilisateur veut essayer le produit, oriente-le vers le bouton « Essai » ou la page /login, sans citer de durée : c'est l'outil de licence qui la donne.
+9. Ne traite jamais de données personnelles sensibles ; si l'utilisateur en partage, invite-le à ne pas le faire.
+10. En cas de problème technique client, oriente vers le support : secretis@ibigsoft.com.
+PROMPT;
 
-        return Inertia::render('Sara/Chat', [
-            'conversations'  => $conversations,
-            'quickQuestions' => $quickQuestions,
-        ]);
-    }
-
-    /**
-     * POST /api/sara/chat — envoyer un message, créer/continuer une conversation.
-     */
     public function chat(Request $request): JsonResponse
     {
-        $request->validate([
+        // ── Droit `sara` — en tout premier ─────────────────────────────────────
+        // Cette route était la porte ouverte du chantier : elle est déclarée
+        // publique dans routes/api.php (« throttle:30,1 », sans authentification).
+        // Or un appelant non authentifié est au mieux en Démo publique, où SARA
+        // est fermée — et chaque message envoyé au fournisseur d'IA est facturé.
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus instanceof JsonResponse
+                ? $refus
+                : response()->json($this->saraLicence()->refus($request->user()), 403);
+        }
+
+        $validated = $request->validate([
             'message'         => 'required|string|max:2000',
-            'conversation_id' => 'nullable|integer|exists:sara_conversations,id',
-            'context_module'  => 'nullable|string|in:agenda,ged,tasks,visitors,hr,accounting,reporting,admin',
+            'history'         => 'sometimes|array|max:10',
+            'history.*.role'  => 'required_with:history|in:user,assistant',
+            'history.*.content' => 'required_with:history|string|max:2000',
+            'conversation_id' => 'sometimes|nullable|integer',
+            'context_module'  => 'sometimes|nullable|string|max:50',
         ]);
 
-        $user    = Auth::user();
-        $orgId   = $user->organization_id;
-        $message = $request->string('message')->trim()->value();
+        $key = 'sara-chat:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            return response()->json([
+                'reply'        => "Vous avez atteint la limite de messages. Merci de réessayer dans quelques minutes ou de nous contacter à secretis@ibigsoft.com.",
+                'response'     => "Vous avez atteint la limite de messages. Merci de réessayer dans quelques minutes ou de nous contacter à secretis@ibigsoft.com.",
+                'rate_limited' => true,
+            ], 429);
+        }
+        RateLimiter::hit($key, 300);
 
-        // Charger ou créer la conversation
-        if ($request->conversation_id) {
-            $conversation = SaraConversation::where('id', $request->conversation_id)
-                ->where('organization_id', $orgId)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-        } else {
-            $conversation = new SaraConversation([
-                'organization_id' => $orgId,
-                'user_id'         => $user->id,
-                'title'           => $this->sara->generateTitle($message),
-                'context_module'  => $request->context_module,
-                'messages'        => [],
-                'tokens_used'     => 0,
-                'provider'        => config('sara.provider', config('secretis.ai.provider', 'groq')),
+        // Charge la conversation persistée (utilisateur authentifié uniquement)
+        $conversation = $this->resolveConversation($validated);
+
+        // Construit l'historique : celui fourni par le client, sinon celui de la conversation persistée
+        $history = $validated['history'] ?? $this->historyFromConversation($conversation);
+
+        $licence  = $this->saraLicence();
+        $reply    = null;
+        $fallback = false;
+
+        // ── Court-circuit licence ──────────────────────────────────────────────
+        // Sur une question de licence, aucun appel au fournisseur d'IA n'a lieu :
+        // la réponse vient de licence.config.json, lue par l'outil dédié.
+        if ($fiche = $licence->courtCircuit($validated['message'])) {
+            $conversationId = $this->persistConversation($conversation, $validated, $fiche['reponse']);
+
+            return response()->json([
+                'reply'           => $fiche['reponse'],
+                'response'        => $fiche['reponse'],
+                'conversation_id' => $conversationId,
+                'faq_suggestions' => [],
+                'fallback'        => false,
+                'source'          => $fiche['source'],
+                'fiche'           => $fiche['cle'],
             ]);
         }
 
-        // Ajouter le message utilisateur
-        $conversation->addMessage('user', $message);
+        $apiKey   = config('services.groq.key', env('GROQ_API_KEY'));
 
-        // Obtenir la réponse de SARA
-        $result = $this->sara->chat(
-            $conversation->messages,
-            $user,
-            $conversation->context_module
-        );
+        if ($apiKey) {
+            $messages = [['role' => 'system', 'content' => self::SYSTEM_PROMPT . $licence->invite()]];
+            foreach ($history as $h) {
+                $messages[] = ['role' => $h['role'], 'content' => $h['content']];
+            }
+            $messages[] = ['role' => 'user', 'content' => $validated['message']];
 
-        // Ajouter la réponse SARA à l'historique
-        $conversation->addMessage('assistant', $result['content']);
-        $conversation->tokens_used += $result['tokens_used'];
-        $conversation->provider    = $result['provider'];
-        $conversation->model_used  = $result['model'] ?? null;
-        $conversation->save();
+            try {
+                $response = Http::timeout(25)
+                    ->withToken($apiKey)
+                    ->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model'       => env('SARA_AI_MODEL', 'llama-3.3-70b-versatile'),
+                        'messages'    => $messages,
+                        'max_tokens'  => 400,
+                        'temperature' => 0.5,
+                    ]);
 
-        // Suggestions FAQ si pertinent
-        $faqSuggestions = $this->sara->suggestFromFaq($message);
+                if ($response->successful()) {
+                    $content = $response->json('choices.0.message.content');
+                    if (is_string($content) && trim($content) !== '') {
+                        $reply = trim($content);
+                    }
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        if ($reply === null) {
+            $reply    = $this->fallback();
+            $fallback = true;
+        }
+
+        // ── Filtre de sortie ───────────────────────────────────────────────────
+        // Relu systématiquement : terme banni, promesse commerciale ou chiffre
+        // de licence absent de la configuration → la réponse est remplacée par
+        // le renvoi officiel, pas rapiécée.
+        $reply = $licence->filtrer($reply, $validated['message']);
+
+        // Persiste la conversation si l'utilisateur est authentifié
+        $conversationId = $this->persistConversation($conversation, $validated, $reply);
 
         return response()->json([
-            'conversation_id' => $conversation->id,
-            'response'        => $result['content'],
-            'provider'        => $result['provider'],
-            'model'           => $result['model'],
-            'faq_suggestions' => array_slice($faqSuggestions, 0, 2),
+            'reply'           => $reply,
+            'response'        => $reply,
+            'conversation_id' => $conversationId,
+            'faq_suggestions' => [],
+            'fallback'        => $fallback,
         ]);
     }
+
+    /**
+     * Récupère la conversation persistée ciblée par la requête (si authentifié).
+     */
+    private function resolveConversation(array $validated): ?SaraConversation
+    {
+        if (! Auth::check() || empty($validated['conversation_id'])) {
+            return null;
+        }
+
+        return SaraConversation::where('id', $validated['conversation_id'])
+            ->where('user_id', Auth::id())
+            ->where('organization_id', Auth::user()->organization_id)
+            ->first();
+    }
+
+    /**
+     * Reconstruit un historique (≤10 derniers messages) depuis une conversation persistée.
+     */
+    private function historyFromConversation(?SaraConversation $conversation): array
+    {
+        if (! $conversation) {
+            return [];
+        }
+
+        return collect($conversation->messages ?? [])
+            ->filter(fn ($m) => in_array($m['role'] ?? null, ['user', 'assistant'], true))
+            ->map(fn ($m) => ['role' => $m['role'], 'content' => $m['content']])
+            ->take(-10)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Persiste (crée ou complète) la conversation. Retourne l'id ou null si non authentifié.
+     */
+    private function persistConversation(?SaraConversation $conversation, array $validated, string $reply): ?int
+    {
+        if (! Auth::check()) {
+            return null;
+        }
+
+        $user = Auth::user();
+
+        if (! $conversation) {
+            $conversation = new SaraConversation();
+            $conversation->organization_id = $user->organization_id;
+            $conversation->user_id         = $user->id;
+            $conversation->title           = Str::limit($validated['message'], 50, '…');
+            $conversation->context_module  = $validated['context_module'] ?? null;
+            $conversation->messages        = [];
+            $conversation->provider        = 'groq';
+        }
+
+        $conversation->addMessage('user', $validated['message']);
+        $conversation->addMessage('assistant', $reply);
+        $conversation->model_used = env('SARA_AI_MODEL', 'llama-3.3-70b-versatile');
+        $conversation->save();
+
+        return $conversation->id;
+    }
+
+    private function fallback(): string
+    {
+        return "Je rencontre un souci technique momentané. Vous pouvez nous écrire à secretis@ibigsoft.com ou via WhatsApp — notre équipe vous répondra rapidement !";
+    }
+
+
+    /**
+     * Page SARA standalone (iframe / accès public).
+     */
+    public function chatPage(Request $request)
+    {
+        if ($refus = $this->refusSiSaraFermee($request)) {
+            return $refus;
+        }
+
+        return response()->view('sara-chat-standalone');
+    }
+
+    // ─── Conversations persistées (app authentifiée) ──────────────────────────
 
     /**
      * GET /api/sara/conversations — liste des conversations de l'utilisateur.
      */
-    public function conversations(): JsonResponse
+    public function conversations(Request $request): JsonResponse
     {
         $user = Auth::user();
 
-        $conversations = SaraConversation::forOrganization($user->organization_id)
-            ->forUser($user->id)
+        $conversations = SaraConversation::where('user_id', $user->id)
+            ->where('organization_id', $user->organization_id)
             ->orderByDesc('updated_at')
-            ->limit(100)
-            ->get(['id', 'title', 'context_module', 'provider', 'feedback', 'tokens_used', 'created_at', 'updated_at'])
-            ->map(fn($c) => [
+            ->limit(50)
+            ->get()
+            ->map(fn (SaraConversation $c) => [
                 'id'             => $c->id,
                 'title'          => $c->title,
                 'context_module' => $c->context_module,
-                'provider'       => $c->provider,
-                'feedback'       => $c->feedback,
-                'tokens_used'    => $c->tokens_used,
-                'created_at'     => $c->created_at->toIso8601String(),
-                'updated_at'     => $c->updated_at->toIso8601String(),
-                'updated_human'  => $c->updated_at->diffForHumans(),
+                'updated_human'  => $c->updated_at?->diffForHumans(),
+                'updated_at'     => $c->updated_at?->toIso8601String(),
             ]);
 
         return response()->json(['conversations' => $conversations]);
     }
 
     /**
-     * GET /api/sara/conversations/{conversation} — détail d'une conversation.
+     * GET /api/sara/conversations/{conversation} — détail + messages.
      */
     public function conversation(SaraConversation $conversation): JsonResponse
     {
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
+        $this->authorizeConversation($conversation);
 
         return response()->json([
             'conversation' => [
                 'id'             => $conversation->id,
                 'title'          => $conversation->title,
                 'context_module' => $conversation->context_module,
-                'messages'       => $conversation->messages,
-                'tokens_used'    => $conversation->tokens_used,
-                'provider'       => $conversation->provider,
-                'model_used'     => $conversation->model_used,
+                'messages'       => $conversation->messages ?? [],
                 'feedback'       => $conversation->feedback,
-                'feedback_comment' => $conversation->feedback_comment,
-                'created_at'     => $conversation->created_at->toIso8601String(),
-                'updated_at'     => $conversation->updated_at->toIso8601String(),
             ],
         ]);
     }
 
     /**
-     * DELETE /api/sara/conversations/{conversation} — supprimer une conversation.
+     * DELETE /api/sara/conversations/{conversation}.
      */
     public function deleteConversation(SaraConversation $conversation): JsonResponse
     {
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
-
+        $this->authorizeConversation($conversation);
         $conversation->delete();
 
-        return response()->json(['message' => 'Conversation supprimée.']);
+        return response()->json(['success' => true, 'message' => 'Conversation supprimée.']);
     }
 
     /**
-     * POST /api/sara/conversations/{conversation}/feedback — laisser un feedback.
+     * POST /api/sara/conversations/{conversation}/feedback.
      */
     public function feedback(Request $request, SaraConversation $conversation): JsonResponse
     {
-        $request->validate([
-            'feedback'         => 'required|in:positive,negative',
-            'feedback_comment' => 'nullable|string|max:1000',
+        $this->authorizeConversation($conversation);
+
+        $validated = $request->validate([
+            'feedback' => 'required|in:positive,negative',
+            'comment'  => 'nullable|string|max:1000',
         ]);
-
-        $user = Auth::user();
-
-        abort_unless(
-            $conversation->organization_id === $user->organization_id && $conversation->user_id === $user->id,
-            403,
-            'Accès refusé.'
-        );
 
         $conversation->update([
-            'feedback'         => $request->feedback,
-            'feedback_comment' => $request->feedback_comment,
+            'feedback'         => $validated['feedback'],
+            'feedback_comment' => $validated['comment'] ?? null,
         ]);
 
-        return response()->json(['message' => 'Merci pour votre retour !']);
+        return response()->json(['success' => true, 'message' => 'Merci pour votre retour.']);
+    }
+
+    /**
+     * Garde-fou multi-tenant : la conversation doit appartenir à l'utilisateur courant.
+     */
+    private function authorizeConversation(SaraConversation $conversation): void
+    {
+        abort_unless(
+            Auth::check()
+                && $conversation->user_id === Auth::id()
+                && $conversation->organization_id === Auth::user()->organization_id,
+            403
+        );
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
     }
 }

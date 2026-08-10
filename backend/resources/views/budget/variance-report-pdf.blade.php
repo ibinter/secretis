@@ -1,349 +1,257 @@
+@php
+    /**
+     * Rapport d'écarts budgétaires — SECRETIS ERP
+     * Appelée par App\Http\Controllers\BudgetController::variancePdf()
+     * Variables : $budget (App\Models\Budget), $analysis (array, cf. BudgetService::getVarianceAnalysis),
+     *             $org (Organization|null), $date (string 'd/m/Y')
+     */
+    $fmt = fn ($v) => number_format((float) ($v ?? 0), 0, ',', ' ');
+    $pct = fn ($v) => number_format((float) ($v ?? 0), 2, ',', ' ') . ' %';
+    $dev = $org->currency ?? 'XOF';
+
+    $summary = $analysis['summary'] ?? [];
+    $lines   = $analysis['lines'] ?? [];
+    $depts   = $analysis['by_department'] ?? [];
+    $cats    = $analysis['by_category'] ?? [];
+    $alerts  = $analysis['alerts'] ?? [];
+
+    $types = [
+        'operationnel'   => 'Opérationnel',
+        'investissement' => 'Investissement',
+        'projet'         => 'Projet',
+        'departement'    => 'Département',
+    ];
+    $statuts = [
+        'draft'    => 'Brouillon',
+        'approved' => 'Approuvé',
+        'active'   => 'Actif',
+        'closed'   => 'Clôturé',
+    ];
+    $categories = [
+        'personnel'      => 'Personnel',
+        'fonctionnement' => 'Fonctionnement',
+        'investissement' => 'Investissement',
+        'impots'         => 'Impôts et taxes',
+        'autres'         => 'Autres',
+    ];
+    $severites = [
+        'exceeded' => 'Dépassement',
+        'warning'  => 'Vigilance',
+        'info'     => 'Information',
+    ];
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rapport d'analyse des écarts — {{ $budget->name }}</title>
+    <meta charset="utf-8">
+    <title>Rapport d'écarts budgétaires — {{ $budget->name ?? '' }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { margin: 12mm 10mm 14mm 10mm; }
+        * { font-family: 'DejaVu Sans', sans-serif; }
+        body { margin: 0; color: #1f2937; font-size: 10px; }
 
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10px;
-            color: #333;
-            background: #fff;
-            padding: 0;
-        }
+        .header { border-bottom: 2px solid #9333EA; padding-bottom: 8px; margin-bottom: 10px; }
+        .org-name { font-size: 15px; font-weight: bold; color: #111827; }
+        .org-meta { font-size: 9px; color: #6b7280; margin-top: 2px; }
+        h1 { font-size: 14px; margin: 10px 0 2px; }
+        h2 { font-size: 11px; color: #5b21b6; margin: 16px 0 5px;
+             border-bottom: 1px solid #ddd6fe; padding-bottom: 3px; }
+        .sub { font-size: 10px; color: #4b5563; margin-bottom: 12px; }
+        .sub strong { color: #111827; }
 
-        /* ── En-tête ─────────────────────────────────── */
-        .header {
-            background: #1A3A5C;
-            color: white;
-            padding: 20px 30px;
-        }
-        .header-grid {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        .header h1 { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
-        .header h2 { font-size: 13px; font-weight: normal; color: #90CAF9; }
-        .header .meta { text-align: right; color: #B0C4DE; font-size: 9px; line-height: 1.6; }
+        table { width: 100%; border-collapse: collapse; }
+        .kpis { margin-bottom: 6px; }
+        .kpis td { width: 25%; padding: 7px; border: 1px solid #e5e7eb; text-align: center; }
+        .kpi-value { font-size: 14px; font-weight: bold; color: #9333EA; }
+        .kpi-label { font-size: 8px; color: #6b7280; text-transform: uppercase; margin-top: 2px; }
 
-        /* ── Résumé exécutif ─────────────────────────── */
-        .section { padding: 16px 30px; }
-        .section-title {
-            font-size: 11px;
-            font-weight: bold;
-            color: #1A3A5C;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #1A3A5C;
-            padding-bottom: 4px;
-            margin-bottom: 12px;
-        }
-
-        .kpi-grid {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .kpi-card {
-            flex: 1;
-            border: 1px solid #E2E8F0;
-            border-radius: 6px;
-            padding: 12px;
-            text-align: center;
-        }
-        .kpi-label { font-size: 8px; color: #666; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
-        .kpi-value { font-size: 14px; font-weight: bold; }
-        .kpi-green  { color: #27AE60; }
-        .kpi-red    { color: #E74C3C; }
-        .kpi-orange { color: #F39C12; }
-        .kpi-navy   { color: #1A3A5C; }
-
-        /* ── Tableau ─────────────────────────────────── */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 8.5px;
-        }
-        thead tr { background: #1A3A5C; color: white; }
-        thead th {
-            padding: 6px 8px;
-            text-align: right;
-            font-weight: bold;
-            font-size: 8px;
-            text-transform: uppercase;
-        }
-        thead th:first-child,
-        thead th:nth-child(2) { text-align: left; }
-
-        tbody tr { border-bottom: 1px solid #F1F5F9; }
-        tbody tr:nth-child(even) { background: #F8FAFC; }
-        tbody td { padding: 5px 8px; vertical-align: middle; }
-        tbody td:not(:first-child):not(:nth-child(2)) { text-align: right; }
-
-        /* Catégorie header */
-        .cat-row td {
-            background: #E8F4FD;
-            font-weight: bold;
-            color: #1A3A5C;
-            padding: 5px 8px;
-            font-size: 9px;
-        }
-
-        /* Couleurs statut */
-        .status-ok       { background: #D4EDDA; color: #155724; padding: 2px 5px; border-radius: 3px; }
-        .status-warning  { background: #FFF3CD; color: #856404; padding: 2px 5px; border-radius: 3px; }
-        .status-exceeded { background: #F8D7DA; color: #721C24; padding: 2px 5px; border-radius: 3px; }
-
-        .text-green  { color: #27AE60; }
-        .text-red    { color: #E74C3C; }
-        .text-orange { color: #F39C12; }
-
-        /* Barre progression */
-        .progress-track { background: #E2E8F0; height: 5px; border-radius: 3px; }
-        .progress-fill  { height: 5px; border-radius: 3px; }
-
-        /* Pied de page */
-        .footer {
-            position: fixed;
-            bottom: 20px;
-            left: 30px;
-            right: 30px;
-            border-top: 1px solid #E2E8F0;
-            padding-top: 8px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 8px;
-            color: #999;
-        }
-
-        /* Signature */
-        .signature-section {
-            margin-top: 30px;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: flex-end;
-        }
-        .signature-box {
-            border: 1px solid #E2E8F0;
-            border-radius: 6px;
-            padding: 16px 30px;
-            text-align: center;
-            min-width: 200px;
-        }
-        .signature-title { font-size: 9px; font-weight: bold; color: #1A3A5C; margin-bottom: 40px; }
-        .signature-line  { border-top: 1px solid #999; padding-top: 6px; font-size: 8px; color: #666; }
-
-        /* Page break */
-        .page-break { page-break-before: always; }
+        table.list th { background: #f5f3ff; color: #5b21b6; text-align: left; padding: 5px 6px;
+                        font-size: 8px; text-transform: uppercase; border-bottom: 1px solid #ddd6fe; }
+        table.list th.num { text-align: right; }
+        table.list td { padding: 4px 6px; border-bottom: 1px solid #f3f4f6; font-size: 9px; }
+        .num { text-align: right; }
+        .ctr { text-align: center; }
+        .muted { color: #9ca3af; }
+        tr.tot td { background: #f5f3ff; font-weight: bold; border-top: 2px solid #9333EA; }
+        .ko { font-weight: bold; }
+        .footer { margin-top: 16px; font-size: 8px; color: #9ca3af; text-align: center; line-height: 1.5; }
     </style>
 </head>
 <body>
 
-{{-- ======== EN-TÊTE ======== --}}
 <div class="header">
-    <div class="header-grid">
-        <div>
-            <h1>{{ $org->name ?? 'Organisation' }}</h1>
-            <h2>Rapport d'analyse des écarts budgétaires</h2>
-        </div>
-        <div class="meta">
-            <div><strong>Budget :</strong> {{ $budget->name }}</div>
-            <div><strong>Type :</strong> {{ ucfirst($budget->type) }}</div>
-            <div><strong>Période :</strong> Cumul annuel (YTD)</div>
-            <div><strong>Date d'arrêté :</strong> {{ $date }}</div>
-            <div><strong>Statut :</strong> {{ ucfirst($budget->status) }}</div>
-        </div>
+    <div class="org-name">{{ $org->name ?? 'Organisation' }}</div>
+    <div class="org-meta">
+        @if(!empty($org?->address)){{ $org->address }}@endif
+        @if(!empty($org?->city)), {{ $org->city }}@endif
+        @if(!empty($org?->phone)) — Tél. {{ $org->phone }}@endif
+        @if(!empty($org?->tax_number)) — N° contribuable : {{ $org->tax_number }}@endif
     </div>
 </div>
 
-{{-- ======== RÉSUMÉ EXÉCUTIF ======== --}}
-<div class="section">
-    <div class="section-title">Résumé exécutif</div>
-
-    @php
-        $summary    = $analysis['summary'] ?? [];
-        $totalBudg  = $summary['total_budget'] ?? 0;
-        $totalReal  = $summary['total_actual'] ?? 0;
-        $variance   = $summary['total_variance'] ?? 0;
-        $execPct    = $summary['consumption_pct'] ?? 0;
-        $alertCount = $summary['alerts_count'] ?? 0;
-
-        $fcfa = fn($v) => number_format(abs($v), 0, ',', ' ') . ' FCFA';
-        $pct  = fn($v) => number_format($v, 1, ',', ' ') . '%';
-
-        $execColor = $execPct >= 100 ? 'kpi-red' : ($execPct >= 80 ? 'kpi-orange' : 'kpi-green');
-    @endphp
-
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-label">Budget total (charges)</div>
-            <div class="kpi-value kpi-navy">{{ $fcfa($totalBudg) }}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Réel consommé (YTD)</div>
-            <div class="kpi-value {{ $execColor }}">{{ $fcfa($totalReal) }}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Taux d'exécution</div>
-            <div class="kpi-value {{ $execColor }}">{{ $pct($execPct) }}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Écart net (Budg. − Réel)</div>
-            <div class="kpi-value {{ $variance >= 0 ? 'kpi-green' : 'kpi-red' }}">
-                {{ ($variance >= 0 ? '+' : '−') . $fcfa($variance) }}
-            </div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Alertes dépassement</div>
-            <div class="kpi-value {{ $alertCount > 0 ? 'kpi-red' : 'kpi-green' }}">{{ $alertCount }}</div>
-        </div>
-    </div>
+<h1>Rapport d'écarts budgétaires</h1>
+<div class="sub">
+    Budget <strong>{{ $budget->name ?? '—' }}</strong>
+    — Type : <strong>{{ $types[$budget->type ?? ''] ?? ($budget->type ?? '—') }}</strong>
+    — Statut : <strong>{{ $statuts[$budget->status ?? ''] ?? ($budget->status ?? '—') }}</strong>
+    — Édité le <strong>{{ $date ?? now()->format('d/m/Y') }}</strong>
+    — Montants en {{ $dev }}
 </div>
 
-{{-- ======== TABLEAU DÉTAILLÉ ======== --}}
-<div class="section">
-    <div class="section-title">Analyse détaillée par catégorie</div>
+<table class="kpis">
+    <tr>
+        <td>
+            <div class="kpi-value">{{ $fmt($summary['total_budget'] ?? 0) }}</div>
+            <div class="kpi-label">Budget charges</div>
+        </td>
+        <td>
+            <div class="kpi-value">{{ $fmt($summary['total_actual'] ?? 0) }}</div>
+            <div class="kpi-label">Réalisé YTD</div>
+        </td>
+        <td>
+            <div class="kpi-value">{{ $fmt($summary['total_variance'] ?? 0) }}</div>
+            <div class="kpi-label">Écart</div>
+        </td>
+        <td>
+            <div class="kpi-value">{{ $pct($summary['consumption_pct'] ?? 0) }}</div>
+            <div class="kpi-label">Taux de consommation</div>
+        </td>
+    </tr>
+</table>
+<div class="muted" style="font-size:8px;">
+    {{ $summary['lines_count'] ?? 0 }} ligne(s) budgétaire(s) — {{ $summary['alerts_count'] ?? 0 }} alerte(s).
+</div>
 
-    @php
-        $byCategory = collect($analysis['lines'] ?? [])->groupBy('category');
-    @endphp
-
-    <table>
-        <thead>
+<h2>Détail par ligne budgétaire</h2>
+<table class="list">
+    <thead>
+        <tr>
+            <th style="width:8%;">Compte</th>
+            <th>Intitulé</th>
+            <th style="width:12%;">Département</th>
+            <th style="width:10%;">Catégorie</th>
+            <th class="num" style="width:11%;">Budget</th>
+            <th class="num" style="width:11%;">Réalisé YTD</th>
+            <th class="num" style="width:11%;">Écart</th>
+            <th class="num" style="width:8%;">Conso.</th>
+            <th style="width:10%;">Statut</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($lines as $l)
             <tr>
-                <th style="text-align:left; width:70px;">Compte</th>
-                <th style="text-align:left; width:160px;">Libellé</th>
-                <th style="width:80px;">Budgété</th>
-                <th style="width:80px;">Réel YTD</th>
-                <th style="width:80px;">Écart</th>
-                <th style="width:50px;">%</th>
-                <th style="width:70px;">Statut</th>
+                <td>{{ $l['account_number'] ?? '—' }}</td>
+                <td>{{ $l['account_name'] ?? '—' }}@if(!empty($l['is_income'])) <span class="muted">(produit)</span>@endif</td>
+                <td>{{ $l['department'] ?? '—' }}</td>
+                <td>{{ $categories[$l['category'] ?? ''] ?? ($l['category'] ?? '—') }}</td>
+                <td class="num">{{ $fmt($l['budgeted'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($l['actual_ytd'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($l['variance'] ?? 0) }}</td>
+                <td class="num">{{ $pct($l['consumption_pct'] ?? 0) }}</td>
+                <td class="{{ ($l['status'] ?? '') === 'défavorable' ? 'ko' : '' }}">{{ $l['status'] ?? '—' }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($byCategory as $cat => $lines)
-                {{-- Ligne catégorie --}}
-                <tr class="cat-row">
-                    <td colspan="7">{{ strtoupper($cat) }}</td>
-                </tr>
-
-                @foreach ($lines as $line)
-                    @php
-                        $pctLine = $line['variance_pct'] ?? 0;
-                        $statusClass = $pctLine >= 100
-                            ? 'status-exceeded'
-                            : ($pctLine >= 80 ? 'status-warning' : 'status-ok');
-                        $statusLabel = $pctLine >= 100
-                            ? 'Dépassé'
-                            : ($pctLine >= 80 ? 'À risque' : 'OK');
-                        $varClass = ($line['variance'] ?? 0) >= 0 ? 'text-green' : 'text-red';
-                    @endphp
-                    <tr>
-                        <td style="font-family:monospace; color:#666;">{{ $line['account_number'] }}</td>
-                        <td>{{ $line['account_name'] }}</td>
-                        <td>{{ $fcfa($line['budgeted'] ?? 0) }}</td>
-                        <td style="font-weight:bold;">{{ $fcfa($line['actual_ytd'] ?? 0) }}</td>
-                        <td class="{{ $varClass }}">
-                            {{ (($line['variance'] ?? 0) >= 0 ? '+ ' : '− ') . $fcfa($line['variance'] ?? 0) }}
-                        </td>
-                        <td style="font-weight:bold;" class="{{ $pctLine >= 100 ? 'text-red' : ($pctLine >= 80 ? 'text-orange' : 'text-green') }}">
-                            {{ $pct($pctLine) }}
-                        </td>
-                        <td>
-                            <span class="{{ $statusClass }}">{{ $statusLabel }}</span>
-                        </td>
-                    </tr>
-                @endforeach
-
-                {{-- Sous-total catégorie --}}
-                @php
-                    $catBudget = $lines->sum('budgeted');
-                    $catActual = $lines->sum('actual_ytd');
-                    $catVar    = $catBudget - $catActual;
-                    $catPct    = $catBudget ? round(($catActual / $catBudget) * 100, 1) : 0;
-                @endphp
-                <tr style="background:#EFF6FF; font-weight:bold; font-size:9px;">
-                    <td colspan="2" style="text-align:right; padding-right:8px;">Sous-total {{ $cat }}</td>
-                    <td>{{ $fcfa($catBudget) }}</td>
-                    <td>{{ $fcfa($catActual) }}</td>
-                    <td class="{{ $catVar >= 0 ? 'text-green' : 'text-red' }}">
-                        {{ ($catVar >= 0 ? '+' : '−') . $fcfa($catVar) }}
-                    </td>
-                    <td class="{{ $catPct >= 100 ? 'text-red' : ($catPct >= 80 ? 'text-orange' : 'text-green') }}">
-                        {{ $pct($catPct) }}
-                    </td>
-                    <td></td>
-                </tr>
-            @endforeach
-
-            {{-- TOTAL GÉNÉRAL --}}
-            <tr style="background:#1A3A5C; color:white; font-weight:bold; font-size:10px;">
-                <td colspan="2" style="text-align:right; padding-right:8px; color:white;">TOTAL GÉNÉRAL</td>
-                <td style="color:white;">{{ $fcfa($totalBudg) }}</td>
-                <td style="color:white;">{{ $fcfa($totalReal) }}</td>
-                <td style="color:{{ $variance >= 0 ? '#A3E0A3' : '#FCA5A5' }};">
-                    {{ ($variance >= 0 ? '+' : '−') . $fcfa($variance) }}
-                </td>
-                <td style="color:white;">{{ $pct($execPct) }}</td>
+        @empty
+            <tr><td colspan="9" class="muted ctr" style="padding:16px;">Aucun élément</td></tr>
+        @endforelse
+        @if(count($lines) > 0)
+            <tr class="tot">
+                <td colspan="4">Total charges</td>
+                <td class="num">{{ $fmt($summary['total_budget'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($summary['total_actual'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($summary['total_variance'] ?? 0) }}</td>
+                <td class="num">{{ $pct($summary['consumption_pct'] ?? 0) }}</td>
                 <td></td>
             </tr>
-        </tbody>
-    </table>
-</div>
+        @endif
+    </tbody>
+</table>
 
-{{-- ======== ALERTES ======== --}}
-@if (!empty($analysis['alerts']))
-<div class="section page-break">
-    <div class="section-title">Lignes en alerte</div>
-    <table>
-        <thead>
+<h2>Consolidation par département</h2>
+<table class="list">
+    <thead>
+        <tr>
+            <th>Département</th>
+            <th class="num" style="width:18%;">Budget</th>
+            <th class="num" style="width:18%;">Réalisé</th>
+            <th class="num" style="width:18%;">Écart</th>
+            <th class="num" style="width:14%;">Conso.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($depts as $d)
             <tr>
-                <th style="text-align:left;">Compte</th>
-                <th style="text-align:left;">Libellé</th>
-                <th>% Consommé</th>
-                <th>Sévérité</th>
+                <td>{{ $d['name'] ?? '—' }}</td>
+                <td class="num">{{ $fmt($d['budgeted'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($d['actual'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($d['variance'] ?? 0) }}</td>
+                <td class="num">{{ $pct($d['variance_pct'] ?? 0) }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($analysis['alerts'] as $alert)
-                <tr>
-                    <td style="font-family:monospace;">{{ $alert['account_number'] }}</td>
-                    <td>{{ $alert['account_name'] }}</td>
-                    <td class="{{ $alert['pct'] >= 100 ? 'text-red' : 'text-orange' }}">{{ $pct($alert['pct']) }}</td>
-                    <td>
-                        <span class="{{ $alert['severity'] === 'exceeded' ? 'status-exceeded' : 'status-warning' }}">
-                            {{ $alert['severity'] === 'exceeded' ? 'Dépassé' : 'Avertissement' }}
-                        </span>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+        @empty
+            <tr><td colspan="5" class="muted ctr" style="padding:14px;">Aucun élément</td></tr>
+        @endforelse
+    </tbody>
+</table>
+
+<h2>Consolidation par catégorie</h2>
+<table class="list">
+    <thead>
+        <tr>
+            <th>Catégorie</th>
+            <th class="num" style="width:18%;">Budget</th>
+            <th class="num" style="width:18%;">Réalisé</th>
+            <th class="num" style="width:18%;">Écart</th>
+            <th class="num" style="width:14%;">Conso.</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($cats as $key => $c)
+            <tr>
+                <td>{{ $categories[$key] ?? $key }}</td>
+                <td class="num">{{ $fmt($c['budgeted'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($c['actual'] ?? 0) }}</td>
+                <td class="num">{{ $fmt($c['variance'] ?? 0) }}</td>
+                <td class="num">{{ $pct($c['variance_pct'] ?? 0) }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="5" class="muted ctr" style="padding:14px;">Aucun élément</td></tr>
+        @endforelse
+    </tbody>
+</table>
+
+<h2>Alertes de dépassement</h2>
+<table class="list">
+    <thead>
+        <tr>
+            <th style="width:12%;">Compte</th>
+            <th>Intitulé</th>
+            <th class="num" style="width:16%;">Consommation</th>
+            <th style="width:20%;">Sévérité</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($alerts as $a)
+            <tr>
+                <td>{{ $a['account_number'] ?? '—' }}</td>
+                <td>{{ $a['account_name'] ?? '—' }}</td>
+                <td class="num">{{ $pct($a['pct'] ?? 0) }}</td>
+                <td class="{{ ($a['severity'] ?? '') === 'exceeded' ? 'ko' : '' }}">
+                    {{ $severites[$a['severity'] ?? ''] ?? ($a['severity'] ?? '—') }}
+                </td>
+            </tr>
+        @empty
+            <tr><td colspan="4" class="muted ctr" style="padding:14px;">Aucun élément</td></tr>
+        @endforelse
+    </tbody>
+</table>
+
+@if(!empty($budget->notes))
+    <h2>Notes</h2>
+    <div style="font-size:9px; color:#4b5563; line-height:1.5;">{!! nl2br(e($budget->notes)) !!}</div>
 @endif
 
-{{-- ======== SIGNATURE ======== --}}
-<div class="signature-section">
-    <div class="signature-box">
-        <div class="signature-title">
-            Directeur Administratif et Financier<br>
-            {{ $org->name ?? '' }}
-        </div>
-        <div class="signature-line">
-            Date et signature
-        </div>
-    </div>
-</div>
-
-{{-- ======== PIED DE PAGE ======== --}}
 <div class="footer">
-    <div>SECRETIS ERP — {{ $org->name ?? 'IBIG' }} — Confidentiel</div>
-    <div>Rapport généré le {{ $date }} · Budget : {{ $budget->name }}</div>
-    <div>Page <span class="pagenum"></span></div>
+    {{ $org->name ?? '' }} — Écart = Budget - Réalisé. Un écart positif sur une charge traduit une sous-consommation.<br>
+    Montants en {{ $dev }} — Document généré le {{ now()->format('d/m/Y à H:i') }} — SECRETIS ERP · IBIG Soft
 </div>
 
 </body>

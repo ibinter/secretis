@@ -44,6 +44,11 @@ class AccountingController extends Controller
     // DASHBOARD
     // =========================================================================
 
+    public function index(Request $request): InertiaResponse
+    {
+        return $this->dashboard($request);
+    }
+
     public function dashboard(Request $request): InertiaResponse
     {
         $user  = Auth::user();
@@ -442,6 +447,101 @@ class AccountingController extends Controller
         ], 201);
     }
 
+    public function quotesCreate(): InertiaResponse
+    {
+        $user    = Auth::user();
+        $clients = AccountingClient::forOrg($user->organization_id)->active()->orderBy('name')->get(['id', 'name', 'email', 'tax_number']);
+
+        return Inertia::render('Comptabilite/QuoteForm', [
+            'clients'    => $clients,
+            'quote'      => null,
+            'defaultTax' => 18.0,
+        ]);
+    }
+
+    public function quotesEdit(int $id): InertiaResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)
+            ->with(['client', 'items'])
+            ->findOrFail($id);
+        $clients = AccountingClient::forOrg($user->organization_id)->active()->orderBy('name')->get(['id', 'name', 'email', 'tax_number']);
+
+        return Inertia::render('Comptabilite/QuoteForm', [
+            'clients'    => $clients,
+            'quote'      => $quote,
+            'defaultTax' => 18.0,
+        ]);
+    }
+
+    public function quotesUpdate(Request $request, int $id): JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)->findOrFail($id);
+
+        if ($quote->status !== 'draft') {
+            return response()->json(['message' => 'Seuls les devis en brouillon peuvent être modifiés.'], 422);
+        }
+
+        $data = $request->validate([
+            'client_id'   => 'required|exists:accounting_clients,id',
+            'title'       => 'required|string|max:255',
+            'issue_date'  => 'required|date',
+            'valid_until' => 'nullable|date|after_or_equal:issue_date',
+            'tax_rate'    => 'nullable|numeric|min:0|max:100',
+            'notes'       => 'nullable|string',
+            'terms'       => 'nullable|string',
+            'items'       => 'required|array|min:1',
+            'items.*.description' => 'required|string|max:500',
+            'items.*.quantity'    => 'required|numeric|min:0.001',
+            'items.*.unit_price'  => 'required|numeric|min:0',
+        ]);
+
+        $taxRate  = (float) ($data['tax_rate'] ?? 18.0);
+        $items    = $data['items'];
+        $subtotal = collect($items)->sum(fn($i) => (float) $i['quantity'] * (float) $i['unit_price']);
+        $taxAmt   = round($subtotal * $taxRate / 100, 2);
+
+        $quote->update([
+            'client_id'   => $data['client_id'],
+            'title'       => $data['title'],
+            'issue_date'  => $data['issue_date'],
+            'valid_until' => $data['valid_until'] ?? null,
+            'subtotal'    => $subtotal,
+            'tax_rate'    => $taxRate,
+            'tax_amount'  => $taxAmt,
+            'total'       => round($subtotal + $taxAmt, 2),
+            'notes'       => $data['notes'] ?? null,
+            'terms'       => $data['terms'] ?? null,
+        ]);
+
+        $quote->items()->delete();
+        foreach ($items as $i => $item) {
+            $quote->items()->create([
+                'description' => $item['description'],
+                'quantity'    => $item['quantity'],
+                'unit_price'  => $item['unit_price'],
+                'total'       => round((float) $item['quantity'] * (float) $item['unit_price'], 2),
+                'sort_order'  => $i,
+            ]);
+        }
+
+        $this->audit->logUpdated('accounting', 'quote', $quote->id, [], [
+            'quote_number' => $quote->quote_number,
+        ]);
+
+        $quote->load(['client', 'items']);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Devis mis à jour.',
+                'quote'   => $quote,
+            ]);
+        }
+
+        return redirect('/comptabilite/devis')->with('success', 'Devis mis à jour.');
+    }
+
     /**
      * GET /quotes/{id}/pdf — Télécharge le PDF du devis.
      */
@@ -599,6 +699,9 @@ class AccountingController extends Controller
      */
     public function export(Request $request): \Symfony\Component\HttpFoundation\Response
     {
+        // Export fermé au palier Découverte et en lecture seule (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('export');
+
         $user  = Auth::user();
         $start = Carbon::parse($request->input('start', now()->startOfYear()));
         $end   = Carbon::parse($request->input('end', now()->endOfYear()));
@@ -610,5 +713,141 @@ class AccountingController extends Controller
             'Content-Type'        => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
+    }
+
+    // =========================================================================
+    // ALIAS (câblage frontend Comptabilité)
+    // =========================================================================
+
+    /**
+     * POST /comptabilite/devis/{id}/send — Envoie le devis par email.
+     * Alias : délègue vers AccountingService::sendQuoteByEmail().
+     */
+    public function quotesSend(int $id): JsonResponse
+    {
+        $user  = Auth::user();
+        $quote = Quote::forOrg($user->organization_id)->findOrFail($id);
+
+        $this->accounting->sendQuoteByEmail($quote);
+
+        return response()->json(['message' => "Devis {$quote->quote_number} envoyé par email."]);
+    }
+
+    /**
+     * POST /comptabilite/factures/{id}/remind — Relance de paiement.
+     * Alias : délègue vers invoicesSend() (renvoi de la facture par email).
+     */
+    public function invoicesRemind(int $id): JsonResponse
+    {
+        return $this->invoicesSend($id);
+    }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Pont facturation → comptabilité
+    // -------------------------------------------------------------------------
+
+    /**
+     * POST /comptabilite/factures/{id}/comptabiliser
+     *
+     * Sans cette passerelle, une facture émise ne produisait AUCUNE écriture :
+     * la déclaration de TVA sortait structurellement à zéro.
+     */
+    public function invoiceToJournal(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    {
+        $facture = \App\Models\Invoice::where('organization_id', $request->user()->organization_id)
+            ->findOrFail($id);
+
+        try {
+            $ecriture = app(\App\Services\InvoiceAccountingService::class)
+                ->comptabiliserFacture($facture, $request->user());
+        } catch (\Throwable $e) {
+            return back()->withErrors(['comptabilisation' => $e->getMessage()]);
+        }
+
+        return back()->with(
+            'success',
+            "Facture comptabilisée — écriture {$ecriture->entry_number}."
+        );
+    }
+
+    /**
+     * GET /comptabilite/factures-non-comptabilisees
+     *
+     * Le trou entre les deux silos, rendu visible : tant qu'une facture émise
+     * n'a pas d'écriture, elle n'existe pas pour l'administration fiscale.
+     */
+    public function invoicesPendingJournal(Request $request): \Inertia\Response
+    {
+        $orgId   = $request->user()->organization_id;
+        $service = app(\App\Services\InvoiceAccountingService::class);
+
+        $enAttente = $service->facturesNonComptabilisees($orgId);
+
+        return Inertia::render('Comptabilite/FacturesAComptabiliser', [
+            'factures' => $enAttente->map(fn ($f) => [
+                'id'             => $f->id,
+                'invoice_number' => $f->invoice_number,
+                'client'         => $f->client->name ?? null,
+                'issue_date'     => optional($f->issue_date)->format('d/m/Y'),
+                'subtotal'       => (float) $f->subtotal,
+                'tax_amount'     => (float) $f->tax_amount,
+                'total'          => (float) $f->total,
+                'status'         => $f->status,
+            ])->values(),
+            'totaux' => [
+                'nombre' => $enAttente->count(),
+                'ht'     => round($enAttente->sum('subtotal'), 2),
+                'tva'    => round($enAttente->sum('tax_amount'), 2),
+                'ttc'    => round($enAttente->sum('total'), 2),
+            ],
+            // Le paramétrage utilisé, pour qu'un comptable puisse le vérifier
+            // sans ouvrir la base.
+            'comptes' => \Illuminate\Support\Facades\DB::table('accounting_mappings')
+                ->where('organization_id', $orgId)
+                ->orderBy('purpose')
+                ->get(['purpose', 'account_number', 'label']),
+        ]);
+    }
+
+    /**
+     * POST /comptabilite/factures-non-comptabilisees/tout
+     *
+     * Comptabilise en une fois. Une facture en erreur n'interrompt pas les
+     * autres : on remonte la liste précise de ce qui reste à traiter.
+     */
+    public function journalizeAllInvoices(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $service = app(\App\Services\InvoiceAccountingService::class);
+        $ok = 0;
+        $erreurs = [];
+
+        foreach ($service->facturesNonComptabilisees($request->user()->organization_id) as $facture) {
+            try {
+                $service->comptabiliserFacture($facture, $request->user());
+                $ok++;
+            } catch (\Throwable $e) {
+                $erreurs[] = $facture->invoice_number . ' : ' . $e->getMessage();
+            }
+        }
+
+        if ($erreurs) {
+            return back()
+                ->with('success', "{$ok} facture(s) comptabilisée(s).")
+                ->withErrors(['comptabilisation' => $erreurs]);
+        }
+
+        return back()->with('success', "{$ok} facture(s) comptabilisée(s).");
     }
 }

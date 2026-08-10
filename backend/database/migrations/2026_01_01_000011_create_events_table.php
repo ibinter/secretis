@@ -8,33 +8,40 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('events', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('calendar_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->string('location')->nullable();
-            $table->string('color', 7)->nullable();
-            $table->enum('type', ['meeting', 'task', 'reminder', 'holiday', 'other'])->default('meeting');
-            $table->timestamp('starts_at');
-            $table->timestamp('ends_at');
-            $table->boolean('all_day')->default(false);
-            $table->json('recurrence_rule')->nullable();
-            $table->foreignId('parent_event_id')->nullable()->constrained('events')->cascadeOnDelete();
-            $table->boolean('is_cancelled')->default(false);
-            $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
-            $table->json('metadata')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('events')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('events', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('calendar_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->string('location')->nullable();
+                $table->string('color', 7)->nullable();
+                $table->enum('type', ['meeting', 'task', 'reminder', 'holiday', 'other'])->default('meeting');
+                $table->timestamp('starts_at');
+                $table->timestamp('ends_at');
+                $table->boolean('all_day')->default(false);
+                $table->json('recurrence_rule')->nullable();
+                $table->foreignId('parent_event_id')->nullable()->constrained('events')->cascadeOnDelete();
+                $table->boolean('is_cancelled')->default(false);
+                $table->unsignedBigInteger('room_id')->nullable();
+                $table->json('metadata')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('calendar_id');
-            $table->index('created_by');
-            $table->index('starts_at');
-            $table->index('ends_at');
-            $table->index('type');
-        });
+                $table->index('organization_id');
+                $table->index('calendar_id');
+                $table->index('created_by');
+                $table->index('starts_at');
+                $table->index('ends_at');
+                $table->index('type');
+            });
+        }
     }
 
     public function down(): void

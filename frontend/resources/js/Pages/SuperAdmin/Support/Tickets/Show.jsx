@@ -1,20 +1,29 @@
+/**
+ * SuperAdmin/Support/Tickets/Show.jsx — Fil de discussion d'un ticket
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes appels réseau
+ * (`POST /superadmin/support/tickets/{id}/reply`,
+ *  `PATCH /superadmin/support/tickets/{id}`), mêmes états locaux,
+ * mêmes props Inertia (`ticket`, `messages`).
+ *
+ * Nettoyage sans effet fonctionnel : import `router` inutilisé supprimé.
+ */
+
 import React, { useState, useRef } from 'react'
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import axios from 'axios'
+import {
+  ArrowLeft, Clock, Lock, Send, AlertTriangle, ExternalLink,
+} from 'lucide-react'
 import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout'
+import {
+  PageHeader, Button, Badge, Card,
+  cx, SURFACE, BORDER, CONTROL, TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI'
 
-// ─── Icônes ──────────────────────────────────────────────────────────────────
-const Ic = {
-  ArrowLeft: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>,
-  User: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>,
-  Clock: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
-  Lock: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>,
-  Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
-  AlertTriangle: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>,
-  ExternalLink: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>,
-}
+/* ─── Données de démonstration (repli historique, conservées) ──────────────── */
 
-// ─── Données mock ─────────────────────────────────────────────────────────────
 const MOCK_TICKET = {
   id: 1042,
   subject: 'Impossible de générer la fiche de paie — module RH',
@@ -43,37 +52,54 @@ const MOCK_MESSAGES = [
 
 const TEMPLATES = [
   { label: 'Accusé de réception', body: 'Bonjour,\n\nNous avons bien reçu votre demande et notre équipe technique la traite en priorité. Nous vous répondrons dans les plus brefs délais.\n\nCordialement, L\'équipe IBIG Soft' },
-  { label: 'Demande d\'info complémentaire', body: 'Bonjour,\n\nPour mieux vous aider, pourriez-vous nous fournir les informations suivantes :\n- Capture d\'écran de l\'erreur\n- Étapes exactes pour reproduire le problème\n\nMerci d\'avance.' },
+  { label: "Demande d'information", body: 'Bonjour,\n\nPour mieux vous aider, pourriez-vous nous fournir les informations suivantes :\n- Capture d\'écran de l\'erreur\n- Étapes exactes pour reproduire le problème\n\nMerci d\'avance.' },
   { label: 'Résolution', body: 'Bonjour,\n\nNous avons identifié et résolu le problème. La correction sera déployée dans les prochaines heures.\n\nN\'hésitez pas à nous recontacter si le problème persiste.\n\nCordialement.' },
 ]
 
-const PRIORITY_MAP = { critique: 'bg-red-100 text-red-700', haute: 'bg-orange-100 text-orange-700', normale: 'bg-blue-100 text-blue-700', basse: 'bg-gray-100 text-gray-600' }
-const STATUS_MAP   = { open: 'bg-blue-100 text-blue-700', pending: 'bg-amber-100 text-amber-700', resolved: 'bg-green-100 text-green-700', closed: 'bg-gray-100 text-gray-500' }
+const PRIORITY_TONE = { critique: 'danger', haute: 'warning', normale: 'info', basse: 'neutral' }
+const STATUS_META = {
+  open:     { label: 'Ouvert',     tone: 'info' },
+  pending:  { label: 'En attente', tone: 'warning' },
+  resolved: { label: 'Résolu',     tone: 'success' },
+  closed:   { label: 'Fermé',      tone: 'neutral' },
+}
+
+/* ─── Composant principal ──────────────────────────────────────────────────── */
 
 export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
   const ticket   = propTicket ?? MOCK_TICKET
   const messages = propMsgs ?? MOCK_MESSAGES
 
-  const [reply, setReply]     = useState('')
-  const [internal, setInternal] = useState(false)
-  const [sending, setSending]   = useState(false)
-  const [status, setStatus]     = useState(ticket.status)
-  const [priority, setPriority] = useState(ticket.priority)
-  const [agent, setAgent]       = useState(ticket.agent ?? '')
+  const [reply, setReply]         = useState('')
+  const [internal, setInternal]   = useState(false)
+  const [sending, setSending]     = useState(false)
+  const [status, setStatus]       = useState(ticket.status)
+  const [priority, setPriority]   = useState(ticket.priority)
+  const [agent, setAgent]         = useState(ticket.agent ?? '')
   const [localMsgs, setLocalMsgs] = useState(messages)
-  const textRef = useRef()
+  const textRef = useRef(null)
 
-  const fmtDate = d => new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+  const fmtDate = d =>
+    new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
   const sendReply = async () => {
     if (!reply.trim()) return
     setSending(true)
     try {
       const res = await axios.post(`/superadmin/support/tickets/${ticket.id}/reply`, { body: reply, internal })
-      setLocalMsgs(m => [...m, res.data.message ?? { id: Date.now(), from: 'agent', author: 'Vous', body: reply, created_at: new Date().toISOString(), internal }])
+      setLocalMsgs(m => [
+        ...m,
+        res.data.message ?? {
+          id: Date.now(), from: 'agent', author: 'Vous',
+          body: reply, created_at: new Date().toISOString(), internal,
+        },
+      ])
       setReply('')
-    } catch { alert('Erreur envoi') }
-    finally { setSending(false) }
+    } catch {
+      alert('Erreur envoi')
+    } finally {
+      setSending(false)
+    }
   }
 
   const updateTicket = async (field, value) => {
@@ -83,70 +109,100 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
 
   const insertTemplate = (t) => { setReply(t.body); textRef.current?.focus() }
 
+  const statusMeta = STATUS_META[status] ?? { label: status, tone: 'neutral' }
+
+  const INFO_ROWS = [
+    ['Organisation', ticket.org_name],
+    ['Utilisateur', ticket.user_name],
+    ['Email', ticket.user_email],
+    ['Module', ticket.module],
+    ['Navigateur', ticket.browser],
+    ['Système', ticket.os],
+    ['Version', ticket.secretis_version],
+  ]
+
   return (
     <SuperAdminLayout title={`Ticket #${ticket.id}`}>
       <Head title={`Ticket #${ticket.id} — Support`} />
 
-      {/* En-tête */}
-      <div className="flex items-start gap-4 mb-6">
-        <Link href="/superadmin/support/tickets" className="mt-1 p-1.5 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-400">
-          <Ic.ArrowLeft />
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{ticket.subject}</h2>
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${PRIORITY_MAP[ticket.priority] ?? 'bg-gray-100 text-gray-600'}`}>{ticket.priority}</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_MAP[status] ?? 'bg-gray-100 text-gray-600'}`}>{status}</span>
-            <span className="text-xs text-gray-400">#{ticket.id} · {ticket.org_name}</span>
-            <Link href={`/superadmin/organisations/${ticket.org_id}`} className="text-xs text-[#1A3A5C] dark:text-blue-400 hover:underline flex items-center gap-1">
-              Voir l'organisation <Ic.ExternalLink />
+      <PageHeader
+        title={ticket.subject}
+        breadcrumbs={[
+          { label: 'Console', href: '/superadmin' },
+          { label: 'Support', href: '/superadmin/support/tickets' },
+          { label: `Ticket #${ticket.id}` },
+        ]}
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={PRIORITY_TONE[ticket.priority] ?? 'neutral'} dot>{ticket.priority}</Badge>
+            <Badge variant={statusMeta.tone} dot>{statusMeta.label}</Badge>
+            <span className={cx('text-xs', TEXT_MUTED, NUM)}>#{ticket.id} · {ticket.org_name}</span>
+            <Link
+              href={`/superadmin/organisations/${ticket.org_id}`}
+              className={cx('inline-flex items-center gap-1 rounded text-xs text-purple-700 hover:underline dark:text-purple-300', FOCUS_RING)}
+            >
+              Voir l'organisation <ExternalLink className="h-3 w-3" />
             </Link>
           </div>
-        </div>
-      </div>
+        }
+        actions={
+          <Button as={Link} href="/superadmin/support/tickets" variant="ghost" icon={ArrowLeft}>
+            Retour aux tickets
+          </Button>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Thread ─────────────────────────────────────────────────────────── */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-          {/* Messages */}
-          <div className="space-y-4">
+        {/* ── Fil de discussion ───────────────────────────────────────────── */}
+        <div className="space-y-4 lg:col-span-2">
+
+          <ol className="space-y-4">
             {localMsgs.map(msg => (
-              <div key={msg.id} className={`rounded-xl p-4 shadow-sm border ${
-                msg.internal
-                  ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/30'
-                  : msg.from === 'client'
-                    ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700'
-                    : 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-800/30 ml-8'
-              }`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                    msg.internal ? 'bg-amber-200 text-amber-800' : msg.from === 'client' ? 'bg-gray-200 text-gray-700' : 'bg-[#1A3A5C] text-white'
-                  }`}>
-                    {msg.author[0]}
-                  </div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{msg.author}</span>
-                  {msg.internal && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                      <Ic.Lock /> Note interne
-                    </span>
-                  )}
-                  <span className="ml-auto text-xs text-gray-400 flex items-center gap-1"><Ic.Clock /> {fmtDate(msg.created_at)}</span>
+              <li
+                key={msg.id}
+                className={cx(
+                  'rounded-xl border p-4 shadow-sm',
+                  msg.internal
+                    ? 'border-amber-200 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10'
+                    : msg.from === 'client'
+                      ? cx(SURFACE, BORDER)
+                      : cx('ml-0 border-purple-200 bg-purple-50 dark:border-purple-500/30 dark:bg-purple-500/10 sm:ml-8'),
+                )}
+              >
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className={cx(
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                    msg.internal
+                      ? 'bg-amber-200 text-amber-800 dark:bg-amber-500/30 dark:text-amber-200'
+                      : msg.from === 'client'
+                        ? 'bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-200'
+                        : 'bg-purple-600 text-white',
+                  )}>
+                    {String(msg.author ?? '?')[0].toUpperCase()}
+                  </span>
+                  <span className={cx('text-sm font-medium', TEXT_TITLE)}>{msg.author}</span>
+                  {msg.internal && <Badge variant="warning" icon={Lock}>Note interne</Badge>}
+                  <span className={cx('ml-auto flex items-center gap-1 text-xs', TEXT_FAINT, NUM)}>
+                    <Clock className="h-3 w-3" /> {fmtDate(msg.created_at)}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{msg.body}</p>
-              </div>
+                <p className={cx('whitespace-pre-wrap text-sm leading-relaxed', TEXT_BODY)}>{msg.body}</p>
+              </li>
             ))}
-          </div>
+          </ol>
 
-          {/* Éditeur réponse */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-            {/* Modèles */}
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Modèles :</span>
+          {/* Éditeur de réponse */}
+          <Card
+            title={internal ? 'Ajouter une note interne' : 'Répondre au client'}
+            subtitle="Les notes internes ne sont jamais visibles par l'organisation cliente."
+          >
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className={cx('text-xs', TEXT_MUTED)}>Modèles :</span>
               {TEMPLATES.map(t => (
-                <button key={t.label} onClick={() => insertTemplate(t)} className="px-2.5 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                <Button key={t.label} variant="secondary" size="xs" onClick={() => insertTemplate(t)}>
                   {t.label}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -156,94 +212,113 @@ export default function TicketShow({ ticket: propTicket, messages: propMsgs }) {
               onChange={e => setReply(e.target.value)}
               rows={5}
               placeholder={internal ? 'Note interne (invisible pour le client)…' : 'Répondre au client…'}
-              className={`w-full border rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none dark:bg-gray-700 dark:text-white transition-colors ${
-                internal ? 'border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/10' : 'border-gray-200 dark:border-gray-600'
-              }`}
+              aria-label={internal ? 'Note interne' : 'Réponse au client'}
+              className={cx(
+                CONTROL, 'resize-none',
+                internal && 'border-amber-300 bg-amber-50/50 dark:border-amber-500/40 dark:bg-amber-500/[0.07]',
+              )}
             />
 
-            <div className="flex items-center justify-between mt-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={internal} onChange={e => setInternal(e.target.checked)} className="rounded" />
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Note interne (invisible client)</span>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={internal}
+                  onChange={e => setInternal(e.target.checked)}
+                  className="h-4 w-4 cursor-pointer rounded border-gray-300 bg-white text-purple-600 focus:ring-purple-500 dark:border-gray-600 dark:bg-[#0F1923]"
+                />
+                <span className={cx('text-xs font-medium', TEXT_MUTED)}>Note interne (invisible pour le client)</span>
               </label>
-              <button
-                disabled={sending || !reply.trim()}
+
+              <Button
+                variant="primary"
+                icon={Send}
+                loading={sending}
+                disabled={!reply.trim()}
                 onClick={sendReply}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] disabled:opacity-50 transition-colors"
               >
-                <Ic.Send /> {sending ? 'Envoi…' : internal ? 'Ajouter note' : 'Envoyer'}
-              </button>
+                {internal ? 'Ajouter la note' : 'Envoyer'}
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
 
-        {/* ── Panneau latéral ───────────────────────────────────────────────── */}
+        {/* ── Panneau latéral ─────────────────────────────────────────────── */}
         <div className="space-y-4">
 
-          {/* Informations ticket */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Informations</h3>
-            <div className="space-y-3">
-              {[
-                ['Organisation', ticket.org_name],
-                ['Utilisateur', ticket.user_name],
-                ['Email', ticket.user_email],
-                ['Module', ticket.module],
-                ['Navigateur', ticket.browser],
-                ['OS', ticket.os],
-                ['Version', ticket.secretis_version],
-              ].map(([label, val]) => (
-                <div key={label} className="flex justify-between text-sm border-b border-gray-50 dark:border-gray-700/50 pb-2 last:border-0 last:pb-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
-                  <span className="text-xs font-medium text-gray-800 dark:text-gray-200 text-right max-w-[60%]">{val}</span>
+          <Card title="Informations">
+            <dl className="space-y-0">
+              {INFO_ROWS.map(([label, val]) => (
+                <div
+                  key={label}
+                  className="flex items-start justify-between gap-3 border-b border-gray-100 py-2.5 last:border-0 dark:border-[#1E3048]"
+                >
+                  <dt className={cx('text-xs', TEXT_MUTED)}>{label}</dt>
+                  <dd className={cx('max-w-[60%] text-right text-xs font-medium', TEXT_BODY)}>{val ?? '—'}</dd>
                 </div>
               ))}
+            </dl>
+          </Card>
+
+          <Card title="Gestion du ticket">
+            <div className="space-y-4">
+              <label className="flex flex-col gap-1.5">
+                <span className={cx('text-xs font-medium', TEXT_MUTED)}>Statut</span>
+                <select
+                  value={status}
+                  onChange={e => { setStatus(e.target.value); updateTicket('status', e.target.value) }}
+                  className={cx(CONTROL, 'h-10')}
+                >
+                  <option value="open">Ouvert</option>
+                  <option value="pending">En attente</option>
+                  <option value="resolved">Résolu</option>
+                  <option value="closed">Fermé</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className={cx('text-xs font-medium', TEXT_MUTED)}>Priorité</span>
+                <select
+                  value={priority}
+                  onChange={e => { setPriority(e.target.value); updateTicket('priority', e.target.value) }}
+                  className={cx(CONTROL, 'h-10')}
+                >
+                  <option value="basse">Basse</option>
+                  <option value="normale">Normale</option>
+                  <option value="haute">Haute</option>
+                  <option value="critique">Critique</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className={cx('text-xs font-medium', TEXT_MUTED)}>Agent assigné</span>
+                <select
+                  value={agent}
+                  onChange={e => { setAgent(e.target.value); updateTicket('agent', e.target.value) }}
+                  className={cx(CONTROL, 'h-10')}
+                >
+                  <option value="">Non assigné</option>
+                  <option value="Brice K.">Brice K.</option>
+                  <option value="Amenan D.">Amenan D.</option>
+                  <option value="Jean-Marc E.">Jean-Marc E.</option>
+                </select>
+              </label>
+
+              <Button
+                variant="secondary"
+                icon={AlertTriangle}
+                block
+                className="text-amber-700 dark:text-amber-400"
+                onClick={() => { if (confirm('Escalader ce ticket ?')) updateTicket('escalated', true) }}
+              >
+                Escalader le ticket
+              </Button>
             </div>
-          </div>
-
-          {/* Gestion */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 space-y-3">
-            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Gestion</h3>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Statut</label>
-              <select value={status} onChange={e => { setStatus(e.target.value); updateTicket('status', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
-                <option value="open">Ouvert</option>
-                <option value="pending">En attente</option>
-                <option value="resolved">Résolu</option>
-                <option value="closed">Fermé</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priorité</label>
-              <select value={priority} onChange={e => { setPriority(e.target.value); updateTicket('priority', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
-                <option value="basse">Basse</option>
-                <option value="normale">Normale</option>
-                <option value="haute">Haute</option>
-                <option value="critique">Critique</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Agent assigné</label>
-              <select value={agent} onChange={e => { setAgent(e.target.value); updateTicket('agent', e.target.value) }} className="w-full text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-transparent dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
-                <option value="">Non assigné</option>
-                <option value="Brice K.">Brice K.</option>
-                <option value="Amenan D.">Amenan D.</option>
-                <option value="Jean-Marc E.">Jean-Marc E.</option>
-              </select>
-            </div>
-
-            <button
-              onClick={() => { if (confirm('Escalader ce ticket ?')) updateTicket('escalated', true) }}
-              className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-amber-700 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 rounded-lg hover:bg-amber-100 transition-colors"
-            >
-              <Ic.AlertTriangle /> Escalader
-            </button>
-          </div>
+          </Card>
         </div>
       </div>
     </SuperAdminLayout>
   )
 }
+
+export { TicketShow };

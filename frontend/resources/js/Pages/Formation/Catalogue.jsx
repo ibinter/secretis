@@ -1,30 +1,54 @@
+/**
+ * Formation/Catalogue.jsx — Accueil du module Formation (GET /formation)
+ *
+ * ⚠️ Page VIVANTE : `TrainingController@index` (route web `formation.index`)
+ * rend bien `Formation/Catalogue`. À ne pas confondre avec `Formation/Catalog`
+ * rendu par `TrainingController@catalog` (route web `formation.catalogue`).
+ *
+ * Présentation migrée sur `@/Components/UI`. Logique métier STRICTEMENT
+ * inchangée : mêmes props Inertia, mêmes routes (`GET /training/courses`,
+ * `POST /training/courses/{id}/enroll`), mêmes états locaux, mêmes payloads.
+ *
+ * Props réelles (Inertia::render('Formation/Catalogue')) :
+ *   courses     : tableau de cours { id, title, description, category, level,
+ *                   duration_minutes, thumbnail_path,
+ *                   enrollment: { status, progress_percent } | null }
+ *   pagination  : { current_page, last_page, total, … }
+ *   filters     : { category, level, search, status }  (sérialisé `[]` si vide)
+ *   categories  : string[]
+ */
+
 import { useState } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AppLayout from '@/Components/Layout/AppLayout';
 import {
     AcademicCapIcon,
     MagnifyingGlassIcon,
     ClockIcon,
-    PlayCircleIcon,
-    CheckCircleIcon,
     BookOpenIcon,
     FunnelIcon,
-    StarIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckSolid } from '@heroicons/react/24/solid';
+import {
+    PageHeader, Button, Badge, Card, EmptyState,
+    cx, CONTROL, SURFACE, SURFACE_SUNK, BORDER,
+    TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM,
+} from '@/Components/UI';
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
+/* Niveaux et statuts en tons sémantiques : l'accent violet reste réservé
+   aux actions principales et à l'état actif.                                  */
 
 const LEVEL_CONFIG = {
-    beginner:     { label: 'Débutant',     color: 'bg-green-100 text-green-700' },
-    intermediate: { label: 'Intermédiaire',color: 'bg-yellow-100 text-yellow-700' },
-    advanced:     { label: 'Avancé',       color: 'bg-red-100 text-red-700' },
+    beginner:     { label: 'Débutant',      tone: 'success' },
+    intermediate: { label: 'Intermédiaire', tone: 'warning' },
+    advanced:     { label: 'Avancé',        tone: 'danger'  },
 };
 
 const STATUS_CONFIG = {
-    enrolled:    { label: 'Inscrit',    color: 'bg-blue-100 text-blue-700' },
-    in_progress: { label: 'En cours',   color: 'bg-orange-100 text-orange-700' },
-    completed:   { label: 'Terminé',    color: 'bg-green-100 text-green-700' },
+    enrolled:    { label: 'Inscrit',  tone: 'info'    },
+    in_progress: { label: 'En cours', tone: 'warning' },
+    completed:   { label: 'Terminé',  tone: 'success' },
 };
 
 function formatDuration(minutes) {
@@ -34,12 +58,30 @@ function formatDuration(minutes) {
     return h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`;
 }
 
-// ─── CourseCard ───────────────────────────────────────────────────────────────
+// ─── Barre de progression ────────────────────────────────────────────────────
+
+function ProgressBar({ value }) {
+    const pct = Math.max(0, Math.min(100, Number(value) || 0));
+    return (
+        <div
+            className={cx('h-1 w-full overflow-hidden rounded-full', SURFACE_SUNK)}
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+        >
+            <div className="h-full rounded-full bg-purple-600 transition-all" style={{ width: `${pct}%` }} />
+        </div>
+    );
+}
+
+// ─── Carte cours ─────────────────────────────────────────────────────────────
 
 function CourseCard({ course }) {
     const enrollment = course.enrollment;
-    const level      = LEVEL_CONFIG[course.level] ?? { label: course.level, color: 'bg-gray-100 text-gray-600' };
+    const level      = LEVEL_CONFIG[course.level] ?? { label: course.level, tone: 'neutral' };
     const status     = enrollment ? STATUS_CONFIG[enrollment.status] : null;
+    const done       = enrollment?.status === 'completed';
 
     function handleAction() {
         if (!enrollment) {
@@ -52,96 +94,101 @@ function CourseCard({ course }) {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-            {/* Thumbnail */}
-            <div className="relative h-36 bg-gradient-to-br from-blue-600 to-indigo-700 overflow-hidden">
+        <article className={cx(
+            SURFACE, 'border', BORDER, 'flex flex-col overflow-hidden rounded-xl shadow-sm',
+            'transition-colors hover:border-purple-300 dark:hover:border-purple-500/50',
+        )}>
+            {/* Miniature */}
+            <div className={cx('relative aspect-[16/9] overflow-hidden border-b', BORDER, SURFACE_SUNK)}>
                 {course.thumbnail_path ? (
-                    <img src={`/storage/${course.thumbnail_path}`} alt={course.title}
-                         className="w-full h-full object-cover"/>
+                    <img
+                        src={`/storage/${course.thumbnail_path}`}
+                        alt=""
+                        className="h-full w-full object-cover"
+                    />
                 ) : (
-                    <div className="flex items-center justify-center h-full">
-                        <AcademicCapIcon className="w-16 h-16 text-white/30"/>
+                    <div className="flex h-full items-center justify-center">
+                        <AcademicCapIcon className={cx('h-10 w-10', TEXT_FAINT)} aria-hidden="true" />
                     </div>
                 )}
-                {/* Badge niveau */}
-                <span className={`absolute top-2 left-2 text-xs font-medium px-2 py-0.5 rounded-full ${level.color}`}>
-                    {level.label}
+
+                <span className="absolute left-2 top-2">
+                    <Badge variant={level.tone} outline className="shadow-sm">{level.label}</Badge>
                 </span>
-                {/* Badge statut */}
+
                 {status && (
-                    <span className={`absolute top-2 right-2 text-xs font-medium px-2 py-0.5 rounded-full ${status.color}`}>
-                        {status.label}
+                    <span className="absolute right-2 top-2">
+                        <Badge variant={status.tone} className="shadow-sm">{status.label}</Badge>
                     </span>
                 )}
-                {/* Progression overlay */}
-                {enrollment && enrollment.status !== 'completed' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-                        <div className="h-full bg-white transition-all"
-                             style={{ width: `${enrollment.progress_percent}%` }}/>
-                    </div>
-                )}
-                {/* Terminé overlay */}
-                {enrollment?.status === 'completed' && (
-                    <div className="absolute inset-0 bg-green-900/40 flex items-center justify-center">
-                        <CheckSolid className="w-10 h-10 text-white"/>
+
+                {/* Progression — trait fin en pied de miniature */}
+                {enrollment && !done && (
+                    <div className="absolute inset-x-0 bottom-0">
+                        <ProgressBar value={enrollment.progress_percent} />
                     </div>
                 )}
             </div>
 
             {/* Contenu */}
-            <div className="p-4 flex flex-col flex-1">
-                <div className="text-xs font-medium text-indigo-600 mb-1 uppercase tracking-wide">
-                    {course.category}
-                </div>
-                <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-2 line-clamp-2">
-                    {course.title}
-                </h3>
-                {course.description && (
-                    <p className="text-xs text-gray-500 line-clamp-2 mb-3">{course.description}</p>
+            <div className="flex flex-1 flex-col p-4">
+                {course.category && (
+                    <p className={cx('mb-1 text-[11px] font-semibold uppercase tracking-wider', TEXT_MUTED)}>
+                        {course.category}
+                    </p>
                 )}
 
-                <div className="flex items-center gap-3 text-xs text-gray-500 mb-4 mt-auto">
+                <h3 className={cx('mb-2 line-clamp-2 text-sm font-semibold leading-5', TEXT_TITLE)}>
+                    {course.title}
+                </h3>
+
+                {course.description && (
+                    <p className={cx('mb-3 line-clamp-2 text-xs leading-5', TEXT_MUTED)}>
+                        {course.description}
+                    </p>
+                )}
+
+                <div className={cx('mb-4 mt-auto flex items-center gap-3 text-xs', TEXT_MUTED)}>
                     <span className="flex items-center gap-1">
-                        <ClockIcon className="w-3.5 h-3.5"/>
-                        {formatDuration(course.duration_minutes)}
+                        <ClockIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className={NUM}>{formatDuration(course.duration_minutes)}</span>
                     </span>
                     {enrollment && (
                         <span className="flex items-center gap-1">
-                            <BookOpenIcon className="w-3.5 h-3.5"/>
-                            {enrollment.progress_percent}% complété
+                            <BookOpenIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                            <span className={NUM}>{enrollment.progress_percent ?? 0}%</span>
+                            <span>complété</span>
                         </span>
                     )}
                 </div>
 
-                <button
+                <Button
+                    variant={done ? 'secondary' : 'primary'}
+                    size="sm"
+                    block
+                    icon={done ? CheckSolid : undefined}
                     onClick={handleAction}
-                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                        enrollment?.status === 'completed'
-                            ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-                            : enrollment
-                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                    }`}
                 >
-                    {enrollment?.status === 'completed' && <CheckSolid className="w-4 h-4 inline mr-1"/>}
-                    {enrollment?.status === 'completed'
-                        ? 'Revoir le cours'
-                        : enrollment
-                            ? 'Continuer'
-                            : "S'inscrire"}
-                </button>
+                    {done ? 'Revoir le cours' : enrollment ? 'Continuer' : "S'inscrire"}
+                </Button>
             </div>
-        </div>
+        </article>
     );
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 export default function Catalogue({ courses, pagination, filters, categories }) {
-    const [search, setSearch]     = useState(filters?.search ?? '');
-    const [category, setCategory] = useState(filters?.category ?? '');
-    const [level, setLevel]       = useState(filters?.level ?? '');
-    const [status, setStatus]     = useState(filters?.status ?? '');
+    /* PHP sérialise un `filters` vide en tableau `[]` : on normalise en objet. */
+    const f = filters && !Array.isArray(filters) ? filters : {};
+
+    const [search, setSearch]     = useState(f.search ?? '');
+    const [category, setCategory] = useState(f.category ?? '');
+    const [level, setLevel]       = useState(f.level ?? '');
+    const [status, setStatus]     = useState(f.status ?? '');
+
+    const items = Array.isArray(courses) ? courses : (courses?.data ?? []);
+    const total = pagination?.total ?? items.length;
 
     function applyFilters(overrides = {}) {
         router.get('/training/courses', {
@@ -157,42 +204,60 @@ export default function Catalogue({ courses, pagination, filters, categories }) 
         applyFilters();
     }
 
+    function resetFilters() {
+        setSearch(''); setCategory(''); setLevel(''); setStatus('');
+        router.get('/training/courses', {}, { preserveState: true, replace: true });
+    }
+
+    const isFiltered = Boolean(f.search || f.category || f.level || f.status);
+    const lbl = cx('mb-1.5 block text-xs font-medium', TEXT_MUTED);
+
     return (
         <AppLayout>
-            <Head title="Catalogue de formations"/>
+            <Head title="Catalogue de formations" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <PageHeader
+                title="Formations"
+                subtitle="Développez vos compétences avec les formations internes de l'organisation."
+                icon={AcademicCapIcon}
+                breadcrumbs={[{ label: 'Formation' }]}
+                meta={
+                    <Badge variant="neutral" size="md">
+                        <span className={NUM}>{total.toLocaleString('fr-FR')}</span>
+                        &nbsp;formation{total > 1 ? 's' : ''}
+                    </Badge>
+                }
+            />
 
-                {/* En-tête */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <AcademicCapIcon className="w-8 h-8 text-indigo-600"/>
-                        <h1 className="text-2xl font-bold text-gray-900">Formations</h1>
-                    </div>
-                    <p className="text-gray-500">Développez vos compétences avec nos formations internes.</p>
-                </div>
-
-                {/* Barre de recherche et filtres */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 flex flex-wrap gap-3 items-end">
-                    <form onSubmit={handleSearch} className="flex-1 min-w-48">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Rechercher</label>
+            {/* Recherche et filtres */}
+            <Card className="mb-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
+                    <form onSubmit={handleSearch} className="lg:col-span-2">
+                        <label className={lbl} htmlFor="cat-search">Rechercher</label>
                         <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"/>
+                            <MagnifyingGlassIcon
+                                className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)}
+                                aria-hidden="true"
+                            />
                             <input
+                                id="cat-search"
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Titre, description..."
-                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="Titre, description…"
+                                className={cx(CONTROL, 'h-10 pl-9')}
                             />
                         </div>
                     </form>
 
-                    <div className="min-w-36">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Catégorie</label>
-                        <select value={category}
-                                onChange={e => { setCategory(e.target.value); applyFilters({ category: e.target.value }); }}
-                                className="w-full py-2 px-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label className={lbl} htmlFor="cat-category">Catégorie</label>
+                        <select
+                            id="cat-category"
+                            value={category}
+                            onChange={e => { setCategory(e.target.value); applyFilters({ category: e.target.value }); }}
+                            className={cx(CONTROL, 'h-10')}
+                        >
                             <option value="">Toutes</option>
                             {(categories ?? []).map(c => (
                                 <option key={c} value={c}>{c}</option>
@@ -200,11 +265,14 @@ export default function Catalogue({ courses, pagination, filters, categories }) 
                         </select>
                     </div>
 
-                    <div className="min-w-36">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Niveau</label>
-                        <select value={level}
-                                onChange={e => { setLevel(e.target.value); applyFilters({ level: e.target.value }); }}
-                                className="w-full py-2 px-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label className={lbl} htmlFor="cat-level-filter">Niveau</label>
+                        <select
+                            id="cat-level-filter"
+                            value={level}
+                            onChange={e => { setLevel(e.target.value); applyFilters({ level: e.target.value }); }}
+                            className={cx(CONTROL, 'h-10')}
+                        >
                             <option value="">Tous</option>
                             <option value="beginner">Débutant</option>
                             <option value="intermediate">Intermédiaire</option>
@@ -212,63 +280,94 @@ export default function Catalogue({ courses, pagination, filters, categories }) 
                         </select>
                     </div>
 
-                    <div className="min-w-36">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Statut</label>
-                        <select value={status}
-                                onChange={e => { setStatus(e.target.value); applyFilters({ status: e.target.value }); }}
-                                className="w-full py-2 px-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div>
+                        <label className={lbl} htmlFor="cat-status">Statut</label>
+                        <select
+                            id="cat-status"
+                            value={status}
+                            onChange={e => { setStatus(e.target.value); applyFilters({ status: e.target.value }); }}
+                            className={cx(CONTROL, 'h-10')}
+                        >
                             <option value="">Tous</option>
                             <option value="not_started">Non commencé</option>
                             <option value="in_progress">En cours</option>
                             <option value="completed">Terminé</option>
                         </select>
                     </div>
-
-                    <button onClick={() => applyFilters()}
-                            className="py-2 px-4 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors">
-                        <FunnelIcon className="w-4 h-4 inline mr-1"/>
-                        Filtrer
-                    </button>
                 </div>
 
-                {/* Grille de cours */}
-                {courses.length === 0 ? (
-                    <div className="text-center py-16">
-                        <AcademicCapIcon className="w-16 h-16 text-gray-300 mx-auto mb-4"/>
-                        <h3 className="text-lg font-medium text-gray-700 mb-2">Aucune formation trouvée</h3>
-                        <p className="text-gray-500">Modifiez vos filtres ou revenez plus tard.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                            {courses.map(course => (
-                                <CourseCard key={course.id} course={course}/>
-                            ))}
-                        </div>
+                <div className={cx('mt-4 flex justify-end gap-2 border-t pt-4', BORDER)}>
+                    {isFiltered && (
+                        <Button variant="ghost" onClick={resetFilters}>Effacer</Button>
+                    )}
+                    <Button variant="primary" icon={FunnelIcon} onClick={() => applyFilters()}>
+                        Filtrer
+                    </Button>
+                </div>
+            </Card>
 
-                        {/* Pagination */}
-                        {pagination && pagination.last_page > 1 && (
-                            <div className="flex justify-center mt-8 gap-2">
-                                {pagination.current_page > 1 && (
-                                    <button onClick={() => router.get('/training/courses', { ...filters, page: pagination.current_page - 1 })}
-                                            className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50">
-                                        Précédent
-                                    </button>
-                                )}
-                                <span className="px-3 py-1.5 text-sm text-gray-600">
-                                    Page {pagination.current_page} / {pagination.last_page}
-                                </span>
-                                {pagination.current_page < pagination.last_page && (
-                                    <button onClick={() => router.get('/training/courses', { ...filters, page: pagination.current_page + 1 })}
-                                            className="px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50">
-                                        Suivant
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
+            {/* Grille de cours */}
+            {items.length === 0 ? (
+                <EmptyState
+                    bordered
+                    variant={isFiltered ? 'no-results' : 'no-data'}
+                    icon={isFiltered ? undefined : AcademicCapIcon}
+                    title={isFiltered ? 'Aucune formation ne correspond' : 'Aucune formation disponible'}
+                    description={
+                        isFiltered
+                            ? 'Aucun cours ne correspond à ces critères. Élargissez la recherche ou réinitialisez les filtres.'
+                            : "Le catalogue interne est vide pour le moment. Les formations publiées par votre organisation apparaîtront ici."
+                    }
+                    hints={
+                        isFiltered
+                            ? undefined
+                            : [
+                                'Seuls les cours publiés de votre organisation sont listés.',
+                                'Votre progression est reprise automatiquement sur chaque carte.',
+                                'Un cours terminé reste accessible en relecture.',
+                            ]
+                    }
+                    secondary={
+                        isFiltered
+                            ? <Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>
+                            : undefined
+                    }
+                />
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {items.map(course => (
+                            <CourseCard key={course.id} course={course} />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {pagination && pagination.last_page > 1 && (
+                        <nav className="mt-8 flex items-center justify-center gap-3" aria-label="Pagination">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={pagination.current_page <= 1}
+                                onClick={() => router.get('/training/courses', { ...f, page: pagination.current_page - 1 })}
+                            >
+                                Précédent
+                            </Button>
+                            <span className={cx('text-sm', NUM, TEXT_MUTED)}>
+                                Page {pagination.current_page} / {pagination.last_page}
+                            </span>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={pagination.current_page >= pagination.last_page}
+                                onClick={() => router.get('/training/courses', { ...f, page: pagination.current_page + 1 })}
+                            >
+                                Suivant
+                            </Button>
+                        </nav>
+                    )}
+                </>
+            )}
         </AppLayout>
     );
 }
+export { Catalogue };

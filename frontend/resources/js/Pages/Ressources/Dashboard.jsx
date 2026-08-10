@@ -96,7 +96,7 @@ export default function ResourcesDashboard({
             label="Salles occupées"
             value={`${kpis.rooms.occupied} / ${kpis.rooms.total}`}
             sub={`Taux occupation : ${occupationRate}%`}
-            color="bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            color="bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400"
             href={route('resources.salles.index')}
           />
           <KpiCard
@@ -198,7 +198,7 @@ export default function ResourcesDashboard({
                   </div>
                   <Link
                     href={route('resources.materiel.index')}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                    className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
                   >
                     Voir <ChevronRight className="w-3 h-3" />
                   </Link>
@@ -215,12 +215,12 @@ export default function ResourcesDashboard({
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <CalendarCheck className="w-5 h-5 text-blue-500" />
+                <CalendarCheck className="w-5 h-5 text-purple-500" />
                 <h2 className="font-semibold text-gray-900 dark:text-white">Salles — Aujourd'hui</h2>
               </div>
               <Link
                 href={route('resources.salles.index')}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
               >
                 Voir tout <ChevronRight className="w-3 h-3" />
               </Link>
@@ -233,7 +233,7 @@ export default function ResourcesDashboard({
                     key={res.id}
                     className="flex items-center gap-3 py-2.5 px-3 rounded-xl bg-gray-50 dark:bg-gray-700/50"
                   >
-                    <DoorOpen className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                    <DoorOpen className="w-4 h-4 text-purple-400 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {res.room?.name}
@@ -270,7 +270,7 @@ export default function ResourcesDashboard({
               </div>
               <Link
                 href={route('resources.vehicules.index')}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                className="text-xs text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
               >
                 Voir tout <ChevronRight className="w-3 h-3" />
               </Link>
@@ -311,7 +311,7 @@ export default function ResourcesDashboard({
         {/* Navigation rapide */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { href: route('resources.salles.index'),      label: 'Gérer les salles',       icon: DoorOpen, color: 'text-blue-600 dark:text-blue-400' },
+            { href: route('resources.salles.index'),      label: 'Gérer les salles',       icon: DoorOpen, color: 'text-purple-600 dark:text-purple-400' },
             { href: route('resources.materiel.index'),    label: 'Gérer le matériel',      icon: Wrench,   color: 'text-amber-600 dark:text-amber-400' },
             { href: route('resources.fournitures.index'), label: 'Gérer les fournitures',  icon: Package,  color: 'text-red-600 dark:text-red-400' },
             { href: route('resources.vehicules.index'),   label: 'Gérer les véhicules',    icon: Car,      color: 'text-indigo-600 dark:text-indigo-400' },
@@ -332,3 +332,4 @@ export default function ResourcesDashboard({
     </AuthLayout>
   );
 }
+export { ResourcesDashboard };

@@ -133,3 +133,4 @@ export default function PaymentMethodIcon({ provider = 'default', size = 32, cla
     </span>
   );
 }
+export { PaymentMethodIcon };

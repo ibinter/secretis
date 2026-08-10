@@ -49,8 +49,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/secretis.conf:/etc/nginx/conf.d/secretis.conf:ro
-      - ../nginx/subdomain-wildcard.conf:/etc/nginx/conf.d/subdomain-wildcard.conf:ro
+      # Les configs nginx ne sont plus versionnées ici : la référence est
+      # /etc/nginx/sites-enabled/secretis sur le serveur (voir deploy/nginx/LISEZ-MOI.md).
+      # Monter un fichier absent empêche le conteneur de démarrer : renseigner
+      # NGINX_CONF avec le chemin d'une configuration réelle avant d'utiliser
+      # ce fichier compose.
+      - ${NGINX_CONF:-/etc/nginx/sites-enabled/secretis}:/etc/nginx/conf.d/secretis.conf:ro
       - public_data:/var/www/secretis/backend/public/storage:ro
       - storage_data:/var/www/secretis/backend/storage:ro
       - letsencrypt_data:/etc/letsencrypt:ro

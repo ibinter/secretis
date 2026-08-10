@@ -48,7 +48,6 @@ class QualityService
             // Séquence auto par organisation et année
             $seq = Nonconformity::where('organization_id', $orgId)
                 ->whereYear('created_at', $year)
-                ->lockForUpdate()
                 ->count() + 1;
 
             $reference = sprintf('NC-%d-%04d', $year, $seq);
@@ -366,7 +365,6 @@ class QualityService
 
         $seq = QualityAudit::where('organization_id', $orgId)
             ->whereYear('created_at', $year)
-            ->lockForUpdate()
             ->count() + 1;
 
         return QualityAudit::create([

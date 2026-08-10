@@ -36,9 +36,6 @@ class Task extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $keyType      = 'string';
-    public    $incrementing = false;
-
     protected $fillable = [
         'organization_id',
         'project_id',
@@ -249,11 +246,8 @@ class Task extends Model
     protected static function booted(): void
     {
         static::creating(function (self $task) {
-            if (empty($task->id)) {
-                $task->id = \Str::uuid()->toString();
-            }
             $task->status      = $task->status      ?? 'todo';
-            $task->priority    = $task->priority    ?? 'normal';
+            $task->priority    = $task->priority    ?? 'medium';
             $task->position    = $task->position    ?? 0;
             $task->attachments = $task->attachments ?? [];
             $task->settings    = $task->settings    ?? [];

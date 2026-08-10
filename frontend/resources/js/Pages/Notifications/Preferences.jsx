@@ -7,6 +7,7 @@
 import React, { useState, useCallback } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Types de notifications groupés par catégorie ─────────────────────────────
 const GROUPS = [
@@ -119,9 +120,9 @@ function Toggle({ checked, onChange, disabled }) {
       aria-checked={checked}
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1
         ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
-        ${checked ? 'bg-[#1A3A5C]' : 'bg-gray-200'}`}
+        ${checked ? 'bg-[#9333EA]' : 'bg-gray-200'}`}
     >
       <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`} />
     </button>
@@ -237,7 +238,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
   };
 
   return (
-    <>
+    <AppLayout>
       <Head title="Préférences de notifications — SECRETIS" />
 
       {/* Toast */}
@@ -340,7 +341,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
                     </tr>
 
                     {openGroups[g.key] && g.types.map((type, i) => (
-                      <tr key={type.key} className={`border-b border-gray-50 hover:bg-blue-50/30 transition-colors ${i === g.types.length - 1 ? 'border-b-2 border-gray-100' : ''}`}>
+                      <tr key={type.key} className={`border-b border-gray-50 hover:bg-purple-50/30 transition-colors ${i === g.types.length - 1 ? 'border-b-2 border-gray-100' : ''}`}>
                         <td className="py-2.5 px-6 text-gray-700 pl-10">{type.label}</td>
                         {/* In-app : toujours actif */}
                         <td className="py-2.5 px-4 text-center">
@@ -380,7 +381,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
                   <select
                     value={digestHour}
                     onChange={e => setDigestHour(e.target.value)}
-                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     {[{ v: '6', l: '06:00' }, { v: '8', l: '08:00' }, { v: '12', l: '12:00' }, { v: '18', l: '18:00' }].map(o => (
                       <option key={o.v} value={o.v}>{o.l}</option>
@@ -403,7 +404,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
                   type="checkbox"
                   checked={reminders.includes(opt.key)}
                   onChange={() => toggleReminder(opt.key)}
-                  className="w-4 h-4 accent-[#1A3A5C] rounded"
+                  className="w-4 h-4 accent-[#9333EA] rounded"
                 />
                 <span className="text-sm text-gray-700">{opt.label}</span>
               </label>
@@ -419,7 +420,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
           <button
             onClick={save}
             disabled={saving}
-            className="px-8 py-3 bg-[#1A3A5C] text-white font-bold rounded-xl hover:bg-[#2E86C1] disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-lg shadow-blue-900/20 flex items-center gap-2"
+            className="px-8 py-3 bg-[#9333EA] text-white font-bold rounded-xl hover:bg-[#7e22ce] disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-lg shadow-blue-900/20 flex items-center gap-2"
           >
             {saving ? (
               <>
@@ -433,6 +434,7 @@ export default function NotificationsPreferences({ preferences: propPrefs, userE
         </div>
 
       </div>
-    </>
+    </AppLayout>
   );
 }
+export { NotificationsPreferences };

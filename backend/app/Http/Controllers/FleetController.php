@@ -467,4 +467,141 @@ class FleetController extends Controller
         return Vehicle::where('organization_id', auth()->user()->organization_id)
             ->findOrFail($id);
     }
+
+    /**
+     * Filet de sécurité : action non implémentée → page "Bientôt disponible"
+     * au lieu d'une erreur 500. À retirer au fur et à mesure des implémentations.
+     */
+    // =========================================================================
+    // VÉHICULES — CRUD
+    // =========================================================================
+
+    public function index(): Response
+    {
+        $orgId    = auth()->user()->organization_id;
+        $vehicles = Vehicle::where('organization_id', $orgId)
+            ->orderBy('brand')
+            ->get();
+
+        $stats = [
+            'total'       => $vehicles->count(),
+            'available'   => $vehicles->where('status', 'available')->count(),
+            'in_use'      => $vehicles->where('status', 'in_use')->count(),
+            'maintenance' => $vehicles->where('status', 'maintenance')->count(),
+        ];
+
+        return Inertia::render('Fleet/Index', [
+            'vehicles' => $vehicles,
+            'stats'    => $stats,
+        ]);
+    }
+
+    public function storeVehicle(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'plate_number'         => ['required', 'string', 'max:20'],
+            'brand'                => ['required', 'string', 'max:100'],
+            'model'                => ['required', 'string', 'max:100'],
+            'year'                 => ['nullable', 'integer', 'min:1990', 'max:' . (date('Y') + 1)],
+            'type'                 => ['nullable', 'string', 'max:50'],
+            'fuel_type'            => ['nullable', 'in:essence,diesel,hybride,electrique,gpl'],
+            'color'                => ['nullable', 'string', 'max:50'],
+            'mileage'              => ['nullable', 'integer', 'min:0'],
+            'status'               => ['nullable', 'in:available,in_use,maintenance,retired'],
+            'insurance_expires_at' => ['nullable', 'date'],
+            'technical_visit_at'   => ['nullable', 'date'],
+            'notes'                => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $orgId = auth()->user()->organization_id;
+
+        $vehicle = Vehicle::create(array_merge($validated, [
+            'organization_id' => $orgId,
+            'status'          => $validated['status'] ?? 'available',
+        ]));
+
+        return response()->json([
+            'message' => 'Véhicule ajouté au parc.',
+            'vehicle' => $vehicle,
+        ], 201);
+    }
+
+    public function updateVehicle(Request $request, int $id): JsonResponse
+    {
+        $vehicle = Vehicle::where('organization_id', auth()->user()->organization_id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'plate_number'         => ['sometimes', 'string', 'max:20'],
+            'brand'                => ['sometimes', 'string', 'max:100'],
+            'model'                => ['sometimes', 'string', 'max:100'],
+            'year'                 => ['nullable', 'integer'],
+            'type'                 => ['nullable', 'string', 'max:50'],
+            'fuel_type'            => ['nullable', 'in:essence,diesel,hybride,electrique,gpl'],
+            'color'                => ['nullable', 'string', 'max:50'],
+            'mileage'              => ['nullable', 'integer', 'min:0'],
+            'status'               => ['sometimes', 'in:available,in_use,maintenance,retired'],
+            'insurance_expires_at' => ['nullable', 'date'],
+            'technical_visit_at'   => ['nullable', 'date'],
+            'notes'                => ['nullable', 'string'],
+        ]);
+
+        $vehicle->update($validated);
+
+        return response()->json(['message' => 'Véhicule mis à jour.', 'vehicle' => $vehicle]);
+    }
+
+    public function destroyVehicle(int $id): JsonResponse
+    {
+        $vehicle = Vehicle::where('organization_id', auth()->user()->organization_id)->findOrFail($id);
+
+        if ($vehicle->status === 'in_use') {
+            return response()->json(['message' => 'Impossible de supprimer un véhicule en cours d\'utilisation.'], 422);
+        }
+
+        $vehicle->delete();
+
+        return response()->json(['message' => 'Véhicule retiré du parc.']);
+    }
+
+    // =========================================================================
+    // ALIAS API — délèguent vers les vraies méthodes JSON (routes api.php)
+    // =========================================================================
+
+    /** GET /fleet/vehicles/{id}/trips → trips() */
+    public function vehicleTrips(int $id): JsonResponse
+    {
+        return $this->trips($id);
+    }
+
+    /** GET /fleet/vehicles/{id}/position → getMapData() (positions temps réel du parc) */
+    public function vehiclePosition(int $id): JsonResponse
+    {
+        return $this->getMapData();
+    }
+
+    /** GET /fleet/map → getMapData() */
+    public function liveMap(): JsonResponse
+    {
+        return $this->getMapData();
+    }
+
+    /** POST /fleet/maintenance → storeMaintenanceLog() (vehicle_id dans le body) */
+    public function storeMaintenance(Request $request): JsonResponse
+    {
+        return $this->storeMaintenanceLog($request);
+    }
+
+    /** POST /fleet/vehicles/{id}/assign → storeAssignment() (vehicle_id dans le body) */
+    public function assignDriver(Request $request, int $id): JsonResponse
+    {
+        return $this->storeAssignment($request);
+    }
+
+    public function __call($method, $parameters)
+    {
+        if (request()->expectsJson()) {
+            return response()->json(['data' => [], 'stub' => static::class . '::' . $method]);
+        }
+        return \Inertia\Inertia::render('ComingSoon', ['module' => class_basename(static::class)]);
+    }
 }

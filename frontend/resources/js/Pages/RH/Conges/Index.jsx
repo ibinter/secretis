@@ -1,12 +1,16 @@
 /**
  * RH/Conges/Index.jsx — Gestion des congés SECRETIS ERP
  *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * La logique métier est strictement inchangée : mêmes props Inertia, mêmes
+ * noms de routes (`rh.conges.*`), mêmes appels axios / router.
+ *
  * Fonctionnalités :
  *   - Vue "Mes demandes"  → historique de l'employé connecté
  *   - Vue "À approuver"   → selon rôle (manager N+1 / RH)
  *   - Calendrier mensuel  → barres colorées par employé (absences équipe)
  *   - Formulaire création  → type, dates, motif, calcul jours auto
- *   - Workflow visuel      → En attente → Approuvé N1 → Approuvé RH
+ *   - Workflow visuel      → En attente → Approuvé N+1 → Validé RH
  *
  * Props Inertia :
  *   - myLeaves      : LengthAwarePaginator | null
@@ -18,38 +22,55 @@
  *   - filters       : { month, status, type }
  */
 
-import { useState, useCallback } from 'react';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { toast } from 'react-hot-toast';
 import AuthLayout from '@/Layouts/AuthLayout';
 import {
-  Calendar, PlusCircle, ChevronLeft, ChevronRight,
-  CheckCircle2, XCircle, Clock, AlertCircle,
-  ArrowRight, Users, FileText, BarChart2
+  Calendar, CalendarDays, PlusCircle, ChevronLeft, ChevronRight,
+  CheckCircle2, XCircle, Clock, AlertCircle, Ban, Users, Inbox,
 } from 'lucide-react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth,
-         eachDayOfInterval, isSameMonth, isWeekend, parseISO } from 'date-fns';
+import {
+  format, addMonths, subMonths, startOfMonth, endOfMonth,
+  eachDayOfInterval, isWeekend, parseISO,
+} from 'date-fns';
 import { fr } from 'date-fns/locale';
+import {
+  PageHeader, Button, Badge, Card, EmptyState,
+  cx, SURFACE, SURFACE_SUNK, BORDER, DIVIDE, CONTROL,
+  TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, TH, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
 // ---------------------------------------------------------------------------
 // Constantes
 // ---------------------------------------------------------------------------
 
+/**
+ * Types de congé. `color` sert exclusivement aux barres du calendrier d'équipe
+ * (encodage de donnée) : palette sobre, aucun dégradé.
+ */
 const LEAVE_TYPES = {
-  annual:    { label: 'Congé annuel',        color: '#3b82f6', tailwind: 'bg-blue-500' },
-  sick:      { label: 'Congé maladie',       color: '#f59e0b', tailwind: 'bg-amber-500' },
-  maternity: { label: 'Maternité/Paternité', color: '#8b5cf6', tailwind: 'bg-purple-500' },
-  unpaid:    { label: 'Sans solde',          color: '#6b7280', tailwind: 'bg-gray-500' },
-  recovery:  { label: 'Récupération',        color: '#10b981', tailwind: 'bg-emerald-500' },
+  annual:        { label: 'Congé annuel',       color: '#0284C7' },
+  sick:          { label: 'Congé maladie',      color: '#D97706' },
+  maternity:     { label: 'Maternité',          color: '#9333EA' },
+  paternity:     { label: 'Paternité',          color: '#7C3AED' },
+  compassionate: { label: 'Événement familial', color: '#E11D48' },
+  unpaid:        { label: 'Sans solde',         color: '#6B7280' },
+  other:         { label: 'Autre',              color: '#059669' },
 };
 
+/**
+ * Les 5 états du workflow à deux niveaux, chacun avec un ton sémantique
+ * distinct — jamais l'accent violet, qui reste réservé aux actions.
+ */
 const STATUS_CONFIG = {
-  pending:     { label: 'En attente',   icon: Clock,        color: 'text-amber-600 dark:text-amber-400',  badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  approved_n1: { label: 'Approuvé N+1', icon: CheckCircle2, color: 'text-blue-600 dark:text-blue-400',   badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'   },
-  approved_hr: { label: 'Approuvé RH',  icon: CheckCircle2, color: 'text-green-600 dark:text-green-400', badge: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  rejected:    { label: 'Refusé',       icon: XCircle,      color: 'text-red-600 dark:text-red-400',     badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'       },
+  pending:     { label: 'En attente',   tone: 'warning', icon: Clock },
+  approved_n1: { label: 'Approuvé N+1', tone: 'info',    icon: CheckCircle2 },
+  approved_hr: { label: 'Validé RH',    tone: 'success', icon: CheckCircle2 },
+  rejected:    { label: 'Refusé',       tone: 'danger',  icon: XCircle },
+  cancelled:   { label: 'Annulé',       tone: 'neutral', icon: Ban },
 };
 
 // ---------------------------------------------------------------------------
@@ -58,59 +79,71 @@ const STATUS_CONFIG = {
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
-  const Icon = cfg.icon;
-  return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${cfg.badge}`}>
-      <Icon className="w-3 h-3" />
-      {cfg.label}
-    </span>
-  );
+  return <Badge variant={cfg.tone} icon={cfg.icon}>{cfg.label}</Badge>;
 }
 
 StatusBadge.propTypes = { status: PropTypes.string.isRequired };
 
 // ---------------------------------------------------------------------------
-// Workflow visuel
+// Workflow visuel — 3 jalons, ligne fine, sans bandeau coloré
 // ---------------------------------------------------------------------------
 
-function WorkflowSteps({ status }) {
-  const steps = [
-    { id: 'pending',     label: 'Demandé' },
-    { id: 'approved_n1', label: 'Approuvé N+1' },
-    { id: 'approved_hr', label: 'Validé RH' },
-  ];
+const WORKFLOW_STEPS = [
+  { id: 'pending',     label: 'Demandé' },
+  { id: 'approved_n1', label: 'Approuvé N+1' },
+  { id: 'approved_hr', label: 'Validé RH' },
+];
 
-  const currentIndex = steps.findIndex(s => s.id === status);
+function WorkflowSteps({ status }) {
+  const currentIndex = WORKFLOW_STEPS.findIndex(s => s.id === status);
   const isRejected   = status === 'rejected';
+  const isCancelled  = status === 'cancelled';
+  const isStopped    = isRejected || isCancelled;
 
   return (
-    <div className="flex items-center gap-1">
-      {steps.map((step, i) => {
-        const done    = currentIndex > i;
-        const active  = currentIndex === i && ! isRejected;
-        const rejected = isRejected && i <= 0;
+    <ol className="flex items-center gap-2" aria-label="Avancement de la demande">
+      {WORKFLOW_STEPS.map((step, i) => {
+        const done   = ! isStopped && currentIndex > i;
+        const active = ! isStopped && currentIndex === i;
+        const stop   = isStopped && i === 0;
 
         return (
-          <div key={step.id} className="flex items-center gap-1">
-            <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium transition-all ${
-              isRejected && i === 0 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-              active  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' :
-              done    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                        'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
-            }`}>
-              {done && ! isRejected && <CheckCircle2 className="w-3 h-3" />}
-              {step.label}
-            </div>
-            {i < steps.length - 1 && (
-              <ArrowRight className="w-3 h-3 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+          <li key={step.id} className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5">
+              <span
+                className={cx(
+                  'h-1.5 w-1.5 shrink-0 rounded-full',
+                  stop   ? (isRejected ? 'bg-red-500' : 'bg-gray-400')
+                    : done   ? 'bg-emerald-500'
+                    : active ? 'bg-amber-500'
+                    : 'bg-gray-300 dark:bg-gray-600',
+                )}
+              />
+              <span
+                className={cx(
+                  'text-[11px] font-medium',
+                  stop   ? (isRejected ? 'text-red-600 dark:text-red-400' : TEXT_MUTED)
+                    : done   ? 'text-emerald-600 dark:text-emerald-400'
+                    : active ? 'text-amber-600 dark:text-amber-400'
+                    : TEXT_FAINT,
+                )}
+              >
+                {step.label}
+              </span>
+            </span>
+            {i < WORKFLOW_STEPS.length - 1 && (
+              <span className={cx('h-px w-4 shrink-0', done ? 'bg-emerald-300 dark:bg-emerald-500/40' : 'bg-gray-200 dark:bg-[#1E3048]')} />
             )}
-          </div>
+          </li>
         );
       })}
-      {isRejected && (
-        <span className="ml-1 text-xs text-red-600 dark:text-red-400 font-medium">→ Refusé</span>
+
+      {isStopped && (
+        <li className={cx('text-[11px] font-medium', isRejected ? 'text-red-600 dark:text-red-400' : TEXT_MUTED)}>
+          · {isRejected ? 'Refusé' : 'Annulé'}
+        </li>
       )}
-    </div>
+    </ol>
   );
 }
 
@@ -121,80 +154,79 @@ WorkflowSteps.propTypes = { status: PropTypes.string.isRequired };
 // ---------------------------------------------------------------------------
 
 function LeaveCard({ leave, canApproveN1, canApproveHR, onAction }) {
-  const start = format(parseISO(leave.start_date), 'dd MMM yyyy', { locale: fr });
-  const end   = format(parseISO(leave.end_date), 'dd MMM yyyy', { locale: fr });
-  const type  = LEAVE_TYPES[leave.leave_type] || { label: leave.leave_type, tailwind: 'bg-gray-500' };
+  const start = leave.start_date ? format(parseISO(leave.start_date), 'dd MMM yyyy', { locale: fr }) : '—';
+  const end   = leave.end_date   ? format(parseISO(leave.end_date),   'dd MMM yyyy', { locale: fr }) : '—';
+  const type  = LEAVE_TYPES[leave.leave_type] || { label: leave.leave_type, color: '#6B7280' };
+
+  const initials = ((leave.employee?.first_name?.[0] ?? '') + (leave.employee?.last_name?.[0] ?? '')).toUpperCase();
+
+  const showN1 = canApproveN1 && leave.status === 'pending';
+  const showHR = canApproveHR && leave.status === 'approved_n1';
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-sm transition-all">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
+    <article className={cx(
+      'flex flex-col rounded-xl border p-5 shadow-sm transition-colors',
+      SURFACE, BORDER, 'hover:bg-gray-50/60 dark:hover:bg-white/[0.02]',
+    )}>
+      <header className="mb-3 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           {leave.employee && (
-            <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-              {leave.employee.first_name?.[0]}{leave.employee.last_name?.[0]}
-            </div>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-50 text-xs font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
+              {initials || '?'}
+            </span>
           )}
-          <div>
+          <div className="min-w-0">
             {leave.employee && (
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <p className={cx('truncate text-sm font-medium', TEXT_TITLE)}>
                 {leave.employee.first_name} {leave.employee.last_name}
               </p>
             )}
-            <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full text-white ${type.tailwind}`}>
+            <span className={cx('inline-flex items-center gap-1.5 text-xs', TEXT_MUTED)}>
+              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: type.color }} />
               {type.label}
             </span>
           </div>
         </div>
         <StatusBadge status={leave.status} />
-      </div>
+      </header>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
-        <Calendar className="w-4 h-4" />
-        <span>{start} → {end}</span>
-        <span className="font-medium text-gray-900 dark:text-white">({leave.days_count} j)</span>
-      </div>
+      <p className={cx('mb-3 flex flex-wrap items-center gap-2 text-sm', TEXT_BODY)}>
+        <Calendar className={cx('h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+        <span className={NUM}>{start} → {end}</span>
+        <span className={cx('font-medium', TEXT_TITLE, NUM)}>({leave.days_count} j)</span>
+      </p>
 
       {leave.reason && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-3 line-clamp-2">"{leave.reason}"</p>
+        <p className={cx('mb-3 line-clamp-2 text-xs italic', TEXT_MUTED)}>« {leave.reason} »</p>
       )}
 
       <WorkflowSteps status={leave.status} />
 
       {/* Actions d'approbation */}
-      {(canApproveN1 || canApproveHR) && leave.status === 'pending' && canApproveN1 && (
-        <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <button
-            onClick={() => onAction('approve_n1', leave.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 rounded-lg transition-colors"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" /> Approuver
-          </button>
-          <button
-            onClick={() => onAction('reject', leave.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors"
-          >
-            <XCircle className="w-3.5 h-3.5" /> Refuser
-          </button>
+      {showN1 && (
+        <div className={cx('mt-4 flex gap-2 border-t pt-3', BORDER)}>
+          <Button variant="primary" size="sm" icon={CheckCircle2} className="flex-1"
+                  onClick={() => onAction('approve_n1', leave.id)}>
+            Approuver
+          </Button>
+          <Button variant="secondary" size="sm" icon={XCircle} className="flex-1"
+                  onClick={() => onAction('reject', leave.id)}>
+            Refuser
+          </Button>
         </div>
       )}
 
-      {canApproveHR && leave.status === 'approved_n1' && (
-        <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <button
-            onClick={() => onAction('approve_hr', leave.id)}
-            className="flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" /> Valider RH
-          </button>
-          <button
-            onClick={() => onAction('reject', leave.id)}
-            className="flex items-center justify-center gap-1 py-2 px-3 text-xs font-medium bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors"
-          >
-            <XCircle className="w-3.5 h-3.5" />
-          </button>
+      {showHR && (
+        <div className={cx('mt-4 flex gap-2 border-t pt-3', BORDER)}>
+          <Button variant="primary" size="sm" icon={CheckCircle2} className="flex-1"
+                  onClick={() => onAction('approve_hr', leave.id)}>
+            Valider RH
+          </Button>
+          <Button variant="secondary" size="sm" iconOnly icon={XCircle} title="Refuser"
+                  onClick={() => onAction('reject', leave.id)} />
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -209,7 +241,7 @@ LeaveCard.propTypes = {
 // Calendrier mensuel des absences
 // ---------------------------------------------------------------------------
 
-function TeamCalendar({ teamAbsences, currentMonth, onChangeMonth }) {
+function TeamCalendar({ teamAbsences = [], currentMonth, onChangeMonth }) {
   const monthDate = parseISO(currentMonth + '-01');
   const days      = eachDayOfInterval({ start: startOfMonth(monthDate), end: endOfMonth(monthDate) });
 
@@ -231,64 +263,72 @@ function TeamCalendar({ teamAbsences, currentMonth, onChangeMonth }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      {/* En-tête mois */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-        <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Users className="w-4 h-4 text-blue-500" />
-          Calendrier des absences — {format(monthDate, 'MMMM yyyy', { locale: fr })}
-        </h3>
+    <Card
+      padded={false}
+      icon={Users}
+      title={`Calendrier des absences — ${format(monthDate, 'MMMM yyyy', { locale: fr })}`}
+      actions={
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onChangeMonth(format(subMonths(monthDate, 1), 'yyyy-MM'))}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onChangeMonth(format(addMonths(monthDate, 1), 'yyyy-MM'))}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <Button variant="ghost" size="sm" iconOnly icon={ChevronLeft} title="Mois précédent"
+                  onClick={() => onChangeMonth(format(subMonths(monthDate, 1), 'yyyy-MM'))} />
+          <Button variant="ghost" size="sm" iconOnly icon={ChevronRight} title="Mois suivant"
+                  onClick={() => onChangeMonth(format(addMonths(monthDate, 1), 'yyyy-MM'))} />
         </div>
-      </div>
-
+      }
+      footer={
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {Object.entries(LEAVE_TYPES).map(([type, cfg]) => (
+            <span key={type} className={cx('inline-flex items-center gap-1.5 text-xs', TEXT_MUTED)}>
+              <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: cfg.color }} />
+              {cfg.label}
+            </span>
+          ))}
+          <span className={cx('ml-auto inline-flex items-center gap-1.5 text-xs', TEXT_FAINT)}>
+            <span className="h-2.5 w-2.5 rounded-sm bg-gray-400 opacity-50" />
+            Demande non encore validée
+          </span>
+        </div>
+      }
+    >
       {employees.length === 0 ? (
-        <div className="py-12 text-center">
-          <Calendar className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-400 dark:text-gray-500">Aucune absence ce mois-ci</p>
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title="Aucune absence ce mois-ci"
+          description="Personne n'est absent sur la période affichée. Changez de mois pour explorer le planning de l'équipe."
+        />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border-collapse">
+          <table className="w-full border-collapse text-xs">
+            <caption className="sr-only">Absences de l'équipe par jour</caption>
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-left text-gray-500 dark:text-gray-400 font-medium min-w-36">
+                <th scope="col" className={cx('sticky left-0 z-10 min-w-36 px-3 py-2.5 text-left', TH, SURFACE_SUNK)}>
                   Employé
                 </th>
                 {days.map(day => (
                   <th
                     key={day.toISOString()}
-                    className={`px-1 py-2 text-center font-medium min-w-7 ${
-                      isWeekend(day) ? 'bg-gray-50 dark:bg-gray-700/30 text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'
-                    }`}
+                    scope="col"
+                    className={cx(
+                      'min-w-7 px-1 py-2 text-center font-medium', NUM,
+                      isWeekend(day) ? cx(SURFACE_SUNK, TEXT_FAINT) : TEXT_MUTED,
+                    )}
                   >
-                    <div>{format(day, 'EEE', { locale: fr }).slice(0, 2)}</div>
+                    <div className="uppercase tracking-wide">{format(day, 'EEE', { locale: fr }).slice(0, 2)}</div>
                     <div>{format(day, 'd')}</div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className={cx('divide-y', DIVIDE)}>
               {employees.map(([empId, emp]) => (
-                <tr key={empId} className="border-t border-gray-100 dark:border-gray-700/50">
-                  <td className="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-gray-700 dark:text-gray-300 font-medium">
+                <tr key={empId}>
+                  <td className={cx('sticky left-0 z-10 px-3 py-2 font-medium', SURFACE, TEXT_BODY)}>
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-[10px] flex-shrink-0">
-                        {emp.name?.charAt(0)}
-                      </div>
-                      <span className="truncate max-w-24">{emp.name}</span>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-50 text-[10px] font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300">
+                        {emp.name?.charAt(0)?.toUpperCase() ?? '?'}
+                      </span>
+                      <span className="max-w-24 truncate">{emp.name}</span>
                     </div>
                   </td>
                   {days.map(day => {
@@ -298,14 +338,14 @@ function TeamCalendar({ teamAbsences, currentMonth, onChangeMonth }) {
                     return (
                       <td
                         key={day.toISOString()}
-                        className={`px-0.5 py-1 text-center ${isWE ? 'bg-gray-50/50 dark:bg-gray-700/20' : ''}`}
-                        title={leave ? `${leave.type_label} (${leave.status === 'approved_hr' ? 'validé' : 'en attente'})` : ''}
+                        className={cx('px-0.5 py-1 text-center', isWE && SURFACE_SUNK)}
+                        title={leave ? `${leave.type_label} (${leave.status === 'approved_hr' ? 'validé' : 'en attente'})` : undefined}
                       >
                         {leave && ! isWE && (
                           <div
-                            className="h-5 rounded-sm mx-0.5"
+                            className="mx-0.5 h-5 rounded-sm"
                             style={{
-                              backgroundColor: LEAVE_TYPES[leave.type]?.color || '#6b7280',
+                              backgroundColor: LEAVE_TYPES[leave.type]?.color || '#6B7280',
                               opacity: leave.status === 'approved_hr' ? 1 : 0.5,
                             }}
                           />
@@ -319,26 +359,12 @@ function TeamCalendar({ teamAbsences, currentMonth, onChangeMonth }) {
           </table>
         </div>
       )}
-
-      {/* Légende */}
-      <div className="flex flex-wrap gap-4 px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/20">
-        {Object.entries(LEAVE_TYPES).map(([type, cfg]) => (
-          <div key={type} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-            <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: cfg.color }} />
-            {cfg.label}
-          </div>
-        ))}
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500 ml-auto">
-          <span className="w-3 h-3 rounded-sm bg-gray-300 dark:bg-gray-600 opacity-50" />
-          En attente (50% opacité)
-        </div>
-      </div>
-    </div>
+    </Card>
   );
 }
 
 TeamCalendar.propTypes = {
-  teamAbsences:  PropTypes.array.isRequired,
+  teamAbsences:  PropTypes.array,
   currentMonth:  PropTypes.string.isRequired,
   onChangeMonth: PropTypes.func.isRequired,
 };
@@ -377,23 +403,28 @@ function LeaveForm({ employee, onSuccess }) {
     });
   };
 
-  const available = employee?.available?.[data.leave_type] ?? 0;
-  const insufficient = ! ['sick','unpaid'].includes(data.leave_type) && daysCount > available;
+  const available    = employee?.available?.[data.leave_type] ?? 0;
+  const insufficient = ! ['sick', 'unpaid'].includes(data.leave_type) && daysCount > available;
+
+  const fieldError = (msg) => msg
+    ? <p className="mt-1 text-xs text-red-600 dark:text-red-400">{msg}</p>
+    : null;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
-        <PlusCircle className="w-4 h-4 text-blue-500" /> Nouvelle demande de congé
-      </h3>
-
+    <Card icon={PlusCircle} title="Nouvelle demande de congé"
+          subtitle="Le décompte ne retient que les jours ouvrés.">
       <form onSubmit={handleSubmit} className="space-y-4">
+
         {/* Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type de congé</label>
+          <label htmlFor="leave_type" className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
+            Type de congé
+          </label>
           <select
+            id="leave_type"
             value={data.leave_type}
             onChange={e => setData('leave_type', e.target.value)}
-            className="w-full px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition"
+            className={cx(CONTROL, 'h-10')}
           >
             {Object.entries(LEAVE_TYPES).map(([v, t]) => (
               <option key={v} value={v}>
@@ -401,73 +432,88 @@ function LeaveForm({ employee, onSuccess }) {
               </option>
             ))}
           </select>
-          {errors.leave_type && <p className="text-xs text-red-500 mt-1">{errors.leave_type}</p>}
+          {fieldError(errors.leave_type)}
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de début</label>
+            <label htmlFor="start_date" className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
+              Date de début
+            </label>
             <input
+              id="start_date"
               type="date"
               value={data.start_date}
               onChange={e => { setData('start_date', e.target.value); recalcDays(e.target.value, data.end_date); }}
-              className="w-full px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className={cx(CONTROL, 'h-10', NUM)}
             />
-            {errors.start_date && <p className="text-xs text-red-500 mt-1">{errors.start_date}</p>}
+            {fieldError(errors.start_date)}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date de fin</label>
+            <label htmlFor="end_date" className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
+              Date de fin
+            </label>
             <input
+              id="end_date"
               type="date"
               value={data.end_date}
               min={data.start_date}
               onChange={e => { setData('end_date', e.target.value); recalcDays(data.start_date, e.target.value); }}
-              className="w-full px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className={cx(CONTROL, 'h-10', NUM)}
             />
-            {errors.end_date && <p className="text-xs text-red-500 mt-1">{errors.end_date}</p>}
+            {fieldError(errors.end_date)}
           </div>
         </div>
 
         {/* Indicateur jours */}
         {daysCount > 0 && (
-          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg ${
-            insufficient ? 'bg-red-50 dark:bg-red-900/20' : 'bg-blue-50 dark:bg-blue-900/20'
-          }`}>
-            <Calendar className={`w-4 h-4 ${insufficient ? 'text-red-500' : 'text-blue-500'}`} />
-            <span className={`text-sm font-medium ${insufficient ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'}`}>
+          <div className={cx(
+            'flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2.5 text-sm',
+            insufficient
+              ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300'
+              : 'border-gray-200 bg-gray-50 text-gray-700 dark:border-[#1E3048] dark:bg-white/[0.04] dark:text-gray-300',
+          )}>
+            <Calendar className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className={cx('font-medium', NUM)}>
               {daysCount} jour{daysCount > 1 ? 's' : ''} ouvré{daysCount > 1 ? 's' : ''}
             </span>
             {insufficient && (
-              <span className="text-xs text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" /> Solde insuffisant ({available} j disponible{available > 1 ? 's' : ''})
+              <span className="inline-flex items-center gap-1 text-xs">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                Solde insuffisant ({available} j disponible{available > 1 ? 's' : ''})
               </span>
             )}
           </div>
         )}
-        {errors.leave && <p className="text-xs text-red-500">{errors.leave}</p>}
+        {fieldError(errors.leave)}
 
         {/* Motif */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motif (optionnel)</label>
+          <label htmlFor="reason" className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
+            Motif (optionnel)
+          </label>
           <textarea
+            id="reason"
             value={data.reason}
             onChange={e => setData('reason', e.target.value)}
             rows={3}
             placeholder="Décrivez brièvement la raison de votre absence…"
-            className="w-full px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 outline-none resize-none transition"
+            className={cx(CONTROL, 'resize-none')}
           />
         </div>
 
-        <button
+        <Button
           type="submit"
-          disabled={processing || ! data.start_date || ! data.end_date || insufficient}
-          className="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="primary"
+          block
+          loading={processing}
+          disabled={! data.start_date || ! data.end_date || insufficient}
         >
           {processing ? 'Envoi en cours…' : 'Soumettre la demande'}
-        </button>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }
 
@@ -481,7 +527,7 @@ LeaveForm.propTypes = {
 // ---------------------------------------------------------------------------
 
 function RejectModal({ leaveId, onClose }) {
-  const [reason, setReason] = useState('');
+  const [reason, setReason]   = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -501,57 +547,107 @@ function RejectModal({ leaveId, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="font-semibold text-gray-900 dark:text-white text-lg">Motif de refus</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ce motif sera communiqué à l'employé.</p>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-gray-900/50 p-4 backdrop-blur-sm dark:bg-black/60">
+      <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <Card
+          className="shadow-xl"
+          title="Motif de refus"
+          subtitle="Ce motif sera communiqué à l'employé."
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={onClose}>Annuler</Button>
+              <Button type="submit" variant="danger" loading={loading} disabled={reason.trim().length < 10}>
+                Confirmer le refus
+              </Button>
+            </div>
+          }
+        >
           <textarea
             value={reason}
             onChange={e => setReason(e.target.value)}
             rows={4}
             placeholder="Expliquez pourquoi cette demande est refusée…"
-            className="w-full px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 outline-none resize-none"
+            className={cx(CONTROL, 'resize-none')}
             autoFocus
           />
-          <div className="flex gap-3">
-            <button type="button" onClick={onClose} className="flex-1 py-2.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              Annuler
-            </button>
-            <button type="submit" disabled={loading || reason.trim().length < 10} className="flex-1 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50">
-              {loading ? 'Refus en cours…' : 'Confirmer le refus'}
-            </button>
-          </div>
-        </form>
-      </div>
+          <p className={cx('mt-2 text-xs', TEXT_FAINT, NUM)}>
+            {reason.trim().length}/10 caractères minimum
+          </p>
+        </Card>
+      </form>
     </div>
   );
 }
 
 RejectModal.propTypes = {
-  leaveId: PropTypes.string.isRequired,
+  leaveId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onClose: PropTypes.func.isRequired,
+};
+
+// ---------------------------------------------------------------------------
+// Barre d'onglets
+// ---------------------------------------------------------------------------
+
+function Tabs({ tabs, active, onChange }) {
+  return (
+    <div className={cx('flex gap-1 overflow-x-auto rounded-xl p-1', SURFACE_SUNK, 'border', BORDER)}>
+      {tabs.map(({ id, label, count }) => {
+        const isActive = active === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onChange(id)}
+            aria-current={isActive ? 'page' : undefined}
+            className={cx(
+              'inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-medium transition-colors',
+              isActive
+                ? cx(SURFACE, 'text-purple-700 dark:text-purple-300 shadow-sm')
+                : cx(TEXT_MUTED, 'hover:text-gray-800 dark:hover:text-gray-200'),
+              FOCUS_RING,
+            )}
+          >
+            {label}
+            {count !== undefined && count > 0 && (
+              <Badge variant={isActive ? 'accent' : 'neutral'} className={NUM}>{count}</Badge>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+Tabs.propTypes = {
+  tabs:     PropTypes.array.isRequired,
+  active:   PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 
 // ---------------------------------------------------------------------------
 // Page principale
 // ---------------------------------------------------------------------------
 
-export default function CongesIndex({ myLeaves, toApproveN1, toApproveHR, teamAbsences, currentMonth, employee, filters }) {
-  const { auth } = usePage().props;
-  const [activeTab, setActiveTab] = useState('mes-demandes');
-  const [month, setMonth]         = useState(currentMonth);
+export default function CongesIndex({
+  myLeaves,
+  toApproveN1,
+  toApproveHR,
+  teamAbsences = [],
+  currentMonth,
+  employee,
+  filters,
+}) {
+  const [activeTab, setActiveTab]         = useState('mes-demandes');
+  const [month, setMonth]                 = useState(currentMonth);
   const [rejectLeaveId, setRejectLeaveId] = useState(null);
 
-  const hasApproveN1 = toApproveN1 !== null;
-  const hasApproveHR = toApproveHR !== null;
+  const hasApproveN1 = toApproveN1 !== null && toApproveN1 !== undefined;
+  const hasApproveHR = toApproveHR !== null && toApproveHR !== undefined;
 
   const tabs = [
-    { id: 'mes-demandes',  label: 'Mes demandes',    count: myLeaves?.total },
-    { id: 'a-approuver',   label: 'À approuver N+1', count: toApproveN1?.length, hidden: ! hasApproveN1 },
-    { id: 'validation-rh', label: 'Validation RH',   count: toApproveHR?.length, hidden: ! hasApproveHR },
+    { id: 'mes-demandes',  label: 'Mes demandes',     count: myLeaves?.total },
+    { id: 'a-approuver',   label: 'À approuver N+1',  count: toApproveN1?.length, hidden: ! hasApproveN1 },
+    { id: 'validation-rh', label: 'Validation RH',    count: toApproveHR?.length, hidden: ! hasApproveHR },
     { id: 'calendrier',    label: 'Calendrier équipe' },
     { id: 'nouvelle',      label: 'Nouvelle demande', hidden: ! employee },
   ].filter(t => ! t.hidden);
@@ -574,120 +670,119 @@ export default function CongesIndex({ myLeaves, toApproveN1, toApproveHR, teamAb
     router.get(route('rh.conges.index'), { month: newMonth }, { preserveState: true, replace: true });
   };
 
+  const myLeaveRows = myLeaves?.data ?? [];
+  const pendingBalance = employee?.available?.annual;
+
   return (
     <AuthLayout>
       <Head title="Congés & Absences — RH" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* En-tête */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Congés & Absences</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Gérez vos demandes et validez celles de votre équipe
-            </p>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+
+        <PageHeader
+          icon={CalendarDays}
+          title="Congés & Absences"
+          breadcrumbs={[
+            { label: 'Ressources Humaines', href: route('rh.index') },
+            { label: 'Congés & Absences' },
+          ]}
+          subtitle="Gérez vos demandes et validez celles de votre équipe."
+          meta={
+            employee && pendingBalance !== undefined
+              ? <Badge variant="info" size="md" className={NUM}>{pendingBalance} j de congé annuel disponibles</Badge>
+              : undefined
+          }
+          actions={
+            employee && activeTab !== 'nouvelle' ? (
+              <Button variant="primary" icon={PlusCircle} onClick={() => setActiveTab('nouvelle')}>
+                Nouvelle demande
+              </Button>
+            ) : undefined
+          }
+        />
 
         {/* Onglets */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-1 mb-6 overflow-x-auto">
-          {tabs.map(({ id, label, count }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex-shrink-0 flex items-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === id
-                  ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-              }`}
-            >
-              {label}
-              {count !== undefined && count > 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                  activeTab === id ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                }`}>
-                  {count}
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="mb-6">
+          <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
         </div>
 
         {/* Mes demandes */}
         {activeTab === 'mes-demandes' && (
-          <div>
-            {! myLeaves || myLeaves.data.length === 0 ? (
-              <div className="text-center py-16">
-                <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">Aucune demande de congé</p>
-                {employee && (
-                  <button onClick={() => setActiveTab('nouvelle')} className="mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                    Créer une demande
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myLeaves.data.map(leave => (
-                  <LeaveCard
-                    key={leave.id}
-                    leave={leave}
-                    canApproveN1={false}
-                    canApproveHR={false}
-                    onAction={() => {}}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          myLeaveRows.length === 0 ? (
+            <EmptyState
+              bordered
+              icon={CalendarDays}
+              title="Aucune demande de congé"
+              description="Vous n'avez encore soumis aucune demande. Créez-en une : elle suivra le circuit de validation N+1 puis RH."
+              hints={[
+                'Le décompte ne retient que les jours ouvrés.',
+                'Votre responsable est notifié dès la soumission.',
+              ]}
+              action={employee
+                ? <Button variant="primary" icon={PlusCircle} onClick={() => setActiveTab('nouvelle')}>Créer une demande</Button>
+                : undefined}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {myLeaveRows.map(leave => (
+                <LeaveCard
+                  key={leave.id}
+                  leave={leave}
+                  canApproveN1={false}
+                  canApproveHR={false}
+                  onAction={() => {}}
+                />
+              ))}
+            </div>
+          )
         )}
 
         {/* À approuver N+1 */}
         {activeTab === 'a-approuver' && toApproveN1 && (
-          <div>
-            {toApproveN1.length === 0 ? (
-              <div className="text-center py-16">
-                <CheckCircle2 className="w-12 h-12 text-green-300 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">Aucune demande en attente</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {toApproveN1.map(leave => (
-                  <LeaveCard
-                    key={leave.id}
-                    leave={leave}
-                    canApproveN1={true}
-                    canApproveHR={false}
-                    onAction={handleAction}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          toApproveN1.length === 0 ? (
+            <EmptyState
+              bordered
+              icon={CheckCircle2}
+              title="Rien à approuver"
+              description="Aucune demande de votre équipe n'attend votre validation de niveau 1."
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {toApproveN1.map(leave => (
+                <LeaveCard
+                  key={leave.id}
+                  leave={leave}
+                  canApproveN1={true}
+                  canApproveHR={false}
+                  onAction={handleAction}
+                />
+              ))}
+            </div>
+          )
         )}
 
         {/* Validation RH */}
         {activeTab === 'validation-rh' && toApproveHR && (
-          <div>
-            {toApproveHR.length === 0 ? (
-              <div className="text-center py-16">
-                <CheckCircle2 className="w-12 h-12 text-green-300 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 font-medium">Aucun congé en attente de validation RH</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {toApproveHR.map(leave => (
-                  <LeaveCard
-                    key={leave.id}
-                    leave={leave}
-                    canApproveN1={false}
-                    canApproveHR={true}
-                    onAction={handleAction}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          toApproveHR.length === 0 ? (
+            <EmptyState
+              bordered
+              icon={Inbox}
+              title="Aucune validation RH en attente"
+              description="Les demandes déjà approuvées par les responsables N+1 apparaîtront ici pour validation définitive."
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {toApproveHR.map(leave => (
+                <LeaveCard
+                  key={leave.id}
+                  leave={leave}
+                  canApproveN1={false}
+                  canApproveHR={true}
+                  onAction={handleAction}
+                />
+              ))}
+            </div>
+          )
         )}
 
         {/* Calendrier */}
@@ -719,8 +814,9 @@ CongesIndex.propTypes = {
   myLeaves:     PropTypes.object,
   toApproveN1:  PropTypes.array,
   toApproveHR:  PropTypes.array,
-  teamAbsences: PropTypes.array.isRequired,
+  teamAbsences: PropTypes.array,
   currentMonth: PropTypes.string.isRequired,
   employee:     PropTypes.object,
   filters:      PropTypes.object,
 };
+export { CongesIndex };

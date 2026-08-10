@@ -48,7 +48,7 @@ const THEME_CONFIG = {
     label:   'Passer en mode automatique',
     tooltip: 'Thème sombre — cliquer pour automatique',
     icon:    MoonIcon,
-    iconClass: 'text-blue-400',
+    iconClass: 'text-purple-400',
   },
   system: {
     next:    'light',
@@ -113,8 +113,8 @@ export default function ThemeToggle({
           text-gray-500 hover:text-gray-700
           dark:text-gray-400 dark:hover:text-gray-200
           hover:bg-gray-100 dark:hover:bg-[#1A2A3A]
-          focus:outline-none focus:ring-2 focus:ring-blue-500
-          dark:focus:ring-[#2E86C1] focus:ring-offset-2
+          focus:outline-none focus:ring-2 focus:ring-purple-500
+          dark:focus:ring-[#7e22ce] focus:ring-offset-2
           dark:focus:ring-offset-[#0F1923]
         `}
       >
@@ -132,7 +132,7 @@ export default function ThemeToggle({
         {/* Indicateur du mode actuel (petit point) */}
         {theme === 'system' && (
           <span
-            className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-400"
+            className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-purple-400"
             aria-hidden="true"
           />
         )}
@@ -190,7 +190,7 @@ export function ThemeDropdown({ className = '' }) {
 
   const options = [
     { value: 'light',  label: 'Thème clair',       icon: SunIcon,    iconClass: 'text-amber-500' },
-    { value: 'dark',   label: 'Thème sombre',       icon: MoonIcon,   iconClass: 'text-blue-400' },
+    { value: 'dark',   label: 'Thème sombre',       icon: MoonIcon,   iconClass: 'text-purple-400' },
     { value: 'system', label: 'Automatique (système)', icon: SystemIcon, iconClass: 'text-gray-400' },
   ];
 
@@ -208,7 +208,7 @@ export function ThemeDropdown({ className = '' }) {
           text-gray-600 dark:text-[#A8C0D6]
           hover:bg-gray-100 dark:hover:bg-[#1A2A3A]
           border border-gray-200 dark:border-[#2A3F55]
-          transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500"
       >
         <CurrentIcon className={`w-4 h-4 ${current.iconClass}`} />
         <span>{theme === 'light' ? 'Clair' : theme === 'dark' ? 'Sombre' : 'Auto'}</span>
@@ -240,14 +240,14 @@ export function ThemeDropdown({ className = '' }) {
                 className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer text-sm
                   transition-colors
                   ${selected
-                    ? 'bg-blue-50 dark:bg-[#162230] text-blue-700 dark:text-blue-400'
+                    ? 'bg-purple-50 dark:bg-[#162230] text-purple-700 dark:text-purple-400'
                     : 'text-gray-700 dark:text-[#A8C0D6] hover:bg-gray-50 dark:hover:bg-[#243447]'
                   }`}
               >
                 <OptIcon className={`w-4 h-4 ${opt.iconClass}`} />
                 <span className="flex-1">{opt.label}</span>
                 {selected && (
-                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -259,3 +259,4 @@ export function ThemeDropdown({ className = '' }) {
     </div>
   );
 }
+export { ThemeToggle };

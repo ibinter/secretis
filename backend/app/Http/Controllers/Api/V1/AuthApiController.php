@@ -65,7 +65,7 @@ class AuthApiController extends ApiController
 
         // Vérification credentials (timing-safe)
         if (! $user || ! Hash::check($request->input('password'), $user->password)) {
-            RateLimiter::hit($key, decay: 60);
+            RateLimiter::hit($key, 60);
             $user?->recordFailedLogin();
 
             $this->audit->log(
@@ -107,6 +107,14 @@ class AuthApiController extends ApiController
         }
 
         $token = $user->createToken('api-token')->plainTextToken;
+
+        // Établit aussi la session web (SPA même domaine) pour les routes Inertia
+        try {
+            \Illuminate\Support\Facades\Auth::guard('web')->login($user, (bool) $request->boolean('remember'));
+            $request->session()->regenerate();
+        } catch (\Throwable $e) {
+            // Requête purement API (mobile) sans session — ignorer
+        }
 
         $this->audit->log(
             action: 'api_login_success',
@@ -192,6 +200,16 @@ class AuthApiController extends ApiController
             'roles'          => $user->getRoleNames(),
             'license_status' => $this->license->checkStatus($user->organization_id),
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Alias API (voir routes/api.php)
+    // -------------------------------------------------------------------------
+
+    /** Alias route POST /api/v1/auth/refresh-token → refresh(). */
+    public function refreshToken(Request $request): JsonResponse
+    {
+        return $this->refresh($request);
     }
 
     // -------------------------------------------------------------------------

@@ -1,7 +1,25 @@
+/**
+ * Projets/TimesheetView.jsx — Feuille de temps d'un projet
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Les appels réseau sont conservés à l'identique :
+ *   - GET  /api/v1/projects/{id}/timesheets?start_date&end_date
+ *   - POST /api/v1/projects/{id}/timesheets
+ */
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import axios from 'axios';
+import {
+  Timer, ChevronLeft, ChevronRight, Download, Users, Banknote, CalendarDays,
+} from 'lucide-react';
+import { formatAmount } from '@/hooks/useCurrency';
+import {
+  PageHeader, Button, StatCard, EmptyState, Skeleton,
+  cx, SURFACE, SURFACE_SUNK, BORDER, DIVIDE,
+  TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, TH, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -70,7 +88,7 @@ function exportCSV(data, days, projectName) {
 
 // ── Cellule éditable ─────────────────────────────────────────────────────────
 
-function TimeCell({ value, onSave, highlight, weekend }) {
+function TimeCell({ value, onSave, highlight, weekend, label }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft]     = useState(value || '');
   const inputRef = useRef(null);
@@ -93,10 +111,14 @@ function TimeCell({ value, onSave, highlight, weekend }) {
         ref={inputRef}
         value={draft}
         type="number" step="0.25" min="0" max="24"
+        aria-label={label}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setEditing(false); }}
-        className="w-full h-full text-center text-sm border-2 border-blue-500 rounded outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+        className={cx(
+          'h-9 w-full rounded-lg border-2 border-purple-500 bg-white px-1 text-center text-sm outline-none',
+          'dark:bg-[#0F1923]', TEXT_TITLE, NUM,
+        )}
         style={{ minWidth: 44 }}
       />
     );
@@ -106,17 +128,27 @@ function TimeCell({ value, onSave, highlight, weekend }) {
   const hasValue = !isNaN(num) && num > 0;
 
   return (
-    <div
+    <button
+      type="button"
       onDoubleClick={activate}
-      className={`w-full h-full flex items-center justify-center text-sm cursor-default select-none rounded transition-colors
-        ${weekend ? 'bg-gray-50 dark:bg-gray-800/50' : ''}
-        ${highlight ? 'ring-2 ring-blue-400 ring-inset' : ''}
-        ${hasValue ? 'text-blue-700 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400'}
-        hover:bg-blue-50 dark:hover:bg-blue-900/20`}
-      style={{ minHeight: 36, minWidth: 44 }}
+      onKeyDown={(e) => { if (e.key === 'Enter') activate(); }}
+      aria-label={label}
+      title="Double-cliquez pour saisir des heures"
+      className={cx(
+        'flex h-9 w-full select-none items-center justify-center rounded-lg text-sm transition-colors',
+        NUM,
+        weekend && SURFACE_SUNK,
+        highlight && 'ring-1 ring-inset ring-purple-400 dark:ring-purple-500/60',
+        hasValue
+          ? 'bg-purple-50 font-semibold text-purple-700 dark:bg-purple-500/10 dark:text-purple-300'
+          : TEXT_FAINT,
+        'hover:bg-purple-50 dark:hover:bg-purple-500/10',
+        FOCUS_RING,
+      )}
+      style={{ minWidth: 44 }}
     >
       {hasValue ? num : ''}
-    </div>
+    </button>
   );
 }
 
@@ -125,12 +157,12 @@ function TimeCell({ value, onSave, highlight, weekend }) {
 export default function TimesheetView() {
   const { project } = usePage().props;
 
-  const [view, setView]           = useState('week'); // 'week' | 'month'
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [data, setData]           = useState([]);
-  const [totalHours, setTotalHours] = useState(0);
+  const [view, setView]                     = useState('week'); // 'week' | 'month'
+  const [currentDate, setCurrentDate]       = useState(new Date());
+  const [data, setData]                     = useState([]);
+  const [totalHours, setTotalHours]         = useState(0);
   const [billableAmount, setBillableAmount] = useState(0);
-  const [loading, setLoading]     = useState(false);
+  const [loading, setLoading]               = useState(false);
 
   // ── Calcul des jours à afficher ───────────────────────────────────────────
 
@@ -146,7 +178,7 @@ export default function TimesheetView() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/projets/${project.id}/feuille-de-temps`, {
+      const res = await axios.get(`/api/v1/projects/${project.id}/timesheets`, {
         params: { start_date: startDate, end_date: endDate },
       });
       setData(res.data.timesheets || []);
@@ -165,7 +197,8 @@ export default function TimesheetView() {
 
   const handleSave = useCallback(async (userId, userName, date, hours) => {
     try {
-      await axios.post(`/projets/${project.id}/feuille-de-temps`, {
+      await axios.post(`/api/v1/projects/${project.id}/timesheets`, {
+        user_id: userId, // sans cela, la saisie était toujours imputée à l'utilisateur connecté
         date,
         hours: hours || 0,
         description: '',
@@ -214,7 +247,6 @@ export default function TimesheetView() {
     }, 0);
   });
 
-  const today = toISO(new Date());
   const periodLabel = view === 'week'
     ? `Semaine du ${days[0].toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' })} au ${days[6].toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}`
     : currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -223,109 +255,126 @@ export default function TimesheetView() {
     <AppLayout>
       <Head title={`Feuille de temps — ${project.name}`} />
 
-      <div className="max-w-full mx-auto px-4 py-6">
-        {/* ── Barre d'outils ── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{project.name}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{periodLabel}</p>
-          </div>
+      <div className="mx-auto max-w-full px-4 sm:px-6 lg:px-8 py-6">
 
-          <div className="flex items-center gap-2">
-            {/* Toggle vue */}
-            <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm">
-              {['week', 'month'].map((v) => (
-                <button key={v} onClick={() => setView(v)}
-                  className={`px-3 py-1.5 transition-colors ${view === v
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
-                  {v === 'week' ? 'Semaine' : 'Mois'}
-                </button>
-              ))}
-            </div>
+        <PageHeader
+          icon={Timer}
+          title={project.name}
+          breadcrumbs={[
+            { label: 'Projets', href: '/projets' },
+            { label: project.name, href: `/projets/${project.id}` },
+            { label: 'Feuille de temps' },
+          ]}
+          subtitle={periodLabel}
+          actions={
+            <>
+              {/* Bascule semaine / mois */}
+              <div className={cx('flex overflow-hidden rounded-lg border', BORDER)}>
+                {[['week', 'Semaine'], ['month', 'Mois']].map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    aria-pressed={view === v}
+                    className={cx(
+                      'h-10 px-3 text-sm font-medium transition-colors',
+                      view === v
+                        ? 'bg-purple-600 text-white'
+                        : cx(SURFACE, TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                      FOCUS_RING,
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
 
-            {/* Navigation */}
-            <button onClick={() => navigate(-1)}
-              className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-              ‹
-            </button>
-            <button onClick={() => setCurrentDate(new Date())}
-              className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-              Aujourd'hui
-            </button>
-            <button onClick={() => navigate(1)}
-              className="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-              ›
-            </button>
+              <Button variant="secondary" size="md" iconOnly icon={ChevronLeft}
+                      title="Période précédente" onClick={() => navigate(-1)} />
+              <Button variant="secondary" onClick={() => setCurrentDate(new Date())}>
+                Aujourd'hui
+              </Button>
+              <Button variant="secondary" size="md" iconOnly icon={ChevronRight}
+                      title="Période suivante" onClick={() => navigate(1)} />
 
-            {/* Export */}
-            <button onClick={() => exportCSV(data, days, project.name)}
-              className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-1">
-              ↓ Export CSV
-            </button>
-          </div>
+              <Button variant="secondary" icon={Download}
+                      onClick={() => exportCSV(data, days, project.name)}>
+                Export CSV
+              </Button>
+            </>
+          }
+        />
+
+        {/* Indicateurs */}
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard label="Heures saisies" value={totalHours} unit="h" icon={Timer} tone="accent" loading={loading} />
+          <StatCard
+            label="Montant facturable"
+            value={formatAmount(Number(billableAmount ?? 0), 'XOF', 'fr')}
+            icon={Banknote}
+            tone="success"
+            loading={loading}
+          />
+          <StatCard label="Collaborateurs" value={data.length} icon={Users} tone="neutral" loading={loading} />
         </div>
 
-        {/* ── KPIs rapides ── */}
-        <div className="grid grid-cols-3 gap-4 mb-5">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <p className="text-2xl font-bold text-blue-600">{totalHours}h</p>
-            <p className="text-xs text-gray-500 mt-1">Heures total</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <p className="text-2xl font-bold text-green-600">
-              {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(billableAmount)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Montant facturable</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-            <p className="text-2xl font-bold text-purple-600">{data.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Collaborateurs</p>
-          </div>
-        </div>
-
-        {/* ── Grille ── */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          {loading && (
-            <div className="flex items-center justify-center py-12 text-gray-400">
-              Chargement…
+        {/* Grille de saisie */}
+        <div className={cx('overflow-hidden rounded-xl border shadow-sm', SURFACE, BORDER)}>
+          {loading ? (
+            <div className="space-y-3 p-6">
+              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-9 w-full" />)}
             </div>
-          )}
-          {!loading && (
+          ) : data.length === 0 ? (
+            <EmptyState
+              icon={CalendarDays}
+              title="Aucune saisie sur cette période"
+              description="Les heures saisies par l'équipe apparaîtront ici, jour par jour."
+              hints={[
+                'Double-cliquez sur une cellule pour saisir des heures.',
+                'Entrée valide la saisie, Échap l’annule.',
+              ]}
+            />
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ minWidth: days.length * 52 + 200 }}>
-                <thead>
-                  <tr className="bg-gray-50 dark:bg-gray-900/50">
-                    <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 px-4 py-3 w-48 sticky left-0 bg-gray-50 dark:bg-gray-900/50 z-10 border-r border-gray-100 dark:border-gray-700">
+                <caption className="sr-only">
+                  Heures saisies par collaborateur et par jour — {periodLabel}
+                </caption>
+                <thead className={cx(SURFACE_SUNK, 'border-b', BORDER)}>
+                  <tr>
+                    <th scope="col" className={cx('sticky left-0 z-10 w-48 border-r px-4 py-3 text-left',
+                      TH, BORDER, SURFACE_SUNK)}>
                       Collaborateur
                     </th>
                     {days.map((day) => (
-                      <th key={toISO(day)}
-                        className={`text-center text-xs font-semibold px-1 py-3 min-w-[52px]
-                          ${isToday(day) ? 'text-blue-600 dark:text-blue-400' : isWeekend(day) ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                      <th
+                        key={toISO(day)}
+                        scope="col"
+                        className={cx(
+                          'min-w-[52px] px-1 py-3 text-center', TH, NUM,
+                          isToday(day)
+                            ? 'text-purple-600 dark:text-purple-400'
+                            : isWeekend(day) ? TEXT_FAINT : TEXT_MUTED,
+                        )}
+                      >
                         {formatDay(day, view)}
                       </th>
                     ))}
-                    <th className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 py-3 border-l border-gray-100 dark:border-gray-700">
+                    <th scope="col" className={cx('border-l px-3 py-3 text-center', TH, BORDER)}>
                       Total
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {data.length === 0 && (
-                    <tr>
-                      <td colSpan={days.length + 2} className="text-center text-gray-400 py-12 text-sm">
-                        Aucune saisie sur cette période.<br />
-                        <span className="text-xs">Double-cliquez sur une cellule pour saisir des heures.</span>
-                      </td>
-                    </tr>
-                  )}
+
+                <tbody className={cx('divide-y', DIVIDE)}>
                   {data.map((row) => (
-                    <tr key={row.user_name} className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/20">
+                    <tr key={row.user_name} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]">
                       {/* Nom */}
-                      <td className="px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 sticky left-0 bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-700 z-10">
+                      <th scope="row" className={cx('sticky left-0 z-10 border-r px-4 py-2 text-left text-sm font-medium',
+                        SURFACE, BORDER, TEXT_TITLE)}>
                         {row.user_name}
-                      </td>
+                      </th>
+
                       {/* Cellules heures */}
                       {days.map((day) => {
                         const iso = toISO(day);
@@ -336,31 +385,38 @@ export default function TimesheetView() {
                               value={entry?.hours}
                               weekend={isWeekend(day)}
                               highlight={isToday(day)}
+                              label={`${row.user_name} — ${iso}`}
                               onSave={(hours) => handleSave(entry?.user_id || row.user_id, row.user_name, iso, hours)}
                             />
                           </td>
                         );
                       })}
+
                       {/* Total */}
-                      <td className="px-3 py-2 text-center text-sm font-bold text-gray-700 dark:text-gray-300 border-l border-gray-100 dark:border-gray-700">
-                        {row.total_hours}h
+                      <td className={cx('border-l px-3 py-2 text-center text-sm font-semibold',
+                        BORDER, TEXT_TITLE, NUM)}>
+                        {row.total_hours} h
                       </td>
                     </tr>
                   ))}
                 </tbody>
+
                 {/* Pied : totaux par jour */}
-                <tfoot>
-                  <tr className="bg-gray-50 dark:bg-gray-900/50 border-t-2 border-gray-200 dark:border-gray-600">
-                    <td className="px-4 py-2 text-xs font-semibold text-gray-500 sticky left-0 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-100 dark:border-gray-700">
+                <tfoot className={cx(SURFACE_SUNK, 'border-t', BORDER)}>
+                  <tr>
+                    <th scope="row" className={cx('sticky left-0 z-10 border-r px-4 py-2.5 text-left',
+                      TH, BORDER, SURFACE_SUNK)}>
                       Total / jour
-                    </td>
+                    </th>
                     {dayTotals.map((total, i) => (
-                      <td key={i} className={`text-center text-xs font-semibold py-2 ${total > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
-                        {total > 0 ? `${total}h` : ''}
+                      <td key={i} className={cx('py-2.5 text-center text-xs font-semibold', NUM,
+                        total > 0 ? 'text-purple-600 dark:text-purple-400' : TEXT_FAINT)}>
+                        {total > 0 ? `${total} h` : ''}
                       </td>
                     ))}
-                    <td className="text-center text-sm font-bold text-blue-700 dark:text-blue-400 border-l border-gray-100 dark:border-gray-700 py-2">
-                      {totalHours}h
+                    <td className={cx('border-l py-2.5 text-center text-sm font-semibold',
+                      BORDER, 'text-purple-700 dark:text-purple-300', NUM)}>
+                      {totalHours} h
                     </td>
                   </tr>
                 </tfoot>
@@ -369,10 +425,13 @@ export default function TimesheetView() {
           )}
         </div>
 
-        <p className="text-xs text-gray-400 mt-3 text-center">
-          Double-cliquez sur une cellule pour saisir ou modifier les heures
-        </p>
+        {data.length > 0 && (
+          <p className={cx('mt-3 text-center text-xs', TEXT_FAINT)}>
+            Double-cliquez sur une cellule pour saisir ou modifier les heures.
+          </p>
+        )}
       </div>
     </AppLayout>
   );
 }
+export { TimesheetView };

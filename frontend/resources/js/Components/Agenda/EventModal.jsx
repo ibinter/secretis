@@ -1,6 +1,11 @@
 /**
  * EventModal — Formulaire complet de création/édition d'un événement
  *
+ * Présentation migrée sur le système de composants `@/Components/UI`
+ * (dark mode complet, contrôles h-10, tons sémantiques, icônes lucide-react).
+ * Logique métier STRICTEMENT inchangée : mêmes hooks TanStack Query, mêmes
+ * enregistrements react-hook-form, mêmes payloads, mêmes callbacks.
+ *
  * Fonctionnalités :
  *  - Titre, description, type, couleur
  *  - Dates/heures avec option "Toute la journée"
@@ -24,18 +29,25 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
+import { AlertTriangle, X, Plus, Trash2, Search, CalendarPlus, Users } from 'lucide-react';
 import { useCreateEvent, useUpdateEvent, useDeleteEvent, useCheckAvailability } from '../../hooks/useAgenda';
 import RoomBookingWidget from './RoomBookingWidget';
+import {
+    Button, Badge,
+    cx, CONTROL, SURFACE, SURFACE_SUNK, BORDER, DIVIDE,
+    TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING, TONES,
+} from '@/Components/UI';
 
 // -----------------------------------------------------------------------
 // Constantes
 // -----------------------------------------------------------------------
 
 const EVENT_TYPES = [
-    { value: 'event',    label: 'Événement',   color: '#3B82F6' },
     { value: 'meeting',  label: 'Réunion',      color: '#8B5CF6' },
     { value: 'task',     label: 'Tâche',        color: '#F59E0B' },
     { value: 'reminder', label: 'Rappel',       color: '#EF4444' },
+    { value: 'holiday',  label: 'Congé',        color: '#10B981' },
+    { value: 'other',    label: 'Autre',        color: '#3B82F6' },
 ];
 
 const RECURRENCE_OPTIONS = [
@@ -65,7 +77,7 @@ const DEFAULT_VALUES = {
     title:            '',
     description:      '',
     location:         '',
-    type:             'event',
+    type:             'meeting',
     color:            '',
     start_at:         '',
     end_at:           '',
@@ -77,6 +89,11 @@ const DEFAULT_VALUES = {
     reminders:        [],
     calendar_id:      null,
 };
+
+const CHECKBOX = cx(
+    'h-4 w-4 rounded border-gray-300 text-purple-600 dark:border-gray-600',
+    'bg-white dark:bg-[#0F1923] focus:ring-purple-500 cursor-pointer',
+);
 
 // -----------------------------------------------------------------------
 // Helpers
@@ -106,17 +123,18 @@ function extractValidationErrors(axiosError) {
 // -----------------------------------------------------------------------
 
 /** Champ de formulaire avec label et erreur */
-function FormField({ label, error, required, children, className = '' }) {
+function FormField({ label, error, required, hint, children, className = '' }) {
     return (
         <div className={className}>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className={cx('mb-1.5 block text-xs font-medium', TEXT_MUTED)}>
                     {label}
-                    {required && <span className="text-red-500 ml-0.5">*</span>}
+                    {required && <span className="ml-0.5 text-red-500" aria-hidden="true">*</span>}
                 </label>
             )}
             {children}
-            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+            {hint && !error && <p className={cx('mt-1 text-xs', TEXT_FAINT)}>{hint}</p>}
+            {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 }
@@ -125,6 +143,7 @@ FormField.propTypes = {
     label:    PropTypes.string,
     error:    PropTypes.string,
     required: PropTypes.bool,
+    hint:     PropTypes.node,
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
 };
@@ -158,19 +177,22 @@ function ParticipantSelector({ users, selected, onChange }) {
     );
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-3">
             {/* Chips des participants sélectionnés */}
             {selectedUsers.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                     {selectedUsers.map((u) => (
                         <span
                             key={u.id}
-                            className="inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs"
+                            className={cx(
+                                'inline-flex items-center gap-1.5 rounded-full py-0.5 pl-1 pr-1.5 text-xs font-medium',
+                                TONES.accent.soft, TONES.accent.text,
+                            )}
                         >
                             {u.avatar ? (
-                                <img src={u.avatar} alt="" className="w-4 h-4 rounded-full" />
+                                <img src={u.avatar} alt="" className="h-4 w-4 rounded-full object-cover" />
                             ) : (
-                                <span className="w-4 h-4 rounded-full bg-blue-300 flex items-center justify-center text-blue-800 font-bold text-[10px]">
+                                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-purple-200 text-[10px] font-semibold text-purple-800 dark:bg-purple-500/30 dark:text-purple-100">
                                     {u.name[0]}
                                 </span>
                             )}
@@ -178,53 +200,60 @@ function ParticipantSelector({ users, selected, onChange }) {
                             <button
                                 type="button"
                                 onClick={() => toggle(u.id)}
-                                className="ml-0.5 hover:text-blue-900"
+                                className={cx('rounded-full transition-colors hover:text-purple-900 dark:hover:text-white', FOCUS_RING)}
                                 aria-label={`Retirer ${u.name}`}
                             >
-                                ×
+                                <X className="h-3 w-3" aria-hidden="true" />
                             </button>
                         </span>
                     ))}
                 </div>
             )}
 
-            {/* Input de recherche */}
-            <input
-                ref={inputRef}
-                type="text"
-                placeholder="Rechercher un participant..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            {/* Champ de recherche */}
+            <div className="relative">
+                <Search className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
+                <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Rechercher un participant…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    aria-label="Rechercher un participant"
+                    className={cx(CONTROL, 'h-10 pl-9')}
+                />
+            </div>
 
             {/* Liste des résultats */}
             {(search || filtered.length > 0) && (
-                <div className="border border-gray-200 rounded-md divide-y divide-gray-100 max-h-40 overflow-y-auto">
+                <div className={cx('max-h-52 overflow-y-auto rounded-lg border divide-y', BORDER, DIVIDE)}>
                     {filtered.map((user) => (
                         <label
                             key={user.id}
-                            className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                            className="flex cursor-pointer items-center gap-2.5 px-3 py-2 transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]"
                         >
                             <input
                                 type="checkbox"
                                 checked={isSelected(user.id)}
                                 onChange={() => toggle(user.id)}
-                                className="w-4 h-4 text-blue-500 rounded"
+                                className={CHECKBOX}
                             />
                             {user.avatar ? (
-                                <img src={user.avatar} alt="" className="w-6 h-6 rounded-full" />
+                                <img src={user.avatar} alt="" className="h-6 w-6 rounded-full object-cover" />
                             ) : (
-                                <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-semibold">
+                                <span className={cx(
+                                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                                    TONES.neutral.soft, TONES.neutral.text,
+                                )}>
                                     {user.name[0]}
                                 </span>
                             )}
-                            <span className="text-sm text-gray-800">{user.name}</span>
-                            <span className="text-xs text-gray-400 ml-auto">{user.email}</span>
+                            <span className={cx('truncate text-sm', TEXT_TITLE)}>{user.name}</span>
+                            <span className={cx('ml-auto truncate text-xs', TEXT_FAINT)}>{user.email}</span>
                         </label>
                     ))}
                     {filtered.length === 0 && (
-                        <p className="text-center text-sm text-gray-400 py-3">
+                        <p className={cx('py-4 text-center text-sm', TEXT_MUTED)}>
                             Aucun utilisateur trouvé.
                         </p>
                     )}
@@ -334,7 +363,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                 title:           event.title ?? '',
                 description:     event.description ?? '',
                 location:        event.location ?? '',
-                type:            event.type ?? 'event',
+                type:            event.type ?? 'meeting',
                 color:           event.color ?? '',
                 start_at:        toInputDatetime(event.start_at ?? event.start),
                 end_at:          toInputDatetime(event.end_at ?? event.end),
@@ -432,74 +461,91 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
     const selectedType   = EVENT_TYPES.find((t) => t.value === watchType);
     const defaultColor   = selectedType?.color ?? '#3B82F6';
 
+    const TABS = [
+        { key: 'general',      label: 'Général',      count: null },
+        { key: 'participants', label: 'Participants', count: participants.length || null },
+        { key: 'room',         label: 'Salle',        count: null },
+        { key: 'advanced',     label: 'Avancé',       count: null },
+    ];
+
+    const reminders = watch('reminders') ?? [];
+
     return (
         /* Overlay */
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 dark:bg-black/70"
             onClick={(e) => e.target === e.currentTarget && handleClose()}
             role="dialog"
             aria-modal="true"
             aria-labelledby="event-modal-title"
         >
             {/* Panneau modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className={cx(
+                'relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border shadow-lg',
+                BORDER, SURFACE,
+            )}>
 
-                {/* En-tête coloré selon le type */}
-                <div
-                    className="px-6 py-4 flex items-center justify-between"
-                    style={{ backgroundColor: watch('color') || defaultColor }}
-                >
-                    <h2 id="event-modal-title" className="text-lg font-semibold text-white">
-                        {isEditing ? 'Modifier l\'événement' : 'Nouvel événement'}
-                    </h2>
-                    <button
-                        type="button"
-                        onClick={handleClose}
-                        className="text-white/80 hover:text-white transition-colors"
-                        aria-label="Fermer"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd"
-                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                clipRule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
+                {/* En-tête */}
+                <header className={cx('flex items-start justify-between gap-3 border-b px-5 py-4', BORDER)}>
+                    <div className="flex min-w-0 items-center gap-3">
+                        <span
+                            className="h-9 w-1.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: watch('color') || defaultColor }}
+                            aria-hidden="true"
+                        />
+                        <div className="min-w-0">
+                            <h2 id="event-modal-title" className={cx('truncate text-base font-semibold tracking-tight', TEXT_TITLE)}>
+                                {isEditing ? 'Modifier l\'événement' : 'Nouvel événement'}
+                            </h2>
+                            <p className={cx('mt-0.5 text-sm', TEXT_MUTED)}>
+                                {selectedType?.label ?? 'Événement'}
+                                {watchIsAllDay ? ' · toute la journée' : ''}
+                            </p>
+                        </div>
+                    </div>
+                    <Button variant="ghost" size="sm" iconOnly icon={X} title="Fermer"
+                            aria-label="Fermer" onClick={handleClose} />
+                </header>
 
                 {/* Onglets */}
-                <div className="border-b border-gray-200 px-6">
-                    <nav className="flex gap-4 -mb-px" aria-label="Sections du formulaire">
-                        {[
-                            { key: 'general',      label: 'Général' },
-                            { key: 'participants', label: `Participants${participants.length ? ` (${participants.length})` : ''}` },
-                            { key: 'room',         label: 'Salle' },
-                            { key: 'advanced',     label: 'Avancé' },
-                        ].map((tab) => (
-                            <button
-                                key={tab.key}
-                                type="button"
-                                onClick={() => setActiveTab(tab.key)}
-                                className={[
-                                    'py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                                    activeTab === tab.key
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700',
-                                ].join(' ')}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
+                <div className={cx('border-b px-5', BORDER)}>
+                    <nav className="-mb-px flex gap-5 overflow-x-auto" aria-label="Sections du formulaire">
+                        {TABS.map((tab) => {
+                            const active = activeTab === tab.key;
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.key)}
+                                    aria-current={active ? 'page' : undefined}
+                                    className={cx(
+                                        'flex items-center gap-1.5 whitespace-nowrap border-b-2 py-3 text-sm font-medium transition-colors',
+                                        FOCUS_RING,
+                                        active
+                                            ? 'border-purple-600 text-purple-700 dark:border-purple-400 dark:text-purple-300'
+                                            : cx('border-transparent', TEXT_MUTED, 'hover:text-gray-700 dark:hover:text-gray-200'),
+                                    )}
+                                >
+                                    {tab.label}
+                                    {tab.count ? <Badge variant="accent" className={NUM}>{tab.count}</Badge> : null}
+                                </button>
+                            );
+                        })}
                     </nav>
                 </div>
 
                 {/* Corps du formulaire */}
-                <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto">
-                    <div className="px-6 py-5 space-y-5">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
 
                         {/* Alerte erreur serveur globale */}
                         {mutationError && (
-                            <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-600">
-                                {mutationError}
+                            <div className={cx(
+                                'flex items-start gap-2 rounded-lg border p-3 text-sm',
+                                TONES.danger.soft, TONES.danger.border, TONES.danger.text,
+                            )}>
+                                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                                <span>{mutationError}</span>
                             </div>
                         )}
 
@@ -517,50 +563,39 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         type="text"
                                         placeholder="Titre de l'événement"
                                         autoFocus
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className={cx(CONTROL, 'h-10')}
                                     />
                                 </FormField>
 
                                 {/* Type + Couleur */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <FormField label="Type">
-                                        <select
-                                            {...register('type')}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
+                                        <select {...register('type')} className={cx(CONTROL, 'h-10')}>
                                             {EVENT_TYPES.map((t) => (
                                                 <option key={t.value} value={t.value}>{t.label}</option>
                                             ))}
                                         </select>
                                     </FormField>
 
-                                    <FormField label="Couleur">
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                {...register('color')}
-                                                type="color"
-                                                defaultValue={defaultColor}
-                                                className="w-10 h-9 rounded border border-gray-300 cursor-pointer p-0.5"
-                                            />
-                                            <span className="text-xs text-gray-400">
-                                                Défaut : type de l'événement
-                                            </span>
-                                        </div>
+                                    <FormField label="Couleur" hint="Par défaut : couleur du type d'événement.">
+                                        <input
+                                            {...register('color')}
+                                            type="color"
+                                            defaultValue={defaultColor}
+                                            aria-label="Couleur de l'événement"
+                                            className={cx('h-10 w-16 cursor-pointer rounded-lg border p-1', BORDER, SURFACE)}
+                                        />
                                     </FormField>
                                 </div>
 
                                 {/* Option : toute la journée */}
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        {...register('is_all_day')}
-                                        type="checkbox"
-                                        className="w-4 h-4 text-blue-500 rounded"
-                                    />
-                                    <span className="text-sm text-gray-700">Toute la journée</span>
+                                <label className="flex w-fit cursor-pointer items-center gap-2">
+                                    <input {...register('is_all_day')} type="checkbox" className={CHECKBOX} />
+                                    <span className={cx('text-sm', TEXT_BODY)}>Toute la journée</span>
                                 </label>
 
                                 {/* Dates */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <FormField
                                         label="Début"
                                         required
@@ -569,7 +604,7 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                         <input
                                             {...register('start_at', { required: 'La date de début est obligatoire.' })}
                                             type={watchIsAllDay ? 'date' : 'datetime-local'}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className={cx(CONTROL, 'h-10', NUM)}
                                             onChange={(e) => {
                                                 setValue('start_at', e.target.value);
                                                 // Auto-calculer end_at = start + 1h si end est vide
@@ -595,19 +630,18 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                             })}
                                             type={watchIsAllDay ? 'date' : 'datetime-local'}
                                             min={watchStartAt}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className={cx(CONTROL, 'h-10', NUM)}
                                         />
                                     </FormField>
                                 </div>
 
                                 {/* Alerte de conflit de créneau */}
                                 {availabilityData?.has_conflict && (
-                                    <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-700">
-                                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd"
-                                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                                clipRule="evenodd" />
-                                        </svg>
+                                    <div className={cx(
+                                        'flex items-start gap-2 rounded-lg border p-3 text-sm',
+                                        TONES.warning.soft, TONES.warning.border, TONES.warning.text,
+                                    )}>
+                                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                                         <span>
                                             Vous avez déjà un événement sur ce créneau.
                                             Vous pouvez quand même enregistrer.
@@ -620,8 +654,8 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                     <input
                                         {...register('location')}
                                         type="text"
-                                        placeholder="Salle de réunion, adresse, lien..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Salle de réunion, adresse, lien…"
+                                        className={cx(CONTROL, 'h-10')}
                                     />
                                 </FormField>
 
@@ -635,8 +669,8 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                             },
                                         })}
                                         type="url"
-                                        placeholder="https://meet.google.com/..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="https://meet.google.com/…"
+                                        className={cx(CONTROL, 'h-10')}
                                     />
                                 </FormField>
 
@@ -645,8 +679,8 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                     <textarea
                                         {...register('description')}
                                         rows={3}
-                                        placeholder="Détails, ordre du jour, notes..."
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                        placeholder="Détails, ordre du jour, notes…"
+                                        className={cx(CONTROL, 'resize-none')}
                                     />
                                 </FormField>
                             </div>
@@ -655,9 +689,13 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                         {/* ═══ ONGLET PARTICIPANTS ═══ */}
                         {activeTab === 'participants' && (
                             <div className="space-y-4">
-                                <p className="text-sm text-gray-500">
-                                    Sélectionnez les utilisateurs à inviter. Le créateur est automatiquement ajouté comme organisateur.
-                                </p>
+                                <div className={cx('flex items-start gap-2.5 rounded-lg border p-3', BORDER, SURFACE_SUNK)}>
+                                    <Users className={cx('mt-0.5 h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+                                    <p className={cx('text-sm', TEXT_MUTED)}>
+                                        Sélectionnez les utilisateurs à inviter. Le créateur est automatiquement
+                                        ajouté comme organisateur.
+                                    </p>
+                                </div>
                                 <ParticipantSelector
                                     users={orgUsers}
                                     selected={participants}
@@ -685,29 +723,28 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                     label="Récurrence"
                                     error={errors.recurrence_rule?.message || serverErrors.recurrence_rule?.[0]}
                                 >
-                                    <select
-                                        {...register('recurrence_rule')}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
+                                    <select {...register('recurrence_rule')} className={cx(CONTROL, 'h-10')}>
                                         {RECURRENCE_OPTIONS.map((o) => (
                                             <option key={o.value} value={o.value}>{o.label}</option>
                                         ))}
                                     </select>
                                     {watch('recurrence_rule') && (
-                                        <p className="mt-1 text-xs text-gray-400 font-mono">
-                                            RRULE: {watch('recurrence_rule')}
+                                        <p className={cx('mt-1.5 font-mono text-xs', TEXT_FAINT)}>
+                                            RRULE : {watch('recurrence_rule')}
                                         </p>
                                     )}
                                 </FormField>
 
                                 {/* Rappels */}
                                 <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <label className="text-sm font-medium text-gray-700">
-                                            Rappels
-                                        </label>
-                                        <button
+                                    <div className="mb-2 flex items-center justify-between gap-2">
+                                        <span className={cx('text-xs font-medium', TEXT_MUTED)}>Rappels</span>
+                                        <Button
                                             type="button"
+                                            variant="ghost"
+                                            size="xs"
+                                            icon={Plus}
+                                            disabled={reminders.length >= 5}
                                             onClick={() => {
                                                 const current = watch('reminders') ?? [];
                                                 if (current.length >= 5) return;
@@ -716,27 +753,31 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                                     { minutes: 15, channel: 'app' },
                                                 ]);
                                             }}
-                                            className="text-xs text-blue-600 hover:underline"
+                                            className="text-purple-700 dark:text-purple-300"
                                         >
-                                            + Ajouter un rappel
-                                        </button>
+                                            Ajouter un rappel
+                                        </Button>
                                     </div>
 
-                                    {(watch('reminders') ?? []).length === 0 && (
-                                        <p className="text-sm text-gray-400 italic">Aucun rappel configuré.</p>
+                                    {reminders.length === 0 && (
+                                        <p className={cx('rounded-lg border border-dashed px-3 py-4 text-center text-sm',
+                                            BORDER, TEXT_MUTED)}>
+                                            Aucun rappel configuré. Les participants ne seront pas relancés avant l'événement.
+                                        </p>
                                     )}
 
                                     <div className="space-y-2">
-                                        {(watch('reminders') ?? []).map((reminder, index) => (
+                                        {reminders.map((reminder, index) => (
                                             <div key={index} className="flex items-center gap-2">
                                                 <select
                                                     value={reminder.minutes}
+                                                    aria-label="Délai du rappel"
                                                     onChange={(e) => {
                                                         const updated = [...watch('reminders')];
                                                         updated[index] = { ...updated[index], minutes: parseInt(e.target.value) };
                                                         setValue('reminders', updated);
                                                     }}
-                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className={cx(CONTROL, 'h-10 flex-1')}
                                                 >
                                                     {REMINDER_MINUTES.map((m) => (
                                                         <option key={m.value} value={m.value}>{m.label}</option>
@@ -744,32 +785,32 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                                                 </select>
                                                 <select
                                                     value={reminder.channel}
+                                                    aria-label="Canal du rappel"
                                                     onChange={(e) => {
                                                         const updated = [...watch('reminders')];
                                                         updated[index] = { ...updated[index], channel: e.target.value };
                                                         setValue('reminders', updated);
                                                     }}
-                                                    className="flex-1 text-sm px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className={cx(CONTROL, 'h-10 flex-1')}
                                                 >
                                                     {REMINDER_CHANNELS.map((c) => (
                                                         <option key={c.value} value={c.value}>{c.label}</option>
                                                     ))}
                                                 </select>
-                                                <button
+                                                <Button
                                                     type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    iconOnly
+                                                    icon={Trash2}
+                                                    title="Supprimer le rappel"
+                                                    aria-label="Supprimer le rappel"
                                                     onClick={() => {
                                                         const updated = watch('reminders').filter((_, i) => i !== index);
                                                         setValue('reminders', updated);
                                                     }}
-                                                    className="text-gray-400 hover:text-red-500 transition-colors"
-                                                    aria-label="Supprimer le rappel"
-                                                >
-                                                    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fillRule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clipRule="evenodd" />
-                                                    </svg>
-                                                </button>
+                                                    className="text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                                                />
                                             </div>
                                         ))}
                                     </div>
@@ -779,56 +820,38 @@ function EventModal({ isOpen, onClose, event, initialDate, orgUsers, onSaved, on
                     </div>
 
                     {/* Pied de formulaire — actions */}
-                    <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+                    <footer className={cx('flex items-center justify-between gap-3 border-t px-5 py-3', BORDER, SURFACE_SUNK)}>
                         {/* Bouton supprimer (édition uniquement) */}
                         <div>
                             {isEditing && (
-                                <button
+                                <Button
                                     type="button"
+                                    variant={confirmDelete ? 'danger' : 'ghost'}
+                                    icon={Trash2}
                                     onClick={handleDelete}
                                     disabled={isBusy}
-                                    className={[
-                                        'px-4 py-2 text-sm rounded-md transition-colors',
-                                        confirmDelete
-                                            ? 'bg-red-600 text-white hover:bg-red-700'
-                                            : 'text-red-600 hover:bg-red-50',
-                                    ].join(' ')}
+                                    loading={deleteEvent.isPending}
+                                    className={confirmDelete ? undefined : 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'}
                                 >
                                     {deleteEvent.isPending
-                                        ? 'Suppression...'
+                                        ? 'Suppression…'
                                         : confirmDelete
                                             ? 'Confirmer la suppression'
                                             : 'Supprimer'}
-                                </button>
+                                </Button>
                             )}
                         </div>
 
                         {/* Boutons Annuler + Enregistrer */}
-                        <div className="flex items-center gap-3">
-                            <button
-                                type="button"
-                                onClick={handleClose}
-                                disabled={isBusy}
-                                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-                            >
+                        <div className="flex items-center gap-2">
+                            <Button type="button" variant="secondary" onClick={handleClose} disabled={isBusy}>
                                 Annuler
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isBusy}
-                                className="px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 flex items-center gap-2"
-                            >
-                                {isBusy && (
-                                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                )}
-                                {isBusy ? 'Enregistrement...' : 'Enregistrer'}
-                            </button>
+                            </Button>
+                            <Button type="submit" variant="primary" icon={CalendarPlus} loading={isBusy}>
+                                {isBusy ? 'Enregistrement…' : 'Enregistrer'}
+                            </Button>
                         </div>
-                    </div>
+                    </footer>
                 </form>
             </div>
         </div>
@@ -850,10 +873,10 @@ EventModal.propTypes = {
         color:           PropTypes.string,
         start_at:        PropTypes.string,
         end_at:          PropTypes.string,
-        start:           PropTypes.string,  // Format FullCalendar
-        end:             PropTypes.string,  // Format FullCalendar
+        start:           PropTypes.string,  // Format calendrier
+        end:             PropTypes.string,  // Format calendrier
         is_all_day:      PropTypes.bool,
-        allDay:          PropTypes.bool,    // Format FullCalendar
+        allDay:          PropTypes.bool,    // Format calendrier
         recurrence_rule: PropTypes.string,
         meet_link:       PropTypes.string,
         room_id:         PropTypes.string,

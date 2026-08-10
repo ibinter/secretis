@@ -1,372 +1,266 @@
+{{--
+    Certificat de signature électronique — preuve / dossier de preuve (dompdf, A4 portrait).
+    Appelé par : App\Services\SignatureService::generateCertificate() (ligne 318)
+    Variables :
+      $request       App\Models\SignatureRequest (relations chargées : signers, document, auditTrail)
+                     id, organization_id, document_id, title, message, status, signing_order,
+                     expires_at, completed_at, created_by
+      $auditTrail    Collection de App\Models\SignatureAuditTrail triée par created_at :
+                     event_type (created|sent|reminder_sent|signed|declined|cancelled|completed),
+                     actor_email, actor_ip, data (array), created_at
+      $generatedAt   Carbon
+      $documentHash  string  empreinte SHA-256 du fichier signé
+--}}
+@php
+    $events = [
+        'created'       => 'Creation de la demande',
+        'sent'          => 'Invitation envoyee',
+        'reminder_sent' => 'Rappel envoye',
+        'signed'        => 'Document signe',
+        'declined'      => 'Signature refusee',
+        'cancelled'     => 'Demande annulee',
+        'completed'     => 'Processus finalise',
+    ];
+    $statuses = [
+        'draft'            => 'Brouillon',
+        'pending'          => 'En attente',
+        'partially_signed' => 'Partiellement signe',
+        'completed'        => 'Complete',
+        'declined'         => 'Refuse',
+        'cancelled'        => 'Annule',
+    ];
+    $signerStatuses = [
+        'pending'  => 'En attente',
+        'signed'   => 'Signe',
+        'declined' => 'Refuse',
+    ];
+
+    $signers     = $request->signers ?? collect();
+    $auditTrail  = $auditTrail ?? collect();
+    $generatedAt = $generatedAt ?? now();
+    $signedCount = $signers->where('status', 'signed')->count();
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <title>Certificat de Signature — {{ $request->title }}</title>
+    <meta charset="utf-8">
+    <title>Certificat de signature electronique — {{ $request->title ?? '' }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { font-family: "DejaVu Sans", sans-serif; }
+        @page { margin: 20mm 15mm 18mm 15mm; }
+        body { font-size: 10.5px; color: #1f2937; margin: 0; }
 
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10pt;
-            color: #1E293B;
-            background: white;
-        }
+        .header { border-bottom: 2px solid #9333EA; padding-bottom: 10px; margin-bottom: 16px; }
+        .brand { font-size: 15px; font-weight: bold; color: #111827; }
+        .doctype { font-size: 9px; color: #9333EA; letter-spacing: 2px;
+                   text-transform: uppercase; margin-top: 3px; }
+        .title { font-size: 13px; font-weight: bold; color: #111827; margin-top: 6px; }
 
-        /* ── Page layout ── */
-        .page { padding: 2cm; }
+        h2.section { font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+                     color: #9333EA; border-bottom: 1px solid #e9d5ff;
+                     padding-bottom: 3px; margin: 16px 0 8px; }
 
-        /* ── En-tête ── */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 3px solid #1E3A5F;
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .header-left h1 {
-            font-size: 18pt;
-            color: #1E3A5F;
-            font-weight: bold;
-            letter-spacing: .5px;
-        }
-        .header-left p {
-            font-size: 9pt;
-            color: #64748B;
-            margin-top: .25rem;
-        }
-        .header-right {
-            text-align: right;
-        }
-        .header-right .badge-secretis {
-            display: inline-block;
-            background: #1E3A5F;
-            color: white;
-            font-size: 8pt;
-            font-weight: bold;
-            padding: .3rem .7rem;
-            border-radius: 4px;
-            letter-spacing: 1px;
-        }
-        .header-right .cert-number {
-            font-size: 8pt;
-            color: #64748B;
-            margin-top: .3rem;
-        }
+        table { width: 100%; border-collapse: collapse; }
+        table.meta td { padding: 4px 6px; border: 1px solid #e5e7eb; vertical-align: top; }
+        table.meta td.k { width: 24%; background: #faf5ff; color: #6b7280; font-size: 9px;
+                          text-transform: uppercase; }
 
-        /* ── Section document ── */
-        .section {
-            margin-bottom: 1.5rem;
-        }
-        .section-title {
-            font-size: 11pt;
-            font-weight: bold;
-            color: #1E3A5F;
-            border-left: 4px solid #2563EB;
-            padding-left: .5rem;
-            margin-bottom: .75rem;
-        }
+        table.list th { background: #f3f4f6; text-align: left; padding: 5px; font-size: 8.5px;
+                        text-transform: uppercase; color: #4b5563;
+                        border-bottom: 1px solid #d1d5db; }
+        table.list td { padding: 5px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+        table.list tr { page-break-inside: avoid; }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: 160px 1fr;
-            gap: .3rem 1rem;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #64748B;
-            font-size: 9pt;
-        }
-        .info-value {
-            color: #1E293B;
-            font-size: 9pt;
-        }
+        .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5px;
+                word-wrap: break-word; color: #374151; }
+        .small { font-size: 8.5px; color: #6b7280; }
+        .muted { color: #9ca3af; }
+        .ok { color: #16a34a; font-weight: bold; }
+        .ko { color: #dc2626; font-weight: bold; }
+        .wait { color: #d97706; font-weight: bold; }
 
-        /* Hash */
-        .hash-box {
-            background: #F1F5F9;
-            border: 1px solid #E2E8F0;
-            border-radius: 4px;
-            padding: .5rem .75rem;
-            font-family: 'Courier New', monospace;
-            font-size: 8pt;
-            word-break: break-all;
-            color: #0F172A;
-            margin-top: .5rem;
-        }
+        .hash-box { border: 1px solid #e5e7eb; background: #f9fafb; padding: 8px 10px; }
 
-        /* ── Tableau signataires ── */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 9pt;
-        }
-        thead th {
-            background: #1E3A5F;
-            color: white;
-            padding: .5rem .75rem;
-            text-align: left;
-            font-weight: 600;
-        }
-        tbody tr:nth-child(even) { background: #F8FAFC; }
-        tbody td {
-            padding: .45rem .75rem;
-            border-bottom: 1px solid #E2E8F0;
-            vertical-align: top;
-        }
-        .status-signed   { color: #16A34A; font-weight: bold; }
-        .status-declined { color: #DC2626; font-weight: bold; }
-        .status-pending  { color: #D97706; }
+        .empty { padding: 10px; border: 1px dashed #d1d5db; color: #9ca3af;
+                 text-align: center; font-size: 10px; }
 
-        /* ── Piste d'audit ── */
-        .audit-list { list-style: none; }
-        .audit-item {
-            display: flex;
-            gap: .75rem;
-            padding: .35rem 0;
-            border-bottom: 1px solid #F1F5F9;
-            font-size: 8.5pt;
-        }
-        .audit-time {
-            color: #64748B;
-            min-width: 130px;
-            flex-shrink: 0;
-        }
-        .audit-event {
-            font-weight: 600;
-            min-width: 100px;
-            flex-shrink: 0;
-        }
-        .audit-actor { color: #475569; }
+        .notice { margin-top: 16px; border-left: 3px solid #9333EA; background: #faf5ff;
+                  padding: 10px 12px; font-size: 9px; color: #4b5563; line-height: 1.6; }
 
-        /* Event colors */
-        .ev-created   { color: #2563EB; }
-        .ev-sent      { color: #7C3AED; }
-        .ev-signed    { color: #16A34A; }
-        .ev-declined  { color: #DC2626; }
-        .ev-completed { color: #059669; }
-        .ev-cancelled { color: #9F1239; }
-        .ev-reminder  { color: #D97706; }
-
-        /* ── Cachet officiel ── */
-        .stamp-area {
-            text-align: center;
-            margin: 1.5rem 0;
-        }
-        .stamp {
-            display: inline-block;
-            border: 3px solid #1E3A5F;
-            border-radius: 50%;
-            width: 110px;
-            height: 110px;
-            line-height: 1.2;
-            text-align: center;
-            padding: 15px 10px;
-            position: relative;
-        }
-        .stamp-inner {
-            border: 1px dashed #1E3A5F;
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .stamp-top    { font-size: 7pt; font-weight: bold; color: #1E3A5F; letter-spacing: 1px; }
-        .stamp-middle { font-size: 8pt; font-weight: bold; color: #1E3A5F; margin: 3px 0; }
-        .stamp-bottom { font-size: 6pt; color: #64748B; }
-
-        /* ── Pied de page ── */
-        .footer {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #E2E8F0;
-            font-size: 7.5pt;
-            color: #94A3B8;
-            line-height: 1.6;
-        }
-        .footer-legal {
-            background: #EFF6FF;
-            border: 1px solid #BFDBFE;
-            border-radius: 4px;
-            padding: .6rem .9rem;
-            margin-bottom: .5rem;
-            font-size: 8pt;
-            color: #1E40AF;
-            font-style: italic;
-        }
-
-        /* ── Page break ── */
-        .page-break { page-break-before: always; }
+        .footer { position: fixed; bottom: -11mm; left: 0; right: 0;
+                  font-size: 8px; color: #9ca3af; text-align: center; }
     </style>
 </head>
 <body>
-<div class="page">
 
-    <!-- ── En-tête ── -->
-    <div class="header">
-        <div class="header-left">
-            <h1>CERTIFICAT DE SIGNATURE ÉLECTRONIQUE</h1>
-            <p>Document généré automatiquement par SECRETIS ERP</p>
-            <p>Date de génération : {{ $generatedAt->format('d/m/Y à H:i:s') }} UTC</p>
-        </div>
-        <div class="header-right">
-            <div class="badge-secretis">SECRETIS</div>
-            <div class="cert-number">Certificat N° CERT-{{ str_pad($request->id, 8, '0', STR_PAD_LEFT) }}</div>
-        </div>
-    </div>
+<div class="footer">
+    Certificat de signature electronique — SECRETIS ERP (IBIG Soft) —
+    Genere le {{ $generatedAt->format('d/m/Y a H:i:s') }}
+</div>
 
-    <!-- ── Informations du document ── -->
-    <div class="section">
-        <div class="section-title">Informations du document</div>
-        <div class="info-grid">
-            <span class="info-label">Titre</span>
-            <span class="info-value">{{ $request->title }}</span>
+<div class="header">
+    <div class="brand">{{ $request->organization->name ?? 'SECRETIS ERP' }}</div>
+    <div class="doctype">Certificat de signature electronique</div>
+    <div class="title">{{ $request->title ?? 'Demande de signature' }}</div>
+</div>
 
-            <span class="info-label">Document</span>
-            <span class="info-value">{{ $request->document->title ?? 'N/A' }}</span>
-
-            <span class="info-label">Fichier</span>
-            <span class="info-value">{{ $request->document->file_name ?? 'N/A' }}</span>
-
-            <span class="info-label">Statut</span>
-            <span class="info-value">
-                @php
-                    $statusLabels = [
-                        'completed'        => 'Complété — tous les signataires ont signé',
-                        'partially_signed' => 'Partiellement signé',
-                        'cancelled'        => 'Annulé',
-                        'expired'          => 'Expiré',
-                    ];
-                @endphp
-                {{ $statusLabels[$request->status] ?? ucfirst($request->status) }}
+<h2 class="section">Identification de la demande</h2>
+<table class="meta">
+    <tr>
+        <td class="k">Reference</td>
+        <td>SIG-{{ $request->id ?? '—' }}</td>
+        <td class="k">Statut</td>
+        <td>
+            @php $st = $request->status ?? null; @endphp
+            <span class="{{ $st === 'completed' ? 'ok' : ($st === 'cancelled' || $st === 'declined' ? 'ko' : 'wait') }}">
+                {{ $statuses[$st] ?? ($st ?: '—') }}
             </span>
+        </td>
+    </tr>
+    <tr>
+        <td class="k">Document</td>
+        <td>{{ $request->document->title ?? $request->document->file_name ?? '—' }}</td>
+        <td class="k">Fichier</td>
+        <td class="small">{{ $request->document->file_name ?? '—' }}</td>
+    </tr>
+    <tr>
+        <td class="k">Mode de signature</td>
+        <td>
+            {{ ($request->signing_order ?? null) === 'sequential' ? 'Sequentiel' : 'Parallele' }}
+        </td>
+        <td class="k">Cree le</td>
+        <td>
+            {{ $request->created_at
+                ? \Carbon\Carbon::parse($request->created_at)->format('d/m/Y a H:i')
+                : '—' }}
+        </td>
+    </tr>
+    <tr>
+        <td class="k">Finalise le</td>
+        <td>
+            {{ $request->completed_at
+                ? \Carbon\Carbon::parse($request->completed_at)->format('d/m/Y a H:i')
+                : '—' }}
+        </td>
+        <td class="k">Expiration</td>
+        <td>
+            {{ $request->expires_at
+                ? \Carbon\Carbon::parse($request->expires_at)->format('d/m/Y a H:i')
+                : 'Sans expiration' }}
+        </td>
+    </tr>
+    <tr>
+        <td class="k">Demandeur</td>
+        <td colspan="3">
+            {{ $request->creator->name ?? '—' }}
+            @if (!empty($request->creator?->email))
+                <span class="small">({{ $request->creator->email }})</span>
+            @endif
+        </td>
+    </tr>
+</table>
 
-            <span class="info-label">Ordre de signature</span>
-            <span class="info-value">
-                {{ $request->signing_order === 'sequential' ? 'Séquentiel' : 'Parallèle' }}
-            </span>
+<h2 class="section">Empreinte du document (integrite)</h2>
+<div class="hash-box">
+    <div class="small">Algorithme : SHA-256</div>
+    <div class="mono">{{ $documentHash ?: 'Empreinte non disponible' }}</div>
+</div>
 
-            <span class="info-label">Complété le</span>
-            <span class="info-value">
-                {{ $request->completed_at ? \Carbon\Carbon::parse($request->completed_at)->format('d/m/Y H:i:s') : '—' }}
-            </span>
-
-            <span class="info-label">Demande créée par</span>
-            <span class="info-value">{{ $request->creator->name ?? 'N/A' }}</span>
-        </div>
-
-        <!-- Hash SHA-256 du document -->
-        <div style="margin-top:.75rem">
-            <div class="info-label" style="margin-bottom:.3rem">Empreinte SHA-256 du document original</div>
-            <div class="hash-box">{{ $documentHash }}</div>
-        </div>
-    </div>
-
-    <!-- ── Tableau des signataires ── -->
-    <div class="section">
-        <div class="section-title">Signataires</div>
-        <table>
-            <thead>
+<h2 class="section">Signataires ({{ $signedCount }} / {{ $signers->count() }} ont signe)</h2>
+@if ($signers->count() > 0)
+    <table class="list">
+        <thead>
+            <tr>
+                <th style="width:5%;">Ordre</th>
+                <th style="width:22%;">Nom</th>
+                <th style="width:24%;">Adresse e-mail</th>
+                <th style="width:13%;">Statut</th>
+                <th style="width:19%;">Date de signature</th>
+                <th style="width:17%;">Adresse IP</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($signers->sortBy('order') as $i => $s)
+                @php $sst = $s->status ?? 'pending'; @endphp
                 <tr>
-                    <th>#</th>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Statut</th>
-                    <th>Date / Heure</th>
-                    <th>Adresse IP</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($request->signers->sortBy('order') as $signer)
-                <tr>
-                    <td>{{ $signer->order }}</td>
-                    <td><strong>{{ $signer->name }}</strong></td>
-                    <td>{{ $signer->email }}</td>
+                    <td>{{ $s->order ?? ($i + 1) }}</td>
+                    <td>{{ $s->name ?? '—' }}</td>
+                    <td class="small">{{ $s->email ?? '—' }}</td>
+                    <td class="{{ $sst === 'signed' ? 'ok' : ($sst === 'declined' ? 'ko' : 'wait') }}">
+                        {{ $signerStatuses[$sst] ?? $sst }}
+                    </td>
                     <td>
-                        @if($signer->status === 'signed')
-                            <span class="status-signed">✓ Signé</span>
-                        @elseif($signer->status === 'declined')
-                            <span class="status-declined">✗ Refusé</span>
-                            @if($signer->decline_reason)
-                                <br><small style="color:#64748B">{{ Str::limit($signer->decline_reason, 60) }}</small>
-                            @endif
-                        @else
-                            <span class="status-pending">En attente</span>
+                        {{ $s->signed_at
+                            ? \Carbon\Carbon::parse($s->signed_at)->format('d/m/Y a H:i:s')
+                            : '—' }}
+                        @if ($sst === 'declined' && !empty($s->decline_reason))
+                            <br><span class="small">Motif : {{ $s->decline_reason }}</span>
                         @endif
                     </td>
-                    <td>{{ $signer->signed_at ? \Carbon\Carbon::parse($signer->signed_at)->format('d/m/Y H:i:s') : '—' }}</td>
-                    <td style="font-family:monospace;font-size:8pt">{{ $signer->ip_address ?? '—' }}</td>
+                    <td class="mono">{{ $s->ip_address ?: '—' }}</td>
                 </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <!-- ── Piste d'audit ── -->
-    <div class="section">
-        <div class="section-title">Piste d'audit horodatée</div>
-        <ul class="audit-list">
-            @php
-            $eventLabels = [
-                'created'       => ['label' => 'Demande créée',    'class' => 'ev-created'],
-                'sent'          => ['label' => 'Invitation envoyée','class' => 'ev-sent'],
-                'viewed'        => ['label' => 'Document consulté', 'class' => 'ev-sent'],
-                'signed'        => ['label' => 'Signé',             'class' => 'ev-signed'],
-                'declined'      => ['label' => 'Refusé',            'class' => 'ev-declined'],
-                'completed'     => ['label' => 'Complété',          'class' => 'ev-completed'],
-                'cancelled'     => ['label' => 'Annulé',            'class' => 'ev-cancelled'],
-                'reminder_sent' => ['label' => 'Rappel envoyé',     'class' => 'ev-reminder'],
-            ];
-            @endphp
-            @foreach($auditTrail as $event)
-            @php
-                $ev = $eventLabels[$event->event_type] ?? ['label' => $event->event_type, 'class' => ''];
-            @endphp
-            <li class="audit-item">
-                <span class="audit-time">{{ \Carbon\Carbon::parse($event->created_at)->format('d/m/Y H:i:s') }}</span>
-                <span class="audit-event {{ $ev['class'] }}">{{ $ev['label'] }}</span>
-                <span class="audit-actor">
-                    @if($event->actor_email) {{ $event->actor_email }} @endif
-                    @if($event->actor_ip) · IP {{ $event->actor_ip }} @endif
-                    @if(!empty($event->data['signer_name'])) · {{ $event->data['signer_name'] }} @endif
-                </span>
-            </li>
             @endforeach
-        </ul>
-    </div>
+        </tbody>
+    </table>
+@else
+    <div class="empty">Aucun signataire enregistre sur cette demande.</div>
+@endif
 
-    <!-- ── Cachet officiel ── -->
-    <div class="stamp-area">
-        <div class="stamp">
-            <div class="stamp-inner">
-                <div class="stamp-top">SECRETIS ERP</div>
-                <div class="stamp-middle">CERTIFIÉ</div>
-                <div class="stamp-bottom">
-                    {{ $generatedAt->format('d/m/Y') }}<br>
-                    SIGNATURE ÉLECTRONIQUE
-                </div>
-            </div>
-        </div>
-    </div>
+<h2 class="section">Journal d'audit ({{ $auditTrail->count() }} evenements)</h2>
+@if ($auditTrail->count() > 0)
+    <table class="list">
+        <thead>
+            <tr>
+                <th style="width:5%;">#</th>
+                <th style="width:19%;">Horodatage</th>
+                <th style="width:20%;">Evenement</th>
+                <th style="width:24%;">Acteur</th>
+                <th style="width:13%;">Adresse IP</th>
+                <th style="width:19%;">Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($auditTrail as $i => $e)
+                @php
+                    $data = is_array($e->data ?? null) ? $e->data : [];
+                    $details = [];
+                    foreach ($data as $k => $v) {
+                        if (is_array($v)) { $v = implode(', ', array_map('strval', $v)); }
+                        if ($v === null || $v === '') { continue; }
+                        $details[] = $k . ' : ' . \Illuminate\Support\Str::limit((string) $v, 60);
+                    }
+                @endphp
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td>
+                        {{ $e->created_at
+                            ? \Carbon\Carbon::parse($e->created_at)->format('d/m/Y a H:i:s')
+                            : '—' }}
+                    </td>
+                    <td>{{ $events[$e->event_type ?? ''] ?? ($e->event_type ?: '—') }}</td>
+                    <td class="small">{{ $e->actor_email ?: 'Systeme' }}</td>
+                    <td class="mono">{{ $e->actor_ip ?: '—' }}</td>
+                    <td class="small">
+                        {{ count($details) ? implode(' | ', $details) : '—' }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@else
+    <div class="empty">Aucun evenement d'audit n'a ete enregistre.</div>
+@endif
 
-    <!-- ── Mention légale ── -->
-    <div class="footer">
-        <div class="footer-legal">
-            Ce document a valeur probante conformément à la loi n°2013-546 relative aux transactions électroniques
-            en République de Côte d'Ivoire, et aux dispositions équivalentes dans les États membres de l'UEMOA.
-            La signature électronique recueillie via SECRETIS ERP est opposable aux signataires.
-        </div>
-        <p>
-            Certificat émis par <strong>IBIG SECRETIS</strong> — Plateforme de gestion documentaire sécurisée.
-            L'intégrité de ce certificat peut être vérifiée sur la plateforme SECRETIS à l'aide du hash SHA-256 du document.
-            Référence : CERT-{{ str_pad($request->id, 8, '0', STR_PAD_LEFT) }} | Généré le {{ $generatedAt->format('d/m/Y à H:i:s') }}.
-        </p>
-    </div>
-
+<div class="notice">
+    <strong>Valeur probante.</strong> Ce certificat constitue le dossier de preuve de la
+    signature electronique du document identifie ci-dessus. Il recense les signataires,
+    les horodatages, les adresses IP de connexion et l'empreinte cryptographique du fichier
+    signe. Toute modification ulterieure du document invalide l'empreinte SHA-256 reproduite
+    dans ce certificat, ce qui permet d'en detecter l'alteration.
+    <br><br>
+    Document genere automatiquement par SECRETIS ERP le
+    {{ $generatedAt->format('d/m/Y a H:i:s') }} — il ne necessite pas de signature manuscrite.
 </div>
+
 </body>
 </html>

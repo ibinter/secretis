@@ -8,32 +8,39 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('visitor_appointments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('host_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('visitor_id')->nullable()->constrained('visitors')->nullOnDelete();
-            $table->string('visitor_name');
-            $table->string('visitor_email')->nullable();
-            $table->string('visitor_phone')->nullable();
-            $table->string('visitor_company')->nullable();
-            $table->string('purpose');
-            $table->text('description')->nullable();
-            $table->timestamp('scheduled_at');
-            $table->integer('duration_minutes')->default(30);
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed', 'no_show'])->default('pending');
-            $table->string('confirmation_token')->unique();
-            $table->timestamp('confirmed_at')->nullable();
-            $table->timestamp('cancelled_at')->nullable();
-            $table->text('cancellation_reason')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('visitor_appointments')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('visitor_appointments', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('host_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('visitor_id')->nullable()->constrained('visitors')->nullOnDelete();
+                $table->string('visitor_name');
+                $table->string('visitor_email')->nullable();
+                $table->string('visitor_phone')->nullable();
+                $table->string('visitor_company')->nullable();
+                $table->string('purpose');
+                $table->text('description')->nullable();
+                $table->timestamp('scheduled_at');
+                $table->integer('duration_minutes')->default(30);
+                $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed', 'no_show'])->default('pending');
+                $table->string('confirmation_token')->unique();
+                $table->timestamp('confirmed_at')->nullable();
+                $table->timestamp('cancelled_at')->nullable();
+                $table->text('cancellation_reason')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('host_id');
-            $table->index('visitor_id');
-            $table->index('scheduled_at');
-            $table->index('status');
-        });
+                $table->index('organization_id');
+                $table->index('host_id');
+                $table->index('visitor_id');
+                $table->index('scheduled_at');
+                $table->index('status');
+            });
+        }
 
         // Add FK for visitor_logs.appointment_id now that appointments table exists
         Schema::table('visitor_logs', function (Blueprint $table) {

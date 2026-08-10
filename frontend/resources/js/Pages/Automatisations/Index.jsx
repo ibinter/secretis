@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import AppLayout from '@/Layouts/AppLayout';
 
 // ─── Icônes ────────────────────────────────────────────────────────────────────
 const PlusIcon = () => (
@@ -47,8 +48,8 @@ function ToggleSwitch({ checked, onChange, disabled }) {
       onClick={onChange}
       disabled={disabled}
       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent
-                  transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${checked ? 'bg-blue-600' : 'bg-gray-200'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                  transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500
+                  ${checked ? 'bg-purple-600' : 'bg-gray-200'} disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       <span className={`inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200
                         ${checked ? 'translate-x-5' : 'translate-x-0'}`}/>
@@ -58,7 +59,7 @@ function ToggleSwitch({ checked, onChange, disabled }) {
 
 function StatCard({ label, value, color = 'blue' }) {
   const colors = {
-    blue: 'bg-blue-50 text-blue-700',
+    blue: 'bg-purple-50 text-purple-700',
     green: 'bg-green-50 text-green-700',
     red: 'bg-red-50 text-red-700',
     yellow: 'bg-yellow-50 text-yellow-700',
@@ -201,7 +202,7 @@ function RuleCard({ rule, onToggle, onDelete, onTest, onLogs, onEdit }) {
                 <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{rule.description}</p>
               )}
               <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <span className="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full font-medium">
+                <span className="text-xs px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full font-medium">
                   {rule.trigger_label || rule.trigger_type}
                 </span>
                 <span className="text-xs text-gray-400">→</span>
@@ -244,7 +245,7 @@ function RuleCard({ rule, onToggle, onDelete, onTest, onLogs, onEdit }) {
             onClick={handleTest}
             disabled={testing}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
-                       bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                       bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors disabled:opacity-50"
           >
             {testing
               ? <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -308,6 +309,7 @@ export default function AutomationsIndex() {
   const [filterActive, setFilterActive]   = useState('all');
   const [filterTrigger, setFilterTrigger] = useState('all');
   const [availableTriggers, setAvailableTriggers] = useState({});
+  const [page, setPage]                   = useState(1);
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
@@ -316,7 +318,7 @@ export default function AutomationsIndex() {
   const loadRules = useCallback(async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = { page };
       if (filterActive !== 'all') params.is_active = filterActive === 'active' ? 1 : 0;
       if (filterTrigger !== 'all') params.trigger_type = filterTrigger;
 
@@ -329,7 +331,7 @@ export default function AutomationsIndex() {
     } finally {
       setLoading(false);
     }
-  }, [filterActive, filterTrigger]);
+  }, [filterActive, filterTrigger, page]);
 
   useEffect(() => { loadRules(); }, [loadRules]);
 
@@ -375,6 +377,7 @@ export default function AutomationsIndex() {
     : 0;
 
   return (
+    <AppLayout>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="max-w-5xl mx-auto px-6 py-8">
 
@@ -388,8 +391,8 @@ export default function AutomationsIndex() {
           </div>
           <a
             href="/automatisations/nouvelle"
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-900 text-white rounded-xl
-                       font-medium text-sm hover:bg-blue-800 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-purple-900 text-white rounded-xl
+                       font-medium text-sm hover:bg-purple-800 transition-colors"
           >
             <PlusIcon/>
             Nouvelle règle
@@ -410,7 +413,7 @@ export default function AutomationsIndex() {
             value={filterActive}
             onChange={e => setFilterActive(e.target.value)}
             className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
-                       focus:outline-none focus:border-blue-400 cursor-pointer"
+                       focus:outline-none focus:border-purple-400 cursor-pointer"
           >
             <option value="all">Toutes les règles</option>
             <option value="active">Actives uniquement</option>
@@ -421,7 +424,7 @@ export default function AutomationsIndex() {
             value={filterTrigger}
             onChange={e => setFilterTrigger(e.target.value)}
             className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
-                       focus:outline-none focus:border-blue-400 cursor-pointer"
+                       focus:outline-none focus:border-purple-400 cursor-pointer"
           >
             <option value="all">Tous les déclencheurs</option>
             {Object.entries(availableTriggers).map(([key, info]) => (
@@ -449,7 +452,7 @@ export default function AutomationsIndex() {
               Créez des règles pour automatiser vos processus métier sans écrire de code.
             </p>
             <a href="/automatisations/nouvelle"
-               className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-900 text-white rounded-xl font-medium text-sm hover:bg-blue-800 transition-colors">
+               className="inline-flex items-center gap-2 px-5 py-2.5 bg-purple-900 text-white rounded-xl font-medium text-sm hover:bg-purple-800 transition-colors">
               <PlusIcon/>Créer ma première règle
             </a>
           </div>
@@ -473,9 +476,9 @@ export default function AutomationsIndex() {
         {meta.last_page > 1 && (
           <div className="flex justify-center mt-8 gap-2">
             {Array.from({ length: meta.last_page }, (_, i) => (
-              <button key={i} className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors
+              <button key={i} type="button" onClick={() => setPage(i + 1)} className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors
                 ${meta.current_page === i + 1
-                  ? 'bg-blue-900 text-white'
+                  ? 'bg-purple-900 text-white'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
                 {i + 1}
               </button>
@@ -545,5 +548,7 @@ export default function AutomationsIndex() {
         <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)}/>
       )}
     </div>
+    </AppLayout>
   );
 }
+export { AutomationsIndex };

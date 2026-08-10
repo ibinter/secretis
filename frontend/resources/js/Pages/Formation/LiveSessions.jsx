@@ -1,5 +1,23 @@
+/**
+ * Formation/LiveSessions.jsx — Sessions de formation en direct
+ * (GET /formation/sessions-live)
+ *
+ * Présentation migrée sur `@/Components/UI`. Logique métier STRICTEMENT
+ * inchangée : mêmes props Inertia, même appel
+ * `POST /training/live-sessions/{id}/register`, mêmes calculs de calendrier,
+ * mêmes onglets et mêmes états locaux.
+ *
+ * Props réelles (TrainingController@liveSessions → Inertia::render('Formation/LiveSessions')) :
+ *   sessions : [{ id, title, description, instructor_name, platform,
+ *                 status: scheduled|live|completed|cancelled,
+ *                 scheduled_at, duration_minutes, max_participants,
+ *                 registrant_count, meeting_url, recording_url,
+ *                 my_status, materials_paths[] }]
+ *   filters  : { status, from, to }   (fourni mais non exploité par la vue)
+ */
+
 import { useState, useMemo } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import AppLayout from '@/Components/Layout/AppLayout';
 import {
@@ -8,30 +26,35 @@ import {
     UserGroupIcon,
     VideoCameraIcon,
     CheckCircleIcon,
-    XCircleIcon,
     PlayIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    SignalIcon,
     FilmIcon,
     BellAlertIcon,
 } from '@heroicons/react/24/outline';
 import { SignalIcon as SignalSolid } from '@heroicons/react/24/solid';
+import {
+    PageHeader, Button, Badge, EmptyState,
+    cx, SURFACE, SURFACE_SUNK, BORDER,
+    TEXT_TITLE, TEXT_BODY, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
+/* La plateforme est une information neutre : pastille grise, jamais l'accent.
+   Le statut de session utilise les tons sémantiques.                          */
 
 const PLATFORM_CONFIG = {
-    zoom:          { label: 'Zoom',          color: 'bg-blue-500' },
-    teams:         { label: 'Teams',         color: 'bg-purple-500' },
-    meet:          { label: 'Google Meet',   color: 'bg-green-500' },
-    secretis_video:{ label: 'Secretis Live', color: 'bg-indigo-500' },
+    zoom:           { label: 'Zoom' },
+    teams:          { label: 'Teams' },
+    meet:           { label: 'Google Meet' },
+    secretis_video: { label: 'Secretis Live' },
 };
 
 const STATUS_CONFIG = {
-    scheduled:  { label: 'Planifiée',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-    live:       { label: 'En direct',  color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400', live: true },
-    completed:  { label: 'Terminée',   color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
-    cancelled:  { label: 'Annulée',    color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
+    scheduled: { label: 'Planifiée', tone: 'info'    },
+    live:      { label: 'En direct', tone: 'danger'  },
+    completed: { label: 'Terminée',  tone: 'neutral' },
+    cancelled: { label: 'Annulée',   tone: 'warning' },
 };
 
 const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -48,110 +71,126 @@ function formatTime(iso) {
 
 // ─── Carte session ────────────────────────────────────────────────────────────
 
-function SessionCard({ session, onRegister }) {
-    const plat  = PLATFORM_CONFIG[session.platform] ?? PLATFORM_CONFIG.teams;
-    const stat  = STATUS_CONFIG[session.status] ?? STATUS_CONFIG.scheduled;
-    const spots = (session.max_participants ?? 50) - (session.registrant_count ?? 0);
+function SessionCard({ session, onRegister, registering }) {
+    const plat   = PLATFORM_CONFIG[session.platform] ?? PLATFORM_CONFIG.teams;
+    const stat   = STATUS_CONFIG[session.status] ?? STATUS_CONFIG.scheduled;
+    const spots  = (session.max_participants ?? 50) - (session.registrant_count ?? 0);
     const isLive = session.status === 'live';
 
     return (
-        <div className={`bg-white dark:bg-gray-800 rounded-xl border shadow-sm p-5 flex flex-col gap-4 transition-all
-            ${isLive ? 'border-red-300 dark:border-red-700 shadow-red-100 dark:shadow-red-900/20' : 'border-gray-200 dark:border-gray-700 hover:shadow-md'}`}>
-
-            {/* Header */}
+        <article className={cx(
+            SURFACE, 'flex flex-col gap-4 rounded-xl border p-5 shadow-sm transition-colors',
+            isLive ? 'border-red-300 dark:border-red-500/50' : BORDER,
+        )}>
+            {/* En-tête */}
             <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${plat.color}`}>
-                    <VideoCameraIcon className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{session.title}</h3>
+                <span className={cx('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', SURFACE_SUNK, 'border', BORDER)}>
+                    <VideoCameraIcon className={cx('h-5 w-5', TEXT_MUTED)} aria-hidden="true" />
+                </span>
+
+                <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <h3 className={cx('text-sm font-semibold', TEXT_TITLE)}>{session.title}</h3>
                         {isLive && (
-                            <span className="flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 animate-pulse">
-                                <SignalSolid className="w-3 h-3" />
-                                EN DIRECT
+                            <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+                                <SignalSolid className="h-3 w-3" aria-hidden="true" />
+                                En direct
                             </span>
                         )}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">par {session.instructor_name}</p>
+                    <p className={cx('truncate text-xs', TEXT_MUTED)}>
+                        {session.instructor_name ? `par ${session.instructor_name}` : 'Formateur non renseigné'}
+                    </p>
                 </div>
-                <span className={`flex-shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${stat.color}`}>
-                    {stat.label}
-                </span>
+
+                <Badge variant={stat.tone} className="shrink-0">{stat.label}</Badge>
             </div>
 
             {/* Infos */}
-            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className={cx('grid grid-cols-1 gap-2 text-sm sm:grid-cols-2', TEXT_BODY)}>
                 <div className="flex items-center gap-2">
-                    <CalendarIcon className="w-4 h-4 text-gray-400" />
-                    {formatDate(session.scheduled_at)}
+                    <CalendarIcon className={cx('h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+                    <span className={NUM}>{formatDate(session.scheduled_at)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4 text-gray-400" />
-                    {formatTime(session.scheduled_at)} • {session.duration_minutes} min
+                    <ClockIcon className={cx('h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+                    <span className={NUM}>{formatTime(session.scheduled_at)} · {session.duration_minutes} min</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <UserGroupIcon className="w-4 h-4 text-gray-400" />
-                    {session.registrant_count ?? 0} / {session.max_participants ?? 50}
+                <div className="flex flex-wrap items-center gap-2">
+                    <UserGroupIcon className={cx('h-4 w-4 shrink-0', TEXT_FAINT)} aria-hidden="true" />
+                    <span className={NUM}>
+                        {session.registrant_count ?? 0} / {session.max_participants ?? 50}
+                    </span>
                     {spots <= 5 && spots > 0 && (
-                        <span className="text-orange-600 dark:text-orange-400 font-medium text-xs">
-                            ({spots} place{spots > 1 ? 's' : ''} restante{spots > 1 ? 's' : ''})
+                        <span className={cx('text-xs font-medium text-amber-600 dark:text-amber-400', NUM)}>
+                            {spots} place{spots > 1 ? 's' : ''} restante{spots > 1 ? 's' : ''}
                         </span>
                     )}
                     {spots <= 0 && (
-                        <span className="text-red-600 dark:text-red-400 font-medium text-xs">Complet</span>
+                        <span className="text-xs font-medium text-red-600 dark:text-red-400">Complet</span>
                     )}
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${plat.color}`} />
+                    <span className={cx('h-2 w-2 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500')} aria-hidden="true" />
                     {plat.label}
                 </div>
             </div>
 
             {/* Description */}
             {session.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{session.description}</p>
+                <p className={cx('line-clamp-2 text-sm leading-5', TEXT_MUTED)}>{session.description}</p>
             )}
 
             {/* Actions */}
-            <div className="flex gap-2 mt-auto">
+            <div className="mt-auto flex flex-wrap gap-2">
                 {session.status === 'scheduled' && !session.my_status && spots > 0 && (
-                    <button onClick={() => onRegister(session)}
-                            className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    <Button
+                        variant="primary" size="sm" className="flex-1"
+                        loading={registering === session.id}
+                        onClick={() => onRegister(session)}
+                    >
                         S'inscrire
-                    </button>
+                    </Button>
                 )}
                 {session.my_status === 'registered' && !isLive && (
-                    <span className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm font-medium rounded-lg border border-green-200 dark:border-green-800">
-                        <CheckCircleIcon className="w-4 h-4" />
+                    <span className={cx(
+                        'flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 text-sm font-medium',
+                        'border-emerald-200 bg-emerald-50 text-emerald-700',
+                        'dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300',
+                    )}>
+                        <CheckCircleIcon className="h-4 w-4" aria-hidden="true" />
                         Inscrit(e)
                     </span>
                 )}
                 {(session.status === 'live' || (session.my_status === 'registered' && session.status === 'live')) && session.meeting_url && (
-                    <a href={session.meeting_url} target="_blank" rel="noreferrer"
-                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors">
-                        <PlayIcon className="w-4 h-4" />
+                    <Button
+                        variant="danger" size="sm" className="flex-1"
+                        href={session.meeting_url} target="_blank" rel="noreferrer"
+                        icon={PlayIcon}
+                    >
                         Rejoindre
-                    </a>
+                    </Button>
                 )}
                 {session.status === 'completed' && session.recording_url && (
-                    <a href={session.recording_url} target="_blank" rel="noreferrer"
-                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
-                        <FilmIcon className="w-4 h-4" />
+                    <Button
+                        variant="secondary" size="sm" className="flex-1"
+                        href={session.recording_url} target="_blank" rel="noreferrer"
+                        icon={FilmIcon}
+                    >
                         Voir le replay
-                    </a>
+                    </Button>
                 )}
             </div>
-        </div>
+        </article>
     );
 }
 
 // ─── Mini-calendrier mensuel ──────────────────────────────────────────────────
 
 function MonthCalendar({ sessions, year, month, onDayClick, selectedDay }) {
-    const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+    const firstDay = new Date(year, month, 1).getDay(); // 0=dimanche
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    // Ajuster pour semaine commençant lundi
+    // Ajuster pour une semaine commençant le lundi
     const startOffset = (firstDay + 6) % 7;
 
     const sessionsByDay = {};
@@ -165,10 +204,12 @@ function MonthCalendar({ sessions, year, month, onDayClick, selectedDay }) {
     });
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-            <div className="grid grid-cols-7 gap-0.5 mb-2">
+        <div className={cx(SURFACE, 'rounded-xl border p-4 shadow-sm', BORDER)}>
+            <div className="mb-2 grid grid-cols-7 gap-0.5">
                 {DAY_NAMES.map(d => (
-                    <div key={d} className="text-center text-xs font-medium text-gray-400 py-1">{d}</div>
+                    <div key={d} className={cx('py-1 text-center text-[11px] font-semibold uppercase tracking-wider', TEXT_MUTED)}>
+                        {d}
+                    </div>
                 ))}
             </div>
             <div className="grid grid-cols-7 gap-0.5">
@@ -187,17 +228,30 @@ function MonthCalendar({ sessions, year, month, onDayClick, selectedDay }) {
                     return (
                         <button
                             key={day}
+                            type="button"
                             onClick={() => onDayClick(daySessions.length > 0 ? day : null)}
-                            className={`aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-colors
-                                ${isSelected ? 'bg-indigo-600 text-white' : ''}
-                                ${!isSelected && daySessions.length > 0 ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40' : ''}
-                                ${!isSelected && daySessions.length === 0 ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50' : ''}
-                                ${isToday && !isSelected ? 'ring-2 ring-indigo-500 ring-inset' : ''}
-                            `}
+                            aria-current={isToday ? 'date' : undefined}
+                            aria-pressed={isSelected}
+                            className={cx(
+                                'flex aspect-square flex-col items-center justify-center rounded-lg text-sm transition-colors',
+                                NUM, FOCUS_RING,
+                                isSelected && 'bg-purple-600 font-medium text-white',
+                                !isSelected && daySessions.length > 0 && cx(
+                                    'bg-purple-50 font-medium text-purple-700 hover:bg-purple-100',
+                                    'dark:bg-purple-500/10 dark:text-purple-300 dark:hover:bg-purple-500/20',
+                                ),
+                                !isSelected && daySessions.length === 0 && cx(
+                                    TEXT_BODY, 'hover:bg-gray-50 dark:hover:bg-white/[0.04]',
+                                ),
+                                isToday && !isSelected && 'ring-1 ring-inset ring-purple-400 dark:ring-purple-500/60',
+                            )}
                         >
                             <span>{day}</span>
                             {daySessions.length > 0 && !isSelected && (
-                                <span className={`w-1 h-1 rounded-full mt-0.5 ${hasLive ? 'bg-red-500' : 'bg-indigo-500'}`} />
+                                <span
+                                    className={cx('mt-0.5 h-1 w-1 rounded-full', hasLive ? 'bg-red-500' : 'bg-purple-500')}
+                                    aria-hidden="true"
+                                />
                             )}
                         </button>
                     );
@@ -209,7 +263,8 @@ function MonthCalendar({ sessions, year, month, onDayClick, selectedDay }) {
 
 // ─── Page principale ─────────────────────────────────────────────────────────
 
-export default function LiveSessions({ sessions = [], filters = {} }) {
+export default function LiveSessions({ sessions = [], filters = {} }) { // eslint-disable-line no-unused-vars
+    const rows            = Array.isArray(sessions) ? sessions : [];
     const today           = new Date();
     const [year, setYear]   = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth());
@@ -227,24 +282,24 @@ export default function LiveSessions({ sessions = [], filters = {} }) {
         setSelectedDay(null);
     };
 
-    const liveSessions   = sessions.filter(s => s.status === 'live');
-    const mySessions     = sessions.filter(s => s.my_status);
-    const replays        = sessions.filter(s => s.status === 'completed' && s.recording_url);
+    const liveSessions = rows.filter(s => s.status === 'live');
+    const mySessions   = rows.filter(s => s.my_status);
+    const replays      = rows.filter(s => s.status === 'completed' && s.recording_url);
 
     const displayedSessions = useMemo(() => {
         if (activeTab === 'mine') return mySessions;
         if (activeTab === 'replays') return replays;
         if (selectedDay) {
-            return sessions.filter(s => {
+            return rows.filter(s => {
                 const d = new Date(s.scheduled_at);
                 return d.getDate() === selectedDay && d.getMonth() === month && d.getFullYear() === year;
             });
         }
-        return sessions.filter(s => {
+        return rows.filter(s => {
             const d = new Date(s.scheduled_at);
             return d.getMonth() === month && d.getFullYear() === year;
         });
-    }, [activeTab, selectedDay, sessions, mySessions, replays, year, month]);
+    }, [activeTab, selectedDay, rows, mySessions, replays, year, month]);
 
     const handleRegister = async (session) => {
         setRegistering(session.id);
@@ -259,127 +314,166 @@ export default function LiveSessions({ sessions = [], filters = {} }) {
     };
 
     const tabs = [
-        { id: 'calendar',  label: 'Calendrier' },
-        { id: 'mine',      label: `Mes inscriptions (${mySessions.length})` },
-        { id: 'replays',   label: `Replays (${replays.length})` },
+        { id: 'calendar', label: 'Calendrier',       count: null },
+        { id: 'mine',     label: 'Mes inscriptions', count: mySessions.length },
+        { id: 'replays',  label: 'Replays',          count: replays.length },
     ];
 
     return (
         <AppLayout>
             <Head title="Sessions Live" />
 
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions en direct</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Formations live avec vos instructeurs</p>
-                </div>
-                {liveSessions.length > 0 && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                        <SignalSolid className="w-4 h-4 text-red-500 animate-pulse" />
-                        <span className="text-sm font-bold text-red-700 dark:text-red-400">
-                            {liveSessions.length} session{liveSessions.length > 1 ? 's' : ''} en direct
-                        </span>
-                    </div>
-                )}
-            </div>
+            <PageHeader
+                title="Sessions en direct"
+                subtitle="Formations animées en visioconférence par vos instructeurs."
+                icon={VideoCameraIcon}
+                breadcrumbs={[{ label: 'Formation', href: '/formation' }, { label: 'Sessions live' }]}
+                actions={
+                    liveSessions.length > 0 ? (
+                        <Badge variant="danger" size="md" icon={SignalSolid}>
+                            <span className={NUM}>{liveSessions.length}</span>
+                            &nbsp;session{liveSessions.length > 1 ? 's' : ''} en direct
+                        </Badge>
+                    ) : undefined
+                }
+                tabs={
+                    <nav className="flex gap-6" aria-label="Vues des sessions">
+                        {tabs.map(t => {
+                            const active = activeTab === t.id;
+                            return (
+                                <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => { setActiveTab(t.id); setSelectedDay(null); }}
+                                    aria-current={active ? 'page' : undefined}
+                                    className={cx(
+                                        'flex items-center gap-1.5 border-b-2 pb-3 text-sm font-medium transition-colors',
+                                        FOCUS_RING,
+                                        active
+                                            ? 'border-purple-600 text-purple-700 dark:border-purple-400 dark:text-purple-300'
+                                            : cx('border-transparent', TEXT_MUTED, 'hover:text-gray-700 dark:hover:text-gray-200'),
+                                    )}
+                                >
+                                    {t.label}
+                                    {t.count !== null && (
+                                        <span className={cx(
+                                            'rounded-full px-1.5 py-0.5 text-[11px]', NUM,
+                                            active
+                                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300'
+                                                : 'bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400',
+                                        )}>
+                                            {t.count}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                }
+            />
 
             {/* Sessions en direct maintenant */}
             {liveSessions.length > 0 && (
-                <div className="mb-6 space-y-3">
-                    <h2 className="text-sm font-semibold text-red-600 dark:text-red-400 uppercase tracking-wide flex items-center gap-2">
-                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <section className="mb-6 space-y-3">
+                    <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-red-600 dark:text-red-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-500" aria-hidden="true" />
                         En direct maintenant
                     </h2>
                     {liveSessions.map(s => (
-                        <SessionCard key={s.id} session={s} onRegister={handleRegister} />
+                        <SessionCard key={s.id} session={s} onRegister={handleRegister} registering={registering} />
                     ))}
-                </div>
+                </section>
             )}
 
-            {/* Onglets */}
-            <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-                <nav className="flex gap-6">
-                    {tabs.map(t => (
-                        <button
-                            key={t.id}
-                            onClick={() => { setActiveTab(t.id); setSelectedDay(null); }}
-                            className={`pb-3 text-sm font-medium border-b-2 transition-colors
-                                ${activeTab === t.id
-                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                }`}
-                        >
-                            {t.label}
-                        </button>
-                    ))}
-                </nav>
-            </div>
-
             {activeTab === 'calendar' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Calendrier */}
                     <div className="lg:col-span-1">
-                        <div className="flex items-center justify-between mb-3">
-                            <button onClick={() => goMonth(-1)}
-                                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                            </button>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                                {MONTH_NAMES[month]} {year}
+                        <div className="mb-3 flex items-center justify-between">
+                            <Button variant="ghost" size="sm" iconOnly title="Mois précédent" onClick={() => goMonth(-1)}>
+                                <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
+                            </Button>
+                            <span className={cx('text-sm font-semibold', TEXT_TITLE)}>
+                                {MONTH_NAMES[month]} <span className={NUM}>{year}</span>
                             </span>
-                            <button onClick={() => goMonth(1)}
-                                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <ChevronRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                            </button>
+                            <Button variant="ghost" size="sm" iconOnly title="Mois suivant" onClick={() => goMonth(1)}>
+                                <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+                            </Button>
                         </div>
+
                         <MonthCalendar
-                            sessions={sessions}
+                            sessions={rows}
                             year={year}
                             month={month}
                             onDayClick={setSelectedDay}
                             selectedDay={selectedDay}
                         />
+
                         {selectedDay && (
-                            <button
-                                onClick={() => setSelectedDay(null)}
-                                className="w-full mt-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                            >
+                            <Button variant="ghost" size="sm" block className="mt-2" onClick={() => setSelectedDay(null)}>
                                 Voir tout le mois
-                            </button>
+                            </Button>
                         )}
                     </div>
 
                     {/* Liste */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="space-y-4 lg:col-span-2">
+                        <p className={cx('text-sm', NUM, TEXT_MUTED)}>
                             {selectedDay
                                 ? `${displayedSessions.length} session(s) le ${selectedDay} ${MONTH_NAMES[month]}`
-                                : `${displayedSessions.length} session(s) en ${MONTH_NAMES[month]} ${year}`
-                            }
+                                : `${displayedSessions.length} session(s) en ${MONTH_NAMES[month]} ${year}`}
                         </p>
+
                         {displayedSessions.length === 0 ? (
-                            <div className="text-center py-16 text-gray-400">
-                                <CalendarIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                                <p>Aucune session planifiée</p>
-                                <p className="text-sm mt-1">pour cette période</p>
-                            </div>
+                            <EmptyState
+                                bordered
+                                icon={CalendarIcon}
+                                title="Aucune session planifiée"
+                                description={
+                                    selectedDay
+                                        ? `Aucune session n'est prévue le ${selectedDay} ${MONTH_NAMES[month]} ${year}.`
+                                        : `Aucune session n'est prévue en ${MONTH_NAMES[month]} ${year}.`
+                                }
+                                hints={[
+                                    'Les jours comportant une session sont surlignés dans le calendrier.',
+                                    'Une pastille rouge signale une session en cours de diffusion.',
+                                ]}
+                                secondary={
+                                    selectedDay
+                                        ? <Button variant="secondary" onClick={() => setSelectedDay(null)}>Voir tout le mois</Button>
+                                        : undefined
+                                }
+                            />
                         ) : (
                             displayedSessions.map(s => (
-                                <SessionCard key={s.id} session={s} onRegister={handleRegister} />
+                                <SessionCard key={s.id} session={s} onRegister={handleRegister} registering={registering} />
                             ))
                         )}
                     </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {displayedSessions.length === 0 ? (
-                        <div className="col-span-2 text-center py-16 text-gray-400">
-                            <BellAlertIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                            <p>Aucune session dans cet onglet</p>
+                        <div className="md:col-span-2">
+                            <EmptyState
+                                bordered
+                                icon={activeTab === 'replays' ? FilmIcon : BellAlertIcon}
+                                title={activeTab === 'replays' ? 'Aucun replay disponible' : 'Aucune inscription'}
+                                description={
+                                    activeTab === 'replays'
+                                        ? "Les enregistrements des sessions terminées apparaîtront ici dès qu'ils seront publiés."
+                                        : "Vous n'êtes inscrit à aucune session. Parcourez le calendrier pour réserver votre place."
+                                }
+                                action={
+                                    <Button variant="primary" onClick={() => { setActiveTab('calendar'); setSelectedDay(null); }}>
+                                        Ouvrir le calendrier
+                                    </Button>
+                                }
+                            />
                         </div>
                     ) : (
                         displayedSessions.map(s => (
-                            <SessionCard key={s.id} session={s} onRegister={handleRegister} />
+                            <SessionCard key={s.id} session={s} onRegister={handleRegister} registering={registering} />
                         ))
                     )}
                 </div>
@@ -387,3 +481,4 @@ export default function LiveSessions({ sessions = [], filters = {} }) {
         </AppLayout>
     );
 }
+export { LiveSessions };

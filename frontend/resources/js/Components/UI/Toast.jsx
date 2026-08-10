@@ -6,7 +6,7 @@ const TYPE_CFG = {
   success: { icon: CheckCircle2, color: 'text-[#1E8449]', bg: 'bg-white dark:bg-[#162032] border-l-4 border-[#1E8449]' },
   error:   { icon: XCircle,      color: 'text-[#C0392B]', bg: 'bg-white dark:bg-[#162032] border-l-4 border-[#C0392B]' },
   warning: { icon: AlertTriangle,color: 'text-[#F39C12]', bg: 'bg-white dark:bg-[#162032] border-l-4 border-[#F39C12]' },
-  info:    { icon: Info,         color: 'text-[#2E86C1]', bg: 'bg-white dark:bg-[#162032] border-l-4 border-[#2E86C1]' },
+  info:    { icon: Info,         color: 'text-[#7e22ce]', bg: 'bg-white dark:bg-[#162032] border-l-4 border-[#7e22ce]' },
 }
 
 // ── Singleton store ───────────────────────────────────────────────────────────
@@ -81,3 +81,4 @@ export default function ToastContainer() {
     document.body
   )
 }
+export { ToastContainer };

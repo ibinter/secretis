@@ -1,384 +1,161 @@
+{{--
+    Certificat de formation interne (dompdf, A4 PAYSAGE — setPaper('A4','landscape')).
+    Appelé par : App\Services\TrainingService::generateCertificatePdf() (ligne 326)
+    Variables :
+      $certificate  stdClass (training_certificates) : id, enrollment_id, user_id, course_id,
+                    certificate_number (CERT-2026-XXXXX), issued_at, expires_at,
+                    verification_token, created_at, updated_at
+      $user         stdClass (users) : id, name, email, ...
+      $course       stdClass (training_courses) : id, organization_id, title, description,
+                    category, thumbnail_path, duration_minutes, level, is_published, created_by
+      $organization stdClass (organizations) : id, name, email, phone, address, ...
+      $avg_score    int|null  score moyen arrondi des quiz réussis
+      $verify_url   string    config('app.url') . '/verify/certificate/{verification_token}'
+--}}
+@php
+    $levels = [
+        'beginner'     => 'Debutant',
+        'intermediate' => 'Intermediaire',
+        'advanced'     => 'Avance',
+    ];
+    $issued  = !empty($certificate->issued_at)
+        ? \Carbon\Carbon::parse($certificate->issued_at)
+        : null;
+    $expires = !empty($certificate->expires_at)
+        ? \Carbon\Carbon::parse($certificate->expires_at)
+        : null;
+    $duration = (int) ($course->duration_minutes ?? 0);
+    $durationLabel = $duration > 0
+        ? ($duration >= 60
+            ? intdiv($duration, 60) . ' h' . ($duration % 60 ? ' ' . ($duration % 60) . ' min' : '')
+            : $duration . ' min')
+        : null;
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attestation de Formation — {{ $certificate->certificate_number }}</title>
+    <meta charset="utf-8">
+    <title>Certificat de formation — {{ $certificate->certificate_number ?? '' }}</title>
     <style>
-        /* ── Reset & base ─────────────────────────────────────────────────── */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        @page { size: A4 landscape; margin: 0; }
+        * { font-family: "DejaVu Sans", sans-serif; }
+        @page { margin: 0; }
+        body { margin: 0; padding: 0; color: #1f2937; }
 
-        body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            background: #fff;
-            color: #1a1a2e;
-            width: 297mm;
-            height: 210mm;
-            position: relative;
-            overflow: hidden;
-        }
+        .sheet { width: 100%; padding: 11mm; }
+        .frame { border: 2px solid #9333EA; padding: 3mm; }
+        .frame-inner { border: 1px solid #e9d5ff; padding: 9mm 14mm; text-align: center; }
 
-        /* ── Cadre décoratif ──────────────────────────────────────────────── */
-        .outer-border {
-            position: absolute;
-            inset: 8mm;
-            border: 3px solid #1e3a5f;
-            border-radius: 4px;
-        }
-        .inner-border {
-            position: absolute;
-            inset: 11mm;
-            border: 1px solid #c9a84c;
-            border-radius: 2px;
-        }
+        .org { font-size: 14px; font-weight: bold; color: #111827; }
+        .org-sub { font-size: 9px; color: #6b7280; margin-top: 1px; }
 
-        /* ── Arrière-plan décoratif ───────────────────────────────────────── */
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 80px;
-            color: rgba(30, 58, 95, 0.04);
-            font-weight: 900;
-            white-space: nowrap;
-            letter-spacing: 4px;
-            pointer-events: none;
-            text-transform: uppercase;
-        }
+        .doctype { font-size: 24px; font-weight: bold; color: #111827;
+                   letter-spacing: 4px; text-transform: uppercase; margin-top: 7mm; }
+        .doctype-sub { font-size: 10px; color: #9333EA; letter-spacing: 2px;
+                       text-transform: uppercase; margin-top: 2px; }
 
-        /* ── Coins décoratifs ─────────────────────────────────────────────── */
-        .corner {
-            position: absolute;
-            width: 24mm;
-            height: 24mm;
-        }
-        .corner-tl { top: 12mm; left: 12mm; border-top: 3px solid #c9a84c; border-left: 3px solid #c9a84c; }
-        .corner-tr { top: 12mm; right: 12mm; border-top: 3px solid #c9a84c; border-right: 3px solid #c9a84c; }
-        .corner-bl { bottom: 12mm; left: 12mm; border-bottom: 3px solid #c9a84c; border-left: 3px solid #c9a84c; }
-        .corner-br { bottom: 12mm; right: 12mm; border-bottom: 3px solid #c9a84c; border-right: 3px solid #c9a84c; }
+        .rule { width: 55mm; border: 0; border-top: 2px solid #9333EA; margin: 5mm auto; }
 
-        /* ── Contenu principal ────────────────────────────────────────────── */
-        .content {
-            position: absolute;
-            inset: 14mm;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+        .lead { font-size: 11px; color: #4b5563; }
+        .name { font-size: 26px; font-weight: bold; color: #111827; margin: 3mm 0 1mm; }
+        .name-underline { width: 105mm; border: 0; border-top: 1px solid #d1d5db;
+                          margin: 0 auto 4mm; }
+        .course { font-size: 15px; font-weight: bold; color: #6b21a8; margin-top: 2mm; }
+        .course-desc { font-size: 9px; color: #6b7280; margin-top: 2mm; }
 
-        /* ── En-tête logos ────────────────────────────────────────────────── */
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 6mm;
-        }
-        .logo-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 40mm;
-        }
-        .logo-img {
-            height: 14mm;
-            max-width: 38mm;
-            object-fit: contain;
-        }
-        .logo-label {
-            font-size: 7px;
-            color: #666;
-            margin-top: 1mm;
-            text-align: center;
-        }
+        table.meta { width: 100%; border-collapse: collapse; margin: 6mm auto 0; }
+        table.meta td { border: 1px solid #e5e7eb; padding: 4px 6px; text-align: center;
+                        font-size: 9px; color: #6b7280; width: 25%; }
+        .meta-value { font-size: 11px; font-weight: bold; color: #111827; }
 
-        /* ── Bandeau titre ────────────────────────────────────────────────── */
-        .title-band {
-            text-align: center;
-            margin-bottom: 5mm;
-        }
-        .title-sub {
-            font-size: 9px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #c9a84c;
-            font-weight: 600;
-            margin-bottom: 1mm;
-        }
-        .title-main {
-            font-size: 26px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #1e3a5f;
-            line-height: 1;
-        }
-        .title-divider {
-            width: 60mm;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #c9a84c, transparent);
-            margin: 2mm auto 0;
-        }
+        table.foot { width: 100%; border-collapse: collapse; margin-top: 8mm; }
+        table.foot td { width: 50%; vertical-align: bottom; font-size: 9px;
+                        color: #6b7280; padding: 0 8mm; text-align: center; }
+        .foot-line { border-top: 1px solid #9ca3af; margin-top: 11mm; padding-top: 3px; }
 
-        /* ── Corps du certificat ──────────────────────────────────────────── */
-        .body-text {
-            text-align: center;
-            margin-bottom: 3mm;
-        }
-        .body-text p {
-            font-size: 10px;
-            color: #444;
-            line-height: 1.5;
-        }
-        .holder-name {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e3a5f;
-            font-style: italic;
-            margin: 2mm 0;
-            text-align: center;
-        }
-        .course-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #c9a84c;
-            text-align: center;
-            margin: 1mm 0 3mm;
-        }
-
-        /* ── Méta-informations ────────────────────────────────────────────── */
-        .meta-row {
-            display: flex;
-            justify-content: center;
-            gap: 10mm;
-            margin-bottom: 4mm;
-        }
-        .meta-item {
-            text-align: center;
-        }
-        .meta-label {
-            font-size: 7px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888;
-            display: block;
-        }
-        .meta-value {
-            font-size: 10px;
-            font-weight: 600;
-            color: #1e3a5f;
-            display: block;
-        }
-
-        /* ── Pied du certificat ───────────────────────────────────────────── */
-        .footer {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: auto;
-        }
-
-        .signature-block {
-            text-align: center;
-            min-width: 50mm;
-        }
-        .signature-line {
-            width: 45mm;
-            height: 1px;
-            background: #1e3a5f;
-            margin: 0 auto 1mm;
-        }
-        .signature-name {
-            font-size: 8px;
-            font-weight: 600;
-            color: #1e3a5f;
-        }
-        .signature-title {
-            font-size: 7px;
-            color: #666;
-        }
-
-        .qr-block {
-            text-align: center;
-        }
-        .qr-block img {
-            width: 20mm;
-            height: 20mm;
-        }
-        .qr-label {
-            font-size: 6px;
-            color: #888;
-            margin-top: 1mm;
-        }
-
-        .cert-number {
-            font-size: 7px;
-            color: #aaa;
-            text-align: center;
-            font-family: monospace;
-        }
-
-        /* ── Bande dorée latérale gauche ──────────────────────────────────── */
-        .side-accent {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 8mm;
-            background: linear-gradient(to bottom, #1e3a5f, #2d5fa6, #1e3a5f);
-        }
-        .side-accent-text {
-            position: absolute;
-            left: 1mm;
-            top: 50%;
-            transform: translateY(-50%) rotate(-90deg);
-            font-size: 6px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.6);
-            white-space: nowrap;
-        }
+        .verify { margin-top: 6mm; font-size: 8px; color: #9ca3af; line-height: 1.5; }
+        .mono { font-family: "DejaVu Sans Mono", monospace; color: #6b7280; }
     </style>
 </head>
 <body>
-    <!-- Bordures décoratives -->
-    <div class="outer-border"></div>
-    <div class="inner-border"></div>
 
-    <!-- Coins dorés -->
-    <div class="corner corner-tl"></div>
-    <div class="corner corner-tr"></div>
-    <div class="corner corner-bl"></div>
-    <div class="corner corner-br"></div>
+<div class="sheet">
+<div class="frame">
+<div class="frame-inner">
 
-    <!-- Filigrane -->
-    <div class="watermark">IBIG SECRETIS</div>
-
-    <!-- Bande latérale -->
-    <div class="side-accent">
-        <span class="side-accent-text">Formation &amp; Certification</span>
+    <div class="org">{{ $organization->name ?? 'SECRETIS ERP' }}</div>
+    <div class="org-sub">
+        @if (!empty($organization->address)){{ $organization->address }}@endif
+        @if (!empty($organization->phone)) · {{ $organization->phone }} @endif
     </div>
 
-    <!-- Contenu principal -->
-    <div class="content" style="left: 20mm;">
+    <div class="doctype">Certificat</div>
+    <div class="doctype-sub">de formation</div>
 
-        <!-- En-tête logos -->
-        <div class="header">
-            <div class="logo-box">
-                <img src="{{ public_path('images/logo-ibig-secretis.png') }}"
-                     alt="IBIG SECRETIS" class="logo-img"
-                     onerror="this.style.display='none'">
-                <span class="logo-label">IBIG SECRETIS</span>
-            </div>
+    <hr class="rule">
 
-            <div style="flex: 1;"></div>
+    <div class="lead">Il est certifie que</div>
 
-            @if($organization && $organization->logo_path)
-            <div class="logo-box">
-                <img src="{{ Storage::path($organization->logo_path) }}"
-                     alt="{{ $organization->name }}" class="logo-img"
-                     onerror="this.style.display='none'">
-                <span class="logo-label">{{ $organization->name }}</span>
-            </div>
-            @endif
-        </div>
+    <div class="name">{{ $user->name ?? 'Apprenant' }}</div>
+    <hr class="name-underline">
 
-        <!-- Titre -->
-        <div class="title-band">
-            <div class="title-sub">Ce document certifie que</div>
-            <div class="title-main">Attestation de Formation</div>
-            <div class="title-divider"></div>
-        </div>
+    <div class="lead">a suivi dans son integralite et valide la formation</div>
+    <div class="course">{{ $course->title ?? 'Formation' }}</div>
+    @if (!empty($course->description))
+        <div class="course-desc">{{ \Illuminate\Support\Str::limit($course->description, 180) }}</div>
+    @endif
 
-        <!-- Nom du participant -->
-        <div class="body-text">
-            <p>Il est attesté par la présente que</p>
-        </div>
-
-        <div class="holder-name">{{ $user->name ?? 'Participant' }}</div>
-
-        <div class="body-text">
-            <p>a suivi et validé avec succès la formation</p>
-        </div>
-
-        <div class="course-name">{{ $course->title }}</div>
-
-        <div class="body-text">
-            <p>{{ $organization->name ?? '' }} — Plateforme IBIG SECRETIS</p>
-        </div>
-
-        <!-- Métadonnées -->
-        <div class="meta-row">
-            <div class="meta-item">
-                <span class="meta-label">Date de délivrance</span>
-                <span class="meta-value">
-                    {{ \Carbon\Carbon::parse($certificate->issued_at)->locale('fr')->isoFormat('D MMMM YYYY') }}
-                </span>
-            </div>
-
-            <div class="meta-item">
-                <span class="meta-label">Niveau</span>
-                <span class="meta-value">
-                    {{ match($course->level) {
-                        'beginner'     => 'Débutant',
-                        'intermediate' => 'Intermédiaire',
-                        'advanced'     => 'Avancé',
-                        default        => ucfirst($course->level)
-                    } }}
-                </span>
-            </div>
-
-            <div class="meta-item">
-                <span class="meta-label">Durée</span>
-                <span class="meta-value">{{ $course->duration_minutes }} min</span>
-            </div>
-
-            @if($avg_score !== null)
-            <div class="meta-item">
-                <span class="meta-label">Score obtenu</span>
-                <span class="meta-value">{{ $avg_score }}%</span>
-            </div>
-            @endif
-
-            @if($certificate->expires_at)
-            <div class="meta-item">
-                <span class="meta-label">Valide jusqu'au</span>
-                <span class="meta-value">
-                    {{ \Carbon\Carbon::parse($certificate->expires_at)->locale('fr')->isoFormat('D MMMM YYYY') }}
-                </span>
-            </div>
-            @endif
-        </div>
-
-        <!-- Pied : signature + QR -->
-        <div class="footer">
-
-            <!-- Signature direction -->
-            <div class="signature-block">
-                <div class="signature-line"></div>
-                <div class="signature-name">{{ $organization->name ?? 'IBIG SECRETIS' }}</div>
-                <div class="signature-title">Direction de la Formation</div>
-            </div>
-
-            <!-- Numéro de certificat centré -->
-            <div style="text-align: center; flex: 1;">
-                <div class="cert-number">N° {{ $certificate->certificate_number }}</div>
-                <div style="font-size: 6px; color: #aaa; margin-top: 0.5mm;">
-                    Vérifiez l'authenticité sur secretis.ibigsoft.com
+    <table class="meta">
+        <tr>
+            <td>
+                <div class="meta-value">{{ $certificate->certificate_number ?? '—' }}</div>
+                <div>Numero de certificat</div>
+            </td>
+            <td>
+                <div class="meta-value">{{ $issued?->format('d/m/Y') ?? '—' }}</div>
+                <div>Date de delivrance</div>
+            </td>
+            <td>
+                <div class="meta-value">
+                    {{ $levels[$course->level ?? ''] ?? ($course->level ?: '—') }}
+                    @if ($durationLabel) — {{ $durationLabel }} @endif
                 </div>
-            </div>
+                <div>Niveau et duree</div>
+            </td>
+            <td>
+                <div class="meta-value">
+                    {{ isset($avg_score) && $avg_score !== null ? $avg_score . ' / 100' : 'Non evalue' }}
+                </div>
+                <div>Score moyen aux evaluations</div>
+            </td>
+        </tr>
+    </table>
 
-            <!-- QR Code de vérification -->
-            <div class="qr-block">
-                {!! QrCode::size(75)->generate($verify_url) !!}
-                <div class="qr-label">Scanner pour vérifier</div>
-            </div>
+    <table class="foot">
+        <tr>
+            <td>
+                <div class="foot-line">Le responsable de la formation</div>
+            </td>
+            <td>
+                <div class="foot-line">La direction — {{ $organization->name ?? 'SECRETIS ERP' }}</div>
+            </td>
+        </tr>
+    </table>
 
-        </div>
+    <div class="verify">
+        @if ($expires)
+            Valable jusqu'au {{ $expires->format('d/m/Y') }}.
+        @else
+            Certificat sans date d'expiration.
+        @endif
+        <br>
+        Verification en ligne : {{ $verify_url ?? '—' }}<br>
+        Jeton :
+        <span class="mono">{{ $certificate->verification_token ?? 'non disponible' }}</span>
+    </div>
 
-    </div><!-- /.content -->
+</div>
+</div>
+</div>
+
 </body>
 </html>

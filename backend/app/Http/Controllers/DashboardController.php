@@ -51,9 +51,26 @@ class DashboardController extends Controller
     {
         $user  = Auth::user();
         $orgId = $user->organization_id;
+        $org   = $user->organization;
 
         return Inertia::render('Dashboard/Index', [
-            'stats'           => Inertia::defer(fn () => $this->getStats($orgId)),
+            // ── Données synchrones (nécessaires au rendu initial) ──────────────
+            'auth' => [
+                'user' => $user->only('id', 'name', 'email', 'role'),
+            ],
+
+            'organization' => $org
+                ? $org->only('id', 'name', 'plan_id', 'trial_ends_at')
+                : null,
+
+            'trial_days_remaining' => $org && $org->trial_ends_at
+                ? max(0, (int) now()->diffInDays($org->trial_ends_at, false))
+                : 14,
+
+            // ── Données KPI (chargées directement — pas de defer) ─────────────
+            'stats' => $this->getStats($orgId),
+
+            // ── Données secondaires en différé (non bloquantes) ───────────────
             'recentEvents'    => Inertia::defer(fn () => $this->getRecentEvents($orgId)),
             'pendingTasks'    => Inertia::defer(fn () => $this->getPendingTasks($orgId, $user->id)),
             'recentDocuments' => Inertia::defer(fn () => $this->getRecentDocuments($orgId)),
@@ -89,7 +106,8 @@ class DashboardController extends Controller
                             ->where('created_at', '>=', $month)
                             ->count(),
 
-                        'visitors_today'       => Visitor::where('organization_id', $orgId)
+                        'visitors_today'       => DB::table('visit_logs')
+                            ->where('organization_id', $orgId)
                             ->whereDate('check_in_at', today())
                             ->count(),
                     ];
@@ -130,9 +148,9 @@ class DashboardController extends Controller
                 "pending_tasks_{$orgId}_user_{$userId}",
                 60, // 1 minute — données très personnelles
                 function () use ($orgId, $userId) {
-                    return Task::with(['project:id,name', 'assignees:id,name,avatar'])
+                    return Task::with(['project:id,name'])
                         ->where('organization_id', $orgId)
-                        ->whereHas('assignees', fn ($q) => $q->where('users.id', $userId))
+                        ->where(function($q) use ($userId) { $q->where('assigned_to', $userId)->orWhere('created_by', $userId); })
                         ->whereNotIn('status', ['done', 'cancelled'])
                         ->orderByRaw("CASE priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END")
                         ->orderBy('due_date')
@@ -154,11 +172,11 @@ class DashboardController extends Controller
                 "recent_docs_{$orgId}",
                 CacheService::DASHBOARD_TTL,
                 function () use ($orgId) {
-                    return Document::with(['updatedBy:id,name,avatar', 'folder:id,name'])
+                    return Document::with(['folder:id,name'])
                         ->where('organization_id', $orgId)
                         ->orderByDesc('updated_at')
                         ->limit(8)
-                        ->get(['id', 'title', 'file_type', 'updated_at', 'updated_by_id', 'folder_id'])
+                        ->get(['id', 'title', 'mime_type', 'updated_at', 'created_by', 'folder_id'])
                         ->toArray();
                 }
             );
@@ -201,12 +219,12 @@ class DashboardController extends Controller
 
         // Visiteurs par service pour PieChart
         $visitorsByDept = DB::select("
-            SELECT COALESCE(d.name, 'Autre') AS name, COUNT(v.id) AS value
-            FROM visitors v
-            LEFT JOIN departments d ON d.id = v.department_id
-            WHERE v.organization_id = :org
-              AND v.check_in_at >= NOW() - INTERVAL '30 days'
-              AND v.deleted_at IS NULL
+            SELECT COALESCE(d.name, 'Autre') AS name, COUNT(vl.id) AS value
+            FROM visit_logs vl
+            JOIN visitors v ON v.id = vl.visitor_id
+            LEFT JOIN departments d ON d.id = vl.host_user_id
+            WHERE vl.organization_id = :org
+              AND vl.check_in_at >= NOW() - INTERVAL '30 days'
             GROUP BY d.name
             ORDER BY value DESC
             LIMIT 6
@@ -269,8 +287,8 @@ class DashboardController extends Controller
                 p.name AS project_name
             FROM tasks t
             LEFT JOIN projects p ON p.id = t.project_id
-            JOIN task_user tu ON tu.task_id = t.id AND tu.user_id = :user
             WHERE t.organization_id = :org
+              AND t.assigned_to = :user
               AND t.priority IN ('high','urgent')
               AND t.status NOT IN ('done','cancelled')
               AND t.deleted_at IS NULL
@@ -312,10 +330,10 @@ class DashboardController extends Controller
         // Documents récents (7 derniers jours)
         $recentDocs = DB::select("
             SELECT
-                d.id, d.title, d.file_type, d.updated_at,
+                d.id, d.title, d.mime_type, d.updated_at,
                 u.name AS updated_by
             FROM documents d
-            JOIN users u ON u.id = d.updated_by_id
+            JOIN users u ON u.id = d.created_by
             WHERE d.organization_id = :org
               AND d.updated_at >= NOW() - INTERVAL '7 days'
               AND d.deleted_at IS NULL

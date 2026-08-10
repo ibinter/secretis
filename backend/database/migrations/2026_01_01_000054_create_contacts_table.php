@@ -8,33 +8,40 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('contacts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->string('first_name');
-            $table->string('last_name')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('mobile')->nullable();
-            $table->string('company')->nullable();
-            $table->string('job_title')->nullable();
-            $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('country', 2)->nullable();
-            $table->string('website')->nullable();
-            $table->string('avatar_path')->nullable();
-            $table->enum('type', ['person', 'organization', 'supplier', 'partner', 'other'])->default('person');
-            $table->json('tags')->nullable();
-            $table->text('notes')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-            $table->softDeletes();
+        if (! Schema::hasTable('contacts')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('contacts', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->string('first_name');
+                $table->string('last_name')->nullable();
+                $table->string('email')->nullable();
+                $table->string('phone')->nullable();
+                $table->string('mobile')->nullable();
+                $table->string('company')->nullable();
+                $table->string('job_title')->nullable();
+                $table->string('address')->nullable();
+                $table->string('city')->nullable();
+                $table->string('country', 2)->nullable();
+                $table->string('website')->nullable();
+                $table->string('avatar_path')->nullable();
+                $table->enum('type', ['person', 'organization', 'supplier', 'partner', 'other'])->default('person');
+                $table->json('tags')->nullable();
+                $table->text('notes')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+                $table->softDeletes();
 
-            $table->index('organization_id');
-            $table->index('type');
-            $table->index('created_by');
-        });
+                $table->index('organization_id');
+                $table->index('type');
+                $table->index('created_by');
+            });
+        }
     }
 
     public function down(): void

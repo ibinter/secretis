@@ -24,7 +24,7 @@ import { fr } from 'date-fns/locale';
 
 const STATUS_CONFIG = {
   available:   { label: 'Disponible',      color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',   dot: 'bg-green-500'  },
-  in_use:      { label: 'En déplacement',  color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',       dot: 'bg-blue-500'   },
+  in_use:      { label: 'En déplacement',  color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',       dot: 'bg-purple-500'   },
   maintenance: { label: 'Maintenance',     color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',   dot: 'bg-amber-500'  },
   retired:     { label: 'Retiré',          color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',          dot: 'bg-gray-400'   },
 };
@@ -53,7 +53,7 @@ function VehicleCard({ vehicle, onRequest, onLogbook }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
       {/* Photo / Icône */}
-      <div className="h-36 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 relative">
+      <div className="h-36 bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 relative">
         {vehicle.photo ? (
           <img src={vehicle.photo} alt={`${vehicle.brand} ${vehicle.model}`} className="w-full h-full object-cover" />
         ) : (
@@ -262,6 +262,128 @@ function RequestModal({ vehicle, onClose, onSuccess }) {
 }
 
 // ---------------------------------------------------------------------------
+// Modal Ajout véhicule — POST resources.vehicules.store
+// ---------------------------------------------------------------------------
+
+const FUEL_TYPES = ['essence', 'diesel', 'electrique', 'hybride'];
+const INPUT_CLS  = 'w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+
+function CreateVehicleModal({ onClose, onSuccess }) {
+  const [form, setForm] = useState({
+    plate_number: '', brand: '', model: '', year: new Date().getFullYear(),
+    fuel_type: 'essence', mileage: '', insurance_end: '', control_end: '', next_service: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState('');
+
+  const setField = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      await axios.post(route('resources.vehicules.store'), {
+        ...form,
+        year:          parseInt(form.year, 10),
+        mileage:       form.mileage === '' ? null : parseInt(form.mileage, 10),
+        insurance_end: form.insurance_end || null,
+        control_end:   form.control_end   || null,
+        next_service:  form.next_service  || null,
+      });
+      onSuccess();
+    } catch (err) {
+      const errs = err.response?.data?.errors;
+      setError(errs ? Object.values(errs).flat()[0] : (err.response?.data?.message ?? 'Erreur lors de la création.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Ajouter un véhicule</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Nouvelle entrée dans la flotte</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Immatriculation *</label>
+            <input value={form.plate_number} onChange={setField('plate_number')} required maxLength={20}
+                   placeholder="1234 AB 01" className={INPUT_CLS} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Marque *</label>
+              <input value={form.brand} onChange={setField('brand')} required maxLength={100} className={INPUT_CLS} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Modèle *</label>
+              <input value={form.model} onChange={setField('model')} required maxLength={100} className={INPUT_CLS} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Année *</label>
+              <input type="number" min={1990} max={new Date().getFullYear() + 1}
+                     value={form.year} onChange={setField('year')} required className={INPUT_CLS} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Carburant</label>
+              <select value={form.fuel_type} onChange={setField('fuel_type')} className={INPUT_CLS}>
+                {FUEL_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Km</label>
+              <input type="number" min={0} value={form.mileage} onChange={setField('mileage')} className={INPUT_CLS} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Fin assurance</label>
+              <input type="date" value={form.insurance_end} onChange={setField('insurance_end')} className={INPUT_CLS} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Fin visite tech.</label>
+              <input type="date" value={form.control_end} onChange={setField('control_end')} className={INPUT_CLS} />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Prochaine révision</label>
+              <input type="date" value={form.next_service} onChange={setField('next_service')} className={INPUT_CLS} />
+            </div>
+          </div>
+
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+
+          <div className="flex gap-2 pt-2">
+            <button type="button" onClick={onClose}
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 transition-colors">
+              Annuler
+            </button>
+            <button type="submit" disabled={saving}
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl transition-colors flex items-center justify-center gap-2">
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              Créer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Modal Carnet de bord
 // ---------------------------------------------------------------------------
 
@@ -381,12 +503,14 @@ export default function VehiculesIndex({ vehicles, alerts }) {
   const { auth }         = usePage().props;
   const [requestTarget, setRequestTarget] = useState(null);
   const [logbookTarget, setLogbookTarget] = useState(null);
+  const [showCreate, setShowCreate]       = useState(false);
 
   const isAdmin = auth.user?.roles?.some(r => ['admin_org', 'superadmin_ibig'].includes(r));
 
   const handleSuccess = () => {
     setRequestTarget(null);
-    router.reload({ only: ['vehicles'] });
+    setShowCreate(false);
+    router.reload({ only: ['vehicles', 'alerts'] });
   };
 
   const availableCount    = vehicles.filter(v => v.status === 'available').length;
@@ -409,7 +533,7 @@ export default function VehiculesIndex({ vehicles, alerts }) {
               </span>
               {inUseCount > 0 && (
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />{inUseCount} en déplacement
+                  <span className="w-2 h-2 rounded-full bg-purple-500" />{inUseCount} en déplacement
                 </span>
               )}
               {maintenanceCount > 0 && (
@@ -421,6 +545,8 @@ export default function VehiculesIndex({ vehicles, alerts }) {
           </div>
           {isAdmin && (
             <button
+              type="button"
+              onClick={() => setShowCreate(true)}
               className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm transition-colors text-sm"
             >
               <PlusCircle className="w-4 h-4" />
@@ -488,6 +614,13 @@ export default function VehiculesIndex({ vehicles, alerts }) {
           onClose={() => setLogbookTarget(null)}
         />
       )}
+      {showCreate && (
+        <CreateVehicleModal
+          onClose={() => setShowCreate(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
     </AuthLayout>
   );
 }
+export { VehiculesIndex };

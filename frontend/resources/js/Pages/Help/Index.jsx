@@ -39,7 +39,7 @@ function CategoryCard({ category }) {
         </span>
       </div>
       <div>
-        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E86C1] transition-colors">
+        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#7e22ce] transition-colors">
           {category.name}
         </h3>
         {category.description && (
@@ -58,13 +58,13 @@ function ArticleCard({ article }) {
     <Link
       href={route('help.article', { category: article.category?.slug, article: article.slug })}
       className="flex flex-col gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700
-        hover:border-[#2E86C1] hover:shadow-md transition-all duration-200 group"
+        hover:border-[#7e22ce] hover:shadow-md transition-all duration-200 group"
     >
       <div className="flex items-center gap-2 text-xs text-gray-400">
         <span>{article.category?.icon}</span>
         <span>{article.category?.name}</span>
       </div>
-      <h4 className="font-medium text-gray-900 dark:text-white text-sm group-hover:text-[#2E86C1] line-clamp-2 transition-colors">
+      <h4 className="font-medium text-gray-900 dark:text-white text-sm group-hover:text-[#7e22ce] line-clamp-2 transition-colors">
         {article.title}
       </h4>
       <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{article.excerpt}</p>
@@ -108,10 +108,10 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
       <Head title="Centre d'aide" />
 
       {/* Hero */}
-      <section className="bg-gradient-to-br from-[#1A3A5C] via-[#2E86C1] to-[#1A3A5C] text-white">
+      <section className="bg-gradient-to-br from-[#9333EA] via-[#7e22ce] to-[#9333EA] text-white">
         <div className="max-w-4xl mx-auto px-4 py-16 sm:py-20 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Comment pouvons-nous vous aider ?</h1>
-          <p className="text-blue-100 text-lg mb-8">Parcourez notre base de connaissances ou ouvrez un ticket support</p>
+          <p className="text-purple-100 text-lg mb-8">Parcourez notre base de connaissances ou ouvrez un ticket support</p>
           <div className="relative max-w-2xl mx-auto" onClick={e => e.stopPropagation()}>
             <form onSubmit={handleSubmit}>
               <div className="relative">
@@ -124,7 +124,7 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
                 />
                 {searching && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <div className="w-5 h-5 border-2 border-[#2E86C1] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#7e22ce] border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
               </div>
@@ -143,7 +143,7 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
                   </Link>
                 ))}
                 <Link href={route('help.search', { q: query })} onClick={() => setShowDrop(false)}
-                  className="block text-center py-3 text-sm text-[#2E86C1] font-medium hover:bg-gray-50 border-t">
+                  className="block text-center py-3 text-sm text-[#7e22ce] font-medium hover:bg-gray-50 border-t">
                   Voir tous les résultats →
                 </Link>
               </div>
@@ -157,7 +157,7 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
               </div>
             )}
           </div>
-          <p className="text-blue-200 text-sm mt-4">{totalArticles} articles disponibles</p>
+          <p className="text-purple-200 text-sm mt-4">{totalArticles} articles disponibles</p>
         </div>
       </section>
 
@@ -193,9 +193,9 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
         )}
 
         {/* CTA bas de page */}
-        <section className="bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] rounded-2xl p-8 text-white text-center">
+        <section className="bg-gradient-to-r from-[#9333EA] to-[#7e22ce] rounded-2xl p-8 text-white text-center">
           <h3 className="text-xl font-bold mb-2">Vous n'avez pas trouvé ce que vous cherchez ?</h3>
-          <p className="text-blue-100 mb-6">Notre équipe support est disponible pour vous aider personnellement.</p>
+          <p className="text-purple-100 mb-6">Notre équipe support est disponible pour vous aider personnellement.</p>
           <Link
             href={route('support.tickets.create')}
             className="inline-flex items-center gap-2 bg-[#F39C12] hover:bg-amber-500 text-white font-semibold
@@ -208,3 +208,4 @@ export default function HelpIndex({ categories = [], featured = [], recent = [] 
     </AppLayout>
   );
 }
+export { HelpIndex };

@@ -87,8 +87,8 @@ const STATUSES = {
   },
   in_progress: {
     label:  'En cours',
-    colors: 'bg-blue-100 text-blue-800 ring-blue-300',
-    dot:    'bg-blue-500',
+    colors: 'bg-purple-100 text-purple-800 ring-purple-300',
+    dot:    'bg-purple-500',
     icon:   '↻',
     pulse:  true,
   },
@@ -122,8 +122,8 @@ const STATUSES = {
   // Tickets
   open: {
     label:  'Ouvert',
-    colors: 'bg-blue-100 text-blue-800 ring-blue-300',
-    dot:    'bg-blue-500',
+    colors: 'bg-purple-100 text-purple-800 ring-purple-300',
+    dot:    'bg-purple-500',
     icon:   '◎',
     pulse:  true,
   },

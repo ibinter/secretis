@@ -1,0 +1,24 @@
+{
+  "name": "IBIG SECRETIS",
+  "short_name": "SECRETIS",
+  "description": "Solution ERP de secrétariat et gestion documentaire — IBIG Soft",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f0a1e",
+  "theme_color": "#7c3aed",
+  "orientation": "any",
+  "lang": "fr",
+  "dir": "ltr",
+  "icons": [
+    {"src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/favicon.ico", "sizes": "64x64"}
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {"name": "Tableau de bord", "short_name": "Dashboard", "url": "/dashboard", "description": "Accéder au tableau de bord"},
+    {"name": "Courrier", "short_name": "Courrier", "url": "/courrier", "description": "Gérer le courrier"},
+    {"name": "Agenda", "short_name": "Agenda", "url": "/agenda", "description": "Voir l agenda"}
+  ]
+}

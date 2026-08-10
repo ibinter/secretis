@@ -6,7 +6,7 @@ import Button from './Button'
 const TYPE_CONFIG = {
   danger:  { icon: Trash2,         iconBg: 'bg-[#C0392B]/10', iconColor: 'text-[#C0392B]', confirmVariant: 'danger',  confirmLabel: 'Supprimer' },
   warning: { icon: AlertTriangle,  iconBg: 'bg-[#F39C12]/10', iconColor: 'text-[#F39C12]', confirmVariant: 'secondary', confirmLabel: 'Confirmer' },
-  info:    { icon: Info,           iconBg: 'bg-[#2E86C1]/10', iconColor: 'text-[#2E86C1]', confirmVariant: 'primary', confirmLabel: 'Confirmer' },
+  info:    { icon: Info,           iconBg: 'bg-[#7e22ce]/10', iconColor: 'text-[#7e22ce]', confirmVariant: 'primary', confirmLabel: 'Confirmer' },
 }
 
 /**
@@ -99,3 +99,4 @@ export default function ConfirmDialog({
     </Modal>
   )
 }
+export { ConfirmDialog };

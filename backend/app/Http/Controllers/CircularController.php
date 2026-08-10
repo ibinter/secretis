@@ -9,9 +9,12 @@ use App\Models\User;
 use App\Services\AuditService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 /**
  * CircularController — Circulaires et Notes de service
@@ -38,6 +41,27 @@ class CircularController extends Controller
     // -------------------------------------------------------------------------
 
     /**
+     * Page Inertia du registre des circulaires.
+     */
+    public function indexPage(Request $request): Response
+    {
+        $user  = Auth::user();
+        $orgId = $user->organization_id;
+
+        return Inertia::render('Circulaires/Index', [
+            'departments' => Department::where('organization_id', $orgId)
+                ->orderBy('name')
+                ->get(['id', 'name']),
+            'users' => User::where('organization_id', $orgId)
+                ->where('status', 'active')
+                ->select('id', 'name', 'email')
+                ->orderBy('name')
+                ->get(),
+            'canCreate' => $user->hasPermissionForModule('circulaires', 'create'),
+        ]);
+    }
+
+    /**
      * Retourne la liste des circulaires accessibles à l'utilisateur.
      * - Pour les auteurs/admins : toutes les circulaires de l'organisation
      * - Pour les autres : seulement celles qui leur sont destinées
@@ -47,7 +71,7 @@ class CircularController extends Controller
         $user = Auth::user();
 
         $query = Circular::where('organization_id', $user->organization_id)
-            ->with(['author:id,name,avatar', 'category'])
+            ->with(['author:id,name,avatar'])
             ->withCount([
                 'recipients as total_recipients',
                 'recipients as read_count' => fn ($q) => $q->whereNotNull('acknowledged_at'),
@@ -130,23 +154,25 @@ class CircularController extends Controller
         }
 
         [$circular, $recipientIds] = DB::transaction(function () use ($validated, $user) {
+            // Déterminer le recipient_type selon les critères de ciblage
+            $recipientType = 'users';
+            if ($validated['target_all'] ?? false) {
+                $recipientType = 'all';
+            } elseif (!empty($validated['target_department_ids']) && empty($validated['target_user_ids'])) {
+                $recipientType = 'departments';
+            }
+
             $circ = Circular::create([
-                'organization_id' => $user->organization_id,
-                'author_id'       => $user->id,
-                'title'           => $validated['title'],
-                'content'         => $validated['content'],
-                'category_id'     => $validated['category_id'] ?? null,
-                'priority'        => $validated['priority'] ?? 'normal',
-                'requires_ack'    => $validated['requires_ack'] ?? false,
-                'status'          => 'published',
-                'published_at'    => $validated['published_at'] ?? now(),
-                'expires_at'      => $validated['expires_at'] ?? null,
-                'targeting'       => [
-                    'all'             => $validated['target_all'] ?? false,
-                    'department_ids'  => $validated['target_department_ids'] ?? [],
-                    'roles'           => $validated['target_roles'] ?? [],
-                    'user_ids'        => $validated['target_user_ids'] ?? [],
-                ],
+                'organization_id'          => $user->organization_id,
+                'created_by'               => $user->id,
+                'subject'                  => $validated['title'],
+                'body'                     => $validated['content'],
+                'recipient_ids'            => $this->resolveRecipients($validated, $user->organization_id),
+                'recipient_type'           => $recipientType,
+                'requires_acknowledgement' => $validated['requires_ack'] ?? false,
+                'status'                   => 'published',
+                'published_at'             => $validated['published_at'] ?? now(),
+                'expires_at'               => $validated['expires_at'] ?? null,
             ]);
 
             // Calculer la liste des destinataires
@@ -175,9 +201,9 @@ class CircularController extends Controller
             $this->notificationService->send(
                 user:  $recipient,
                 type:  'circular',
-                title: 'Nouvelle circulaire : ' . $circular->title,
-                body:  "Priorité : {$circular->priority}. " . ($circular->requires_ack ? 'Accusé de réception requis.' : ''),
-                data:  ['circular_id' => $circular->id, 'requires_ack' => $circular->requires_ack],
+                title: 'Nouvelle circulaire : ' . $circular->subject,
+                body:  ($circular->requires_acknowledgement ? 'Accusé de réception requis.' : ''),
+                data:  ['circular_id' => $circular->id, 'requires_ack' => $circular->requires_acknowledgement],
             );
         }
 
@@ -186,7 +212,7 @@ class CircularController extends Controller
             module: 'circulaires',
             resourceType: 'circular',
             resourceId: $circular->id,
-            newValues: ['title' => $circular->title, 'recipient_count' => count($recipientIds)],
+            newValues: ['subject' => $circular->subject, 'recipient_count' => count($recipientIds)],
         );
 
         return response()->json($circular->load('author:id,name'), 201);
@@ -329,7 +355,7 @@ class CircularController extends Controller
 
         return response()->json([
             'circular_id'  => $circular->id,
-            'requires_ack' => $circular->requires_ack,
+            'requires_ack' => $circular->requires_acknowledgement,
             'read'         => $recipients->whereNotNull('read_at')->values()->map(fn ($r) => [
                 'user'    => $r->user,
                 'read_at' => $r->read_at?->toIso8601String(),
@@ -397,5 +423,182 @@ class CircularController extends Controller
         }
 
         return array_unique($ids);
+    }
+
+    // -------------------------------------------------------------------------
+    // update($id) — Éditer une circulaire existante (org-scopée)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Met à jour le sujet, le contenu, le statut ou les échéances d'une
+     * circulaire. Seuls l'auteur ou un manager peuvent éditer.
+     * N'écrit QUE des colonnes réelles de la table `circulars`.
+     * Web/Inertia → redirect ; requête API pure → JSON.
+     */
+    public function update(Request $request, int $id): JsonResponse|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $circular = Circular::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        if ($circular->created_by !== $user->id
+            && !$user->hasPermissionForModule('circulaires', 'manage')) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(['message' => 'Accès refusé.'], 403);
+            }
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'title'        => ['sometimes', 'required', 'string', 'max:500'],
+            'content'      => ['sometimes', 'required', 'string'],
+            'reference'    => ['sometimes', 'nullable', 'string', 'max:255'],
+            'requires_ack' => ['sometimes', 'boolean'],
+            'published_at' => ['sometimes', 'nullable', 'date'],
+            'expires_at'   => ['sometimes', 'nullable', 'date'],
+            'status'       => ['sometimes', 'in:draft,published,archived'],
+        ]);
+
+        // Mapper vers les colonnes réelles de la table `circulars`.
+        $changes = [];
+        if (array_key_exists('title', $validated))        $changes['subject'] = $validated['title'];
+        if (array_key_exists('content', $validated))      $changes['body'] = $validated['content'];
+        if (array_key_exists('reference', $validated))    $changes['reference'] = $validated['reference'];
+        if (array_key_exists('requires_ack', $validated)) $changes['requires_acknowledgement'] = $validated['requires_ack'];
+        if (array_key_exists('published_at', $validated)) $changes['published_at'] = $validated['published_at'];
+        if (array_key_exists('expires_at', $validated))   $changes['expires_at'] = $validated['expires_at'];
+        if (array_key_exists('status', $validated))       $changes['status'] = $validated['status'];
+
+        if (!empty($changes)) {
+            $circular->update($changes);
+        }
+
+        $this->auditService->log(
+            action: 'circular_updated',
+            module: 'circulaires',
+            resourceType: 'circular',
+            resourceId: $circular->id,
+            newValues: $changes,
+        );
+
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json($circular->fresh()->load('author:id,name'));
+        }
+
+        return redirect()->route('circulaires.index')->with('success', 'Circulaire mise à jour.');
+    }
+
+    // -------------------------------------------------------------------------
+    // destroy($id) — Supprimer une circulaire (org-scopée)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Supprime une circulaire. Seuls l'auteur ou un manager peuvent supprimer.
+     * Web/Inertia → redirect ; requête API pure → JSON.
+     */
+    public function destroy(Request $request, int $id): JsonResponse|RedirectResponse
+    {
+        $user = Auth::user();
+
+        $circular = Circular::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        if ($circular->created_by !== $user->id
+            && !$user->hasPermissionForModule('circulaires', 'manage')) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(['message' => 'Accès refusé.'], 403);
+            }
+            abort(403);
+        }
+
+        $circular->delete();
+
+        $this->auditService->logDeleted('circulaires', 'circular', $id);
+
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json(['message' => 'Circulaire supprimée.']);
+        }
+
+        return redirect()->route('circulaires.index')->with('success', 'Circulaire supprimée.');
+    }
+
+    // -------------------------------------------------------------------------
+    // send($id) — (Re)diffuser une circulaire et notifier les destinataires
+    // -------------------------------------------------------------------------
+
+    /**
+     * Publie (si nécessaire) et rediffuse une circulaire : renvoie une
+     * notification à chaque destinataire (mêmes destinataires que ceux
+     * résolus à la création, stockés dans la colonne JSON `recipient_ids`).
+     * Route API → réponse JSON.
+     */
+    public function send(Request $request, int $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user->hasPermissionForModule('circulaires', 'create')
+            && !$user->hasPermissionForModule('circulaires', 'manage')) {
+            return response()->json(['message' => 'Permission refusée.'], 403);
+        }
+
+        $circular = Circular::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        if ($circular->created_by !== $user->id
+            && !$user->hasPermissionForModule('circulaires', 'manage')) {
+            return response()->json(['message' => 'Accès refusé.'], 403);
+        }
+
+        // Publier si la circulaire était encore en brouillon.
+        if ($circular->status !== 'published') {
+            $circular->update([
+                'status'       => 'published',
+                'published_at' => $circular->published_at ?? now(),
+            ]);
+        }
+
+        // recipient_ids (JSON) contient des IDs d'utilisateurs résolus à la création.
+        $recipientIds = array_values(array_filter(
+            (array) ($circular->recipient_ids ?? []),
+            fn ($rid) => (int) $rid !== (int) $user->id,
+        ));
+
+        $recipients = User::whereIn('id', $recipientIds)->get();
+        foreach ($recipients as $recipient) {
+            $this->notificationService->send(
+                user:  $recipient,
+                type:  'circular',
+                title: 'Circulaire : ' . $circular->subject,
+                body:  ($circular->requires_acknowledgement ? 'Accusé de réception requis.' : ''),
+                data:  ['circular_id' => $circular->id, 'requires_ack' => $circular->requires_acknowledgement],
+            );
+        }
+
+        $this->auditService->log(
+            action: 'circular_sent',
+            module: 'circulaires',
+            resourceType: 'circular',
+            resourceId: $circular->id,
+            newValues: ['recipient_count' => count($recipientIds)],
+        );
+
+        return response()->json([
+            'message'         => 'Circulaire diffusée.',
+            'recipient_count' => count($recipientIds),
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Alias API — délègue vers la vraie méthode (routes api.php)
+    // -------------------------------------------------------------------------
+
+    /** GET /circulaires/{id}/recipients */
+    public function recipients(Request $request, int $id): JsonResponse
+    {
+        return $this->getReadStatus($request, $id);
     }
 }

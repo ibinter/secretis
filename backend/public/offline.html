@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#7c3aed">
+  <title>Hors ligne — IBIG SECRETIS</title>
+  <!--
+    Page hors-ligne STATIQUE de SECRETIS.
+    Elle est pré-cachée par /sw.js et servie quand une navigation échoue.
+    Elle doit rester entièrement autonome : aucun appel réseau, aucune police
+    externe, aucun bundle Vite (ceux-ci ne sont pas garantis disponibles).
+    L'équivalent React (resources/js/Pages/Offline.jsx) nécessite le serveur et
+    ne peut donc pas servir de repli en cas de coupure.
+  -->
+  <style>
+    :root {
+      --fond:      #f9fafb;
+      --carte:     #ffffff;
+      --bordure:   #e5e7eb;
+      --texte:     #111827;
+      --texte-2:   #6b7280;
+      --primaire:  #9333ea;
+      --alerte:    #d97706;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fond:    #0f1923;
+        --carte:   #162032;
+        --bordure: #1e3048;
+        --texte:   #f3f4f6;
+        --texte-2: #9ca3af;
+        --primaire:#a855f7;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background: var(--fond);
+      color: var(--texte);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .boite { width: 100%; max-width: 26rem; text-align: center; }
+    svg.illu { width: 12rem; height: 9rem; margin: 0 auto 1.5rem; display: block; }
+    h1 { font-size: 1.5rem; line-height: 1.3; margin: 0 0 .75rem; }
+    p.intro { color: var(--texte-2); font-size: .9rem; line-height: 1.6; margin: 0 0 1.5rem; }
+    .carte {
+      background: var(--carte);
+      border: 1px solid var(--bordure);
+      border-radius: .75rem;
+      padding: 1rem;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    .carte h2 {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--texte-2);
+      margin: 0 0 .75rem;
+    }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      font-size: .85rem;
+      color: var(--texte-2);
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--bordure);
+    }
+    li:last-child { border-bottom: 0; }
+    li .puce {
+      width: .5rem; height: .5rem; border-radius: 50%;
+      background: var(--alerte); flex: 0 0 auto;
+    }
+    button {
+      width: 100%;
+      padding: .8rem 1.5rem;
+      border: 0;
+      border-radius: .75rem;
+      background: var(--primaire);
+      color: #fff;
+      font-size: .95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    button:hover  { filter: brightness(1.08); }
+    button[disabled] { opacity: .65; cursor: progress; }
+    .secondaire {
+      margin-top: .75rem;
+      background: transparent;
+      color: var(--texte-2);
+      font-weight: 500;
+      font-size: .8rem;
+      border: 1px solid var(--bordure);
+    }
+    .etat {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .78rem; color: var(--texte-2);
+      margin-bottom: 1rem;
+    }
+    .etat .voyant {
+      width: .5rem; height: .5rem; border-radius: 50%;
+      background: var(--alerte);
+    }
+    .etat.enligne .voyant { background: #16a34a; }
+    footer { margin-top: 2rem; font-size: .7rem; color: var(--texte-2); opacity: .7; }
+  </style>
+</head>
+<body>
+  <main class="boite">
+    <svg class="illu" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Connexion hors ligne">
+      <ellipse cx="120" cy="95"  rx="58" ry="38" fill="currentColor" opacity=".08"/>
+      <ellipse cx="95"  cy="106" rx="35" ry="30" fill="currentColor" opacity=".08"/>
+      <ellipse cx="148" cy="108" rx="28" ry="24" fill="currentColor" opacity=".08"/>
+      <path d="M100 75 Q120 55 140 75" stroke="#7e22ce" stroke-width="3.5" stroke-linecap="round" opacity=".4"/>
+      <path d="M90 65 Q120 40 150 65"  stroke="#7e22ce" stroke-width="3.5" stroke-linecap="round" opacity=".2"/>
+      <circle cx="120" cy="82" r="5" fill="#9333EA"/>
+      <line x1="68" y1="60" x2="172" y2="140" stroke="#C0392B" stroke-width="6" stroke-linecap="round"/>
+      <rect x="100" y="135" width="4" height="12" rx="2" fill="#7e22ce" opacity=".5"/>
+      <rect x="118" y="140" width="4" height="10" rx="2" fill="#7e22ce" opacity=".4"/>
+      <rect x="136" y="133" width="4" height="14" rx="2" fill="#7e22ce" opacity=".5"/>
+    </svg>
+
+    <div class="etat" id="etat">
+      <span class="voyant"></span>
+      <span id="etat-texte">Aucune connexion détectée</span>
+    </div>
+
+    <h1 id="titre">Vous êtes hors ligne</h1>
+    <p class="intro" id="intro">
+      SECRETIS n'a pas pu joindre le serveur. Vérifiez votre connexion internet.
+      La page se rechargera automatiquement dès que le réseau sera rétabli.
+    </p>
+
+    <div class="carte">
+      <h2>Ce que vous pouvez faire</h2>
+      <ul>
+        <li><span class="puce"></span> Vérifier le Wi-Fi ou les données mobiles</li>
+        <li><span class="puce"></span> Patienter : la reconnexion est automatique</li>
+        <li><span class="puce"></span> Vos saisies non envoyées restent dans l'onglet ouvert</li>
+      </ul>
+    </div>
+
+    <button id="reessayer" type="button">Réessayer la connexion</button>
+    <button id="forcer" type="button" class="secondaire">
+      Vider le cache et forcer la mise à jour
+    </button>
+
+    <footer>IBIG SECRETIS — ERP Secrétariat</footer>
+  </main>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var btnReessayer = document.getElementById('reessayer');
+    var btnForcer    = document.getElementById('forcer');
+    var etat         = document.getElementById('etat');
+    var etatTexte    = document.getElementById('etat-texte');
+    var titre        = document.getElementById('titre');
+    var intro        = document.getElementById('intro');
+
+    function recharger() {
+      btnReessayer.disabled = true;
+      btnReessayer.textContent = 'Reconnexion…';
+      window.location.reload();
+    }
+
+    function auRetourDuReseau() {
+      etat.className = 'etat enligne';
+      etatTexte.textContent = 'Connexion rétablie';
+      titre.textContent = 'Reconnexion en cours…';
+      intro.textContent = 'Le réseau est de retour, rechargement de SECRETIS.';
+      setTimeout(recharger, 800);
+    }
+
+    btnReessayer.addEventListener('click', recharger);
+    window.addEventListener('online', auRetourDuReseau);
+
+    // Purge complète : caches + service workers. Utilisable par le support
+    // quand un cache corrompu empêche l'application de démarrer.
+    btnForcer.addEventListener('click', function () {
+      btnForcer.disabled = true;
+      btnForcer.textContent = 'Nettoyage…';
+
+      var taches = [];
+
+      try {
+        if ('caches' in window) {
+          taches.push(caches.keys().then(function (cles) {
+            return Promise.all(cles.map(function (c) { return caches.delete(c); }));
+          }));
+        }
+        if ('serviceWorker' in navigator) {
+          taches.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }));
+        }
+      } catch (e) { /* purge best-effort */ }
+
+      Promise.all(taches)
+        .catch(function () { /* on recharge quand même */ })
+        .then(function () { window.location.replace('/'); });
+    });
+
+    // Sondage léger : certains réseaux instables ne déclenchent pas 'online'.
+    setInterval(function () {
+      if (navigator.onLine) auRetourDuReseau();
+    }, 15000);
+  })();
+  </script>
+</body>
+</html>

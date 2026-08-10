@@ -1,5 +1,5 @@
-import React, { useState, useEffect, createContext, useContext } from 'react'
-import { Link, usePage } from '@inertiajs/react'
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react'
+import { Link, usePage, router } from '@inertiajs/react'
 import OfflineIndicator from './OfflineIndicator'
 import InstallBanner    from '@/Components/PWA/InstallBanner'
 import UpdatePrompt     from '@/Components/PWA/UpdatePrompt'
@@ -48,19 +48,20 @@ function NavIcon({ name, size = 16 }) {
 
 // ─── Single nav item ──────────────────────────────────────────────────────────
 function NavItem({ module, collapsed, currentUrl }) {
-  const isActive = currentUrl && currentUrl.includes(module.id)
+  const target = module.href || `/${module.id.replace(/_/g, '-')}`
+  const isActive = currentUrl && (currentUrl === target || currentUrl.startsWith(target + '/'))
   return (
     <Link
-      href={`/${module.id.replace(/_/g, '-')}`}
+      href={target}
       className={[
         'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
         isActive
-          ? 'bg-[#2E86C1]/15 text-[#2E86C1] dark:text-blue-300'
+          ? 'bg-[#7e22ce]/15 text-[#7e22ce] dark:text-purple-300'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-white/5',
       ].join(' ')}
       title={collapsed ? module.label : undefined}
     >
-      <span className={`shrink-0 ${isActive ? 'text-[#2E86C1]' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}>
+      <span className={`shrink-0 ${isActive ? 'text-[#7e22ce]' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}>
         <NavIcon name={module.icon} />
       </span>
       {!collapsed && <span className="truncate flex-1">{module.label}</span>}
@@ -69,7 +70,7 @@ function NavItem({ module, collapsed, currentUrl }) {
           {module.badge}
         </span>
       )}
-      {isActive && !collapsed && !module.badge && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#2E86C1] shrink-0" />}
+      {isActive && !collapsed && !module.badge && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#7e22ce] shrink-0" />}
     </Link>
   )
 }
@@ -86,7 +87,7 @@ function NavSection({ section, modules, collapsed, currentUrl }) {
         className={[
           'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors',
           isAnyActive
-            ? 'text-[#1A3A5C] dark:text-blue-200'
+            ? 'text-[#9333EA] dark:text-purple-200'
             : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300',
         ].join(' ')}
         title={collapsed ? section.label : undefined}
@@ -122,6 +123,18 @@ function Sidebar({ collapsed, onClose, isMobile }) {
   const userRole = props?.auth?.user?.role ?? 'user'
   const isAdmin  = userRole === 'admin' || userRole === 'super_admin'
 
+  // Droit `sara` calculé côté serveur (HandleInertiaRequests). Défaut : fermé —
+  // une absence de réponse ne doit pas ouvrir un service facturé au jeton.
+  const saraOuverte = props?.licence?.droits?.sara === true
+
+  // Persiste la position de scroll du menu entre les navigations Inertia
+  const navRef = useRef(null)
+  useEffect(() => {
+    const el = navRef.current
+    const s  = sessionStorage.getItem('sidebarScroll')
+    if (el && s) el.scrollTop = parseInt(s, 10)
+  }, [])
+
   const sidebarClass = isMobile
     ? 'fixed inset-y-0 left-0 z-40 w-72 bg-white dark:bg-[#162032] shadow-2xl flex flex-col transition-transform duration-300'
     : `h-screen sticky top-0 flex flex-col bg-white dark:bg-[#162032] border-r border-gray-200 dark:border-[#1E3048] transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`
@@ -130,12 +143,12 @@ function Sidebar({ collapsed, onClose, isMobile }) {
     <aside className={sidebarClass}>
       {/* Logo */}
       <div className={`flex items-center h-16 px-4 border-b border-gray-100 dark:border-[#1E3048] shrink-0 ${collapsed && !isMobile ? 'justify-center' : 'gap-3'}`}>
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#9333EA] to-[#7e22ce] flex items-center justify-center shrink-0">
           <span className="text-white font-black text-sm">S</span>
         </div>
         {(!collapsed || isMobile) && (
           <div className="min-w-0">
-            <span className="font-bold text-[#1A3A5C] dark:text-white text-sm tracking-tight">SECRETIS</span>
+            <span className="font-bold text-[#9333EA] dark:text-white text-sm tracking-tight">SECRETIS</span>
             <span className="block text-[10px] text-gray-400 font-medium">IBIG Soft</span>
           </div>
         )}
@@ -147,7 +160,11 @@ function Sidebar({ collapsed, onClose, isMobile }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+      <nav
+        ref={navRef}
+        onScroll={(e) => sessionStorage.setItem('sidebarScroll', e.target.scrollTop)}
+        className="flex-1 overflow-y-auto py-3 px-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700"
+      >
         {MODULE_SECTIONS.map(section => {
           const mods = MODULES.filter(m =>
             m.section === section.id &&
@@ -166,10 +183,14 @@ function Sidebar({ collapsed, onClose, isMobile }) {
         })}
       </nav>
 
-      {/* SARA bubble */}
-      {(!collapsed || isMobile) && (
+      {/* SARA — masquée quand le droit `sara` est fermé (Découverte, Démo
+          publique, abonnement échu). Le serveur reste seul juge : ce masquage
+          évite un clic vers une porte fermée, il ne la ferme pas. */}
+      {saraOuverte && (!collapsed || isMobile) && (
         <div className="shrink-0 px-3 pb-4 pt-2 border-t border-gray-100 dark:border-[#1E3048]">
-          <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#1A3A5C] to-[#2E86C1] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+          <button
+            onClick={() => router.visit('/sara')}
+            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-[#9333EA] to-[#7e22ce] text-white text-sm font-medium hover:opacity-90 transition-opacity">
             <MessageCircle size={16} />
             Parler à SARA
           </button>
@@ -201,10 +222,10 @@ function Header({ onMenuToggle, collapsed, onCollapseToggle, dark, onThemeToggle
 
       {/* Trial badge */}
       {trial && (
-        <div className="bg-[#1A3A5C] text-white text-xs font-medium text-center py-1.5 px-4 flex items-center justify-center gap-2">
-          <span className="px-2 py-0.5 bg-[#F39C12] text-[#1A3A5C] rounded font-bold">ESSAI</span>
+        <div className="bg-[#9333EA] text-white text-xs font-medium text-center py-1.5 px-4 flex items-center justify-center gap-2">
+          <span className="px-2 py-0.5 bg-[#F39C12] text-[#9333EA] rounded font-bold">ESSAI</span>
           Essai gratuit — {trial.daysLeft} jour{trial.daysLeft > 1 ? 's' : ''} restant{trial.daysLeft > 1 ? 's' : ''}
-          <a href="/upgrade" className="underline hover:no-underline ml-1">Passer à Pro →</a>
+          <a href="/abonnement/plans" className="underline hover:no-underline ml-1">Passer à Pro →</a>
         </div>
       )}
 
@@ -270,7 +291,8 @@ function Header({ onMenuToggle, collapsed, onCollapseToggle, dark, onThemeToggle
 
 // ─── Main AppLayout ───────────────────────────────────────────────────────────
 export default function AppLayout({ children, announcement, trial }) {
-  const { auth } = usePage().props ?? {}
+  const { auth, licence } = usePage().props ?? {}
+  const saraOuverte  = licence?.droits?.sara === true
   const user         = auth?.user
   const notifications= auth?.notifications ?? []
 
@@ -339,14 +361,17 @@ export default function AppLayout({ children, announcement, trial }) {
           </main>
         </div>
 
-        {/* SARA floating bubble (outside sidebar) */}
-        <button
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#1A3A5C] to-[#2E86C1] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center lg:hidden print:hidden"
-          aria-label="Ouvrir SARA — Assistant IA"
-          title="SARA — Assistant IA"
-        >
-          <MessageCircle size={24} />
-        </button>
+        {/* SARA floating bubble — masquée quand le droit `sara` est fermé. */}
+        {saraOuverte && (
+          <button
+            onClick={() => router.visit('/sara')}
+            className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[#9333EA] to-[#7e22ce] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center print:hidden"
+            aria-label="Ouvrir SARA — Assistant IA"
+            title="SARA — Assistant IA"
+          >
+            <MessageCircle size={24} />
+          </button>
+        )}
 
         <ToastContainer />
 
@@ -357,3 +382,4 @@ export default function AppLayout({ children, announcement, trial }) {
     </ThemeCtx.Provider>
   )
 }
+export { AppLayout };

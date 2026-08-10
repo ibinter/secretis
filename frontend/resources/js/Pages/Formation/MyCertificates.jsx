@@ -54,7 +54,7 @@ function CertificateCard({ cert }) {
             expired ? 'border-red-200 opacity-75' : 'border-gray-200'
         }`}>
             {/* En-tête coloré */}
-            <div className={`h-2 ${expired ? 'bg-red-400' : 'bg-gradient-to-r from-indigo-500 to-blue-600'}`}/>
+            <div className={`h-2 ${expired ? 'bg-red-400' : 'bg-gradient-to-r from-indigo-500 to-purple-600'}`}/>
 
             <div className="p-5">
                 {/* Titre et statut */}
@@ -203,3 +203,4 @@ export default function MyCertificates({ certificates }) {
         </AppLayout>
     );
 }
+export { MyCertificates };

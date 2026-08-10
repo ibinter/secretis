@@ -149,10 +149,9 @@ php8.2 artisan db:seed --class=ProductionSeeder
 
 ```bash
 # Copier les configurations Nginx
-sudo cp /var/www/secretis/backend/deploy/nginx/secretis.conf \
-    /etc/nginx/sites-available/secretis.conf
-
-sudo cp /var/www/secretis/backend/deploy/nginx/subdomain-wildcard.conf \
+# ⚠️ Les configurations nginx ne sont plus versionnées dans le dépôt.
+# La référence est /etc/nginx/sites-enabled/secretis sur le serveur.
+# Voir deploy/nginx/LISEZ-MOI.md avant toute modification. \
     /etc/nginx/sites-available/subdomain-wildcard.conf
 
 # Activer les sites

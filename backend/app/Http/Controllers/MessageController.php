@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 /**
  * MessageController — Messagerie interne temps réel
@@ -41,7 +42,7 @@ class MessageController extends Controller
      * triées par date du dernier message (les plus récentes en premier).
      * Chaque conversation inclut le dernier message et le nombre de messages non lus.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -74,7 +75,12 @@ class MessageController extends Controller
             ->get()
             ->map(fn (Conversation $conv) => $this->formatConversation($conv, $user));
 
-        return response()->json($conversations);
+        // Requête API pure (fetch/axios) → JSON ; navigation navigateur/Inertia → page.
+        if ($request->wantsJson() && ! $request->header('X-Inertia')) {
+            return response()->json($conversations);
+        }
+
+        return Inertia::render('Messages/Index', ['conversations' => $conversations]);
     }
 
     // -------------------------------------------------------------------------
@@ -158,7 +164,7 @@ class MessageController extends Controller
             'attachment_ids'  => ['nullable', 'array', 'max:10'],
             'attachment_ids.*'=> ['integer'],
             'reply_to_id'     => ['nullable', 'integer'],
-            'type'            => ['in:text,file,image,voice'],
+            'type'            => ['in:text,file,image,system'],
         ]);
 
         // Vérifier l'accès à la conversation
@@ -267,7 +273,6 @@ class MessageController extends Controller
                 'type'            => $validated['type'],
                 'name'            => $validated['name'] ?? null,
                 'created_by'      => $user->id,
-                'token'           => Str::uuid(),
             ]);
 
             // Ajouter les participants
@@ -348,14 +353,14 @@ class MessageController extends Controller
             ->where('role', 'admin')
             ->exists();
 
-        if ($message->sender_id !== $user->id && !$isAdmin) {
+        if ($message->user_id !== $user->id && !$isAdmin) {
             return response()->json(['message' => 'Action non autorisée.'], 403);
         }
 
         $message->update([
-            'deleted_at'      => now(),
-            'deleted_by'      => $user->id,
-            'content'         => null, // Effacer le contenu pour la confidentialité
+            'deleted_at' => now(),
+            'is_deleted' => true,
+            'body'       => null, // Effacer le contenu pour la confidentialité
         ]);
 
         // Notifier les participants de la suppression via Reverb
@@ -449,12 +454,245 @@ class MessageController extends Controller
     {
         sort($participantIds);
 
+        // PostgreSQL n'autorise pas un alias de SELECT dans HAVING (contrairement à MySQL) :
+        // on exprime « exactement 2 participants » via un whereHas comptant les lignes.
         return Conversation::where('type', 'direct')
             ->where('organization_id', $organizationId)
             ->whereHas('participants', fn ($q) => $q->where('user_id', $participantIds[0]))
             ->whereHas('participants', fn ($q) => $q->where('user_id', $participantIds[1]))
-            ->withCount('participants')
-            ->having('participants_count', 2)
+            ->whereHas('participants', null, '=', 2)
             ->first();
+    }
+
+    // -------------------------------------------------------------------------
+    // store() — Créer un message (POST /messages, conversation_id dans le corps)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Crée un message dans une conversation. Contrairement à sendMessage()
+     * (broadcast Reverb), cette méthode sert la route web/JSON POST /messages
+     * où l'ID de conversation est fourni dans le corps de la requête.
+     * Utilise EXCLUSIVEMENT les colonnes réelles : `user_id`, `body`, `type`,
+     * `reply_to_id`, `attachments`.
+     */
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'conversation_id' => ['required', 'integer'],
+            'body'            => ['required_without_all:content,attachments', 'nullable', 'string', 'max:10000'],
+            'content'         => ['nullable', 'string', 'max:10000'], // alias toléré côté front
+            'attachments'     => ['nullable', 'array', 'max:10'],
+            'reply_to_id'     => ['nullable', 'integer'],
+            'type'            => ['nullable', 'in:text,file,image,system'],
+        ]);
+
+        $body = $validated['body'] ?? $validated['content'] ?? null;
+
+        // Vérifier l'accès : participant actif de la conversation, isolation tenant.
+        $conversation = Conversation::where('id', $validated['conversation_id'])
+            ->where('organization_id', $user->organization_id)
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $user->id)->whereNull('left_at'))
+            ->firstOrFail();
+
+        $message = DB::transaction(function () use ($conversation, $user, $body, $validated) {
+            $data = [
+                'conversation_id' => $conversation->id,
+                'user_id'         => $user->id,
+                'body'            => $body,
+                'type'            => $validated['type'] ?? 'text',
+                'reply_to_id'     => $validated['reply_to_id'] ?? null,
+            ];
+
+            // Colonne JSON `attachments` sans cast Eloquent → encoder manuellement.
+            if (!empty($validated['attachments'])) {
+                $data['attachments'] = json_encode($validated['attachments']);
+            }
+
+            $msg = Message::create($data);
+
+            // Mettre à jour l'activité de la conversation (colonnes réelles).
+            $conversation->forceFill([
+                'last_message_id'  => $msg->id,
+                'last_activity_at' => now(),
+            ])->save();
+
+            return $msg;
+        });
+
+        $this->auditService->log(
+            action: 'message_sent',
+            module: 'messagerie',
+            resourceType: 'message',
+            resourceId: $message->id,
+            newValues: ['conversation_id' => $conversation->id],
+        );
+
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json($this->presentMessage($message, $user), 201);
+        }
+
+        return redirect()->back()->with('success', 'Message envoyé.');
+    }
+
+    // -------------------------------------------------------------------------
+    // show($id) — Détail d'une conversation (messages récents)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Retourne une conversation avec ses participants et ses derniers messages.
+     * Version auto-portée (colonnes réelles `user_id`/`body`, pas de table
+     * `message_reads`), servant la route GET /messages/{id}.
+     */
+    public function show(Request $request, int $id)
+    {
+        $user = Auth::user();
+
+        $conversation = Conversation::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $user->id)->whereNull('left_at'))
+            ->with(['participants.user:id,name,avatar,status'])
+            ->firstOrFail();
+
+        $perPage = min((int) $request->get('per_page', 30), 100);
+
+        $messages = Message::where('conversation_id', $conversation->id)
+            ->where('is_deleted', false)
+            ->orderByDesc('id')
+            ->limit($perPage)
+            ->get()
+            ->reverse()
+            ->values();
+
+        $payload = [
+            'conversation' => [
+                'id'           => $conversation->id,
+                'type'         => $conversation->type,
+                'name'         => $conversation->name,
+                'participants' => $conversation->participants->map(fn ($p) => [
+                    'id'     => $p->user_id,
+                    'name'   => $p->user?->name,
+                    'avatar' => $p->user?->avatar,
+                    'status' => $p->user?->status,
+                    'role'   => $p->role,
+                ]),
+            ],
+            'messages' => $messages->map(fn (Message $m) => $this->presentMessage($m, $user)),
+        ];
+
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json($payload);
+        }
+
+        return Inertia::render('Messages/Show', $payload);
+    }
+
+    // -------------------------------------------------------------------------
+    // updateMessage($id, $mid) — Éditer un message
+    // -------------------------------------------------------------------------
+
+    /**
+     * Édite le contenu d'un message. Seul l'auteur peut éditer son message.
+     * Colonnes réelles : `body`, `is_edited`, `edited_at`.
+     * Route API PUT /conversations/{id}/messages/{mid} → JSON.
+     */
+    public function updateMessage(Request $request, int $id, int $mid)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'body'    => ['required_without:content', 'nullable', 'string', 'max:10000'],
+            'content' => ['nullable', 'string', 'max:10000'], // alias toléré
+        ]);
+
+        $body = $validated['body'] ?? $validated['content'] ?? null;
+
+        // Isolation tenant via la conversation.
+        $conversation = Conversation::where('id', $id)
+            ->where('organization_id', $user->organization_id)
+            ->firstOrFail();
+
+        $message = Message::where('id', $mid)
+            ->where('conversation_id', $conversation->id)
+            ->firstOrFail();
+
+        if ((int) $message->user_id !== (int) $user->id) {
+            if ($request->wantsJson() && !$request->header('X-Inertia')) {
+                return response()->json(['message' => 'Action non autorisée.'], 403);
+            }
+            abort(403);
+        }
+
+        if ($message->is_deleted) {
+            return response()->json(['message' => 'Message supprimé, édition impossible.'], 422);
+        }
+
+        $message->update([
+            'body'      => $body,
+            'is_edited' => true,
+            'edited_at' => now(),
+        ]);
+
+        $this->auditService->log(
+            action: 'message_updated',
+            module: 'messagerie',
+            resourceType: 'message',
+            resourceId: $message->id,
+            newValues: ['conversation_id' => $conversation->id],
+        );
+
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json($this->presentMessage($message->fresh(), $user));
+        }
+
+        return redirect()->back()->with('success', 'Message modifié.');
+    }
+
+    /**
+     * Sérialise un message à partir des colonnes réelles de la table `messages`
+     * (user_id/body/type/is_edited/is_deleted/read_at) — sans relations non définies.
+     */
+    private function presentMessage(Message $msg, User $user): array
+    {
+        return [
+            'id'              => $msg->id,
+            'conversation_id' => $msg->conversation_id,
+            'user_id'         => $msg->user_id,
+            'body'            => $msg->body,
+            'type'            => $msg->type,
+            'is_mine'         => (int) $msg->user_id === (int) $user->id,
+            'reply_to_id'     => $msg->reply_to_id,
+            'is_edited'       => (bool) $msg->is_edited,
+            'is_deleted'      => (bool) $msg->is_deleted,
+            'read_at'         => $msg->read_at,
+            'created_at'      => $msg->created_at?->toIso8601String(),
+            'updated_at'      => $msg->updated_at?->toIso8601String(),
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Alias API — délèguent vers les méthodes réelles (voir routes/api.php)
+    // -------------------------------------------------------------------------
+
+    /** Alias route GET /conversations → index(). */
+    public function conversations(Request $request): JsonResponse
+    {
+        return $this->index($request);
+    }
+
+    /** Alias route GET /conversations/{id}/messages → getConversation(). */
+    public function messages(Request $request, int $id): JsonResponse
+    {
+        return $this->getConversation($request, $id);
+    }
+
+    /**
+     * Alias route DELETE /conversations/{id}/messages/{mid} → deleteMessage().
+     * La cible attend l'ID du message ({mid}), pas celui de la conversation.
+     */
+    public function destroyMessage(Request $request, int $id, int $mid): JsonResponse
+    {
+        return $this->deleteMessage($request, $mid);
     }
 }

@@ -8,28 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('expense_reports', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->json('expenses'); // [{category, amount, date, description, receipt_path}]
-            $table->decimal('total_amount', 10, 2)->default(0);
-            $table->string('currency', 3)->default('XOF');
-            $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'paid'])->default('draft');
-            $table->timestamp('submitted_at')->nullable();
-            $table->timestamp('approved_at')->nullable();
-            $table->timestamp('paid_at')->nullable();
-            $table->text('rejection_reason')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('expense_reports')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('expense_reports', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->string('title');
+                $table->text('description')->nullable();
+                $table->json('expenses'); // [{category, amount, date, description, receipt_path}]
+                $table->decimal('total_amount', 10, 2)->default(0);
+                $table->string('currency', 3)->default('XOF');
+                $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'paid'])->default('draft');
+                $table->timestamp('submitted_at')->nullable();
+                $table->timestamp('approved_at')->nullable();
+                $table->timestamp('paid_at')->nullable();
+                $table->text('rejection_reason')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('employee_id');
-            $table->index('status');
-            $table->index('submitted_at');
-        });
+                $table->index('organization_id');
+                $table->index('employee_id');
+                $table->index('status');
+                $table->index('submitted_at');
+            });
+        }
     }
 
     public function down(): void

@@ -8,28 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('circulars', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->string('reference')->nullable();
-            $table->string('subject');
-            $table->longText('body');
-            $table->json('recipient_ids'); // user IDs or department IDs
-            $table->enum('recipient_type', ['users', 'departments', 'all'])->default('all');
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
-            $table->json('attachments')->nullable();
-            $table->timestamp('published_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
-            $table->boolean('requires_acknowledgement')->default(false);
-            $table->json('acknowledged_by')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('circulars')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('circulars', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->string('reference')->nullable();
+                $table->string('subject');
+                $table->longText('body');
+                $table->json('recipient_ids'); // user IDs or department IDs
+                $table->enum('recipient_type', ['users', 'departments', 'all'])->default('all');
+                $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
+                $table->json('attachments')->nullable();
+                $table->timestamp('published_at')->nullable();
+                $table->timestamp('expires_at')->nullable();
+                $table->boolean('requires_acknowledgement')->default(false);
+                $table->json('acknowledged_by')->nullable();
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('created_by');
-            $table->index('status');
-            $table->index('published_at');
-        });
+                $table->index('organization_id');
+                $table->index('created_by');
+                $table->index('status');
+                $table->index('published_at');
+            });
+        }
     }
 
     public function down(): void

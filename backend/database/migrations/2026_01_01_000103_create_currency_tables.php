@@ -9,52 +9,73 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('currencies', function (Blueprint $table) {
-            $table->id();
-            $table->string('code', 3)->unique(); // ISO 4217
-            $table->string('name');
-            $table->string('name_en')->nullable();
-            $table->string('symbol', 10);
-            $table->unsignedTinyInteger('decimal_places')->default(2);
-            $table->string('decimal_separator', 1)->default(',');
-            $table->string('thousands_separator', 1)->default(' ');
-            $table->string('symbol_position')->default('after'); // before|after
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_default_for_region')->default(false);
-            $table->string('region')->nullable(); // OHADA, Europe, International
-            $table->json('countries')->nullable(); // pays qui utilisent cette devise
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('currencies')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('currencies', function (Blueprint $table) {
+                $table->id();
+                $table->string('code', 3)->unique(); // ISO 4217
+                $table->string('name');
+                $table->string('name_en')->nullable();
+                $table->string('symbol', 10);
+                $table->unsignedTinyInteger('decimal_places')->default(2);
+                $table->string('decimal_separator', 1)->default(',');
+                $table->string('thousands_separator', 1)->default(' ');
+                $table->string('symbol_position')->default('after'); // before|after
+                $table->boolean('is_active')->default(true);
+                $table->boolean('is_default_for_region')->default(false);
+                $table->string('region')->nullable(); // OHADA, Europe, International
+                $table->json('countries')->nullable(); // pays qui utilisent cette devise
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('exchange_rates', function (Blueprint $table) {
-            $table->id();
-            $table->string('from_currency', 3);
-            $table->string('to_currency', 3);
-            $table->decimal('rate', 20, 8);
-            $table->decimal('inverse_rate', 20, 8)->nullable();
-            $table->enum('source', ['ecb', 'manual', 'openexchangerates', 'bceao', 'beac'])->default('manual');
-            $table->timestamp('fetched_at');
-            $table->timestamp('valid_from')->nullable();
-            $table->timestamp('valid_until')->nullable();
-            $table->decimal('variation_pct', 8, 4)->nullable()->comment('Variation par rapport au taux précédent en %');
-            $table->timestamps();
+        if (! Schema::hasTable('exchange_rates')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('exchange_rates', function (Blueprint $table) {
+                $table->id();
+                $table->string('from_currency', 3);
+                $table->string('to_currency', 3);
+                $table->decimal('rate', 20, 8);
+                $table->decimal('inverse_rate', 20, 8)->nullable();
+                $table->enum('source', ['ecb', 'manual', 'openexchangerates', 'bceao', 'beac'])->default('manual');
+                $table->timestamp('fetched_at');
+                $table->timestamp('valid_from')->nullable();
+                $table->timestamp('valid_until')->nullable();
+                $table->decimal('variation_pct', 8, 4)->nullable()->comment('Variation par rapport au taux précédent en %');
+                $table->timestamps();
 
-            $table->index(['from_currency', 'to_currency', 'fetched_at']);
-            $table->foreign('from_currency')->references('code')->on('currencies');
-            $table->foreign('to_currency')->references('code')->on('currencies');
-        });
+                $table->index(['from_currency', 'to_currency', 'fetched_at']);
+                $table->foreign('from_currency')->references('code')->on('currencies');
+                $table->foreign('to_currency')->references('code')->on('currencies');
+            });
+        }
 
-        Schema::create('organization_currencies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->onDelete('cascade');
-            $table->string('primary_currency', 3);
-            $table->string('reporting_currency', 3);
-            $table->json('accepted_currencies')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('organization_currencies')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('organization_currencies', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->onDelete('cascade');
+                $table->string('primary_currency', 3);
+                $table->string('reporting_currency', 3);
+                $table->json('accepted_currencies')->nullable();
+                $table->timestamps();
 
-            $table->foreign('primary_currency')->references('code')->on('currencies');
-            $table->foreign('reporting_currency')->references('code')->on('currencies');
-        });
+                $table->foreign('primary_currency')->references('code')->on('currencies');
+                $table->foreign('reporting_currency')->references('code')->on('currencies');
+            });
+        }
 
         $this->seedCurrencies();
     }

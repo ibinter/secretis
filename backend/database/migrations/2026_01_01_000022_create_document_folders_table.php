@@ -8,26 +8,33 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('document_folders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('parent_id')->nullable()->constrained('document_folders')->nullOnDelete();
-            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->string('name');
-            $table->string('slug')->nullable();
-            $table->text('description')->nullable();
-            $table->enum('access_level', ['public', 'organization', 'department', 'private'])->default('organization');
-            $table->json('allowed_departments')->nullable();
-            $table->json('allowed_users')->nullable();
-            $table->string('color', 7)->nullable();
-            $table->string('icon')->nullable();
-            $table->integer('position')->default(0);
-            $table->timestamps();
+        if (! Schema::hasTable('document_folders')) {
+            // Création idempotente. La production porte des migrations
+            // APPLIQUÉES A MOITIÉ : certaines ont créé une partie de leurs
+            // tables avant d'échouer, puis ont été marquées comme jouées. Les
+            // rejouer pour créer ce qui manque exige que chaque création sache
+            // ne rien faire quand la table est déjà là.
+            Schema::create('document_folders', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('parent_id')->nullable()->constrained('document_folders')->nullOnDelete();
+                $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
+                $table->string('name');
+                $table->string('slug')->nullable();
+                $table->text('description')->nullable();
+                $table->enum('access_level', ['public', 'organization', 'department', 'private'])->default('organization');
+                $table->json('allowed_departments')->nullable();
+                $table->json('allowed_users')->nullable();
+                $table->string('color', 7)->nullable();
+                $table->string('icon')->nullable();
+                $table->integer('position')->default(0);
+                $table->timestamps();
 
-            $table->index('organization_id');
-            $table->index('parent_id');
-            $table->index('created_by');
-        });
+                $table->index('organization_id');
+                $table->index('parent_id');
+                $table->index('created_by');
+            });
+        }
     }
 
     public function down(): void

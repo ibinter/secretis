@@ -79,15 +79,15 @@ function FaqItem({ faq, defaultOpen = false }) {
 
   return (
     <div className={`border rounded-xl overflow-hidden transition-all duration-200
-      ${open ? 'border-blue-200 shadow-sm' : 'border-gray-200'}`}>
+      ${open ? 'border-purple-200 shadow-sm' : 'border-gray-200'}`}>
       {/* Question */}
       <button
         onClick={() => setOpen(!open)}
         className={`w-full flex items-start justify-between gap-4 p-5 text-left transition-colors
-          ${open ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
+          ${open ? 'bg-purple-50' : 'bg-white hover:bg-gray-50'}`}
         aria-expanded={open}
       >
-        <h3 className={`text-sm font-semibold leading-relaxed ${open ? 'text-blue-700' : 'text-gray-900'}`}>
+        <h3 className={`text-sm font-semibold leading-relaxed ${open ? 'text-purple-700' : 'text-gray-900'}`}>
           {faq.question}
         </h3>
         <div className="flex-shrink-0 mt-0.5 text-gray-400">
@@ -157,7 +157,7 @@ function FaqItem({ faq, defaultOpen = false }) {
                 href={faq.guide_section_url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800
+                className="flex items-center gap-1.5 text-xs text-purple-600 hover:text-purple-800
                   font-medium transition-colors"
               >
                 <Icon.BookOpen />
@@ -207,7 +207,7 @@ export default function FaqCategory() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -244,7 +244,7 @@ export default function FaqCategory() {
               onChange={e => setSearchQuery(e.target.value)}
               placeholder={`Filtrer dans "${category?.name}"…`}
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white
-                text-sm outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                text-sm outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400"
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,7 +266,7 @@ export default function FaqCategory() {
               <p className="text-4xl mb-3">🔍</p>
               <p className="text-lg font-medium text-gray-600 mb-1">Aucun article trouvé</p>
               <p className="text-sm">Essayez des termes différents ou</p>
-              <Link to="/help/ticket" className="text-sm text-blue-600 hover:underline">
+              <Link to="/help/ticket" className="text-sm text-purple-600 hover:underline">
                 ouvrez un ticket de support
               </Link>
             </div>
@@ -293,7 +293,7 @@ export default function FaqCategory() {
                   className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg
                     text-sm transition-colors
                     ${cat.slug === slug
-                      ? 'bg-blue-50 text-blue-700 font-semibold'
+                      ? 'bg-purple-50 text-purple-700 font-semibold'
                       : 'text-gray-700 hover:bg-gray-50'}
                   `}
                 >
@@ -308,7 +308,7 @@ export default function FaqCategory() {
             <div className="mt-4 pt-4 border-t border-gray-100">
               <Link
                 to="/help/ticket"
-                className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:text-blue-800"
+                className="flex items-center gap-2 text-sm text-purple-600 font-medium hover:text-purple-800"
               >
                 <span>🎫</span> Ouvrir un ticket
               </Link>
@@ -319,3 +319,4 @@ export default function FaqCategory() {
     </div>
   );
 }
+export { FaqCategory };

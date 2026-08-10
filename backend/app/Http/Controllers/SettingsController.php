@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organisation;
+use App\Models\Organization;
+
 use App\Models\User;
-use App\Models\Setting;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -181,6 +181,9 @@ class SettingsController extends Controller
      */
     public function inviteUser(Request $request): \Illuminate\Http\RedirectResponse
     {
+        // Multi-utilisateur fermé au palier Découverte (section 3.3).
+        app(\App\Services\LicenceGarde::class)->exiger('multi_utilisateur', $request->user());
+
         $validated = $request->validate([
             'email'   => ['required', 'email', 'max:255'],
             'role'    => ['required', 'in:admin,manager,employe,consultant'],
@@ -517,13 +520,29 @@ class SettingsController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // ALIAS API (routes api.php → méthodes réelles)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * GET /organization (API) → getOrganizationSettings
+     *
+     * NOTE : la cible suggérée showOrganisation() retourne une réponse Inertia pure
+     * (Inertia\Response), non adaptée à une route API JSON. On délègue donc vers
+     * getOrganizationSettings() qui retourne un JsonResponse équivalent.
+     */
+    public function organization(): JsonResponse
+    {
+        return $this->getOrganizationSettings();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Private helpers
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Construit les configs d'intégration masquées (pas de secrets en clair).
      */
-    private function buildIntegrationConfigs(Organisation $org): array
+    private function buildIntegrationConfigs(Organization $org): array
     {
         $raw     = $org->integrations ?? [];
         $configs = [];

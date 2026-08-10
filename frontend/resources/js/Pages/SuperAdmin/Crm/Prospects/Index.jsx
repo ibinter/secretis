@@ -1,39 +1,49 @@
+/**
+ * SuperAdmin/Crm/Prospects/Index.jsx — Pipeline de prospection
+ *
+ * Présentation migrée sur le système de composants `@/Components/UI`.
+ * Logique métier inchangée : mêmes props Inertia (`prospects`, `kpi`),
+ * mêmes états locaux (vue kanban/tableau, recherche, filtres),
+ * mêmes destinations de navigation.
+ *
+ * Nettoyage sans effet fonctionnel : imports `axios` et `router` inutilisés
+ * supprimés. Les boutons « Import » et « Export » n'ont toujours aucun
+ * gestionnaire côté code : ils sont conservés tels quels et signalés dans le
+ * rapport.
+ */
+
 import React, { useState } from 'react'
-import { Head, Link, router } from '@inertiajs/react'
-import axios from 'axios'
+import { Head, Link } from '@inertiajs/react'
+import {
+  Users, Plus, Search, Upload, Download, Eye, Calendar, Star,
+  LayoutGrid, List,
+} from 'lucide-react'
 import SuperAdminLayout from '@/Components/Layout/SuperAdminLayout'
+import {
+  PageHeader, Button, Badge, Card, StatCard, DataTable, EmptyState,
+  cx, SURFACE, BORDER, CONTROL, TEXT_TITLE, TEXT_MUTED, TEXT_FAINT, NUM, FOCUS_RING,
+} from '@/Components/UI'
 
-// ─── Icônes ──────────────────────────────────────────────────────────────────
-const Ic = {
-  Plus: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>,
-  Grid: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>,
-  List: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>,
-  Search: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>,
-  Download: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>,
-  Upload: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>,
-  Eye: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>,
-  ArrowRight: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>,
-  Star: () => <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
-  Calendar: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
-  Users: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
-}
+/* ─── Étapes du pipeline ───────────────────────────────────────────────────── */
 
-// ─── Pipeline stages ──────────────────────────────────────────────────────────
 const STAGES = [
-  { key: 'new',        label: 'Nouveau',         color: 'bg-gray-400' },
-  { key: 'to_contact', label: 'À contacter',     color: 'bg-blue-400' },
-  { key: 'contacted',  label: 'Contacté',        color: 'bg-indigo-400' },
-  { key: 'qualified',  label: 'Qualifié',        color: 'bg-violet-400' },
-  { key: 'demo_scheduled', label: 'Démo prévue', color: 'bg-amber-400' },
-  { key: 'demo_done',  label: 'Démo réalisée',   color: 'bg-orange-400' },
-  { key: 'offer_sent', label: 'Offre envoyée',   color: 'bg-pink-400' },
-  { key: 'negotiation',label: 'Négociation',     color: 'bg-rose-400' },
-  { key: 'won',        label: 'Gagné',           color: 'bg-green-500' },
-  { key: 'lost',       label: 'Perdu',           color: 'bg-red-400' },
-  { key: 'to_retry',   label: 'À relancer',      color: 'bg-gray-500' },
+  { key: 'new',             label: 'Nouveau',       dot: 'bg-gray-400' },
+  { key: 'to_contact',      label: 'À contacter',   dot: 'bg-sky-400' },
+  { key: 'contacted',       label: 'Contacté',      dot: 'bg-sky-500' },
+  { key: 'qualified',       label: 'Qualifié',      dot: 'bg-purple-400' },
+  { key: 'demo_scheduled',  label: 'Démo prévue',   dot: 'bg-amber-400' },
+  { key: 'demo_done',       label: 'Démo réalisée', dot: 'bg-amber-500' },
+  { key: 'offer_sent',      label: 'Offre envoyée', dot: 'bg-purple-500' },
+  { key: 'negotiation',     label: 'Négociation',   dot: 'bg-purple-600' },
+  { key: 'won',             label: 'Gagné',         dot: 'bg-emerald-500' },
+  { key: 'lost',            label: 'Perdu',         dot: 'bg-red-500' },
+  { key: 'to_retry',        label: 'À relancer',    dot: 'bg-gray-500' },
 ]
 
-// ─── Mock data ─────────────────────────────────────────────────────────────────
+const STAGE_MAP = Object.fromEntries(STAGES.map(s => [s.key, s]))
+
+/* ─── Données de démonstration (repli historique, conservées) ──────────────── */
+
 const MOCK_PROSPECTS = Array.from({ length: 16 }, (_, i) => ({
   id: i + 1,
   first_name: ['Awa', 'Konan', 'Brice', 'Fatou', 'Jean-Marc', 'Aminata', 'David', 'Sylvie'][i % 8],
@@ -52,52 +62,72 @@ const MOCK_PROSPECTS = Array.from({ length: 16 }, (_, i) => ({
 
 const MOCK_KPI = { new_week: 7, in_progress: 24, demos_scheduled: 4, converted_month: 3 }
 
-const STAGE_MAP = Object.fromEntries(STAGES.map(s => [s.key, s]))
+/* ─── Score ────────────────────────────────────────────────────────────────── */
 
 function ScoreBar({ score }) {
-  const color = score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-amber-400' : 'bg-red-400'
+  const bar = score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-red-500'
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-14 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${score}%` }} />
-      </div>
-      <span className="text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400">{score}</span>
-    </div>
+    <span className="flex items-center gap-1.5">
+      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
+        <span className={cx('block h-full rounded-full', bar)} style={{ width: `${Math.min(100, Math.max(0, score))}%` }} />
+      </span>
+      <span className={cx('text-xs font-medium', TEXT_MUTED, NUM)}>{score}</span>
+    </span>
   )
 }
 
-// ─── Vue Kanban ────────────────────────────────────────────────────────────────
+/* ─── Vue kanban ───────────────────────────────────────────────────────────── */
+
 function KanbanView({ prospects }) {
-  const byStage = STAGES.reduce((acc, s) => ({ ...acc, [s.key]: prospects.filter(p => p.stage === s.key) }), {})
+  const byStage = STAGES.reduce(
+    (acc, s) => ({ ...acc, [s.key]: prospects.filter(p => p.stage === s.key) }),
+    {},
+  )
 
   return (
     <div className="overflow-x-auto pb-4">
-      <div className="flex gap-3 min-w-max">
+      <div className="flex min-w-max gap-3">
         {STAGES.map(stage => (
           <div key={stage.key} className="w-60 shrink-0">
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <span className={`w-2 h-2 rounded-full ${stage.color}`} />
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{stage.label}</span>
-              <span className="ml-auto text-xs text-gray-400">{byStage[stage.key]?.length ?? 0}</span>
+            <div className="mb-2 flex items-center gap-2 px-1">
+              <span className={cx('h-2 w-2 rounded-full', stage.dot)} />
+              <span className={cx('text-xs font-semibold', TEXT_TITLE)}>{stage.label}</span>
+              <span className={cx('ml-auto text-xs', TEXT_FAINT, NUM)}>{byStage[stage.key]?.length ?? 0}</span>
             </div>
+
             <div className="space-y-2">
               {(byStage[stage.key] ?? []).map(p => (
                 <Link
                   key={p.id}
                   href={`/superadmin/crm/prospects/${p.id}`}
-                  className="block bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:border-[#1A3A5C]/30 dark:hover:border-blue-500/30 transition-all group"
+                  className={cx(
+                    SURFACE, 'group block rounded-xl border p-3 shadow-sm transition-colors', BORDER,
+                    'hover:border-purple-300 dark:hover:border-purple-500/40', FOCUS_RING,
+                  )}
                 >
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white group-hover:text-[#1A3A5C] dark:group-hover:text-blue-400">{p.first_name} {p.last_name}</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{p.company} · {p.country}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[10px] text-gray-400">{p.software}</span>
+                  <p className={cx('text-xs font-semibold group-hover:text-purple-700 dark:group-hover:text-purple-300', TEXT_TITLE)}>
+                    {p.first_name} {p.last_name}
+                  </p>
+                  <p className={cx('mt-0.5 truncate text-[11px]', TEXT_MUTED)}>{p.company} · {p.country}</p>
+
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className={cx('truncate text-[11px]', TEXT_FAINT)}>{p.software}</span>
                     <ScoreBar score={p.score} />
                   </div>
+
                   {p.next_action && (
-                    <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5 truncate">→ {p.next_action}</p>
+                    <p className="mt-1.5 truncate text-[11px] text-amber-600 dark:text-amber-400">
+                      &rarr; {p.next_action}
+                    </p>
                   )}
                 </Link>
               ))}
+
+              {(byStage[stage.key] ?? []).length === 0 && (
+                <p className={cx('rounded-lg border border-dashed py-6 text-center text-[11px]', BORDER, TEXT_FAINT)}>
+                  Aucun prospect
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -106,65 +136,16 @@ function KanbanView({ prospects }) {
   )
 }
 
-// ─── Vue Tableau ───────────────────────────────────────────────────────────────
-function TableView({ prospects }) {
-  const fmtDate = d => new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700">
-            <tr>
-              {['Nom', 'Entreprise', 'Pays', 'Logiciel', 'Source', 'Score', 'Stage', 'Commercial', 'Prochaine action', ''].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-            {prospects.map(p => {
-              const stage = STAGE_MAP[p.stage]
-              return (
-                <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{p.first_name} {p.last_name}</td>
-                  <td className="px-4 py-3 text-gray-600 dark:text-gray-400 max-w-[120px] truncate">{p.company}</td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{p.country}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{p.software}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{p.source}</span>
-                  </td>
-                  <td className="px-4 py-3"><ScoreBar score={p.score} /></td>
-                  <td className="px-4 py-3">
-                    <span className="flex items-center gap-1.5 text-xs font-medium">
-                      <span className={`w-2 h-2 rounded-full ${stage?.color ?? 'bg-gray-400'}`} />
-                      {stage?.label ?? p.stage}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{p.assigned_to ?? '—'}</td>
-                  <td className="px-4 py-3 max-w-[140px]">
-                    {p.next_action ? (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 truncate">{p.next_action}</p>
-                    ) : <span className="text-gray-300">—</span>}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link href={`/superadmin/crm/prospects/${p.id}`} className="p-1.5 rounded-md text-gray-400 hover:text-[#1A3A5C] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors inline-flex"><Ic.Eye /></Link>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
+/* ─── Composant principal ──────────────────────────────────────────────────── */
 
 export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi }) {
   const prospects = propProspects ?? MOCK_PROSPECTS
   const kpi       = propKpi ?? MOCK_KPI
-  const [view, setView]       = useState('kanban')
-  const [search, setSearch]   = useState('')
-  const [filterStage, setFS]  = useState('')
-  const [filterAgent, setFA]  = useState('')
+
+  const [view, setView]      = useState('kanban')
+  const [search, setSearch]  = useState('')
+  const [filterStage, setFS] = useState('')
+  const [filterAgent, setFA] = useState('')
 
   const filtered = prospects.filter(p => {
     if (search && !`${p.first_name} ${p.last_name} ${p.company}`.toLowerCase().includes(search.toLowerCase())) return false
@@ -173,54 +154,200 @@ export default function ProspectsIndex({ prospects: propProspects, kpi: propKpi 
     return true
   })
 
-  const KPI_CARDS = [
-    { label: 'Nouveaux cette semaine', value: kpi.new_week, color: 'text-[#1A3A5C]', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: <Ic.Plus /> },
-    { label: 'En cours', value: kpi.in_progress, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20', icon: <Ic.Users /> },
-    { label: 'Démos planifiées', value: kpi.demos_scheduled, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', icon: <Ic.Calendar /> },
-    { label: 'Convertis ce mois', value: kpi.converted_month, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', icon: <Ic.Star /> },
+  const isFiltered = Boolean(search || filterStage || filterAgent)
+  const resetFilters = () => { setSearch(''); setFS(''); setFA('') }
+
+  const agents = [...new Set(prospects.map(p => p.assigned_to).filter(Boolean))]
+
+  /* ─── Colonnes du tableau ────────────────────────────────────────────────── */
+
+  const columns = [
+    {
+      key: 'last_name',
+      label: 'Nom',
+      nowrap: true,
+      render: (_v, p) => (
+        <span className={cx('font-medium', TEXT_TITLE)}>{p.first_name} {p.last_name}</span>
+      ),
+    },
+    {
+      key: 'company',
+      label: 'Entreprise',
+      render: (v) => <span className="block max-w-[160px] truncate">{v}</span>,
+    },
+    { key: 'country', label: 'Pays', nowrap: true, className: cx('font-mono text-xs', TEXT_MUTED) },
+    { key: 'software', label: 'Logiciel', nowrap: true, className: cx('text-xs', TEXT_MUTED) },
+    { key: 'source', label: 'Source', nowrap: true, render: (v) => <Badge variant="neutral">{v}</Badge> },
+    { key: 'score', label: 'Score', width: '140px', render: (v) => <ScoreBar score={v} /> },
+    {
+      key: 'stage',
+      label: 'Étape',
+      nowrap: true,
+      render: (v) => {
+        const stage = STAGE_MAP[v]
+        return (
+          <span className={cx('inline-flex items-center gap-1.5 text-xs font-medium', TEXT_TITLE)}>
+            <span className={cx('h-2 w-2 rounded-full', stage?.dot ?? 'bg-gray-400')} />
+            {stage?.label ?? v}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'assigned_to',
+      label: 'Commercial',
+      nowrap: true,
+      className: cx('text-xs', TEXT_MUTED),
+      render: (v) => v ?? <span className={TEXT_FAINT}>—</span>,
+    },
+    {
+      key: 'next_action',
+      label: 'Prochaine action',
+      render: (v) => (v
+        ? <span className="block max-w-[180px] truncate text-xs text-amber-600 dark:text-amber-400">{v}</span>
+        : <span className={TEXT_FAINT}>—</span>),
+    },
   ]
 
   return (
     <SuperAdminLayout title="Prospects CRM">
       <Head title="Prospects — CRM Super Admin" />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {KPI_CARDS.map(k => (
-          <div key={k.label} className={`rounded-xl p-4 ${k.bg} flex items-center gap-3`}>
-            <span className={k.color}>{k.icon}</span>
-            <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{k.label}</p>
-              <p className={`text-2xl font-bold tabular-nums ${k.color}`}>{k.value}</p>
+      <PageHeader
+        icon={Users}
+        title="Prospects"
+        subtitle="Pipeline de prospection commerciale de la plateforme."
+        breadcrumbs={[{ label: 'Console', href: '/superadmin' }, { label: 'CRM' }, { label: 'Prospects' }]}
+        actions={
+          <>
+            <Button variant="secondary" icon={Upload}>Import</Button>
+            <Button variant="secondary" icon={Download}>Export</Button>
+            <Button as={Link} href="/superadmin/crm/prospects/create" variant="primary" icon={Plus}>
+              Nouveau prospect
+            </Button>
+          </>
+        }
+      />
+
+      <div className="space-y-6">
+
+        {/* ── Indicateurs ─────────────────────────────────────────────────── */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard icon={Plus}     tone="accent"  label="Nouveaux cette semaine" value={kpi.new_week ?? 0} />
+          <StatCard icon={Users}    tone="info"    label="En cours"               value={kpi.in_progress ?? 0} />
+          <StatCard icon={Calendar} tone="warning" label="Démos planifiées"       value={kpi.demos_scheduled ?? 0} />
+          <StatCard icon={Star}     tone="success" label="Convertis ce mois"      value={kpi.converted_month ?? 0} />
+        </section>
+
+        {/* ── Barre d'outils ──────────────────────────────────────────────── */}
+        <Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[220px] flex-1">
+              <Search className={cx('pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2', TEXT_FAINT)} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Nom ou entreprise…"
+                aria-label="Rechercher un prospect"
+                className={cx(CONTROL, 'h-10 pl-9')}
+              />
+            </div>
+
+            <select
+              value={filterStage}
+              onChange={e => setFS(e.target.value)}
+              aria-label="Filtrer par étape"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[170px]')}
+            >
+              <option value="">Toutes les étapes</option>
+              {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+            </select>
+
+            <select
+              value={filterAgent}
+              onChange={e => setFA(e.target.value)}
+              aria-label="Filtrer par commercial"
+              className={cx(CONTROL, 'h-10 w-auto min-w-[170px]')}
+            >
+              <option value="">Tous les commerciaux</option>
+              {agents.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+
+            {isFiltered && <Button variant="ghost" onClick={resetFilters}>Réinitialiser</Button>}
+
+            <div
+              role="group"
+              aria-label="Mode d'affichage"
+              className={cx('ml-auto flex overflow-hidden rounded-lg border', BORDER)}
+            >
+              <button
+                type="button"
+                title="Vue kanban"
+                aria-pressed={view === 'kanban'}
+                onClick={() => setView('kanban')}
+                className={cx(
+                  'p-2.5 transition-colors',
+                  view === 'kanban' ? 'bg-purple-600 text-white' : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                  FOCUS_RING,
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                title="Vue tableau"
+                aria-pressed={view === 'table'}
+                onClick={() => setView('table')}
+                className={cx(
+                  'p-2.5 transition-colors',
+                  view === 'table' ? 'bg-purple-600 text-white' : cx(TEXT_MUTED, 'hover:bg-gray-50 dark:hover:bg-white/[0.05]'),
+                  FOCUS_RING,
+                )}
+              >
+                <List className="h-4 w-4" />
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </Card>
 
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-3 items-center mb-5">
-        <div className="relative flex-1 min-w-48">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Ic.Search /></span>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nom, entreprise…" className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none" />
-        </div>
-        <select value={filterStage} onChange={e => setFS(e.target.value)} className="text-sm border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-[#1A3A5C]/30 outline-none">
-          <option value="">Tous les stages</option>
-          {STAGES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-        </select>
-        <div className="ml-auto flex gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"><Ic.Upload /> Import</button>
-          <button className="flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"><Ic.Download /> Export</button>
-          <div className="flex border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button onClick={() => setView('kanban')} className={`p-2 transition-colors ${view === 'kanban' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.Grid /></button>
-            <button onClick={() => setView('table')} className={`p-2 transition-colors ${view === 'table' ? 'bg-[#1A3A5C] text-white' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}><Ic.List /></button>
-          </div>
-          <Link href="/superadmin/crm/prospects/create" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#1A3A5C] text-white rounded-lg hover:bg-[#122a45] transition-colors">
-            <Ic.Plus /> Nouveau prospect
-          </Link>
-        </div>
-      </div>
+        {/* ── Contenu ─────────────────────────────────────────────────────── */}
+        {view === 'kanban' ? (
+          <KanbanView prospects={filtered} />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={filtered}
+            rowKey="id"
+            pageSize={25}
+            actions={(p) => (
+              <Button
+                as={Link} href={`/superadmin/crm/prospects/${p.id}`}
+                variant="ghost" size="sm" iconOnly icon={Eye}
+                title="Voir la fiche prospect"
+              />
+            )}
+            empty={
+              isFiltered ? (
+                <EmptyState
+                  variant="no-results"
+                  title="Aucun prospect ne correspond"
+                  description="Aucun résultat pour cette recherche ou ces filtres."
+                  action={<Button variant="secondary" onClick={resetFilters}>Réinitialiser les filtres</Button>}
+                />
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="Aucun prospect"
+                  description="Les prospects du pipeline commercial apparaîtront ici."
+                />
+              )
+            }
+          />
+        )}
 
-      {view === 'kanban' ? <KanbanView prospects={filtered} /> : <TableView prospects={filtered} />}
+      </div>
     </SuperAdminLayout>
   )
 }
+
+export { ProspectsIndex };

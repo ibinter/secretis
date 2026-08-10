@@ -7,9 +7,12 @@
  *     payment_rate, revenue_by_month, top_clients, overdue_invoices
  *   }
  *   dateRange : { start, end }
+ *
+ * Présentation migrée sur `@/Components/UI` + socle comptable partagé.
+ * Aucun calcul modifié : les KPI restent ceux fournis par le backend.
  */
 
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -17,21 +20,21 @@ import {
 } from 'recharts';
 import {
   BanknotesIcon, ClockIcon, ExclamationTriangleIcon,
-  CheckCircleIcon, ArrowDownTrayIcon, EnvelopeIcon,
+  CheckCircleIcon, ArrowDownTrayIcon, EnvelopeIcon, PlusIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import AuthLayout from '@/Layouts/AuthLayout';
-import KpiTile from '@/Components/Dashboard/KpiTile';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import {
+  PageHeader, Button, Badge, Card, StatCard, EmptyState,
+  cx, BORDER, TEXT_TITLE, TEXT_MUTED, NUM,
+} from '@/Components/UI';
+import { money, amount } from '@/Components/Comptabilite/accounting';
 
-// Palette couleurs module comptabilité
-const PIE_COLORS = ['#1A3A5C', '#2E86C1', '#27AE60', '#F39C12', '#E74C3C'];
-
-// Formateur FCFA
-const fcfa = (v) =>
-  new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(v) + ' FCFA';
+// Palette du camembert « top clients » — teintes distinctes, sans dégradé.
+const PIE_COLORS = ['#9333EA', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444'];
 
 // Libellé mois FR
 const monthLabel = (ym) => {
@@ -50,7 +53,7 @@ export default function AccountingDashboard({ kpis, dateRange }) {
   const handleSendReminder = async (invoiceId) => {
     setSending(invoiceId);
     try {
-      await axios.post(`/comptabilite/invoices/${invoiceId}/remind`);
+      await axios.post(`/comptabilite/factures/${invoiceId}/remind`);
       toast.success('Relance envoyée.');
     } catch {
       toast.error('Échec de l\'envoi de la relance.');
@@ -64,156 +67,145 @@ export default function AccountingDashboard({ kpis, dateRange }) {
   };
 
   // Préparer données graphique revenus
-  const revenueData = kpis.revenue_by_month.map((r) => ({
+  const revenueData = (kpis.revenue_by_month ?? []).map((r) => ({
     ...r,
     label: monthLabel(r.month),
   }));
 
   // Données camembert top clients
-  const pieData = kpis.top_clients.map((c) => ({
+  const pieData = (kpis.top_clients ?? []).map((c) => ({
     name: c.name,
     value: parseFloat(c.total_billed),
   }));
+
+  const overdue = kpis.overdue_invoices ?? [];
+
+  const rate = Number(kpis.payment_rate) || 0;
+  const rateColor = rate >= 80 ? '#059669' : rate >= 50 ? '#F59E0B' : '#DC2626';
 
   return (
     <AuthLayout>
       <Head title="Comptabilité — Tableau de bord" />
 
-      <div className="p-6 space-y-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* ===== En-tête ===== */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Comptabilité</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Période : {dateRange.start} → {dateRange.end}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleExport}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition"
-            >
-              <ArrowDownTrayIcon className="h-4 w-4" />
-              Export CSV
-            </button>
-            <a
-              href="/comptabilite/invoices/create"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A3A5C] text-white rounded-lg text-sm hover:bg-[#16324e] transition"
-            >
-              + Nouvelle facture
-            </a>
-          </div>
-        </div>
+        <PageHeader
+          icon={BanknotesIcon}
+          title="Comptabilité"
+          breadcrumbs={[{ label: 'Accueil', href: '/' }, { label: 'Comptabilité' }]}
+          subtitle={`Période du ${dateRange.start} au ${dateRange.end} — montants en FCFA (XOF)`}
+          actions={
+            <>
+              <Button variant="secondary" icon={ArrowDownTrayIcon} onClick={handleExport}>
+                Export CSV
+              </Button>
+              <Button
+                variant="primary" icon={PlusIcon}
+                onClick={() => router.visit('/comptabilite/factures/create')}
+              >
+                Nouvelle facture
+              </Button>
+            </>
+          }
+        />
 
-        {/* ===== KPI Tiles ===== */}
+        {/* ===== KPI ===== */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <KpiTile
+          <StatCard
             label="Total facturé"
-            value={Math.round(kpis.total_invoiced)}
+            value={amount(Math.round(kpis.total_invoiced))}
+            unit="FCFA"
             icon={BanknotesIcon}
-            color="navy"
-            suffix=" FCFA"
+            tone="neutral"
           />
-          <KpiTile
+          <StatCard
             label="Encaissé"
-            value={Math.round(kpis.total_paid)}
+            value={amount(Math.round(kpis.total_paid))}
+            unit="FCFA"
             icon={CheckCircleIcon}
-            color="green"
-            suffix=" FCFA"
+            tone="success"
           />
-          <KpiTile
+          <StatCard
             label="En attente"
-            value={Math.round(kpis.total_pending)}
+            value={amount(Math.round(kpis.total_pending))}
+            unit="FCFA"
             icon={ClockIcon}
-            color="amber"
-            suffix=" FCFA"
+            tone="warning"
           />
-          <KpiTile
+          <StatCard
             label="En retard"
-            value={Math.round(kpis.total_overdue)}
+            value={amount(Math.round(kpis.total_overdue))}
+            unit="FCFA"
             icon={ExclamationTriangleIcon}
-            color="red"
-            suffix=" FCFA"
-            critical={kpis.total_overdue > 0 ? 0 : undefined}
+            tone="danger"
           />
         </div>
 
         {/* ===== Taux de recouvrement ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-gray-700">Taux de recouvrement</span>
-            <span className="text-2xl font-bold text-[#1A3A5C]">{kpis.payment_rate}%</span>
+        <Card className="mt-6" title="Taux de recouvrement" subtitle="Part du facturé effectivement encaissé sur la période">
+          <div className="flex items-baseline justify-between">
+            <span className={cx('text-2xl font-semibold tracking-tight', NUM, TEXT_TITLE)}>
+              {kpis.payment_rate}%
+            </span>
+            <span className={cx('text-xs', TEXT_MUTED)}>Objectif 90 %</span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-3">
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
             <div
-              className="h-3 rounded-full transition-all duration-700"
-              style={{
-                width: `${kpis.payment_rate}%`,
-                background: kpis.payment_rate >= 80
-                  ? '#27AE60'
-                  : kpis.payment_rate >= 50
-                  ? '#F39C12'
-                  : '#E74C3C',
-              }}
+              className="h-2.5 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(Math.max(rate, 0), 100)}%`, background: rateColor }}
             />
           </div>
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
-            <span>0%</span>
-            <span>Objectif 90%</span>
-            <span>100%</span>
+          <div className={cx('mt-1.5 flex justify-between text-xs', TEXT_MUTED, NUM)}>
+            <span>0 %</span>
+            <span>100 %</span>
           </div>
-        </div>
+        </Card>
 
         {/* ===== Revenus + Répartition clients ===== */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-          {/* Graphique revenus */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-gray-700 mb-4">
-              Revenus encaissés — 12 derniers mois
-            </h2>
+          <Card className="lg:col-span-2" title="Revenus encaissés" subtitle="12 derniers mois">
             {revenueData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={230}>
                 <AreaChart data={revenueData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1A3A5C" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#1A3A5C" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#9333EA" stopOpacity={0.22} />
+                      <stop offset="95%" stopColor="#9333EA" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-200 dark:text-white/10" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="currentColor" className="text-gray-400" />
                   <YAxis
                     tickFormatter={(v) => new Intl.NumberFormat('fr-FR', { notation: 'compact' }).format(v)}
                     tick={{ fontSize: 11 }}
                     width={60}
+                    stroke="currentColor"
+                    className="text-gray-400"
                   />
-                  <Tooltip
-                    formatter={(v) => [fcfa(v), 'Revenus']}
-                    contentStyle={{ fontSize: 12 }}
-                  />
+                  <Tooltip formatter={(v) => [money(v), 'Revenus']} contentStyle={{ fontSize: 12 }} />
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#1A3A5C"
+                    stroke="#9333EA"
                     strokeWidth={2}
                     fill="url(#colorRev)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
-                Aucune donnée de revenus pour cette période.
-              </div>
+              <EmptyState
+                compact
+                variant="no-data"
+                title="Aucun revenu sur la période"
+                description="Les encaissements apparaîtront ici dès qu'une facture aura été réglée."
+              />
             )}
-          </div>
+          </Card>
 
-          {/* Camembert top clients */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h2 className="text-sm font-semibold text-gray-700 mb-4">Top 5 clients</h2>
+          <Card title="Top 5 clients" subtitle="Répartition du chiffre facturé">
             {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={210}>
                 <PieChart>
                   <Pie
                     data={pieData}
@@ -228,10 +220,7 @@ export default function AccountingDashboard({ kpis, dateRange }) {
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(v) => [fcfa(v), 'Facturé']}
-                    contentStyle={{ fontSize: 11 }}
-                  />
+                  <Tooltip formatter={(v) => [money(v), 'Facturé']} contentStyle={{ fontSize: 11 }} />
                   <Legend
                     iconType="circle"
                     iconSize={8}
@@ -240,65 +229,65 @@ export default function AccountingDashboard({ kpis, dateRange }) {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
-                Aucun client à afficher.
-              </div>
+              <EmptyState
+                compact
+                variant="no-data"
+                title="Aucun client facturé"
+                description="Le classement se remplit dès la première facture émise."
+              />
             )}
-          </div>
-
+          </Card>
         </div>
 
         {/* ===== Factures en retard ===== */}
-        {kpis.overdue_invoices.length > 0 && (
-          <div className="bg-white rounded-xl border border-red-100 shadow-sm">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-red-50">
-              <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-              <h2 className="text-sm font-semibold text-gray-800">
-                Factures en retard ({kpis.overdue_invoices.length})
-              </h2>
-            </div>
-            <div className="divide-y divide-gray-50">
-              {kpis.overdue_invoices.map((inv) => (
-                <div
+        {overdue.length > 0 && (
+          <Card
+            className="mt-6"
+            flush
+            title={`Factures en retard (${overdue.length})`}
+            subtitle="Relancez les clients dont l'échéance est dépassée"
+            icon={ExclamationTriangleIcon}
+          >
+            <ul className={cx('divide-y', BORDER)}>
+              {overdue.map((inv) => (
+                <li
                   key={inv.id}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-red-50 transition"
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-gray-900">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={cx('font-mono text-sm font-semibold', TEXT_TITLE)}>
                         {inv.invoice_number}
                       </span>
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                        {inv.days_overdue}j de retard
-                      </span>
+                      <Badge variant="danger">{inv.days_overdue} j de retard</Badge>
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {inv.client} — Échéance {inv.due_date}
-                    </div>
+                    <p className={cx('mt-0.5 text-xs', TEXT_MUTED)}>
+                      {inv.client} — échéance {inv.due_date}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="text-sm font-bold text-red-600">
-                        {fcfa(inv.balance_due)}
-                      </div>
-                      <div className="text-xs text-gray-400">Solde dû</div>
+                      <p className={cx('text-sm font-semibold whitespace-nowrap', NUM, 'text-red-600 dark:text-red-400')}>
+                        {money(inv.balance_due)}
+                      </p>
+                      <p className={cx('text-xs', TEXT_MUTED)}>Solde dû</p>
                     </div>
-                    <button
+                    <Button
+                      variant="secondary" size="sm" icon={EnvelopeIcon}
+                      loading={sending === inv.id}
                       onClick={() => handleSendReminder(inv.id)}
-                      disabled={sending === inv.id}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 disabled:opacity-50 transition"
                     >
-                      <EnvelopeIcon className="h-3.5 w-3.5" />
-                      {sending === inv.id ? 'Envoi...' : 'Relance'}
-                    </button>
+                      Relancer
+                    </Button>
                   </div>
-                </div>
+                </li>
               ))}
-            </div>
-          </div>
+            </ul>
+          </Card>
         )}
 
       </div>
     </AuthLayout>
   );
 }
+export { AccountingDashboard };
