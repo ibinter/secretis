@@ -184,10 +184,10 @@ class HelpCenterSeeder extends Seeder
                     $this->makeArt('plans-tarifs-secretis',true,1087,['abonnement','plan','tarif'],
                         ['title'=>'Comprendre les plans tarifaires SECRETIS ERP','excerpt'=>'Plans Starter, Pro et Enterprise pour toutes les structures.',
                          'meta_title'=>'Plans SECRETIS ERP','meta_description'=>'Comparatif plans tarifaires.',
-                         'content'=>'<h2>Plans SECRETIS</h2><p><b>Starter</b> : 10 utilisateurs, modules essentiels (Agenda, Courrier, Taches, GED 10 Go), support email 48h.</p><p><b>Pro</b> : 50 utilisateurs, tous modules (RH, Comptabilite), GED 100 Go, support prioritaire 24h, integrations M365 et Google.</p><p><b>Enterprise</b> : utilisateurs illimites, modules personnalises, stockage illimite, manager dedie, formation sur site, SLA 4h. Changer de plan : Mon abonnement > Changer de plan. Facturation au prorata.</p>'],
+                         'content'=>$this->contenuFormules('fr')],
                         ['title'=>'Understanding SECRETIS ERP pricing plans','excerpt'=>'Starter, Pro and Enterprise plans for all organizations.',
                          'meta_title'=>'SECRETIS ERP pricing plans','meta_description'=>'Pricing plans comparison.',
-                         'content'=>'<h2>SECRETIS Plans</h2><p><b>Starter</b>: 10 users, essential modules (Calendar, Mail, Tasks, DMS 10GB), email support 48h.</p><p><b>Pro</b>: 50 users, all modules (HR, Accounting), DMS 100GB, priority support 24h, M365 and Google integrations.</p><p><b>Enterprise</b>: unlimited users, custom modules, unlimited storage, dedicated manager, on-site training, 4h SLA.</p>']),
+                         'content'=>$this->contenuFormules('en')]),
                     $this->makeArt('payer-mobile-money-afrique',true,934,['Mobile Money','Orange','MTN','Wave'],
                         ['title'=>'Payer avec Mobile Money (Orange, MTN, Wave)','excerpt'=>'Principaux moyens de paiement mobile africains acceptes par SECRETIS ERP.',
                          'meta_title'=>'Mobile Money SECRETIS ERP','meta_description'=>'Payer avec Mobile Money africain.',
@@ -296,5 +296,48 @@ class HelpCenterSeeder extends Seeder
                          'content'=>'<h2>Emails not received</h2><p>1. Check spam folder and add noreply@secretis.app to your contacts. 2. My Profile > Notifications: verify each type is enabled (email, push, in-app). 3. Ask IT to whitelist the secretis.app domain in enterprise spam filter. If issue persists, open a support ticket with your email and the missing notification types.</p>']),
                 ]),
         ];
+    }
+
+    /**
+     * Description des formules, LUE dans la base et dans le moteur de licence.
+     *
+     * Les contenus d'origine decrivaient des formules « Starter / Professional
+     * / Enterprise » avec des limites d'utilisateurs et de stockage inventees.
+     * Aucune n'existe : la table `plans` porte Demarrage, Essentiel, Pro et
+     * Entreprise. Un prospect qui lisait le centre d'aide y trouvait une offre
+     * sans rapport avec celle de la page tarifs.
+     *
+     * On ne reecrit pas cette fiction avec une autre : le texte est produit a
+     * partir des formules reellement enregistrees et des reglages de
+     * licence.config.json. Il suit donc l'offre sans intervention.
+     */
+    private function contenuFormules(string $langue = 'fr'): string
+    {
+        $licence = app(\App\Services\LicenceService::class);
+        $formules = \Illuminate\Support\Facades\DB::table('plans')
+            ->where('is_active', true)->orderBy('price_xof')->get();
+
+        $gratuit = $licence->config()['gratuit'];
+
+        if ($langue === 'en') {
+            $html = '<h2>Plans</h2><p>The <b>' . e($gratuit['nom']) . '</b> plan is free for ever, capped at '
+                  . e($gratuit['resume']) . '.</p><ul>';
+            foreach ($formules as $f) {
+                $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, '.', ' ') . ' XOF/month</li>';
+            }
+
+            return $html . '</ul><p>A ' . $licence->essaiJours() . '-day trial is available on the Pro plan, no card required.</p>';
+        }
+
+        $html = '<h2>Nos formules</h2><p>Le palier <b>' . e($gratuit['nom']) . '</b> est gratuit sans limite de duree, '
+              . 'plafonne a ' . e($gratuit['resume']) . '.</p><ul>';
+
+        foreach ($formules as $f) {
+            $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, ',', ' ') . ' FCFA/mois</li>';
+        }
+
+        return $html . '</ul><p>Un essai de ' . $licence->essaiJours() . ' jours est disponible sur la formule Pro, '
+             . 'sans carte bancaire. A son terme, votre espace bascule dans le palier ' . e($gratuit['nom'])
+             . ' : vos donnees sont conservees.</p>';
     }
 }

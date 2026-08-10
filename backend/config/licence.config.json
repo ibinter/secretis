@@ -19,27 +19,27 @@
     "  L'ancienne colonne `status` (trial|active|suspended|expired|cancelled) est",
     "  conservée en lecture pour le code non encore repris, mais `etat` fait foi."
   ],
-
   "solution": "secretis",
   "nom": "Secretis ERP",
   "editeur": "IBIG SOFT",
   "domaine_editeur": "ibigsoft.com",
-
   "essai_jours": 14,
   "grace_jours": 7,
   "retention_jours": 90,
   "prolongation_jours": 15,
   "prolongation_max": 1,
-
   "tolerance_hors_ligne_jours": 15,
-
   "gratuit": {
     "nom": "Découverte",
     "prix": 0,
     "devise": "XOF",
-    "quotas": { "courriers_mois": 5 },
+    "quotas": {
+      "courriers_mois": 5
+    },
     "resume": "5 courriers par mois",
-    "compteurs_mensuels": ["courriers_mois"],
+    "compteurs_mensuels": [
+      "courriers_mois"
+    ],
     "compteurs_cumulatifs": [],
     "utilisateurs": 1,
     "stockage_mo": 50,
@@ -62,49 +62,86 @@
     "otp": "email",
     "filigrane": true
   },
-
   "demo": {
     "url": null,
     "actif": false,
     "purge_cron": "02:00",
     "fuseau_purge": "GMT"
   },
-
   "droits_par_etat": {
-    "DEMO":    { "ecriture": true,  "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": false },
-    "FREE":    { "ecriture": true,  "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": true  },
-    "TRIAL":   { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
-    "ACTIVE":  { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
-    "GRACE":   { "ecriture": true,  "export": true,  "api": true,  "multi_utilisateur": true,  "sara": true,  "whatsapp": true,  "sms": true,  "filigrane": false, "quotas": false },
-    "EXPIRED": { "ecriture": false, "export": false, "api": false, "multi_utilisateur": false, "sara": false, "whatsapp": false, "sms": false, "filigrane": true,  "quotas": true  }
+    "DEMO": {
+      "ecriture": true,
+      "export": false,
+      "api": false,
+      "multi_utilisateur": false,
+      "sara": false,
+      "whatsapp": false,
+      "sms": false,
+      "filigrane": true,
+      "quotas": false
+    },
+    "FREE": {
+      "ecriture": true,
+      "export": false,
+      "api": false,
+      "multi_utilisateur": false,
+      "sara": false,
+      "whatsapp": false,
+      "sms": false,
+      "filigrane": true,
+      "quotas": true
+    },
+    "TRIAL": {
+      "ecriture": true,
+      "export": true,
+      "api": true,
+      "multi_utilisateur": true,
+      "sara": true,
+      "whatsapp": true,
+      "sms": true,
+      "filigrane": false,
+      "quotas": false
+    },
+    "ACTIVE": {
+      "ecriture": true,
+      "export": true,
+      "api": true,
+      "multi_utilisateur": true,
+      "sara": true,
+      "whatsapp": true,
+      "sms": true,
+      "filigrane": false,
+      "quotas": false
+    },
+    "GRACE": {
+      "ecriture": true,
+      "export": true,
+      "api": true,
+      "multi_utilisateur": true,
+      "sara": true,
+      "whatsapp": true,
+      "sms": true,
+      "filigrane": false,
+      "quotas": false
+    },
+    "EXPIRED": {
+      "ecriture": false,
+      "export": false,
+      "api": false,
+      "multi_utilisateur": false,
+      "sara": false,
+      "whatsapp": false,
+      "sms": false,
+      "filigrane": true,
+      "quotas": true
+    }
   },
-
   "formule_suivante": "essentiel",
-
   "_formules": [
     "Grille payante INCHANGÉE (décision D1). Les prix sont lus dans la table",
     "`plans` et ne sont pas recopiés ici : les dupliquer créerait une seconde",
     "vérité tarifaire, ce que la correction C2 interdit explicitement."
   ],
-
-  "_arbitrage_requis": {
-    "collision_nom_decouverte": [
-      "La table `plans` contient déjà une formule PAYANTE nommée « Découverte »",
-      "à 4 900 FCFA (slug `decouverte`). La section 3.1 du cahier impose",
-      "« Découverte » comme nom du palier GRATUIT.",
-      "Les deux ne peuvent pas coexister sans que le prospect lise deux prix",
-      "différents pour le même nom — exactement l'incohérence que la section 12",
-      "cherche à éliminer.",
-      "EN ATTENTE D'ARBITRAGE. Le nom du palier gratuit est lu ici et nulle part",
-      "ailleurs : le changer est une modification d'une ligne."
-    ],
-    "trial_days_par_formule": [
-      "`plans.trial_days` porte une durée d'essai PAR FORMULE, ce que la",
-      "décision D4 interdit (durée unique par solution).",
-      "La colonne est neutralisée par la migration : `essai_jours` fait foi."
-    ]
-  },
-
   "glossaire": {
     "demo_publique": "Démo publique",
     "gratuit": "Découverte",
@@ -117,7 +154,6 @@
     "espace": "Espace",
     "filigrane": "Filigrane"
   },
-
   "termes_bannis": [
     "version d'évaluation",
     "période test",
@@ -128,5 +164,18 @@
     "compte suspendu",
     "compte bloqué",
     "accès révoqué"
+  ],
+  "_arbitrages_rendus": [
+    "Les trois arbitrages ouverts a la livraison du chantier licence ont ete",
+    "tranches par la migration 2026_08_09_000010_arbitrages_licence, ou le",
+    "raisonnement de chacun est ecrit :",
+    "  1. Collision « Decouverte » — la formule PAYANTE a ete renommee",
+    "     « Demarrage ». Prix, contenu et position inchanges ; aucune licence ne",
+    "     la citait. Le palier gratuit garde le nom impose par la section 3.1.",
+    "  2. Organisation 4 (IBIG Soft, interne) — licence contradictoire ecartee,",
+    "     remplacee par une licence interne datee de dix ans. La decision D5",
+    "     n'admet pas d'exception, pas meme pour l'editeur.",
+    "  3. Deux consoles superadmin — la console historique redirige desormais",
+    "     vers celle des six etats (routes/web.php)."
   ]
 }

@@ -1282,7 +1282,18 @@ Route::middleware([
         Route::get('/monitoring', [SaasMetricsController::class, 'monitoring'])->name('monitoring');
 
         // Licences
-        Route::get('/licences', [SuperAdminLicenseController::class, 'index'])->name('licences');
+        // ARBITRAGE — deux consoles de licences coexistaient.
+        //
+        // Celle-ci precede le modele a six etats : elle ne connait pas DEMO ni
+        // FREE, et permettait de creer une licence sans date de fin (ce que la
+        // section 12.6 interdit et que la contrainte en base refuse desormais).
+        //
+        // On REDIRIGE plutot que de supprimer : les liens existants, les
+        // signets et les supports internes continuent de fonctionner, et
+        // aboutissent a la console qui fait foi. Les actions CRUD historiques
+        // restent joignables le temps que la nouvelle console les couvre
+        // toutes, mais l'entree principale est desormais unique.
+        Route::get('/licences', fn () => redirect()->route('superadmin.licences-etats.index'))->name('licences');
         Route::get('/licences/{id}', [SuperAdminLicenseController::class, 'show'])->name('licences.show');
         Route::post('/licences', [SuperAdminLicenseController::class, 'store'])->name('licences.store');
         Route::put('/licences/{id}', [SuperAdminLicenseController::class, 'update'])->name('licences.update');

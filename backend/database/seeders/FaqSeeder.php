@@ -335,11 +335,11 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Quels types de fichiers puis-je uploader dans la GED ?',
-                        'answer'   => 'SECRETIS accepte la plupart des formats courants : PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), vidéos (MP4, MOV), archives (ZIP, RAR) et fichiers texte. La taille maximale par fichier est de 50 Mo sur le plan Starter, 200 Mo sur Professional et 1 Go sur Enterprise. Les fichiers exécutables (.exe, .bat, .sh) sont bloqués pour des raisons de sécurité.',
+                        'answer'   => 'SECRETIS accepte la plupart des formats courants : PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), vidéos (MP4, MOV), archives (ZIP, RAR) et fichiers texte. La taille maximale par fichier dépend de votre formule ; le détail figure sur la page tarifs. Les fichiers exécutables (.exe, .bat, .sh) sont bloqués pour des raisons de sécurité.',
                     ],
                     'en' => [
                         'question' => 'What types of files can I upload to the DMS?',
-                        'answer'   => 'SECRETIS accepts most common formats: PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), videos (MP4, MOV), archives (ZIP, RAR) and text files. Maximum file size is 50 MB on Starter plan, 200 MB on Professional and 1 GB on Enterprise. Executable files (.exe, .bat, .sh) are blocked for security reasons.',
+                        'answer'   => 'SECRETIS accepts most common formats: PDF, Word (docx), Excel (xlsx), PowerPoint (pptx), images (JPG, PNG, GIF, SVG), videos (MP4, MOV), archives (ZIP, RAR) and text files. Maximum file size depends on your plan; see the pricing page for details. Executable files (.exe, .bat, .sh) are blocked for security reasons.',
                     ],
                 ],
             ],
@@ -425,11 +425,11 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Comment rechercher un document dans toute la GED ?',
-                        'answer'   => 'Utilisez la barre de recherche globale (raccourci Ctrl+K / Cmd+K). La recherche porte sur les noms de fichiers, les tags, les descriptions et le contenu textuel des PDF. Vous pouvez affiner avec des filtres : type de fichier, date, dossier, propriétaire. La recherche en plein texte dans les documents est disponible dès le plan Professional.',
+                        'answer'   => 'Utilisez la barre de recherche globale (raccourci Ctrl+K / Cmd+K). La recherche porte sur les noms de fichiers, les tags, les descriptions et le contenu textuel des PDF. Vous pouvez affiner avec des filtres : type de fichier, date, dossier, propriétaire. La recherche en plein texte dans les documents est disponible sur les formules payantes.',
                     ],
                     'en' => [
                         'question' => 'How do I search for a document across the entire DMS?',
-                        'answer'   => 'Use the global search bar (shortcut Ctrl+K / Cmd+K). The search covers file names, tags, descriptions and textual content of PDFs. You can refine with filters: file type, date, folder, owner. Full-text search within documents is available from the Professional plan.',
+                        'answer'   => 'Use the global search bar (shortcut Ctrl+K / Cmd+K). The search covers file names, tags, descriptions and textual content of PDFs. You can refine with filters: file type, date, folder, owner. Full-text search within documents is available on paid plans.',
                     ],
                 ],
             ],
@@ -470,11 +470,11 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Quelle est la capacité de stockage disponible ?',
-                        'answer'   => 'La capacité de stockage dépend de votre plan : 10 Go (Starter), 100 Go (Professional), 1 To (Enterprise). Vous pouvez voir votre utilisation actuelle dans Administration > Stockage. En cas de dépassement, un avertissement est envoyé à 80% et 95% de la capacité. Des extensions de stockage à la carte sont disponibles pour tous les plans.',
+                        'answer'   => 'La capacité de stockage dépend de votre formule ; le détail figure sur la page tarifs. Vous pouvez voir votre utilisation actuelle dans Administration > Stockage. En cas de dépassement, un avertissement est envoyé à 80% et 95% de la capacité. Des extensions de stockage à la carte sont disponibles pour tous les plans.',
                     ],
                     'en' => [
                         'question' => 'What storage capacity is available?',
-                        'answer'   => 'Storage capacity depends on your plan: 10 GB (Starter), 100 GB (Professional), 1 TB (Enterprise). You can view your current usage in Administration > Storage. When approaching the limit, a warning is sent at 80% and 95% capacity. On-demand storage extensions are available for all plans.',
+                        'answer'   => 'Storage capacity depends on your plan; see the pricing page for details. You can view your current usage in Administration > Storage. When approaching the limit, a warning is sent at 80% and 95% capacity. On-demand storage extensions are available for all plans.',
                     ],
                 ],
             ],
@@ -842,7 +842,7 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Comment résilier mon abonnement ?',
-                        'answer'   => 'Allez dans Administration > Abonnement > Résilier. Votre accès reste actif jusqu\'à la fin de la période payée. Avant la résiliation, nous vous recommandons d\'exporter toutes vos données (Administration > Exports). Après résiliation, vos données sont conservées 30 jours puis supprimées définitivement. La résiliation peut être annulée pendant ce délai.',
+                        'answer'   => 'Allez dans Administration > Abonnement > Résilier. Votre accès reste actif jusqu\'à la fin de la période payée. Avant la résiliation, nous vous recommandons d\'exporter toutes vos données (Administration > Exports). Après résiliation, votre espace bascule dans le palier gratuit : vos données restent accessibles, plafond en vigueur. En cas de non-renouvellement, elles sont conservées le temps prévu par la politique de sauvegarde, avec deux avertissements avant toute suppression.',
                     ],
                     'en' => [
                         'question' => 'How do I cancel my subscription?',
@@ -872,7 +872,7 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Que se passe-t-il si mon paiement échoue ?',
-                        'answer'   => 'En cas d\'échec de paiement, vous recevez un e-mail d\'alerte immédiatement. Une nouvelle tentative automatique est effectuée à J+3 et J+7. Si le paiement reste en échec après 7 jours, votre compte passe en mode dégradé (lecture seule). Vous avez 30 jours pour régulariser avant suspension définitive. Contactez support@ibig-secretis.com pour toute assistance.',
+                        'answer'   => 'En cas d\'échec de paiement, vous recevez un e-mail d\'alerte immédiatement. Une nouvelle tentative automatique est effectuée à J+3 et J+7. Après l\'échéance, l\'accès complet est maintenu pendant la période de grâce. Ensuite votre espace passe en lecture seule : vos données restent consultables et sont conservées. Aucune n\'est supprimée sans avertissement préalable. Contactez support@ibig-secretis.com pour toute assistance.',
                     ],
                     'en' => [
                         'question' => 'What happens if my payment fails?',
@@ -1026,7 +1026,7 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Comment connecter SECRETIS à notre annuaire Active Directory ou LDAP ?',
-                        'answer'   => 'Le SSO Active Directory/LDAP est disponible dès le plan Professional. Dans Administration > Intégrations > SSO/LDAP, renseignez les paramètres de connexion (serveur LDAP, port, base DN, attributs de mapping). Une fois configuré, les utilisateurs se connectent avec leurs identifiants d\'entreprise existants. Contactez notre équipe technique pour l\'assistance à la configuration.',
+                        'answer'   => 'Le SSO Active Directory/LDAP est disponible sur les formules payantes. Dans Administration > Intégrations > SSO/LDAP, renseignez les paramètres de connexion (serveur LDAP, port, base DN, attributs de mapping). Une fois configuré, les utilisateurs se connectent avec leurs identifiants d\'entreprise existants. Contactez notre équipe technique pour l\'assistance à la configuration.',
                     ],
                     'en' => [
                         'question' => 'How do I connect SECRETIS to our Active Directory or LDAP directory?',
@@ -1210,7 +1210,7 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Y a-t-il une limite au nombre de rapports que je peux créer ?',
-                        'answer'   => 'Les rapports prédéfinis sont illimités sur tous les plans. Pour les rapports personnalisés : 3 rapports sauvegardés (Starter), 20 rapports (Professional), illimité (Enterprise). Les tableaux de bord personnalisés : 1 (Starter), 10 (Professional), illimité (Enterprise).',
+                        'answer'   => 'Le nombre de rapports personnalisés dépend de votre formule ; le détail figure sur la page tarifs. (Professional), illimité (Enterprise). Les tableaux de bord personnalisés : 1 (Starter), 10 (Professional), illimité (Enterprise).',
                     ],
                     'en' => [
                         'question' => 'Is there a limit to the number of reports I can create?',

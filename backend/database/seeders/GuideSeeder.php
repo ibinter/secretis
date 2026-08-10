@@ -498,12 +498,12 @@ class GuideSeeder extends Seeder
                             'fr' => [
                                 'title'   => 'Changer de formule d\'abonnement',
                                 'summary' => 'Montez ou descendez en gamme selon l\'évolution des besoins de votre organisation.',
-                                'content' => '<h2>Plans disponibles</h2><p>SECRETIS propose trois plans :</p><ul><li><strong>Starter</strong> : jusqu\'à 5 utilisateurs, 10 Go de stockage, modules essentiels</li><li><strong>Professional</strong> : jusqu\'à 25 utilisateurs, 100 Go, tous les modules + SSO + rapports avancés</li><li><strong>Enterprise</strong> : utilisateurs illimités, 1 To, hébergement personnalisé, SLA garanti, support dédié</li></ul><h2>Passer à un plan supérieur (upgrade)</h2><ol><li>Allez dans Administration &gt; Abonnement &gt; Changer de plan</li><li>Comparez les plans côte à côte</li><li>Cliquez sur « Choisir Professional » (ou Enterprise)</li><li>Vérifiez le prorata calculé pour la période restante</li><li>Confirmez le paiement</li></ol><p>Le changement est immédiat. Vous avez accès aux nouvelles fonctionnalités sans attendre le prochain cycle.</p><h2>Passer à un plan inférieur (downgrade)</h2><p>Le downgrade prend effet au début du prochain cycle de facturation. Si votre utilisation actuelle dépasse les limites du plan inférieur (ex : plus d\'utilisateurs actifs que permis), SECRETIS vous alerte et vous demande de désactiver les comptes en excès avant de confirmer.</p>',
+                                'content' => $this->contenuFormules('fr'),
                             ],
                             'en' => [
                                 'title'   => 'Change your subscription plan',
                                 'summary' => 'Upgrade or downgrade according to your organisation\'s evolving needs.',
-                                'content' => '<h2>Available plans</h2><p>Starter (up to 5 users, 10 GB), Professional (up to 25 users, 100 GB, all modules + SSO) and Enterprise (unlimited users, 1 TB, dedicated support).</p><h2>Upgrading</h2><p>Go to Administration &gt; Subscription &gt; Change plan, compare plans, select and confirm payment. The change is immediate.</p><h2>Downgrading</h2><p>Downgrade takes effect at the start of the next billing cycle. SECRETIS alerts you if current usage exceeds the lower plan\'s limits.</p>',
+                                'content' => $this->contenuFormules('en'),
                             ],
                         ],
                     ],
@@ -1218,5 +1218,48 @@ HTML,
         }
 
         return "<ul>{$items}</ul>";
+    }
+
+    /**
+     * Description des formules, LUE dans la base et dans le moteur de licence.
+     *
+     * Les contenus d'origine decrivaient des formules « Starter / Professional
+     * / Enterprise » avec des limites d'utilisateurs et de stockage inventees.
+     * Aucune n'existe : la table `plans` porte Demarrage, Essentiel, Pro et
+     * Entreprise. Un prospect qui lisait le centre d'aide y trouvait une offre
+     * sans rapport avec celle de la page tarifs.
+     *
+     * On ne reecrit pas cette fiction avec une autre : le texte est produit a
+     * partir des formules reellement enregistrees et des reglages de
+     * licence.config.json. Il suit donc l'offre sans intervention.
+     */
+    private function contenuFormules(string $langue = 'fr'): string
+    {
+        $licence = app(\App\Services\LicenceService::class);
+        $formules = \Illuminate\Support\Facades\DB::table('plans')
+            ->where('is_active', true)->orderBy('price_xof')->get();
+
+        $gratuit = $licence->config()['gratuit'];
+
+        if ($langue === 'en') {
+            $html = '<h2>Plans</h2><p>The <b>' . e($gratuit['nom']) . '</b> plan is free for ever, capped at '
+                  . e($gratuit['resume']) . '.</p><ul>';
+            foreach ($formules as $f) {
+                $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, '.', ' ') . ' XOF/month</li>';
+            }
+
+            return $html . '</ul><p>A ' . $licence->essaiJours() . '-day trial is available on the Pro plan, no card required.</p>';
+        }
+
+        $html = '<h2>Nos formules</h2><p>Le palier <b>' . e($gratuit['nom']) . '</b> est gratuit sans limite de duree, '
+              . 'plafonne a ' . e($gratuit['resume']) . '.</p><ul>';
+
+        foreach ($formules as $f) {
+            $html .= '<li><b>' . e($f->name) . '</b> — ' . number_format((float) $f->price_xof, 0, ',', ' ') . ' FCFA/mois</li>';
+        }
+
+        return $html . '</ul><p>Un essai de ' . $licence->essaiJours() . ' jours est disponible sur la formule Pro, '
+             . 'sans carte bancaire. A son terme, votre espace bascule dans le palier ' . e($gratuit['nom'])
+             . ' : vos donnees sont conservees.</p>';
     }
 }
