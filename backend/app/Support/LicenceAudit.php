@@ -53,6 +53,12 @@ final class LicenceAudit
         'coverage/',
         'storage/framework/',
         'storage/logs/',
+        // Base de connaissances de SARA : ENGENDRÉE depuis licence.config.json
+        // par `sara:reindexer-licence`. Elle contient donc les valeurs exactes,
+        // par construction. La signaler reviendrait à auditer la sortie de la
+        // source de vérité — le défaut, s'il existait, serait dans le
+        // générateur, qui lui est bien analysé.
+        'storage/app/sara/',
         'bootstrap/cache/',
         '.min.js',
         '.min.css',
@@ -164,9 +170,28 @@ final class LicenceAudit
     // ─── Détection ligne à ligne ─────────────────────────────────────────────
 
     /** @return list<array{regle:string,motif:string,extrait:string}> */
+    /**
+     * Marqueur d'exemption explicite.
+     *
+     * Certaines lignes CITENT une valeur interdite parce que c'est leur objet :
+     * la question Q8 du cahier contient « licence à vie », les cas de recette du
+     * garde-fou SARA contiennent délibérément « l'essai dure 30 jours » pour
+     * vérifier qu'il la refuse, et une assertion de test doit nommer la valeur
+     * qu'elle contrôle.
+     *
+     * L'exemption est NOMINATIVE et visible dans le code — pas une exclusion de
+     * répertoire qui rendrait aveugle sur tout un pan du dépôt. Écrire ce
+     * marqueur est une décision qu'on assume ligne par ligne.
+     */
+    public const EXEMPTION = 'licence-audit:citation';
+
     private function constatsDeLaLigne(string $ligne): array
     {
         $trouves = [];
+
+        if (str_contains($ligne, self::EXEMPTION)) {
+            return $trouves;
+        }
 
         // Toute la détection travaille sur la ligne NORMALISÉE : minuscules,
         // sans accents, apostrophes uniformisées. « Période d'essai » et
@@ -236,9 +261,17 @@ final class LicenceAudit
      */
     private static function estNie(string $nue, int $position): bool
     {
-        $avant = substr($nue, max(0, $position - 70), min(70, $position));
+        // La fenetre porte sur 160 caracteres AVANT et 80 APRES. Une phrase
+        // comme « on n'ecrit ni "compte suspendu", ni "acces revoque" » place sa
+        // negation loin devant le second terme, et « ... , terme banni par le
+        // glossaire » la place APRES. Une fenetre trop courte faisait rougir
+        // l'audit sur les fichiers les mieux commentes — ceux qui rappellent
+        // precisement la regle.
+        $avant  = substr($nue, max(0, $position - 160), min(160, $position));
+        $apres  = substr($nue, $position, 80);
 
-        return self::contientUn($avant, self::NEGATIONS);
+        return self::contientUn($avant, self::NEGATIONS)
+            || self::contientUn($apres, self::NEGATIONS);
     }
 
     /** Marqueurs de négation ou de citation d'un interdit. */
@@ -246,6 +279,11 @@ final class LicenceAudit
         'aucun', 'jamais', 'pas de', 'absence de', 'ne concede',
         'ne vend', 'ne propose', 'interdit', 'proscrit', 'banni', 'a ne pas',
         'plutot que', 'au lieu de', 'remplace par', 'eviter', 'evitez',
+        // Marqueurs constates a l'usage : un commentaire qui EXPLIQUE la regle
+        // la cite forcement, et c'est le contraire d'une violation.
+        'terme banni', 'bannis', 'employait', 'annoncait', 'contredisait',
+        'ne doit', 'ni ', 'obsolete', 'deprecie', 'correction', 'corrige',
+        'faux', 'incorrect', 'erreur', 'ancienne', 'historique',
     ];
 
     /** Ce qui fait qu'une ligne parle bien de licence et pas d'autre chose. */

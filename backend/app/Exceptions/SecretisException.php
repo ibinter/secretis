@@ -520,7 +520,7 @@ class SecretisException extends RuntimeException
             self::LIMITE_UTILISATEURS         => 'Limite d\'utilisateurs atteinte',
             self::QUOTA_STOCKAGE_DEPASSE      => 'Quota de stockage dépassé',
             self::PAIEMENT_DEJA_TRAITE        => 'Paiement déjà traité (idempotence)',
-            self::COMPTE_SUSPENDU             => 'Compte suspendu par IBIG',
+            self::COMPTE_SUSPENDU             => 'Acces restreint — contactez le support',
             self::FONCTIONNALITE_PREMIUM      => 'Fonctionnalité premium indisponible en trial',
             self::LICENCE_INVALIDE            => 'Clé de licence invalide',
             self::ABONNEMENT_NON_ACTIVE       => 'Abonnement non activé',

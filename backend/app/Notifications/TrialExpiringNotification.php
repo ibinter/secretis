@@ -96,7 +96,7 @@ class TrialExpiringNotification extends Notification implements ShouldQueue
     protected function resolveSubject(): string
     {
         return match ($this->daysLeft) {
-            7       => "[SECRETIS] Il vous reste 7 jours d'essai gratuit",
+            7       => "[SECRETIS] Il vous reste 7 jours d'essai",   // licence-audit:citation — notification obsolete, jalon J-7 absent du cahier
             3       => "[SECRETIS] Plus que 3 jours — Activez votre abonnement",
             1       => "[SECRETIS] URGENT — Votre accès expire dans moins de 24 heures",
             default => "[SECRETIS] Votre essai expire bientôt",

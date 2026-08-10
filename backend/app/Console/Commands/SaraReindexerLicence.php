@@ -117,7 +117,7 @@ class SaraReindexerLicence extends Command
             'Q5'  => "Le palier Découverte expire-t-il un jour ?",
             'Q6'  => "Peut-on exporter ses données au palier Découverte ?",
             'Q7'  => "Combien de temps mes données sont-elles conservées après expiration ?",
-            'Q8'  => "Existe-t-il une licence à vie ou perpétuelle ?",
+            'Q8'  => "Existe-t-il une licence à vie ou perpétuelle ?",   // licence-audit:citation — question Q8 du cahier
             'Q9'  => "L'essai peut-il être prolongé, et combien de fois ?",
             'Q10' => "Comment retirer le filigrane des documents ?",
         ];
@@ -182,17 +182,17 @@ class SaraReindexerLicence extends Command
             ],
             'durée inventée' => [
                 'question' => "Combien de temps dure l'essai ?",
-                'reponse'  => "L'essai dure 30 jours.",
+                'reponse'  => "L'essai dure 30 jours.",   // licence-audit:citation — reponse fausse, doit etre refusee
                 'attendu'  => false,
             ],
             'durée convertie' => [
                 'question' => "Combien de temps mes données sont conservées ?",
-                'reponse'  => "Vos données sont conservées 3 mois après expiration.",
+                'reponse'  => "Vos données sont conservées 3 mois après expiration.",   // licence-audit:citation — conversion interdite
                 'attendu'  => false,
             ],
             'prix récité' => [
                 'question' => "Quel est le prix ?",
-                'reponse'  => "La formule Essentiel est à 25 000 FCFA par mois.",
+                'reponse'  => "La formule Essentiel est à 25 000 FCFA par mois.",   // licence-audit:citation — prix invente, doit etre refuse
                 'attendu'  => false,
             ],
             'terme banni' => [

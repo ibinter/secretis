@@ -1041,11 +1041,11 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Combien d\'utilisateurs puis-je avoir sur mon compte ?',
-                        'answer'   => 'Le nombre d\'utilisateurs dépend de votre plan : 5 utilisateurs (Starter), 25 utilisateurs (Professional), illimité (Enterprise). Des utilisateurs supplémentaires peuvent être ajoutés à l\'unité sur les plans Starter et Professional depuis Administration > Abonnement > Utilisateurs supplémentaires.',
+                        'answer'   => 'Le nombre d\'utilisateurs dépend de votre plan : 5 utilisateurs (Starter), 25 utilisateurs (Professional), illimité (Enterprise). Des utilisateurs supplémentaires peuvent être ajoutés à l\'unité sur les formules payantes depuis Administration > Abonnement > Utilisateurs supplémentaires.',
                     ],
                     'en' => [
                         'question' => 'How many users can I have on my account?',
-                        'answer'   => 'The number of users depends on your plan: 5 users (Starter), 25 users (Professional), unlimited (Enterprise). Additional users can be added individually on Starter and Professional plans from Administration > Subscription > Additional users.',
+                        'answer'   => 'The number of users depends on your plan; see the pricing page for details. Additional users can be added individually on paid plans from Administration > Subscription > Additional users.',
                     ],
                 ],
             ],
@@ -1214,7 +1214,7 @@ class FaqSeeder extends Seeder
                     ],
                     'en' => [
                         'question' => 'Is there a limit to the number of reports I can create?',
-                        'answer'   => 'Pre-defined reports are unlimited on all plans. For custom reports: 3 saved reports (Starter), 20 reports (Professional), unlimited (Enterprise). Custom dashboards: 1 (Starter), 10 (Professional), unlimited (Enterprise).',
+                        'answer'   => 'The number of custom reports depends on your plan; see the pricing page for details. Custom dashboards: 1 (Starter), 10 (Professional), unlimited (Enterprise).',
                     ],
                 ],
             ],
@@ -1458,11 +1458,11 @@ class FaqSeeder extends Seeder
                 'translations' => [
                     'fr' => [
                         'question' => 'Comment sont gérées les sauvegardes de mes données ?',
-                        'answer'   => 'SECRETIS effectue des sauvegardes automatiques quotidiennes de toutes les données (base de données + fichiers GED). Les sauvegardes sont conservées 30 jours et stockées dans un datacenter géographiquement distinct. En cas de besoin de restauration, contactez le support avec votre demande et la date cible. Pour le plan Enterprise, des sauvegardes toutes les 6 heures sont disponibles.',
+                        'answer'   => 'SECRETIS effectue des sauvegardes automatiques quotidiennes de toutes les données (base de données + fichiers GED). Les sauvegardes sont conservées selon la politique de sauvegarde publiée et stockées dans un datacenter géographiquement distinct. En cas de besoin de restauration, contactez le support avec votre demande et la date cible. Pour le plan Enterprise, des sauvegardes toutes les 6 heures sont disponibles.',
                     ],
                     'en' => [
                         'question' => 'How are my data backups managed?',
-                        'answer'   => 'SECRETIS performs automatic daily backups of all data (database + DMS files). Backups are retained for 30 days and stored in a geographically separate datacenter. If restoration is needed, contact support with your request and target date. For the Enterprise plan, backups every 6 hours are available.',
+                        'answer'   => 'SECRETIS performs automatic daily backups of all data (database + DMS files). Backups are retained according to the published backup policy and stored in a geographically separate datacenter. If restoration is needed, contact support with your request and target date. For the Enterprise plan, backups every 6 hours are available.',
                     ],
                 ],
             ],
